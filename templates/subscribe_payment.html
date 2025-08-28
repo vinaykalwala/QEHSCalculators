@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Payment - {{ plan.name }}</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .payment-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .plan-card {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="payment-container">
+            <h2 class="text-center mb-4">Complete Your Payment</h2>
+            
+            <div class="plan-card">
+                <h4>{{ plan.get_name_display }} Plan</h4>
+                <p class="mb-1"><strong>Price:</strong> ₹{{ plan.price }}</p>
+                <p class="mb-1"><strong>Device limit:</strong> {{ plan.device_limit }}</p>
+                <p class="mb-0"><strong>Duration:</strong> {{ plan.duration_days }} days</p>
+            </div>
+            
+            <div class="d-grid gap-2">
+                <button id="rzp-button" class="btn btn-primary btn-lg">
+                    <i class="fas fa-credit-card me-2"></i>Pay Now
+                </button>
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+            
+            <div class="alert alert-info mt-4">
+                <i class="fas fa-info-circle me-2"></i>
+                You will be redirected to Razorpay's secure payment page to complete your transaction.
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        var options = {
+            "key": "{{ razorpay_key_id }}",
+            "amount": "{{ razorpay_order.amount }}",
+            "currency": "{{ razorpay_order.currency }}",
+            "name": "QEHS Calculators",
+            "description": "Subscription for {{ plan.name }} Plan",
+            "order_id": "{{ razorpay_order.id }}",
+            "handler": function (response){
+                // Create a form and submit it to payment_success view
+                var form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '{{ callback_url }}';
+                
+                var orderIdInput = document.createElement('input');
+                orderIdInput.type = 'hidden';
+                orderIdInput.name = 'razorpay_order_id';
+                orderIdInput.value = response.razorpay_order_id;
+                
+                var paymentIdInput = document.createElement('input');
+                paymentIdInput.type = 'hidden';
+                paymentIdInput.name = 'razorpay_payment_id';
+                paymentIdInput.value = response.razorpay_payment_id;
+                
+                var signatureInput = document.createElement('input');
+                signatureInput.type = 'hidden';
+                signatureInput.name = 'razorpay_signature';
+                signatureInput.value = response.razorpay_signature;
+                
+                var csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrfmiddlewaretoken';
+                csrfInput.value = '{{ csrf_token }}';
+                
+                form.appendChild(orderIdInput);
+                form.appendChild(paymentIdInput);
+                form.appendChild(signatureInput);
+                form.appendChild(csrfInput);
+                
+                document.body.appendChild(form);
+                form.submit();
+            },
+            "prefill": {
+                "name": "{{ user.get_full_name }}",
+                "email": "{{ user.email }}",
+                "contact": "{{ user.phone }}"
+            },
+            "theme": {
+                "color": "#F37254"
+            },
+            "modal": {
+                "ondismiss": function(){
+                    // Redirect to payment failed page if user closes the modal
+                    window.location.href = '{{ error_url }}';
+                }
+            }
+        };
+        
+        var rzp1 = new Razorpay(options);
+        
+        document.getElementById('rzp-button').onclick = function(e){
+            rzp1.open();
+            e.preventDefault();
+        }
+        
+        // // Auto-open the payment dialog
+        // rzp1.open();
+    </script>
+</body>
+</html>
