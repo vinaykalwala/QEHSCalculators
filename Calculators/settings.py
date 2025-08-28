@@ -53,7 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'QehsCalculators.middleware.SubscriptionMiddleware',
+    'QehsCalculators.middleware.DeviceLimitMiddleware',
     'allauth.account.middleware.AccountMiddleware',
 ]
 
@@ -85,7 +85,7 @@ WSGI_APPLICATION = 'Calculators.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': BASE_DIR / 'db1.sqlite3',
     }
 }
 
@@ -128,34 +128,21 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+AUTH_USER_MODEL = "QehsCalculators.CustomUser"
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-# # settings.py
-# ACCOUNT_FORMS = {
-#     'signup': 'QehsCalculators.forms.CustomSignupForm',
-# }
-# # Custom User Model
-# AUTH_USER_MODEL = 'QehsCalculators.CustomUser'
-# ACCOUNT_SIGNUP_FORM_CLASS = 'QehsCalculators.forms.CustomSignupForm'
+RAZORPAY_KEY_ID = 'rzp_test_KdiESTDcHPC74B'
+RAZORPAY_KEY_SECRET = 'F8aPdLzdQKLt3RmgTWFcnYBG'
+RAZORPAY_CURRENCY = 'INR'
 
-# Authentication
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
-]
-SITE_ID = 1
-LOGIN_REDIRECT_URL = '/dashboard/'
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-# ACCOUNT_SIGNUP_FORM_CLASS = 'QehsCalculators.forms.CustomSignupForm'
+SUBSCRIPTION_CURRENCY = "INR"
 
 
-# Razorpay Keys (Replace with actual keys from Razorpay dashboard)
-RAZORPAY_KEY_ID = 'your_razorpay_key_id'
-RAZORPAY_KEY_SECRET = 'your_razorpay_key_secret'
 
-# Email Backend (For development; use SMTP for production)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'durgaprakash1102@gmail.com'
+EMAIL_HOST_PASSWORD = 'aqrj iljs kdph okgm '
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+  

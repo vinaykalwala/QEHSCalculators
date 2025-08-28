@@ -1,15 +1,162 @@
 {% extends 'base.html' %}
-{% block title %}Dashboard{% endblock %}
+{% load static %}
+{% load custom_filters %}
 {% block content %}
-    <h1>Dashboard</h1>
-    <p>Plan: {{ subscription.plan.name }}</p>
-    <p>Start Date: {{ subscription.start_date }}</p>
-    <p>End Date: {% if subscription.end_date %}{{ subscription.end_date }}{% else %}Never{% endif %}</p>
-    <h3>Recent Usage</h3>
-    <ul>
-        {% for entry in history %}
-            <li>{{ entry.calculator.name }} - {{ entry.timestamp }}</li>
-        {% endfor %}
-    </ul>
-   
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar with categories -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <h4 class="sidebar-heading">Calculator Categories</h4>
+            <div class="list-group list-group-flush">
+                {% for category_id, category in categories.items %}
+                <a href="#category-{{ category_id }}" class="list-group-item list-group-item-action">
+                    <i class="fas {{ category.icon }} me-2"></i>
+                    {{ category.name }}
+                </a>
+                {% empty %}
+                <div class="list-group-item text-muted">
+                    No categories available with your current subscription.
+                </div>
+                {% endfor %}
+            </div>
+            
+            {% if not subscription %}
+            <div class="mt-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h6>Upgrade Your Plan</h6>
+                        <p class="small">Access more calculators by upgrading your subscription.</p>
+                        <a href="#subscription-plans" class="btn btn-sm btn-outline-primary">View Plans</a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-9 col-lg-10 main-content">
+            <h2>Welcome {{ request.user.first_name|default:request.user.username }}</h2>
+            
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if subscription and subscription.is_active %}
+                <div class="alert alert-success">
+                    <p><strong>Status:</strong> Active</p>
+                    <p><strong>Plan:</strong> {{ subscription.plan.get_name_display }}</p>
+                    <p><strong>End Date:</strong> {{ subscription.end_date|date:"F j, Y" }}</p>
+                    {% if subscription.status == "pending" %}
+                    <p class="text-warning"><strong>Note:</strong> Your subscription is pending admin approval</p>
+                    {% endif %}
+                </div>
+
+                <!-- Calculators by Category -->
+                {% for category_id, calculators in calculators_by_category.items %}
+                <div class="category-section mb-5" id="category-{{ category_id }}">
+                    <h3 class="category-title">
+                        <i class="fas {{ categories|get_item:category_id|get_item:'icon' }} me-2"></i>
+                        {{ categories|get_item:category_id|get_item:'name' }}
+                    </h3>
+                    <p class="text-muted">{{ categories|get_item:category_id|get_item:'description' }}</p>
+                    
+                    <div class="row">
+                        {% for calc in calculators %}
+                        <div class="col-xl-3 col-lg-4 col-md-6 mb-3">
+                            <div class="card calculator-card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ calc.name }}</h5>
+                                   
+                                </div>
+                                <div class="card-footer bg-transparent">
+                                    <a href="{% url calc.url_name %}" class="btn btn-sm btn-primary">Open Calculator</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="alert alert-info">
+                    <h4>No Calculators Available</h4>
+                    <p>You don't have access to any calculators with your current subscription plan.</p>
+                </div>
+                {% endfor %}
+
+            {% else %}
+                <div class="alert alert-info">
+                    <p>No active subscription yet. Choose a plan to subscribe:</p>
+                </div>
+                
+                <div class="row" id="subscription-plans">
+                    {% for plan in plans %}
+                    <div class="col-md-4">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ plan.get_name_display }}</h5>
+                                <p class="card-text">
+                                    <strong>Price:</strong> ₹{{ plan.price }}<br>
+                                    <strong>Device limit:</strong> {{ plan.device_limit }}<br>
+                                    <strong>Duration:</strong> {{ plan.duration_days }} days
+                                </p>
+                                <a href="{% url 'subscribe_plan' plan.id %}" class="btn btn-primary">Subscribe</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12">
+                        <p class="text-muted">No subscription plans available at the moment.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .sidebar {
+        background-color: #f8f9fa;
+        height: 100vh;
+        position: sticky;
+        top: 0;
+        padding-top: 20px;
+        border-right: 1px solid #dee2e6;
+    }
+    .sidebar-heading {
+        padding: 0 15px 15px;
+        border-bottom: 1px solid #dee2e6;
+        margin-bottom: 15px;
+    }
+    .main-content {
+        padding: 30px;
+    }
+    .calculator-card {
+        transition: transform 0.2s;
+    }
+    .calculator-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .category-title {
+        padding-bottom: 10px;
+        border-bottom: 2px solid #0d6efd;
+        margin-bottom: 20px;
+    }
+    @media (max-width: 768px) {
+        .sidebar {
+            height: auto;
+            position: relative;
+        }
+    }
+</style>
 {% endblock %}
