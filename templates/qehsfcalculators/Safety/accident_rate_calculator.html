@@ -1,0 +1,305 @@
+{% extends 'base.html' %}
+{% block title %}Accident Rate Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<style>
+/* Main container */
+.calculator-container {
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Header */
+.calculator-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.calculator-header h1 {
+  color: #1560bd;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.calculator-header p {
+  color: #7f8c8d;
+  font-size: 18px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Layout */
+.calc-content {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 40px;
+  align-items: stretch;
+}
+@media (max-width: 900px) {
+  .calc-content { flex-direction: column; }
+}
+
+/* Cards */
+.calc-card, .result-card {
+  flex: 1;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease;
+}
+.calc-card:hover { transform: translateY(-5px); }
+.calc-card h2 {
+  color: #2c3e50;
+  margin-bottom: 25px;
+  border-bottom: 2px solid #f1f5f9;
+  padding-bottom: 10px;
+  font-weight: 600;
+}
+
+/* Inputs */
+.form-group { margin-bottom: 20px; }
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #34495e;
+}
+.form-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #f9fbfd;
+  font-size: 16px;
+  transition: all 0.3s;
+}
+.form-input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+}
+
+/* Button */
+.calculate-btn {
+  padding: 16px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg,#3498db,#2980b9);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 5px 12px rgba(52,152,219,0.25);
+  transition: all 0.3s;
+}
+.calculate-btn:hover {
+  background: linear-gradient(135deg,#2980b9,#3498db);
+  transform: translateY(-2px);
+}
+
+/* Result Card */
+.result-card {
+  justify-content: center;
+  align-items: center;
+  min-height: 420px;
+  text-align: center;
+}
+.result-placeholder img {
+  max-width: 240px;
+  margin-bottom: 20px;
+  opacity: 0.85;
+}
+.result-placeholder p {
+  color: #7f8c8d;
+  font-size: 16px;
+  line-height: 1.6;
+}
+.result-value { width: 100%; }
+.rate-value {
+  font-size: 42px;
+  font-weight: 700;
+  color: #2980b9;
+  margin-bottom: 10px;
+}
+.rate-label { color: #7f8c8d; }
+
+/* Meter */
+.safety-meter {
+  width: 100%; height: 12px;
+  background: #f1f5f9;
+  border-radius: 6px;
+  margin: 20px 0;
+  overflow: hidden;
+}
+.meter-fill {
+  height: 100%;
+  transition: width 1s ease-in-out;
+  border-radius: 6px;
+}
+.meter-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #7f8c8d;
+  margin-bottom: 20px;
+}
+
+/* Feedback */
+.result-feedback {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 18px;
+  border-left: 4px solid #3498db;
+  text-align: left;
+}
+.feedback-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #2c3e50;
+}
+.feedback-content { color: #34495e; }
+
+/* Note Section */
+.note-section {
+  background: #f8f9fa;
+  border-radius: 16px;
+  padding: 25px;
+}
+.note-section h3 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.note-section p, .note-section li {
+  color: #34495e;
+  line-height: 1.6;
+}
+.note-section code {
+  background: #eef4ff;
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-family: monospace;
+  color: #e74c3c;
+}
+.note-list { margin-left: 20px; }
+
+/* Toggle helper */
+.hidden { display: none; }
+</style>
+
+<div class="calculator-container">
+  <div class="calculator-header">
+    <h1>Accident Rate Calculator</h1>
+    <p>Calculate your workplace safety performance based on hours worked and incident data</p>
+  </div>
+
+  <div class="calc-content">
+    <!-- Calculator -->
+    <div class="calc-card">
+      <h2>Enter Data</h2>
+      <div class="form-group">
+        <label for="numAccidents">Number of Recordable Incidents</label>
+        <input type="number" id="numAccidents" class="form-input" min="0" placeholder="e.g., 5">
+      </div>
+      <div class="form-group">
+        <label for="totalHours">Total Hours Worked</label>
+        <input type="number" id="totalHours" class="form-input" min="1" placeholder="e.g., 200000">
+      </div>
+      <button class="calculate-btn" onclick="calculateAccidentRate()">Calculate Accident Rate</button>
+    </div>
+
+    <!-- Result -->
+    <div class="result-card">
+      <!-- Default Placeholder with image -->
+      <div class="result-placeholder" id="placeholder">
+        <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Safety illustration">
+        <p>
+          This tool will calculate the <strong>Accident Rate</strong>, a key safety KPI.  
+          Enter your data to see results and insights here.
+        </p>
+      </div>
+
+      <!-- Result Output -->
+      <div class="result-value hidden" id="resultValue">
+        <div class="rate-value" id="rateValue">0.00</div>
+        <div class="rate-label">Accidents per 1,000,000 hours worked</div>
+
+        <div class="safety-meter">
+          <div class="meter-fill" id="meterFill"></div>
+        </div>
+        <div class="meter-labels">
+          <span>Excellent</span><span>Good</span>
+          <span>Moderate</span><span>High</span><span>Critical</span>
+        </div>
+
+        <div class="result-feedback">
+          <div class="feedback-title">Safety Assessment</div>
+          <div class="feedback-content" id="feedbackContent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notes -->
+  <div class="note-section">
+    <h3><i class="fas fa-info-circle"></i> About This Calculator</h3>
+    <p>
+      The Accident Rate Calculator measures workplace safety performance by calculating the number of recordable incidents per 1,000,000 hours worked.
+    </p>
+    <p><strong>Formula:</strong> <code>Accident Rate = (Number of Incidents ÷ Total Hours Worked) × 1,000,000</code></p>
+    <ul class="note-list">
+      <li><strong>Recordable Incidents:</strong> Work-related injuries, illnesses, and fatalities per OSHA criteria.</li>
+      <li><strong>Total Hours Worked:</strong> Sum of all employee hours during the measured period.</li>
+      <li>Lower rates indicate better safety performance; rates below 1.0 are typically considered good.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+function calculateAccidentRate() {
+  const numAccidents = parseFloat(document.getElementById('numAccidents').value);
+  const totalHours = parseFloat(document.getElementById('totalHours').value);
+  if (isNaN(numAccidents) || isNaN(totalHours) || totalHours <= 0) {
+    alert('Please enter valid values. Total hours must be greater than 0.');
+    return;
+  }
+
+  const accidentRate = (numAccidents / totalHours) * 1000000;
+  document.getElementById('rateValue').textContent = accidentRate.toFixed(2);
+
+  const meterFill = document.getElementById('meterFill');
+  let meterWidth, meterColor, feedback;
+  if (accidentRate === 0) {
+    meterWidth = '5%'; meterColor = '#27ae60';
+    feedback = '🌟 Outstanding! Zero incidents recorded. Maintain and share your best practices.';
+  } else if (accidentRate < 1.0) {
+    meterWidth = '25%'; meterColor = '#2ecc71';
+    feedback = '👍 Good safety performance. Continue monitoring and improving safety culture.';
+  } else if (accidentRate <= 5.0) {
+    meterWidth = '50%'; meterColor = '#f39c12';
+    feedback = '⚠️ Moderate safety performance. Review safety protocols and strengthen controls.';
+  } else if (accidentRate <= 10.0) {
+    meterWidth = '75%'; meterColor = '#e67e22';
+    feedback = '🚨 High accident rate. Immediate safety review and corrective actions are needed.';
+  } else {
+    meterWidth = '95%'; meterColor = '#e74c3c';
+    feedback = '❌ Critical risk level. Stop operations if necessary and implement urgent corrective measures.';
+  }
+  meterFill.style.width = meterWidth;
+  meterFill.style.backgroundColor = meterColor;
+  document.getElementById('feedbackContent').textContent = feedback;
+
+  document.getElementById('placeholder').classList.add('hidden');
+  document.getElementById('resultValue').classList.remove('hidden');
+}
+</script>
+
+<!-- Font Awesome -->
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+{% endblock %}
