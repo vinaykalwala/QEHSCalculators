@@ -129,3 +129,6 @@ def privacy(request):
 
 def upgrade_required(request):
     return render(request, 'upgrade_required.html')
+
+def accident_rate_calculator(request):
+    return render(request, 'qehsfcalculators/Safety/accident_rate_calculator.html')

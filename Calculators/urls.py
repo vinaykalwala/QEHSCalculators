@@ -21,4 +21,6 @@ urlpatterns = [
     path('dashboard/', dashboard, name='dashboard'),
     path('terms/', terms, name='terms'),
     path('privacy/', privacy, name='privacy'),
+    path('accident_rate_calculator/', accident_rate_calculator, name='accident_rate_calculator'),
+
 ]
