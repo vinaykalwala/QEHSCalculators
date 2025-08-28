@@ -14,10 +14,8 @@ urlpatterns = [
     path('disclaimer/', disclaimer, name='disclaimer'),
     path('terms/', terms, name='terms'),
     path('privacy/', privacy, name='privacy'),
-<<<<<<< HEAD
     path('accident_rate_calculator/', accident_rate_calculator, name='accident_rate_calculator'),
 
-=======
     path('dashboard/', dashboard, name='dashboard'),
     path('subscribe/<int:plan_id>/', subscribe_plan, name='subscribe_plan'),
      path('payment/success/', payment_success, name='payment_success'),
@@ -28,5 +26,4 @@ urlpatterns = [
     path('fire/', fire_calculator, name='fire_calculator'),
     path('co2/', co2_calculator, name='co2_calculator'),
     path('profit/', profit_calculator, name='profit_calculator'),
->>>>>>> 5f5a572b3189a89dd637d2c5bc5493c2f1a61a6a
 ]

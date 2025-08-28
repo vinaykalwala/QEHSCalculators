@@ -303,10 +303,8 @@ def privacy(request):
 def upgrade_required(request):
     return render(request, 'upgrade_required.html')
 
-<<<<<<< HEAD
 def accident_rate_calculator(request):
     return render(request, 'qehsfcalculators/Safety/accident_rate_calculator.html')
-=======
 from .forms import CustomUserCreationForm, CustomAuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 
@@ -354,4 +352,3 @@ def co2_calculator(request):
 @subscription_required(plan_type="corporate")
 def profit_calculator(request):
     return render(request, 'calculators/profit.html', {'title': 'Profit Calculator'})
->>>>>>> 5f5a572b3189a89dd637d2c5bc5493c2f1a61a6a
