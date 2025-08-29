@@ -30,37 +30,59 @@ def check_device_limit(user, plan):
         return False, f"You have reached the maximum device limit ({plan.device_limit}) for your plan."
     return True, None
 
-from django.db.models import Q  # Add this import at the top
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .models import UserDevice
+from django.contrib import messages
 
 @login_required
+def device_limit_exceeded(request):
+    devices = UserDevice.objects.filter(user=request.user)
+
+    if request.method == "POST":
+        devices.delete()
+        messages.success(request, "All devices removed. You can log in again.")
+        return redirect("logout")  # Or redirect to login page
+
+    return render(request, "device_limit.html", {"devices": devices})
+
+
+from django.db.models import Q  # Add this import at the top
+@login_required
 def dashboard(request):
+    # Get the latest active or pending subscription
     subscription = request.user.subscriptions.filter(
-        Q(status="active") | Q(status="pending")  # Use Q directly instead of models.Q
+        Q(status="active") | Q(status="pending")
     ).order_by('-created_at').first()
-    
+
+    # Determine user's plan level
     user_level = PLAN_HIERARCHY.get(subscription.plan.name.lower(), 0) if subscription and subscription.plan else 0
 
     # Organize calculators by category with access control
     accessible_calculators_by_category = {}
-    
+
     for calc in CALCULATORS:
         calc_plan_level = PLAN_HIERARCHY.get(calc["plan_type"].lower(), 3)
-        if subscription and subscription.is_active and calc_plan_level <= user_level:
+        if subscription and subscription.status == "active" and calc_plan_level <= user_level:
             category = calc["category"]
             if category not in accessible_calculators_by_category:
                 accessible_calculators_by_category[category] = []
             accessible_calculators_by_category[category].append(calc)
 
-    # Get all categories that have accessible calculators
-    accessible_categories = {}
-    for category_id, category_info in CATEGORIES.items():
-        if category_id in accessible_calculators_by_category:
-            accessible_categories[category_id] = category_info
+    # Get only categories with accessible calculators
+    accessible_categories = {
+        category_id: category_info
+        for category_id, category_info in CATEGORIES.items()
+        if category_id in accessible_calculators_by_category
+    }
 
+    # Get all active subscription plans
     plans = SubscriptionPlan.objects.filter(is_active=True).order_by('price')
 
+    # Check device limit if subscription exists
     device_message = None
-    if subscription and subscription.is_active and subscription.plan:
+    if subscription and subscription.status == "active" and subscription.plan:
         is_allowed, device_message = check_device_limit(request.user, subscription.plan)
         if not is_allowed:
             messages.warning(request, device_message)
@@ -72,6 +94,7 @@ def dashboard(request):
         "plans": plans,
         "user": request.user
     })
+
 from django.urls import reverse
 
 # Razorpay client
@@ -490,6 +513,14 @@ def login_view(request):
     return render(request, "login.html", {"form": form})
 
 def logout_view(request):
+    user = request.user
+    device_id = request.session.session_key or request.COOKIES.get("device_id")
+
+    # Remove the current device from UserDevice
+    if user.is_authenticated and device_id:
+        UserDevice.objects.filter(user=user, device_id=device_id).delete()
+
+    # Log out the user
     logout(request)
     messages.success(request, "Logged out successfully.")
     return redirect("home")
@@ -504,10 +535,10 @@ from .models import UserSubscription  # import your subscription model
 from .access_map import CALCULATORS, CATEGORIES, PLAN_HIERARCHY
 
 def get_user_plan(user):
+    """Returns the plan name if user has an active subscription, else None."""
     if not user.is_authenticated:
-        return "individual"  # default for guests
+        return None  # Guests have no plan
 
-    # Get the latest active subscription
     active_subscription = UserSubscription.objects.filter(
         user=user,
         status="active",
@@ -515,12 +546,16 @@ def get_user_plan(user):
     ).order_by('-start_date').first()
 
     if active_subscription and active_subscription.plan:
-        return active_subscription.plan.name  # returns "individual" / "employee" / "corporate"
-    return "individual"  # fallback
+        return active_subscription.plan.name  # "individual" / "employee" / "corporate"
+    return None  # No active plan
 
 
 def get_calculators_for_category(category, user_plan):
-    user_plan_level = PLAN_HIERARCHY.get(user_plan, 1)
+    if not user_plan:
+        # No plan → no calculators
+        return []
+
+    user_plan_level = PLAN_HIERARCHY.get(user_plan, 0)  # 0 = no access
     filtered = [
         calc for calc in CALCULATORS
         if calc['category'] == category and PLAN_HIERARCHY[calc['plan_type']] <= user_plan_level
@@ -528,7 +563,7 @@ def get_calculators_for_category(category, user_plan):
     print(f"DEBUG: Category={category}, User Plan={user_plan}, Found={filtered}")
     return filtered
 
-@login_required
+
 def quality_calculators(request):
     user_plan = get_user_plan(request.user)
     calculators = get_calculators_for_category('quality', user_plan)
@@ -537,7 +572,7 @@ def quality_calculators(request):
         'category': CATEGORIES['quality']
     })
 
-@login_required
+
 def environment_calculators(request):
     user_plan = get_user_plan(request.user)
     calculators = get_calculators_for_category('environment', user_plan)
@@ -546,7 +581,7 @@ def environment_calculators(request):
         'category': CATEGORIES['environment']
     })
 
-@login_required
+
 def health_calculators(request):
     user_plan = get_user_plan(request.user)
     calculators = get_calculators_for_category('health', user_plan)
@@ -555,7 +590,7 @@ def health_calculators(request):
         'category': CATEGORIES['health']
     })
 
-@login_required
+
 def safety_calculators(request):
     user_plan = get_user_plan(request.user)
     calculators = get_calculators_for_category('safety', user_plan)
@@ -564,7 +599,7 @@ def safety_calculators(request):
         'category': CATEGORIES['safety']
     })
 
-@login_required
+
 def fire_calculators(request):
     user_plan = get_user_plan(request.user)
     calculators = get_calculators_for_category('fire', user_plan)

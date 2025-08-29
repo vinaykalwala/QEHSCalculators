@@ -16,6 +16,7 @@ urlpatterns = [
     path('disclaimer/', disclaimer, name='disclaimer'),
     path('terms/', terms, name='terms'),
     path('privacy/', privacy, name='privacy'),
+    path("device-limit/", device_limit_exceeded, name="device_limit_exceeded"),
     path('accident_rate_calculator/', accident_rate_calculator, name='accident_rate_calculator'),
 
     path('dashboard/', dashboard, name='dashboard'),
