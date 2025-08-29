@@ -289,10 +289,37 @@ def fire_calculators(request):
 def disclaimer(request):
     return render(request, 'disclaimer.html', {'title': 'Disclaimer'})
 
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from .models import Contact
+from .forms import ContactForm
+
 def contact(request):
     if request.method == 'POST':
-        pass  # Handle form submission
-    return render(request, 'contact.html')
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your message has been sent successfully!')
+            return redirect('contact')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ContactForm()
+
+    return render(request, 'contact.html', {'form': form})
+
+@login_required
+def contact_list(request):
+    contacts = Contact.objects.all().order_by('-created_at')
+    return render(request, 'contact_list.html', {'contacts': contacts})
+
+@login_required
+def delete_contact(request, pk):
+    contact = get_object_or_404(Contact, pk=pk)
+    contact.delete()
+    messages.success(request, 'Contact deleted successfully!')
+    return redirect('contact_list')
+
 
 def terms(request):
     return render(request, 'terms.html')
