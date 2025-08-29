@@ -1,3 +1,5 @@
+from datetime import timedelta
+from decimal import Decimal
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
@@ -15,6 +17,8 @@ from .models import CustomUser, SubscriptionPlan, UserSubscription, Transaction,
 from .access_map import CALCULATORS, PLAN_HIERARCHY, CATEGORIES 
 from .decorators import subscription_required
 import json
+from django.db.models import Q
+
 
 # Razorpay client
 client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
@@ -26,17 +30,22 @@ def check_device_limit(user, plan):
         return False, f"You have reached the maximum device limit ({plan.device_limit}) for your plan."
     return True, None
 
+from django.db.models import Q  # Add this import at the top
+
 @login_required
 def dashboard(request):
-    subscription = request.user.subscriptions.filter(status="active").last()
-    user_level = PLAN_HIERARCHY.get(subscription.plan.name.lower(), 0) if subscription else 0
+    subscription = request.user.subscriptions.filter(
+        Q(status="active") | Q(status="pending")  # Use Q directly instead of models.Q
+    ).order_by('-created_at').first()
+    
+    user_level = PLAN_HIERARCHY.get(subscription.plan.name.lower(), 0) if subscription and subscription.plan else 0
 
     # Organize calculators by category with access control
     accessible_calculators_by_category = {}
     
     for calc in CALCULATORS:
         calc_plan_level = PLAN_HIERARCHY.get(calc["plan_type"].lower(), 3)
-        if subscription and calc_plan_level <= user_level:
+        if subscription and subscription.is_active and calc_plan_level <= user_level:
             category = calc["category"]
             if category not in accessible_calculators_by_category:
                 accessible_calculators_by_category[category] = []
@@ -48,10 +57,10 @@ def dashboard(request):
         if category_id in accessible_calculators_by_category:
             accessible_categories[category_id] = category_info
 
-    plans = SubscriptionPlan.objects.filter(is_active=True)
+    plans = SubscriptionPlan.objects.filter(is_active=True).order_by('price')
 
     device_message = None
-    if subscription:
+    if subscription and subscription.is_active and subscription.plan:
         is_allowed, device_message = check_device_limit(request.user, subscription.plan)
         if not is_allowed:
             messages.warning(request, device_message)
@@ -63,7 +72,6 @@ def dashboard(request):
         "plans": plans,
         "user": request.user
     })
-
 from django.urls import reverse
 
 # Razorpay client
@@ -74,21 +82,90 @@ def subscribe_plan(request, plan_id):
     plan = get_object_or_404(SubscriptionPlan, id=plan_id, is_active=True)
     
     existing_subscription = request.user.subscriptions.filter(status="active").last()
+    
+    # Calculate upgrade amount if user has an active subscription
+    upgrade_amount = Decimal('0.00')
+    credit_amount = Decimal('0.00')  # Add credit amount calculation
+    original_end_date = None
+    is_upgrade = False
+    
     if existing_subscription:
-        messages.warning(request, "You already have an active subscription. Please cancel or wait for it to expire.")
-        return redirect("dashboard")
+        # Check if user is trying to upgrade to a higher plan
+        if plan.price <= existing_subscription.plan.price:
+            messages.warning(request, "You can only upgrade to a higher-priced plan.")
+            return redirect("dashboard")
+        
+        # Store the original end date from the existing subscription
+        original_end_date = existing_subscription.end_date
+        
+        # Calculate remaining value of current subscription
+        total_days = (existing_subscription.end_date - existing_subscription.start_date).days
+        elapsed_days = (timezone.now() - existing_subscription.start_date).days
+        remaining_days = max(0, total_days - elapsed_days)
+        
+        if remaining_days > 0:
+            # Calculate daily rate of current plan
+            daily_rate_current = existing_subscription.plan.price / total_days
+            # Calculate remaining value
+            remaining_value = daily_rate_current * remaining_days
+            
+            # Calculate daily rate of new plan
+            daily_rate_new = plan.price / total_days
+            # Calculate value for remaining days in new plan
+            new_value = daily_rate_new * remaining_days
+            
+            # Calculate upgrade amount (difference between plans for remaining period)
+            upgrade_amount = max(Decimal('0.00'), new_value - remaining_value)
+            # Calculate credit amount for display purposes
+            credit_amount = remaining_value
+        
+        is_upgrade = True
+        messages.info(request, f"Upgrading from {existing_subscription.plan.name}. Your subscription will continue until {original_end_date.strftime('%b. %d, %Y')}.")
+    else:
+        # Regular subscription - use full plan price
+        upgrade_amount = plan.price
+        credit_amount = Decimal('0.00')  # No credit for new subscriptions
 
     is_allowed, device_message = check_device_limit(request.user, plan)
     if not is_allowed:
         messages.error(request, device_message)
         return redirect("dashboard")
 
-    amount_in_paise = int(plan.price * 100)
+    amount_in_paise = int(upgrade_amount * 100)
     
     if amount_in_paise < 100:
-        messages.error(request, "Plan amount is too low for payment processing.")
+        # If amount is too low, create subscription without payment
+        if is_upgrade and existing_subscription:
+            # Handle upgrade with minimal payment
+            existing_subscription.mark_as_upgraded()
+        
+        # Create new subscription with the SAME end date as previous subscription
+        start_date = timezone.now()
+        if is_upgrade and original_end_date:
+            end_date = original_end_date  # Use the original end date
+        else:
+            end_date = start_date + timedelta(days=plan.duration_days)
+        
+        # Create new subscription
+        new_subscription = UserSubscription.objects.create(
+            user=request.user,
+            plan=plan,
+            start_date=start_date,
+            end_date=end_date,
+            amount_paid=upgrade_amount,
+            status="active" if plan.name.lower() == "individual" else "pending",
+            previous_subscription=existing_subscription if is_upgrade else None,
+            is_upgrade=is_upgrade
+        )
+        
+        if plan.name.lower() == "individual":
+            messages.success(request, f"Your plan has been upgraded to {plan.name}!")
+        else:
+            messages.success(request, f"Upgrade request submitted! Waiting for admin approval.")
+        
         return redirect("dashboard")
 
+    # Create Razorpay order
     order_data = {
         "amount": amount_in_paise,
         "currency": "INR",
@@ -101,12 +178,15 @@ def subscribe_plan(request, plan_id):
         messages.error(request, "Failed to create payment order. Please try again later.")
         return redirect("dashboard")
 
-    # Store order details in session instead of creating database records
+    # Store order details in session
     request.session['pending_subscription'] = {
         'plan_id': plan.id,
         'razorpay_order_id': razorpay_order["id"],
-        'amount': str(plan.price),
-        'order_data': razorpay_order
+        'amount': str(upgrade_amount),
+        'order_data': razorpay_order,
+        'is_upgrade': is_upgrade,
+        'existing_subscription_id': existing_subscription.id if existing_subscription else None,
+        'original_end_date': original_end_date.isoformat() if original_end_date else None
     }
 
     # Return the payment page with Razorpay integration
@@ -116,19 +196,12 @@ def subscribe_plan(request, plan_id):
         "razorpay_key_id": settings.RAZORPAY_KEY_ID,
         "callback_url": request.build_absolute_uri(reverse('payment_success')),
         "error_url": request.build_absolute_uri(reverse('payment_failed')),
+        "is_upgrade": is_upgrade,
+        "upgrade_amount": upgrade_amount,
+        "credit_amount": credit_amount,  # Add credit amount to context
+        "existing_plan": existing_subscription.plan if existing_subscription else None
     }
     return render(request, "subscribe_payment.html", context)
-
-def verify_payment_signature(order_id, payment_id, signature):
-    try:
-        client.utility.verify_payment_signature({
-            "razorpay_order_id": order_id,
-            "razorpay_payment_id": payment_id,
-            "razorpay_signature": signature
-        })
-        return True
-    except razorpay.errors.SignatureVerificationError:
-        return False
 
 @login_required
 @csrf_exempt
@@ -164,6 +237,41 @@ def payment_success(request):
             messages.error(request, "The subscription plan is no longer available.")
             return redirect("dashboard")
             
+        # Handle upgrade scenario
+        is_upgrade = pending_subscription.get('is_upgrade', False)
+        existing_subscription = None
+        original_end_date = None
+        
+        if is_upgrade:
+            existing_subscription_id = pending_subscription.get('existing_subscription_id')
+            if existing_subscription_id:
+                try:
+                    existing_subscription = UserSubscription.objects.get(
+                        id=existing_subscription_id, 
+                        user=request.user
+                    )
+                    # Store the original end date BEFORE marking as upgraded
+                    original_end_date = existing_subscription.end_date
+                    # Mark old subscription as upgraded
+                    existing_subscription.mark_as_upgraded()
+                except UserSubscription.DoesNotExist:
+                    messages.error(request, "Existing subscription not found.")
+                    return redirect("dashboard")
+            else:
+                # Try to get original_end_date from session as fallback
+                original_end_date_str = pending_subscription.get('original_end_date')
+                if original_end_date_str:
+                    original_end_date = timezone.datetime.fromisoformat(original_end_date_str)
+        
+        # Calculate start and end dates
+        start_date = timezone.now()
+        
+        # For upgrades, use the original end date from the previous subscription
+        if is_upgrade and original_end_date:
+            end_date = original_end_date
+        else:
+            end_date = start_date + timedelta(days=plan.duration_days)
+        
         # Create subscription only after successful payment verification
         subscription = UserSubscription.objects.create(
             user=request.user,
@@ -171,9 +279,12 @@ def payment_success(request):
             razorpay_order_id=order_id,
             razorpay_payment_id=payment_id,
             razorpay_signature=signature,
-            status="pending",
-            start_date=None,
-            end_date=None
+            status="active" if plan.name.lower() == "individual" else "pending",
+            start_date=start_date,
+            end_date=end_date,
+            amount_paid=Decimal(pending_subscription['amount']),
+            previous_subscription=existing_subscription if is_upgrade else None,
+            is_upgrade=is_upgrade
         )
 
         # Create transaction record
@@ -181,26 +292,28 @@ def payment_success(request):
             subscription=subscription,
             razorpay_order_id=order_id,
             razorpay_payment_id=payment_id,
-            amount=plan.price,
+            amount=Decimal(pending_subscription['amount']),
             currency="INR",
             payload={
                 "order": pending_subscription['order_data'],
                 "payment_id": payment_id,
                 "signature": signature,
-                "verified": True
+                "verified": True,
+                "is_upgrade": is_upgrade,
+                "original_end_date": original_end_date.isoformat() if original_end_date else None
             }
         )
         
-        # Activate subscription if it's an individual plan
-        requires_approval = True
-        if plan.name.lower() == "individual":
-            subscription.activate()
-            requires_approval = False
-            messages.success(request, "Payment successful! Your subscription is now active.")
-        else:
-            subscription.status = "pending"
-            subscription.save()
+        # Set appropriate message based on plan type and upgrade status
+        requires_approval = plan.name.lower() != "individual"
+        
+        if requires_approval:
             messages.success(request, "Payment successful! Waiting for admin approval.")
+        else:
+            if is_upgrade:
+                messages.success(request, f"Payment successful! Your plan has been upgraded to {plan.name}.")
+            else:
+                messages.success(request, f"Payment successful! You are now subscribed to {plan.name}.")
 
         # Clear the pending subscription from session
         if 'pending_subscription' in request.session:
@@ -208,11 +321,25 @@ def payment_success(request):
 
         return render(request, "payment_success.html", {
             "subscription": subscription,
-            "requires_approval": requires_approval
+            "requires_approval": requires_approval,
+            "is_upgrade": is_upgrade
         })
     else:
         messages.error(request, "Invalid request method.")
         return redirect("dashboard")
+    
+def verify_payment_signature(order_id, payment_id, signature):
+    try:
+        client.utility.verify_payment_signature({
+            "razorpay_order_id": order_id,
+            "razorpay_payment_id": payment_id,
+            "razorpay_signature": signature
+        })
+        return True
+    except razorpay.errors.SignatureVerificationError:
+        return False
+
+
 
 @login_required
 def payment_failed(request):
@@ -369,6 +496,83 @@ def logout_view(request):
 
 def fire_calculator(request):
     return render(request, 'calculators/fire.html', {'title': 'Fire Calculator'})
+
+
+from django.shortcuts import render
+from django.utils import timezone
+from .models import UserSubscription  # import your subscription model
+from .access_map import CALCULATORS, CATEGORIES, PLAN_HIERARCHY
+
+def get_user_plan(user):
+    if not user.is_authenticated:
+        return "individual"  # default for guests
+
+    # Get the latest active subscription
+    active_subscription = UserSubscription.objects.filter(
+        user=user,
+        status="active",
+        end_date__gte=timezone.now()
+    ).order_by('-start_date').first()
+
+    if active_subscription and active_subscription.plan:
+        return active_subscription.plan.name  # returns "individual" / "employee" / "corporate"
+    return "individual"  # fallback
+
+
+def get_calculators_for_category(category, user_plan):
+    user_plan_level = PLAN_HIERARCHY.get(user_plan, 1)
+    filtered = [
+        calc for calc in CALCULATORS
+        if calc['category'] == category and PLAN_HIERARCHY[calc['plan_type']] <= user_plan_level
+    ]
+    print(f"DEBUG: Category={category}, User Plan={user_plan}, Found={filtered}")
+    return filtered
+
+@login_required
+def quality_calculators(request):
+    user_plan = get_user_plan(request.user)
+    calculators = get_calculators_for_category('quality', user_plan)
+    return render(request, 'calculatorcategories/qualitycategory.html', {
+        'calculators': calculators,
+        'category': CATEGORIES['quality']
+    })
+
+@login_required
+def environment_calculators(request):
+    user_plan = get_user_plan(request.user)
+    calculators = get_calculators_for_category('environment', user_plan)
+    return render(request, 'calculatorcategories/environmentcategory.html', {
+        'calculators': calculators,
+        'category': CATEGORIES['environment']
+    })
+
+@login_required
+def health_calculators(request):
+    user_plan = get_user_plan(request.user)
+    calculators = get_calculators_for_category('health', user_plan)
+    return render(request, 'calculatorcategories/healthcategory.html', {
+        'calculators': calculators,
+        'category': CATEGORIES['health']
+    })
+
+@login_required
+def safety_calculators(request):
+    user_plan = get_user_plan(request.user)
+    calculators = get_calculators_for_category('safety', user_plan)
+    return render(request, 'calculatorcategories/safetycategory.html', {
+        'calculators': calculators,
+        'category': CATEGORIES['safety']
+    })
+
+@login_required
+def fire_calculators(request):
+    user_plan = get_user_plan(request.user)
+    calculators = get_calculators_for_category('fire', user_plan)
+    return render(request, 'calculatorcategories/firecategory.html', {
+        'calculators': calculators,
+        'category': CATEGORIES['fire']
+    })
+
 
 @login_required
 @subscription_required(plan_type="employee")

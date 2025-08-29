@@ -32,8 +32,14 @@ class SubscriptionPlan(models.Model):
 
 
 class UserSubscription(models.Model):
-    STATUS_CHOICES = [("pending", "Pending Approval"), ("active", "Active"), ("rejected", "Rejected"),
-                      ("expired", "Expired"), ("cancelled", "Cancelled")]
+    STATUS_CHOICES = [
+        ("pending", "Pending Approval"), 
+        ("active", "Active"), 
+        ("rejected", "Rejected"),
+        ("expired", "Expired"), 
+        ("cancelled", "Cancelled"),
+        ("upgraded", "Upgraded")  # Added new status for upgraded subscriptions
+    ]
 
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="subscriptions")
     plan = models.ForeignKey(SubscriptionPlan, on_delete=models.SET_NULL, null=True)
@@ -44,18 +50,56 @@ class UserSubscription(models.Model):
     razorpay_payment_id = models.CharField(max_length=200, blank=True, null=True)
     razorpay_signature = models.CharField(max_length=200, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    # New fields for upgrade functionality
+    previous_subscription = models.ForeignKey(
+        'self', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='upgraded_subscriptions'
+    )
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    is_upgrade = models.BooleanField(default=False)
 
     def activate(self):
         self.start_date = timezone.now()
         if self.plan:
-            self.end_date = self.start_date + timedelta(days=self.plan.duration_days)
+            # For upgrades, we might not want to use the full duration
+            if self.is_upgrade and self.previous_subscription:
+                # Calculate remaining days from previous subscription
+                remaining_days = self.calculate_remaining_days()
+                if remaining_days > 0:
+                    self.end_date = self.start_date + timedelta(days=remaining_days)
+                else:
+                    self.end_date = self.start_date + timedelta(days=self.plan.duration_days)
+            else:
+                # Regular subscription - use full duration
+                self.end_date = self.start_date + timedelta(days=self.plan.duration_days)
         self.status = "active"
         self.save()
+
+    def calculate_remaining_days(self):
+        """Calculate remaining days from previous subscription for upgrades"""
+        if not self.previous_subscription or not self.previous_subscription.end_date:
+            return 0
+        
+        # Calculate days remaining in previous subscription
+        time_remaining = self.previous_subscription.end_date - timezone.now()
+        remaining_days = max(0, time_remaining.days)
+        return remaining_days
 
     @property
     def is_active(self):
         return self.status == "active" and self.end_date and self.end_date >= timezone.now()
 
+    def mark_as_upgraded(self):
+        """Mark this subscription as upgraded (for previous subscriptions)"""
+        self.status = "upgraded"
+        self.save()
+
+    class Meta:
+        ordering = ['-created_at']
 
 class UserDevice(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="devices")

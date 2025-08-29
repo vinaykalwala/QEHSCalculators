@@ -27,6 +27,12 @@ urlpatterns = [
     path("logout/", logout_view, name="logout"),
     path('fire/', fire_calculator, name='fire_calculator'),
     path('co2/', co2_calculator, name='co2_calculator'),
+
+    path('calculators/quality/', quality_calculators, name='quality_calculators'),
+    path('calculators/environment/', environment_calculators, name='environment_calculators'),
+    path('calculators/health/', health_calculators, name='health_calculators'),
+    path('calculators/safety/',safety_calculators, name='safety_calculators'),
+    path('calculators/fire/', fire_calculators, name='fire_calculators'),
    
 
     path('quality/main_calculator/', quality_main_calculator, name='quality_main_calculator'),
