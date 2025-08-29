@@ -564,7 +564,7 @@ def get_calculators_for_category(category, user_plan):
     return filtered
 
 
-def quality_calculators(request):
+def qualitycategory_calculators(request):
     user_plan = get_user_plan(request.user)
     calculators = get_calculators_for_category('quality', user_plan)
     return render(request, 'calculatorcategories/qualitycategory.html', {
@@ -573,7 +573,7 @@ def quality_calculators(request):
     })
 
 
-def environment_calculators(request):
+def environmentcategory_calculators(request):
     user_plan = get_user_plan(request.user)
     calculators = get_calculators_for_category('environment', user_plan)
     return render(request, 'calculatorcategories/environmentcategory.html', {
@@ -582,7 +582,7 @@ def environment_calculators(request):
     })
 
 
-def health_calculators(request):
+def healthcategory_calculators(request):
     user_plan = get_user_plan(request.user)
     calculators = get_calculators_for_category('health', user_plan)
     return render(request, 'calculatorcategories/healthcategory.html', {
@@ -591,7 +591,7 @@ def health_calculators(request):
     })
 
 
-def safety_calculators(request):
+def safetycategory_calculators(request):
     user_plan = get_user_plan(request.user)
     calculators = get_calculators_for_category('safety', user_plan)
     return render(request, 'calculatorcategories/safetycategory.html', {
@@ -600,7 +600,7 @@ def safety_calculators(request):
     })
 
 
-def fire_calculators(request):
+def firecategory_calculators(request):
     user_plan = get_user_plan(request.user)
     calculators = get_calculators_for_category('fire', user_plan)
     return render(request, 'calculatorcategories/firecategory.html', {

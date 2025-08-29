@@ -29,11 +29,11 @@ urlpatterns = [
     path('fire/', fire_calculator, name='fire_calculator'),
     path('co2/', co2_calculator, name='co2_calculator'),
 
-    path('calculators/quality/', quality_calculators, name='qualitycategory_calculators'),
-    path('calculators/environment/', environment_calculators, name='environmentcategory_calculators'),
-    path('calculators/health/', health_calculators, name='healthcategory_calculators'),
-    path('calculators/safety/',safety_calculators, name='safetycategory_calculators'),
-    path('calculators/fire/', fire_calculators, name='firecategory_calculators'),
+    path('calculators/quality/', qualitycategory_calculators, name='qualitycategory_calculators'),
+    path('calculators/environment/', environmentcategory_calculators, name='environmentcategory_calculators'),
+    path('calculators/health/', healthcategory_calculators, name='healthcategory_calculators'),
+    path('calculators/safety/',safetycategory_calculators, name='safetycategory_calculators'),
+    path('calculators/fire/', firecategory_calculators, name='firecategory_calculators'),
    
 
     path('quality/main_calculator/', quality_main_calculator, name='quality_main_calculator'),
