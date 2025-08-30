@@ -1,0 +1,551 @@
+{% extends 'base.html' %}
+{% block title %}ASME (API RP 520) Nozzle Gas Constant Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASME (API RP 520) Nozzle Gas Constant Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            {% comment %} max-width: 700px; {% endcomment %}
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 320px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+       
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+   <div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>ASME (API RP 520) Nozzle Gas Constant (Cg) Calculator</h1>
+            <p>Calculate the nozzle gas constant (Cg) for pressure relief valve sizing</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="k">Isentropic Coefficient (k)</label>
+                    <input type="number" id="k" class="form-input" min="0.01" step="0.01" placeholder="e.g., 1.4">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateCg()">Calculate Cg</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2721/2721299.png" alt="Calculator illustration">
+
+                    <p>This tool will calculate the <strong>Nozzle Gas Constant (Cg)</strong>. Enter the isentropic coefficient (k) to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Nozzle Gas Constant (Cg)</h2>
+                    </div>
+                    <div class="rate-display">
+                    <div class="rate-value" id="cgValue">0.00</div>
+                    <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">Nozzle Gas Constant (Cg)</div></div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low</span><span>Moderate</span><span>Standard</span><span>High</span><span>Very High</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Interpretation</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Nozzle Gas Constant (Cg) Calculator</strong> helps determine the gas discharge coefficient 
+                    through a nozzle in safety valves according to ASME (API RP 520) standards. It's essential for 
+                    calculating gas flow rate and pressure relief requirements in industrial applications.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ What is the Nozzle Gas Constant (Cg)?</h3>
+                <p>Cg represents how efficiently a gas flows through a nozzle. It's a critical parameter in sizing 
+                    pressure relief valves for gas service applications.</p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Isentropic Coefficient (k):</strong> The ratio of specific heats (Cp/Cv) that determines gas expansion and compression behavior.</li>
+                    <li><strong>520:</strong> A standard conversion factor used in API safety calculations.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>🏭 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Safety Valves in Industries:</strong> Used for proper sizing of pressure relief valves in oil, gas, and chemical industries.</li>
+                    <li><strong>Fire Safety Engineering:</strong> Helps in gas dispersion modeling during fire hazards.</li>
+                    <li><strong>HVAC and Industrial Airflow:</strong> Regulates airflow and gas emission control in ventilation systems.</li>
+                    <li><strong>Gas Pipeline Pressure Control:</strong> Used in natural gas and petroleum processing for leak detection.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <p>
+                    <b>Higher Cg Values</b> indicate a higher gas discharge rate, meaning the nozzle allows more gas to pass through efficiently.
+                </p>
+                <p>
+                    <b>Lower Cg Values</b> indicate restricted gas flow, which may cause pressure buildup.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>🏢 About ASME (API RP 520)</h3>
+                <p>
+                    <strong>ASME (API RP 520)</strong> stands for American Society of Mechanical Engineers (American Petroleum Institute Recommended Practice 520). 
+                    It provides guidelines for designing and installing pressure relief systems to protect equipment from excessive pressure 
+                    in industries like oil & gas and chemical processing.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>❌ Why Can't k be Zero?</h3>
+                <p>
+                    <strong>k cannot be zero</strong> because division by zero is undefined in mathematics, and it would make the formula invalid. 
+                    The isentropic coefficient must be greater than 0, with typical values ranging from 1.0 to 1.7 for common gases.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateCg() {
+            const kValue = document.getElementById('k').value.trim();
+            
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+
+            let errors = [];
+
+            if (kValue === "") {
+                errors.push("👉 Please enter the isentropic coefficient (k).");
+            } else if (parseFloat(kValue) <= 0) {
+                errors.push("👉 The isentropic coefficient (k) must be greater than 0 because division by zero is undefined, and negative values do not apply to gas laws.");
+            }
+
+            if (errors.length > 0) {
+                // Show error box
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden"); // hide error box if valid
+            }
+
+            const k = parseFloat(kValue);
+            let Cg;
+            
+            if (k === 1) {
+                Cg = 315; // Default value for k = 1
+            } else {
+                Cg = 520 * Math.sqrt(k * Math.pow((2 / (k + 1)), (k + 1) / (k - 1)));
+            }
+            
+            document.getElementById('cgValue').textContent = Cg.toFixed(3);
+
+            const meterFill = document.getElementById('meterFill');
+            let meterWidth, meterColor, feedback;
+            
+            if (Cg < 300) {
+                meterWidth = '10%'; meterColor = '#2ecc71';
+                feedback = 'Low gas discharge coefficient. This indicates restricted gas flow through the nozzle.';
+            } else if (Cg < 330) {
+                meterWidth = '30%'; meterColor = '#3498db';
+                feedback = 'Moderate gas discharge coefficient. Typical for many common gases.';
+            } else if (Cg < 360) {
+                meterWidth = '50%'; meterColor = '#f39c12';
+                feedback = 'Standard gas discharge coefficient. Common for many industrial applications.';
+            } else if (Cg < 400) {
+                meterWidth = '70%'; meterColor = '#e67e22';
+                feedback = 'High gas discharge coefficient. Indicates efficient gas flow through the nozzle.';
+            } else {
+                meterWidth = '90%'; meterColor = '#e74c3c';
+                feedback = 'Very high gas discharge coefficient. Excellent flow characteristics.';
+            }
+
+            meterFill.style.width = meterWidth;
+            meterFill.style.backgroundColor = meterColor;
+            document.getElementById('feedbackContent').textContent = feedback;
+
+            placeholder.classList.add('hidden');
+            resultValue.classList.remove('hidden');
+        }
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+
+</body>
+</html>
+{% endblock %}
