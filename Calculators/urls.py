@@ -30,9 +30,12 @@ urlpatterns = [
     path('co2/', co2_calculator, name='co2_calculator'),
 
     path('users/', user_list, name='user_list'),
-   
     path('users/<int:pk>/edit/', edit_user, name='edit_user'),
     path('users/<int:pk>/delete/', delete_user, name='delete_user'),
+    path('subscriptions/', subscription_list, name='subscription_list'),
+    path('subscriptions/add/', subscription_add, name='subscription_add'),
+    path('subscriptions/edit/<int:pk>/', subscription_edit, name='subscription_edit'),
+    path('subscriptions/delete/<int:pk>/',subscription_delete, name='subscription_delete'),
 
     path('calculators/quality/', qualitycategory_calculators, name='qualitycategory_calculators'),
     path('calculators/environment/', environmentcategory_calculators, name='environmentcategory_calculators'),

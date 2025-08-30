@@ -40,3 +40,11 @@ class UserEditForm(forms.ModelForm):
     class Meta:
         model = CustomUser
         fields = ['email', 'phone', 'company_name', 'designation', 'address', 'industry', 'purpose']
+
+
+from .models import SubscriptionPlan
+
+class SubscriptionPlanForm(forms.ModelForm):
+    class Meta:
+        model = SubscriptionPlan
+        fields = ['name', 'price', 'calculators_per_category', 'device_limit', 'duration_days', 'is_active']

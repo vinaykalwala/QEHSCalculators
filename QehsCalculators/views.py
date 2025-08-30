@@ -678,6 +678,50 @@ def delete_user(request, pk):
 
     return render(request, 'delete_user_confirm.html', {'user_obj': user_obj})
 
+
+from .models import SubscriptionPlan
+from .forms import SubscriptionPlanForm
+
+# Restrict only superusers
+def superuser_required(view_func):
+    return user_passes_test(lambda u: u.is_superuser)(view_func)
+
+@superuser_required
+def subscription_list(request):
+    plans = SubscriptionPlan.objects.all()
+    return render(request, 'subscription_list.html', {'plans': plans})
+
+@superuser_required
+def subscription_add(request):
+    if request.method == 'POST':
+        form = SubscriptionPlanForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('subscription_list')
+    else:
+        form = SubscriptionPlanForm()
+    return render(request, 'subscription_form.html', {'form': form})
+
+@superuser_required
+def subscription_edit(request, pk):
+    plan = get_object_or_404(SubscriptionPlan, pk=pk)
+    if request.method == 'POST':
+        form = SubscriptionPlanForm(request.POST, instance=plan)
+        if form.is_valid():
+            form.save()
+            return redirect('subscription_list')
+    else:
+        form = SubscriptionPlanForm(instance=plan)
+    return render(request, 'subscription_form.html', {'form': form})
+
+@superuser_required
+def subscription_delete(request, pk):
+    plan = get_object_or_404(SubscriptionPlan, pk=pk)
+    if request.method == 'POST':
+        plan.delete()
+        return redirect('subscription_list')
+    return render(request, 'subscription_confirm_delete.html', {'plan': plan})
+
 @login_required
 @subscription_required(plan_type="employee")
 def co2_calculator(request):
