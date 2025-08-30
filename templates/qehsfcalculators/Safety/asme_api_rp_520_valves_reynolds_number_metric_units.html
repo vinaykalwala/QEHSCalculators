@@ -1,0 +1,644 @@
+{% extends 'base.html' %}
+{% block title %}ASME (API RP 520) Valves - Reynolds Number Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASME (API RP 520) Valves - Reynolds Number Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            {% comment %} max-width: 700px; {% endcomment %}
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (min-width: 901px) {
+            .calc-content { 
+                flex-direction: row; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+            order: 2;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            min-height: 320px;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Input rows for side-by-side fields */
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        
+        
+        .laminar { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .transitional { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .turbulent { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        /* Mobile-specific adjustments */
+        @media (max-width: 320px) {
+            .calculator-container {
+                padding: 10px;
+            }
+            
+            .calculator-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .calculator-header p {
+                font-size: 16px;
+            }
+            
+            .calc-card, .result-card {
+                padding: 20px 15px;
+                border-radius: 12px;
+            }
+            
+            .calc-card h2 {
+                font-size: 1.4rem;
+            }
+            
+            .form-input {
+                padding: 12px 14px;
+                font-size: 14px;
+            }
+            
+            .calculate-btn {
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+            
+            .result-placeholder img {
+                max-width: 180px;
+            }
+            
+            .rate-value {
+                font-size: 36px;
+            }
+            
+            .meter-labels span {
+                font-size: 10px;
+            }
+            
+            .note-card {
+                padding: 15px 18px;
+            }
+            
+            .note-card h3 {
+                font-size: 16px;
+            }
+            
+            .note-card p, .note-card li {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+   <div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>ASME (API RP 520) Valves - Reynolds Number Calculator</h1>
+            <p>Calculate the Reynolds Number for discharge valves using metric units</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                
+                <div class="form-group">
+                    <label for="massFlow">Mass Flow Rate (kg/h)</label>
+                    <input type="number" id="massFlow" class="form-input" min="0.0001" step="any" placeholder="e.g., 1000" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="viscosity">Dynamic Viscosity (Pa·s)</label>
+                    <input type="number" id="viscosity" class="form-input" min="0.0001" step="any" placeholder="e.g., 0.001" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dischargeArea">Discharge Area (mm²)</label>
+                    <input type="number" id="dischargeArea" class="form-input" min="0.0001" step="any" placeholder="e.g., 50" required>
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateReynolds()">Calculate Reynolds Number</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/869/869869.png" alt="Fluid dynamics illustration">
+                    <p>This tool will calculate the <strong>Reynolds Number</strong> for discharge valves. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Reynolds Number</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                    </div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Laminar (<2000)</span><span>Transitional</span><span>Turbulent (>4000)</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Flow Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Reynolds Number (Re)</strong> is a dimensionless quantity used to predict flow patterns in different fluid flow situations. 
+                    It helps determine whether fluid flow through a discharge valve is laminar, turbulent, or transitional. 
+                    This calculator follows the ASME (API RP 520) standard for metric units.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Mass Flow Rate (ṁ):</strong> The mass of fluid passing through the valve per hour, measured in kg/h.</li>
+                    <li><strong>Dynamic Viscosity (μ):</strong> The resistance of the fluid to flow, measured in Pascal-seconds (Pa·s).</li>
+                    <li><strong>Discharge Area (A₀):</strong> The effective cross-sectional area of the discharge outlet, measured in mm².</li>
+                </ul>
+            </div>
+
+            
+
+            <div class="note-card">
+                <h3>📈 Interpretation</h3>
+                <p>
+                    The Reynolds Number determines the flow regime:
+                </p>
+                <ul class="note-list">
+                    <li><span class="laminar">Re < 2000</span> → Laminar flow (smooth and orderly)</li>
+                    <li><span class="transitional">2000 ≤ Re ≤ 4000</span> → Transitional flow (unstable, between laminar and turbulent)</li>
+                    <li><span class="turbulent">Re > 4000</span> → Turbulent flow (chaotic and mixed)</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>🔍 Why Is Reynolds Number Important?</h3>
+                <p>
+                    The Reynolds Number is a crucial parameter in fluid mechanics for:
+                </p>
+                <ul class="note-list">
+                    <li><strong>Valve Sizing:</strong> Properly sizing relief valves for different flow regimes</li>
+                    <li><strong>System Design:</strong> Designing efficient fluid systems with appropriate pressure drops</li>
+                    <li><strong>Safety Analysis:</strong> Ensuring safe operation of pressure relief systems</li>
+                    <li><strong>Performance Prediction:</strong> Predicting flow behavior and potential issues like cavitation</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>🏭 ASME (API RP 520) Standard</h3>
+                <p>
+                    <strong>ASME (API RP 520)</strong> stands for American Society of Mechanical Engineers (American Petroleum Institute Recommended Practice 520). 
+                    It provides guidelines for designing and installing pressure relief systems to protect equipment from excessive pressure 
+                    in industries like oil & gas, chemical processing, and power generation.
+                </p>
+            </div>
+             <div class="note-card">
+                <h3>🌍 Real-life Applications </h3>
+                <ul>
+                <li>Used in <strong>relief valve sizing</strong> to ensure safety in pressure systems.</li>
+                 <li>Helps determine if a flow is <strong>laminar or turbulent</strong>, which impacts valve design.</li>
+                <li>Ensures <strong>efficient fluid discharge</strong> in industrial and chemical plants.</li>
+               </ul>
+            </div>
+             <div class="note-card">
+                <h3>📌 Conclusion</h3>
+                    <p>The Reynolds number is crucial for evaluating <strong>flow conditions in safety relief systems</strong>. Understanding its calculation helps engineers design and maintain efficient discharge valves, preventing system failures.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateReynolds() {
+            const massFlow = document.getElementById('massFlow').value.trim();
+            const viscosity = document.getElementById('viscosity').value.trim();
+            const dischargeArea = document.getElementById('dischargeArea').value.trim();
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+
+            let errors = [];
+
+            if (massFlow === "") errors.push("👉 Please enter the mass flow rate.");
+            if (viscosity === "") errors.push("👉 Please enter the dynamic viscosity.");
+            if (dischargeArea === "") errors.push("👉 Please enter the discharge area.");
+
+            // Validate numeric values
+            if (errors.length === 0) {
+                if (parseFloat(massFlow) <= 0) errors.push("👉 Mass flow rate must be greater than zero.");
+                if (parseFloat(viscosity) <= 0) errors.push("👉 Dynamic viscosity must be greater than zero.");
+                if (parseFloat(dischargeArea) <= 0) errors.push("👉 Discharge area must be greater than zero.");
+            }
+
+            if (errors.length > 0) {
+                // Show error box
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden"); // hide error box if valid
+            }
+
+            const m = parseFloat(massFlow);
+            const μ = parseFloat(viscosity);
+            const A = parseFloat(dischargeArea);
+            
+            // Calculate Reynolds Number
+            const Re = (0.3414 * m) / (μ * A);
+            document.getElementById('rateValue').textContent = Re.toFixed(2);
+
+            const meterFill = document.getElementById('meterFill');
+            let meterWidth, meterColor, feedback;
+            
+            if (Re < 2000) {
+                meterWidth = '15%'; 
+                meterColor = '#27ae60';
+                feedback = 'Laminar flow: Smooth, orderly fluid motion with parallel layers.';
+            } else if (Re <= 4000) {
+                meterWidth = '50%'; 
+                meterColor = '#f39c12';
+                feedback = 'Transitional flow: Unstable flow regime between laminar and turbulent.';
+            } else {
+                meterWidth = '85%'; 
+                meterColor = '#e74c3c';
+                feedback = 'Turbulent flow: Chaotic, mixed fluid motion with eddies and vortices.';
+            }
+
+            meterFill.style.width = meterWidth;
+            meterFill.style.backgroundColor = meterColor;
+            document.getElementById('feedbackContent').textContent = feedback;
+
+            placeholder.classList.add('hidden');
+            resultValue.classList.remove('hidden');
+        }
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}

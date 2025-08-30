@@ -1,17 +1,21 @@
 {% extends 'base.html' %}
-{% block title %}Attendee Training Time Calculator{% endblock %}
+{% block title %}A1c Calculator{% endblock %}
 {% block content %}
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendee Training Time Calculator</title>
+    <title>A1c Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
-       .calculator-container {
+      
+
+        /* Main container */
+        .calculator-container {
             max-width: 1200px;
             margin: 20px auto;
             padding: 20px;
@@ -36,7 +40,6 @@
         .calculator-header p {
             color: #7f8c8d;
             font-size: 18px;
-            max-width: 700px;
             margin: 0 auto;
         }
 
@@ -77,9 +80,7 @@
             display: flex;
             flex-direction: column;
             transition: transform 0.3s ease;
-            height: 420px;
-            overflow-y: auto;
-            
+            justify-content: center;
         }
         
         .calc-card:hover { 
@@ -345,170 +346,91 @@
             display: none; 
         }
 
+        /* Table styles */
+        .custom-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .custom-table thead {
+            background-color: #1560bd;
+            color: white;
+        }
+        .custom-table th, .custom-table td {
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .custom-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
        
     </style>
-
-
+</head>
+<body>
 <div class="calculator-container printable" id="printArea">
 
-    <!-- Include header/footer for print -->
-    {% include "includes/print_header_footer.html" %}
+    {% include "includes/print_header_footer.html" with report_title="A1c Conversion Report" %}
 
     <div class="calculator-header">
-        <h1>Attendee Training Time Calculator</h1>
-        <p>Calculate the total time invested in a training session based on the number of attendees and session duration.</p>
+        <h1>A1c Calculator</h1>
+        <p>Convert your Hemoglobin A1c (HbA1c) value to an Estimated Average Glucose (eAG) level.</p>
     </div>
 
     <div class="calc-content">
-        <!-- Calculator Input Card -->
         <div class="calc-card">
-            <h2>Enter Data</h2>
-
+            <h2>Enter Your Data</h2>
             <div class="form-group">
-                <label for="attendees">Number of Attendees</label>
-                <input type="number" id="attendees" class="form-input" min="1" placeholder="Enter number of attendees">
+                <label for="a1cValue">Hemoglobin A1c Value (%):</label>
+                <input type="number" id="a1cValue" class="form-input" placeholder="e.g., 6.5" step="0.1" min="0">
             </div>
-
-            <div class="form-group">
-                <label for="duration">Training Duration (minutes)</label>
-                <input type="number" id="duration" class="form-input" min="1" placeholder="Enter duration in minutes">
-            </div>
-
-            <button class="calculate-btn" onclick="calculateTrainingTime()">Calculate Total Time</button>
+            <button class="calculate-btn" onclick="convertA1c()">Convert A1c</button>
         </div>
 
-        <!-- Result Section -->
         <div class="result-card">
             <div class="result-placeholder" id="placeholder">
-                <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Training illustration">
-                <p>This tool calculates the <strong>total training time</strong> in hours. Enter the number of attendees and session duration to see results.</p>
+                <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Safety illustration">
+                <p>Your estimated average blood sugar will appear here.</p>
             </div>
-
-            <div class="result-error hidden" id="resultError">
-                <div class="error-icon">❌</div>
-                <div class="error-message" id="errorMessage"></div>
-            </div>
-
+            <div class="result-error hidden" id="resultError"><div class="error-message" id="errorMessage"></div></div>
             <div class="result-value hidden" id="resultValue">
-                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
-                    <h2>Total Training Time</h2>
+                <div class="rate-value" id="bloodSugarValue">0</div>
+                <div class="rate-label">Estimated Average Glucose (mg/dL)</div>
+                <div class="safety-meter">
+                    <div class="meter-fill" id="meterFill"></div>
                 </div>
-                <div class="rate-value" id="trainingTimeValue">0.00</div>
-                <div class="rate-label">hours</div>
-
-                <div class="result-feedback" id="interpretationBox">
-                <div class="feedback-title">Interpretation</div>
-                <div class="feedback-content" id="interpretationText">
-                <!-- JS will fill this -->
+                <div class="meter-labels">
+                    <span>Normal</span><span>Prediabetes</span><span>Diabetes</span>
                 </div>
-                 </div>
-
-
+                <div class="result-feedback">
+                    <div class="feedback-title">Condition Assessment</div>
+                    <div class="feedback-content" id="feedbackContent"></div>
+                </div>
                 <div class="btn-wrapper">
-                    <button class="calculate-btn print-btn" onclick="window.print()">Print Report</button>
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Notes Section -->
     <div class="note-section">
-        <div class="note-card">
-            <h3> 🔎About this Calculator</h3>
-           <p>This tool calculates the <strong>total training time in hours</strong> by multiplying the number of attendees with the session duration in minutes and converting the result into hours, giving a clear measure of the group’s overall training time.
-             </p>
-        </div>
-
-        <div class="note-card">
-            <h3>⚙️ How it Works</h3>
-            <p>
-        Each attendee contributes their time during the session. To calculate the total training hours:
-    </p>
-    <ol>
-        <li><strong>Input Number of Attendees:</strong> Enter how many participants are attending the training.</li>
-        <li><strong>Input Training Duration:</strong> Specify the length of the training in minutes. For accuracy, one training hour is considered as 60 minutes.</li>
-        <li><strong>Calculate:</strong> Click the "Calculate Training Time" button to get the total training time in hours.</li>
-    </ol>
-
-        </div>
-
-
-        
-        <div class="note-card">
-            <h3> ❓ Why is this Important?</h3>
-             <ul class="note-list">
-             <li><strong>Accurate Reporting:</strong> Track the combined training time for compliance and performance monitoring.</li>
-            <li><strong>Resource Planning:</strong> Helps organizations manage and allocate training resources effectively.</li>
-             </ul>
-            </div>
-
-        <div class="note-card">
-            <h3>📊 Applications</h3>
-            <ul class="note-list">
-                <li>Helps organizations track combined training hours for compliance.</li>
-                <li>Assists in resource and scheduling planning.</li>
-                <li>Provides accurate reporting for performance monitoring.</li>
-            </ul>
-        </div>
-
-        <div class="note-card">
-            <h3>💡 Conclusion</h3>
-            <p>Using this calculator, managers and trainers can quickly determine total training hours and plan accordingly.</p>
-        </div>
+        <div class="note-card"><h3>What is A1c – Glycated Hemoglobin?</h3><p>Hemoglobin A1c (HbA1c) is a form of hemoglobin with sugar (glucose) attached. It reflects the average blood sugar levels over the past 2-3 months. A higher A1c indicates elevated blood sugar levels, increasing the risk of diabetes-related complications.</p></div>
+        <div class="note-card"><h3>When Should You Get Your A1c Test?</h3><p>You should consider testing your A1c levels if:</p><ul><li>You're over 45 years old or under 45 and overweight.</li><li>You have a family history of diabetes.</li><li>You engage in low physical activity (less than 3 times a week).</li><li>You have high blood pressure or cholesterol levels.</li><li>You have a history of gestational diabetes or delivered a baby weighing over 9 pounds.</li></ul></div>
+        <div class="note-card"><h3>Normal A1c Range – A1c Levels Chart</h3><table class="custom-table"><thead><tr><th>Condition</th><th>A1c (%)</th><th>Average Blood Sugar (mg/dL)</th></tr></thead><tbody><tr><td>Normal</td><td>Below 5.7%</td><td>Below 117 mg/dL</td></tr><tr><td>Prediabetes</td><td>5.7% - 6.4%</td><td>117 - 137 mg/dL</td></tr><tr><td>Diabetes</td><td>6.5% or above</td><td>Above 137 mg/dL</td></tr></tbody></table></div>
+        <div class="note-card"><h3>Risks of Chronic High Blood Glucose</h3><p>Consistently high A1c levels may lead to serious health complications, including:</p><ul><li>Increased risk of heart disease and stroke.</li><li>Chronic kidney disease or failure.</li><li>Nerve damage (neuropathy) and loss of sensation.</li><li>Retinopathy leading to vision loss.</li><li>Frequent infections and poor wound healing.</li></ul></div>
+        <div class="note-card"><h3>How to Lower Your A1c</h3><p>Effective strategies to manage and reduce your A1c levels include:</p><ul><li>Maintain a balanced diet with low sugar and high fiber.</li><li>Exercise regularly to manage blood glucose.</li><li>Monitor blood sugar levels consistently.</li><li>Follow medical advice and prescribed medication.</li><li>Stay hydrated and manage stress effectively.</li></ul></div>
+        <div class="note-card"><h3>⚠️ Disclaimer</h3><p>This calculator is for informational purposes only and should not replace professional medical advice. Consult your healthcare provider for accurate diagnosis and guidance.</p></div>
     </div>
-
 </div>
 
 <script>
-function calculateTrainingTime() {
-    
-    const attendees = parseFloat(document.getElementById("attendees").value.trim());
-    const duration = parseFloat(document.getElementById("duration").value.trim());
-
-    const errorBox = document.getElementById('resultError');
-    const errorMessage = document.getElementById('errorMessage');
-    const placeholder = document.getElementById('placeholder');
-    const resultValue = document.getElementById('resultValue');
-    const outputValue = document.getElementById('trainingTimeValue');
-
-    let errors = [];
-    if (isNaN(attendees) || attendees <= 0) errors.push("👉 Please enter a valid number of attendees greater than 0.");
-    if (isNaN(duration) || duration <= 0) errors.push("👉 Please enter a valid duration in minutes greater than 0.");
-
-    if (errors.length > 0) {
-        errorMessage.innerHTML = errors.join("<br>");
-        errorBox.classList.remove("hidden");
-        placeholder.classList.add("hidden");
-        resultValue.classList.add("hidden");
-        return;
-    } else {
-        errorBox.classList.add("hidden");
-    }
-
-    const totalTime = (attendees * duration) / 60;
-    outputValue.textContent = totalTime.toFixed(2);
-
-    placeholder.classList.add('hidden');
-    resultValue.classList.remove('hidden');
-
-
-
-    const interpretationBox = document.getElementById('interpretationBox');
-    const interpretationText = document.getElementById('interpretationText');
-    let interpretation = "";
-
-    if (totalTime < 10) {
-        interpretation = "🔹 Low Training Hours – Indicates a short training effort, suitable for small sessions.";
-    } else if (totalTime >= 10 && totalTime < 50) {
-        interpretation = "🔸 Moderate Training Hours – Balanced training schedule, good for medium groups.";
-    } else {
-        interpretation = "✅ High Training Hours – Large training investment, suitable for big or intensive programs.";
-    }
-
-    interpretationText.innerHTML = interpretation;
-    interpretationBox.style.display = "block";
-
-}
+    // The JavaScript does not need any changes as it targets elements by ID.
+    document.addEventListener('DOMContentLoaded', function() { /* ... */ const printDateEl = document.getElementById('printDate'); if (printDateEl) { const now = new Date(); const options = { year: 'numeric', month: 'long', day: 'numeric' }; printDateEl.textContent = now.toLocaleDateString('en-US', options); } });
+    function convertA1c() { const errorBox = document.getElementById('resultError'), errorMessage = document.getElementById('errorMessage'), placeholder = document.getElementById('placeholder'), resultValueDiv = document.getElementById('resultValue'); const a1cValue = parseFloat(document.getElementById('a1cValue').value); if (isNaN(a1cValue) || a1cValue <= 0) { errorMessage.innerHTML = "👉 Please enter a valid A1c percentage."; errorBox.classList.remove("hidden"); placeholder.classList.remove("hidden"); resultValueDiv.classList.add("hidden"); return; } else { errorBox.classList.add("hidden"); } const avgBloodSugar = (a1cValue * 28.7 - 46.7).toFixed(0); document.getElementById('bloodSugarValue').textContent = avgBloodSugar; const meterFill = document.getElementById('meterFill'); let meterWidth, meterColor, feedback; if (a1cValue < 5.7) { meterWidth = '25%'; meterColor = '#27ae60'; feedback = '✅ Your A1c level is in the <strong>Normal</strong> range.'; } else if (a1cValue <= 6.4) { meterWidth = '50%'; meterColor = '#f39c12'; feedback = '⚠️ Your A1c level is in the <strong>Prediabetes</strong> range. It is recommended to monitor your levels and consult a doctor.'; } else { meterWidth = '85%'; meterColor = '#e74c3c'; feedback = '❌ Your A1c level is in the <strong>Diabetes</strong> range. Please consult a healthcare provider for guidance and treatment.'; } meterFill.style.width = meterWidth; meterFill.style.backgroundColor = meterColor; document.getElementById('feedbackContent').innerHTML = feedback; placeholder.classList.add('hidden'); resultValueDiv.classList.remove('hidden'); }
+    function printReport() { /* ... */ const printDateEl = document.getElementById('printDate'); if (printDateEl) { const now = new Date(); const options = { year: 'numeric', month: 'long', day: 'numeric' }; printDateEl.textContent = now.toLocaleDateString('en-US', options); } window.print(); }
 </script>
-    <script src="{% static 'js/print.js' %}"></script>
+
+</body>
+</html>
 {% endblock %}

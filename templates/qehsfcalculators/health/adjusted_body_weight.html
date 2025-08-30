@@ -1,17 +1,21 @@
 {% extends 'base.html' %}
-{% block title %}Attendee Training Time Calculator{% endblock %}
+{% block title %}Adjusted Body Weight Calculator{% endblock %}
 {% block content %}
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendee Training Time Calculator</title>
+    <title>Adjusted Body Weight Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
-       .calculator-container {
+      
+
+        /* Main container */
+        .calculator-container {
             max-width: 1200px;
             margin: 20px auto;
             padding: 20px;
@@ -36,7 +40,6 @@
         .calculator-header p {
             color: #7f8c8d;
             font-size: 18px;
-            max-width: 700px;
             margin: 0 auto;
         }
 
@@ -79,7 +82,6 @@
             transition: transform 0.3s ease;
             height: 420px;
             overflow-y: auto;
-            
         }
         
         .calc-card:hover { 
@@ -345,170 +347,102 @@
             display: none; 
         }
 
+        /* Table styles */
+        .custom-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .custom-table thead {
+            background-color: #1560bd;
+            color: white;
+        }
+        .custom-table th, .custom-table td {
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .custom-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
        
     </style>
-
-
+</head>
+<body>
 <div class="calculator-container printable" id="printArea">
 
-    <!-- Include header/footer for print -->
-    {% include "includes/print_header_footer.html" %}
+    {% include "includes/print_header_footer.html" with report_title="Adjusted Body Weight Report" %}
 
     <div class="calculator-header">
-        <h1>Attendee Training Time Calculator</h1>
-        <p>Calculate the total time invested in a training session based on the number of attendees and session duration.</p>
+        <h1>Adjusted Body Weight Calculator</h1>
+        <p>Calculate your adjusted body weight (AjBW) for nutritional planning based on your ideal and actual weight.</p>
     </div>
 
     <div class="calc-content">
-        <!-- Calculator Input Card -->
         <div class="calc-card">
-            <h2>Enter Data</h2>
-
-            <div class="form-group">
-                <label for="attendees">Number of Attendees</label>
-                <input type="number" id="attendees" class="form-input" min="1" placeholder="Enter number of attendees">
-            </div>
-
-            <div class="form-group">
-                <label for="duration">Training Duration (minutes)</label>
-                <input type="number" id="duration" class="form-input" min="1" placeholder="Enter duration in minutes">
-            </div>
-
-            <button class="calculate-btn" onclick="calculateTrainingTime()">Calculate Total Time</button>
+            <h2>Enter Your Data</h2>
+            <div class="form-group"><label for="sex">Gender:</label><select id="sex" class="form-input"><option value="male">Male</option><option value="female">Female</option></select></div>
+            <div class="form-group"><label for="height">Height (cm):</label><input type="number" id="height" class="form-input" placeholder="e.g., 175" min="1"></div>
+            <div class="form-group"><label for="weight">Actual Body Weight (kg):</label><input type="number" id="weight" class="form-input" placeholder="e.g., 80" min="1"></div>
+            <button class="calculate-btn" onclick="calculateAdjustedBodyWeight()">Calculate</button>
         </div>
 
-        <!-- Result Section -->
         <div class="result-card">
-            <div class="result-placeholder" id="placeholder">
-                <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Training illustration">
-                <p>This tool calculates the <strong>total training time</strong> in hours. Enter the number of attendees and session duration to see results.</p>
-            </div>
-
-            <div class="result-error hidden" id="resultError">
-                <div class="error-icon">❌</div>
-                <div class="error-message" id="errorMessage"></div>
-            </div>
-
+            <div class="result-placeholder" id="placeholder"><img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Nutrition scale icon"><p>Results for your Ideal and Adjusted Body Weight will be displayed here.</p></div>
+            <div class="result-error hidden" id="resultError"><div class="error-message" id="errorMessage"></div></div>
             <div class="result-value hidden" id="resultValue">
-                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
-                    <h2>Total Training Time</h2>
-                </div>
-                <div class="rate-value" id="trainingTimeValue">0.00</div>
-                <div class="rate-label">hours</div>
-
-                <div class="result-feedback" id="interpretationBox">
-                <div class="feedback-title">Interpretation</div>
-                <div class="feedback-content" id="interpretationText">
-                <!-- JS will fill this -->
-                </div>
-                 </div>
-
-
-                <div class="btn-wrapper">
-                    <button class="calculate-btn print-btn" onclick="window.print()">Print Report</button>
-                </div>
+                <div class="rate-value" id="ajbwValue">0.00 kg</div>
+                <div class="rate-label" id="ibwValue"></div>
+                <div class="result-feedback"><div class="feedback-title">Interpretation</div><div class="feedback-content" id="feedbackContent"></div></div>
+                <div class="btn-wrapper"><button class="calculate-btn print-btn" onclick="printReport()">Print Report</button></div>
             </div>
         </div>
     </div>
 
-    <!-- Notes Section -->
     <div class="note-section">
         <div class="note-card">
-            <h3> 🔎About this Calculator</h3>
-           <p>This tool calculates the <strong>total training time in hours</strong> by multiplying the number of attendees with the session duration in minutes and converting the result into hours, giving a clear measure of the group’s overall training time.
-             </p>
+            <h3>What is Adjusted Body Weight?</h3>
+            <p>Adjusted Body Weight (AjBW) is a measure used to estimate a person's nutritional needs more accurately, especially for individuals who are overweight or obese. Since fat tissue (adipose tissue) is less metabolically active than muscle tissue, using actual body weight to calculate energy requirements can overestimate the needs of individuals with excess body fat. Adjusted Body Weight accounts for this by adjusting the actual body weight to better reflect metabolic activity.</p>
         </div>
-
         <div class="note-card">
-            <h3>⚙️ How it Works</h3>
-            <p>
-        Each attendee contributes their time during the session. To calculate the total training hours:
-    </p>
-    <ol>
-        <li><strong>Input Number of Attendees:</strong> Enter how many participants are attending the training.</li>
-        <li><strong>Input Training Duration:</strong> Specify the length of the training in minutes. For accuracy, one training hour is considered as 60 minutes.</li>
-        <li><strong>Calculate:</strong> Click the "Calculate Training Time" button to get the total training time in hours.</li>
-    </ol>
-
+            <h3>How is Adjusted Body Weight Calculated?</h3>
+            <p>Adjusted Body Weight is calculated using a formula that combines <strong>Ideal Body Weight (IBW)</strong> and <strong>Actual Body Weight (ABW)</strong>. The calculation involves two main steps:</p>
+            <ol>
+                <li><strong>Calculate Ideal Body Weight (IBW):</strong> This is the weight considered healthy for a person based on their height and gender. It is calculated using a standardized formula that varies slightly between men and women.</li>
+                <li><strong>Calculate Adjusted Body Weight (AjBW):</strong> This adjusts the actual body weight by considering the difference between the actual weight and the ideal weight, with a correction factor applied to account for the lower metabolic activity of fat tissue.</li>
+            </ol>
         </div>
-
-
-        
         <div class="note-card">
-            <h3> ❓ Why is this Important?</h3>
-             <ul class="note-list">
-             <li><strong>Accurate Reporting:</strong> Track the combined training time for compliance and performance monitoring.</li>
-            <li><strong>Resource Planning:</strong> Helps organizations manage and allocate training resources effectively.</li>
-             </ul>
-            </div>
-
-        <div class="note-card">
-            <h3>📊 Applications</h3>
-            <ul class="note-list">
-                <li>Helps organizations track combined training hours for compliance.</li>
-                <li>Assists in resource and scheduling planning.</li>
-                <li>Provides accurate reporting for performance monitoring.</li>
+            <h3>Why Use Adjusted Body Weight?</h3>
+            <p>Adjusted Body Weight is particularly useful for:</p>
+            <ul>
+                <li><strong>Overweight or Obese Individuals:</strong> It provides a more accurate estimate of nutritional needs by accounting for the lower metabolic activity of fat tissue.</li>
+                <li><strong>Clinical Settings:</strong> Dietitians and healthcare providers use AjBW to design personalized nutrition plans for patients.</li>
             </ul>
         </div>
-
         <div class="note-card">
-            <h3>💡 Conclusion</h3>
-            <p>Using this calculator, managers and trainers can quickly determine total training hours and plan accordingly.</p>
+            <h3>Limitations of Adjusted Body Weight</h3>
+            <p>While Adjusted Body Weight is useful in many cases, it is not suitable for everyone:</p>
+            <ul>
+                <li><strong>Athletes:</strong> Individuals with high muscle mass may have a higher actual body weight due to muscle, not fat. In such cases, AjBW may underestimate their nutritional needs.</li>
+                <li><strong>Pregnancy:</strong> AjBW is not applicable during pregnancy, as weight gain is due to the growing fetus and related changes, not fat tissue.</li>
+            </ul>
+        </div>
+        <div class="note-card">
+            <h3>⚠️ Disclaimer</h3>
+            <p>This calculator provides estimates and is not a substitute for professional medical advice. Always consult a healthcare provider for personalized recommendations.</p>
         </div>
     </div>
-
 </div>
 
 <script>
-function calculateTrainingTime() {
-    
-    const attendees = parseFloat(document.getElementById("attendees").value.trim());
-    const duration = parseFloat(document.getElementById("duration").value.trim());
-
-    const errorBox = document.getElementById('resultError');
-    const errorMessage = document.getElementById('errorMessage');
-    const placeholder = document.getElementById('placeholder');
-    const resultValue = document.getElementById('resultValue');
-    const outputValue = document.getElementById('trainingTimeValue');
-
-    let errors = [];
-    if (isNaN(attendees) || attendees <= 0) errors.push("👉 Please enter a valid number of attendees greater than 0.");
-    if (isNaN(duration) || duration <= 0) errors.push("👉 Please enter a valid duration in minutes greater than 0.");
-
-    if (errors.length > 0) {
-        errorMessage.innerHTML = errors.join("<br>");
-        errorBox.classList.remove("hidden");
-        placeholder.classList.add("hidden");
-        resultValue.classList.add("hidden");
-        return;
-    } else {
-        errorBox.classList.add("hidden");
-    }
-
-    const totalTime = (attendees * duration) / 60;
-    outputValue.textContent = totalTime.toFixed(2);
-
-    placeholder.classList.add('hidden');
-    resultValue.classList.remove('hidden');
-
-
-
-    const interpretationBox = document.getElementById('interpretationBox');
-    const interpretationText = document.getElementById('interpretationText');
-    let interpretation = "";
-
-    if (totalTime < 10) {
-        interpretation = "🔹 Low Training Hours – Indicates a short training effort, suitable for small sessions.";
-    } else if (totalTime >= 10 && totalTime < 50) {
-        interpretation = "🔸 Moderate Training Hours – Balanced training schedule, good for medium groups.";
-    } else {
-        interpretation = "✅ High Training Hours – Large training investment, suitable for big or intensive programs.";
-    }
-
-    interpretationText.innerHTML = interpretation;
-    interpretationBox.style.display = "block";
-
-}
+    // All JS functions remain the same
+    document.addEventListener('DOMContentLoaded', function() { /* ... */ const printDateEl = document.getElementById('printDate'); if (printDateEl) { const now = new Date(); const options = { year: 'numeric', month: 'long', day: 'numeric' }; printDateEl.textContent = now.toLocaleDateString('en-US', options); } });
+    function calculateAdjustedBodyWeight() { /* ... */ const errorBox = document.getElementById('resultError'); const errorMessage = document.getElementById('errorMessage'); const placeholder = document.getElementById('placeholder'); const resultValueDiv = document.getElementById('resultValue'); const sex = document.getElementById('sex').value; const height = parseFloat(document.getElementById('height').value); const weight = parseFloat(document.getElementById('weight').value); let errors = []; if (isNaN(height) || height <= 0) { errors.push("👉 Please enter a valid height."); } if (isNaN(weight) || weight <= 0) { errors.push("👉 Please enter a valid weight."); } if (errors.length > 0) { errorMessage.innerHTML = errors.join("<br>"); errorBox.classList.remove("hidden"); placeholder.classList.remove("hidden"); resultValueDiv.classList.add("hidden"); return; } else { errorBox.classList.add("hidden"); } const heightInches = height / 2.54; let ibw; if (heightInches < 60) { ibw = (sex === 'male') ? 52 * Math.pow(heightInches/60, 2) : 49 * Math.pow(heightInches/60, 2); } else { if (sex === 'male') { ibw = 52 + 1.9 * (heightInches - 60); } else { ibw = 49 + 1.7 * (heightInches - 60); } } const ajbw = ibw + 0.4 * (weight - ibw); const ibwRounded = parseFloat(ibw.toFixed(2)); const ajbwRounded = parseFloat(ajbw.toFixed(2)); document.getElementById('ajbwValue').textContent = ajbwRounded + ' kg'; document.getElementById('ibwValue').textContent = 'Ideal Body Weight: ' + ibwRounded + ' kg'; document.getElementById('feedbackContent').innerHTML = `For planning your diet and nutrition, you should aim for the calorie intake of someone weighing <strong>${ajbwRounded} kg</strong>, even though your actual weight is <strong>${weight} kg</strong>.`; placeholder.classList.add('hidden'); resultValueDiv.classList.remove('hidden'); }
+    function printReport() { /* ... */ const printDateEl = document.getElementById('printDate'); if (printDateEl) { const now = new Date(); const options = { year: 'numeric', month: 'long', day: 'numeric' }; printDateEl.textContent = now.toLocaleDateString('en-US', options); } window.print(); }
 </script>
-    <script src="{% static 'js/print.js' %}"></script>
+
+</body>
+</html>
 {% endblock %}

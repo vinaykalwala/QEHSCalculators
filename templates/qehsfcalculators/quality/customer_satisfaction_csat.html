@@ -1,0 +1,500 @@
+{% extends 'base.html' %}
+{% block title %}Customer Satisfaction (CSAT) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Satisfaction (CSAT) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+   <div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Customer Satisfaction (CSAT) Calculator</h1>
+            <p>Calculates the Customer Satisfaction Score based on the number of satisfied customers and total responses</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator Input Card -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="S">Number of Satisfied Customers</label>
+                    <input type="number" id="S" class="form-input" min="0" placeholder="Enter satisfied customers">
+                </div>
+
+                <div class="form-group">
+                    <label for="T">Total Number of Responses</label>
+                    <input type="number" id="T" class="form-input" min="0" placeholder="Enter total responses">
+                </div>
+
+                <button class="calculate-btn" onclick="calculateCSAT()">Calculate CSAT Score</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Customer satisfaction illustration">
+                    <p>This tool calculates the <strong>Customer Satisfaction Score (CSAT)</strong>. Enter your data to see results.</p>
+                </div>
+
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>CSAT Score</h2>
+                    </div>
+                    <div class="rate-value" id="csatValue">0.00</div>
+                    <div class="rate-label"><strong></strong>%</strong></div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">Customer Satisfaction Interpretation</div>
+                        <div class="feedback-content" id="csatFeedback"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🔎 About This Calculator</h3>
+                <p>
+                    The <strong>Customer Satisfaction (CSAT) Calculator</strong> measures customer satisfaction levels based on feedback data. It helps businesses understand how satisfied their customers are with products or services, enabling data-driven decisions to improve customer experience.
+                </p> 
+            </div>
+
+            <div class="note-card">
+                <h3>❓ Explanation of Parameters</h3>
+                <ul class="note-list">
+                    <li><strong>Number of Satisfied Customers (S):</strong> The count of customers who responded positively to your satisfaction survey.</li>
+                    <li><strong>Total Number of Responses (T):</strong> The total number of customers who responded to your satisfaction survey.</li>
+                    <li><strong>CSAT Score:</strong> The percentage of satisfied customers, calculated as (S/T) × 100%.</li>
+                </ul>
+            </div>
+
+            <div class="note-card ">
+                <h3>What is the Use of Quality Qualifiers?</h3>
+                <p>
+                     Quality qualifiers help businesses measure customer sentiment and service efficiency. They ensure that the collected feedback is categorized correctly and used to enhance customer experience. High CSAT scores indicate **excellent customer experience**, while low scores suggest **areas for improvement**.
+    </p>
+                
+            </div>
+            
+            <div class="note-card">
+                <h3>How Quality Qualifiers Help</h3>
+    <ul class= "note-list">
+        <li>Identify gaps in **product or service quality**.</li>
+        <li>Enhance **customer retention** by improving service.</li>
+        <li>Pinpoint **key areas for improvement** based on real customer feedback.</li>
+        <li>Ensure **continuous improvement** in customer support and product offerings.</li>
+    </ul>
+                </div>
+
+            <div class="note-card">
+                <h3>📊 Interpretation Guidelines</h3>
+                <ul class="note-list">
+                    <li><strong>90% - 100% (Excellent):</strong> Customers are highly satisfied! Maintain this quality and continue engaging with your customers.</li>
+        <li><strong>70% - 89% (Good):</strong> Customers are mostly happy, but there is room for improvement. Consider refining services and addressing common complaints.</li>
+        <li><strong>50% - 69% (Needs Improvement):</strong> A significant portion of customers is dissatisfied. Look into customer concerns and improve response times.</li>
+        <li><strong>Below 50% (Poor):</strong> Urgent action needed! Customers are highly unsatisfied. Identify key issues, improve support, and act on feedback immediately.</li>
+    </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Importance of CSAT</h3>
+                <p>Monitoring CSAT is crucial for businesses to understand customer sentiment, identify areas for improvement, and enhance customer retention. Regular measurement helps companies make informed decisions about service improvements, product enhancements, and customer support strategies.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateCSAT() {
+            const S = document.getElementById("S").value.trim();
+            const T = document.getElementById("T").value.trim();
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+            const outputValue = document.getElementById('csatValue');
+            const feedbackBox = document.getElementById('csatFeedback'); 
+
+            let errors = [];
+            if (S === "") {
+                errors.push("👉 Please enter the number of satisfied customers.");
+            } else if (parseFloat(S) < 0) {
+                errors.push("👉 Number of satisfied customers cannot be negative.");
+            }
+            
+            if (T === "") {
+                errors.push("👉 Please enter the total number of responses.");
+            } else if (parseFloat(T) <= 0) {
+                errors.push("👉 Total responses must be greater than 0.");
+            }
+
+            // Validate that S is not greater than T
+            if (S !== "" && T !== "" && parseFloat(S) > parseFloat(T)) {
+                errors.push("👉 Satisfied customers cannot exceed total responses.");
+            }
+
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden");
+            }
+
+            const SNum = parseFloat(S);
+            const TNum = parseFloat(T);
+            const csatScore = (SNum / TNum) * 100;
+            outputValue.textContent = csatScore.toFixed(2);
+
+            let feedback = "";
+            if (csatScore >= 90) {
+                feedback = "🌟 <strong>Excellent!</strong> Your customers are very satisfied. Keep up the great work!";
+            } else if (csatScore >= 70) {
+                feedback = "👍 <strong>Good!</strong> Your customers are happy, but some improvements could make them even more satisfied.";
+            } else if (csatScore >= 50) {
+                feedback = "⚠️ <strong>Needs Improvement!</strong> Some customers are not satisfied. Identify issues and work on enhancing customer experience.";
+            } else {
+                feedback = "🚨 <strong>Poor!</strong> Your customers are largely unsatisfied. Immediate action is required to improve your services.";
+            }
+
+            feedbackBox.innerHTML = feedback;
+
+            placeholder.classList.add('hidden');
+            resultValue.classList.remove('hidden');
+        }
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}

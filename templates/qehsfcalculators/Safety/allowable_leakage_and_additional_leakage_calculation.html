@@ -1,0 +1,592 @@
+{% extends 'base.html' %}
+{% block title %}Allowable Leakage and Additional Leakage Calculation{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Allowable Leakage and Additional Leakage Calculation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            {% comment %} max-width: 700px; {% endcomment %}
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-bottom: 15px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+      
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .image-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .responsive-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+   <div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Allowable Leakage and Additional Leakage Calculation</h1>
+            <p>Calculate the average time taken to resolve issues based on your support metrics</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="pipeLength">Length of Pipe Tested (Feet)</label>
+                    <input type="number" id="pipeLength" class="form-input" min="0" placeholder="e.g., 500">
+                </div>
+                <div class="form-group">
+                    <label for="pipeDiameter">Nominal Diameter of Pipe (Inches)</label>
+                    <input type="number" id="pipeDiameter" class="form-input" min="0" placeholder="e.g., 8">
+                </div>
+                <div class="form-group">
+                    <label for="testPressure">Average Test Pressure (PSI)</label>
+                    <input type="number" id="testPressure" class="form-input" min="0" placeholder="e.g., 150">
+                </div>
+                <div class="form-group">
+                    <label for="valveSize">Nominal Valve Size (Inches) - Optional</label>
+                    <input type="number" id="valveSize" class="form-input" min="0" placeholder="e.g., 4">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateLeakage()">Calculate Leakage</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Safety illustration">
+                    <p>This tool will calculate the <strong>Allowable Leakage</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Allowable Leakage</h2>
+                    </div>
+                    <div class="rate-display">
+                    <div class="rate-value" id="rateValue">0.00</div>
+                    <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">Allowable Leakage (gallons per hour)</div></div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Excellent</span><span>Good</span><span>Moderate</span><span>High</span><span>Critical</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Leakage Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    
+                    <!-- Additional Leakage Result -->
+                    <div class="result-feedback hidden" id="additionalLeakageContainer">
+                        <div class="feedback-title">Additional Leakage</div>
+                        <div class="feedback-content" id="additionalLeakageValue"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Allowable Leakage Calculator</strong> helps determine the maximum allowable leakage 
+                    in a pipeline during pressure testing based on industry standards. It considers pipe length, 
+                    diameter, test pressure, and optional valve size for comprehensive leakage assessment.
+                </p>
+            </div>
+            
+            <div class="note-card">
+                <h3>❓ What is Allowable Leakage?</h3>
+                <p>
+                    Allowable Leakage is the maximum acceptable amount of fluid loss in a pipeline system 
+                    during pressure testing, calculated based on system parameters and industry standards.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Length of Pipe Tested:</strong> Total length of the pipeline being tested (in feet).</li>
+                    <li><strong>Nominal Diameter of Pipe:</strong> The diameter of the pipe being tested (in inches).</li>
+                    <li><strong>Average Test Pressure:</strong> The average pressure applied during the leakage test (in PSI).</li>
+                    <li><strong>Nominal Valve Size:</strong> Size of closed metal-seated valves if applicable (optional).</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <p>
+                    <b>Lower Leakage Values</b> indicate better system integrity. Industry standards typically consider:
+                </p>
+                <ul class="note-list">
+                    <li><span class="good">Below 0.5 gph</span> → Excellent system integrity</li>
+                    <li><span class="average">0.5 – 2.0 gph</span> → Acceptable with minor improvements needed</li>
+                    <li><span class="bad">Above 2.0 gph</span> → Requires system review and potential repairs</li>
+                </ul>
+            </div>
+            
+            <!-- Reference Image -->
+            <div class="image-container">
+                <img src="{% static 'images/leakeage.png' %}" alt="Leakage Calculation Reference Table" class="responsive-image">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateLeakage() {
+            const pipeLength = document.getElementById('pipeLength').value.trim();
+            const pipeDiameter = document.getElementById('pipeDiameter').value.trim();
+            const testPressure = document.getElementById('testPressure').value.trim();
+            const valveSize = document.getElementById('valveSize').value.trim();
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+            const additionalLeakageContainer = document.getElementById('additionalLeakageContainer');
+            const additionalLeakageValue = document.getElementById('additionalLeakageValue');
+
+            let errors = [];
+
+            if (pipeLength === "") {
+                errors.push("👉 Please enter the length of pipe tested.");
+            } else if (parseFloat(pipeLength) <= 0) {
+                errors.push("👉 Pipe length must be greater than 0.");
+            }
+            
+            if (pipeDiameter === "") {
+                errors.push("👉 Please enter the nominal diameter of the pipe.");
+            } else if (parseFloat(pipeDiameter) <= 0) {
+                errors.push("👉 Pipe diameter must be greater than 0.");
+            }
+            
+            if (testPressure === "") {
+                errors.push("👉 Please enter the average test pressure.");
+            } else if (parseFloat(testPressure) <= 0) {
+                errors.push("👉 Test pressure must be greater than 0.");
+            }
+
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden");
+            }
+
+            const length = parseFloat(pipeLength);
+            const diameter = parseFloat(pipeDiameter);
+            const pressure = parseFloat(testPressure);
+            const valve = valveSize ? parseFloat(valveSize) : 0;
+
+            // Calculate allowable leakage
+            const allowableLeakage = (length * diameter * Math.sqrt(pressure)) / 133200;
+            document.getElementById('rateValue').textContent = allowableLeakage.toFixed(4);
+
+            const meterFill = document.getElementById('meterFill');
+            let meterWidth, meterColor, feedback;
+            
+            if (allowableLeakage === 0) {
+                meterWidth = '5%'; 
+                meterColor = '#27ae60';
+                feedback = '🌟 Perfect system integrity. No detectable leakage.';
+            } else if (allowableLeakage < 0.5) {
+                meterWidth = '25%'; 
+                meterColor = '#2ecc71';
+                feedback = '👍 Excellent system integrity. Minimal leakage within acceptable limits.';
+            } else if (allowableLeakage <= 2.0) {
+                meterWidth = '50%'; 
+                meterColor = '#f39c12';
+                feedback = '⚠️ Moderate leakage. System may require minor improvements or monitoring.';
+            } else if (allowableLeakage <= 5.0) {
+                meterWidth = '75%'; 
+                meterColor = '#e67e22';
+                feedback = '🚨 High leakage. System review and potential repairs needed.';
+            } else {
+                meterWidth = '95%'; 
+                meterColor = '#e74c3c';
+                feedback = '❌ Critical leakage level. Immediate system inspection and repairs required.';
+            }
+
+            meterFill.style.width = meterWidth;
+            meterFill.style.backgroundColor = meterColor;
+            document.getElementById('feedbackContent').textContent = feedback;
+
+            // Calculate and display additional leakage if valve size is provided
+            if (valve > 0) {
+                const additionalLeakage = 0.0078 * valve;
+                additionalLeakageValue.textContent = `Additional leakage allowance for ${valve}-inch valve: ${additionalLeakage.toFixed(4)} gallons per hour.`;
+                additionalLeakageContainer.classList.remove('hidden');
+            } else {
+                additionalLeakageContainer.classList.add('hidden');
+            }
+
+            placeholder.classList.add('hidden');
+            resultValue.classList.remove('hidden');
+        }
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
