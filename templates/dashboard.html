@@ -1,136 +1,292 @@
 {% extends 'login_base.html' %}
 {% load static %}
 {% block content %}
+<style>
+/* ----------------------- General ----------------------- */
+.main-content {
+    padding: 10px 2%;
+}
+
+/* ----------------------- Heading ----------------------- */
+.dashboard-heading {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1560bd;
+    margin-bottom: 30px;
+    text-align: center;
+    position: relative;
+}
+.dashboard-heading::after {
+    content: "";
+    display: block;
+    width: 60px;
+    height: 4px;
+    background: #1560bd;
+    margin: 10px auto 0;
+    border-radius: 2px;
+}
+
+/* ----------------------- Category Cards ----------------------- */
+.category-card {
+    border-radius: 15px;
+    overflow: hidden;
+    cursor: pointer;
+    text-align: center;
+    padding: 10px;
+    border: 2px dotted #1560bd;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    transition: all 0.3s ease-in-out;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.category-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0,123,255,0.4);
+}
+.category-img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px;
+    transition: transform 0.3s ease-in-out;
+}
+.category-card:hover .category-img {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+.category-title {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #fff;
+    border: 0.1rem dotted #1560bd;
+    border-radius: 5px;
+    width: 100%;
+    margin: 10px 0 0;
+    padding: 8px 0;
+    background: linear-gradient(#1560bd,#000040);
+}
+
+/* Grid - 5 per row */
+.category-col {
+    flex: 0 0 20%;
+    max-width: 20%;
+    padding: 10px;
+}
+@media (max-width: 1200px) {
+    .category-col { flex: 0 0 25%; max-width: 25%; }
+}
+@media (max-width: 992px) {
+    .category-col { flex: 0 0 33.33%; max-width: 33.33%; }
+}
+@media (max-width: 768px) {
+    .category-col { flex: 0 0 50%; max-width: 50%; }
+}
+@media (max-width: 576px) {
+    .category-col { flex: 0 0 100%; max-width: 100%; }
+}
+
+/* ----------------------- Subscription Plans ----------------------- */
+.pricing-card {
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+    border: 1px solid #ddd;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.pricing-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+.pricing-card .card-header {
+    background: #1560bd;
+    color: #fff;
+    font-size: 1.25rem;
+    font-weight: 600;
+    text-align: center;
+    padding: 15px;
+}
+.pricing-card .card-body {
+    flex: 1;
+    text-align: center;
+    padding: 20px;
+}
+.pricing-card .price {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #1560bd;
+}
+.pricing-card ul {
+    margin-top: 20px;
+    text-align: left;
+}
+.pricing-card ul li {
+    margin-bottom: 10px;
+}
+.pricing-card .card-footer {
+    padding: 15px;
+    text-align: center;
+    background: #f9f9f9;
+}
+
+/* Highlight active plan */
+.pricing-card.active {
+    border: 2px solid #1560bd;
+}
+.pricing-card.active .card-header {
+    background: #0d3c91;
+}
+</style>
+
 <div class="main-content">
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        
+    <!-- Heading -->
+    <h2 class="dashboard-heading">
+        Welcome, {{ request.user.first_name|default:request.user.username }}
+    </h2>
 
-        <!-- Main content -->
-        <div >
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>Welcome, {{ request.user.first_name|default:request.user.username }}</h2>
+    <!-- Messages -->
+    {% if messages %}
+    <div class="messages mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if user.is_superuser %}
+        <!-- Admin Dashboard Placeholder -->
+        <div class="alert alert-info">
+            <h4>Admin Dashboard</h4>
+            <p>This is a placeholder for admin content. Here you can manage users, contacts, approvals, and subscriptions.</p>
+        </div>
+    {% else %}
+        <!-- Current Subscription Info -->
+        {% if subscription and subscription.is_active %}
+        <div class="alert alert-success mb-4">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <p><strong>Status:</strong> Active</p>
+                    <p><strong>Plan:</strong> {{ subscription.plan.get_name_display }}</p>
+                    <p><strong>End Date:</strong> {{ subscription.end_date|date:"F j, Y" }}</p>
+                    {% if subscription.status == "pending" %}
+                    <p class="text-warning"><strong>Note:</strong> Your subscription is pending admin approval</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <a href="#subscription-plans" class="btn btn-sm btn-warning">
+                        <i class="fas fa-arrow-up me-1"></i> Upgrade
+                    </a>
+                </div>
             </div>
+        </div>
+        {% endif %}
+    {% endif %}
 
-            {% if messages %}
-            <div class="messages mb-4">
-                {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                {% endfor %}
+    <!-- Category Section -->
+    <div class="d-flex flex-wrap justify-content-center">
+        <div class="category-col">
+            <div class="category-card">
+                <img src="{% static 'images/qualitymainimage.jpg' %}" class="category-img" alt="Quality Calculators">
+                <h3 class="category-title">Quality <br>Calculator</h3>
             </div>
-            {% endif %}
-
-            {% if user.is_superuser %}
-                <div class="alert alert-info">
-                    <h4>Admin Dashboard</h4>
-                    <p>This is a placeholder for admin content. Here you can manage users, contacts, approvals, and subscriptions.</p>
-                </div>
-            {% else %}
-                <!-- Current Subscription Info -->
-                {% if subscription and subscription.is_active %}
-                <div class="alert alert-success mb-4">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <p><strong>Status:</strong> Active</p>
-                            <p><strong>Plan:</strong> {{ subscription.plan.get_name_display }}</p>
-                            <p><strong>End Date:</strong> {{ subscription.end_date|date:"F j, Y" }}</p>
-                            {% if subscription.status == "pending" %}
-                            <p class="text-warning"><strong>Note:</strong> Your subscription is pending admin approval</p>
-                            {% endif %}
-                        </div>
-                        <div>
-                            <a href="#subscription-plans" class="btn btn-sm btn-warning">
-                                <i class="fas fa-arrow-up me-1"></i> Upgrade
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Subscription Plans Section -->
-                <div class="row mt-5" id="subscription-plans">
-                    <div class="col-12 mb-4">
-                        <h3>
-                            {% if subscription and subscription.is_active %}
-                            Upgrade Your Plan
-                            {% else %}
-                            Subscription Plans
-                            {% endif %}
-                        </h3>
-                    </div>
-
-                    {% for plan in plans %}
-                    <div class="col-md-4 mb-4">
-                        <div class="card h-100 {% if subscription and subscription.plan.id == plan.id %}border-primary{% endif %}">
-                            <div class="card-header {% if subscription and subscription.plan.id == plan.id %}bg-primary text-white{% endif %}">
-                                <h5 class="card-title mb-0">{{ plan.get_name_display }}</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="text-center mb-3">
-                                    <span class="h3">₹{{ plan.price }}</span>
-                                    <span class="text-muted">/ 
-                                        {% if subscription and subscription.is_active and subscription.is_upgrade %}
-                                            Same as previous plan
-                                        {% else %}
-                                            {{ plan.duration_days }} days
-                                        {% endif %}
-                                    </span>
-                                </div>
-                                <ul class="list-unstyled">
-                                    <li class="mb-2">
-                                        <i class="fas fa-desktop me-2"></i>
-                                        <strong>Device limit:</strong> {{ plan.device_limit }}
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="fas fa-clock me-2"></i>
-                                        <strong>Duration:</strong>
-                                        {% if subscription and subscription.is_active and subscription.is_upgrade %}
-                                            Same as previous plan
-                                        {% else %}
-                                            {{ plan.duration_days }} days
-                                        {% endif %}
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="card-footer bg-transparent">
-                                {% if subscription and subscription.is_active %}
-                                    {% if subscription.plan.id == plan.id %}
-                                        <button class="btn btn-outline-secondary w-100" disabled>Current Plan</button>
-                                    {% elif subscription.plan.price >= plan.price %}
-                                        <button class="btn btn-outline-secondary w-100" disabled>Downgrade Not Allowed</button>
-                                    {% else %}
-                                        <a href="{% url 'subscribe_plan' plan.id %}" class="btn btn-warning w-100">
-                                            <i class="fas fa-arrow-up me-1"></i> Upgrade to This Plan
-                                        </a>
-                                    {% endif %}
-                                {% else %}
-                                    <a href="{% url 'subscribe_plan' plan.id %}" class="btn btn-primary w-100">
-                                        Subscribe Now
-                                    </a>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    {% empty %}
-                    <div class="col-12">
-                        <p class="text-muted">No subscription plans available at the moment.</p>
-                    </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
+        </div>
+        <div class="category-col">
+            <div class="category-card">
+                <img src="{% static 'images/environmentmainimage.jpg' %}" class="category-img" alt="Environment Calculators">
+                <h3 class="category-title">Environment <br>Calculator</h3>
+            </div>
+        </div>
+        <div class="category-col">
+            <div class="category-card">
+                <img src="{% static 'images/healthmainimage1.jpg' %}" class="category-img" alt="Health Calculators">
+                <h3 class="category-title">Health <br>Calculator</h3>
+            </div>
+        </div>
+        <div class="category-col">
+            <div class="category-card">
+                <img src="{% static 'images/calsafety.jpg' %}" class="category-img" alt="Safety Calculators">
+                <h3 class="category-title">Safety <br>Calculator</h3>
+            </div>
+        </div>
+        <div class="category-col">
+            <div class="category-card">
+                <img src="{% static 'images/firemainimage.jpg' %}" class="category-img" alt="Fire Calculators">
+                <h3 class="category-title">Fire <br>Calculator</h3>
+            </div>
         </div>
     </div>
-</div>
-</div>
-{% endblock %}
 
-{% block extra_css %}
-<style>
-    .main-content { padding: 30px; }
-    .card-header { font-weight: 600; }
-</style>
+    <!-- Subscription Plans -->
+    {% if not user.is_superuser %}
+    <div class="row mt-5" id="subscription-plans">
+        <div class="col-12 mb-4 text-center">
+            <h3>
+                {% if subscription and subscription.is_active %}
+                Upgrade Your Plan
+                {% else %}
+                Subscription Plans
+                {% endif %}
+            </h3>
+        </div>
+
+        {% for plan in plans %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="pricing-card {% if subscription and subscription.plan.id == plan.id %}active{% endif %}">
+                <div class="card-header">
+                    {{ plan.get_name_display }}
+                </div>
+                <div class="card-body">
+                    <div class="price">₹{{ plan.price }}</div>
+                    <div class="text-muted">
+                        {% if subscription and subscription.is_active and subscription.is_upgrade %}
+                            Same as previous plan
+                        {% else %}
+                            {{ plan.duration_days }} days
+                        {% endif %}
+                    </div>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-desktop me-2"></i> <strong>Device limit:</strong> {{ plan.device_limit }}</li>
+                        <li><i class="fas fa-clock me-2"></i> <strong>Duration:</strong> 
+                            {% if subscription and subscription.is_active and subscription.is_upgrade %}
+                                Same as previous plan
+                            {% else %}
+                                {{ plan.duration_days }} days
+                            {% endif %}
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    {% if subscription and subscription.is_active %}
+                        {% if subscription.plan.id == plan.id %}
+                            <button class="btn btn-outline-secondary w-100" disabled>Current Plan</button>
+                        {% elif subscription.plan.price >= plan.price %}
+                            <button class="btn btn-outline-secondary w-100" disabled>Downgrade Not Allowed</button>
+                        {% else %}
+                            <a href="{% url 'subscribe_plan' plan.id %}" class="btn btn-warning w-100">
+                                <i class="fas fa-arrow-up me-1"></i> Upgrade
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'subscribe_plan' plan.id %}" class="btn btn-primary w-100">
+                            Subscribe Now
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center">
+            <p class="text-muted">No subscription plans available at the moment.</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
 {% endblock %}
