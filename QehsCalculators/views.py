@@ -627,6 +627,56 @@ def firecategory_calculators(request):
         'category': CATEGORIES['fire']
     })
 
+from django.contrib.auth.decorators import login_required, user_passes_test
+
+from .forms import UserEditForm 
+
+# Check if user is superuser
+def is_superuser(user):
+    return user.is_superuser
+
+@login_required
+@user_passes_test(is_superuser)
+def user_list(request):
+    """List all users (superuser only)."""
+    users = CustomUser.objects.all().order_by('-date_joined')
+    return render(request, 'user_list.html', {'users': users})
+
+
+
+
+@login_required
+def edit_user(request, pk):
+    """Allow user to edit their own profile."""
+    user_obj = get_object_or_404(CustomUser, pk=pk)
+
+    if request.user != user_obj:
+        messages.error(request, "You can only edit your own profile.")
+        return redirect('user_detail', pk=request.user.pk)
+
+    if request.method == 'POST':
+        form = UserEditForm(request.POST, instance=user_obj)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Your profile has been updated successfully!")
+            return redirect('user_detail', pk=user_obj.pk)
+    else:
+        form = UserEditForm(instance=user_obj)
+
+    return render(request, 'edit_user.html', {'form': form})
+
+
+@login_required
+@user_passes_test(is_superuser)
+def delete_user(request, pk):
+    """Delete a user (superusers only)."""
+    user_obj = get_object_or_404(CustomUser, pk=pk)
+    if request.method == 'POST':
+        user_obj.delete()
+        messages.success(request, "User deleted successfully!")
+        return redirect('user_list')
+
+    return render(request, 'delete_user_confirm.html', {'user_obj': user_obj})
 
 @login_required
 @subscription_required(plan_type="employee")

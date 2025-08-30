@@ -29,6 +29,11 @@ urlpatterns = [
     path('fire/', fire_calculator, name='fire_calculator'),
     path('co2/', co2_calculator, name='co2_calculator'),
 
+    path('users/', user_list, name='user_list'),
+   
+    path('users/<int:pk>/edit/', edit_user, name='edit_user'),
+    path('users/<int:pk>/delete/', delete_user, name='delete_user'),
+
     path('calculators/quality/', qualitycategory_calculators, name='qualitycategory_calculators'),
     path('calculators/environment/', environmentcategory_calculators, name='environmentcategory_calculators'),
     path('calculators/health/', healthcategory_calculators, name='healthcategory_calculators'),
