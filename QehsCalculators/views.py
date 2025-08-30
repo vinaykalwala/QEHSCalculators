@@ -2485,7 +2485,7 @@ def safety_asme_api_rp_520_valves_minimum_flow_area_for_dry_gases_and_air_calcul
 @login_required
 @subscription_required(plan_type="corporate")
 def safety_asme_api_rp_520_valves_minimum_flow_area_for_dry_gases_and_air_calculator(request):
-    return render(request, 'qehsfcalculators/safety/asme_api_rp_520_valves_minimum_flow_area_for_dry_gases_and_air.html', {'title': 'ASME (API RP 520) Valves - Minimum Flow Area for Dry Gases and Air Calculator'})
+    return render(request, 'qehsfcalculators/safety/asme_api_rp_520_valves_reynolds_number_imperial_units_calculator.html', {'title': 'ASME (API RP 520) Valves - Reynolds number imperial units Calculator'})
 
 @login_required
 @subscription_required(plan_type="corporate")
