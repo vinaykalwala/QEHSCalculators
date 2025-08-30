@@ -61,11 +61,11 @@ CALCULATORS = [
 {"name": "BOD  (Biochemical Oxygen Demand) Exertion Calculator", "url_name": "environment_bod_biochemical_oxygen_demand_exertion_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-{"name": "Breakthrough Time Calculator", "url_name": "environment_breakthrough_time_calculator'", "plan_type": "corporate", "category": "environment"},
+{"name": "Breakthrough Time Calculator", "url_name": "environment_breakthrough_time_calculator", "plan_type": "corporate", "category": "environment"},
 
-{"name": "Biomass Microbial Growth Calculator", "url_name": "environment_biomass_microbial_growth_calculator'", "plan_type": "corporate", "category": "environment"},
+{"name": "Biomass Microbial Growth Calculator", "url_name": "environment_biomass_microbial_growth_calculator", "plan_type": "corporate", "category": "environment"},
 
-{"name": "Biomass Substrate Utilization Rate Calculator", "url_name": "environment_biomass_substrate_utilization_rate_calculator'", "plan_type": "corporate", "category": "environment"},
+{"name": "Biomass Substrate Utilization Rate Calculator", "url_name": "environment_biomass_substrate_utilization_rate_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 
