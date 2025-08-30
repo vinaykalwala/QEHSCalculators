@@ -1,0 +1,645 @@
+{% extends 'base.html' %}
+{% block title %}Aeration Tank Volume Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aeration Tank Volume Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+<style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+             /* display: flex;  */
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            /* overflow-y: auto;  */
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Input rows for better organization */
+        .input-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+        
+        @media (max-width: 600px) {
+            .input-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calculator-container printable" id="printArea">
+
+    {% include "includes/print_header_footer.html" %}
+
+    <div class="calculator-header">
+        <h1>Aeration Tank Volume Calculator</h1>
+        <p>Calculate the required <strong>Aeration Tank Volume (V)</strong> for wastewater treatment systems using key design parameters.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Calculator -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+
+            <div class="input-row">
+            <div class="form-group">
+                <label for="Y">Maximum Yield Coefficient (Y)</label>
+                <input type="number" id="Y" class="form-input" min="0.01" step="any" placeholder="e.g., 0.6">
+            </div>
+
+            <div class="form-group">
+                <label for="Q">Flow Rate (Q) (m³/day)</label>
+                <input type="number" id="Q" class="form-input" min="0.1" step="any" placeholder="e.g., 5000">
+            </div>
+            </div>
+
+            <div class="input-row">
+            <div class="form-group">
+                <label for="thetaC">Mean Cell Residence Time (θc) (days)</label>
+                <input type="number" id="thetaC" class="form-input" min="0.1" step="any" placeholder="e.g., 8">
+            </div>
+
+            <div class="form-group">
+                <label for="S0">Influent Substrate Concentration (S₀) (mg/L)</label>
+                <input type="number" id="S0" class="form-input" min="1" step="any" placeholder="e.g., 300">
+            </div>
+            </div>
+
+            <div class="input-row">
+            <div class="form-group">
+                <label for="S">Effluent Substrate Concentration (S) (mg/L)</label>
+                <input type="number" id="S" class="form-input" min="0" step="any" placeholder="e.g., 20">
+            </div>
+
+            <div class="form-group">
+                <label for="kd">Endogenous Decay Rate (kd) (d⁻¹)</label>
+                <input type="number" id="kd" class="form-input" min="0" step="any" placeholder="e.g., 0.05">
+            </div>
+            </div>
+
+            <div class="form-group">
+                <label for="X">MLSS Concentration (X) (mg/L)</label>
+                <input type="number" id="X" class="form-input" min="100" step="any" placeholder="e.g., 3000">
+            </div>
+            
+            <button class="calculate-btn" onclick="calculateVolume()">Calculate Volume</button>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="https://cdn-icons-png.flaticon.com/512/4839/4839464.png" alt="Aeration Tank illustration">
+
+                <p>This tool will calculate the <strong>Aeration Tank Volume (V)</strong>.</p>
+            </div>
+            
+            <div class="result-error hidden" id="resultError">
+                <div class="error-icon">❌</div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+             
+            <div class="result-value hidden" id="resultValue">
+                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Calculated Volume</h2>
+                </div>
+
+                <div class="rate-display">
+                <div class="rate-value" id="rateValue">0.00</div>
+                <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">m³</div>
+                </div>
+
+                <div class="result-feedback">
+                    <div class="feedback-title">Assessment</div>
+                    <div class="feedback-content" id="feedbackContent"></div>
+                </div>
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="note-section">
+        <div class="note-card">
+            <h3>📘 About This Calculator</h3>
+            <p>
+                The <strong>Aeration Tank Volume Calculator</strong> estimates the required tank size for biological wastewater treatment 
+                using the <strong>activated sludge process</strong>.
+            </p>
+        </div>
+        
+        <div class="note-card">
+            <h3>📊 Interpretation</h3>
+            <ul class="note-list">
+                <li><span class="good">V ≥ 1000 m³</span> → ⚠️ Large Tank Volume: Optimization may be needed.</li>
+                <li><span class="average">10 m³ ≤ V &lt; 1000 m³</span> → ✅ Practical volume for operation.</li>
+                <li><span class="bad">V &lt; 10 m³</span> → 🔴 Very small, may be impractical.</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h3>⚠️ Validations</h3>
+            <p>
+                ✔️ All inputs must be positive values.<br>
+                ✔️ Influent concentration (S₀) must be greater than or equal to effluent concentration (S).<br>
+                ❌ Negative or unrealistic values are not acceptable.
+            </p>
+        </div>
+
+        <div class="note-card">
+            <h3>🌍 Key Applications</h3>
+            <ul class="note-list">
+                <li><strong>Wastewater Treatment Plants:</strong> Aeration tank sizing.</li>
+                <li><strong>Industrial Effluent Treatment:</strong> Designing bioreactors.</li>
+                <li><strong>Environmental Engineering:</strong> Process optimization.</li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+<script>
+/* Helper: consistent error display */
+function showErrors(errors) {
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+
+  if (errorMessage) errorMessage.innerHTML = errors.join("<br>");
+  if (errorBox) errorBox.classList.remove("hidden");
+  if (placeholder) placeholder.classList.add("hidden");
+  if (resultValue) resultValue.classList.add("hidden");
+}
+
+function calculateVolume() {
+  // safe reads
+  const Yraw = document.getElementById("Y")?.value.trim() ?? "";
+  const Qraw = document.getElementById("Q")?.value.trim() ?? "";
+  const thetaCraw = document.getElementById("thetaC")?.value.trim() ?? "";
+  const S0raw = document.getElementById("S0")?.value.trim() ?? "";
+  const Sraw = document.getElementById("S")?.value.trim() ?? "";
+  const kdraw = document.getElementById("kd")?.value.trim() ?? "";
+  const Xraw = document.getElementById("X")?.value.trim() ?? "";
+
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+  const rateEl = document.getElementById("rateValue");
+  const feedbackEl = document.getElementById("feedbackContent");
+
+  // reset UI
+  if (errorBox) errorBox.classList.add("hidden");
+  if (errorMessage) errorMessage.innerHTML = "";
+  if (feedbackEl) feedbackEl.innerHTML = "";
+
+  const errors = [];
+  const warnings = [];
+
+  // required field checks
+  if (Yraw === "") errors.push("👉 Enter Maximum Yield Coefficient (Y).");
+  if (Qraw === "") errors.push("👉 Enter Flow Rate Q (include units in label).");
+  if (thetaCraw === "") errors.push("👉 Enter Mean Cell Residence Time (θc).");
+  if (S0raw === "") errors.push("👉 Enter Influent substrate concentration S₀.");
+  if (Sraw === "") errors.push("👉 Enter Effluent substrate concentration S.");
+  if (kdraw === "") errors.push("👉 Enter Endogenous decay rate (kd).");
+  if (Xraw === "") errors.push("👉 Enter MLSS concentration X.");
+
+  if (errors.length > 0) {
+    showErrors(errors);
+    return;
+  }
+
+  // parse numbers
+  const Y = parseFloat(Yraw);
+  const Q = parseFloat(Qraw);
+  const thetaC = parseFloat(thetaCraw);
+  const S0 = parseFloat(S0raw);
+  const S = parseFloat(Sraw);
+  const kd = parseFloat(kdraw);
+  const X = parseFloat(Xraw);
+
+  // numeric & sign checks
+  if (!Number.isFinite(Y) || Y <= 0) errors.push("👉 Y must be a positive number (typical 0.1–1.0).");
+  if (!Number.isFinite(Q) || Q <= 0) errors.push("👉 Q must be a positive number (check units: m³/d, m³/h, etc.).");
+  if (!Number.isFinite(thetaC) || thetaC <= 0) errors.push("👉 θc must be positive (time units — hrs/days).");
+  if (!Number.isFinite(S0) || S0 <= 0) errors.push("👉 S₀ must be positive (concentration units).");
+  if (!Number.isFinite(S) || S < 0) errors.push("👉 S must be non-negative (concentration units).");
+  if (S0 <= S) errors.push("👉 S₀ must be greater than S (there must be substrate removal).");
+  if (!Number.isFinite(kd) || kd < 0) errors.push("👉 kd must be non-negative (1/time).");
+  if (!Number.isFinite(X) || X <= 0) errors.push("👉 MLSS (X) must be positive (mass/volume).");
+
+  if (errors.length > 0) {
+    showErrors(errors);
+    return;
+  }
+
+  // warnings (non-blocking) to catch unit mistakes / unrealistic inputs
+  if (Y > 2) warnings.push("⚠️ Y > 2 is unusual — check that Y is a fraction (typical 0.1–1.0).");
+  if (thetaC > 1e4) warnings.push("⚠️ Very large θc — check time units (hrs vs days).");
+  if (Q > 1e9) warnings.push("⚠️ Very large Q — check units (m³/d vs m³/h vs L/s).");
+  if (X < 50) warnings.push("⚠️ Low MLSS (X) — units may be mg/L vs g/L; confirm units.");
+  if (S0 > 1e6 || S > 1e6) warnings.push("⚠️ Very large substrate concentrations — verify units (mg/L, g/m³ etc.).");
+
+  // denominator guard
+  const denom = 1 + kd * thetaC;
+  if (!Number.isFinite(denom) || Math.abs(denom) < 1e-9) {
+    showErrors(["⚠️ Calculation unstable: denominator (1 + kd·θc) ≈ 0. Check kd and θc values."]);
+    return;
+  }
+
+  // core formula (same as your original)
+  const V = (Y * Q * thetaC * (S0 - S)) / (X * denom);
+
+  if (!Number.isFinite(V) || V <= 0) {
+    showErrors(["⚠️ Computed tank volume is not physically valid (≤ 0). Check inputs — likely S₀ ≈ S or unit mismatch."]);
+    return;
+  }
+
+  // feedback based on practical magnitude (examples — change to your domain thresholds)
+  let feedback = "";
+  if (V >= 1e5) {
+    feedback = "⚠️ Extremely large tank volume — likely unit mismatch or unrealistic parameters.";
+  } else if (V >= 1000) {
+    feedback = "⚠️ Large Tank Volume: consider parameter optimization or staged treatment.";
+  } else if (V >= 10) {
+    feedback = "✅ Suitable Tank Volume for many practical systems.";
+  } else {
+    feedback = "🔴 Very Small Tank Volume: verify if this is practical for construction and hydraulics.";
+  }
+
+  // details + warnings
+  let detailsHtml = `<div>Computed V: <b>${V.toFixed(3)}</b> (units depend on Q/X units)</div>`;
+  if (warnings.length) {
+    detailsHtml += `<div style="margin-top:6px; color:#b35d00; font-size:0.95em;">Note: ${warnings.join(" | ")}</div>`;
+  }
+
+  // update UI
+  if (rateEl) rateEl.textContent = V.toFixed(3);
+  if (feedbackEl) feedbackEl.innerHTML = `<div>${feedback}</div>${detailsHtml}`;
+
+  if (placeholder) placeholder.classList.add("hidden");
+  if (resultValue) resultValue.classList.remove("hidden");
+  if (errorBox) errorBox.classList.add("hidden");
+}
+
+/* safe print guard */
+function printReport() {
+  const el = document.getElementById('printDate');
+  if (el) {
+    const now = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    el.textContent = now.toLocaleDateString('en-IN', options);
+  }
+  window.print();
+}
+</script>
+
+<script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}

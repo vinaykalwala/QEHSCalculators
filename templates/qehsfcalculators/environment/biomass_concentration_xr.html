@@ -1,0 +1,585 @@
+{% extends 'base.html' %}
+{% block title %}Biomass Concentration (Xr) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biomass Concentration (Xr) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+       
+    <style>
+    .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            overflow-y: auto;
+            justify-content: center;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+      .btn-wrapper {
+    text-align: center; /* centers inline-block buttons */
+    margin-top: 20px;
+  }
+
+   .btn-wrapper {
+    text-align: center; /* centers the button */
+    margin-top: 20px;
+  }
+
+  .print-btn {
+    display: inline-block;
+    background:linear-gradient(#1560bd,#000040);
+    color: white;
+    padding: 8px 18px;   /* control button size */
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    width: auto !important; /* prevent full width */
+  }
+
+  .print-btn:hover {
+    background: #1560bd;
+  }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+       
+    </style>
+</head>
+<body>
+
+    <div class="calculator-container printable" id="printArea">
+
+    {% include "includes/print_header_footer.html" %}
+
+    <div class="calculator-header">
+        <h1>Biomass Concentration (Xr) Calculator</h1>
+        <p>Estimate the biomass concentration in return activated sludge using the Sludge Volume Index (result shown in g/m³).</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Calculator -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+
+            <div class="input-row">
+                <div class="form-group">
+                    <label for="svi">Sludge Volume Index (SVI) — <small>mL/g</small></label>
+                    <input type="number" id="svi" class="form-input" step="any" min="0" placeholder="e.g., 150" aria-label="Sludge Volume Index">
+                    
+                </div>
+            </div>
+
+            <button class="calculate-btn" onclick="calculateBiomassConcentration()">Calculate Biomass Concentration</button>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Biomass concentration illustration">
+                <p>This tool estimates the biomass concentration in return activated sludge based on the Sludge Volume Index.</p>
+            </div>
+
+            <div class="result-error hidden" id="resultError" role="alert" aria-live="polite">
+                <div class="error-icon">❌</div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+
+            <div class="result-value hidden" id="resultValue" aria-live="polite">
+                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Biomass Concentration</h2>
+                </div>
+
+                <div class="rate-display" style="gap:12px; align-items:center; justify-content:center;">
+                    
+                        <div class="rate-value" id="biomassConcentration">0.000</div>
+                        <div class="rate-label" style="font-size:16px; color: #2980b9; ">g/m³</div>
+                </div>
+
+                <div class="result-feedback">
+                    <div class="feedback-title">Assessment & Suggestions</div>
+                    <div class="feedback-content" id="feedbackContent"></div>
+                </div>
+
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="note-section">
+        <div class="note-card">
+            <h3>📘 About</h3>
+            <p>
+                This calculator estimates biomass concentration in return activated sludge using the formula: 
+                
+            </p>
+        </div>
+
+        <div class="note-card">
+            <h3>📏 Units & typical ranges</h3>
+            <ul class="note-list">
+                <li><strong>Sludge Volume Index (SVI)</strong>: mL/g. Typical range: 50-200 mL/g.</li>
+                <li><strong>Biomass Concentration (Xᵣ)</strong>: g/m³. Typical range: 5,000-20,000 g/m³.</li>
+                <li><em>Optimal SVI range for most wastewater plants is 100-150 mL/g</em></li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h3>⚠️ Strong validations (what is checked)</h3>
+            <ul>
+                <li>SVI input is required and must be a finite number.</li>
+                <li><strong>SVI > 0</strong> - Must be a positive value (mL/g).</li>
+                <li><strong>SVI ≥ 10</strong> - Values below 10 mL/g will trigger warnings as potentially unrealistic.</li>
+                <li><strong>SVI ≤ 500</strong> - Values above 500 mL/g will trigger warnings as potentially problematic.</li>
+                <li>Results that are physically unrealistic (Xᵣ > 100,000 g/m³) will be flagged for review.</li>
+                <li>Division by zero is prevented (SVI cannot be 0).</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h3>🔎 Interpretation</h3>
+            <ul class="note-list">
+                <li><strong>Low SVI (&lt; 100 mL/g)</strong>: Dense sludge, higher biomass concentration - may indicate old sludge or potential bulking issues.</li>
+                <li><strong>Optimal SVI (100-150 mL/g)</strong>: Good settling characteristics, appropriate biomass concentration.</li>
+                <li><strong>High SVI (&gt; 150 mL/g)</strong>: Light, fluffy sludge, lower biomass concentration - may indicate young sludge or bulking problems.</li>
+                <li><strong>Very High SVI (&gt; 200 mL/g)</strong>: Poor settling, likely bulking - requires operational adjustments.</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h3>🛑 Limitations</h3>
+            <ul class="note-list">
+                <li>Assumes typical activated sludge properties.</li>
+                <li>Does not account for variations in sludge composition or temperature effects.</li>
+                <li>Actual plant performance may vary based on specific wastewater characteristics.</li>
+                <li>Other factors like dissolved oxygen, nutrient balance, and toxic inputs can affect sludge quality.</li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+<script>
+/* Helper: show errors consistently */
+function showErrors(errors) {
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+
+  if (errorMessage) errorMessage.innerHTML = errors.join("<br>");
+  if (errorBox) errorBox.classList.remove("hidden");
+  if (placeholder) placeholder.classList.add("hidden");
+  if (resultValue) resultValue.classList.add("hidden");
+}
+
+/* Main Biomass Concentration calculation with strong validations */
+function calculateBiomassConcentration() {
+  // safe reads
+  const sviRaw = document.getElementById("svi")?.value.trim() ?? "";
+
+  const biomassEl = document.getElementById("biomassConcentration");
+  const feedbackEl = document.getElementById("feedbackContent");
+
+  // reset UI
+  document.getElementById("resultError").classList.add("hidden");
+  if (feedbackEl) feedbackEl.innerHTML = "";
+
+  const errors = [];
+  const warnings = [];
+
+  // required checks
+  if (sviRaw === "") errors.push("👉 Enter Sludge Volume Index (SVI) in mL/g.");
+
+  if (errors.length > 0) { showErrors(errors); return; }
+
+  // parse
+  const svi = parseFloat(sviRaw);
+
+  // numeric & sign checks
+  if (!Number.isFinite(svi) || svi <= 0) errors.push("👉 SVI must be a positive finite number (mL/g).");
+  if (svi === 0) errors.push("👉 SVI cannot be zero (division by zero error).");
+
+  if (errors.length > 0) { showErrors(errors); return; }
+
+  // warning checks
+  if (svi < 10) warnings.push("⚠️ SVI value seems very low - verify measurement and units (typical range: 50-200 mL/g).");
+  if (svi > 500) warnings.push("⚠️ SVI value seems very high - verify measurement and units, may indicate severe bulking.");
+  
+  // compute biomass concentration (g/m³)
+  // formula: Xᵣ = 1,000,000 / SVI
+  const biomassConc = 1000000 / svi;
+
+  if (!Number.isFinite(biomassConc) || biomassConc <= 0) {
+    showErrors(["⚠️ Computed biomass concentration is invalid. Check SVI input."]);
+    return;
+  }
+
+  // Additional warning for extreme results
+  if (biomassConc > 100000) {
+    warnings.push("⚠️ Extremely high biomass concentration - verify SVI measurement.");
+  }
+
+  // classification based on SVI values
+  let classification = "";
+  let suggestion = "";
+  
+  if (svi < 100) {
+    classification = "Low SVI - Dense Sludge";
+    suggestion = "✅ Good settling but may indicate old sludge. Check sludge age and wasting rates.";
+  } else if (svi >= 100 && svi <= 150) {
+    classification = "Optimal SVI - Good Settling";
+    suggestion = "✅ Excellent settling characteristics. Maintain current operational parameters.";
+  } else if (svi > 150 && svi <= 200) {
+    classification = "High SVI - Fair Settling";
+    suggestion = "⚠️ Moderate settling issues. Monitor for bulking and consider adjusting RAS rates.";
+  } else {
+    classification = "Very High SVI - Poor Settling";
+    suggestion = "❌ Significant settling problems likely. Investigate bulking causes and consider process adjustments.";
+  }
+
+  // compose feedback content
+  let details = `<div>Biomass concentration (Xᵣ) = <b>${biomassConc.toFixed(0)}</b> g/m³</div>`;
+  details += `<div>SVI classification: <b>${classification}</b></div>`;
+  details += `<div style="margin-top:6px;">${suggestion}</div>`;
+  if (warnings.length) {
+    details += `<div style="margin-top:8px; color:#b35d00;">Note: ${warnings.join(" | ")}</div>`;
+  }
+
+  // update UI
+  if (biomassEl) biomassEl.textContent = biomassConc.toFixed(0);
+  if (feedbackEl) feedbackEl.innerHTML = details;
+
+  // toggle display
+  document.getElementById("placeholder").classList.add("hidden");
+  document.getElementById("resultValue").classList.remove("hidden");
+  document.getElementById("resultError").classList.add("hidden");
+}
+
+/* safe print guard */
+function printReport() {
+  const el = document.getElementById('printDate');
+  if (el) {
+    const now = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    el.textContent = now.toLocaleDateString('en-US', options);
+  }
+  window.print();
+}
+</script>
+</body>
+</html>
+{% endblock %}
