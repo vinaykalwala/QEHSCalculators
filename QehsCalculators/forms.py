@@ -31,3 +31,12 @@ class ContactForm(forms.ModelForm):
             'subject': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Subject'}),
             'message': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Your Message'}),
         }
+
+
+from django import forms
+from .models import CustomUser
+
+class UserEditForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['email', 'phone', 'company_name', 'designation', 'address', 'industry', 'purpose']
