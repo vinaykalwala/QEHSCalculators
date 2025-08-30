@@ -1,17 +1,21 @@
 {% extends 'base.html' %}
-{% block title %}Attendee Training Time Calculator{% endblock %}
+{% block title %}Army Body Fat Calculator{% endblock %}
 {% block content %}
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendee Training Time Calculator</title>
+    <title>Army Body Fat Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
-       .calculator-container {
+      
+
+        /* Main container */
+        .calculator-container {
             max-width: 1200px;
             margin: 20px auto;
             padding: 20px;
@@ -36,7 +40,6 @@
         .calculator-header p {
             color: #7f8c8d;
             font-size: 18px;
-            max-width: 700px;
             margin: 0 auto;
         }
 
@@ -79,7 +82,6 @@
             transition: transform 0.3s ease;
             height: 420px;
             overflow-y: auto;
-            
         }
         
         .calc-card:hover { 
@@ -345,170 +347,230 @@
             display: none; 
         }
 
+        /* Table styles */
+        .custom-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .custom-table thead {
+            background-color: #1560bd;
+            color: white;
+        }
+        .custom-table th, .custom-table td {
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .custom-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
        
     </style>
-
-
+</head>
+<body>
 <div class="calculator-container printable" id="printArea">
 
-    <!-- Include header/footer for print -->
     {% include "includes/print_header_footer.html" %}
 
     <div class="calculator-header">
-        <h1>Attendee Training Time Calculator</h1>
-        <p>Calculate the total time invested in a training session based on the number of attendees and session duration.</p>
+        <h1>Army Body Fat Calculator</h1>
+        <p>Estimate your body fat percentage using the U.S. Army's official formula and check against standards.</p>
     </div>
 
     <div class="calc-content">
-        <!-- Calculator Input Card -->
         <div class="calc-card">
-            <h2>Enter Data</h2>
-
+            <h2>Enter Measurements</h2>
             <div class="form-group">
-                <label for="attendees">Number of Attendees</label>
-                <input type="number" id="attendees" class="form-input" min="1" placeholder="Enter number of attendees">
+                <label for="sex">Gender:</label>
+                <select id="sex" class="form-input" onchange="toggleHipInput()">
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
             </div>
-
             <div class="form-group">
-                <label for="duration">Training Duration (minutes)</label>
-                <input type="number" id="duration" class="form-input" min="1" placeholder="Enter duration in minutes">
+                <label for="age">Age (years):</label>
+                <input type="number" id="age" class="form-input" placeholder="e.g., 25" min="17">
             </div>
-
-            <button class="calculate-btn" onclick="calculateTrainingTime()">Calculate Total Time</button>
+            <div class="form-group">
+                <label for="height">Height (cm):</label>
+                <input type="number" id="height" class="form-input" placeholder="e.g., 175" min="1">
+            </div>
+            <div class="form-group">
+                <label for="neck">Neck (cm):</label>
+                <input type="number" id="neck" class="form-input" placeholder="e.g., 38" min="1">
+            </div>
+            <div class="form-group">
+                <label for="waist">Waist (cm):</label>
+                <input type="number" id="waist" class="form-input" placeholder="e.g., 85" min="1">
+            </div>
+            <div class="form-group hidden" id="hip-group">
+                <label for="hip">Hip (cm):</label>
+                <input type="number" id="hip" class="form-input" placeholder="e.g., 95" min="1">
+            </div>
+            <button class="calculate-btn" onclick="calculateBodyFat()">Calculate</button>
         </div>
 
-        <!-- Result Section -->
         <div class="result-card">
             <div class="result-placeholder" id="placeholder">
-                <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Training illustration">
-                <p>This tool calculates the <strong>total training time</strong> in hours. Enter the number of attendees and session duration to see results.</p>
+                <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Fitness illustration">
+                <p>Your results will appear here. Enter your measurements and click "Calculate" to see your body fat estimate.</p>
             </div>
-
+            
             <div class="result-error hidden" id="resultError">
-                <div class="error-icon">❌</div>
                 <div class="error-message" id="errorMessage"></div>
             </div>
-
+                
             <div class="result-value hidden" id="resultValue">
-                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
-                    <h2>Total Training Time</h2>
-                </div>
-                <div class="rate-value" id="trainingTimeValue">0.00</div>
-                <div class="rate-label">hours</div>
+                <div class="rate-value" id="bodyFatValue">0.00%</div>
+                <div class="rate-label" id="armyStandard"></div>
 
-                <div class="result-feedback" id="interpretationBox">
-                <div class="feedback-title">Interpretation</div>
-                <div class="feedback-content" id="interpretationText">
-                <!-- JS will fill this -->
+                <div class="safety-meter">
+                    <div class="meter-fill" id="meterFill"></div>
                 </div>
-                 </div>
 
+                <div class="result-feedback">
+                    <div class="feedback-title">Assessment</div>
+                    <div class="feedback-content" id="feedbackContent"></div>
+                </div>
 
                 <div class="btn-wrapper">
-                    <button class="calculate-btn print-btn" onclick="window.print()">Print Report</button>
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Notes Section -->
     <div class="note-section">
         <div class="note-card">
-            <h3> 🔎About this Calculator</h3>
-           <p>This tool calculates the <strong>total training time in hours</strong> by multiplying the number of attendees with the session duration in minutes and converting the result into hours, giving a clear measure of the group’s overall training time.
-             </p>
+            <h3>📘 About This Calculator</h3>
+            <p>This tool uses the formulas outlined in <strong>U.S. Army Regulation 600-9</strong> to estimate body fat percentage. It's a method used for its simplicity and reliability in the field.</p>
         </div>
-
         <div class="note-card">
-            <h3>⚙️ How it Works</h3>
-            <p>
-        Each attendee contributes their time during the session. To calculate the total training hours:
-    </p>
-    <ol>
-        <li><strong>Input Number of Attendees:</strong> Enter how many participants are attending the training.</li>
-        <li><strong>Input Training Duration:</strong> Specify the length of the training in minutes. For accuracy, one training hour is considered as 60 minutes.</li>
-        <li><strong>Calculate:</strong> Click the "Calculate Training Time" button to get the total training time in hours.</li>
-    </ol>
-
+            <h3>📏 US Army Body Fat Standards</h3>
+            <p>The US Army maintains specific body fat percentage standards which vary by age and gender to ensure soldiers meet fitness requirements.</p>
+            <h4 style="text-align:center; color:#333; margin-top:20px;">Active Duty Personnel</h4>
+            <table class="custom-table">
+                <thead><tr><th>Age Group</th><th>Male (%)</th><th>Female (%)</th></tr></thead>
+                <tbody>
+                    <tr><td>17-20</td><td>20%</td><td>30%</td></tr>
+                    <tr><td>21-27</td><td>22%</td><td>32%</td></tr>
+                    <tr><td>28-39</td><td>24%</td><td>34%</td></tr>
+                    <tr><td>40+</td><td>26%</td><td>36%</td></tr>
+                </tbody>
+            </table>
         </div>
-
-
-        
-        <div class="note-card">
-            <h3> ❓ Why is this Important?</h3>
-             <ul class="note-list">
-             <li><strong>Accurate Reporting:</strong> Track the combined training time for compliance and performance monitoring.</li>
-            <li><strong>Resource Planning:</strong> Helps organizations manage and allocate training resources effectively.</li>
-             </ul>
-            </div>
-
-        <div class="note-card">
-            <h3>📊 Applications</h3>
-            <ul class="note-list">
-                <li>Helps organizations track combined training hours for compliance.</li>
-                <li>Assists in resource and scheduling planning.</li>
-                <li>Provides accurate reporting for performance monitoring.</li>
-            </ul>
-        </div>
-
-        <div class="note-card">
-            <h3>💡 Conclusion</h3>
-            <p>Using this calculator, managers and trainers can quickly determine total training hours and plan accordingly.</p>
+         <div class="note-card">
+            <h3>⚠️ Disclaimer</h3>
+            <p>This calculator provides an estimate for informational purposes only. It is not a substitute for a professional medical assessment. Consult a healthcare provider for personalized health advice.</p>
         </div>
     </div>
-
 </div>
 
 <script>
-function calculateTrainingTime() {
-    
-    const attendees = parseFloat(document.getElementById("attendees").value.trim());
-    const duration = parseFloat(document.getElementById("duration").value.trim());
+    // Added from reference to handle print date
+    document.addEventListener('DOMContentLoaded', function() {
+        // This check prevents an error if the included file isn't found or doesn't have the element
+        const printDateEl = document.getElementById('printDate');
+        if (printDateEl) {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            printDateEl.textContent = now.toLocaleDateString('en-US', options);
+        }
+    });
 
-    const errorBox = document.getElementById('resultError');
-    const errorMessage = document.getElementById('errorMessage');
-    const placeholder = document.getElementById('placeholder');
-    const resultValue = document.getElementById('resultValue');
-    const outputValue = document.getElementById('trainingTimeValue');
-
-    let errors = [];
-    if (isNaN(attendees) || attendees <= 0) errors.push("👉 Please enter a valid number of attendees greater than 0.");
-    if (isNaN(duration) || duration <= 0) errors.push("👉 Please enter a valid duration in minutes greater than 0.");
-
-    if (errors.length > 0) {
-        errorMessage.innerHTML = errors.join("<br>");
-        errorBox.classList.remove("hidden");
-        placeholder.classList.add("hidden");
-        resultValue.classList.add("hidden");
-        return;
-    } else {
-        errorBox.classList.add("hidden");
+    function toggleHipInput() {
+        const gender = document.getElementById('sex').value;
+        const hipGroup = document.getElementById('hip-group');
+        hipGroup.classList.toggle('hidden', gender !== 'female');
     }
 
-    const totalTime = (attendees * duration) / 60;
-    outputValue.textContent = totalTime.toFixed(2);
+    function calculateBodyFat() {
+        const errorBox = document.getElementById('resultError');
+        const errorMessage = document.getElementById('errorMessage');
+        const placeholder = document.getElementById('placeholder');
+        const resultValueDiv = document.getElementById('resultValue');
+        
+        const gender = document.getElementById('sex').value;
+        const age = parseFloat(document.getElementById('age').value);
+        const height = parseFloat(document.getElementById('height').value);
+        const neck = parseFloat(document.getElementById('neck').value);
+        const waist = parseFloat(document.getElementById('waist').value);
+        const hip = parseFloat(document.getElementById('hip').value) || 0;
 
-    placeholder.classList.add('hidden');
-    resultValue.classList.remove('hidden');
+        let errors = [];
+        if (isNaN(age) || age < 17) errors.push("👉 Please enter a valid age (17+).");
+        if (isNaN(height) || height <= 0) errors.push("👉 Please enter a valid height.");
+        if (isNaN(neck) || neck <= 0) errors.push("👉 Please enter a valid neck measurement.");
+        if (isNaN(waist) || waist <= 0) errors.push("👉 Please enter a valid waist measurement.");
+        if (gender === 'female' && (isNaN(hip) || hip <= 0)) {
+            errors.push("👉 Please enter a valid hip measurement for females.");
+        }
 
+        if (errors.length > 0) {
+            errorMessage.innerHTML = errors.join("<br>");
+            errorBox.classList.remove("hidden");
+            placeholder.classList.remove("hidden");
+            resultValueDiv.classList.add("hidden");
+            return;
+        } else {
+            errorBox.classList.add("hidden");
+        }
 
+        const heightIn = height / 2.54;
+        const neckIn = neck / 2.54;
+        const waistIn = waist / 2.54;
+        const hipIn = hip / 2.54;
 
-    const interpretationBox = document.getElementById('interpretationBox');
-    const interpretationText = document.getElementById('interpretationText');
-    let interpretation = "";
+        let bodyFatPercentage;
+        if (gender === 'male') {
+            bodyFatPercentage = 86.010 * Math.log10(waistIn - neckIn) - 70.041 * Math.log10(heightIn) + 36.76;
+        } else {
+            bodyFatPercentage = 163.205 * Math.log10(waistIn + hipIn - neckIn) - 97.684 * Math.log10(heightIn) - 78.387;
+        }
+        bodyFatPercentage = Math.max(0, bodyFatPercentage);
 
-    if (totalTime < 10) {
-        interpretation = "🔹 Low Training Hours – Indicates a short training effort, suitable for small sessions.";
-    } else if (totalTime >= 10 && totalTime < 50) {
-        interpretation = "🔸 Moderate Training Hours – Balanced training schedule, good for medium groups.";
-    } else {
-        interpretation = "✅ High Training Hours – Large training investment, suitable for big or intensive programs.";
+        let standard;
+        if (gender === 'male') {
+            if (age <= 20) standard = 20; else if (age <= 27) standard = 22; else if (age <= 39) standard = 24; else standard = 26;
+        } else {
+            if (age <= 20) standard = 30; else if (age <= 27) standard = 32; else if (age <= 39) standard = 34; else standard = 36;
+        }
+
+        const passed = bodyFatPercentage <= standard;
+        document.getElementById('bodyFatValue').textContent = bodyFatPercentage.toFixed(2) + '%';
+        document.getElementById('armyStandard').textContent = `Army Standard for your group: ${standard}%`;
+
+        const meterFill = document.getElementById('meterFill');
+        const feedbackContent = document.getElementById('feedbackContent');
+        
+        if (passed) {
+            meterFill.style.backgroundColor = '#2ecc71';
+            meterFill.style.width = '25%';
+            feedbackContent.innerHTML = `✅ <strong>Congratulations!</strong> Your body fat is within the U.S. Army standard.`;
+        } else {
+            meterFill.style.backgroundColor = '#e74c3c';
+            meterFill.style.width = '85%';
+            feedbackContent.innerHTML = `⚠️ <strong>Action Required.</strong> Your body fat exceeds the U.S. Army standard.`;
+        }
+
+        placeholder.classList.add('hidden');
+        resultValueDiv.classList.remove('hidden');
     }
 
-    interpretationText.innerHTML = interpretation;
-    interpretationBox.style.display = "block";
-
-}
+    // Added printReport function from reference
+    function printReport() {
+        const printDateEl = document.getElementById('printDate');
+        if (printDateEl) {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            printDateEl.textContent = now.toLocaleDateString('en-US', options);
+        }
+        window.print();
+    }
 </script>
-    <script src="{% static 'js/print.js' %}"></script>
+
+</body>
+</html>
 {% endblock %}

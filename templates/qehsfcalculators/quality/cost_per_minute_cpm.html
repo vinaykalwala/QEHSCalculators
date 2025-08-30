@@ -1,0 +1,489 @@
+{% extends 'base.html' %}
+{% block title %}Cost Per Minute (CPM) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cost Per Minute (CPM) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+   <div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Cost Per Minute (CPM) Calculator</h1>
+            <p>Calculates the cost efficiency of operations based on labor and operational costs divided by available work minutes</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator Input Card -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="laborCost">Direct Labor Cost ($)</label>
+                    <input type="number" id="laborCost" class="form-input" min="0.01" step="0.01" placeholder="Enter labor cost">
+                </div>
+
+                <div class="form-group">
+                    <label for="operationalCost">Operational Cost ($)</label>
+                    <input type="number" id="operationalCost" class="form-input" min="0.01" step="0.01" placeholder="Enter operational cost">
+                </div>
+
+                <div class="form-group">
+                    <label for="availableMinutes">Available Minutes</label>
+                    <input type="number" id="availableMinutes" class="form-input" min="0.01" step="0.01" placeholder="Enter available minutes">
+                </div>
+
+                <button class="calculate-btn" onclick="calculateCPM()">Calculate CPM</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Cost efficiency illustration">
+                    <p>This tool calculates the <strong>Cost Per Minute (CPM)</strong>. Enter your cost data to see results.</p>
+                </div>
+
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2> The Cost Per Minute</h2>
+                    </div>
+                    <div class="rate-value" id="cpmValue">0.00</div>
+                    <div class="rate-label">$ per minute</div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">Cost Efficiency Interpretation</div>
+                        <div class="feedback-content" id="cpmFeedback"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🔎 About This Calculator</h3>
+                <p>
+                    The <strong>Cost Per Minute (CPM) Calculator</strong> measures the cost efficiency of operations based on labor and operational costs divided by available work minutes. It helps companies optimize their resource allocation and identify areas for cost reduction.
+                </p> 
+            </div>
+
+            <div class="note-card">
+                <h3>❓ Explanation of Parameters</h3>
+                <ul class="note-list">
+                    <li><strong>Direct Labor Cost:</strong> The total wages paid to workers for a given period.</li>
+                    <li><strong>Operational Cost:</strong> Expenses required to keep operations running, such as rent, utilities, and materials.</li>
+                    <li><strong>Available Minutes:</strong> The total number of working minutes available in a given period.</li>
+                </ul>
+            </div>
+
+            
+
+            <div class="note-card">
+                <h3>📊 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Production Lines:</strong> Measure efficiency and identify bottlenecks in manufacturing processes.</li>
+                    <li><strong>Call Centers:</strong> Optimize staffing levels and operational costs based on call volume.</li>
+                    <li><strong>Service Industries:</strong> Determine the cost efficiency of time-based services.</li>
+                    <li><strong>Resource Allocation:</strong> Make informed decisions about workforce and operational budgeting.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Conclusion</h3>
+                <p>Monitoring CPM is crucial for businesses to understand their operational efficiency. A lower CPM indicates better cost optimization relative to time usage, while a higher CPM suggests areas where costs can be reduced or processes can be made more efficient. Regular assessment helps companies maintain competitive advantage and improve profitability.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateCPM() {
+            const laborCost = document.getElementById("laborCost").value.trim();
+            const operationalCost = document.getElementById("operationalCost").value.trim();
+            const availableMinutes = document.getElementById("availableMinutes").value.trim();
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+            const outputValue = document.getElementById('cpmValue');
+            const feedbackBox = document.getElementById('cpmFeedback'); 
+
+            let errors = [];
+            if (laborCost === "") {
+                errors.push("👉 Please enter the direct labor cost.");
+            } else if (parseFloat(laborCost) <= 0) {
+                errors.push("👉 Direct labor cost must be greater than 0.");
+            }
+            
+            if (operationalCost === "") {
+                errors.push("👉 Please enter the operational cost.");
+            } else if (parseFloat(operationalCost) <= 0) {
+                errors.push("👉 Operational cost must be greater than 0.");
+            }
+            
+            if (availableMinutes === "") {
+                errors.push("👉 Please enter the available minutes.");
+            } else if (parseFloat(availableMinutes) <= 0) {
+                errors.push("👉 Available minutes must be greater than 0.");
+            }
+
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden");
+            }
+
+            const laborCostNum = parseFloat(laborCost);
+            const operationalCostNum = parseFloat(operationalCost);
+            const availableMinutesNum = parseFloat(availableMinutes);
+            
+            const cpm = (laborCostNum + operationalCostNum) / availableMinutesNum;
+            outputValue.textContent = cpm.toFixed(4);
+
+            let feedback = "";
+            if (cpm > 1) {
+                feedback = "⚠️ This CPM is relatively high. Consider optimizing labor or operational costs to improve efficiency.";
+            } else {
+                feedback = "✅ This is a cost-effective operation. Your costs are well-managed relative to available time.";
+            }
+
+            feedbackBox.textContent = feedback;
+
+            placeholder.classList.add('hidden');
+            resultValue.classList.remove('hidden');
+        }
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}

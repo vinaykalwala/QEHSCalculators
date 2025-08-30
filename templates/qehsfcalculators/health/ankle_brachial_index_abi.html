@@ -1,17 +1,21 @@
 {% extends 'base.html' %}
-{% block title %}Attendee Training Time Calculator{% endblock %}
+{% block title %}Ankle-Brachial Index (ABI) Calculator{% endblock %}
 {% block content %}
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendee Training Time Calculator</title>
+    <title>Ankle-Brachial Index (ABI) Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
-       .calculator-container {
+      
+
+        /* Main container */
+        .calculator-container {
             max-width: 1200px;
             margin: 20px auto;
             padding: 20px;
@@ -36,7 +40,6 @@
         .calculator-header p {
             color: #7f8c8d;
             font-size: 18px;
-            max-width: 700px;
             margin: 0 auto;
         }
 
@@ -79,7 +82,6 @@
             transition: transform 0.3s ease;
             height: 420px;
             overflow-y: auto;
-            
         }
         
         .calc-card:hover { 
@@ -345,170 +347,77 @@
             display: none; 
         }
 
+        /* Table styles */
+        .custom-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .custom-table thead {
+            background-color: #1560bd;
+            color: white;
+        }
+        .custom-table th, .custom-table td {
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .custom-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
        
     </style>
-
-
+</head>
+<body>
 <div class="calculator-container printable" id="printArea">
 
-    <!-- Include header/footer for print -->
-    {% include "includes/print_header_footer.html" %}
+    {% include "includes/print_header_footer.html" with report_title="Ankle-Brachial Index (ABI) Report" %}
 
     <div class="calculator-header">
-        <h1>Attendee Training Time Calculator</h1>
-        <p>Calculate the total time invested in a training session based on the number of attendees and session duration.</p>
+        <h1>Ankle-Brachial Index (ABI) Calculator</h1>
+        <p>Assess for Peripheral Artery Disease (PAD) by comparing blood pressure in the ankles to the arms.</p>
     </div>
 
     <div class="calc-content">
-        <!-- Calculator Input Card -->
         <div class="calc-card">
-            <h2>Enter Data</h2>
-
-            <div class="form-group">
-                <label for="attendees">Number of Attendees</label>
-                <input type="number" id="attendees" class="form-input" min="1" placeholder="Enter number of attendees">
-            </div>
-
-            <div class="form-group">
-                <label for="duration">Training Duration (minutes)</label>
-                <input type="number" id="duration" class="form-input" min="1" placeholder="Enter duration in minutes">
-            </div>
-
-            <button class="calculate-btn" onclick="calculateTrainingTime()">Calculate Total Time</button>
+            <h2>Enter Pressures</h2>
+            <div class="form-group"><label for="armPressure">Highest Arm Systolic Pressure (mmHg)</label><input type="number" id="armPressure" class="form-input" placeholder="e.g., 120" min="1"></div>
+            <div class="form-group"><label for="rightAnkle">Highest Right Ankle Systolic Pressure (mmHg)</label><input type="number" id="rightAnkle" class="form-input" placeholder="e.g., 130" min="0"></div>
+            <div class="form-group"><label for="leftAnkle">Highest Left Ankle Systolic Pressure (mmHg)</label><input type="number" id="leftAnkle" class="form-input" placeholder="e.g., 110" min="0"></div>
+            <button class="calculate-btn" onclick="calculateABI()">Calculate ABI</button>
         </div>
 
-        <!-- Result Section -->
         <div class="result-card">
-            <div class="result-placeholder" id="placeholder">
-                <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Training illustration">
-                <p>This tool calculates the <strong>total training time</strong> in hours. Enter the number of attendees and session duration to see results.</p>
-            </div>
-
-            <div class="result-error hidden" id="resultError">
-                <div class="error-icon">❌</div>
-                <div class="error-message" id="errorMessage"></div>
-            </div>
-
+            <div class="result-placeholder" id="placeholder"><img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Blood pressure icon"><p>The ABI results for the left and right ankle will be displayed here.</p></div>
+            <div class="result-error hidden" id="resultError"><div class="error-message" id="errorMessage"></div></div>
             <div class="result-value hidden" id="resultValue">
-                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
-                    <h2>Total Training Time</h2>
+                <div class="result-grid">
+                    <div class="result-half"><h3>Right Ankle</h3><div class="rate-value" id="rightAbiValue">0.00</div><div class="feedback-content" id="rightAbiInterpretation"></div></div>
+                    <div class="result-half"><h3>Left Ankle</h3><div class="rate-value" id="leftAbiValue">0.00</div><div class="feedback-content" id="leftAbiInterpretation"></div></div>
                 </div>
-                <div class="rate-value" id="trainingTimeValue">0.00</div>
-                <div class="rate-label">hours</div>
-
-                <div class="result-feedback" id="interpretationBox">
-                <div class="feedback-title">Interpretation</div>
-                <div class="feedback-content" id="interpretationText">
-                <!-- JS will fill this -->
-                </div>
-                 </div>
-
-
-                <div class="btn-wrapper">
-                    <button class="calculate-btn print-btn" onclick="window.print()">Print Report</button>
-                </div>
+                <div class="btn-wrapper"><button class="calculate-btn print-btn" onclick="printReport()">Print Report</button></div>
             </div>
         </div>
     </div>
 
-    <!-- Notes Section -->
     <div class="note-section">
-        <div class="note-card">
-            <h3> 🔎About this Calculator</h3>
-           <p>This tool calculates the <strong>total training time in hours</strong> by multiplying the number of attendees with the session duration in minutes and converting the result into hours, giving a clear measure of the group’s overall training time.
-             </p>
-        </div>
-
-        <div class="note-card">
-            <h3>⚙️ How it Works</h3>
-            <p>
-        Each attendee contributes their time during the session. To calculate the total training hours:
-    </p>
-    <ol>
-        <li><strong>Input Number of Attendees:</strong> Enter how many participants are attending the training.</li>
-        <li><strong>Input Training Duration:</strong> Specify the length of the training in minutes. For accuracy, one training hour is considered as 60 minutes.</li>
-        <li><strong>Calculate:</strong> Click the "Calculate Training Time" button to get the total training time in hours.</li>
-    </ol>
-
-        </div>
-
-
+        <div class="note-card"><h3>Note:</h3><p>The <strong>Ankle-Brachial Index (ABI)</strong> is a non-invasive diagnostic tool used to evaluate the presence and severity of peripheral artery disease (PAD). By comparing the blood pressure in the ankle to the blood pressure in the arm, healthcare providers can assess blood flow and detect arterial narrowing or blockage.</p></div>
         
-        <div class="note-card">
-            <h3> ❓ Why is this Important?</h3>
-             <ul class="note-list">
-             <li><strong>Accurate Reporting:</strong> Track the combined training time for compliance and performance monitoring.</li>
-            <li><strong>Resource Planning:</strong> Helps organizations manage and allocate training resources effectively.</li>
-             </ul>
-            </div>
-
-        <div class="note-card">
-            <h3>📊 Applications</h3>
-            <ul class="note-list">
-                <li>Helps organizations track combined training hours for compliance.</li>
-                <li>Assists in resource and scheduling planning.</li>
-                <li>Provides accurate reporting for performance monitoring.</li>
-            </ul>
-        </div>
-
-        <div class="note-card">
-            <h3>💡 Conclusion</h3>
-            <p>Using this calculator, managers and trainers can quickly determine total training hours and plan accordingly.</p>
-        </div>
+        <div class="note-card"><h3>Explanation of Parameters:</h3><ul><li><strong>Highest Arm Systolic Pressure:</strong> This is the systolic pressure (top number) from the arm that shows the highest reading. It serves as the baseline for calculating ABI and reflects central blood pressure.</li><li><strong>Highest Right Ankle Systolic Pressure:</strong> This is the highest systolic pressure recorded in the arteries of the right ankle. It helps detect any obstruction in the blood flow to the right leg.</li><li><strong>Highest Left Ankle Systolic Pressure:</strong> This is the highest systolic pressure recorded in the arteries of the left ankle, used to detect obstruction in the blood flow to the left leg.</li></ul></div>
+        
+        <div class="note-card"><h3>How to Interpret the ABI:</h3><table class="custom-table"><thead><tr><th>ABI Range</th><th>Interpretation</th></tr></thead><tbody><tr><td><strong>Above 1.4</strong></td><td>May indicate vessel calcification or hardening. Consult a vascular specialist.</td></tr><tr><td><strong>1.0 – 1.4</strong></td><td>Normal ABI. No immediate action required.</td></tr><tr><td><strong>0.9 – 1.0</strong></td><td>Acceptable range. Usually no action required.</td></tr><tr><td><strong>0.8 – 0.9</strong></td><td>Mild arterial disease. Talk to your doctor about managing risk factors.</td></tr><tr><td><strong>0.5 – 0.8</strong></td><td>Moderate arterial disease. Consult a vascular specialist.</td></tr><tr><td><strong>Below 0.5</strong></td><td>Severe arterial disease. Immediate medical attention is advised.</td></tr></tbody></table></div>
+        <div class="note-card"><h3>Conclusion:</h3><p>The ABI test is a valuable and simple screening method for early detection of PAD. Regular monitoring can help reduce the risk of serious cardiovascular events. Always consult a healthcare professional to discuss your results and next steps.</p></div>
     </div>
-
 </div>
 
 <script>
-function calculateTrainingTime() {
-    
-    const attendees = parseFloat(document.getElementById("attendees").value.trim());
-    const duration = parseFloat(document.getElementById("duration").value.trim());
-
-    const errorBox = document.getElementById('resultError');
-    const errorMessage = document.getElementById('errorMessage');
-    const placeholder = document.getElementById('placeholder');
-    const resultValue = document.getElementById('resultValue');
-    const outputValue = document.getElementById('trainingTimeValue');
-
-    let errors = [];
-    if (isNaN(attendees) || attendees <= 0) errors.push("👉 Please enter a valid number of attendees greater than 0.");
-    if (isNaN(duration) || duration <= 0) errors.push("👉 Please enter a valid duration in minutes greater than 0.");
-
-    if (errors.length > 0) {
-        errorMessage.innerHTML = errors.join("<br>");
-        errorBox.classList.remove("hidden");
-        placeholder.classList.add("hidden");
-        resultValue.classList.add("hidden");
-        return;
-    } else {
-        errorBox.classList.add("hidden");
-    }
-
-    const totalTime = (attendees * duration) / 60;
-    outputValue.textContent = totalTime.toFixed(2);
-
-    placeholder.classList.add('hidden');
-    resultValue.classList.remove('hidden');
-
-
-
-    const interpretationBox = document.getElementById('interpretationBox');
-    const interpretationText = document.getElementById('interpretationText');
-    let interpretation = "";
-
-    if (totalTime < 10) {
-        interpretation = "🔹 Low Training Hours – Indicates a short training effort, suitable for small sessions.";
-    } else if (totalTime >= 10 && totalTime < 50) {
-        interpretation = "🔸 Moderate Training Hours – Balanced training schedule, good for medium groups.";
-    } else {
-        interpretation = "✅ High Training Hours – Large training investment, suitable for big or intensive programs.";
-    }
-
-    interpretationText.innerHTML = interpretation;
-    interpretationBox.style.display = "block";
-
-}
+    // The JavaScript logic remains unchanged
+    document.addEventListener('DOMContentLoaded', function() { /* ... */ const printDateEl = document.getElementById('printDate'); if (printDateEl) { const now = new Date(); const options = { year: 'numeric', month: 'long', day: 'numeric' }; printDateEl.textContent = now.toLocaleDateString('en-US', options); } });
+    function calculateABI() { const errorBox = document.getElementById('resultError'), errorMessage = document.getElementById('errorMessage'), placeholder = document.getElementById('placeholder'), resultValueDiv = document.getElementById('resultValue'); const armPressure = parseFloat(document.getElementById('armPressure').value); const rightAnkle = parseFloat(document.getElementById('rightAnkle').value); const leftAnkle = parseFloat(document.getElementById('leftAnkle').value); let errors = []; if (isNaN(armPressure) || armPressure <= 0) errors.push("👉 Please enter a valid arm pressure."); if (isNaN(rightAnkle) || rightAnkle < 0) errors.push("👉 Please enter a valid right ankle pressure."); if (isNaN(leftAnkle) || leftAnkle < 0) errors.push("👉 Please enter a valid left ankle pressure."); if (errors.length > 0) { errorMessage.innerHTML = errors.join("<br>"); errorBox.classList.remove("hidden"); placeholder.classList.remove("hidden"); resultValueDiv.classList.add("hidden"); return; } else { errorBox.classList.add("hidden"); } const rightABI = rightAnkle / armPressure; const leftABI = leftAnkle / armPressure; function interpretABI(value) { if (value > 1.4) return "🔍 Possible calcification. Consult specialist."; else if (value >= 1.0) return "✅ Normal ABI."; else if (value >= 0.9) return "✅ Acceptable range."; else if (value >= 0.8) return "⚠️ Mild arterial disease. Manage risk factors."; else if (value >= 0.5) return "🚨 Moderate arterial disease. Consult specialist."; else return "❌ Severe arterial disease. Immediate attention needed!"; } document.getElementById('rightAbiValue').textContent = rightABI.toFixed(2); document.getElementById('rightAbiInterpretation').textContent = interpretABI(rightABI); document.getElementById('leftAbiValue').textContent = leftABI.toFixed(2); document.getElementById('leftAbiInterpretation').textContent = interpretABI(leftABI); placeholder.classList.add('hidden'); resultValueDiv.classList.remove('hidden'); }
+    function printReport() { /* ... */ const printDateEl = document.getElementById('printDate'); if (printDateEl) { const now = new Date(); const options = { year: 'numeric', month: 'long', day: 'numeric' }; printDateEl.textContent = now.toLocaleDateString('en-US', options); } window.print(); }
 </script>
-    <script src="{% static 'js/print.js' %}"></script>
+
+</body>
+</html>
 {% endblock %}

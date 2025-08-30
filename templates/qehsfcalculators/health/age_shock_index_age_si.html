@@ -1,17 +1,19 @@
 {% extends 'base.html' %}
-{% block title %}Attendee Training Time Calculator{% endblock %}
+{% block title %}Age Shock Index (Age SI) Calculator{% endblock %}
 {% block content %}
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendee Training Time Calculator</title>
+    <title>Age Shock Index (Age SI) Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
-       .calculator-container {
+        /* Main container */
+        .calculator-container {
             max-width: 1200px;
             margin: 20px auto;
             padding: 20px;
@@ -36,7 +38,6 @@
         .calculator-header p {
             color: #7f8c8d;
             font-size: 18px;
-            max-width: 700px;
             margin: 0 auto;
         }
 
@@ -79,7 +80,6 @@
             transition: transform 0.3s ease;
             height: 420px;
             overflow-y: auto;
-            
         }
         
         .calc-card:hover { 
@@ -345,170 +345,141 @@
             display: none; 
         }
 
+        /* Table styles */
+        .custom-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .custom-table thead {
+            background-color: #1560bd;
+            color: white;
+        }
+        .custom-table th, .custom-table td {
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .custom-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
        
     </style>
-
-
+</head>
+<body>
 <div class="calculator-container printable" id="printArea">
 
-    <!-- Include header/footer for print -->
-    {% include "includes/print_header_footer.html" %}
+    {% include "includes/print_header_footer.html" with report_title="Age Shock Index Report" %}
 
     <div class="calculator-header">
-        <h1>Attendee Training Time Calculator</h1>
-        <p>Calculate the total time invested in a training session based on the number of attendees and session duration.</p>
+        <h1>Age Shock Index (Age SI) Calculator</h1>
+        <p>Assess cardiovascular risk by combining age with standard shock index parameters (heart rate and systolic blood pressure).</p>
     </div>
 
     <div class="calc-content">
-        <!-- Calculator Input Card -->
         <div class="calc-card">
-            <h2>Enter Data</h2>
-
+            <h2>Enter Patient Data</h2>
             <div class="form-group">
-                <label for="attendees">Number of Attendees</label>
-                <input type="number" id="attendees" class="form-input" min="1" placeholder="Enter number of attendees">
+                <label for="age">Age (years)</label>
+                <input type="number" id="age" class="form-input" placeholder="e.g., 65" min="1">
             </div>
-
             <div class="form-group">
-                <label for="duration">Training Duration (minutes)</label>
-                <input type="number" id="duration" class="form-input" min="1" placeholder="Enter duration in minutes">
+                <label for="heartRate">Heart Rate (beats/minute)</label>
+                <input type="number" id="heartRate" class="form-input" placeholder="e.g., 95" min="1">
             </div>
-
-            <button class="calculate-btn" onclick="calculateTrainingTime()">Calculate Total Time</button>
+            <div class="form-group">
+                <label for="systolicBP">Systolic Blood Pressure (mmHg)</label>
+                <input type="number" id="systolicBP" class="form-input" placeholder="e.g., 110" min="1">
+            </div>
+            <button class="calculate-btn" onclick="calculateAgeShockIndex()">Calculate Age SI</button>
         </div>
 
-        <!-- Result Section -->
         <div class="result-card">
             <div class="result-placeholder" id="placeholder">
-                <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Training illustration">
-                <p>This tool calculates the <strong>total training time</strong> in hours. Enter the number of attendees and session duration to see results.</p>
+                <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Cardiovascular health icon">
+                <p>The patient's Age Shock Index and risk interpretation will appear here.</p>
             </div>
-
-            <div class="result-error hidden" id="resultError">
-                <div class="error-icon">❌</div>
-                <div class="error-message" id="errorMessage"></div>
-            </div>
-
+            <div class="result-error hidden" id="resultError"><div class="error-message" id="errorMessage"></div></div>
             <div class="result-value hidden" id="resultValue">
-                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
-                    <h2>Total Training Time</h2>
+                <div class="rate-value" id="ageSiValue">0.00</div>
+                <div class="rate-label">Age Shock Index</div>
+                <div class="safety-meter">
+                    <div class="meter-fill" id="meterFill"></div>
                 </div>
-                <div class="rate-value" id="trainingTimeValue">0.00</div>
-                <div class="rate-label">hours</div>
-
-                <div class="result-feedback" id="interpretationBox">
-                <div class="feedback-title">Interpretation</div>
-                <div class="feedback-content" id="interpretationText">
-                <!-- JS will fill this -->
+                <div class="meter-labels">
+                    <span>Normal</span><span>Elevated</span>
                 </div>
-                 </div>
-
-
+                <div class="result-feedback">
+                    <div class="feedback-title">Interpretation</div>
+                    <div class="feedback-content" id="feedbackContent"></div>
+                </div>
                 <div class="btn-wrapper">
-                    <button class="calculate-btn print-btn" onclick="window.print()">Print Report</button>
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Notes Section -->
     <div class="note-section">
-        <div class="note-card">
-            <h3> 🔎About this Calculator</h3>
-           <p>This tool calculates the <strong>total training time in hours</strong> by multiplying the number of attendees with the session duration in minutes and converting the result into hours, giving a clear measure of the group’s overall training time.
-             </p>
-        </div>
-
-        <div class="note-card">
-            <h3>⚙️ How it Works</h3>
-            <p>
-        Each attendee contributes their time during the session. To calculate the total training hours:
-    </p>
-    <ol>
-        <li><strong>Input Number of Attendees:</strong> Enter how many participants are attending the training.</li>
-        <li><strong>Input Training Duration:</strong> Specify the length of the training in minutes. For accuracy, one training hour is considered as 60 minutes.</li>
-        <li><strong>Calculate:</strong> Click the "Calculate Training Time" button to get the total training time in hours.</li>
-    </ol>
-
-        </div>
-
-
-        
-        <div class="note-card">
-            <h3> ❓ Why is this Important?</h3>
-             <ul class="note-list">
-             <li><strong>Accurate Reporting:</strong> Track the combined training time for compliance and performance monitoring.</li>
-            <li><strong>Resource Planning:</strong> Helps organizations manage and allocate training resources effectively.</li>
-             </ul>
-            </div>
-
-        <div class="note-card">
-            <h3>📊 Applications</h3>
-            <ul class="note-list">
-                <li>Helps organizations track combined training hours for compliance.</li>
-                <li>Assists in resource and scheduling planning.</li>
-                <li>Provides accurate reporting for performance monitoring.</li>
-            </ul>
-        </div>
-
-        <div class="note-card">
-            <h3>💡 Conclusion</h3>
-            <p>Using this calculator, managers and trainers can quickly determine total training hours and plan accordingly.</p>
-        </div>
+        <div class="note-card"><h3>What is Age Shock Index?</h3><p>The <strong>Age Shock Index (Age SI)</strong> is an advanced clinical tool that incorporates a patient’s age with their heart rate and systolic blood pressure. It is used to more accurately predict the severity of a patient’s condition, especially in emergencies like acute myocardial infarction (AMI).</p></div>
+        <div class="note-card"><h3>📌 Explanation of Parameters</h3><ul><li><strong>Age (years):</strong> Older individuals generally have a higher baseline risk for cardiovascular issues, adding crucial context to vital signs.</li><li><strong>Heart Rate (beats/min):</strong> A high heart rate can signal physiological stress or shock.</li><li><strong>Systolic Blood Pressure (mmHg):</strong> Low systolic pressure may indicate poor organ perfusion and potential circulatory failure.</li></ul></div>
+        <div class="note-card"><h3>How Is It Calculated?</h3><p>The Age SI is calculated with the formula: <strong>(Age × Heart Rate) / Systolic Blood Pressure</strong>. By combining these three parameters, the Age SI provides a clearer and more immediate picture of how well the cardiovascular system is handling stress.</p></div>
+        <div class="note-card"><h3>Why It Matters</h3><p>In fast-paced clinical environments, the Age Shock Index helps healthcare professionals make quick, informed decisions. It provides rapid risk stratification at the bedside, with predictive power similar to more complex scoring systems.</p></div>
     </div>
-
 </div>
 
 <script>
-function calculateTrainingTime() {
-    
-    const attendees = parseFloat(document.getElementById("attendees").value.trim());
-    const duration = parseFloat(document.getElementById("duration").value.trim());
+    document.addEventListener('DOMContentLoaded', function() { /* ... */ const printDateEl = document.getElementById('printDate'); if (printDateEl) { const now = new Date(); const options = { year: 'numeric', month: 'long', day: 'numeric' }; printDateEl.textContent = now.toLocaleDateString('en-US', options); } });
 
-    const errorBox = document.getElementById('resultError');
-    const errorMessage = document.getElementById('errorMessage');
-    const placeholder = document.getElementById('placeholder');
-    const resultValue = document.getElementById('resultValue');
-    const outputValue = document.getElementById('trainingTimeValue');
+    function calculateAgeShockIndex() {
+        const errorBox = document.getElementById('resultError'), errorMessage = document.getElementById('errorMessage'), placeholder = document.getElementById('placeholder'), resultValueDiv = document.getElementById('resultValue');
+        const age = parseFloat(document.getElementById('age').value);
+        const HR = parseFloat(document.getElementById('heartRate').value);
+        const SBP = parseFloat(document.getElementById('systolicBP').value);
 
-    let errors = [];
-    if (isNaN(attendees) || attendees <= 0) errors.push("👉 Please enter a valid number of attendees greater than 0.");
-    if (isNaN(duration) || duration <= 0) errors.push("👉 Please enter a valid duration in minutes greater than 0.");
+        let errors = [];
+        if (isNaN(age) || age <= 0) errors.push("👉 Please enter a valid age.");
+        if (isNaN(HR) || HR <= 0) errors.push("👉 Please enter a valid heart rate.");
+        if (isNaN(SBP) || SBP <= 0) errors.push("👉 Please enter a valid systolic BP.");
 
-    if (errors.length > 0) {
-        errorMessage.innerHTML = errors.join("<br>");
-        errorBox.classList.remove("hidden");
-        placeholder.classList.add("hidden");
-        resultValue.classList.add("hidden");
-        return;
-    } else {
-        errorBox.classList.add("hidden");
+        if (errors.length > 0) {
+            errorMessage.innerHTML = errors.join("<br>");
+            errorBox.classList.remove("hidden");
+            placeholder.classList.remove("hidden");
+            resultValueDiv.classList.add("hidden");
+            return;
+        } else {
+            errorBox.classList.add("hidden");
+        }
+
+        const ageSI = (age * HR) / SBP;
+        document.getElementById('ageSiValue').textContent = ageSI.toFixed(2);
+
+        const meterFill = document.getElementById('meterFill');
+        let meterWidth, meterColor, feedback, interpretation;
+
+        if (ageSI > 50) {
+            meterWidth = '85%'; meterColor = '#e74c3c'; // Red
+            interpretation = "⚠️ Elevated";
+            feedback = `<strong>${interpretation}:</strong> Indicates a potentially higher risk of mortality and may require urgent medical attention.`;
+        } else {
+            meterWidth = '25%'; meterColor = '#27ae60'; // Green
+            interpretation = "✅ Normal";
+            feedback = `<strong>${interpretation}:</strong> Suggests a stable cardiovascular status with a lower risk for serious cardiac events.`;
+        }
+        
+        meterFill.style.width = meterWidth;
+        meterFill.style.backgroundColor = meterColor;
+        document.getElementById('feedbackContent').innerHTML = feedback;
+
+        placeholder.classList.add('hidden');
+        resultValueDiv.classList.remove('hidden');
     }
 
-    const totalTime = (attendees * duration) / 60;
-    outputValue.textContent = totalTime.toFixed(2);
-
-    placeholder.classList.add('hidden');
-    resultValue.classList.remove('hidden');
-
-
-
-    const interpretationBox = document.getElementById('interpretationBox');
-    const interpretationText = document.getElementById('interpretationText');
-    let interpretation = "";
-
-    if (totalTime < 10) {
-        interpretation = "🔹 Low Training Hours – Indicates a short training effort, suitable for small sessions.";
-    } else if (totalTime >= 10 && totalTime < 50) {
-        interpretation = "🔸 Moderate Training Hours – Balanced training schedule, good for medium groups.";
-    } else {
-        interpretation = "✅ High Training Hours – Large training investment, suitable for big or intensive programs.";
-    }
-
-    interpretationText.innerHTML = interpretation;
-    interpretationBox.style.display = "block";
-
-}
+    function printReport() { /* ... */ const printDateEl = document.getElementById('printDate'); if (printDateEl) { const now = new Date(); const options = { year: 'numeric', month: 'long', day: 'numeric' }; printDateEl.textContent = now.toLocaleDateString('en-US', options); } window.print(); }
 </script>
-    <script src="{% static 'js/print.js' %}"></script>
+
+</body>
+</html>
 {% endblock %}
