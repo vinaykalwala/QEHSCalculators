@@ -1,0 +1,545 @@
+{% extends 'base.html' %}
+{% block title %}Acidity Calculator Based On Hydrogen Ion Concentration {% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actual Evaporation Rate Of A Boiler From Its kW Rating And The Energy Required To Be Added To The Feedwater To Make Steam Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+
+<div class="calculator-container printable" id="printArea">
+
+    {% include "includes/print_header_footer.html" %}
+
+    <div class="calculator-header">
+        <h1>Acidity Calculator Based On Hydrogen Ion Concentration </h1>
+        <p>Calculate the pH of a solution using [H⁺].</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Input Card -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+
+            <div class="form-group">
+                <label for="calcType">Select Calculation Type</label>
+                <select id="calcType" class="form-input" onchange="updateInputFields()">
+                    <option value="h">Calculate pH from [H⁺]</option>
+                    <option value="oh">Calculate [H⁺] from pH</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="hInput">
+                <label for="hConc">Hydrogen Ion Concentration [H⁺] (mol/L)</label>
+                <input type="number" id="hConc" class="form-input" min="0" step="any" placeholder="Enter value between 0 to 1 ">
+            </div>
+
+            <div class="form-group hidden" id="ohInput">
+                <label for="ohConc">pH Value</label>
+                <input type="number" id="ohConc" class="form-input" min="0" step="any" placeholder="Enter pH">
+            </div>
+
+            <div class="form-group hidden" id="pOHInput">
+                <label for="pOHValue">pOH</label>
+                <input type="number" id="pOHValue" class="form-input" min="0" max="14" step="any" placeholder="Enter pOH">
+            </div>
+
+            <button class="calculate-btn" onclick="calculatePH()">Calculate pH</button>
+        </div>
+
+        <!-- Result Card -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="pH illustration">
+                <p>Enter your values to calculate the <strong>pH</strong> of the solution.</p>
+            </div>
+
+            <div class="result-value hidden" id="resultValue">
+                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>pH Value</h2>
+                </div>
+
+                <div class="rate-value" id="phValue">0.00</div>
+                <div class="rate-label">pH</div>
+
+
+
+                <div class="result-feedback">
+        <p id="hResult"></p>
+        <p id="ohResult"></p>
+        <p id="pohResult"></p>
+        <p id="classification"></p>
+        <p id="warning" style="color:red; font-weight:bold;"></p>
+           </div>
+
+
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+     
+    <div class="note-section">
+            <div class="note-card">
+                <h3>🧪 About This Calculator</h3>
+                <p>This calculator determines a solution’s <strong>pH</strong> using Hydrogen Ion Concentration [H⁺] (mol/L)
+               </p>               
+            <ul class="note-list">
+               <li>  Find <strong>pH from \[H⁺]</strong></li>
+                <li> Find <strong> [H⁺] from pH</strong></li>
+               <li> Find <strong>pH from pOH</strong> using the relation <strong>pH + pOH = 14</strong>.</li>
+            </ul>
+            </div>
+                
+            <div class="note-card">
+            
+              <h3>Why is pH Critical for Environmental Monitoring?</h3>
+              <p>pH directly impacts water quality, soil health, and ecosystem balance. It determines metal solubility, nutrient availability, and toxicity levels. Most aquatic life can only survive within specific pH ranges, making it a fundamental water quality parameter.</p>
+            </div>
+            <div class="note-card">
+                <h3>What Are We Calculating?</h3>
+                <ul class="note-list">
+                   <li><strong>1. Calculate pH from [H⁺]:</strong>  
+                   This option uses the entered hydrogen ion concentration to calculate the pH value of a solution. It helps assess how acidic or basic a solution is. This is commonly used in water testing, soil analysis, and environmental chemistry.
+                    </li>
+        
+                    <li><strong>2. Calculate [H⁺] from pH:</strong>  
+                   This option helps determine the hydrogen ion concentration when the pH value is known. It is useful for reverse calculations in laboratory analysis and for understanding the concentration of hydrogen ions in various chemical or environmental samples.
+                    </li>
+                </ul>
+            </div>
+    
+            <div class="note-card">
+                   <h3>Key Parameters:</h3>
+                <ul class="note-list">
+                <li><strong>[H⁺]</strong> - Hydrogen ion concentration in moles per liter (mol/L)</li>
+                <li><strong>pH Scale</strong> - Ranges from 0 (acidic) to 14 (alkaline), with 7 neutral</li>
+                <li><strong>Temperature</strong> - pH measurements are temperature-dependent</li>
+                 </ul>
+            </div>
+            <div class="note-card">
+               <h3>Critical Environmental Applications:</h3>
+                <ul class = "note-list">
+                <li><strong>Drinking Water Treatment</strong> - Optimal pH (6.5-8.5) ensures safety and prevents pipe corrosion</li>
+                <li ><strong>Wastewater Management</strong> - pH adjustment is essential for effective treatment processes</li>
+                <li><strong>Aquatic Ecosystems</strong> - Most fish require pH 6.5-9.0 for survival</li>
+                <li><strong>Soil Quality</strong> - Affects nutrient availability for plant growth</li>
+                 <li><strong>Industrial Discharges</strong> - Regulatory compliance for effluent pH levels</li>
+                </ul>
+    
+            </div>
+            <div class="note-card">
+            <h3>Environmental Health Impacts:</h3>
+            <ul class = "note-list">
+             <li><strong>Acid Rain</strong> - Low pH precipitation damages forests and aquatic systems</li>
+             <li><strong>Algal Blooms</strong> - pH changes can indicate and influence nutrient pollution events</li>
+            <li><strong>Heavy Metal Mobilization</strong> - Low pH increases toxic metal solubility in water</li>
+            </ul>
+        </div>
+    
+
+        <div class="note-card">
+    <h3>Historical Environmental Incidents:</h3>
+    <ul class = "note-list">
+        <li><strong>Acid Mine Drainage</strong> - pH as low as 2.0 from abandoned mines devastates waterways</li>
+        <li><strong>Ocean Acidification</strong> - Rising CO₂ levels decreasing ocean pH, harming marine life</li>
+        <li><strong>Flint Water Crisis</strong> - Improper pH control caused lead leaching from pipes</li>
+    </ul>
+    
+    </div>
+
+        <div class="note-card">
+    <h3>Industry Standards & Regulations:</h3>
+    <p>EPA requires pH monitoring for NPDES permits (6-9 for discharges). Drinking water standards typically mandate pH 6.5-8.5. Many industries must monitor pH for OSHA safety requirements and process control.</p>
+
+</div>
+        <div class="note-card">
+    <h3>Conclusion:</h3>
+    <p>pH measurement is one of the most important parameters in environmental science and water quality management. Understanding pH relationships helps protect ecosystems, ensure safe drinking water, and maintain industrial processes. Regular pH monitoring is essential for detecting pollution events and maintaining regulatory compliance across multiple sectors.</p>
+      </div>
+      
+
+
+</div>
+
+<script>
+function updateInputFields() {
+    const type = document.getElementById("calcType").value;
+    document.getElementById("hInput").classList.add("hidden");
+    document.getElementById("ohInput").classList.add("hidden");
+    document.getElementById("pOHInput").classList.add("hidden");
+
+    if(type === "h") document.getElementById("hInput").classList.remove("hidden");
+    else if(type === "oh") document.getElementById("ohInput").classList.remove("hidden");
+    else if(type === "pOH") document.getElementById("pOHInput").classList.remove("hidden");
+}
+
+function calculatePH() {
+    const type = document.getElementById("calcType").value;
+    let ph ,h, poh, oh, classification, warning;
+;
+
+    if(type === "h") {
+        const hConc = parseFloat(document.getElementById("hConc").value.trim());
+        if(isNaN(hConc) || hConc <= 0) { alert("Enter valid [H⁺] > 0"); return; }
+        ph = -Math.log10(hConc);
+        h = hConc;
+
+    }
+    else if(type === "oh") {
+        const phInput = parseFloat(document.getElementById("ohConc").value.trim());
+        if(isNaN(phInput) || phInput < 0 || phInput > 14) { alert("Enter valid pH 0-14"); return; }
+        ph = phInput;
+        h = Math.pow(10, -ph);
+    }
+    else if(type === "pOH") {
+        const pOH = parseFloat(document.getElementById("pOHValue").value.trim());
+        if(isNaN(pOH) || pOH < 0 || pOH > 14) { alert("Enter valid pOH between 0-14"); return; }
+        ph = 14 - pOH;
+        h = Math.pow(10, -ph);
+    }
+
+    poh = 14 - ph;
+    oh = Math.pow(10, -poh);
+
+    // classification + warnings
+    if (ph < 3) {
+        classification = "Strongly acidic (hazardous)";
+        warning = "⚠ Highly acidic: May be corrosive and UnSafe for handling without Protection.";
+    } else if (ph < 7) {
+        classification = "Moderately acidic";
+        warning = "";
+    } else if (ph === 7) {
+        classification = "Neutral";
+        warning = "";
+    } else if (ph <= 11) {
+        classification = "Moderately basic";
+        warning = "";
+    } else {
+        classification = "Strongly basic (hazardous)";
+        warning = "⚠ Highly basic: May be corrosive and UnSafe for handling without Protection.";
+    }
+
+    // update UI
+    document.getElementById("phValue").textContent = ph.toFixed(2);
+    document.getElementById("hResult").textContent = `[H⁺]: ${h.toExponential(2)} mol/L`;
+    document.getElementById("ohResult").textContent = `[OH⁻]: ${oh.toExponential(2)} mol/L`;
+    document.getElementById("pohResult").textContent = `pOH: ${poh.toFixed(2)}`;
+    document.getElementById("classification").textContent = `Classification: ${classification}`;
+    document.getElementById("warning").textContent = warning;
+
+    document.getElementById("phValue").textContent = ph.toFixed(4);
+    document.getElementById("placeholder").classList.add("hidden");
+    document.getElementById("resultValue").classList.remove("hidden");
+}
+
+function printReport() {
+    window.print();
+}
+</script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+
+{% endblock %}
