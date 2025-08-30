@@ -1,0 +1,567 @@
+{% extends 'base.html' %}
+{% block title %}Average Individual Risk Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Average Individual Risk Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            {% comment %} max-width: 700px; {% endcomment %}
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            {% comment %} display: flex; {% endcomment %}
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+      
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+   <div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Average Individual Risk Calculator</h1>
+            <p>Calculate the probability of fatality for an individual within an exposed population</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="fatalities">Number of Fatalities</label>
+                    <input type="number" id="fatalities" class="form-input" min="0" placeholder="e.g., 5">
+                </div>
+                <div class="form-group">
+                    <label for="population">Population at Risk</label>
+                    <input type="number" id="population" class="form-input" min="1" placeholder="e.g., 10000">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateRisk()">Calculate Risk</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Risk illustration">
+                    <p>This tool will calculate the <strong>Average Individual Risk</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Average Individual Risk</h2>
+                    </div>
+                    <div class="rate-display">
+                    <div class="rate-value" id="rateValue">0.00</div>
+                    <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">Probability of fatality per individual</div></div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low</span><span>Moderate</span><span>High</span><span>Very High</span><span>Extreme</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Risk Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Average Individual Risk Calculator</strong> measures the probability of fatality 
+                    for an individual within an exposed population, providing a standardized way to compare risks 
+                    across different scenarios.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ What is Average Individual Risk?</h3>
+                <p>
+                    Average Individual Risk is a risk metric that quantifies the probability that any one individual 
+                    in an exposed group will suffer a fatality from a specific hazard.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Number of Fatalities:</strong> Total deaths occurring in the population</li>
+                    <li><strong>Population at Risk:</strong> Total number of people exposed to the hazard</li>
+                </ul>
+            </div>
+            
+
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <p>
+                    <b>Lower Risk Values</b> = safer conditions.  
+                    Generally:
+                </p>
+                <ul class="note-list">
+                    <li><span class="good">Below 0.001</span> → Low risk</li>
+                    <li><span class="average">0.001 - 0.01</span> → Moderate risk</li>
+                    <li><span class="average">0.01 - 0.1</span> → High risk</li>
+                    <li><span class="bad">Above 0.1</span> → Extreme risk</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>🌍 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Workplace Safety</strong> - Comparing risks across industries</li>
+                    <li><strong>Public Health</strong> - Assessing disease mortality rates</li>
+                    <li><strong>Transportation Safety</strong> - Evaluating different travel modes</li>
+                    <li><strong>Environmental Risk</strong> - Assessing pollution impacts</li>
+                    <li><strong>Emergency Planning</strong> - Preparing for natural disasters</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📋 Industry Standards</h3>
+                <p>
+                    ISO 31000 (Risk Management), OSHA's Acceptable Risk Thresholds (typically 1×10⁻⁴ per year), 
+                    and EPA's Cancer Risk Guidelines (1×10⁻⁶ benchmark).
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateRisk() {
+            const fatalities = document.getElementById('fatalities').value.trim();
+            const population = document.getElementById('population').value.trim();
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+
+            let errors = [];
+
+            if (fatalities === "") {
+                errors.push("👉 Please enter the number of fatalities.");
+            } else if (parseFloat(fatalities) < 0) {
+                errors.push("👉 Fatalities must be 0 or greater.");
+            }
+            
+            if (population === "") {
+                errors.push("👉 Please enter the population at risk.");
+            } else if (parseFloat(population) <= 0) {
+                errors.push("👉 Population must be greater than 0.");
+            }
+            
+            if (fatalities !== "" && population !== "" && parseFloat(fatalities) > parseFloat(population)) {
+                errors.push("👉 Fatalities cannot exceed population. Please check the input values.");
+            }
+
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden");
+            }
+
+            const numFatalities = parseFloat(fatalities);
+            const pop = parseFloat(population);
+            const risk = numFatalities / pop;
+            const riskPer100k = risk * 100000;
+            
+            document.getElementById('rateValue').textContent = risk.toExponential(4);
+
+            const meterFill = document.getElementById('meterFill');
+            let meterWidth, meterColor, feedback;
+            
+            if (risk === 0) {
+                meterWidth = '5%'; 
+                meterColor = '#27ae60';
+                feedback = '✅ Zero fatalities reported - excellent safety record.';
+            } else if (risk <= 0.001) {
+                meterWidth = '20%'; 
+                meterColor = '#2ecc71';
+                feedback = '✅ Low risk - within typical safety thresholds.';
+            } else if (risk <= 0.01) {
+                meterWidth = '40%'; 
+                meterColor = '#f1c40f';
+                feedback = '🔵 Moderate risk - consider safety enhancements.';
+            } else if (risk <= 0.1) {
+                meterWidth = '65%'; 
+                meterColor = '#e67e22';
+                feedback = '⚠️ High risk - significant safety improvements needed.';
+            } else {
+                meterWidth = '95%'; 
+                meterColor = '#e74c3c';
+                feedback = '❌ Extremely high risk - immediate intervention required.';
+            }
+
+            meterFill.style.width = meterWidth;
+            meterFill.style.backgroundColor = meterColor;
+            
+            // Add additional risk information
+            feedback += `<br><br>Risk per 100,000 people: ${riskPer100k.toFixed(2)}`;
+            
+            document.getElementById('feedbackContent').innerHTML = feedback;
+
+            placeholder.classList.add('hidden');
+            resultValue.classList.remove('hidden');
+        }
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+
+</body>
+</html>
+{% endblock %}

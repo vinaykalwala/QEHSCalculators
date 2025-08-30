@@ -29,11 +29,25 @@ urlpatterns = [
     path('fire/', fire_calculator, name='fire_calculator'),
     path('co2/', co2_calculator, name='co2_calculator'),
 
+    path('users/', user_list, name='user_list'),
+    path('users/<int:pk>/edit/', edit_user, name='edit_user'),
+    path('users/<int:pk>/delete/', delete_user, name='delete_user'),
+    path('subscriptions/', subscription_list, name='subscription_list'),
+    path('subscriptions/add/', subscription_add, name='subscription_add'),
+    path('subscriptions/edit/<int:pk>/', subscription_edit, name='subscription_edit'),
+    path('subscriptions/delete/<int:pk>/',subscription_delete, name='subscription_delete'),
+
     path('calculators/quality/', qualitycategory_calculators, name='qualitycategory_calculators'),
     path('calculators/environment/', environmentcategory_calculators, name='environmentcategory_calculators'),
     path('calculators/health/', healthcategory_calculators, name='healthcategory_calculators'),
     path('calculators/safety/',safetycategory_calculators, name='safetycategory_calculators'),
     path('calculators/fire/', firecategory_calculators, name='firecategory_calculators'),
+
+    path('calculators/quality_basic_calculator/', quality_basic_calculator, name='quality_basic_calculator'),
+    path('calculators/environment_basic_calculator/', environment_basic_calculator, name='environment_basic_calculator'),
+    path('calculators/health_basic_calculator/', health_basic_calculator, name='health_basic_calculator'),
+    path('calculators/safety_basic_calculator/', safety_basic_calculator, name='safety_basic_calculator'),
+    path('calculators/fire_basic_calculator/', fire_basic_calculator, name='fire_basic_calculator'),
    
 
     path('quality/main_calculator/', quality_main_calculator, name='quality_main_calculator'),
@@ -396,7 +410,8 @@ urlpatterns = [
     path('safety/asme_api_rp_520_valves_reynolds_number_metric_units_calculator/', safety_asme_api_rp_520_valves_reynolds_number_metric_units_calculator, name='safety_asme_api_rp_520_valves_reynolds_number_metric_units_calculator'),
     path('safety/asme_api_rp_520_valves_minimum_flow_area_for_steam_calculator/', safety_asme_api_rp_520_valves_minimum_flow_area_for_steam_calculator, name='safety_asme_api_rp_520_valves_minimum_flow_area_for_steam_calculator'),
     path('safety/asme_api_rp_520_valves_minimum_flow_area_for_dry_gases_and_air_calculator/', safety_asme_api_rp_520_valves_minimum_flow_area_for_dry_gases_and_air_calculator, name='safety_asme_api_rp_520_valves_minimum_flow_area_for_dry_gases_and_air_calculator'),
-    path('safety/asme_api_rp_520_valves_minimum_flow_area_for_dry_gases_and_air_calculator/', safety_asme_api_rp_520_valves_minimum_flow_area_for_dry_gases_and_air_calculator, name='safety_asme_api_rp_520_valves_minimum_flow_area_for_dry_gases_and_air_calculator'),
+  
+    path('safety/asme_api_rp_520_valves_reynolds_number_imperial_units_calculator/', safety_asme_api_rp_520_valves_reynolds_number_imperial_units_calculator, name='safety_asme_api_rp_520_valves_reynolds_number_imperial_units_calculator'),
     path('safety/bs_6759_minimum_orifice_area_for_steam_calculator/', safety_bs_6759_minimum_orifice_area_for_steam_calculator, name='safety_bs_6759_minimum_orifice_area_for_steam_calculator'),
     path('safety/bs_6759_minimum_orifice_area_for_air_calculator/', safety_bs_6759_minimum_orifice_area_for_air_calculator, name='safety_bs_6759_minimum_orifice_area_for_air_calculator'),
     path('safety/bs_6759_valves_minimum_orifice_area_for_liquids_calculator/', safety_bs_6759_valves_minimum_orifice_area_for_liquids_calculator, name='safety_bs_6759_valves_minimum_orifice_area_for_liquids_calculator'),

@@ -1,0 +1,583 @@
+{% extends 'base.html' %}
+{% block title %}Approximate Mass Flux Formula (All-Liquid Inlet Condition){% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approximate Mass Flux Formula (All-Liquid Inlet Condition)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            {% comment %} max-width: 700px; {% endcomment %}
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+    
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+   <div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Approximate Mass Flux Formula (All-Liquid Inlet Condition)</h1>
+            <p>Calculate the mass flux for systems with all-liquid inlet conditions</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="hfg">Latent Heat of Vaporization (h_fg)</label>
+                    <input type="number" id="hfg" class="form-input" step="any" min="0.0001" placeholder="e.g., 2257">
+                </div>
+                <div class="form-group">
+                    <label for="vfg">Specific Volume Difference (v_fg)</label>
+                    <input type="number" id="vfg" class="form-input" step="any" min="0.0001" placeholder="e.g., 1.67185">
+                </div>
+                <div class="form-group">
+                    <label for="cp">Specific Heat at Constant Pressure (C_p)</label>
+                    <input type="number" id="cp" class="form-input" step="any" min="0.0001" placeholder="e.g., 4.18">
+                </div>
+                <div class="form-group">
+                    <label for="temp">Temperature (T)</label>
+                    <input type="number" id="temp" class="form-input" step="any" min="0.0001" placeholder="e.g., 373">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateMassFlux()">Calculate Mass Flux</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                   <img src="https://cdn-icons-png.flaticon.com/512/1157/1157109.png" alt="Computer with calculator illustration">
+
+                    <p>This tool will calculate the <strong>Mass Flux</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Mass Flux</h2>
+                    </div>
+                    <div class="rate-display">
+                    <div class="rate-value" id="rateValue">0.00</div>
+                    <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">Mass Flux (kg/m²s)</div></div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low</span><span>Moderate</span><span>High</span><span>Very High</span><span>Critical</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Mass Flux Calculator</strong> helps estimate mass flux in systems where liquid rapidly evaporates, 
+                    such as fire suppression, boiler safety, and steam release scenarios. It helps in understanding energy transfer 
+                    and phase change in high-temperature environments.
+                </p>
+            </div>
+            
+            <div class="note-card">
+                <h3>❓ What is Mass Flux?</h3>
+                <p>
+                    Mass flux is the mass flow rate per unit area, representing how much mass passes through a given area per unit time.
+                    It's a critical parameter in fluid dynamics and heat transfer calculations.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>h_fg (Latent Heat of Vaporization):</strong> The energy required to convert a unit mass of liquid into vapor.</li>
+                    <li><strong>v_fg (Specific Volume Difference):</strong> The change in volume between the liquid and vapor phase.</li>
+                    <li><strong>C_p (Specific Heat at Constant Pressure):</strong> The heat capacity of the fluid.</li>
+                    <li><strong>T (Temperature):</strong> The absolute temperature of the fluid.</li>
+                </ul>
+            </div>
+            
+            
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <p>
+                    <b>Mass Flux Values</b> indicate the intensity of phase change processes:
+                </p>
+                <ul class="note-list">
+                    <li><span class="good">Below 100 kg/m²s</span> → Low intensity phase change</li>
+                    <li><span class="average">100 – 500 kg/m²s</span> → Moderate phase change</li>
+                    <li><span class="bad">Above 500 kg/m²s</span> → High intensity phase change</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>🔬 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li>Used in <strong>fire safety</strong> to estimate steam or vapor flow from heated liquids.</li>
+                    <li>Critical for <strong>boiler safety</strong> and high-pressure steam calculations.</li>
+                    <li>Applied in <strong>nuclear reactor cooling</strong> for heat transfer estimation.</li>
+                    <li>Essential in <strong>chemical processing</strong> for evaporation and condensation systems.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>🔢 Constant Values</h3>
+                <ul class="note-list">
+                    <li><strong>0.9:</strong> Represents an empirical factor accounting for real-world inefficiencies.</li>
+                    <li><strong>0.5:</strong> The exponent represents a square root relationship between temperature and mass flux.</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateMassFlux() {
+            const hfg = document.getElementById('hfg').value.trim();
+            const vfg = document.getElementById('vfg').value.trim();
+            const cp = document.getElementById('cp').value.trim();
+            const temp = document.getElementById('temp').value.trim();
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+
+            let errors = [];
+
+            if (hfg === "") {
+                errors.push("👉 Please enter the Latent Heat of Vaporization (h_fg).");
+            } else if (parseFloat(hfg) <= 0) {
+                errors.push("👉 Latent Heat of Vaporization must be greater than 0.");
+            }
+            
+            if (vfg === "") {
+                errors.push("👉 Please enter the Specific Volume Difference (v_fg).");
+            } else if (parseFloat(vfg) <= 0) {
+                errors.push("👉 Specific Volume Difference must be greater than 0.");
+            }
+            
+            if (cp === "") {
+                errors.push("👉 Please enter the Specific Heat at Constant Pressure (C_p).");
+            } else if (parseFloat(cp) <= 0) {
+                errors.push("👉 Specific Heat at Constant Pressure must be greater than 0.");
+            }
+            
+            if (temp === "") {
+                errors.push("👉 Please enter the Temperature (T).");
+            } else if (parseFloat(temp) <= 0) {
+                errors.push("👉 Temperature must be greater than 0.");
+            }
+
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden");
+            }
+
+            const h_fg = parseFloat(hfg);
+            const v_fg = parseFloat(vfg);
+            const c_p = parseFloat(cp);
+            const T = parseFloat(temp);
+            
+            // Calculate mass flux: G = 0.9 * (h_fg / v_fg) * (1 / (C_p * T))^0.5
+            const massFlux = 0.9 * (h_fg / v_fg) * Math.pow((1 / (c_p * T)), 0.5);
+            
+            document.getElementById('rateValue').textContent = massFlux.toFixed(4);
+
+            const meterFill = document.getElementById('meterFill');
+            let meterWidth, meterColor, feedback;
+            
+            if (massFlux < 100) {
+                meterWidth = '20%'; 
+                meterColor = '#27ae60';
+                feedback = '✅ Low mass flux. This indicates a relatively mild phase change process.';
+            } else if (massFlux < 500) {
+                meterWidth = '40%'; 
+                meterColor = '#2ecc71';
+                feedback = '👍 Moderate mass flux. This is typical for many industrial evaporation processes.';
+            } else if (massFlux < 1000) {
+                meterWidth = '60%'; 
+                meterColor = '#f39c12';
+                feedback = '⚠️ High mass flux. Monitor the system carefully as this indicates intense phase change.';
+            } else if (massFlux < 5000) {
+                meterWidth = '80%'; 
+                meterColor = '#e67e22';
+                feedback = '🚨 Very high mass flux. This suggests rapid evaporation that may need engineering controls.';
+            } else {
+                meterWidth = '95%'; 
+                meterColor = '#e74c3c';
+                feedback = '❌ Critical mass flux level. This indicates extremely rapid phase change that requires immediate attention.';
+            }
+
+            meterFill.style.width = meterWidth;
+            meterFill.style.backgroundColor = meterColor;
+            document.getElementById('feedbackContent').textContent = feedback;
+
+            placeholder.classList.add('hidden');
+            resultValue.classList.remove('hidden');
+        }
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+
+</body>
+</html>
+{% endblock %}

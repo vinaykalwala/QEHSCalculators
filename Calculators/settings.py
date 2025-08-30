@@ -71,6 +71,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'QehsCalculators.context_processors.subscription_context',
             ],
         },
     },
@@ -145,4 +146,4 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'durgaprakash1102@gmail.com'
 EMAIL_HOST_PASSWORD = 'aqrj iljs kdph okgm '
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-  
+

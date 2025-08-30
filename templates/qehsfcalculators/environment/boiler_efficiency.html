@@ -1,0 +1,602 @@
+{% extends 'base.html' %}
+{% block title %}Boiler efficiency Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boiler efficiency Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+      
+
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+      .btn-wrapper {
+    text-align: center; /* centers inline-block buttons */
+    margin-top: 20px;
+  }
+
+   .btn-wrapper {
+    text-align: center; /* centers the button */
+    margin-top: 20px;
+  }
+
+  .print-btn {
+    display: inline-block;
+    background:linear-gradient(#1560bd,#000040);
+    color: white;
+    padding: 8px 18px;   /* control button size */
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    width: auto !important; /* prevent full width */
+  }
+
+  .print-btn:hover {
+    background: #1560bd;
+  }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+
+        .rate-display{
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+       
+    </style>
+</head>
+<body>
+
+    <div class="calculator-container printable" id="printArea">
+
+    {% include "includes/print_header_footer.html" %}
+
+    <div class="calculator-header">
+        <h1>Boiler Efficiency Calculator</h1>
+        <p>Calculate the <strong>Boiler Efficiency (%)</strong> to measure how effectively a boiler converts fuel energy into useful steam energy.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Calculator -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+
+            <div class="form-group">
+                <label for="heatExported">Heat Exported in Steam (BTU/hr)</label>
+                <input type="number" id="heatExported" class="form-input" min="1" step="any" placeholder="e.g., 50000">
+            </div>
+
+            <div class="form-group">
+                <label for="heatProvided">Heat Provided by Fuel (BTU/hr)</label>
+                <input type="number" id="heatProvided" class="form-input" min="1" step="any" placeholder="e.g., 60000">
+            </div>
+            
+            <button class="calculate-btn" onclick="calculateEfficiency()">Calculate Efficiency</button>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="https://cdn-icons-png.flaticon.com/512/4727/4727260.png" alt="Boiler efficiency illustration">
+                <p>This tool will calculate the <strong>Boiler Efficiency (%)</strong>.</p>
+            </div>
+            
+            <div class="result-error hidden" id="resultError">
+                <div class="error-icon">❌</div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+             
+            <div class="result-value hidden" id="resultValue">
+                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Calculated Boiler Efficiency</h2>
+                </div>
+
+                <div class="rate-display">
+                <div class="rate-value" id="rateValue">0.00<div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">%</div></div>
+                <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">%</div>
+                </div>
+
+                <div class="result-feedback">
+                    <div class="feedback-title">Assessment</div>
+                    <div class="feedback-content" id="feedbackContent"></div>
+                </div>
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="note-section">
+        <div class="note-card">
+            <h3>📘 About This Calculator</h3>
+            <p>
+                The <strong>Boiler Efficiency Calculator</strong> determines how effectively a boiler converts 
+                <strong>fuel energy</strong> into useful <strong>steam energy</strong>, reducing energy waste and operating costs.
+            </p>
+        </div>
+        
+        <div class="note-card">
+            <h3>📊 Interpretation</h3>
+            <ul class="note-list">
+                <li><span class="bad">Efficiency &lt; 60%</span> → 🔴 Poor efficiency (High energy loss).</li>
+                <li><span class="average">60% ≤ Efficiency ≤ 85%</span> → ⚠️ Moderate efficiency (Needs optimization).</li>
+                <li><span class="good">Efficiency &gt; 85%</span> → ✅ High efficiency (Good fuel utilization).</li>
+            </ul>
+        </div>
+
+        
+
+        <div class="note-card">
+            <h3>⚠️ Validations</h3>
+            <p>
+                ✔️ Heat Exported in Steam must be a positive value.<br>
+                ✔️ Heat Provided by Fuel must be a positive value.<br>
+                ❌ Zero or negative values are invalid.<br>
+                ❌ Non-numeric entries are invalid.
+            </p>
+        </div>
+
+        <div class="note-card">
+            <h3>🌍 Key Applications</h3>
+            <ul class="note-list">
+                <li><strong>Power Plants:</strong> Efficiency monitoring and optimization.</li>
+                <li><strong>Industrial Boilers:</strong> Energy cost reduction & performance tracking.</li>
+                <li><strong>Energy Audits:</strong> Compliance with energy-saving standards.</li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+<script>
+/* Helper: show errors consistently */
+function showErrors(errors) {
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+
+  if (errorMessage) errorMessage.innerHTML = errors.join("<br>");
+  if (errorBox) errorBox.classList.remove("hidden");
+  if (placeholder) placeholder.classList.add("hidden");
+  if (resultValue) resultValue.classList.add("hidden");
+}
+
+function calculateEfficiency() {
+  // safe reads
+  const heatExportedRaw = document.getElementById("heatExported")?.value.trim() ?? "";
+  const heatProvidedRaw = document.getElementById("heatProvided")?.value.trim() ?? "";
+
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+  const rateEl = document.getElementById("rateValue");
+  const feedbackEl = document.getElementById("feedbackContent");
+
+  // reset UI
+  if (errorBox) errorBox.classList.add("hidden");
+  if (errorMessage) errorMessage.innerHTML = "";
+  if (feedbackEl) feedbackEl.innerHTML = "";
+
+  const errors = [];
+  const warnings = [];
+
+  // required checks
+  if (heatExportedRaw === "") errors.push("👉 Please enter Heat Exported (same energy units as Heat Provided).");
+  if (heatProvidedRaw === "") errors.push("👉 Please enter Heat Provided by fuel.");
+
+  if (errors.length > 0) {
+    showErrors(errors);
+    return;
+  }
+
+  // parse
+  const heatExported = parseFloat(heatExportedRaw);
+  const heatProvided = parseFloat(heatProvidedRaw);
+
+  if (!Number.isFinite(heatExported) || heatExported < 0) errors.push("👉 Heat Exported must be a non-negative number.");
+  if (!Number.isFinite(heatProvided) || heatProvided <= 0) errors.push("👉 Heat Provided must be a positive number (check units).");
+
+  if (errors.length > 0) {
+    showErrors(errors);
+    return;
+  }
+
+  // tiny denominator guard
+  if (heatProvided < 1e-9) {
+    showErrors(["⚠️ Heat Provided is too small — check units and input value."]);
+    return;
+  }
+
+  // check: exported > provided (physically suspicious)
+  // small measurement tolerances allowed; big exceedances are blocked
+if (heatExported > heatProvided) {
+    const ratio = heatExported / heatProvided;
+    if (ratio > 1.05) {
+        // >5% more exported than provided -> unrealistic, likely data issue
+        showErrors([
+          "❌ Invalid Input: Heat Exported cannot realistically exceed Heat Provided by more than 5%. Please recheck your measurements, fuel data, or unit conversions."
+        ]);
+        return;
+    } else {
+        // small exceedance -> warning but allow calculation
+        warnings.push(
+          "⚠️ Note: Heat Exported is slightly higher than Heat Provided. This may be due to minor measurement inaccuracies or rounding differences."
+        );
+    }
+}
+
+
+  // compute efficiency and heat loss
+  const efficiency = (heatExported / heatProvided) * 100; // %
+  const heatLoss = heatProvided - heatExported; // same energy units
+  const heatLossPercent = (heatLoss / heatProvided) * 100;
+
+  // sanity warnings for unrealistic results
+  if (!Number.isFinite(efficiency)) {
+    showErrors(["⚠️ Computation produced invalid efficiency. Check inputs."]);
+    return;
+  }
+  if (efficiency > 120) warnings.push("⚠️ Efficiency > 120% — very likely unit mismatch or measurement error.");
+  if (efficiency < 5) warnings.push("⚠️ Extremely low efficiency (<5%) — check fuel measurements and energy accounting.");
+
+  // feedback categories (kept your original thresholds; tweak if you want)
+  let statusMsg = "";
+  if (efficiency < 60) {
+    statusMsg = "🔴 Poor efficiency (High energy loss).";
+  } else if (efficiency >= 60 && efficiency <= 85) {
+    statusMsg = "⚠️ Moderate efficiency (Needs optimization).";
+  } else {
+    statusMsg = "✅ High efficiency (Good fuel utilization).";
+  }
+
+  // Build details (show both absolute and percent loss)
+  let details = `<div>Efficiency: <b>${efficiency.toFixed(2)}%</b></div>`;
+  details += `<div>Heat loss: <b>${heatLoss.toFixed(3)}</b> (same units as inputs)</div>`;
+  details += `<div>Heat loss percentage: <b>${heatLossPercent.toFixed(2)}%</b></div>`;
+
+  if (warnings.length) {
+    details += `<div style="margin-top:6px; color:#b35d00; font-size:0.95em;">Note: ${warnings.join(" | ")}</div>`;
+  }
+
+  // Update UI
+  if (rateEl) rateEl.textContent = efficiency.toFixed(2);
+  if (feedbackEl) feedbackEl.innerHTML = `<div>${statusMsg}</div>${details}`;
+
+  if (placeholder) placeholder.classList.add("hidden");
+  if (resultValue) resultValue.classList.remove("hidden");
+  if (errorBox) errorBox.classList.add("hidden");
+}
+
+/* safe print */
+function printReport() {
+  const el = document.getElementById('printDate');
+  if (el) {
+    const now = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    el.textContent = now.toLocaleDateString('en-IN', options);
+  }
+  window.print();
+}
+</script>
+
+<script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}

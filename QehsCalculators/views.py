@@ -48,7 +48,6 @@ def device_limit_exceeded(request):
     return render(request, "device_limit.html", {"devices": devices})
 
 
-from django.db.models import Q  # Add this import at the top
 @login_required
 def dashboard(request):
     # Get the latest active or pending subscription
@@ -56,15 +55,19 @@ def dashboard(request):
         Q(status="active") | Q(status="pending")
     ).order_by('-created_at').first()
 
+    # Boolean flag for template
+    has_active_subscription = subscription and subscription.status == "active"
+    can_access_calculators = bool(subscription and subscription.status == "active" and subscription.plan)
+
     # Determine user's plan level
-    user_level = PLAN_HIERARCHY.get(subscription.plan.name.lower(), 0) if subscription and subscription.plan else 0
+    user_level = PLAN_HIERARCHY.get(subscription.plan.name.lower(), 0) if has_active_subscription and subscription.plan else 0
 
     # Organize calculators by category with access control
     accessible_calculators_by_category = {}
 
     for calc in CALCULATORS:
         calc_plan_level = PLAN_HIERARCHY.get(calc["plan_type"].lower(), 3)
-        if subscription and subscription.status == "active" and calc_plan_level <= user_level:
+        if has_active_subscription and calc_plan_level <= user_level:
             category = calc["category"]
             if category not in accessible_calculators_by_category:
                 accessible_calculators_by_category[category] = []
@@ -82,13 +85,15 @@ def dashboard(request):
 
     # Check device limit if subscription exists
     device_message = None
-    if subscription and subscription.status == "active" and subscription.plan:
+    if has_active_subscription and subscription.plan:
         is_allowed, device_message = check_device_limit(request.user, subscription.plan)
         if not is_allowed:
             messages.warning(request, device_message)
 
     return render(request, "dashboard.html", {
         "subscription": subscription,
+        "has_active_subscription": has_active_subscription,
+        "can_access_calculators": can_access_calculators,
         "calculators_by_category": accessible_calculators_by_category,
         "categories": accessible_categories,
         "plans": plans,
@@ -470,6 +475,25 @@ def delete_contact(request, pk):
     messages.success(request, 'Contact deleted successfully!')
     return redirect('contact_list')
 
+@login_required
+def safety_basic_calculator(request):
+     return render(request, 'calculators/safety_basic_calculator.html')
+     
+@login_required
+def quality_basic_calculator(request):
+     return render(request, 'calculators/quality_basic_calculator.html')
+
+@login_required
+def environment_basic_calculator(request):
+     return render(request, 'calculators/environment_basic_calculator.html')
+
+@login_required
+def health_basic_calculator(request):
+     return render(request, 'calculators/health_basic_calculator.html')
+
+@login_required
+def fire_basic_calculator(request):
+     return render(request, 'calculators/fire_basic_calculator.html')
 
 def terms(request):
     return render(request, 'terms.html')
@@ -560,7 +584,6 @@ def get_calculators_for_category(category, user_plan):
         calc for calc in CALCULATORS
         if calc['category'] == category and PLAN_HIERARCHY[calc['plan_type']] <= user_plan_level
     ]
-    print(f"DEBUG: Category={category}, User Plan={user_plan}, Found={filtered}")
     return filtered
 
 
@@ -608,6 +631,100 @@ def firecategory_calculators(request):
         'category': CATEGORIES['fire']
     })
 
+from django.contrib.auth.decorators import login_required, user_passes_test
+
+from .forms import UserEditForm 
+
+# Check if user is superuser
+def is_superuser(user):
+    return user.is_superuser
+
+@login_required
+@user_passes_test(is_superuser)
+def user_list(request):
+    """List all users (superuser only)."""
+    users = CustomUser.objects.all().order_by('-date_joined')
+    return render(request, 'user_list.html', {'users': users})
+
+
+
+
+@login_required
+def edit_user(request, pk):
+    """Allow user to edit their own profile."""
+    user_obj = get_object_or_404(CustomUser, pk=pk)
+
+    if request.user != user_obj:
+        messages.error(request, "You can only edit your own profile.")
+        return redirect('user_detail', pk=request.user.pk)
+
+    if request.method == 'POST':
+        form = UserEditForm(request.POST, instance=user_obj)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Your profile has been updated successfully!")
+            return redirect('user_detail', pk=user_obj.pk)
+    else:
+        form = UserEditForm(instance=user_obj)
+
+    return render(request, 'edit_user.html', {'form': form})
+
+
+@login_required
+@user_passes_test(is_superuser)
+def delete_user(request, pk):
+    """Delete a user (superusers only)."""
+    user_obj = get_object_or_404(CustomUser, pk=pk)
+    if request.method == 'POST':
+        user_obj.delete()
+        messages.success(request, "User deleted successfully!")
+        return redirect('user_list')
+
+    return render(request, 'delete_user_confirm.html', {'user_obj': user_obj})
+
+
+from .models import SubscriptionPlan
+from .forms import SubscriptionPlanForm
+
+# Restrict only superusers
+def superuser_required(view_func):
+    return user_passes_test(lambda u: u.is_superuser)(view_func)
+
+@superuser_required
+def subscription_list(request):
+    plans = SubscriptionPlan.objects.all()
+    return render(request, 'subscription_list.html', {'plans': plans})
+
+@superuser_required
+def subscription_add(request):
+    if request.method == 'POST':
+        form = SubscriptionPlanForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('subscription_list')
+    else:
+        form = SubscriptionPlanForm()
+    return render(request, 'subscription_form.html', {'form': form})
+
+@superuser_required
+def subscription_edit(request, pk):
+    plan = get_object_or_404(SubscriptionPlan, pk=pk)
+    if request.method == 'POST':
+        form = SubscriptionPlanForm(request.POST, instance=plan)
+        if form.is_valid():
+            form.save()
+            return redirect('subscription_list')
+    else:
+        form = SubscriptionPlanForm(instance=plan)
+    return render(request, 'subscription_form.html', {'form': form})
+
+@superuser_required
+def subscription_delete(request, pk):
+    plan = get_object_or_404(SubscriptionPlan, pk=pk)
+    if request.method == 'POST':
+        plan.delete()
+        return redirect('subscription_list')
+    return render(request, 'subscription_confirm_delete.html', {'plan': plan})
 
 @login_required
 @subscription_required(plan_type="employee")
@@ -2415,8 +2532,8 @@ def safety_asme_api_rp_520_valves_minimum_flow_area_for_dry_gases_and_air_calcul
 
 @login_required
 @subscription_required(plan_type="corporate")
-def safety_asme_api_rp_520_valves_minimum_flow_area_for_dry_gases_and_air_calculator(request):
-    return render(request, 'qehsfcalculators/safety/asme_api_rp_520_valves_minimum_flow_area_for_dry_gases_and_air.html', {'title': 'ASME (API RP 520) Valves - Minimum Flow Area for Dry Gases and Air Calculator'})
+def safety_asme_api_rp_520_valves_reynolds_number_imperial_units_calculator(request):
+    return render(request, 'qehsfcalculators/safety/asme_api_rp_520_valves_reynolds_number_imperial_units_calculator.html', {'title': 'ASME (API RP 520) Valves - Reynolds number imperial units Calculator'})
 
 @login_required
 @subscription_required(plan_type="corporate")
