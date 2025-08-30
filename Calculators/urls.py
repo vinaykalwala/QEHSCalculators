@@ -34,6 +34,12 @@ urlpatterns = [
     path('calculators/health/', healthcategory_calculators, name='healthcategory_calculators'),
     path('calculators/safety/',safetycategory_calculators, name='safetycategory_calculators'),
     path('calculators/fire/', firecategory_calculators, name='firecategory_calculators'),
+
+    path('calculators/quality_basic_calculator/', quality_basic_calculator, name='quality_basic_calculator'),
+    path('calculators/environment_basic_calculator/', environment_basic_calculator, name='environment_basic_calculator'),
+    path('calculators/health_basic_calculator/', health_basic_calculator, name='health_basic_calculator'),
+    path('calculators/safety_basic_calculator/', safety_basic_calculator, name='safety_basic_calculator'),
+    path('calculators/fire_basic_calculator/', fire_basic_calculator, name='fire_basic_calculator'),
    
 
     path('quality/main_calculator/', quality_main_calculator, name='quality_main_calculator'),

@@ -470,6 +470,25 @@ def delete_contact(request, pk):
     messages.success(request, 'Contact deleted successfully!')
     return redirect('contact_list')
 
+@login_required
+def safety_basic_calculator(request):
+     return render(request, 'calculators/safety_basic_calculator.html')
+     
+@login_required
+def quality_basic_calculator(request):
+     return render(request, 'calculators/quality_basic_calculator.html')
+
+@login_required
+def environment_basic_calculator(request):
+     return render(request, 'calculators/environment_basic_calculator.html')
+
+@login_required
+def health_basic_calculator(request):
+     return render(request, 'calculators/health_basic_calculator.html')
+
+@login_required
+def fire_basic_calculator(request):
+     return render(request, 'calculators/fire_basic_calculator.html')
 
 def terms(request):
     return render(request, 'terms.html')
