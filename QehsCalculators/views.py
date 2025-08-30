@@ -48,7 +48,6 @@ def device_limit_exceeded(request):
     return render(request, "device_limit.html", {"devices": devices})
 
 
-from django.db.models import Q  # Add this import at the top
 @login_required
 def dashboard(request):
     # Get the latest active or pending subscription
@@ -56,15 +55,19 @@ def dashboard(request):
         Q(status="active") | Q(status="pending")
     ).order_by('-created_at').first()
 
+    # Boolean flag for template
+    has_active_subscription = subscription and subscription.status == "active"
+    can_access_calculators = bool(subscription and subscription.status == "active" and subscription.plan)
+
     # Determine user's plan level
-    user_level = PLAN_HIERARCHY.get(subscription.plan.name.lower(), 0) if subscription and subscription.plan else 0
+    user_level = PLAN_HIERARCHY.get(subscription.plan.name.lower(), 0) if has_active_subscription and subscription.plan else 0
 
     # Organize calculators by category with access control
     accessible_calculators_by_category = {}
 
     for calc in CALCULATORS:
         calc_plan_level = PLAN_HIERARCHY.get(calc["plan_type"].lower(), 3)
-        if subscription and subscription.status == "active" and calc_plan_level <= user_level:
+        if has_active_subscription and calc_plan_level <= user_level:
             category = calc["category"]
             if category not in accessible_calculators_by_category:
                 accessible_calculators_by_category[category] = []
@@ -82,13 +85,15 @@ def dashboard(request):
 
     # Check device limit if subscription exists
     device_message = None
-    if subscription and subscription.status == "active" and subscription.plan:
+    if has_active_subscription and subscription.plan:
         is_allowed, device_message = check_device_limit(request.user, subscription.plan)
         if not is_allowed:
             messages.warning(request, device_message)
 
     return render(request, "dashboard.html", {
         "subscription": subscription,
+        "has_active_subscription": has_active_subscription,
+        "can_access_calculators": can_access_calculators,
         "calculators_by_category": accessible_calculators_by_category,
         "categories": accessible_categories,
         "plans": plans,
@@ -579,7 +584,6 @@ def get_calculators_for_category(category, user_plan):
         calc for calc in CALCULATORS
         if calc['category'] == category and PLAN_HIERARCHY[calc['plan_type']] <= user_plan_level
     ]
-    print(f"DEBUG: Category={category}, User Plan={user_plan}, Found={filtered}")
     return filtered
 
 
