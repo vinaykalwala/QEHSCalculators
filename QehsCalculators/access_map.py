@@ -10,6 +10,29 @@ CALCULATORS = [
 
     {"name": "Binomial Distribution Calculator", "url_name": "quality_binomial_distribution_calculator", "plan_type": "corporate", "category": "quality"},
 
+    {"name": "Broad Calculation of Garments Cost of Making (CM)", "url_name": "quality_broad_calculation_of_garments_cost_of_making_cm_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+
+{"name": "Boiling Point Elevation Calculator", "url_name": "quality_boiling_point_elevation_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+
+{"name": "Correct the Conductivity of a Sample Calculator", "url_name": "quality_correct_the_conductivity_of_a_sample_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+
+{"name": "Cost of Poor Quality (COPQ) Calculator", "url_name": "quality_cost_of_poor_quality_copq_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Customer Satisfaction (CSAT) Calculator", "url_name": "quality_customer_satisfaction_csat_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Cost Per Minute (CPM) Calculator", "url_name": "quality_cost_per_minute_cpm_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Cost of Making (CM) Calculator", "url_name": "quality_cost_of_making_cm_calculator", "plan_type": "corporate", "category": "quality"},
+
 
 
     # Environment Calculators
@@ -32,6 +55,31 @@ CALCULATORS = [
     {"name": "Boiler Blowdown Rate Calculator", "url_name": "environment_boiler_blowdown_rate_calculator", "plan_type": "corporate", "category": "environment"},
 
     {"name": "Boiler efficiency Calculator", "url_name": "environment_boiler_efficiency_calculator", "plan_type": "corporate", "category": "environment"},
+
+    {"name": "Bernoulli’s Equation Calculator With constant Potential Energy", "url_name": "environment_bernoullis_equation_with_constant_potential_energy_terms_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "BOD  (Biochemical Oxygen Demand) Exertion Calculator", "url_name": "environment_bod_biochemical_oxygen_demand_exertion_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Breakthrough Time Calculator", "url_name": "environment_breakthrough_time_calculator'", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Biomass Microbial Growth Calculator", "url_name": "environment_biomass_microbial_growth_calculator'", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Biomass Substrate Utilization Rate Calculator", "url_name": "environment_biomass_substrate_utilization_rate_calculator'", "plan_type": "corporate", "category": "environment"},
+
+
+
+{"name": "Biomass Concentration (Xr) Calculator", "url_name": "environment_biomass_concentration_xr_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Carbnot effiency calculator", "url_name": "environment_carbnot_effiency_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Carbon Footprint Effient Calculator", "url_name": "environment_carbon_footprint_effient_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Cost of Fuel Saved by Returning Condensate Calculator", "url_name": "environment_cost_of_fuel_saved_by_returning_condensate_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Cost of water Saved by Returning Condensate Calculator", "url_name": "environment_cost_of_water_saved_by_returning_condensate_calculator", "plan_type": "corporate", "category": "environment"},
         
 
 
@@ -49,6 +97,15 @@ CALCULATORS = [
     {"name": "Age Shock Index (Age SI) Calculator", "url_name": "health_age_shock_index_age_si_calculator", "plan_type": "corporate", "category": "health"},
     
     {"name": "Alzheimer’s Life Expectancy Calculator", "url_name": "health_alzheimers_life_expectancy_calculator", "plan_type": "corporate", "category": "health"},
+
+    {"name": "Army Body Fat Calculator", "url_name": "health_army_body_fat_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Adjusted Body Weight Calculator", "url_name": "health_adjusted_body_weight_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "A Body Shape Index (ABSI) Calculator", "url_name": "health_a_body_shape_index_absi_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "A1c Calculator", "url_name": "health_a1c_hemoglobin_a1c_to_average_blood_sugar_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Age Shock Index (Age SI) Calculator", "url_name": "health_age_shock_index_age_si_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Alzheimer’s Life Expectancy Calculator", "url_name": "health_alzheimers_life_expectancy_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "BMI Calculator", "url_name": "health_bmi_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "BMI Calculator for Kids", "url_name": "health_bmi_for_kids_calculator", "plan_type": "corporate", "category": "health"},
 
 
 
@@ -81,6 +138,26 @@ CALCULATORS = [
     {"name": "ASME (API RP 520) Valves - Bellows Balanced Valves", "url_name": "safety_asme_api_rp_520_valves_bellows_balanced_valves_calculator", "plan_type": "corporate", "category": "safety"},
 
     {"name": "AD-MERKBLATT Minimum Flow Area for Liquids", "url_name": "safety_ad_merkblatt_minimum_flow_area_for_liquids_calculator", "plan_type": "corporate", "category": "safety"},
+
+    {"name": "ASME (API RP 520) Valves - Conventional Valves Calculator", "url_name": "safety_asme_api_rp_520_valves_conventional_valves_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "ASME (API RP 520) Valves - Reynolds Number Calculator", "url_name": "safety_asme_api_rp_520_valves_reynolds_number_metric_units_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "ASME (API RP 520) Valves - Minimum Flow Area For Steam", "url_name": "safety_asme_api_rp_520_valves_minimum_flow_area_for_steam_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "ASME (API RP 520) Valves - Minimum Flow Area for Dry Gases and Air", "url_name": "safety_asme_api_rp_520_valves_minimum_flow_area_for_dry_gases_and_air_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "ASME (API RP 520) Valves - Reynolds Number Imperial Units Calculator", "url_name": "safety_asme_api_rp_520_valves_reynolds_number_imperial_units_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "ASME (API RP 520) Valves - Minimum Flow Area For Steam calculator", "url_name": "safety_bs_6759_minimum_orifice_area_for_steam_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "BS-6759 Minimum Orifice Area for Air", "url_name": "safety_bs_6759_minimum_orifice_area_for_air_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "BS 6759 Valves Minimum Orifice Area For Liquids Calculator", "url_name": "safety_bs_6759_valves_minimum_orifice_area_for_liquids_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "BS 6759 Valves Minimum Orifice Area For Hot Water Calculator", "url_name": "safety_bs_6759_valves_minimum_orifice_area_for_hot_water_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "BS 6759 Valves - Nozzle Gas Constant Calculator", "url_name": "safety_bs_6759_valves_nozzle_gas_constant_calculator", "plan_type": "corporate", "category": "safety"},
 
     
     # Fire Calculators
