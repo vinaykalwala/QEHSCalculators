@@ -1,0 +1,532 @@
+{% extends 'base.html' %}
+{% block title %}Boiling Point Elevation Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boiling Point Elevation Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+   <div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Boiling Point Elevation Calculator</h1>
+            <p>Calculate how adding solute to a solvent raises its boiling point based on molality and ebullioscopic constant</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator Input Card -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="molality">Molality (m) of Solution (mol/kg)</label>
+                    <input type="number" id="molality" class="form-input" step="any" min="0" placeholder="Enter solute molality">
+                </div>
+
+                <div class="form-group">
+                    <label for="ebullioscopicConstant">Ebullioscopic Constant (Kₑ) (K·kg/mol)</label>
+                    <input type="number" id="ebullioscopicConstant" class="form-input" step="any" min="0.01" placeholder="Enter Kₑ for solvent" value="0.512">
+                </div>
+
+                <div class="form-group">
+                    <label for="pureSolventBP">Pure Solvent Boiling Point (°C)</label>
+                    <input type="number" id="pureSolventBP" class="form-input" step="any" placeholder="Enter solvent BP" value="100">
+                </div>
+
+                <button class="calculate-btn" onclick="calculateBPElevation()">Calculate Boiling Point Elevation</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Boiling point illustration">
+                    <p>This tool calculates the <strong>boiling point elevation</strong>. Enter your data to see results.</p>
+                </div>
+
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Boiling Point Elevation</h2>
+                    </div>
+                    <div class="rate-value" id="elevationValue">0.00</div>
+                    <div class="rate-label">°C</div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">New Boiling Point</div>
+                        <div class="feedback-content" id="newBPValue"></div>
+                    </div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">Interpretation</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🔎 About This Calculator</h3>
+                <p>
+                    <strong>Boiling Point Elevation</strong> describes how adding solute to a solvent raises its boiling point. 
+                    It's a colligative property depending only on particle number, not identity. This phenomenon is 
+                    crucial for industrial processes and environmental monitoring.
+                </p> 
+            </div>
+
+            <div class="note-card">
+                <h3>❓ Explanation of Parameters</h3>
+                <ul class="note-list">
+                    <li><strong>Molality (m):</strong> Moles of solute per kg of solvent (independent of temperature).</li>
+                    <li><strong>Ebullioscopic Constant (Kₑ):</strong> Solvent-specific property (0.512 K·kg/mol for water).</li>
+                    <li><strong>Pure Solvent Boiling Point:</strong> Reference boiling point without solute (100°C for water).</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3> ✅Why is This Important for Quality Control?</h3>
+            <p>Boiling point elevation affects sterilization processes, chemical manufacturing, and food processing. It helps determine solute concentration and verify solution purity in quality assurance protocols.</p>
+
+            </div>
+
+            
+            <div class="note-card">
+                
+                <h3> ⚖️Industry Standards & Guidelines</h3>
+                <p>ASTM E1269 and ISO 11357-1 reference boiling point elevation for material characterization. FDA guidelines consider it for sterilization validation in pharmaceutical manufacturing.</p>
+            </div>
+
+            <div class="note-card">
+                <h3>📊 Critical Quality Control Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Pharmaceuticals:</strong> Ensuring proper sterilization temperatures for solutions.</li>
+                    <li><strong>Food Processing:</strong> Calculating sugar concentrations in syrups and jams.</li>
+                    <li><strong>Water Treatment:</strong> Monitoring salt buildup in boilers and evaporators.</li>
+                    <li><strong>Chemical Manufacturing:</strong> Controlling reaction temperatures in solutions.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>⚠️ Important Safety Implications</h3>
+                <ul class="note-list">
+                    <li><strong>Process Safety:</strong> Prevents underestimating operating temperatures.</li>
+                    <li><strong>Equipment Design:</strong> Ensures proper pressure ratings for boiling solutions.</li>
+                    <li><strong>Environmental Releases:</strong> Affects volatile emissions from heated solutions.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Conclusion</h3>
+                <p>
+                    Understanding boiling point elevation is essential for precise temperature control in industrial processes. 
+                    This calculator helps quality professionals anticipate how solutes affect boiling behavior, ensuring process 
+                    safety and product consistency.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateBPElevation() {
+            const molality = document.getElementById('molality').value.trim();
+            const kb = document.getElementById('ebullioscopicConstant').value.trim();
+            const pureBP = document.getElementById('pureSolventBP').value.trim();
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+            const elevationValue = document.getElementById('elevationValue');
+            const newBPValue = document.getElementById('newBPValue');
+            const feedbackContent = document.getElementById('feedbackContent');
+
+            let errors = [];
+            
+            // Validation
+            if (molality === "") {
+                errors.push("👉 Please enter the molality of the solution.");
+            } else if (parseFloat(molality) < 0) {
+                errors.push("👉 Molality must be ≥ 0. Zero molality means no solute present.");
+            }
+            
+            if (kb === "") {
+                errors.push("👉 Please enter the ebullioscopic constant.");
+            } else if (parseFloat(kb) <= 0) {
+                errors.push("👉 Ebullioscopic constant must be greater than 0.");
+            }
+            
+            if (pureBP === "") {
+                errors.push("👉 Please enter the pure solvent boiling point.");
+            }
+
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden");
+            }
+
+            // Convert values to numbers
+            const molalityNum = parseFloat(molality);
+            const kbNum = parseFloat(kb);
+            const pureBPNum = parseFloat(pureBP);
+
+            // Calculate elevation
+            const deltaTb = kbNum * molalityNum;
+            const newBP = pureBPNum + deltaTb;
+
+            // Display result
+            elevationValue.textContent = deltaTb.toFixed(3);
+            newBPValue.textContent = `New boiling point: ${newBP.toFixed(2)} °C`;
+
+            // Provide feedback based on elevation magnitude
+            let feedback = "";
+            if (deltaTb === 0) {
+                feedback = "No boiling point elevation — this is pure solvent.";
+            } else if (deltaTb < 0.5) {
+                feedback = "✅ Minor elevation — typical for dilute solutions.";
+            } else if (deltaTb < 2) {
+                feedback = "⚠️ Moderate elevation — may impact thermal processing.";
+            } else {
+                feedback = "❗ Significant elevation — requires attention in process control.";
+            }
+
+            feedbackContent.textContent = feedback;
+
+            placeholder.classList.add('hidden');
+            resultValue.classList.remove('hidden');
+        }
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}

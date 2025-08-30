@@ -1,0 +1,531 @@
+{% extends 'base.html' %}
+{% block title %}Cost of Poor Quality (COPQ) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cost of Poor Quality (COPQ) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+        
+        /* Input rows for COPQ calculator */
+        .input-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+        
+        @media (max-width: 600px) {
+            .input-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+   <div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Cost of Poor Quality (COPQ) Calculator</h1>
+            <p>Calculates the total cost of poor quality based on internal, external, appraisal, and prevention costs</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator Input Card -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                
+                    <div class="form-group">
+                        <label for="internal">Internal Costs (₹)</label>
+                        <input type="number" id="internal" class="form-input" min="0" step="0.01" placeholder="Enter internal costs">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="external">External Costs (₹)</label>
+                        <input type="number" id="external" class="form-input" min="0" step="0.01" placeholder="Enter external costs">
+                    </div>
+                
+                
+                    <div class="form-group">
+                        <label for="appraisal">Appraisal Costs (₹)</label>
+                        <input type="number" id="appraisal" class="form-input" min="0" step="0.01" placeholder="Enter appraisal costs">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="prevention">Prevention Costs (₹)</label>
+                        <input type="number" id="prevention" class="form-input" min="0" step="0.01" placeholder="Enter prevention costs">
+                    </div>
+                
+
+                <button class="calculate-btn" onclick="calculateCOPQ()">Calculate COPQ</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Quality illustration">
+                    <p>This tool calculates the <strong>Cost of Poor Quality (COPQ)</strong>. Enter your quality-related costs to see results.</p>
+                </div>
+
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Cost of Poor Quality</h2>
+                    </div>
+                    <div class="rate-value" id="copqValue">0.00</div>
+                    <div class="rate-label">₹ (Indian Rupees)</div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">COPQ Interpretation</div>
+                        <div class="feedback-content" id="copqFeedback"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🔎 About This Calculator</h3>
+                <p>
+                    The <strong>Cost of Poor Quality (COPQ) Calculator</strong> estimates the financial impact of quality-related failures in your organization. It helps identify areas for improvement, reduce operational inefficiencies, and enhance profitability and customer satisfaction.
+                </p> 
+            </div>
+
+            <div class="note-card">
+                <h3>❓ Explanation of Parameters</h3>
+                <ul class="note-list">
+                    <li><strong>Internal Costs:</strong> Expenses due to scrap, rework, and reinspection within the organization.</li>
+                    <li><strong>External Costs:</strong> Costs from warranty claims, product returns, and customer dissatisfaction.</li>
+                    <li><strong>Appraisal Costs:</strong> Expenses related to testing, inspections, and audits to ensure quality.</li>
+                    <li><strong>Prevention Costs:</strong> Investments in training, process improvements, and preventive actions.</li>
+                </ul>
+            </div>
+
+
+            <div class="note-card">
+                <h3>📊 Interpretation Guidelines</h3>
+                <ul class="note-list">
+                    <li><strong>Excellent (≤ ₹50,000):</strong> COPQ is well-controlled. Keep maintaining quality standards.</li>
+                    <li><strong>Good (₹50,001 - ₹200,000):</strong> Moderate COPQ. Focus on continuous improvement.</li>
+                    <li><strong>Average (₹200,001 - ₹500,000):</strong> Relatively high COPQ. Improve quality processes.</li>
+                    <li><strong>Critical (> ₹500,000):</strong> Very high COPQ. Immediate action needed.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Conclusion</h3>
+                <p>Monitoring COPQ is crucial for organizations to identify quality issues, reduce waste, and improve profitability. By calculating and analyzing these costs regularly, companies can make informed decisions about quality improvement initiatives and resource allocation.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateCOPQ() {
+            const internal = document.getElementById("internal").value.trim();
+            const external = document.getElementById("external").value.trim();
+            const appraisal = document.getElementById("appraisal").value.trim();
+            const prevention = document.getElementById("prevention").value.trim();
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+            const outputValue = document.getElementById('copqValue');
+            const feedbackBox = document.getElementById('copqFeedback'); 
+
+            let errors = [];
+            
+            // Validate inputs
+            if (internal === "") {
+                errors.push("👉 Please enter internal costs.");
+            } else if (parseFloat(internal) < 0) {
+                errors.push("👉 Internal costs cannot be negative.");
+            }
+            
+            if (external === "") {
+                errors.push("👉 Please enter external costs.");
+            } else if (parseFloat(external) < 0) {
+                errors.push("👉 External costs cannot be negative.");
+            }
+            
+            if (appraisal === "") {
+                errors.push("👉 Please enter appraisal costs.");
+            } else if (parseFloat(appraisal) < 0) {
+                errors.push("👉 Appraisal costs cannot be negative.");
+            }
+            
+            if (prevention === "") {
+                errors.push("👉 Please enter prevention costs.");
+            } else if (parseFloat(prevention) < 0) {
+                errors.push("👉 Prevention costs cannot be negative.");
+            }
+
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden");
+            }
+
+            // Calculate COPQ
+            const internalNum = parseFloat(internal);
+            const externalNum = parseFloat(external);
+            const appraisalNum = parseFloat(appraisal);
+            const preventionNum = parseFloat(prevention);
+            
+            const copq = internalNum + externalNum + appraisalNum + preventionNum;
+            outputValue.textContent = copq.toFixed(2);
+
+            // Provide feedback based on COPQ value
+            let feedback = "";
+            if (copq <= 50000) {
+                feedback = "✅ <strong>Excellent:</strong> Your COPQ is well-controlled. Keep maintaining your quality standards!";
+            } else if (copq <= 200000) {
+                feedback = "👍 <strong>Good:</strong> Your COPQ is moderate. Focus on continuous improvement to reduce costs.";
+            } else if (copq <= 500000) {
+                feedback = "⚠️ <strong>Average:</strong> Your COPQ is relatively high. Consider improving quality processes.";
+            } else {
+                feedback = "❌ <strong>Critical:</strong> Your COPQ is very high. Immediate action is needed to reduce quality-related costs.";
+            }
+
+            feedbackBox.innerHTML = feedback;
+
+            placeholder.classList.add('hidden');
+            resultValue.classList.remove('hidden');
+        }
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}

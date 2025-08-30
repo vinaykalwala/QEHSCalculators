@@ -1,0 +1,513 @@
+{% extends 'base.html' %}
+{% block title %}Attendee Training Time Calculator{% endblock %}
+{% block content %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendee Training Time Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+       .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+      .btn-wrapper {
+    text-align: center; /* centers inline-block buttons */
+    margin-top: 20px;
+  }
+
+   .btn-wrapper {
+    text-align: center; /* centers the button */
+    margin-top: 20px;
+  }
+
+  .print-btn {
+    display: inline-block;
+    background:linear-gradient(#1560bd,#000040);
+    color: white;
+    padding: 8px 18px;   /* control button size */
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    width: auto !important; /* prevent full width */
+  }
+
+  .print-btn:hover {
+    background: #1560bd;
+  }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+       
+    </style>
+
+
+<div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+
+    <div class="calculator-header">
+        <h1>Attendee Training Time Calculator</h1>
+        <p>Calculate the total time invested in a training session based on the number of attendees and session duration.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Calculator Input Card -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+
+            <div class="form-group">
+                <label for="attendees">Number of Attendees</label>
+                <input type="number" id="attendees" class="form-input" min="1" placeholder="Enter number of attendees">
+            </div>
+
+            <div class="form-group">
+                <label for="duration">Training Duration (minutes)</label>
+                <input type="number" id="duration" class="form-input" min="1" placeholder="Enter duration in minutes">
+            </div>
+
+            <button class="calculate-btn" onclick="calculateTrainingTime()">Calculate Total Time</button>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Training illustration">
+                <p>This tool calculates the <strong>total training time</strong> in hours. Enter the number of attendees and session duration to see results.</p>
+            </div>
+
+            <div class="result-error hidden" id="resultError">
+                <div class="error-icon">❌</div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+
+            <div class="result-value hidden" id="resultValue">
+                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Total Training Time</h2>
+                </div>
+                <div class="rate-value" id="trainingTimeValue">0.00</div>
+                <div class="rate-label">hours</div>
+
+                <div class="result-feedback" id="interpretationBox">
+                <div class="feedback-title">Interpretation</div>
+                <div class="feedback-content" id="interpretationText">
+                <!-- JS will fill this -->
+                </div>
+                 </div>
+
+
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="window.print()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="note-section">
+        <div class="note-card">
+            <h3> 🔎About this Calculator</h3>
+           <p>This tool calculates the <strong>total training time in hours</strong> by multiplying the number of attendees with the session duration in minutes and converting the result into hours, giving a clear measure of the group’s overall training time.
+             </p>
+        </div>
+
+        <div class="note-card">
+            <h3>⚙️ How it Works</h3>
+            <p>
+        Each attendee contributes their time during the session. To calculate the total training hours:
+    </p>
+    <ol>
+        <li><strong>Input Number of Attendees:</strong> Enter how many participants are attending the training.</li>
+        <li><strong>Input Training Duration:</strong> Specify the length of the training in minutes. For accuracy, one training hour is considered as 60 minutes.</li>
+        <li><strong>Calculate:</strong> Click the "Calculate Training Time" button to get the total training time in hours.</li>
+    </ol>
+
+        </div>
+
+
+        
+        <div class="note-card">
+            <h3> ❓ Why is this Important?</h3>
+             <ul class="note-list">
+             <li><strong>Accurate Reporting:</strong> Track the combined training time for compliance and performance monitoring.</li>
+            <li><strong>Resource Planning:</strong> Helps organizations manage and allocate training resources effectively.</li>
+             </ul>
+            </div>
+
+        <div class="note-card">
+            <h3>📊 Applications</h3>
+            <ul class="note-list">
+                <li>Helps organizations track combined training hours for compliance.</li>
+                <li>Assists in resource and scheduling planning.</li>
+                <li>Provides accurate reporting for performance monitoring.</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h3>💡 Conclusion</h3>
+            <p>Using this calculator, managers and trainers can quickly determine total training hours and plan accordingly.</p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+function calculateTrainingTime() {
+    
+    const attendees = parseFloat(document.getElementById("attendees").value.trim());
+    const duration = parseFloat(document.getElementById("duration").value.trim());
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const outputValue = document.getElementById('trainingTimeValue');
+
+    let errors = [];
+    if (isNaN(attendees) || attendees <= 0) errors.push("👉 Please enter a valid number of attendees greater than 0.");
+    if (isNaN(duration) || duration <= 0) errors.push("👉 Please enter a valid duration in minutes greater than 0.");
+
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    const totalTime = (attendees * duration) / 60;
+    outputValue.textContent = totalTime.toFixed(2);
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+
+
+
+    const interpretationBox = document.getElementById('interpretationBox');
+    const interpretationText = document.getElementById('interpretationText');
+    let interpretation = "";
+
+    if (totalTime < 10) {
+        interpretation = "🔹 Low Training Hours – Indicates a short training effort, suitable for small sessions.";
+    } else if (totalTime >= 10 && totalTime < 50) {
+        interpretation = "🔸 Moderate Training Hours – Balanced training schedule, good for medium groups.";
+    } else {
+        interpretation = "✅ High Training Hours – Large training investment, suitable for big or intensive programs.";
+    }
+
+    interpretationText.innerHTML = interpretation;
+    interpretationBox.style.display = "block";
+
+}
+</script>
+    <script src="{% static 'js/print.js' %}"></script>
+{% endblock %}
