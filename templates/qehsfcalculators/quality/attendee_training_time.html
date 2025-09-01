@@ -14,7 +14,7 @@
        .calculator-container {
             max-width: 1200px;
             margin: 20px auto;
-            padding: 20px;
+            padding:0 20px;
             border-radius: 12px;
         }
 
@@ -345,10 +345,37 @@
             display: none; 
         }
 
-       
+         .btn-container {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    margin: 30px 0;
+}
+
+.back-btn {
+    background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+    color: #ffffff; /* White text */
+    border: 2px solid #1560bd; /* Highlight border */
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none; /* Remove underline for link */
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    background-color: #1560bd; /* Highlight on hover */
+    color: #ffffff;
+    border-color: #000040;
+    transform: scale(1.05); /* Subtle hover effect */
+}
+
     </style>
 
-
+<div class="btn-container">
+    <a href="{% url 'qualitycategory_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+</div>
 <div class="calculator-container printable" id="printArea">
 
     <!-- Include header/footer for print -->
@@ -364,15 +391,16 @@
         <div class="calc-card">
             <h2>Enter Data</h2>
 
-            <div class="form-group">
-                <label for="attendees">Number of Attendees</label>
-                <input type="number" id="attendees" class="form-input" min="1" placeholder="Enter number of attendees">
-            </div>
+          <div class="form-group">
+    <label for="attendees">Number of Attendees</label>
+    <input type="number" id="attendees" class="form-input" min="1" step="any" placeholder="Enter number of attendees">
+</div>
 
-            <div class="form-group">
-                <label for="duration">Training Duration (minutes)</label>
-                <input type="number" id="duration" class="form-input" min="1" placeholder="Enter duration in minutes">
-            </div>
+<div class="form-group">
+    <label for="duration">Training Duration (minutes)</label>
+    <input type="number" id="duration" class="form-input" min="1" step="any" placeholder="Enter duration in minutes">
+</div>
+
 
             <button class="calculate-btn" onclick="calculateTrainingTime()">Calculate Total Time</button>
         </div>
@@ -461,7 +489,6 @@
 
 <script>
 function calculateTrainingTime() {
-    
     const attendees = parseFloat(document.getElementById("attendees").value.trim());
     const duration = parseFloat(document.getElementById("duration").value.trim());
 
@@ -472,9 +499,21 @@ function calculateTrainingTime() {
     const outputValue = document.getElementById('trainingTimeValue');
 
     let errors = [];
-    if (isNaN(attendees) || attendees <= 0) errors.push("👉 Please enter a valid number of attendees greater than 0.");
-    if (isNaN(duration) || duration <= 0) errors.push("👉 Please enter a valid duration in minutes greater than 0.");
 
+    // Basic validations
+    if (isNaN(attendees) || attendees <= 0) {
+        errors.push("👉 Please enter a valid number of attendees greater than 0.");
+    }
+    if (isNaN(duration) || duration <= 0) {
+        errors.push("👉 Please enter a valid duration in minutes greater than 0.");
+    }
+
+  
+    if (duration > 1440) {
+        errors.push("👉 Training duration should be less than 24 hours (1440 minutes).Training sessions longer than a full day are impractical, and larger values could generate meaningless results.");
+    }
+
+    // Show errors if any
     if (errors.length > 0) {
         errorMessage.innerHTML = errors.join("<br>");
         errorBox.classList.remove("hidden");
@@ -485,30 +524,32 @@ function calculateTrainingTime() {
         errorBox.classList.add("hidden");
     }
 
+    // Perform calculation
     const totalTime = (attendees * duration) / 60;
-    outputValue.textContent = totalTime.toFixed(2);
+
+    // Smart rounding: show 2 decimals for small results, whole numbers for large
+    outputValue.textContent = totalTime < 100 ? totalTime.toFixed(2) : Math.round(totalTime);
 
     placeholder.classList.add('hidden');
     resultValue.classList.remove('hidden');
 
-
-
+    // Interpretation feedback
     const interpretationBox = document.getElementById('interpretationBox');
     const interpretationText = document.getElementById('interpretationText');
     let interpretation = "";
 
     if (totalTime < 10) {
-        interpretation = "🔹 Low Training Hours – Indicates a short training effort, suitable for small sessions.";
+        interpretation = "🔹 Low Training Hours – Short training effort. Consider extending sessions for deeper impact.";
     } else if (totalTime >= 10 && totalTime < 50) {
-        interpretation = "🔸 Moderate Training Hours – Balanced training schedule, good for medium groups.";
+        interpretation = "🔸 Moderate Training Hours – Balanced training schedule. Suitable for most medium groups.";
     } else {
-        interpretation = "✅ High Training Hours – Large training investment, suitable for big or intensive programs.";
+        interpretation = "✅ High Training Hours – Large investment. Ensure breaks and engagement strategies to maintain quality.";
     }
 
     interpretationText.innerHTML = interpretation;
     interpretationBox.style.display = "block";
-
 }
+
 </script>
     <script src="{% static 'js/print.js' %}"></script>
 {% endblock %}
