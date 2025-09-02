@@ -89,9 +89,22 @@ class UserSubscription(models.Model):
         remaining_days = max(0, time_remaining.days)
         return remaining_days
 
+    def check_and_update_expiration(self):
+        """Check and update expiration status if needed"""
+        if (self.status == "active" and 
+            self.end_date and 
+            self.end_date < timezone.now()):
+            self.status = "expired"
+            self.save(update_fields=['status'])
+            return True
+        return False
+
     @property
     def is_active(self):
-        return self.status == "active" and self.end_date and self.end_date >= timezone.now()
+        # Always check expiration when accessing this property
+        self.check_and_update_expiration()
+        return self.status == "active"
+    
 
     def mark_as_upgraded(self):
         """Mark this subscription as upgraded (for previous subscriptions)"""
@@ -101,6 +114,14 @@ class UserSubscription(models.Model):
     class Meta:
         ordering = ['-created_at']
 
+    def save(self, *args, **kwargs):
+        # Auto-check expiration before saving
+        if self.pk and self.status == "active":  # Only for existing active instances
+            original = UserSubscription.objects.get(pk=self.pk)
+            if (original.end_date and 
+                original.end_date < timezone.now()):
+                self.status = "expired"
+        super().save(*args, **kwargs)
 class UserDevice(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="devices")
     device_id = models.CharField(max_length=255)

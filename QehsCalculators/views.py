@@ -55,6 +55,16 @@ def dashboard(request):
         Q(status="active") | Q(status="pending")
     ).order_by('-created_at').first()
 
+    # Check for expired subscriptions first
+    active_subs = request.user.subscriptions.filter(status="active")
+    for sub in active_subs:
+        sub.check_and_update_expiration()
+    
+    # Now get the latest active subscription
+    subscription = request.user.subscriptions.filter(
+        Q(status="active") | Q(status="pending")
+    ).order_by('-created_at').first()
+
     # Boolean flag for template
     has_active_subscription = subscription and subscription.status == "active"
     can_access_calculators = bool(subscription and subscription.status == "active" and subscription.plan)
@@ -336,7 +346,7 @@ def payment_success(request):
         if is_upgrade:
             messages.success(request, f"Payment successful! Your upgrade to {plan.name} is pending admin approval.")
         else:
-            messages.success(request, f"Payment successful! Your subscription to {plan.name} is pending admin approval.")
+            messages.success(request, f"Payment successful! Your subscription to {plan.name} plan is pending admin approval.")
 
         # Clear the pending subscription from session
         if 'pending_subscription' in request.session:
@@ -414,6 +424,21 @@ def razorpay_webhook(request):
         return JsonResponse({"status": "ok"})
     return JsonResponse({"status": "invalid"}, status=400)
 
+
+
+def expire_if_needed(self):
+    """Expire the subscription if end_date is exceeded"""
+    if self.status == "active" and self.end_date and self.end_date < timezone.now():
+        self.status = "expired"
+        self.save(update_fields=['status'])
+        return True
+    return False
+
+
+def subscription_expired(request):
+    return render(request, "expired.html", {
+        "message": "Your subscription has expired. Please renew to continue using the service."
+    })
 # Other views (home, about, etc.) remain unchanged as per previous code
 def home(request):
     return render(request, 'home.html')
