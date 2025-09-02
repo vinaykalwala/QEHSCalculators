@@ -18,7 +18,7 @@
         .calculator-container {
             max-width: 1200px;
             margin: 20px auto;
-            padding: 20px;
+            padding:0 20px;
             border-radius: 12px;
         }
 
@@ -196,7 +196,7 @@
         }
         
         .rate-value {
-            font-size: 42px;
+            font-size: 36px;
             font-weight: 700;
             color: #2980b9;
             margin-bottom: 10px;
@@ -366,10 +366,35 @@
         .custom-table tr:nth-child(even) {
             background-color: #f9f9f9;
         }
-       
+         .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
+      <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
 <div class="calculator-container printable" id="printArea">
 
     {% include "includes/print_header_footer.html" with report_title="A Body Shape Index Report" %}
@@ -400,7 +425,7 @@
                 
             <div class="result-value hidden" id="resultValue">
                 <div class="rate-value" id="absiZScoreValue">0.00</div>
-                <div class="rate-label" id="absiValue"></div>
+                <div class="rate-value" id="absiValue"></div>
 
                 <div class="safety-meter">
                     <div class="meter-fill" id="meterFill"></div>
@@ -431,67 +456,108 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() { /* ... */ const printDateEl = document.getElementById('printDate'); if (printDateEl) { const now = new Date(); const options = { year: 'numeric', month: 'long', day: 'numeric' }; printDateEl.textContent = now.toLocaleDateString('en-US', options); } });
+document.addEventListener('DOMContentLoaded', function() { 
+    const printDateEl = document.getElementById('printDate'); 
+    if (printDateEl) { 
+        const now = new Date(); 
+        const options = { year: 'numeric', month: 'long', day: 'numeric' }; 
+        printDateEl.textContent = now.toLocaleDateString('en-US', options); 
+    } 
+});
 
-    function calculateABSI() {
-        const errorBox = document.getElementById('resultError'), errorMessage = document.getElementById('errorMessage'), placeholder = document.getElementById('placeholder'), resultValueDiv = document.getElementById('resultValue');
-        const age = parseFloat(document.getElementById('age').value), height = parseFloat(document.getElementById('height').value), weight = parseFloat(document.getElementById('weight').value), waist = parseFloat(document.getElementById('waist').value);
+function calculateABSI() {
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValueDiv = document.getElementById('resultValue');
 
-        let errors = [];
-        if (isNaN(age) || age <= 0) errors.push("👉 Please enter a valid age.");
-        if (isNaN(height) || height <= 0) errors.push("👉 Please enter a valid height.");
-        if (isNaN(weight) || weight <= 0) errors.push("👉 Please enter a valid weight.");
-        if (isNaN(waist) || waist <= 0) errors.push("👉 Please enter a valid waist circumference.");
+    const age = parseFloat(document.getElementById('age').value);
+    const height = parseFloat(document.getElementById('height').value);
+    const weight = parseFloat(document.getElementById('weight').value);
+    const waist = parseFloat(document.getElementById('waist').value);
 
-        if (errors.length > 0) {
-            errorMessage.innerHTML = errors.join("<br>");
-            errorBox.classList.remove("hidden");
-            placeholder.classList.remove("hidden");
-            resultValueDiv.classList.add("hidden");
-            return;
-        } else {
-            errorBox.classList.add("hidden");
-        }
+    let errors = [];
+    if (isNaN(age) || age <= 0) errors.push("👉 Please enter a valid age.");
+    if (isNaN(height) || height <= 0) errors.push("👉 Please enter a valid height.");
+    if (isNaN(weight) || weight <= 0) errors.push("👉 Please enter a valid weight.");
+    if (isNaN(waist) || waist <= 0) errors.push("👉 Please enter a valid waist circumference.");
 
-        const heightM = height / 100, waistM = waist / 100;
-        const bmi = weight / (heightM * heightM);
-        const absi = waistM / (Math.pow(bmi, 2 / 3) * Math.pow(heightM, 1 / 2));
-        
-        // These are reference values from scientific literature for calculating the z-score.
-        const absiMean = 0.0803; 
-        const absiStdDev = 0.0048; 
-        const absiZScore = (absi - absiMean) / absiStdDev;
-
-        const absiRounded = parseFloat(absi.toFixed(5));
-        const absiZScoreRounded = parseFloat(absiZScore.toFixed(2));
-        
-        document.getElementById('absiZScoreValue').textContent = absiZScoreRounded;
-        document.getElementById('absiValue').textContent = `ABSI Value: ${absiRounded}`;
-
-        const meterFill = document.getElementById('meterFill');
-        let meterWidth, meterColor, feedback;
-
-        if (absiZScoreRounded < -1) {
-            meterWidth = '10%'; meterColor = '#27ae60'; feedback = '✅ Your body shape indicates a <strong>low risk</strong> of premature mortality compared to the average.';
-        } else if (absiZScoreRounded <= 1) {
-            meterWidth = '30%'; meterColor = '#2ecc71'; feedback = '👍 Your body shape indicates an <strong>average risk</strong> of premature mortality.';
-        } else if (absiZScoreRounded <= 2) {
-            meterWidth = '50%'; meterColor = '#f39c12'; feedback = '⚠️ Your body shape indicates a <strong>moderate risk</strong> of premature mortality. Consider lifestyle improvements.';
-        } else if (absiZScoreRounded <= 3) {
-            meterWidth = '70%'; meterColor = '#e67e22'; feedback = '🚨 Your body shape indicates a <strong>high risk</strong> of premature mortality. It is advisable to consult a healthcare provider.';
-        } else {
-            meterWidth = '90%'; meterColor = '#e74c3c'; feedback = '❌ Your body shape indicates a <strong>very high risk</strong> of premature mortality. Please consult a healthcare provider promptly.';
-        }
-        
-        meterFill.style.width = meterWidth;
-        meterFill.style.backgroundColor = meterColor;
-        document.getElementById('feedbackContent').innerHTML = feedback;
-
-        placeholder.classList.add('hidden');
-        resultValueDiv.classList.remove('hidden');
+    // If there are validation errors
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");      // Show error box
+        placeholder.classList.add("hidden");      // Hide default image/text
+        resultValueDiv.classList.add("hidden");   // Hide previous results
+        return;
+    } else {
+        errorBox.classList.add("hidden");         // Hide error box
     }
 
-    function printReport() { /* ... */ const printDateEl = document.getElementById('printDate'); if (printDateEl) { const now = new Date(); const options = { year: 'numeric', month: 'long', day: 'numeric' }; printDateEl.textContent = now.toLocaleDateString('en-US', options); } window.print(); }
+    // ABSI Calculation
+    const heightM = height / 100;
+    const waistM = waist / 100;
+    const bmi = weight / (heightM * heightM);
+    const absi = waistM / (Math.pow(bmi, 2 / 3) * Math.pow(heightM, 1 / 2));
+
+    // Reference values for z-score
+    const absiMean = 0.0803; 
+    const absiStdDev = 0.0048; 
+    const absiZScore = (absi - absiMean) / absiStdDev;
+
+    const absiRounded = parseFloat(absi.toFixed(5));
+    const absiZScoreRounded = parseFloat(absiZScore.toFixed(2));
+
+    // Display ABSI value
+document.getElementById('absiValue').textContent = `ABSI Value: ${absiRounded}`;
+
+// Display ABSI Z-score
+document.getElementById('absiZScoreValue').textContent = `ABSI Z-score: ${absiZScoreRounded}`;
+
+
+    // Risk meter and feedback
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+
+    if (absiZScoreRounded < -1) {
+        meterWidth = '10%'; 
+        meterColor = '#27ae60'; 
+        feedback = '✅ Your body shape indicates a <strong>low risk</strong> of premature mortality compared to the average.';
+    } else if (absiZScoreRounded <= 1) {
+        meterWidth = '30%'; 
+        meterColor = '#2ecc71'; 
+        feedback = '👍 Your body shape indicates an <strong>average risk</strong> of premature mortality.';
+    } else if (absiZScoreRounded <= 2) {
+        meterWidth = '50%'; 
+        meterColor = '#f39c12'; 
+        feedback = '⚠️ Your body shape indicates a <strong>moderate risk</strong> of premature mortality. Consider lifestyle improvements.';
+    } else if (absiZScoreRounded <= 3) {
+        meterWidth = '70%'; 
+        meterColor = '#e67e22'; 
+        feedback = '🚨 Your body shape indicates a <strong>high risk</strong> of premature mortality. It is advisable to consult a healthcare provider.';
+    } else {
+        meterWidth = '90%'; 
+        meterColor = '#e74c3c'; 
+        feedback = '❌ Your body shape indicates a <strong>very high risk</strong> of premature mortality. Please consult a healthcare provider promptly.';
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').innerHTML = feedback;
+
+    // Show result, hide placeholder
+    placeholder.classList.add('hidden');
+    resultValueDiv.classList.remove('hidden');
+}
+
+function printReport() { 
+    const printDateEl = document.getElementById('printDate'); 
+    if (printDateEl) { 
+        const now = new Date(); 
+        const options = { year: 'numeric', month: 'long', day: 'numeric' }; 
+        printDateEl.textContent = now.toLocaleDateString('en-US', options); 
+    } 
+    window.print(); 
+}
 </script>
 
 </body>
