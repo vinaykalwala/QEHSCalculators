@@ -486,6 +486,17 @@
                     and EPA's Cancer Risk Guidelines (1×10⁻⁶ benchmark).
                 </p>
             </div>
+            <div class="note-card">
+    <h3>✅ Validation Rules</h3>
+    <ul class="note-list">
+        <li><b>Fatalities:</b> Must be an integer, 0 – 1,000,000 (cannot exceed population).</li>
+        <li><b>Population:</b> Must be an integer, 1 – 1,000,000,000.</li>
+        <li><b>Cross-check:</b> Fatalities cannot exceed population.</li>
+        <li><b>Units:</b> Both values are counts of people (no decimals allowed).</li>
+        <li><b>Compliance:</b> Based on ISO 31000, OSHA, NFPA, EPA thresholds.</li>
+    </ul>
+</div>
+
         </div>
 
     </div>
@@ -497,87 +508,102 @@
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
             document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
         });
+function calculateRisk() {
+    const fatalities = document.getElementById('fatalities').value.trim();
+    const population = document.getElementById('population').value.trim();
 
-        function calculateRisk() {
-            const fatalities = document.getElementById('fatalities').value.trim();
-            const population = document.getElementById('population').value.trim();
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
 
-            const errorBox = document.getElementById('resultError');
-            const errorMessage = document.getElementById('errorMessage');
-            const placeholder = document.getElementById('placeholder');
-            const resultValue = document.getElementById('resultValue');
+    let errors = [];
 
-            let errors = [];
+    // --- Validation Rules (based on ISO 31000, OSHA, NFPA) ---
+    // Fatalities
+    if (fatalities === "" || isNaN(fatalities)) {
+        errors.push("👉 Please enter the number of fatalities.");
+    } else if (!Number.isInteger(parseFloat(fatalities))) {
+        errors.push("👉 Fatalities must be a whole number (no decimals).");
+    } else if (parseInt(fatalities) < 0) {
+        errors.push("👉 Fatalities cannot be negative.");
+    } else if (parseInt(fatalities) > 1000000) {
+        errors.push("👉 Fatalities cannot exceed 1,000,000 (out of range).");
+    }
 
-            if (fatalities === "") {
-                errors.push("👉 Please enter the number of fatalities.");
-            } else if (parseFloat(fatalities) < 0) {
-                errors.push("👉 Fatalities must be 0 or greater.");
-            }
-            
-            if (population === "") {
-                errors.push("👉 Please enter the population at risk.");
-            } else if (parseFloat(population) <= 0) {
-                errors.push("👉 Population must be greater than 0.");
-            }
-            
-            if (fatalities !== "" && population !== "" && parseFloat(fatalities) > parseFloat(population)) {
-                errors.push("👉 Fatalities cannot exceed population. Please check the input values.");
-            }
+    // Population
+    if (population === "" || isNaN(population)) {
+        errors.push("👉 Please enter the population at risk.");
+    } else if (!Number.isInteger(parseFloat(population))) {
+        errors.push("👉 Population must be a whole number (no decimals).");
+    } else if (parseInt(population) <= 0) {
+        errors.push("👉 Population must be greater than 0.");
+    } else if (parseInt(population) > 1000000000) {
+        errors.push("👉 Population cannot exceed 1,000,000,000 (out of range).");
+    }
 
-            if (errors.length > 0) {
-                errorMessage.innerHTML = errors.join("<br>");
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
-            } else {
-                errorBox.classList.add("hidden");
-            }
+    // Cross-field dependency
+    if (fatalities !== "" && population !== "" && parseInt(fatalities) > parseInt(population)) {
+        errors.push("👉 Fatalities cannot exceed population.");
+    }
 
-            const numFatalities = parseFloat(fatalities);
-            const pop = parseFloat(population);
-            const risk = numFatalities / pop;
-            const riskPer100k = risk * 100000;
-            
-            document.getElementById('rateValue').textContent = risk.toExponential(4);
+    // --- Error Handling ---
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
 
-            const meterFill = document.getElementById('meterFill');
-            let meterWidth, meterColor, feedback;
-            
-            if (risk === 0) {
-                meterWidth = '5%'; 
-                meterColor = '#27ae60';
-                feedback = '✅ Zero fatalities reported - excellent safety record.';
-            } else if (risk <= 0.001) {
-                meterWidth = '20%'; 
-                meterColor = '#2ecc71';
-                feedback = '✅ Low risk - within typical safety thresholds.';
-            } else if (risk <= 0.01) {
-                meterWidth = '40%'; 
-                meterColor = '#f1c40f';
-                feedback = '🔵 Moderate risk - consider safety enhancements.';
-            } else if (risk <= 0.1) {
-                meterWidth = '65%'; 
-                meterColor = '#e67e22';
-                feedback = '⚠️ High risk - significant safety improvements needed.';
-            } else {
-                meterWidth = '95%'; 
-                meterColor = '#e74c3c';
-                feedback = '❌ Extremely high risk - immediate intervention required.';
-            }
+    // --- Safe Calculations ---
+    const numFatalities = parseInt(fatalities);
+    const pop = parseInt(population);
 
-            meterFill.style.width = meterWidth;
-            meterFill.style.backgroundColor = meterColor;
-            
-            // Add additional risk information
-            feedback += `<br><br>Risk per 100,000 people: ${riskPer100k.toFixed(2)}`;
-            
-            document.getElementById('feedbackContent').innerHTML = feedback;
+    // Formula: R = F / P
+    const risk = numFatalities / pop;
+    const riskPer100k = risk * 100000;
 
-            placeholder.classList.add('hidden');
-            resultValue.classList.remove('hidden');
-        }
+    document.getElementById('rateValue').textContent = risk.toExponential(4);
+
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+    
+    // --- Output thresholds ---
+    if (risk === 0) {
+        meterWidth = '5%'; 
+        meterColor = '#27ae60';
+        feedback = '✅ Zero fatalities reported - excellent safety record.';
+    } else if (risk < 0.001) {
+        meterWidth = '20%'; 
+        meterColor = '#2ecc71';
+        feedback = '✅ Low risk - within typical safety thresholds.';
+    } else if (risk < 0.01) {
+        meterWidth = '40%'; 
+        meterColor = '#f1c40f';
+        feedback = '🔵 Moderate risk - consider safety enhancements.';
+    } else if (risk < 0.1) {
+        meterWidth = '65%'; 
+        meterColor = '#e67e22';
+        feedback = '⚠️ High risk - significant safety improvements needed.';
+    } else {
+        meterWidth = '95%'; 
+        meterColor = '#e74c3c';
+        feedback = '❌ Extremely high risk - immediate intervention required.';
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+
+    // Add contextual risk info
+    feedback += `<br><br>Risk per 100,000 people: ${riskPer100k.toFixed(2)}`;
+    document.getElementById('feedbackContent').innerHTML = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
 
         function printReport() {
             // Update date just before printing
@@ -593,3 +619,79 @@
 </body>
 </html>
 {% endblock %}
+
+{% comment %} 
+1. Formula Analysis (QEHS / Fire Safety)
+
+📌 Formula:
+
+𝑅
+=
+𝐹
+𝑃
+R=
+P
+F
+	​
+
+
+Where:
+
+R = Average Individual Risk (probability of fatality per person)
+
+F = Number of fatalities (integer, ≥ 0)
+
+P = Population at risk (integer, > 0)
+
+📌 Derived Output:
+
+𝑅
+100
+𝑘
+=
+𝑅
+×
+100
+,
+000
+R
+100k
+	​
+
+=R×100,000
+
+This expresses risk per 100,000 people (commonly used in epidemiology, OSHA reports, NFPA safety benchmarks).
+
+2. Input Validation Rules (Based on Industry Practice)
+Fatalities
+
+Type: Integer (no decimals).
+
+Range: 0 – 1,000,000 (upper bound to avoid unrealistic data entry).
+
+Logic: Cannot be negative, cannot exceed the population.
+
+Population at Risk
+
+Type: Integer.
+
+Range: 1 – 1,000,000,000 (to cover cities, national populations, but prevent nonsense entries).
+
+Logic: Must be greater than 0.
+
+Cross-Field Dependency
+
+Fatalities ≤ Population.
+
+If Fatalities = Population → Risk = 1 (100%) → must show as Extreme / Catastrophic.
+
+3. Output Validation & Thresholds
+
+🔎 Based on ISO 31000, OSHA, EPA guidelines:
+
+Risk Value (R)	Risk per 100k	Category	Interpretation
+0	0	Zero Risk	No fatalities recorded
+< 0.001	< 100	Low Risk	Acceptable, within OSHA thresholds
+0.001 – 0.01	100 – 1,000	Moderate Risk	Needs monitoring
+0.01 – 0.1	1,000 – 10,000	High Risk	Safety improvements required
+> 0.1	> 10,000	Extreme Risk	Not acceptable – immediate action {% endcomment %}

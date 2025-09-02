@@ -481,6 +481,19 @@
                     <li><strong>Gas and Chemical Processing:</strong> Prevents overpressure in <strong>reactors, pipelines, and storage tanks</strong>.</li>
                 </ul>
             </div>
+            <div class="note-card">
+    <h3>✅ Validation Rules Applied</h3>
+    <ul class="note-list">
+        <li>C1 (Capacity with backpressure): must be >0 and ≤1,000,000</li>
+        <li>C2 (Capacity to atmosphere): must be >0 and ≤1,000,000</li>
+        <li>C1 must always be ≤ C2 (backpressure reduces capacity)</li>
+        <li>Both inputs must be in the same units (e.g., kg/h, Nm³/h, SCFM)</li>
+        <li>Kb = C1 ÷ C2 → must result in a value between 0 and 1</li>
+        <li>Invalid, blank, negative, or zero values are not allowed</li>
+    </ul>
+    <p>⚠️ These rules follow <b>ASME API RP 520</b> and international QEHS safety practices to prevent mis-sizing of relief valves under backpressure conditions.</p>
+</div>
+
 
             <div class="note-card">
                 <h3>✅ Conclusion</h3>
@@ -500,87 +513,77 @@
         });
 
         function calculateKb() {
-            const C1 = document.getElementById('C1').value.trim();
-            const C2 = document.getElementById('C2').value.trim();
+    const C1 = parseFloat(document.getElementById('C1').value.trim());
+    const C2 = parseFloat(document.getElementById('C2').value.trim());
 
-            const errorBox = document.getElementById('resultError');
-            const errorMessage = document.getElementById('errorMessage');
-            const placeholder = document.getElementById('placeholder');
-            const resultValue = document.getElementById('resultValue');
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    let errors = [];
 
-            let errors = [];
-            if (C1 === "") {
-                errors.push("👉 Please enter the capacity with backpressure applied (C1).");
-            }
-            if (C2 === "") {
-                errors.push("👉 Please enter the capacity when discharging to atmosphere (C2).");
-            }
+    // ✅ Validation rules based on API RP 520 / OSHA safe practice
+    if (isNaN(C1) || C1 <= 0 || C1 > 1e6) {
+        errors.push("👉 C1 (capacity with backpressure) must be between 1 and 1,000,000 (same units as C2).");
+    }
+    if (isNaN(C2) || C2 <= 0 || C2 > 1e6) {
+        errors.push("👉 C2 (capacity to atmosphere) must be between 1 and 1,000,000.");
+    }
+    if (C1 > 0 && C2 > 0 && C1 > C2) {
+        errors.push("👉 C1 cannot be greater than C2. Backpressure always reduces or equals capacity.");
+    }
 
-            if (errors.length > 0) {
-                errorMessage.innerHTML = errors.join("<br>");
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
-            } else {
-                errorBox.classList.add("hidden");
-            }
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
 
-            const numC1 = parseFloat(C1);
-            const numC2 = parseFloat(C2);
-            
-            // Additional validation
-            if (numC1 <= 0 || numC2 <= 0) {
-                errorMessage.innerHTML = "👉 Values for C1 and C2 must be greater than 0 because a valve cannot have zero or negative capacity.";
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
-            }
+    // ✅ Formula (API RP 520 / ASME)
+    // Kb = C1 / C2
+    const Kb = C1 / C2;
 
-            if (numC1 > numC2) {
-                errorMessage.innerHTML = "👉 C1 should not be greater than C2. Check the values entered.";
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
-            }
+    if (!isFinite(Kb) || Kb <= 0 || Kb > 1) {
+        errorMessage.innerHTML = "❌ Invalid Kb value. Check that C1 ≤ C2 and inputs are correct.";
+        errorBox.classList.remove("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
 
-            const Kb = numC1 / numC2;
-            document.getElementById('rateValue').textContent = Kb.toFixed(4);
+    document.getElementById('rateValue').textContent = Kb.toFixed(4);
 
-            const meterFill = document.getElementById('meterFill');
-            let meterWidth, meterColor, feedback;
-            
-            if (Kb >= 0.9) {
-                meterWidth = '20%'; 
-                meterColor = '#27ae60';
-                feedback = '🌟 Excellent performance. Backpressure has minimal effect on valve capacity.';
-            } else if (Kb >= 0.7) {
-                meterWidth = '40%'; 
-                meterColor = '#2ecc71';
-                feedback = '👍 Good performance. Valve capacity is moderately affected by backpressure.';
-            } else if (Kb >= 0.5) {
-                meterWidth = '60%'; 
-                meterColor = '#f39c12';
-                feedback = '⚠️ Moderate reduction. Valve capacity is significantly affected by backpressure. Review may be needed.';
-            } else if (Kb >= 0.3) {
-                meterWidth = '80%'; 
-                meterColor = '#e67e22';
-                feedback = '🚨 High reduction. Valve capacity is greatly reduced by backpressure. System review recommended.';
-            } else {
-                meterWidth = '95%'; 
-                meterColor = '#e74c3c';
-                feedback = '❌ Critical reduction. Valve capacity is severely limited by backpressure. Immediate review required.';
-            }
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
 
-            meterFill.style.width = meterWidth;
-            meterFill.style.backgroundColor = meterColor;
-            document.getElementById('feedbackContent').textContent = feedback;
+    if (Kb >= 0.9) {
+        meterWidth = '20%'; meterColor = '#27ae60';
+        feedback = '🌟 Optimal. Backpressure has minimal effect (<10% reduction).';
+    } else if (Kb >= 0.7) {
+        meterWidth = '40%'; meterColor = '#2ecc71';
+        feedback = '👍 Good. Acceptable backpressure influence (10–30% reduction).';
+    } else if (Kb >= 0.5) {
+        meterWidth = '60%'; meterColor = '#f39c12';
+        feedback = '⚠️ Moderate reduction (30–50%). Review valve sizing.';
+    } else if (Kb >= 0.3) {
+        meterWidth = '80%'; meterColor = '#e67e22';
+        feedback = '🚨 Severe reduction (>50%). Engineering reassessment required.';
+    } else {
+        meterWidth = '95%'; meterColor = '#e74c3c';
+        feedback = '❌ Critical. Backpressure renders valve ineffective. Immediate corrective action required.';
+    }
 
-            placeholder.classList.add('hidden');
-            resultValue.classList.remove('hidden');
-        }
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
 
         function printReport() {
             // Update date just before printing
@@ -595,3 +598,39 @@
 </body>
 </html>
 {% endblock %}
+{% comment %} 
+1. Input Validation Rules (Real-World Practice)
+Parameter	Symbol	Unit	Validation Rules
+Capacity with backpressure	C1	Nm³/h, kg/h, SCFM (depends on service)	Must be >0. Cannot exceed C2. Should not exceed 1,000,000 (typical upper bound for API RP 520 service valves).
+Capacity to atmosphere	C2	Nm³/h, kg/h, SCFM	Must be >0. Represents full rated capacity. Must always be ≥ C1. Same units as C1.
+
+🔎 Cross-field dependency:
+
+C1 ≤ C2 (backpressure always reduces or equals atmospheric discharge capacity).
+
+Both must use the same units (user must confirm).
+
+2. Output Validation (Kb)
+
+Formula:
+
+Kb = C1 / C2
+
+
+Kb Range (based on ASME/API RP 520 practice):
+
+Kb ≈ 1.0 → No effect of backpressure (ideal).
+
+0.7 ≤ Kb < 1.0 → Acceptable / moderate derating.
+
+0.5 ≤ Kb < 0.7 → Significant reduction → requires design review.
+
+0.3 ≤ Kb < 0.5 → Severe reduction → may need redesign/multiple valves.
+
+Kb < 0.3 → Critical → unacceptable per OSHA/API safety margins.
+
+Validation:
+
+Kb must always be positive and ≤1.0.
+
+If outside [0,1] → invalid input combination. {% endcomment %}

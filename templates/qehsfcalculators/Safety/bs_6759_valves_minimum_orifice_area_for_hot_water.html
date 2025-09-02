@@ -438,6 +438,17 @@
                     <li><strong>HVAC and Heating Plants:</strong> Helps in designing safety mechanisms for heating units.</li>
                 </ul>
             </div>
+            <div class="note-card">
+    <h3>✅ Validation Rules</h3>
+    <ul class="note-list">
+        <li><strong>Q (Heating Capacity):</strong> Must be 1–100,000 kW. Below 1 kW or above 100,000 kW is flagged.</li>
+        <li><strong>PR (Absolute Relieving Pressure):</strong> Must be >1 bar a and ≤200 bar a. ≤1 bar a is invalid.</li>
+        <li><strong>Kdr (Coefficient):</strong> Allowed 0.6–0.85 (typical). Must not exceed 1.0.</li>
+        <li>Division by zero is prevented if PR or Kdr = 0.</li>
+        <li>Calculated Orifice Area (Ao) > 1,000,000 mm² is flagged as unrealistic.</li>
+    </ul>
+</div>
+
             
             <div class="note-card">
                 <h3>📋 About BS 6759</h3>
@@ -459,84 +470,86 @@
             document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
         });
 
-        function calculateOrifice() {
-            const Q = document.getElementById('Q').value.trim();
-            const PR = document.getElementById('PR').value.trim();
-            const Kdr = document.getElementById('Kdr').value.trim();
+        
+function calculateOrifice() {
+    const Q = parseFloat(document.getElementById('Q').value.trim());
+    const PR = parseFloat(document.getElementById('PR').value.trim());
+    const Kdr = parseFloat(document.getElementById('Kdr').value.trim());
 
-            const errorQ = document.getElementById('errorQ');
-            const errorPR = document.getElementById('errorPR');
-            const errorKdr = document.getElementById('errorKdr');
-            const errorBox = document.getElementById('resultError');
-            const errorMessage = document.getElementById('errorMessage');
-            const placeholder = document.getElementById('placeholder');
-            const resultValue = document.getElementById('resultValue');
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
 
-            // Reset error messages
-            errorQ.innerText = "";
-            errorPR.innerText = "";
-            errorKdr.innerText = "";
-            
-            let errors = [];
-            
-            // Validation for Q
-            if (Q === "") {
-                errors.push("👉 Please enter the hot water heating capacity (kW).");
-            } else if (parseFloat(Q) <= 0) {
-                errors.push("👉 Heating capacity (Q) must be greater than 0. A zero or negative value would mean no heat transfer.");
-            }
+    let errors = [];
 
-            // Validation for PR
-            if (PR === "") {
-                errors.push("👉 Please enter the absolute relieving pressure (bar a).");
-            } else if (parseFloat(PR) <= 0) {
-                errors.push("👉 Absolute relieving pressure (PR) must be greater than 0. A zero value means no pressure to relieve.");
-            }
+    // ✅ Validate Q (Heating Capacity)
+    if (isNaN(Q) || Q <= 0) {
+        errors.push("👉 Heating capacity (Q) must be greater than 0 kW.");
+    } else if (Q < 1) {
+        errors.push("👉 Q < 1 kW is unusually small. Check input.");
+    } else if (Q > 100000) {
+        errors.push("👉 Q > 100,000 kW is unrealistic for standard valves.");
+    }
 
-            // Validation for Kdr
-            if (Kdr === "") {
-                errors.push("👉 Please enter the derated coefficient of discharge.");
-            } else if (parseFloat(Kdr) <= 0) {
-                errors.push("👉 Derated coefficient of discharge (Kdr) must be greater than 0. A zero value means no fluid flow.");
-            } else if (parseFloat(Kdr) > 1) {
-                errors.push("👉 Derated coefficient of discharge (Kdr) cannot exceed 1.0 (100% efficiency).");
-            }
+    // ✅ Validate PR (Absolute Pressure)
+    if (isNaN(PR) || PR <= 0) {
+        errors.push("👉 Absolute relieving pressure (PR) must be greater than 0 bar a.");
+    } else if (PR <= 1) {
+        errors.push("👉 PR must be greater than 1 bar a (above atmosphere).");
+    } else if (PR > 200) {
+        errors.push("👉 PR above 200 bar a is beyond standard hot water applications.");
+    }
 
-            if (errors.length > 0) {
-                errorMessage.innerHTML = errors.join("<br>");
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
-            } else {
-                errorBox.classList.add("hidden");
-            }
+    // ✅ Validate Kdr (Coefficient)
+    if (isNaN(Kdr) || Kdr <= 0) {
+        errors.push("👉 Derated coefficient (Kdr) must be greater than 0.");
+    } else if (Kdr > 1) {
+        errors.push("👉 Kdr cannot exceed 1.0 (100% efficiency).");
+    } else if (Kdr < 0.6) {
+        errors.push("👉 Kdr < 0.6 is outside standard certified values. Check valve data.");
+    }
 
-            // Calculate minimum orifice area
-            const numQ = parseFloat(Q);
-            const numPR = parseFloat(PR);
-            const numKdr = parseFloat(Kdr);
-            
-            const Ao = numQ / (0.329 * numPR * numKdr);
-            document.getElementById('rateValue').textContent = Ao.toFixed(2);
+    // Stop if errors
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
 
-            // Provide feedback based on orifice size
-            let feedback = "";
-            if (Ao < 10) {
-                feedback = "This is a small orifice size. Ensure system compatibility with small orifice valves.";
-            } else if (Ao < 100) {
-                feedback = "Standard orifice size. Most commercial valves will accommodate this requirement.";
-            } else if (Ao < 1000) {
-                feedback = "Medium to large orifice size. Verify valve specifications for proper fit.";
-            } else {
-                feedback = "This orifice size is quite large. Double-check system parameters and consider multiple valves if needed.";
-            }
+    // ✅ Perform Calculation
+    const Ao = Q / (0.329 * PR * Kdr);
 
-            document.getElementById('feedbackContent').textContent = feedback;
+    // ✅ Output Validation
+    if (Ao > 1000000) {
+        errorMessage.innerHTML = "👉 Calculated orifice area exceeds 1,000,000 mm². Inputs likely incorrect.";
+        errorBox.classList.remove("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
 
-            placeholder.classList.add('hidden');
-            resultValue.classList.remove('hidden');
-        }
+    document.getElementById('rateValue').textContent = Ao.toFixed(2);
+
+    // ✅ Feedback messages
+    let feedback = "";
+    if (Ao < 10) {
+        feedback = "⚠️ Very small orifice size. Verify availability of certified valves.";
+    } else if (Ao < 100) {
+        feedback = "✅ Standard orifice size. Most commercial valves can handle this.";
+    } else if (Ao < 1000) {
+        feedback = "⚠️ Medium/large orifice size. Confirm valve model compatibility.";
+    } else {
+        feedback = "⚠️ Large orifice size. Consider multiple valves for safety compliance.";
+    }
+
+    document.getElementById('feedbackContent').textContent = feedback;
+    placeholder.classList.add("hidden");
+    resultValue.classList.remove("hidden");
+}
 
         function printReport() {
             // Update date just before printing
@@ -552,3 +565,132 @@
 </body>
 </html>
 {% endblock %}
+
+
+/*
+Formula (BS 6759 Hot Water Relief Valves):
+Ao = Q / (0.329 * PR * Kdr)
+
+Where:
+- Q   = Heating Capacity (kW) [1 – 100,000]
+- PR  = Absolute Relieving Pressure (bar a) [> 1 to 200]
+- Kdr = Derated Coefficient of Discharge (dimensionless) [0.6 – 0.85 typical]
+- Ao  = Minimum Orifice Area (mm²)
+
+Validation Rules:
+1. Q must be > 0, realistic range 1–100,000 kW.
+2. PR must be > 1 bar a (absolute), max ~200 bar.
+3. Kdr between 0.01–1, but typically 0.60–0.85.
+4. Prevent division by zero (PR or Kdr = 0).
+5. Flag extreme Ao > 1,000,000 mm² as unrealistic.
+*/
+
+
+{% comment %} 
+
+🔹 1. Formula Used
+
+For BS 6759 hot water safety valves, the orifice area is calculated as:
+
+𝐴
+𝑜
+=
+𝑄
+0.329
+×
+𝑃
+𝑅
+×
+𝐾
+𝑑
+𝑟
+A
+o
+	​
+
+=
+0.329×P
+R
+	​
+
+×K
+dr
+	​
+
+Q
+	​
+
+
+Where:
+
+Q = Heating Capacity (kW)
+
+PR = Absolute Relieving Pressure (bar a)
+
+Kdr = Derated Coefficient of Discharge (dimensionless, ≤ 1)
+
+Ao = Minimum Orifice Area (mm²)
+
+⚠️ Note: Formula assumes hot water relief under BS 6759; constant 0.329 is derived from standard conversion factors.
+
+🔹 2. Input Validation Rules (Industry Standards)
+
+✅ Q – Hot Water Heating Capacity (kW)
+
+Must be > 0 (0 means no heat load; negative is impossible).
+
+Practical minimum: 1 kW (tiny systems).
+
+Practical maximum: 100,000 kW (100 MW) for very large industrial plants.
+
+Decimals allowed: 2 (to represent fractions of kW in lab cases).
+
+✅ PR – Absolute Relieving Pressure (bar a)
+
+Must be > 1 bar a (since absolute pressure includes atmosphere ~1 bar).
+
+Maximum practical safety valve pressures in heating: 200 bar a (above this, you’re in special designs).
+
+Allowed decimals: 2 (to allow precision).
+
+⚠️ If PR ≤ 1, error: “Relieving pressure must be above atmospheric (1 bar a).”
+
+✅ Kdr – Derated Coefficient of Discharge
+
+Allowed range: 0.60 – 0.85 (most manufacturers per API / BS 6759).
+
+Absolute min: 0.01 (but unrealistic).
+
+Max: 1.0 (perfect efficiency, not achievable in reality).
+
+Error if < 0.6: “Kdr below 0.6 is unsafe; check valve certification.”
+
+🔹 3. Edge Case Validations
+
+Division by Zero: if PR = 0 or Kdr = 0 → prevent calculation.
+
+Extreme Outliers: if Ao > 1,000,000 mm² → warn user: “Unrealistic orifice size; check inputs.”
+
+Negative Inputs: reject as invalid.
+
+Empty Fields: prevent calculation and highlight missing inputs.
+
+Logical Consistency:
+
+Q must scale reasonably with PR (a 10 kW heater with 150 bar relief is unusual).
+
+Kdr must be within certification ranges.
+
+🔹 4. Output Validation & Thresholds
+
+Meaningful ranges for Orifice Area (Ao):
+
+< 10 mm² → Too small, check if valve size exists.
+
+10 – 100 mm² → Typical small commercial valves.
+
+100 – 1000 mm² → Medium / industrial valves.
+
+> 1000 mm² → Large system, consider multiple valves.
+
+> 100,000 mm² → Unreasonable → likely input error. {% endcomment %}

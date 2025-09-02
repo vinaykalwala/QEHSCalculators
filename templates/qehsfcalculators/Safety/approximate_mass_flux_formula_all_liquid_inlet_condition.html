@@ -493,6 +493,19 @@
                     <li><strong>0.5:</strong> The exponent represents a square root relationship between temperature and mass flux.</li>
                 </ul>
             </div>
+            <div class="note-card">
+    <h3>✅ Validation Rules Applied</h3>
+    <ul class="note-list">
+        <li><b>h_fg (Latent Heat):</b> Must be 100 – 5000 kJ/kg.</li>
+        <li><b>v_fg (Specific Volume):</b> Must be 0.001 – 50 m³/kg.</li>
+        <li><b>C_p (Specific Heat):</b> Must be 0.5 – 10 kJ/kg·K.</li>
+        <li><b>T (Temperature):</b> Must be 250 – 2000 K.</li>
+        <li><b>No Zero/Negative Values:</b> All inputs must be positive.</li>
+        <li><b>Cross-check:</b> h_fg should be > C_p × T.</li>
+        <li><b>Units:</b> Ensure inputs are in SI units (kJ/kg, m³/kg, K).</li>
+    </ul>
+</div>
+
         </div>
 
     </div>
@@ -506,94 +519,97 @@
         });
 
         function calculateMassFlux() {
-            const hfg = document.getElementById('hfg').value.trim();
-            const vfg = document.getElementById('vfg').value.trim();
-            const cp = document.getElementById('cp').value.trim();
-            const temp = document.getElementById('temp').value.trim();
+    const hfg = parseFloat(document.getElementById('hfg').value.trim());
+    const vfg = parseFloat(document.getElementById('vfg').value.trim());
+    const cp  = parseFloat(document.getElementById('cp').value.trim());
+    const temp = parseFloat(document.getElementById('temp').value.trim());
 
-            const errorBox = document.getElementById('resultError');
-            const errorMessage = document.getElementById('errorMessage');
-            const placeholder = document.getElementById('placeholder');
-            const resultValue = document.getElementById('resultValue');
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
 
-            let errors = [];
+    let errors = [];
 
-            if (hfg === "") {
-                errors.push("👉 Please enter the Latent Heat of Vaporization (h_fg).");
-            } else if (parseFloat(hfg) <= 0) {
-                errors.push("👉 Latent Heat of Vaporization must be greater than 0.");
-            }
-            
-            if (vfg === "") {
-                errors.push("👉 Please enter the Specific Volume Difference (v_fg).");
-            } else if (parseFloat(vfg) <= 0) {
-                errors.push("👉 Specific Volume Difference must be greater than 0.");
-            }
-            
-            if (cp === "") {
-                errors.push("👉 Please enter the Specific Heat at Constant Pressure (C_p).");
-            } else if (parseFloat(cp) <= 0) {
-                errors.push("👉 Specific Heat at Constant Pressure must be greater than 0.");
-            }
-            
-            if (temp === "") {
-                errors.push("👉 Please enter the Temperature (T).");
-            } else if (parseFloat(temp) <= 0) {
-                errors.push("👉 Temperature must be greater than 0.");
-            }
+    // ✅ Validation rules (compliance-based)
+    if (isNaN(hfg) || hfg <= 0) {
+        errors.push("👉 Enter Latent Heat of Vaporization (h_fg) > 0 kJ/kg.");
+    } else if (hfg < 100 || hfg > 5000) {
+        errors.push("⚠️ h_fg value seems unrealistic (expected range: 100–3000 kJ/kg).");
+    }
 
-            if (errors.length > 0) {
-                errorMessage.innerHTML = errors.join("<br>");
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
-            } else {
-                errorBox.classList.add("hidden");
-            }
+    if (isNaN(vfg) || vfg <= 0) {
+        errors.push("👉 Enter Specific Volume Difference (v_fg) > 0 m³/kg.");
+    } else if (vfg < 0.0001 || vfg > 100) {
+        errors.push("⚠️ v_fg value seems unrealistic (expected range: 0.001–50 m³/kg).");
+    }
 
-            const h_fg = parseFloat(hfg);
-            const v_fg = parseFloat(vfg);
-            const c_p = parseFloat(cp);
-            const T = parseFloat(temp);
-            
-            // Calculate mass flux: G = 0.9 * (h_fg / v_fg) * (1 / (C_p * T))^0.5
-            const massFlux = 0.9 * (h_fg / v_fg) * Math.pow((1 / (c_p * T)), 0.5);
-            
-            document.getElementById('rateValue').textContent = massFlux.toFixed(4);
+    if (isNaN(cp) || cp <= 0) {
+        errors.push("👉 Enter Specific Heat (C_p) > 0 kJ/kg·K.");
+    } else if (cp < 0.1 || cp > 20) {
+        errors.push("⚠️ C_p value seems unrealistic (expected range: 0.5–10 kJ/kg·K).");
+    }
 
-            const meterFill = document.getElementById('meterFill');
-            let meterWidth, meterColor, feedback;
-            
-            if (massFlux < 100) {
-                meterWidth = '20%'; 
-                meterColor = '#27ae60';
-                feedback = '✅ Low mass flux. This indicates a relatively mild phase change process.';
-            } else if (massFlux < 500) {
-                meterWidth = '40%'; 
-                meterColor = '#2ecc71';
-                feedback = '👍 Moderate mass flux. This is typical for many industrial evaporation processes.';
-            } else if (massFlux < 1000) {
-                meterWidth = '60%'; 
-                meterColor = '#f39c12';
-                feedback = '⚠️ High mass flux. Monitor the system carefully as this indicates intense phase change.';
-            } else if (massFlux < 5000) {
-                meterWidth = '80%'; 
-                meterColor = '#e67e22';
-                feedback = '🚨 Very high mass flux. This suggests rapid evaporation that may need engineering controls.';
-            } else {
-                meterWidth = '95%'; 
-                meterColor = '#e74c3c';
-                feedback = '❌ Critical mass flux level. This indicates extremely rapid phase change that requires immediate attention.';
-            }
+    if (isNaN(temp) || temp <= 0) {
+        errors.push("👉 Enter Temperature (T) > 0 K.");
+    } else if (temp < 200 || temp > 3000) {
+        errors.push("⚠️ Temperature value seems unrealistic (expected range: 250–2000 K).");
+    }
 
-            meterFill.style.width = meterWidth;
-            meterFill.style.backgroundColor = meterColor;
-            document.getElementById('feedbackContent').textContent = feedback;
+    // Cross-field check
+    if (hfg && cp && temp && (hfg < cp * temp)) {
+        errors.push("⚠️ h_fg is unusually low compared to Cp*T (phase change unlikely).");
+    }
 
-            placeholder.classList.add('hidden');
-            resultValue.classList.remove('hidden');
-        }
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // ✅ Safe calculation
+    const massFlux = 0.9 * (hfg / vfg) * Math.pow((1 / (cp * temp)), 0.5);
+
+    // ✅ Output validation and display
+    document.getElementById('rateValue').textContent = massFlux.toFixed(4);
+
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+
+    if (massFlux < 100) {
+        meterWidth = '20%'; 
+        meterColor = '#27ae60';
+        feedback = '✅ Low mass flux. Mild phase change process.';
+    } else if (massFlux < 500) {
+        meterWidth = '40%'; 
+        meterColor = '#2ecc71';
+        feedback = '👍 Moderate. Typical for industrial evaporation.';
+    } else if (massFlux < 1000) {
+        meterWidth = '60%'; 
+        meterColor = '#f39c12';
+        feedback = '⚠️ High. Monitor system closely.';
+    } else if (massFlux < 5000) {
+        meterWidth = '80%'; 
+        meterColor = '#e67e22';
+        feedback = '🚨 Very high. Consider engineering controls.';
+    } else {
+        meterWidth = '95%'; 
+        meterColor = '#e74c3c';
+        feedback = '❌ Critical. Immediate safety action required.';
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
 
         function printReport() {
             // Update date just before printing
@@ -609,3 +625,87 @@
 </body>
 </html>
 {% endblock %}
+
+{% comment %} 
+1. Formula (for documentation & code comments)
+/*
+Mass Flux Formula (All-Liquid Inlet Condition):
+
+   G = 0.9 * (h_fg / v_fg) * (1 / (C_p * T))^0.5
+
+Where:
+- h_fg = Latent Heat of Vaporization [kJ/kg]
+- v_fg = Specific Volume Difference (vapor – liquid) [m³/kg]
+- C_p  = Specific Heat at Constant Pressure [kJ/kg·K]
+- T    = Absolute Temperature [K]
+
+Units: Result G is in kg/m²·s
+
+Reference: Commonly used in two-phase heat transfer, safety relief valve sizing,
+and steam release calculations under NFPA/ASME methodologies.
+*/
+
+2. Input Validation Rules (Real-World QEHS / Fire Safety Standards)
+
+h_fg (Latent Heat of Vaporization, kJ/kg)
+
+Must be > 0.
+
+Typical range for water-like fluids: 100 – 3000 kJ/kg.
+
+Safety validation: values < 100 or > 5000 are likely incorrect input (unit mismatch or typo).
+
+Allow up to 3 decimal places.
+
+v_fg (Specific Volume Difference, m³/kg)
+
+Must be > 0.
+
+Typical engineering range: 0.001 – 50 m³/kg (depends on fluid).
+
+If value < 0.0001 or > 100, reject as unrealistic.
+
+Allow up to 6 decimals.
+
+C_p (Specific Heat, kJ/kg·K)
+
+Must be > 0.
+
+Common fluids: 0.5 – 10 kJ/kg·K.
+
+Reject if < 0.1 or > 20 (physically unrealistic).
+
+Allow 3 decimals.
+
+T (Temperature, K)
+
+Must be > 0 K.
+
+For practical use: 250 – 2000 K (approx. -23 °C to 1726 °C).
+
+Reject < 200 K or > 3000 K (likely unit error or typo).
+
+Integer values acceptable, allow 2 decimals.
+
+3. Cross-Field & Logical Validations
+
+Division by Zero: ensure (v_fg * C_p * T) ≠ 0.
+
+Physical Consistency:
+
+h_fg should always be > C_p*T (otherwise phase change is negligible → unrealistic).
+
+If (h_fg / v_fg) < 1, warn user (low enthalpy/volume ratio unusual for real fluids).
+
+Negative/NaN: Reject immediately.
+
+4. Output Validation Logic
+
+Mass Flux classification (aligned with fire safety / process safety significance):
+
+Range (kg/m²·s)	Classification	Interpretation (for safety reports)
+< 100	Low	Mild evaporation, low hazard
+100 – 500	Moderate	Typical industrial boiling
+500 – 1000	High	Requires monitoring (steam release, relief valves)
+1000 – 5000	Very High	Serious safety consideration
+> 5000	Critical	Imminent risk, engineering control required {% endcomment %}

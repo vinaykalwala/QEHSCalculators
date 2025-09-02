@@ -1,0 +1,821 @@
+{% extends 'base.html' %}
+{% block title %}Cement Volume Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cement Volume Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            {% comment %} max-width: 700px; {% endcomment %}
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 520px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+         .result-card {
+        justify-content: flex-start; /* Changed from center to flex-start */
+        align-items: center;
+        min-height: 420px;
+        text-align: center;
+        margin-top: 10px;
+        overflow-y: auto; /* Ensure scrolling is enabled */
+        max-height: 520px; /* Set a maximum height */
+    }
+    
+    .result-placeholder img {
+        max-width: 240px;
+        margin-bottom: 20px;
+        opacity: 0.85;
+    }
+    
+    .result-placeholder p {
+        color: #7f8c8d;
+        font-size: 16px;
+        line-height: 1.6;
+    }
+    
+    .result-value { 
+        width: 100%; 
+        overflow-y: auto; /* Ensure content can scroll */
+        max-height: 100%; /* Take full height of parent */
+    }
+    
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .volume-breakdown {
+            width: 100%;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .volume-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .volume-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-top: 10px;
+            padding-top: 15px;
+            color: #1560bd;
+        }
+        
+        .unit-toggle {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        
+        .unit-btn {
+            background: #e9ecef;
+            border: 1px solid #ced4da;
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .unit-btn:first-child {
+            border-radius: 5px 0 0 5px;
+        }
+        
+        .unit-btn:last-child {
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .unit-btn.active {
+            background: #1560bd;
+            color: white;
+            border-color: #1560bd;
+        }
+        @media print {
+  .result-card, .calc-card {
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+  }
+}
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+    
+        <div class="calculator-header">
+            <h1>Cement Volume Calculator</h1>
+            <p>Calculate the volume of cement required to fill the annular space between borehole and casing</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="Dhole">Hole Diameter (D_hole) (inches)</label>
+                    <input type="number" id="Dhole" class="form-input" min="0" step="0.01" placeholder="e.g., 12.25">
+                </div>
+                <div class="form-group">
+                    <label for="Dcasing">Casing Outer Diameter (D_casing) (inches)</label>
+                    <input type="number" id="Dcasing" class="form-input" min="0" step="0.01" placeholder="e.g., 9.625">
+                </div>
+                <div class="form-group">
+                    <label for="H">Casing Height (H) (feet)</label>
+                    <input type="number" id="H" class="form-input" min="0" step="0.01" placeholder="e.g., 500">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateCementVolume()">Calculate Cement Volume</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3285/3285739.png" alt="Cement volume illustration">
+                    <p>This tool will calculate the <strong>Cement Volume Required</strong>. Enter your data to see results here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Cement Volume Required</h2></div>
+                    <div class="rate-value" id="totalVolumeValue">0.00 cubic feet</div>
+                    
+                    <div class="unit-toggle">
+                        <button class="unit-btn active" id="cubicFeetBtn" onclick="toggleUnit('cubicFeet')">Cubic Feet</button>
+                        <button class="unit-btn" id="cubicInchesBtn" onclick="toggleUnit('cubicInches')">Cubic Inches</button>
+                        <button class="unit-btn" id="cubicMetersBtn" onclick="toggleUnit('cubicMeters')">Cubic Meters</button>
+                    </div>
+                    
+                    <div class="volume-breakdown">
+                        <div class="volume-item">
+                            <span>Hole Diameter:</span>
+                            <span id="holeDiaDisplay">0.00 inches</span>
+                        </div>
+                        <div class="volume-item">
+                            <span>Casing Outer Diameter:</span>
+                            <span id="casingDiaDisplay">0.00 inches</span>
+                        </div>
+                        <div class="volume-item">
+                            <span>Casing Height:</span>
+                            <span id="casingHeightDisplay">0.00 feet</span>
+                        </div>
+                        <div class="volume-item">
+                            <span>Annular Area:</span>
+                            <span id="annularAreaDisplay">0.00 sq inches</span>
+                        </div>
+                        <div class="volume-item">
+                            <span>Total Volume:</span>
+                            <span id="totalVolumeDisplay">0.00 cubic feet</span>
+                        </div>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Engineering Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Cement Volume Calculator</strong> helps determine the volume of cement required to properly fill 
+                    the annular space between the borehole and casing in various drilling applications.
+                </p>
+            </div>
+            <div class="note-card">
+                <h3>❓ What is Cement Volume Calculation?</h3>
+                <p>This calculation determines the amount of cement needed to secure casing in a borehole, ensuring proper zonal isolation and structural integrity.</p>
+            </div>
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Hole Diameter (D_hole):</strong> The diameter of the drilled hole in inches.</li>
+                    <li><strong>Casing Outer Diameter (D_casing):</strong> The external diameter of the casing pipe in inches.</li>
+                    <li><strong>Casing Height (H):</strong> The depth or height of the casing that needs to be cemented, in feet.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <ul class="note-list">
+                    <li>Accurate cement volume calculation is <span class="good">critical for well integrity</span></li>
+                    <li><span class="average">Insufficient cement</span> can lead to poor zonal isolation and casing failure</li>
+                    <li><span class="bad">Excessive cement</span> represents material waste and increased costs</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Important Note</h3>
+                <p>
+                    In practice, engineers typically add a <strong>10-20% excess volume</strong> to account for irregularities in the borehole, 
+                    cement shrinkage, and potential losses during the cementing process.
+                </p>
+            </div>
+            
+            <div class="note-card">
+                <h3>🌍 Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Oil & Gas Wells:</strong> Ensures proper well construction and zonal isolation.</li>
+                    <li><strong>Geothermal Drilling:</strong> Helps secure casing in heat-intensive environments.</li>
+                    <li><strong>Water Well Drilling:</strong> Prevents water contamination and casing collapse.</li>
+                    <li><strong>Mining & Exploration:</strong> Provides borehole stability in underground operations.</li>
+                    <li><strong>Construction Piling:</strong> Supports deep foundation works in civil engineering.</li>
+                </ul>
+            </div>
+            <div class="note-card">
+                <h3>🔍 Validation Rules Applied</h3>
+                <ul class="note-list">
+                    <li>Hole diameter must be <strong>4–60 inches</strong> and greater than casing diameter.</li>
+                    <li>Casing outer diameter must be <strong>3–48 inches</strong> and less than hole diameter.</li>
+                    <li>Casing height must be <strong>10–20,000 feet</strong>.</li>
+                    <li>Annular clearance must be ≥ <strong>0.5 in</strong> for safe cement placement.</li>
+                    <li>Inputs must be <strong>positive numbers</strong> with ≤ 2 decimal places.</li>
+                    <li>Volumes above <strong>2000 m³</strong> are flagged as unrealistic.</li>
+                    <li>Always plan for <strong>10–20% excess cement</strong> as per industry standards.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>✅ Conclusion</h3>
+                <p>
+                    This tool helps engineers calculate the exact cement volume required, ensuring efficient well construction 
+                    and preventing operational failures. By inputting accurate values, users can ensure proper casing support 
+                    and long-term well integrity.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables to store calculation results
+        let V_cubicInches = 0;
+        let V_cubicFeet = 0;
+        let V_cubicMeters = 0;
+        let annularArea = 0;
+        let currentUnit = 'cubicFeet';
+        
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateCementVolume() {
+            const DholeInput = document.getElementById('Dhole').value.trim();
+            const DcasingInput = document.getElementById('Dcasing').value.trim();
+            const HInput = document.getElementById('H').value.trim();
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+
+            let errors = [];
+            
+            // Basic validation
+            if (DholeInput === "") {
+                errors.push("👉 Please enter the hole diameter.");
+            } else if (parseFloat(DholeInput) <= 0) {
+                errors.push("👉 Hole diameter must be a positive number.");
+            }
+            
+            if (DcasingInput === "") {
+                errors.push("👉 Please enter the casing outer diameter.");
+            } else if (parseFloat(DcasingInput) <= 0) {
+                errors.push("👉 Casing outer diameter must be a positive number.");
+            }
+            
+            if (HInput === "") {
+                errors.push("👉 Please enter the casing height.");
+            } else if (parseFloat(HInput) <= 0) {
+                errors.push("👉 Casing height must be a positive number.");
+            }
+            
+            // If we have basic errors, show them and return
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            }
+
+            const Dhole = parseFloat(DholeInput);
+            const Dcasing = parseFloat(DcasingInput);
+            const H = parseFloat(HInput);
+            
+            // Advanced validation
+            if (Dhole < 4 || Dhole > 60) {
+                errors.push("👉 Hole diameter should be between 4 and 60 inches.");
+            }
+            
+            if (Dcasing < 3 || Dcasing > 48) {
+                errors.push("👉 Casing outer diameter should be between 3 and 48 inches.");
+            }
+            
+            if (H < 10 || H > 20000) {
+                errors.push("👉 Casing height should be between 10 and 20,000 feet.");
+            }
+            
+            if (Dhole <= Dcasing) {
+                errors.push("👉 Hole diameter must be greater than casing diameter.");
+            }
+            
+            if ((Dhole - Dcasing) < 0.5) {
+                errors.push("👉 Annular clearance is too small (<0.5 in). Risk of poor cementing.");
+            }
+            
+            // If we have advanced errors, show them and return
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden");
+            }
+
+            // Calculate annular area
+            annularArea = (Math.PI / 4) * (Math.pow(Dhole, 2) - Math.pow(Dcasing, 2));
+            
+            // Calculate Cement Volume in cubic inches
+            V_cubicInches = annularArea * (H * 12); // Convert height to inches
+            
+            // Convert to other units
+            V_cubicFeet = V_cubicInches / 1728; // 1 cubic foot = 1728 cubic inches
+            V_cubicMeters = V_cubicInches * 0.0000163871; // 1 cubic inch = 0.0000163871 cubic meters
+            
+            // Check for unrealistic volume
+            if (V_cubicMeters > 2000) {
+                errors.push("👉 Calculated cement volume exceeds 2000 m³. Verify inputs.");
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                return;
+            }
+            
+            // Update displays
+            document.getElementById('holeDiaDisplay').textContent = Dhole.toFixed(2) + " inches";
+            document.getElementById('casingDiaDisplay').textContent = Dcasing.toFixed(2) + " inches";
+            document.getElementById('casingHeightDisplay').textContent = H.toFixed(2) + " feet";
+            document.getElementById('annularAreaDisplay').textContent = annularArea.toFixed(2) + " sq inches";
+            
+            // Set initial unit display to cubic feet
+            toggleUnit('cubicFeet');
+            
+            // Generate feedback based on volume
+            let feedback = "";
+            const volumeInCubicFeet = V_cubicFeet;
+            
+            if (volumeInCubicFeet < 10) {
+                feedback = "✅ This is a <strong>small volume</strong> application, typical of shallow wells or test bores. Ensure proper mixing and placement techniques.";
+            } else if (volumeInCubicFeet >= 10 && volumeInCubicFeet < 100) {
+                feedback = "⚠️ This is a <strong>moderate volume</strong> application. Consider standard cementing equipment and procedures.";
+            } else if (volumeInCubicFeet >= 100 && volumeInCubicFeet < 500) {
+                feedback = "🔶 This is a <strong>significant volume</strong> application. Plan for adequate mixing capacity and consider potential additives for performance.";
+            } else {
+                feedback = "🚨 This is a <strong>large volume</strong> application! Professional cementing equipment and detailed planning are essential. Consider using specialized cement blends and carefully monitor the cementing process.";
+            }
+            
+            // Add recommendation for excess volume
+            feedback += "<br><br><strong>Recommendation:</strong> Add 10-20% excess volume to account for borehole irregularities and potential losses.";
+
+            document.getElementById('feedbackContent').innerHTML = feedback;
+            placeholder.classList.add('hidden');
+            resultValue.classList.remove('hidden');
+        }
+        
+        function toggleUnit(unit) {
+            currentUnit = unit;
+            
+            // Update active button state
+            document.getElementById('cubicFeetBtn').classList.remove('active');
+            document.getElementById('cubicInchesBtn').classList.remove('active');
+            document.getElementById('cubicMetersBtn').classList.remove('active');
+            document.getElementById(unit + 'Btn').classList.add('active');
+            
+            // Update displayed volume based on selected unit
+            let displayValue, unitText;
+            
+            switch(unit) {
+                case 'cubicInches':
+                    displayValue = V_cubicInches.toFixed(2);
+                    unitText = "cubic inches";
+                    document.getElementById('totalVolumeDisplay').textContent = displayValue + " cubic inches";
+                    break;
+                case 'cubicMeters':
+                    displayValue = V_cubicMeters.toFixed(2);
+                    unitText = "cubic meters";
+                    document.getElementById('totalVolumeDisplay').textContent = displayValue + " cubic meters";
+                    break;
+                default: // cubic feet
+                    displayValue = V_cubicFeet.toFixed(2);
+                    unitText = "cubic feet";
+                    document.getElementById('totalVolumeDisplay').textContent = displayValue + " cubic feet";
+            }
+            
+            document.getElementById('totalVolumeValue').textContent = displayValue + " " + unitText;
+        }
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+{% comment %} 
+1. Formula Used (comment-ready)
+/*
+📘 Cement Volume Formula:
+---------------------------------
+Annular Area (A) = (π/4) * (D_hole² - D_casing²)   [in²]
+Cement Volume (V_in³) = A * H * 12                 [cubic inches]
+Cement Volume (V_ft³) = V_in³ / 1728               [cubic feet]
+Cement Volume (V_m³) = V_in³ * 0.0000163871        [cubic meters]
+
+Where:
+- D_hole = Borehole diameter (inches)
+- D_casing = Casing outer diameter (inches)
+- H = Casing height (feet)
+
+Practical Note:
+Always add 10–20% excess volume for borehole irregularities,
+cement shrinkage, and placement losses (API RP 65, ISO 10426).
+*/
+
+2. Input Validation Rules (QEHS & Fire Safety aligned)
+a) Hole Diameter (D_hole, inches)
+
+Must be > casing diameter (logic check).
+
+Acceptable range: 4–60 inches
+(below 4" = impractical for standard casing; above 60" = excavation, not borehole).
+
+Decimal precision: max 2 places.
+
+Units: inches (consistent with API, ISO drilling practices).
+
+b) Casing Outer Diameter (D_casing, inches)
+
+Must be less than hole diameter.
+
+Acceptable range: 3–48 inches (API casing standard ranges).
+
+Decimal precision: max 2 places.
+
+Safety compliance: if D_casing / D_hole > 0.95, warn about insufficient annular clearance (poor cement bonding risk).
+
+c) Casing Height (H, feet)
+
+Must be > 0.
+
+Acceptable range: 10–20,000 ft
+(below 10 ft = irrelevant; above 20,000 ft = extreme outlier, deepwater wells).
+
+Decimal precision: max 2 places.
+
+Safety compliance: if H < 50 ft, warn "short casing may compromise structural integrity."
+
+3. Edge Case Validations
+
+Division by zero: Not possible in formula, but check Dhole ≠ Dcasing.
+
+Negative inputs: Reject with clear error.
+
+Zero values: Reject; no valid borehole can be 0.
+
+Annular clearance too small: If (Dhole - Dcasing) < 0.5 in, flag risk (too tight, cement flow restricted).
+
+Unrealistic volumes: If V_m³ > 2000, prompt "Verify input, unusually high cement requirement."
+
+Formatting: Prevent exponential notation (e.g., "1e10").
+
+4. Output Validation & Threshold Explanations
+
+Your feedback scale is good, but in real QEHS audits, thresholds are explained like this:
+
+< 10 ft³ → Shallow/test wells; low fire/explosion hazard.
+
+10–100 ft³ → Moderate operations; standard cementing.
+
+100–500 ft³ → Significant; requires planning for cement truck logistics & fire-safe handling.
+
+> 500 ft³ → Major operation; NFPA/OSHA require dedicated fire-watch, PPE compliance, chemical exposure monitoring. {% endcomment %}

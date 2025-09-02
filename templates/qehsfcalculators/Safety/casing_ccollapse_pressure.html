@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Accident Rate Calculator{% endblock %}
+{% block title %}Casing Collapse Pressure Calculator{% endblock %}
 {% block content %}
 {% load static %}
 
@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accident Rate Calculator</title>
+    <title>Casing Collapse Pressure Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
@@ -232,7 +232,6 @@
             padding: 18px;
             border-left: 4px solid #3498db;
             text-align: left;
-            margin-top: 20px;
         }
         
         .feedback-title {
@@ -326,6 +325,28 @@
         .hidden { 
             display: none; 
         }
+
+        .cost-breakdown {
+            width: 100%;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .cost-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-top: 10px;
+            padding-top: 15px;
+            color: #1560bd;
+        }
     </style>
 </head>
 <body>
@@ -338,8 +359,8 @@
         {% include "includes/print_header_footer.html" %}
     
         <div class="calculator-header">
-            <h1>Accident Rate Calculator</h1>
-            <p>Calculate the accident rate per 1,000,000 hours worked to assess workplace safety performance</p>
+            <h1>Casing Collapse Pressure Calculator</h1>
+            <p>Calculate the external pressure at which casing will collapse based on material properties and dimensions</p>
         </div>
 
         <div class="calc-content">
@@ -347,22 +368,27 @@
             <div class="calc-card">
                 <h2>Enter Data</h2>
                 <div class="form-group">
-                    <label for="numAccidents">Number of Accidents</label>
-                    <input type="number" id="numAccidents" class="form-input" min="0" placeholder="e.g., 5">
+                    <label for="modulusElasticity">Modulus of Elasticity (E) (psi)</label>
+                    <input type="number" id="modulusElasticity" class="form-input" min="0" placeholder="e.g., 30000000">
                 </div>
                 <div class="form-group">
-                    <label for="totalHours">Total Hours Worked</label>
-                    <input type="number" id="totalHours" class="form-input" min="0" placeholder="e.g., 250000">
+                    <label for="outerDiameter">Outer Diameter (D<sub>o</sub>) (inches)</label>
+                    <input type="number" id="outerDiameter" class="form-input" min="0" step="0.001" placeholder="e.g., 9.625">
+                </div>
+                <div class="form-group">
+                    <label for="wallThickness">Wall Thickness (t) (inches)</label>
+                    <input type="number" id="wallThickness" class="form-input" min="0" step="0.001" placeholder="e.g., 0.545">
                 </div>
                 
-                <button class="calculate-btn" onclick="calculateAccidentRate()">Calculate Accident Rate</button>
+                <button class="calculate-btn" onclick="calculateCollapsePressure()">Calculate Collapse Pressure</button>
             </div>
 
             <!-- Result Section -->
             <div class="result-card">
                 <div class="result-placeholder" id="placeholder">
-                    <img src="https://cdn-icons-png.flaticon.com/512/609/609361.png" alt="Accident rate illustration">
-                    <p>This tool will calculate the <strong>Accident Rate</strong>. Enter your data to see results and insights here.</p>
+                   <img src="https://cdn-icons-png.flaticon.com/512/616/616490.png" alt="Liquid colorful drop" width="100">
+
+                    <p>This tool will calculate the <strong>Casing Collapse Pressure</strong>. Enter your data to see results and insights here.</p>
                 </div>
                 
                 <div class="result-error hidden" id="resultError">
@@ -372,12 +398,11 @@
                  
                 <div class="result-value hidden" id="resultValue">
                     <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
-                    <h2>Accident Rate Result</h2></div>
-                    <div class="rate-value" id="accidentRateValue">0.00</div>
-                    <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold; ">accidents per 1,000,000 hours worked</div>
-
+                    <h2>Casing Collapse Pressure</h2></div>
+                    <div class="rate-value" id="collapsePressureValue">0 psi</div>
+                    
                     <div class="result-feedback">
-                        <div class="feedback-title">Safety Performance Assessment</div>
+                        <div class="feedback-title">Safety Assessment</div>
                         <div class="feedback-content" id="feedbackContent"></div>
                     </div>
                     <div class="btn-wrapper">
@@ -392,49 +417,64 @@
             <div class="note-card">
                 <h3>📘 About This Calculator</h3>
                 <p>
-                    The <strong>Accident Rate Calculator</strong> helps determine the frequency of workplace accidents per 1,000,000 hours worked, 
-                    providing a standardized metric to assess safety performance.
+                    The <strong>Casing Collapse Pressure Calculator</strong> helps determine the external pressure at which a casing will collapse based on its material properties and dimensions.
                 </p>
             </div>
             <div class="note-card">
-                <h3>❓ What is Accident Rate?</h3>
-                <p>The Accident Rate is a key safety metric that measures how many accidents occur per 1,000,000 hours worked, allowing for comparison across different organizations and industries.</p>
+                <h3>❓ What is Casing Collapse Pressure?</h3>
+                <p>Casing collapse pressure is the external pressure at which the casing will collapse due to external forces. This is a critical parameter in industries like oil and gas where casing failure can lead to serious safety hazards.</p>
             </div>
             <div class="note-card">
                 <h3>⚙️ Parameters Used</h3>
                 <ul class="note-list">
-                    <li><strong>Number of Accidents:</strong> This includes reportable workplace accidents such as injuries, fatalities, and lost-time incidents.</li>
-                    <li><strong>Total Hours Worked:</strong> The total number of hours worked by all employees over a specific period.</li>
+                    <li><strong>Modulus of Elasticity (E):</strong> The material's stiffness, measured in psi (pounds per square inch).</li>
+                    <li><strong>Outer Diameter (D<sub>o</sub>):</strong> The external diameter of the casing, measured in inches.</li>
+                    <li><strong>Wall Thickness (t):</strong> The thickness of the casing wall, measured in inches.</li>
                 </ul>
             </div>
             
             <div class="note-card">
                 <h3>📊 Interpretation</h3>
                 <ul class="note-list">
-                    <li><span class="good">0.0</span> → Excellent safety performance with no accidents</li>
-                    <li><span class="good">Below 1.0</span> → Good safety performance with minimal accidents</li>
-                    <li><span class="average">1.0 – 5.0</span> → Moderate safety performance needing improvement</li>
-                    <li><span class="bad">Above 5.0</span> → Poor safety performance requiring immediate action</li>
+                    <li><span class="bad">Below 10,000 psi</span> → Very low collapse pressure, casing may fail under typical external pressures</li>
+                    <li><span class="average">10,000 – 50,000 psi</span> → Acceptable range, but monitor external pressures during operation</li>
+                    <li><span class="good">Above 50,000 psi</span> → High collapse pressure, indicating a strong casing</li>
                 </ul>
             </div>
-            <div class="note-card">
-    <h3>✅ Input Validation Rules</h3>
-    <ul class="note-list">
-        <li><strong>Number of Accidents:</strong> Must be a whole number (0–1000). Decimals or negative values not allowed.</li>
-        <li><strong>Total Hours Worked:</strong> Must be a positive number greater than 0 and less than 1,000,000,000.</li>
-        <li><strong>Cross-check:</strong> Accidents > 0 requires total hours > 0.</li>
-        <li><strong>Unrealistic Data:</strong> Accident Rate above 100 will trigger a warning to recheck input values.</li>
-    </ul>
-</div>
-
             
             <div class="note-card">
                 <h3>💡 Important Note</h3>
                 <p>
-                    A lower accident rate indicates better safety performance. Regular monitoring of this metric helps organizations 
-                    identify safety issues and implement preventive measures to protect workers.
+                    This calculation assumes ideal conditions and does not account for factors like material defects, pressure cycling, or temperature variations. Always consult with engineers to ensure the casing design is appropriate for your specific operating conditions.
                 </p>
             </div>
+            
+            <div class="note-card">
+                <h3>ℹ️ About PSI</h3>
+                <p>
+                    PSI stands for "Pounds per Square Inch" and is a unit of pressure commonly used in the United States to measure the intensity of force applied over an area. One psi is the pressure resulting from a force of one pound-force applied to an area of one square inch.
+                </p>
+            </div>
+            
+            <div class="note-card">
+                <h3>🔒 Safety Importance</h3>
+                <p>
+                    Calculating casing collapse pressure is critical for ensuring that casing can withstand external pressures without failing. In high-pressure environments like deep-well drilling, knowing the collapse pressure limits is vital to prevent potential disasters, protecting workers, the environment, and equipment.
+                </p>
+            </div>
+            <div class="note-card">
+  <h3>✅ Validation Rules Applied</h3>
+  <ul class="note-list">
+    <li>Modulus of Elasticity (E): 25,000,000 – 35,000,000 psi typical for steel.</li>
+    <li>Outer Diameter (Do): 2 – 48 inches.</li>
+    <li>Wall Thickness (t): 0.2 – 2.5 inches.</li>
+    <li>Wall thickness must be &lt; Do ÷ 2.</li>
+    <li>Aspect ratio (t/Do) must be between 0.02 and 0.3.</li>
+    <li>No blank, negative, or zero inputs allowed.</li>
+    <li>Calculated collapse pressure &gt; 1,000,000 psi is flagged as unrealistic.</li>
+  </ul>
+</div>
+
         </div>
     </div>
 
@@ -446,9 +486,10 @@
             document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
         });
 
-        function calculateAccidentRate() {
-    const numAccidentsInput = document.getElementById('numAccidents').value.trim();
-    const totalHoursInput = document.getElementById('totalHours').value.trim();
+        function calculateCollapsePressure() {
+    const modulusElasticityInput = document.getElementById('modulusElasticity').value.trim();
+    const outerDiameterInput = document.getElementById('outerDiameter').value.trim();
+    const wallThicknessInput = document.getElementById('wallThickness').value.trim();
 
     const errorBox = document.getElementById('resultError');
     const errorMessage = document.getElementById('errorMessage');
@@ -457,27 +498,34 @@
 
     let errors = [];
 
-    // Validation: Number of Accidents
-    if (numAccidentsInput === "") {
-        errors.push("👉 Please enter the number of accidents.");
-    } else if (!Number.isInteger(Number(numAccidentsInput))) {
-        errors.push("👉 Number of accidents must be an integer (no decimals).");
-    } else if (parseInt(numAccidentsInput) < 0) {
-        errors.push("👉 Number of accidents cannot be negative.");
-    } else if (parseInt(numAccidentsInput) > 1000) {
-        errors.push("👉 Number of accidents entered is unusually high. Please recheck.");
+    // Convert to numbers
+    const E = parseFloat(modulusElasticityInput);
+    const Do = parseFloat(outerDiameterInput);
+    const t = parseFloat(wallThicknessInput);
+
+    // Basic input checks
+    if (!modulusElasticityInput || isNaN(E) || E <= 0) {
+        errors.push("👉 Enter a valid modulus of elasticity (psi). Typical steel: 25,000,000–35,000,000 psi.");
+    }
+    if (!outerDiameterInput || isNaN(Do) || Do <= 0) {
+        errors.push("👉 Enter a valid outer diameter (inches). Acceptable range: 2–48 in.");
+    }
+    if (!wallThicknessInput || isNaN(t) || t <= 0) {
+        errors.push("👉 Enter a valid wall thickness (inches). Acceptable range: 0.2–2.5 in.");
     }
 
-    // Validation: Total Hours Worked
-    if (totalHoursInput === "") {
-        errors.push("👉 Please enter the total hours worked.");
-    } else if (isNaN(totalHoursInput) || parseFloat(totalHoursInput) <= 0) {
-        errors.push("👉 Total hours worked must be a positive number greater than zero.");
-    } else if (parseFloat(totalHoursInput) > 1000000000) {
-        errors.push("👉 Total hours worked exceeds realistic thresholds. Please recheck.");
+    // Cross-field validations
+    if (t >= Do / 2) {
+        errors.push("👉 Wall thickness must be less than half of the outer diameter.");
+    }
+    if (Do && t && (t / Do < 0.02 || t / Do > 0.3)) {
+        errors.push("👉 Wall thickness to diameter ratio (t/Do) must be between 0.02 and 0.3 for realistic casing.");
+    }
+    if (E && (E < 1e6 || E > 5e7)) {
+        errors.push("👉 Modulus of Elasticity outside realistic range (1,000,000–50,000,000 psi).");
     }
 
-    // Display errors if any
+    // Handle errors
     if (errors.length > 0) {
         errorMessage.innerHTML = errors.join("<br>");
         errorBox.classList.remove("hidden");
@@ -488,31 +536,29 @@
         errorBox.classList.add("hidden");
     }
 
-    const numAccidents = parseInt(numAccidentsInput);
-    const totalHours = parseFloat(totalHoursInput);
+    // Calculate collapse pressure
+    const Pc = (2 * E * t) / Do;
 
-    // Calculate Accident Rate
-    const accidentRate = (numAccidents / totalHours) * 1000000;
-    document.getElementById('accidentRateValue').textContent = accidentRate.toFixed(2);
-
+    // Output safety checks
+    const formatter = new Intl.NumberFormat('en-US');
     let feedback = "";
 
-    if (accidentRate === 0) {
-        feedback = "✅ <strong>Excellent safety performance!</strong> No accidents reported.";
-    } else if (accidentRate < 1.0) {
-        feedback = "✅ <strong>Good safety performance.</strong> Minimal accidents reported.";
-    } else if (accidentRate >= 1.0 && accidentRate <= 5.0) {
-        feedback = "⚠️ <strong>Moderate safety performance.</strong> Needs improvement.";
-    } else if (accidentRate > 5.0 && accidentRate <= 100.0) {
-        feedback = "🚨 <strong>Concerning safety performance.</strong> Immediate action required.";
-    } else {
-        feedback = "❌ <strong>Critical!</strong> Extremely high accident rate. Verify inputs and investigate urgently.";
+    if (Pc > 1e6) {
+        feedback = "⚠️ Unrealistic collapse pressure (>1,000,000 psi). Check your inputs.";
+    } else if (Pc < 10000) {
+        feedback = "❌ Very low collapse pressure (<10,000 psi). High risk of casing collapse.";
+    } else if (Pc >= 10000 && Pc <= 50000) {
+        feedback = "⚠️ Collapse pressure within acceptable range (10,000–50,000 psi). Monitor closely.";
+    } else if (Pc > 50000) {
+        feedback = "✅ High collapse pressure (>50,000 psi). Good design margin, verify other failure modes.";
     }
 
+    document.getElementById('collapsePressureValue').textContent = `${formatter.format(Pc.toFixed(2))} psi`;
     document.getElementById('feedbackContent').innerHTML = feedback;
     placeholder.classList.add('hidden');
     resultValue.classList.remove('hidden');
 }
+
 
         function printReport() {
             // Update date just before printing
@@ -529,87 +575,100 @@
 {% endblock %}
 
 
-/*
-Accident Rate Formula (per 1,000,000 hours worked):
-AR = (Number of Accidents / Total Hours Worked) * 1,000,000
-
-Validation Rules:
-- Number of Accidents: integer, ≥0, ≤1000
-- Total Hours Worked: >0, ≤1,000,000,000, decimals allowed up to 2
-- Cross-checks: accidents >0 requires totalHours >0
-- Prevent division by zero
-- Flag unrealistic combinations (e.g., AR > 100)
-*/
-
-
-
 {% comment %} 
-1️⃣ Formula Used
+1. Formula & Its Compliance Basis
 
-Accident Rate (AR) is typically defined as:
+Formula Used (as in your code):
 
-𝐴
-𝑅
+𝑃
+𝑐
 =
-Number of Accidents
-Total Hours Worked
-×
-1
-,
-000
-,
-000
-AR=
-Total Hours Worked
-Number of Accidents
+2
+⋅
+𝐸
+⋅
+𝑡
+𝐷
+𝑜
+P
+c
 	​
 
-×1,000,000
+=
+D
+o
+	​
 
-Numerator: Reportable accidents (lost-time injuries, fatalities, major recordable cases as per OSHA/ILO).
+2⋅E⋅t
+	​
 
-Denominator: Total hours worked by all employees (including part-time/contractual staff) in a defined period.
 
-Multiplier: Standardized at 1,000,000 hours to normalize across industries and workforce sizes.
+Where:
 
-👉 I’ll add this as a code comment for future reference.
+𝑃
+𝑐
+P
+c
+	​
 
-2️⃣ Input Validation Rules (QEHS & Fire Safety Best Practice)
-Number of Accidents (numAccidents)
+ = Collapse Pressure (psi)
 
-Type: Integer only (fractions not logical).
+𝐸
+E = Modulus of Elasticity (psi)
 
-Min: 0 (can’t have negative accidents).
+𝑡
+t = Wall Thickness (inches)
 
-Max: 1000 (very high, anything above requires investigation, flag as unrealistic).
+𝐷
+𝑜
+D
+o
+	​
 
-Decimal places: Not allowed.
+ = Outer Diameter (inches)
 
-Cross-field check: If accidents > 0, totalHours must also be > 0.
+⚠️ Note: This is a simplified elastic collapse model (from API/ASME thin-wall approximation). In practice, API 5C3 collapse ratings also include plastic, transition, and yield collapse modes. For educational/awareness calculators this simplified version is acceptable, but should be marked clearly as “idealized conditions.”
 
-Total Hours Worked (totalHours)
+2. Input Validation Rules (Real-world & QEHS Standards)
+Field	Unit	Valid Range	Allowed Decimals	Cross-Field/Logical Rules	Why It Matters (QEHS/Fire Safety)
+Modulus of Elasticity (E)	psi	25,000,000 – 35,000,000 psi (steel range, per API 5CT, ASTM A106)	No decimals needed	Must be positive	Unrealistic E values give meaningless collapse pressures. Prevents garbage-in → garbage-out during safety audits.
+Outer Diameter (Do)	inches	2 – 48 in (API casing range)	Up to 3 decimals	Must be > 2× wall thickness	Ensures casing is physically possible. Prevents collapse model from being applied to non-standard sizes.
+Wall Thickness (t)	inches	0.2 – 2.5 in (API practical limits)	Up to 3 decimals	Must be < Do ÷ 2	Prevents invalid geometries. Too-thin → unsafe casing, too-thick → physically impossible casing.
+Cross-field rule	–	t/Do must be between 0.02 and 0.3	–	Enforces realistic aspect ratio	Maintains model validity (thin-wall assumption).
+General	–	No blank, null, or negative inputs	–	Must handle bad user input	Prevents unsafe miscalculations or empty audit fields.
+3. Output Validation & Thresholds
 
-Type: Positive number.
+From a safety reporting/audit lens:
 
-Min: > 0 (cannot be zero, division by zero risk).
+< 10,000 psi → Very Low Risk Margin (Red Flag ⚠️)
+→ Casing may collapse under hydrostatic loads at shallow depths. Non-compliant with most API well safety designs.
 
-Max: 1e9 (1 billion hours; beyond this, likely input error).
+10,000 – 50,000 psi → Acceptable / Conditional Range (Caution ⚠️)
+→ Monitor operations. May be acceptable for shallow/intermediate casing, but requires continuous monitoring.
 
-Decimal places: Up to 2 allowed (though usually whole numbers).
+> 50,000 psi → High Capacity (Good ✅)
+→ Casing is strong, but check for other failure modes (burst, tension, fatigue). {% endcomment %}
 
-Cross-field check: If totalHours < 160 (one worker’s monthly hours), warn as unrealistic.
 
-3️⃣ Output Validation & Thresholds
-Meaningful Ranges:
+/*
+======================================================
+ Casing Collapse Pressure Formula:
+ Pc = (2 * E * t) / Do
+ where:
+   Pc = Collapse Pressure (psi)
+   E  = Modulus of Elasticity (psi) [25,000,000–35,000,000 typical steel]
+   Do = Outer Diameter (inches) [2–48 in typical casing]
+   t  = Wall Thickness (inches) [0.2–2.5 in]
+======================================================
 
-0.0 → Perfect, no accidents.
-
-< 1.0 → Good (acceptable per ISO/ILO benchmarking).
-
-1.0 – 5.0 → Moderate concern (needs attention).
-
-5.0 – 100.0 → Poor safety (serious corrective action).
-
-> 100.0 → Critical — unrealistic in most industries, needs verification.
-
-👉 These align with OSHA DART/incident rate comparisons used in audits. {% endcomment %}
+ Validation Rules (per API 5CT, ASME B31.8, OSHA principles):
+ - E must be 25e6–35e6 psi (steel) → reject outside range
+ - Do must be 2–48 in
+ - t must be 0.2–2.5 in
+ - t < Do/2 always
+ - 0.02 ≤ t/Do ≤ 0.3 (realistic casing ratio)
+ - No zero, blank, or negative inputs
+ - Handle division by zero gracefully
+ - Collapse Pressure > 1,000,000 psi flagged as unrealistic
+======================================================
+*/

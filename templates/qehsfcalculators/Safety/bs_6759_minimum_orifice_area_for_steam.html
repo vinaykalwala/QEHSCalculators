@@ -450,14 +450,17 @@
                 <p><strong>BS 6759</strong> is a British Standard that specifies requirements for the performance, design, and testing of safety valves used in pressurized systems. It ensures that safety valves operate reliably to prevent overpressure in boilers, pipelines, and industrial equipment.</p>
             </div>
              <div class="note-card">
-                <h3>📌 Validations & Input Constraints</h3>
-                 <ul>
-                    <li><strong>Mass Flow Rate (ṁ) must be positive:</strong> The amount of steam discharged must be a valid positive number.</li>
-                    <li><strong>Pressure (Pᵣ) must be greater than zero:</strong> Absolute relieving pressure must be a positive value.</li>
-                    <li><strong>Coefficients (K<sub>dr</sub> & K<sub>SH</sub>) must be valid:</strong> Discharge and superheat correction factors must be in the acceptable range.</li>
-                    <li><strong>Check for extreme Orifice Area values:</strong> Very small or large areas may indicate incorrect input values or improper valve selection.</li>
-                 </ul>
-            </div>
+    <h3>✔️ Input Validation Rules</h3>
+    <ul class="note-list">
+        <li><strong>Mass Flow Rate (ṁ):</strong> Must be > 0 and ≤ 1,000,000 kg/h.</li>
+        <li><strong>Absolute Relieving Pressure (Pᵣ):</strong> Must be > 1.01 bar a and ≤ 320 bar a.</li>
+        <li><strong>Derated Coefficient of Discharge (Kdr):</strong> Must be between 0.65 and 1.0.</li>
+        <li><strong>Superheat Correction Factor (Ksh):</strong> Must be between 0.9 and 1.2.</li>
+        <li><strong>Orifice Area Results:</strong> <50 mm² = very small, 50–2000 mm² = optimal, 2000–8000 mm² = large, >8000 mm² = unrealistic.</li>
+        <li><strong>Invalid / extreme values:</strong> Blocked with error messages to ensure compliance with BS 6759 & ISO 4126.</li>
+    </ul>
+</div>
+
              <div class="note-card">
                 <h3>✅ Conclusion</h3>
                   <p>This tool helps engineers and technicians determine the minimum orifice area required for a safety valve in steam systems. Proper valve sizing enhances safety, efficiency, and compliance with industrial safety standards.</p>
@@ -475,80 +478,92 @@
         });
 
         function calculateOrificeArea() {
-            const massFlow = document.getElementById('massFlow').value.trim();
-            const pressure = document.getElementById('pressure').value.trim();
-            const kdr = document.getElementById('kdr').value.trim();
-            const ksh = document.getElementById('ksh').value.trim();
+    const massFlow = document.getElementById('massFlow').value.trim();
+    const pressure = document.getElementById('pressure').value.trim();
+    const kdr = document.getElementById('kdr').value.trim();
+    const ksh = document.getElementById('ksh').value.trim();
 
-            const errorBox = document.getElementById('resultError');
-            const errorMessage = document.getElementById('errorMessage');
-            const placeholder = document.getElementById('placeholder');
-            const resultValue = document.getElementById('resultValue');
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
 
-            let errors = [];
-            
-            // Validations
-            if (massFlow === "") {
-                errors.push("👉 Please enter the mass flow rate.");
-            } else if (parseFloat(massFlow) <= 0) {
-                errors.push("👉 Mass flow rate must be greater than 0.");
-            }
-            
-            if (pressure === "") {
-                errors.push("👉 Please enter the absolute relieving pressure.");
-            } else if (parseFloat(pressure) <= 0) {
-                errors.push("👉 Pressure must be greater than 0.");
-            }
-            
-            if (kdr === "") {
-                errors.push("👉 Please enter the derated coefficient of discharge.");
-            } else if (parseFloat(kdr) <= 0 || parseFloat(kdr) > 1) {
-                errors.push("👉 Kdr must be between 0 and 1.");
-            }
-            
-            if (ksh === "") {
-                errors.push("👉 Please enter the superheat correction factor.");
-            } else if (parseFloat(ksh) <= 0) {
-                errors.push("👉 Ksh must be greater than 0.");
-            }
+    let errors = [];
 
-            if (errors.length > 0) {
-                errorMessage.innerHTML = errors.join("<br>");
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
-            } else {
-                errorBox.classList.add("hidden");
-            }
+    // ---- Input Validations ----
+    // Mass Flow
+    if (massFlow === "") {
+        errors.push("👉 Please enter the mass flow rate.");
+    } else if (parseFloat(massFlow) <= 0) {
+        errors.push("👉 Mass flow rate must be greater than 0 kg/h.");
+    } else if (parseFloat(massFlow) > 1000000) {
+        errors.push("👉 Mass flow rate seems too high (> 1,000,000 kg/h). Check your input.");
+    }
 
-            // Calculate orifice area
-            const m = parseFloat(massFlow);
-            const p = parseFloat(pressure);
-            const kd = parseFloat(kdr);
-            const ks = parseFloat(ksh);
-            
-            const orificeArea = m / (0.525 * p * kd * ks);
-            
-            document.getElementById('rateValue').textContent = orificeArea.toFixed(4);
+    // Pressure
+    if (pressure === "") {
+        errors.push("👉 Please enter the absolute relieving pressure.");
+    } else if (parseFloat(pressure) <= 1.01) {
+        errors.push("👉 Pressure must be greater than atmospheric (> 1.01 bar a).");
+    } else if (parseFloat(pressure) > 320) {
+        errors.push("👉 Pressure above 320 bar a is unrealistic for steam systems.");
+    }
 
-            // Provide feedback based on orifice area
-            let feedback;
-            let feedbackColor = "#34495e";
-            
-            if (orificeArea < 50) {
-                feedback = '⚠️ <strong>Small Orifice Area:</strong> Ensure this is sufficient for steam discharge.';
-            } else if (orificeArea <= 2000) {
-                feedback = '✅ <strong>Optimal Orifice Area:</strong> This is within a typical range for safety valves.';
-            } else {
-                feedback = '❌ <strong>Large Orifice Area:</strong> Ensure this matches the system design.';
-            }
+    // Kdr
+    if (kdr === "") {
+        errors.push("👉 Please enter the derated coefficient of discharge.");
+    } else if (parseFloat(kdr) < 0.65 || parseFloat(kdr) > 1) {
+        errors.push("👉 Kdr must be between 0.65 and 1.0.");
+    }
 
-            document.getElementById('feedbackContent').innerHTML = feedback;
+    // Ksh
+    if (ksh === "") {
+        errors.push("👉 Please enter the superheat correction factor.");
+    } else if (parseFloat(ksh) < 0.9 || parseFloat(ksh) > 1.2) {
+        errors.push("👉 Ksh must be between 0.9 and 1.2.");
+    }
 
-            placeholder.classList.add('hidden');
-            resultValue.classList.remove('hidden');
-        }
+    // ---- Show Errors ----
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // ---- Calculation ----
+    const m = parseFloat(massFlow);
+    const p = parseFloat(pressure);
+    const kd = parseFloat(kdr);
+    const ks = parseFloat(ksh);
+
+    // Formula (BS-6759)
+    // A = m / (0.525 × Pr × Kdr × Ksh)
+    const orificeArea = m / (0.525 * p * kd * ks);
+
+    document.getElementById('rateValue').textContent = orificeArea.toFixed(4);
+
+    // ---- Output Feedback ----
+    let feedback;
+    if (orificeArea < 50) {
+        feedback = '⚠️ <strong>Very Small Orifice Area:</strong> Verify against valve catalog.';
+    } else if (orificeArea <= 2000) {
+        feedback = '✅ <strong>Optimal Range:</strong> Suitable for standard safety valves.';
+    } else if (orificeArea <= 8000) {
+        feedback = '⚠️ <strong>Large Orifice Area:</strong> May require pilot-operated or multiple valves.';
+    } else {
+        feedback = '❌ <strong>Unrealistic Orifice Area:</strong> Recheck input data.';
+    }
+
+    document.getElementById('feedbackContent').innerHTML = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
 
         function printReport() {
             // Update date just before printing
@@ -564,3 +579,69 @@
 </body>
 </html>
 {% endblock %}
+
+
+{% comment %} 
+1. Formula & Engineering Basis (for code comments)
+/*
+BS-6759 Minimum Orifice Area for Steam (A) Formula:
+    A = m / (0.525 × Pr × Kdr × Ksh)
+
+Where:
+    m   = Mass Flow Rate (kg/h)
+    Pr  = Absolute Relieving Pressure (bar a)
+    Kdr = Derated Coefficient of Discharge (0 < Kdr ≤ 1)
+    Ksh = Superheat Correction Factor (> 0, typically 0.9 – 1.2)
+
+Notes:
+- 0.525 is a BS-6759 constant (units conversion + steam properties).
+- Result A is in mm².
+*/
+
+2. Input Validation Rules (Industry-Aligned)
+Mass Flow Rate (ṁ, kg/h)
+
+Min: > 0 (steam must be flowing).
+
+Max (practical): 1,000,000 kg/h (very large utility boilers).
+
+Decimals: up to 1 decimal allowed.
+
+Compliance Rationale: Zero/negative values meaningless; too high values likely input error → could lead to undersized valves in design.
+
+Absolute Relieving Pressure (Pr, bar a)
+
+Min: > 1.01 bar a (must be above atmospheric).
+
+Max: 320 bar a (supercritical steam limit).
+
+Decimals: 2 allowed.
+
+Cross-field: Pressure must be consistent with industrial steam ranges.
+
+Derated Coefficient of Discharge (Kdr)
+
+Range: 0.65 – 1.0 (typical certified safety valves).
+
+Decimals: 2 allowed.
+
+Compliance Rationale: Too low (<0.65) is not realistic; >1 violates physics.
+
+Superheat Correction Factor (Ksh)
+
+Range: 0.9 – 1.2 (BS-6759 & ISO 4126 recommended).
+
+Decimals: 2 allowed.
+
+Compliance Rationale: Values outside → likely miscalculation of steam superheat correction.
+
+3. Output Validation & Thresholds
+Minimum Orifice Area (A, mm²)
+
+< 50 mm² → Very small; verify valve catalog limits.
+
+50 – 2000 mm² → Normal working range for industrial spring-loaded valves.
+
+2000 – 8000 mm² → Very large orifices (pilot-operated or multiple valves needed).
+
+> 8000 mm² → Likely input error or unrealistic system (flag for review). {% endcomment %}

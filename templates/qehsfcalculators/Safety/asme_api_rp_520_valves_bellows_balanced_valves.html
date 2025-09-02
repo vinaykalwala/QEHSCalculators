@@ -503,6 +503,16 @@
                     <li><strong>Pb should not exceed Ps:</strong> If Pb > Ps, the system might fail to relieve pressure, causing safety issues.</li>
                 </ul>
             </div>
+            <div class="note-card">
+  <h3>📈 Input Validation Rules</h3>
+  <ul class="note-list">
+    <li><strong>Pb (Backpressure):</strong> Must be ≥ 0 and ≤ 10,000 psig</li>
+    <li><strong>Ps (Set Pressure):</strong> Must be > 0 and ≤ 10,000 psig</li>
+    <li><strong>Pb < Ps:</strong> Backpressure should normally be lower than set pressure. If Pb ≥ Ps, valve may fail.</li>
+    <li><strong>Precision:</strong> Values accepted up to 2 decimal places.</li>
+  </ul>
+</div>
+
 
             <div class="note-card">
                 <h3>📝 Conclusion</h3>
@@ -525,87 +535,81 @@
         });
 
         function calculateBackpressure() {
-            const pb = document.getElementById('pb').value.trim();
-            const ps = document.getElementById('ps').value.trim();
+    const pb = parseFloat(document.getElementById('pb').value.trim());
+    const ps = parseFloat(document.getElementById('ps').value.trim());
 
-            const pbError = document.getElementById('pbError');
-            const psError = document.getElementById('psError');
-            const errorBox = document.getElementById('resultError');
-            const errorMessage = document.getElementById('errorMessage');
-            const placeholder = document.getElementById('placeholder');
-            const resultValue = document.getElementById('resultValue');
+    const pbError = document.getElementById('pbError');
+    const psError = document.getElementById('psError');
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
 
-            // Reset errors
-            pbError.innerText = "";
-            psError.innerText = "";
-            errorBox.classList.add("hidden");
-            
-            let errors = [];
+    // Reset errors
+    pbError.innerText = "";
+    psError.innerText = "";
+    errorBox.classList.add("hidden");
 
-            if (pb === "") {
-                errors.push("👉 Please enter the backpressure value.");
-                pbError.innerText = "Backpressure is required.";
-            } else if (parseFloat(pb) < 0) {
-                errors.push("👉 Backpressure must be a positive number.");
-                pbError.innerText = "Backpressure must be positive.";
-            }
-            
-            if (ps === "") {
-                errors.push("👉 Please enter the set pressure value.");
-                psError.innerText = "Set pressure is required.";
-            } else if (parseFloat(ps) <= 0) {
-                errors.push("👉 Set pressure must be greater than zero.");
-                psError.innerText = "Set pressure must be greater than zero.";
-            }
+    let errors = [];
 
-            if (errors.length > 0) {
-                // Show error box
-                errorMessage.innerHTML = errors.join("<br>");
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
-            }
+    // Validation rules
+    if (isNaN(pb) || pb < 0 || pb > 10000) {
+        errors.push("Backpressure (Pb) must be between 0 and 10,000 psig.");
+        pbError.innerText = "Enter valid backpressure ≥ 0.";
+    }
+    if (isNaN(ps) || ps <= 0 || ps > 10000) {
+        errors.push("Set pressure (Ps) must be greater than 0 and ≤ 10,000 psig.");
+        psError.innerText = "Enter valid set pressure > 0.";
+    }
 
-            const pbVal = parseFloat(pb);
-            const psVal = parseFloat(ps);
-            
-            if (pbVal > psVal) {
-                errorMessage.innerHTML = "⚠️ Warning: Backpressure is greater than set pressure. This may indicate a system problem.";
-                errorBox.classList.remove("hidden");
-            }
+    // Show errors if any
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
 
-            const percentage = (pbVal / psVal) * 100;
-            document.getElementById('rateValue').textContent = percentage.toFixed(2) + "%";
+    // Cross-field validation
+    if (pb >= ps) {
+        errorMessage.innerHTML = "⚠️ Warning: Backpressure (Pb) is greater than or equal to Set Pressure (Ps). Valve may not function correctly.";
+        errorBox.classList.remove("hidden");
+    }
 
-            const meterFill = document.getElementById('meterFill');
-            let meterWidth, meterColor, feedback;
-            
-            if (percentage < 10) {
-                meterWidth = '20%'; meterColor = '#27ae60';
-                feedback = '✅ Optimal backpressure percentage. Your system is operating within safe parameters.';
-            } else if (percentage < 20) {
-                meterWidth = '40%'; meterColor = '#2ecc71';
-                feedback = '👍 Acceptable backpressure percentage. Continue monitoring system performance.';
-            } else if (percentage < 30) {
-                meterWidth = '60%'; meterColor = '#f39c12';
-                feedback = '⚠️ Moderate backpressure percentage. Consider monitoring more frequently and planning for adjustments.';
-            } else if (percentage < 50) {
-                meterWidth = '80%'; meterColor = '#e67e22';
-                feedback = '🚨 High backpressure percentage. Review system configuration and consider corrective actions.';
-            } else {
-                meterWidth = '95%'; meterColor = '#e74c3c';
-                feedback = '❌ Critical backpressure percentage. Immediate system review and corrective measures required.';
-            }
+    // Calculation
+    const percentage = (pb / ps) * 100;
+    document.getElementById('rateValue').textContent = percentage.toFixed(2) + "%";
 
-            meterFill.style.width = meterWidth;
-            meterFill.style.backgroundColor = meterColor;
-            document.getElementById('feedbackContent').textContent = feedback;
+    // Output classification
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+    
+    if (percentage < 10) {
+        meterWidth = '20%'; meterColor = '#27ae60';
+        feedback = '✅ Optimal. Backpressure well within safe limits.';
+    } else if (percentage < 20) {
+        meterWidth = '40%'; meterColor = '#2ecc71';
+        feedback = '👍 Acceptable. Keep monitoring system conditions.';
+    } else if (percentage < 30) {
+        meterWidth = '60%'; meterColor = '#f39c12';
+        feedback = '⚠️ Caution. Approaching API 520 design limits.';
+    } else if (percentage < 50) {
+        meterWidth = '80%'; meterColor = '#e67e22';
+        feedback = '🚨 High. Relief valve performance may be impaired.';
+    } else {
+        meterWidth = '95%'; meterColor = '#e74c3c';
+        feedback = '❌ Critical. Immediate system review required.';
+    }
 
-            placeholder.classList.add('hidden');
-            resultValue.classList.remove('hidden');
-            errorBox.classList.add('hidden');
-        }
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
 
         function printReport() {
             // Update date just before printing
@@ -621,3 +625,54 @@
 </body>
 </html>
 {% endblock %}
+{% comment %} 
+
+1. Formula (comment for your code)
+/*
+Formula for Bellows Balanced Valves (API RP 520, ASME Sec. VIII):
+
+Backpressure Percentage (%) = ( Pb / Ps ) × 100
+
+Where:
+  Pb = Backpressure (psig) → pressure at valve outlet (superimposed + built-up)
+  Ps = Set Pressure (psig) → pressure at which valve starts to lift
+
+Important Compliance Notes:
+- Pb ≥ 0 (cannot be negative, absolute physical requirement)
+- Ps > 0 (valve cannot function at zero set pressure)
+- Pb should not exceed Ps (if Pb ≥ Ps, the valve may not open properly)
+- Acceptable backpressure % for bellows balanced valves is typically ≤ 30%
+  (API RP 520 Part I, Section 3.3.3.2)
+*/
+
+2. Input Validation Rules (industry-based)
+Input	Valid Range	Compliance Justification
+Pb (Backpressure, psig)	≥ 0 and ≤ 10,000 psig	Backpressure cannot be negative. Extreme upper bound avoids entry errors (10,000 psig is beyond typical API design).
+Ps (Set Pressure, psig)	> 0 and ≤ 10,000 psig	Set pressure must be positive. Valves are not designed for 0 psig. Limit prevents unrealistic inputs.
+Cross-field dependency	Pb < Ps (recommended)	If Pb ≥ Ps → the valve cannot relieve pressure effectively → dangerous condition. Must warn user.
+Decimal precision	Allow 2 decimals	API-calculated pressures are usually reported to one or two decimals in safety reports.
+3. Edge Case Validations
+
+Pb = 0, Ps > 0 → Valid, gives 0% backpressure (ideal).
+
+Ps = 0 → Block, error: “Set pressure must be >0 psig.”
+
+Pb > Ps → Show critical warning, as this indicates unsafe design.
+
+Pb and Ps extremely close (e.g., Ps = 1 psig, Pb = 0.9 psig) → Valid, but warn about high backpressure %.
+
+Extreme outliers (Pb or Ps > 10,000 psig) → Block, considered unrealistic for process safety applications.
+
+4. Output Validation Logic & Thresholds
+
+Following API 520 guidance (and fire safety best practice):
+
+< 10% → ✅ Optimal → valve works efficiently, minimal outlet resistance.
+
+10–20% → 👍 Acceptable → requires monitoring.
+
+20–30% → ⚠️ Caution → still within bellows balanced valve capability, but approaching limit.
+
+30–50% → 🚨 High → may impair relief capacity, corrective action recommended.
+
+> 50% → ❌ Critical → system unsafe, immediate redesign/review required. {% endcomment %}

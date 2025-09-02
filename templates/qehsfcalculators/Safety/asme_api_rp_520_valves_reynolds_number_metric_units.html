@@ -575,6 +575,19 @@
                 <li>Ensures <strong>efficient fluid discharge</strong> in industrial and chemical plants.</li>
                </ul>
             </div>
+            <div class="note-card">
+  <h3>🛡️ Input Validation Rules</h3>
+  <ul class="note-list">
+    <li><strong>Mass Flow Rate:</strong> 0.0001 – 100,000,000 kg/h</li>
+    <li><strong>Dynamic Viscosity:</strong> 0.000001 – 1000 Pa·s</li>
+    <li><strong>Discharge Area:</strong> 0.1 – 1,000,000 mm²</li>
+    <li>Values must be positive and physically realistic.</li>
+    <li>Unrealistic combinations (tiny area with huge mass flow) will be flagged.</li>
+    <li>⚠️ Note: Constant 0.3414 is a unit conversion factor, not Euler’s “e”.</li>
+  </ul>
+</div>
+
+
              <div class="note-card">
                 <h3>📌 Conclusion</h3>
                     <p>The Reynolds number is crucial for evaluating <strong>flow conditions in safety relief systems</strong>. Understanding its calculation helps engineers design and maintain efficient discharge valves, preventing system failures.</p>
@@ -590,72 +603,84 @@
             document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
         });
 
-        function calculateReynolds() {
-            const massFlow = document.getElementById('massFlow').value.trim();
-            const viscosity = document.getElementById('viscosity').value.trim();
-            const dischargeArea = document.getElementById('dischargeArea').value.trim();
+       function calculateReynolds() {
+    const massFlow = parseFloat(document.getElementById('massFlow').value.trim());
+    const viscosity = parseFloat(document.getElementById('viscosity').value.trim());
+    const dischargeArea = parseFloat(document.getElementById('dischargeArea').value.trim());
 
-            const errorBox = document.getElementById('resultError');
-            const errorMessage = document.getElementById('errorMessage');
-            const placeholder = document.getElementById('placeholder');
-            const resultValue = document.getElementById('resultValue');
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
 
-            let errors = [];
+    let errors = [];
 
-            if (massFlow === "") errors.push("👉 Please enter the mass flow rate.");
-            if (viscosity === "") errors.push("👉 Please enter the dynamic viscosity.");
-            if (dischargeArea === "") errors.push("👉 Please enter the discharge area.");
+    // ====== INPUT VALIDATIONS ======
+    if (isNaN(massFlow)) errors.push("👉 Please enter a valid mass flow rate (kg/h).");
+    if (isNaN(viscosity)) errors.push("👉 Please enter a valid dynamic viscosity (Pa·s).");
+    if (isNaN(dischargeArea)) errors.push("👉 Please enter a valid discharge area (mm²).");
 
-            // Validate numeric values
-            if (errors.length === 0) {
-                if (parseFloat(massFlow) <= 0) errors.push("👉 Mass flow rate must be greater than zero.");
-                if (parseFloat(viscosity) <= 0) errors.push("👉 Dynamic viscosity must be greater than zero.");
-                if (parseFloat(dischargeArea) <= 0) errors.push("👉 Discharge area must be greater than zero.");
-            }
+    if (errors.length === 0) {
+        // Mass Flow Rate Validation
+        if (massFlow <= 0) errors.push("👉 Mass flow rate must be greater than zero.");
+        if (massFlow > 1e8) errors.push("👉 Mass flow rate is unrealistically high. Check input.");
 
-            if (errors.length > 0) {
-                // Show error box
-                errorMessage.innerHTML = errors.join("<br>");
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
-            } else {
-                errorBox.classList.add("hidden"); // hide error box if valid
-            }
+        // Dynamic Viscosity Validation
+        if (viscosity <= 0) errors.push("👉 Dynamic viscosity must be greater than zero.");
+        if (viscosity < 1e-6) errors.push("👉 Viscosity too low. Minimum realistic value is 0.000001 Pa·s.");
+        if (viscosity > 1000) errors.push("👉 Viscosity too high. Maximum realistic value is 1000 Pa·s.");
 
-            const m = parseFloat(massFlow);
-            const μ = parseFloat(viscosity);
-            const A = parseFloat(dischargeArea);
-            
-            // Calculate Reynolds Number
-            const Re = (0.3414 * m) / (μ * A);
-            document.getElementById('rateValue').textContent = Re.toFixed(2);
+        // Discharge Area Validation
+        if (dischargeArea <= 0) errors.push("👉 Discharge area must be greater than zero.");
+        if (dischargeArea < 0.1) errors.push("👉 Discharge area too small (<0.1 mm²).");
+        if (dischargeArea > 1e6) errors.push("👉 Discharge area too large (>1,000,000 mm²).");
 
-            const meterFill = document.getElementById('meterFill');
-            let meterWidth, meterColor, feedback;
-            
-            if (Re < 2000) {
-                meterWidth = '15%'; 
-                meterColor = '#27ae60';
-                feedback = 'Laminar flow: Smooth, orderly fluid motion with parallel layers.';
-            } else if (Re <= 4000) {
-                meterWidth = '50%'; 
-                meterColor = '#f39c12';
-                feedback = 'Transitional flow: Unstable flow regime between laminar and turbulent.';
-            } else {
-                meterWidth = '85%'; 
-                meterColor = '#e74c3c';
-                feedback = 'Turbulent flow: Chaotic, mixed fluid motion with eddies and vortices.';
-            }
-
-            meterFill.style.width = meterWidth;
-            meterFill.style.backgroundColor = meterColor;
-            document.getElementById('feedbackContent').textContent = feedback;
-
-            placeholder.classList.add('hidden');
-            resultValue.classList.remove('hidden');
+        // Cross-field validation
+        if (massFlow > 1e6 && dischargeArea < 10) {
+            errors.push("👉 Unlikely input: very high mass flow with very tiny area. Please recheck.");
         }
+    }
+
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // ====== CALCULATION ======
+    const Re = (0.3414 * massFlow) / (viscosity * dischargeArea);
+    const cappedRe = Math.min(Re, 1e9); // prevent overflow
+    document.getElementById('rateValue').textContent = cappedRe.toFixed(2);
+
+    // ====== OUTPUT LOGIC ======
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+
+    if (cappedRe < 2000) {
+        meterWidth = '15%';
+        meterColor = '#27ae60';
+        feedback = 'Laminar flow: Smooth, orderly fluid motion with parallel layers.';
+    } else if (cappedRe <= 4000) {
+        meterWidth = '50%';
+        meterColor = '#f39c12';
+        feedback = 'Transitional flow: Unstable regime, may cause flow oscillations.';
+    } else {
+        meterWidth = '85%';
+        meterColor = '#e74c3c';
+        feedback = 'Turbulent flow: Chaotic but effective for valve discharge.';
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
 
         function printReport() {
             // Update date just before printing
@@ -670,3 +695,102 @@
 </body>
 </html>
 {% endblock %}
+
+/*
+ FORMULA (API RP 520):
+ Re = (0.3414 * m) / (μ * A)
+ where:
+   m = mass flow rate (kg/h)
+   μ = dynamic viscosity (Pa·s)
+   A = discharge area (mm²)
+   0.3414 = unit conversion constant (not Euler's e!)
+*/
+{% comment %} 
+🔎 1. Reynolds Number Formula & Meaning
+
+The calculator uses:
+
+𝑅
+𝑒
+=
+0.3414
+⋅
+𝑚
+˙
+𝜇
+⋅
+𝐴
+Re=
+μ⋅A
+0.3414⋅
+m
+˙
+	​
+
+
+Re → Reynolds Number (dimensionless)
+
+ṁ (massFlow) → Mass flow rate [kg/h]
+
+μ (viscosity) → Dynamic viscosity [Pa·s]
+
+A (dischargeArea) → Effective discharge area [mm²]
+
+Why 0.3414?
+
+It is a unit conversion constant (from kg/h and mm² into SI-consistent kg/s and m²). Without this factor, the Reynolds number would be off by orders of magnitude.
+👉 This is not “Euler’s e” (2.718). It is simply a conversion constant, not a mathematical constant.
+
+🛠 2. Validation Rules (Industry Standards – QEHS, ASME, API RP 520, NFPA, OSHA)
+
+Here’s what you should enforce in the calculator:
+
+Mass Flow Rate (ṁ, kg/h)
+
+Min: 0.0001 kg/h (non-zero, positive flow required)
+
+Max: 1e8 kg/h (upper bound for refinery-scale flows, prevents overflow)
+
+Decimals: up to 3 significant decimals
+
+Rule: Must be consistent with discharge area (unrealistically high mass flow with tiny area is invalid).
+
+Dynamic Viscosity (μ, Pa·s)
+
+Min: 0.000001 Pa·s (≈ water at 20 °C is 0.001 Pa·s → this sets realistic bounds)
+
+Max: 1000 Pa·s (very viscous, e.g., bitumen; prevents absurd inputs)
+
+Decimals: up to 6 decimals recommended.
+
+Rule: Must be >0, cannot be negative.
+
+Discharge Area (A, mm²)
+
+Min: 0.1 mm² (smallest physical hole)
+
+Max: 1e6 mm² (≈ 1 m² opening; beyond this is not a valve but a large vent/pipe).
+
+Decimals: up to 3 decimals.
+
+⚠️ 3. Edge Case Validations
+
+Division by zero: μ = 0 or A = 0 → Stop calculation, show error.
+
+Unrealistic combination:
+
+Very high mass flow + very small discharge area → warning (“Check valve sizing – inputs may be unrealistic”).
+
+Extreme viscosity: If μ > 10 Pa·s → show advisory (“Highly viscous flow – Reynolds interpretation may be less reliable”).
+
+Overflow prevention: Cap Re to 1e9 (upper bound for turbulent industrial flow).
+
+✅ 4. Output Validation & Safety Interpretation
+
+Re < 2000 → Laminar (smooth, safe but may cause pressure drop).
+
+2000 ≤ Re ≤ 4000 → Transitional (unstable, possible flow oscillations, watch for resonance issues).
+
+Re > 4000 → Turbulent (expected in most relief valves, ensures effective discharge).
+
+👉 In safety reports, always state: input assumptions, flow regime, and limitations. {% endcomment %}
