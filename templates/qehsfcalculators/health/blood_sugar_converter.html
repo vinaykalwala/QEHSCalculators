@@ -1,0 +1,572 @@
+{% extends 'base.html' %}
+{% block title %}Blood Sugar Converter{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Sugar Converter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 10px;
+            align-items: baseline;
+            justify-content: center;
+        }
+        .result-value {
+            width: 100%;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        .rate-label {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2980b9;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        /* Table styles */
+        .custom-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .custom-table thead {
+            background-color: #1560bd;
+            color: white;
+        }
+        .custom-table th, .custom-table td {
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .custom-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+        /* Toggle helper */
+        .hidden {
+            display: none;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Blood Sugar Converter</h1>
+            <p>Convert blood glucose levels between the international standard (mmol/L) and mg/dL.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Enter Value to Convert</h2>
+                <div class="form-group">
+                    <label for="glucoseValue">Glucose Value</label>
+                    <input type="number" id="glucoseValue" class="form-input" placeholder="e.g., 100">
+                </div>
+                <div class="form-group">
+                    <label for="unitFrom">From Unit</label>
+                    <select id="unitFrom" class="form-select">
+                        <option value="mmolL">mmol/L</option>
+                        <option value="mgdL" selected>mg/dL</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="unitTo">To Unit</label>
+                    <select id="unitTo" class="form-select">
+                        <option value="mgdL">mg/dL</option>
+                        <option value="mmolL" selected>mmol/L</option>
+                    </select>
+                </div>
+                <button class="calculate-btn" onclick="convertGlucose()">Convert</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Enter a glucose value to convert it and see the health range assessment.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div class="result-value hidden" id="resultValue">
+                    <h2>Converted Value</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.0</div>
+                        <div class="rate-label" id="rateLabel">mmol/L</div>
+                    </div>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low (Hypoglycemia)</span><span>Normal</span><span>High (Hyperglycemia)</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Health Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📖 Understanding Blood Sugar Levels</h3>
+                <p>
+                    This blood sugar converter helps you easily interpret your glucose levels in venous blood by switching 
+                    between the international standard <strong>mmol/L</strong> and the popular <strong>mg/dL</strong> glucose units.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>📋 Parameter Explanation</h3>
+                <ul class="note-list">
+                    <li><strong>Glucose Value:</strong> The numerical value of glucose concentration in the blood.</li>
+                    <li><strong>mmol/L:</strong> Millimoles per liter – the international standard unit used to measure blood glucose.</li>
+                    <li><strong>mg/dL:</strong> Milligrams per deciliter – a common unit used in countries like the United States.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📌 Key Definitions</h3>
+                <ul class="note-list">
+                    <li><strong>Glycemia:</strong> The presence and concentration of glucose in the blood.</li>
+                    <li><strong>Hypoglycemia:</strong> Abnormally low blood sugar levels (below 2.8 mmol/L or 50 mg/dL in healthy people).</li>
+                    <li><strong>Normoglycemia:</strong> Normal blood sugar range (2.8–5.5 mmol/L or 50–100 mg/dL).</li>
+                    <li><strong>Hyperglycemia:</strong> Abnormally high blood sugar levels (above 11.1 mmol/L or 200 mg/dL).</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📊 Normal Blood Sugar Ranges</h3>
+                <div class="table-container">
+                </div>
+            </div>
+            <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Condition</th>
+                                <th>Healthy Individuals</th>
+                                <th>Diabetics</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Fasting</strong></td>
+                                <td>4.4–6.1 mmol/L (79–110 mg/dL)</td>
+                                <td>5.0–7.2 mmol/L (90–130 mg/dL)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>After meals</strong></td>
+                                <td>Up to 7.8 mmol/L (140 mg/dL)</td>
+                                <td>Below 10 mmol/L (180 mg/dL)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+            <div class="note-card">
+                <h3>💡 Tips for Maintaining Healthy Blood Sugar</h3>
+                <ul class="note-list">
+                    <li>Eat complex carbohydrates, fiber, healthy fats, and lean protein</li>
+                    <li>Maintain a healthy weight</li>
+                    <li>Exercise regularly and avoid prolonged sitting</li>
+                    <li>Avoid smoking and limit alcohol intake</li>
+                    <li>Get adequate sleep (7+ hours nightly)</li>
+                    <li>Manage stress effectively</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>⚠️ Important Disclaimer</h3>
+                <p>
+                    This tool is for informational purposes only and cannot replace professional medical advice. 
+                    If you have concerns about your blood sugar levels, <strong>consult a physician</strong>.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            if(document.getElementById('printDate')) {
+               document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
+        });
+
+        function convertGlucose() {
+            const glucoseValue = document.getElementById('glucoseValue').value.trim();
+            const unitFrom = document.getElementById('unitFrom').value;
+            const unitTo = document.getElementById('unitTo').value;
+            
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+
+            const value = parseFloat(glucoseValue);
+            const CONVERSION_FACTOR = 18.0182;
+
+            let errors = [];
+
+            // Check for valid number
+            if (glucoseValue === "" || isNaN(value) || value <= 0) {
+                errors.push("👉 Please enter a valid, positive glucose value.");
+            } else {
+                // Range validation depending on input unit
+                if (unitFrom === "mgdL" && (value < 20 || value > 600)) {
+                    errors.push("👉 Glucose in mg/dL must be between 20 and 600.");
+                }
+                if (unitFrom === "mmolL" && (value < 1 || value > 33)) {
+                    errors.push("👉 Glucose in mmol/L must be between 1 and 33.");
+                }
+            }
+
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden");
+            }
+
+            // Conversion
+            let convertedValue;
+            if (unitFrom === unitTo) {
+                convertedValue = value;
+            } else if (unitFrom === 'mmolL' && unitTo === 'mgdL') {
+                convertedValue = value * CONVERSION_FACTOR;
+            } else if (unitFrom === 'mgdL' && unitTo === 'mmolL') {
+                convertedValue = value / CONVERSION_FACTOR;
+            } else {
+                convertedValue = value; // failsafe
+            }
+            
+            const toUnitText = unitTo === 'mmolL' ? 'mmol/L' : 'mg/dL';
+            document.getElementById('rateValue').textContent = convertedValue.toFixed(2);
+            document.getElementById('rateLabel').textContent = toUnitText;
+            
+            // Feedback based on mg/dL equivalent
+            const valueInMgDl = (unitTo === 'mgdL') ? convertedValue : convertedValue * CONVERSION_FACTOR;
+            
+            const meterFill = document.getElementById('meterFill');
+            let meterWidth, meterColor, feedback;
+
+            if (valueInMgDl < 70) {
+                meterWidth = '33%'; meterColor = '#3498db';
+                feedback = 'This level is considered low (Hypoglycemia). Symptoms like shakiness or confusion can occur. Consult a doctor.';
+            } else if (valueInMgDl <= 140) {
+                meterWidth = '66%'; meterColor = '#2ecc71';
+                feedback = 'This is within the normal, healthy range for most individuals. Keep up the good work!';
+            } else {
+                meterWidth = '95%'; meterColor = '#e74c3c';
+                feedback = 'This level is high (Hyperglycemia). Consistently high levels can lead to health complications. Medical advice is recommended.';
+            }
+
+            meterFill.style.width = meterWidth;
+            meterFill.style.backgroundColor = meterColor;
+            document.getElementById('feedbackContent').textContent = feedback;
+
+            placeholder.classList.add('hidden');
+            resultValue.classList.remove('hidden');
+        }
+
+
+        function printReport() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            if(document.getElementById('printDate')) {
+               document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
+            window.print();
+        }
+    </script>
+</body>
+</html>
+{% endblock %}

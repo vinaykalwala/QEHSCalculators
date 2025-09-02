@@ -1,0 +1,494 @@
+{% extends 'base.html' %}
+{% block title %}Body Roundness Index (BRI) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Body Roundness Index (BRI) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            justify-content: center;
+        }
+        .result-value {
+            width: 100%;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        .rate-label {
+            color: #7f8c8d;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+        /* Toggle helper */
+        .hidden {
+            display: none;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Body Roundness Index (BRI) Calculator</h1>
+            <p>Assess health risks related to body fat distribution using your height and waist circumference.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Enter Your Data</h2>
+                <div class="form-group">
+                    <label for="height">Height (cm)</label>
+                    <input type="number" id="height" class="form-input" min="0" placeholder="e.g., 175">
+                </div>
+                <div class="form-group">
+                    <label for="waist">Waist Circumference (cm)</label>
+                    <input type="number" id="waist" class="form-input" min="0" placeholder="e.g., 88">
+                </div>
+                <button class="calculate-btn" onclick="calculateBRI()">Calculate BRI</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Enter your measurements to calculate your <strong>Body Roundness Index</strong> and assess your risk level.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div class="result-value hidden" id="resultValue">
+                    <h2>Body Roundness Index (BRI)</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                    </div>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low Risk</span><span>Normal</span><span>Moderate Risk</span><span>High Risk</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Health Risk Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+    <div class="note-card">
+        <h3>📘 What is the Body Roundness Index (BRI)?</h3>
+        <p>
+            The Body Roundness Index (BRI) is a measure of body fat distribution, focusing on how much your body shape resembles a circle. It is calculated using your height and waist circumference. Unlike BMI, BRI considers the distribution of fat, particularly visceral fat, which is linked to health risks such as cardiovascular disease and diabetes.
+        </p>
+    </div>
+
+    <div class="note-card">
+        <h3>💡 Why is BRI Important?</h3>
+        <p>
+            BRI provides a more accurate assessment of health risks related to body fat distribution. It helps identify individuals at risk for conditions like metabolic syndrome, hypertension, and insulin resistance. A higher BRI indicates a higher concentration of visceral fat, which is more dangerous than subcutaneous fat.
+        </p>
+    </div>
+
+    <div class="note-card">
+        <h3>📝 How to Use the BRI Calculator</h3>
+        <p>Follow these steps to calculate your BRI:</p>
+        <ol class="note-list">
+            <li><strong>Measure Your Height:</strong> Stand straight and measure your height in centimeters (cm).</li>
+            <li><strong>Measure Your Waist Circumference:</strong> Use a measuring tape to measure your waist at the midpoint between the bottom of your ribs and the top of your hips.</li>
+            <li><strong>Enter Your Values:</strong> Input your height and waist circumference into the calculator.</li>
+            <li><strong>Calculate:</strong> Click "Calculate BRI" to see your results and interpretation.</li>
+        </ol>
+    </div>
+
+    <div class="note-card">
+        <h3>📊 Interpreting Your BRI Results</h3>
+        <p>Based on studies, BRI values can be interpreted as follows:</p>
+        <ul class="note-list">
+            <li><strong>BRI &lt; 3.41:</strong> Moderate increase in health risks (25% higher risk of mortality).</li>
+            <li><strong>BRI 3.41–4.44:</strong> No significant increase in health risks.</li>
+            <li><strong>BRI 4.45–5.45:</strong> Low risk for health problems related to visceral obesity.</li>
+            <li><strong>BRI 5.46–6.91:</strong> Moderate increase in health risks.</li>
+            <li><strong>BRI &gt; 6.91:</strong> High risk of health problems related to visceral obesity (50% higher risk of mortality).</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>⚖️ BRI vs. BMI</h3>
+        <p>
+            Unlike BMI, which only considers height and weight, BRI focuses on waist circumference and fat distribution. This makes BRI a better predictor of health risks related to visceral fat, such as heart disease and diabetes.
+        </p>
+    </div>
+
+    <div class="note-card">
+        <h3>❗ Disclaimer</h3>
+        <p>
+            This calculator provides estimates for informational purposes only. It should not replace medical advice, diagnosis, or treatment. Always consult a healthcare provider for a comprehensive assessment of your health.
+        </p>
+    </div>
+    </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            if(document.getElementById('printDate')) {
+               document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
+        });
+
+        function calculateBRI() {
+            const height = document.getElementById('height').value.trim();
+            const waist = document.getElementById('waist').value.trim();
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+
+            let errors = [];
+            if (height === "" || parseFloat(height) <= 0) errors.push("👉 Please enter a valid height.");
+            if (waist === "" || parseFloat(waist) <= 0) errors.push("👉 Please enter a valid waist circumference.");
+
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden");
+            }
+            
+            const h = parseFloat(height) / 100; // height in meters
+            const w = parseFloat(waist) / 100; // waist in meters
+            
+            const eccentricity = (1 / h) * Math.sqrt(h*h - (w*w / (Math.PI * Math.PI)) );
+            const bri = 364.2 - 365.5 * eccentricity;
+
+            const briRounded = bri.toFixed(2);
+            document.getElementById('rateValue').textContent = briRounded;
+
+            const meterFill = document.getElementById('meterFill');
+            let meterWidth, meterColor, feedback;
+
+            if (briRounded < 3.5) {
+                meterWidth = '25%'; meterColor = '#2ecc71';
+                feedback = 'Your BRI is in the <strong>low-risk</strong> category, suggesting a healthy body shape and a lower risk of visceral obesity-related health issues.';
+            } else if (briRounded <= 5.0) {
+                meterWidth = '50%'; meterColor = '#27ae60';
+                feedback = 'Your BRI is in the <strong>normal</strong> range. This indicates a balanced body composition. Continue maintaining a healthy lifestyle.';
+            } else if (briRounded <= 6.5) {
+                meterWidth = '75%'; meterColor = '#f39c12';
+                feedback = 'Your BRI indicates a <strong>moderate health risk</strong>. This may be due to higher levels of visceral fat. Consider focusing on diet and exercise.';
+            } else {
+                meterWidth = '95%'; meterColor = '#e74c3c';
+                feedback = 'Your BRI is in the <strong>high-risk</strong> category. This suggests a significant amount of visceral fat, and consulting a healthcare professional is strongly recommended.';
+            }
+            
+            meterFill.style.width = meterWidth;
+            meterFill.style.backgroundColor = meterColor;
+            document.getElementById('feedbackContent').innerHTML = feedback;
+
+            placeholder.classList.add('hidden');
+            resultValue.classList.remove('hidden');
+        }
+
+        function printReport() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+             if(document.getElementById('printDate')) {
+               document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
+            window.print();
+        }
+    </script>
+</body>
+</html>
+{% endblock %}

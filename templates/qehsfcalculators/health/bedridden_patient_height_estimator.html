@@ -1,0 +1,745 @@
+{% extends 'base.html' %}
+{% block title %}Bedridden Patient Height Estimator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bedridden Patient Height Estimator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            min-height: 420px;
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            justify-content: center;
+        }
+        .result-value {
+            width: 100%;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        .rate-label {
+            color: #2980b9;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        /* Image CSS */
+        .measurement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+        .measurement-block {
+            background: #f9f9f9;
+            border-left: 4px solid #1560bd;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .measurement-block h4 {
+          font-size: 16px;
+          color: #1560bd;
+          margin-bottom: 8px;
+        }
+        .measurement-block p {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .measurement-block img {
+             display: block;
+             max-width: 100%;
+             height: auto;
+             border-radius: 8px;
+             margin-top: 10px;
+        }
+        /* Table styles */
+        .custom-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .custom-table thead {
+            background-color: #1560bd;
+            color: white;
+        }
+        .custom-table th, .custom-table td {
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .custom-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+        /* Toggle helper */
+        .hidden {
+            display: none;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Bedridden Patient Height Estimator</h1>
+            <p>Estimate height using various formulas for patients unable to stand.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Select Formula and Enter Data</h2>
+                <div class="form-group">
+                    <label for="formula">Select Formula</label>
+                    <select id="formula" class="form-select" onchange="renderInputs()">
+                        <option value="mitchell">Mitchell & Lipschitz</option>
+                        <option value="who">WHO</option>
+                        <option value="rabito1">Rabito et al. (Arm length + Semi-span)</option>
+                        <option value="rabito2">Rabito et al. (Semi-span only)</option>
+                        <option value="gray">Gray et al. (Recumbent height)</option>
+                        <option value="chumlea">Chumlea et al.</option>
+                        <option value="cereda">Cereda et al.</option>
+                        <option value="knee">Knee Height formula</option>
+                        <option value="demi">Demi-span formula</option>
+                    </select>
+                </div>
+                <div id="inputFields"></div>
+                <button class="calculate-btn" onclick="calculateHeight()">Estimate Height</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Select a formula and enter measurements to estimate the patient's height.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div class="result-value hidden" id="resultValue">
+                    <h2>Estimated Height</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.0</div>
+                        <div class="rate-label">cm</div>
+                    </div>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Estimation</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Formula Used</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+        <div class="note-card">
+            <h3>📘 Height Estimation in Bedridden Patients</h3>
+            <p>
+                Measuring height in bedridden or immobile patients can be challenging due to the inability to stand upright. 
+                In such cases, alternative anthropometric methods are used to estimate height using body segment measurements. 
+                These estimates are valuable in clinical care, especially for calculating medication dosages, 
+                nutritional requirements, and physiological volumes.
+            </p>
+        </div>
+
+        <div class="note-card">
+            <h3>📖 Why Estimate Height Without Standing?</h3>
+            <ul class="note-list">
+                <li>To calculate nutritional needs, body surface area, and physiological volumes.</li>
+                <li>For dosing medications accurately in critical care or chronic illness.</li>
+                <li>To monitor growth or body composition in patients unable to stand due to injury, surgery, or illness.</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h3>📏 Common Methods for Estimating Height</h3>
+            <ul class="note-list">
+                <li><strong>Semi-span Method:</strong> Doubling the distance from the sternum to the fingertips on an outstretched arm.</li>
+                <li><strong>Arm Span Method:</strong> Distance between the fingertips of both outstretched arms, usually close to height.</li>
+                <li><strong>Demi-span Method:</strong> From the middle of the chest to the fingers, with sex-based adjustments.</li>
+                <li><strong>Knee Height Method:</strong> Measures heel-to-knee distance, adjusted for age and sex.</li>
+                <li><strong>Ulna / Forearm Length Charts:</strong> Uses standardized charts to estimate height.</li>
+                <li><strong>Recumbent Length:</strong> Head-to-heel while lying down, direct but sometimes limited.</li>
+                <li><strong>Composite Equations:</strong> Combine multiple anthropometric and demographic variables.</li>
+                <li><strong>Forearm Length-Based:</strong> Use ulna length as reference, compare with table by sex and age.</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h3>📊 Forearm Length-Based Height Estimation</h3>
+            <div class="table-container">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Ulna Length (cm)</th>
+                            <th>Men &lt;65 yrs (cm)</th>
+                            <th>Men ≥65 yrs (cm)</th>
+                            <th>Women &lt;65 yrs (cm)</th>
+                            <th>Women ≥65 yrs (cm)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>18.5</td><td>146</td><td>145</td><td>147</td><td>140</td></tr>
+                        <tr><td>19.0</td><td>148</td><td>146</td><td>148</td><td>142</td></tr>
+                        <tr><td>19.5</td><td>149</td><td>148</td><td>150</td><td>144</td></tr>
+                        <tr><td>20.0</td><td>151</td><td>149</td><td>151</td><td>145</td></tr>
+                        <tr><td>20.5</td><td>153</td><td>151</td><td>152</td><td>147</td></tr>
+                        <tr><td>21.0</td><td>155</td><td>152</td><td>154</td><td>148</td></tr>
+                        <tr><td>21.5</td><td>157</td><td>154</td><td>155</td><td>150</td></tr>
+                        <tr><td>22.0</td><td>158</td><td>156</td><td>156</td><td>152</td></tr>
+                        <tr><td>22.5</td><td>160</td><td>157</td><td>158</td><td>153</td></tr>
+                        <tr><td>23.0</td><td>162</td><td>159</td><td>159</td><td>155</td></tr>
+                        <tr><td>23.5</td><td>164</td><td>160</td><td>161</td><td>156</td></tr>
+                        <tr><td>24.0</td><td>166</td><td>162</td><td>162</td><td>158</td></tr>
+                        <tr><td>24.5</td><td>167</td><td>163</td><td>163</td><td>160</td></tr>
+                        <tr><td>25.0</td><td>169</td><td>165</td><td>165</td><td>161</td></tr>
+                        <tr><td>25.5</td><td>171</td><td>167</td><td>166</td><td>163</td></tr>
+                        <tr><td>26.0</td><td>173</td><td>168</td><td>168</td><td>165</td></tr>
+                        <tr><td>26.5</td><td>175</td><td>170</td><td>169</td><td>166</td></tr>
+                        <tr><td>27.0</td><td>176</td><td>171</td><td>170</td><td>168</td></tr>
+                        <tr><td>27.5</td><td>178</td><td>173</td><td>172</td><td>170</td></tr>
+                        <tr><td>28.0</td><td>180</td><td>175</td><td>173</td><td>171</td></tr>
+                        <tr><td>28.5</td><td>182</td><td>176</td><td>175</td><td>173</td></tr>
+                        <tr><td>29.0</td><td>184</td><td>178</td><td>176</td><td>175</td></tr>
+                        <tr><td>29.5</td><td>185</td><td>179</td><td>177</td><td>176</td></tr>
+                        <tr><td>30.0</td><td>187</td><td>181</td><td>179</td><td>178</td></tr>
+                        <tr><td>30.5</td><td>189</td><td>182</td><td>180</td><td>179</td></tr>
+                        <tr><td>31.0</td><td>191</td><td>184</td><td>181</td><td>181</td></tr>
+                        <tr><td>31.5</td><td>193</td><td>186</td><td>183</td><td>183</td></tr>
+                        <tr><td>32.0</td><td>194</td><td>187</td><td>184</td><td>184</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="note-card">
+            <h3>⚠️ Important Considerations</h3>
+            <ul class="note-list">
+                <li>Choose a method based on the patient's mobility and accessibility of body parts.</li>
+                <li>Use sex- and race-specific approaches when available for greater precision.</li>
+                <li>All methods provide estimations, not exact measurements.</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h3>📐 Measurement Guide for Bedridden Patients</h3>
+            <div class="measurement-grid">
+                <div class="measurement-block">
+                    <h4>Semi-span (Demi-span)</h4>
+                    <p>Measure from the middle of the sternal notch to the tip of the middle finger.</p>
+                    <img src="{% static 'images/arm2.jpg' %}" alt="Semi-span measurement">
+                </div>
+                <div class="measurement-block">
+                    <h4>Forearm Length</h4>
+                    <p>Measure from the elbow tip to the midpoint of the wrist bone.</p>
+                    <img src="{% static 'images/arm1.jpg' %}" alt="Forearm length measurement">
+                </div>
+                <div class="measurement-block">
+                    <h4>Recumbent Height</h4>
+                    <p>From head to heel while lying flat.</p>
+                    <img src="{% static 'images/arm4.jpg' %}" alt="Recumbent height measurement">
+                </div>
+                <div class="measurement-block">
+                    <h4>Knee Height</h4>
+                    <p>Sliding caliper from heel to thigh top.</p>
+                    <img src="{% static 'images/arm5.jpg' %}" alt="Knee height measurement">
+                </div>
+                <div class="measurement-block">
+                    <h4>Calf Circumference</h4>
+                    <p>Measure widest part of calf (non-dominant leg).</p>
+                    <img src="{% static 'images/arm6.jpg' %}" alt="Calf circumference measurement">
+                </div>
+                <div class="measurement-block">
+                    <h4>Arm Circumference</h4>
+                    <p>Midpoint between shoulder and elbow.</p>
+                    <img src="{% static 'images/arm7.jpg' %}" alt="Arm circumference measurement">
+                </div>
+                <div class="measurement-block">
+                    <h4>Subscapular Skinfold</h4>
+                    <p>Diagonal skinfold below shoulder blade.</p>
+                    <img src="{% static 'images/arm8.gif' %}" alt="Subscapular skinfold measurement">
+                </div>
+                <div class="measurement-block">
+                    <h4>Arm Length</h4>
+                    <p>From acromion to elbow midpoint.</p>
+                    <img src="{% static 'images/arm3.jpg' %}" alt="Arm length measurement">
+                </div>
+                <div class="measurement-block">
+                    <h4>Abdominal Circumference</h4>
+                    <p>Midpoint between last rib and hip bone.</p>
+                    <img src="{% static 'images/arm9.webp' %}" alt="Abdominal circumference measurement">
+                </div>
+            </div>
+        </div>
+
+        <div class="note-card">
+            <h3>✅ Conclusion</h3>
+            <p>
+                Accurate height estimation in bedridden patients is crucial for clinical assessments and treatment planning. 
+                By using validated anthropometric methods such as knee height, demi-span, or arm span, healthcare professionals 
+                can derive reasonably accurate height estimates, even without upright measurements.
+            </p>
+        </div>
+    </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            if (document.getElementById('printDate')) {
+                document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
+            renderInputs(); // Initial render
+        });
+
+        function renderInputs() {
+            const formula = document.getElementById("formula").value;
+            const container = document.getElementById("inputFields");
+            container.innerHTML = "";
+
+            const addField = (id, label) => {
+                container.innerHTML += `<div class="form-group"><label for="${id}">${label}</label><input type="number" id="${id}" class="form-input" placeholder="Enter value in cm"></div>`;
+            };
+            const addAgeField = () => {
+                container.innerHTML += `<div class="form-group"><label for="age">Age (years)</label><input type="number" id="age" class="form-input" placeholder="Enter age in years"></div>`;
+            }
+            const addSelect = (id, label, options) => {
+                let optionsHTML = options.map(o => `<option value="${o.value}">${o.label}</option>`).join("");
+                container.innerHTML += `<div class="form-group"><label for="${id}">${label}</label><select id="${id}" class="form-select">${optionsHTML}</select></div>`;
+            };
+
+            switch (formula) {
+                case "mitchell": addField("semispan", "Semi-span (cm)"); break;
+                case "who": addField("armspan", "Half Arm-span (cm)"); break;
+                case "rabito1":
+                    addSelect("sex", "Gender", [{ value: 1, label: "Male" }, { value: 2, label: "Female" }]);
+                    addAgeField(); addField("armlength", "Arm Length (cm)"); addField("semispan", "Semi-span (cm)"); break;
+                case "rabito2":
+                    addSelect("sex", "Gender", [{ value: 1, label: "Male" }, { value: 2, label: "Female" }]);
+                    addAgeField(); addField("semispan", "Semi-span (cm)"); break;
+                case "gray": addField("recumbent", "Recumbent Height (cm)"); break;
+                case "chumlea":
+                    addSelect("sex", "Race & Gender", [
+                        { value: 1, label: "White Male" }, 
+                        { value: 2, label: "White Female" }, 
+                        { value: 3, label: "Black Male" }, 
+                        { value: 4, label: "Black Female" }
+                    ]);
+                    addField("knee", "Knee Height (cm)"); addAgeField(); break;
+                case "cereda":
+                    addSelect("sex", "Gender", [{ value: 1, label: "Male" }, { value: 0, label: "Female" }]);
+                    addField("knee", "Knee Height (cm)"); addAgeField(); break;
+                case "knee":
+                    addSelect("sex", "Gender", [{ value: 1, label: "Male" }, { value: 2, label: "Female" }]);
+                    addField("knee", "Knee Height (cm)"); addAgeField(); break;
+                case "demi":
+                    addSelect("sex", "Gender", [{ value: 1, label: "Male" }, { value: 2, label: "Female" }]);
+                    addField("demi", "Demi-span (cm)"); break;
+            }
+        }
+
+        function calculateHeight() {
+            const formula = document.getElementById("formula").value;
+            const formulaText = document.getElementById("formula").options[document.getElementById("formula").selectedIndex].text;
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+
+            let height = 0;
+            let errors = [];
+
+            // validation with realistic ranges
+            const getVal = (id) => {
+                const input = document.getElementById(id);
+                if (!input) return null;
+                const val = input.value.trim();
+                const label = document.querySelector(`label[for=${id}]`).textContent;
+
+                let num = parseFloat(val);
+                if (val === "" || isNaN(num) || num <= 0) {
+                    errors.push(`👉 Please enter a valid ${label}.`);
+                    return null;
+                }
+
+                // range validation
+                if (id === "age" && (num < 1 || num > 120)) {
+                    errors.push("👉 Age must be between 1 and 120 years.");
+                    return null;
+                }
+                if (["semispan", "armspan", "armlength", "demi"].includes(id) && (num < 20 || num > 150)) {
+                    errors.push(`👉 ${label} must be between 20 and 150 cm.`);
+                    return null;
+                }
+                if (["knee"].includes(id) && (num < 20 || num > 80)) {
+                    errors.push("👉 Knee height must be between 20 and 80 cm.");
+                    return null;
+                }
+                if (["recumbent"].includes(id) && (num < 50 || num > 250)) {
+                    errors.push("👉 Recumbent height must be between 50 and 250 cm.");
+                    return null;
+                }
+
+                return num;
+            };
+
+            try {
+                switch (formula) {
+                    case "mitchell": height = getVal("semispan") * 2; break;
+                    case "who": height = (0.73 * 2 * getVal("armspan")) + 0.43; break;
+                    case "rabito1": height = 58.694 - (2.974 * getVal("sex")) - (0.0736 * getVal("age")) + (0.4958 * getVal("armlength")) + (1.132 * getVal("semispan")); break;
+                    case "rabito2": height = 63.525 - (3.237 * getVal("sex")) - (0.06904 * getVal("age")) + (1.293 * getVal("semispan")); break;
+                    case "gray": height = getVal("recumbent"); break;
+                    case "chumlea":
+                        const s_chumlea = getVal("sex"), k_chumlea = getVal("knee"), a_chumlea = getVal("age");
+                        if (s_chumlea === 1) height = 71.85 + (1.88 * k_chumlea);
+                        else if (s_chumlea === 2) height = 70.25 + (1.87 * k_chumlea) - (0.06 * a_chumlea);
+                        else if (s_chumlea === 3) height = 73.42 + (1.79 * k_chumlea);
+                        else if (s_chumlea === 4) height = 68.1 + (1.86 * k_chumlea) - (0.06 * a_chumlea);
+                        break;
+                    case "cereda": height = 60.76 + (2.16 * getVal("knee")) - (0.06 * getVal("age")) + (2.76 * getVal("sex")); break;
+                    case "knee":
+                        const s_knee = getVal("sex"), k_knee = getVal("knee"), a_knee = getVal("age");
+                        height = s_knee === 1 ? (64.19 - (0.04 * a_knee) + (2.02 * k_knee)) : (84.88 - (0.24 * a_knee) + (1.83 * k_knee));
+                        break;
+                    case "demi":
+                        const s_demi = getVal("sex"), d_demi = getVal("demi");
+                        height = s_demi === 1 ? (1.4 * d_demi) + 57.8 : (1.35 * d_demi) + 60.1;
+                        break;
+                }
+            } catch (e) { /* handled by getVal */ }
+
+            // If invalid inputs
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            }
+
+            // sanity check on height
+            if (isNaN(height) || height < 50 || height > 250) {
+                errorMessage.innerHTML = "👉 Calculated height is out of realistic range (50–250 cm). Please check your inputs.";
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            }
+
+            // show result
+            errorBox.classList.add("hidden");
+            document.getElementById('rateValue').textContent = height.toFixed(1);
+
+            const meterFill = document.getElementById('meterFill');
+            meterFill.style.width = '100%';
+            meterFill.style.backgroundColor = '#2980b9'; // Neutral color
+            document.getElementById('feedbackContent').textContent = formulaText;
+
+            placeholder.classList.add('hidden');
+            resultValue.classList.remove('hidden');
+        }
+
+
+        function printReport() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            if(document.getElementById('printDate')) {
+               document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
+            window.print();
+        }
+    </script>
+</body>
+</html>
+{% endblock %}
