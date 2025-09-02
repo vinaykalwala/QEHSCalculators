@@ -16,7 +16,7 @@
         .calculator-container {
             max-width: 1200px;
             margin: 20px auto;
-            padding: 20px;
+            padding: 0 20px;
             border-radius: 12px;
         }
 
@@ -302,6 +302,33 @@
         .hidden { 
             display: none; 
         }
+
+
+               .btn-container {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    margin: 30px 0;
+}
+
+.back-btn {
+    background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+    color: #ffffff; /* White text */
+    border: 2px solid #1560bd; /* Highlight border */
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none; /* Remove underline for link */
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    background-color: #1560bd; /* Highlight on hover */
+    color: #ffffff;
+    border-color: #000040;
+    transform: scale(1.05); /* Subtle hover effect */
+}
     </style>
 </head>
 <body>
@@ -309,6 +336,11 @@
 
     <!-- Include header/footer for print -->
     {% include "includes/print_header_footer.html" %}
+
+            <div class="btn-container">
+    <a href="{% url 'quality_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+</div>
+
 
         <div class="calculator-header">
             <h1>Broad Calculation of Garments Cost of Making (CM)</h1>
@@ -391,10 +423,23 @@
         production costs, set accurate pricing, and improve efficiency.</p> 
             </div>
 
+
+      <div class="note-card">
+  <h3>📌 Input Validation</h3>
+  <ul class="note-list">
+    <li><strong>Expenditure:</strong> > 0, ≤ ₹100M, 2 decimals.</li>
+    <li><strong>Machines:</strong> 1–10,000 (integer).</li>
+    <li><strong>Running Machines:</strong> ≥1, ≤ total machines.</li>
+    <li><strong>Prod/hr:</strong> 1–500 pcs (integer).</li>
+    <li><strong>Pieces/Dozen:</strong> 1–12 (default 12).</li>
+  </ul>
+</div>
+
+
             <div class="note-card">
                 <h3>❓ Explanation of Parameters</h3>
                 <ul class="note-list">
-                    <li><strong>Monthly Total Expenditure:</strong> The total cost (in dollars) spent on manufacturing per month.</li>
+                    <li><strong>Monthly Total Expenditure:</strong> The total cost  spent on manufacturing per month.</li>
         <li><strong>Qty of Running Machines:</strong> The number of machines currently running in production.</li>
         <li><strong>Number of Machines:</strong> The total number of machines used for production.</li>
         <li><strong>Production Capacity per Hour:</strong> The number of garments a machine can produce in one hour.</li>
@@ -422,113 +467,211 @@
 </div>
         </div>
     </div>
-<script>
-        // Set current date for print header
-        document.addEventListener('DOMContentLoaded', function() {
-            const now = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
-        });
+<script>function calculateCM() {
+    const expenditure = document.getElementById('expenditure').value.trim();
+    const machines = document.getElementById('machines').value.trim();
+    const runningMachines = document.getElementById('runningMachines').value.trim();
+    const production = document.getElementById('production').value.trim();
+    const piecesPerDozen = document.getElementById('piecesPerDozen').value.trim();
 
-        function calculateCM() {
-            const expenditure = document.getElementById('expenditure').value.trim();
-            const machines = document.getElementById('machines').value.trim();
-            const runningMachines = document.getElementById('runningMachines').value.trim();
-            const production = document.getElementById('production').value.trim();
-            const piecesPerDozen = document.getElementById('piecesPerDozen').value.trim();
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const cmValue = document.getElementById('cmValue');
+    const feedbackContent = document.getElementById('feedbackContent');
 
-            const errorBox = document.getElementById('resultError');
-            const errorMessage = document.getElementById('errorMessage');
-            const placeholder = document.getElementById('placeholder');
-            const resultValue = document.getElementById('resultValue');
-            const cmValue = document.getElementById('cmValue');
-            const feedbackContent = document.getElementById('feedbackContent');
+    let errors = [];
 
-            let errors = [];
-            
-            // Validation
-            if (expenditure === "") {
-                errors.push("👉 Please enter the monthly expenditure.");
-            } else if (parseFloat(expenditure) <= 0) {
-                errors.push("👉 Monthly expenditure must be greater than 0.");
-            }
-            
-            if (machines === "") {
-                errors.push("👉 Please enter the number of machines.");
-            } else if (parseFloat(machines) <= 0) {
-                errors.push("👉 Number of machines must be greater than 0.");
-            }
-            
-            if (runningMachines === "") {
-                errors.push("👉 Please enter the quantity of running machines.");
-            } else if (parseFloat(runningMachines) <= 0) {
-                errors.push("👉 Quantity of running machines must be greater than 0.");
-            }
-            
-            if (production === "") {
-                errors.push("👉 Please enter the production capacity per hour.");
-            } else if (parseFloat(production) <= 0) {
-                errors.push("👉 Production capacity must be greater than 0.");
-            }
-            
-            if (piecesPerDozen === "") {
-                errors.push("👉 Please enter the total pieces in a dozen.");
-            } else if (parseFloat(piecesPerDozen) <= 0 || parseFloat(piecesPerDozen) > 12) {
-                errors.push("👉 Total pieces in a dozen must be between 1 and 12.");
-            }
+    // --- Validation ---
+    const expNum = parseFloat(expenditure);
+    if (!expenditure || isNaN(expNum) || expNum <= 0) {
+        errors.push("👉 Monthly Expenditure must be greater than 0.");
+    } else if (expNum > 100000000) {
+        errors.push("👉 Monthly Expenditure seems too high (>₹100M). Recheck input.");
+    }
 
-            if (errors.length > 0) {
-                errorMessage.innerHTML = errors.join("<br>");
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
-            } else {
-                errorBox.classList.add("hidden");
-            }
+    const machinesNum = parseInt(machines);
+    if (!machines || isNaN(machinesNum) || machinesNum <= 0) {
+        errors.push("👉 Number of Machines must be a positive integer.");
+    } else if (machinesNum > 10000) {
+        errors.push("👉 Number of Machines cannot exceed 10,000 (unrealistic).");
+    }
 
-            // Convert values to numbers
-            const expenditureNum = parseFloat(expenditure);
-            const machinesNum = parseFloat(machines);
-            const runningMachinesNum = parseFloat(runningMachines);
-            const productionNum = parseFloat(production);
-            const piecesPerDozenNum = parseFloat(piecesPerDozen);
+    const runningMachinesNum = parseInt(runningMachines);
+    if (!runningMachines || isNaN(runningMachinesNum) || runningMachinesNum <= 0) {
+        errors.push("👉 Running Machines must be a positive integer.");
+    } else if (runningMachinesNum > machinesNum) {
+        errors.push("👉 Running Machines cannot exceed Total Machines.");
+    }
 
-            // CM Calculation
-            const dailyExpenditure = expenditureNum / 26; // Assuming 26 working days
-            const productionPerDay = (runningMachinesNum * machinesNum) / (productionNum * 8);
-            const CM = (dailyExpenditure / productionPerDay) * (12 / piecesPerDozenNum);
+    const productionNum = parseInt(production);
+    if (!production || isNaN(productionNum) || productionNum <= 0) {
+        errors.push("👉 Production Capacity must be greater than 0.");
+    } else if (productionNum > 500) {
+        errors.push("👉 Production Capacity per Hour seems too high (>500 pcs/hr).");
+    }
 
-            // Display result
-            cmValue.textContent = CM.toFixed(4);
+    const piecesPerDozenNum = parseInt(piecesPerDozen);
+    if (!piecesPerDozen || isNaN(piecesPerDozenNum) || piecesPerDozenNum <= 0) {
+        errors.push("👉 Pieces per Dozen must be a positive integer.");
+    } else if (piecesPerDozenNum > 12) {
+        errors.push("👉 Pieces per Dozen cannot exceed 12.");
+    }
 
-            // Provide feedback based on CM value
-            let feedback = "";
-            if (CM < 50) {
-                feedback = "✅ Efficient cost structure! Your production costs are well optimized.";
-            } else if (CM >= 50 && CM <= 100) {
-                feedback = "⚖️ Average cost structure. There may be opportunities for optimization.";
-            } else {
-                feedback = "⚠️ High cost structure! Consider efficiency improvements and cost reduction strategies.";
-            }
+    // --- Error Handling ---
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
 
-            feedbackContent.textContent = feedback;
+    // --- Corrected Formula ---
+    const dailyExpenditure = expNum / 26;
+    const dailyProduction = runningMachinesNum * productionNum * 8;
+    const CM = (dailyExpenditure / dailyProduction) * (12 / piecesPerDozenNum);
 
-            placeholder.classList.add('hidden');
-            resultValue.classList.remove('hidden');
-        }
+    // --- Output Validation ---
+    if (CM <= 0 || !isFinite(CM)) {
+        errorMessage.innerHTML = "❌ Invalid calculation. Check your inputs.";
+        errorBox.classList.remove("hidden");
+        return;
+    }
 
-        function printReport() {
-            // Update date just before printing
-            const now = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
-            
-            window.print();
-        }
+    // Show result
+    cmValue.textContent = CM.toFixed(2);
+
+    // Feedback
+    let feedback = "";
+    if (CM < 50) {
+        feedback = "✅ Efficient cost structure! Production costs are well optimized.";
+    } else if (CM >= 50 && CM <= 100) {
+        feedback = "⚖️ Average cost structure. Review efficiency opportunities.";
+    } else {
+        feedback = "⚠️ High cost structure! Consider efficiency improvements.";
+    }
+
+    feedbackContent.textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
     </script>
 
     <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
 {% endblock %}
+<!--
+
+Input Validation Rules (Compliance-based)
+Monthly Expenditure (₹)
+
+Required (cannot be blank).
+
+Type: Numeric, decimal allowed (2 decimals for currency).
+
+Min: > 0.
+
+Max: ≤ 100,000,000 (₹100M; prevents accidental wrong unit entry like annual instead of monthly).
+
+Compliance reasoning: Prevents underreporting/overreporting costs in audits.
+
+Number of Machines
+
+Required.
+
+Type: Integer only.
+
+Min: ≥ 1.
+
+Max: ≤ 10,000 (beyond this is unrealistic for garment factories).
+
+Compliance reasoning: Machine count must be traceable in OSHA/ILO audits.
+
+Quantity of Running Machines
+
+Required.
+
+Type: Integer only.
+
+Min: ≥ 1.
+
+Max: Cannot exceed Number of Machines.
+
+Compliance reasoning: Prevents false capacity reporting (ILO factory inspection requirement).
+
+Production Capacity per Hour (pcs)
+
+Required.
+
+Type: Integer.
+
+Min: ≥ 1.
+
+Max: ≤ 500 (typical upper bound for garment sewing/finishing).
+
+Compliance reasoning: Unrealistic productivity values must be rejected to maintain reporting accuracy.
+
+Total Pieces in a Dozen
+
+Required.
+
+Type: Integer only.
+
+Allowed range: 1–12.
+
+Default standard: 12.
+
+Compliance reasoning: Prevents skewed cost-per-dozen reporting in quality audits.
+
+🔹 2. Output Validation & Thresholds
+
+Formula (intended correction):
+
+𝐶M = ((Daily Expenditure/Daily Production) * (12/Pieces per Dozen))
+
+Daily Expenditure:
+
+Monthly Expenditure
+÷
+26
+Monthly Expenditure÷26 (assuming 26 working days).
+
+Daily Production (correction):
+
+Running Machines
+×
+Production per Hour
+×
+8
+Running Machines×Production per Hour×8 (8-hour day).
+⚠️ Note: Original code incorrectly multiplied machines × running machines.
+
+Output Range:
+
+CM < 50 ₹/dozen → Efficient.
+
+50 ≤ CM ≤ 100 ₹/dozen → Acceptable, but review efficiency.
+
+CM > 100 ₹/dozen → High-cost warning, requires corrective actions.
+
+Edge Cases & Handling
+
+Expenditure = 0 → reject (division by zero).
+
+Machines = 0 → reject (invalid factory setup).
+
+Running Machines > Total Machines → reject.
+
+Production per hour unrealistically high (>500 pcs/hr) → reject.
+
+Pieces per dozen = 0 or >12 → reject.
+
+Result CM ≤ 0 or NaN → flagged as invalid output.
+-->

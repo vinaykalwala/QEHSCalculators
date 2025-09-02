@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Satisfaction (CSAT) Calculator</title>
+    <title>Actual Evaporation Rate Of A Boiler From Its kW Rating And The Energy Required To Be Added To The Feedwater To Make Steam Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
@@ -16,7 +16,7 @@
         .calculator-container {
             max-width: 1200px;
             margin: 20px auto;
-            padding: 20px;
+            padding: 0 20px;
             border-radius: 12px;
         }
 
@@ -302,6 +302,32 @@
         .hidden { 
             display: none; 
         }
+
+        .btn-container {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    margin: 30px 0;
+}
+
+.back-btn {
+    background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+    color: #ffffff; /* White text */
+    border: 2px solid #1560bd; /* Highlight border */
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none; /* Remove underline for link */
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    background-color: #1560bd; /* Highlight on hover */
+    color: #ffffff;
+    border-color: #000040;
+    transform: scale(1.05); /* Subtle hover effect */
+}
     </style>
 </head>
 <body>
@@ -309,6 +335,12 @@
 
     <!-- Include header/footer for print -->
     {% include "includes/print_header_footer.html" %}
+
+    <div class="btn-container">
+    <a href="{% url 'quality_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+     </div>
+
+    
 
         <div class="calculator-header">
             <h1>Customer Satisfaction (CSAT) Calculator</h1>
@@ -418,81 +450,78 @@
 
     <script>
         // Set current date for print header
-        document.addEventListener('DOMContentLoaded', function() {
-            const now = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
-        });
-
         function calculateCSAT() {
-            const S = document.getElementById("S").value.trim();
-            const T = document.getElementById("T").value.trim();
+    const S = document.getElementById("S").value.trim();
+    const T = document.getElementById("T").value.trim();
 
-            const errorBox = document.getElementById('resultError');
-            const errorMessage = document.getElementById('errorMessage');
-            const placeholder = document.getElementById('placeholder');
-            const resultValue = document.getElementById('resultValue');
-            const outputValue = document.getElementById('csatValue');
-            const feedbackBox = document.getElementById('csatFeedback'); 
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const outputValue = document.getElementById('csatValue');
+    const feedbackBox = document.getElementById('csatFeedback'); 
 
-            let errors = [];
-            if (S === "") {
-                errors.push("👉 Please enter the number of satisfied customers.");
-            } else if (parseFloat(S) < 0) {
-                errors.push("👉 Number of satisfied customers cannot be negative.");
-            }
-            
-            if (T === "") {
-                errors.push("👉 Please enter the total number of responses.");
-            } else if (parseFloat(T) <= 0) {
-                errors.push("👉 Total responses must be greater than 0.");
-            }
+    let errors = [];
 
-            // Validate that S is not greater than T
-            if (S !== "" && T !== "" && parseFloat(S) > parseFloat(T)) {
-                errors.push("👉 Satisfied customers cannot exceed total responses.");
-            }
+    // --- Input Validations ---
+    function validateInteger(value, fieldName, min, max) {
+        if (value === "") return `👉 Please enter ${fieldName}.`;
+        if (!/^\d+$/.test(value)) return `👉 ${fieldName} must be a whole number.`;
+        const num = parseInt(value);
+        if (num < min) return `👉 ${fieldName} must be at least ${min}.`;
+        if (num > max) return `👉 ${fieldName} cannot exceed ${max.toLocaleString()}.`;
+        return null;
+    }
 
-            if (errors.length > 0) {
-                errorMessage.innerHTML = errors.join("<br>");
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
-            } else {
-                errorBox.classList.add("hidden");
-            }
+    const maxLimit = 1000000; // cap at 1 million for realism
+    const validations = [
+        validateInteger(S, "Number of satisfied customers", 0, maxLimit),
+        validateInteger(T, "Total responses", 1, maxLimit)
+    ];
 
-            const SNum = parseFloat(S);
-            const TNum = parseFloat(T);
-            const csatScore = (SNum / TNum) * 100;
-            outputValue.textContent = csatScore.toFixed(2);
+    validations.forEach(v => { if (v) errors.push(v); });
 
-            let feedback = "";
-            if (csatScore >= 90) {
-                feedback = "🌟 <strong>Excellent!</strong> Your customers are very satisfied. Keep up the great work!";
-            } else if (csatScore >= 70) {
-                feedback = "👍 <strong>Good!</strong> Your customers are happy, but some improvements could make them even more satisfied.";
-            } else if (csatScore >= 50) {
-                feedback = "⚠️ <strong>Needs Improvement!</strong> Some customers are not satisfied. Identify issues and work on enhancing customer experience.";
-            } else {
-                feedback = "🚨 <strong>Poor!</strong> Your customers are largely unsatisfied. Immediate action is required to improve your services.";
-            }
+    // Cross-field validation
+    if (errors.length === 0 && parseInt(S) > parseInt(T)) {
+        errors.push("👉 Satisfied customers cannot exceed total responses.");
+    }
 
-            feedbackBox.innerHTML = feedback;
+    // Show errors if any
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
 
-            placeholder.classList.add('hidden');
-            resultValue.classList.remove('hidden');
-        }
+    // --- CSAT Calculation ---
+    const SNum = parseInt(S);
+    const TNum = parseInt(T);
+    const csatScore = (SNum / TNum) * 100;
 
-        function printReport() {
-            // Update date just before printing
-            const now = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
-            
-            window.print();
-        }
+    outputValue.textContent = csatScore.toFixed(2);
+
+    // --- Output Thresholds ---
+    let feedback = "";
+    if (csatScore >= 90) {
+        feedback = "🌟 <strong>Excellent!</strong> Customers are highly satisfied.";
+    } else if (csatScore >= 70) {
+        feedback = "👍 <strong>Good:</strong> Customers are happy, but improvements are possible.";
+    } else if (csatScore >= 50) {
+        feedback = "⚠️ <strong>Needs Improvement:</strong> Dissatisfaction present. Review service quality.";
+    } else {
+        feedback = "🚨 <strong>Poor:</strong> Customers are unsatisfied. Immediate action needed.";
+    }
+
+    feedbackBox.innerHTML = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
     </script>
     <script src="{% static 'js/print.js' %}"></script>
 </body>

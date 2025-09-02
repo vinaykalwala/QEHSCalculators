@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Actual Evaporation Rate Of A Boiler From Its kW Rating And The Energy Required To Be Added To The Feedwater To Make Steam Calculator</title>
+    <title>Acidity Calculator Based On Hydrogen Ion Concentration</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
@@ -303,6 +303,33 @@
         .hidden { 
             display: none; 
         }
+
+ .btn-container {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    margin: 30px 0;
+}
+
+.back-btn {
+    background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+    color: #ffffff; /* White text */
+    border: 2px solid #1560bd; /* Highlight border */
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none; /* Remove underline for link */
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    background-color: #1560bd; /* Highlight on hover */
+    color: #ffffff;
+    border-color: #000040;
+    transform: scale(1.05); /* Subtle hover effect */
+}
+
     </style>
 </head>
 <body>
@@ -311,6 +338,10 @@
 <div class="calculator-container printable" id="printArea">
 
     {% include "includes/print_header_footer.html" %}
+
+      <div class="btn-container">
+    <a href="{% url 'quality_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+</div>
 
     <div class="calculator-header">
         <h1>Acidity Calculator Based On Hydrogen Ion Concentration </h1>
@@ -465,79 +496,184 @@
 </div>
 
 <script>
-function updateInputFields() {
-    const type = document.getElementById("calcType").value;
-    document.getElementById("hInput").classList.add("hidden");
-    document.getElementById("ohInput").classList.add("hidden");
-    document.getElementById("pOHInput").classList.add("hidden");
+    // Toggle visibility based on selected option
+    function updateInputFields() {
+        const type = document.getElementById("calcType").value;
+        document.getElementById("hInput").classList.add("hidden");
+        document.getElementById("ohInput").classList.add("hidden");
+        document.getElementById("pOHInput").classList.add("hidden");
 
-    if(type === "h") document.getElementById("hInput").classList.remove("hidden");
-    else if(type === "oh") document.getElementById("ohInput").classList.remove("hidden");
-    else if(type === "pOH") document.getElementById("pOHInput").classList.remove("hidden");
-}
-
-function calculatePH() {
-    const type = document.getElementById("calcType").value;
-    let ph ,h, poh, oh, classification, warning;
-;
-
-    if(type === "h") {
-        const hConc = parseFloat(document.getElementById("hConc").value.trim());
-        if(isNaN(hConc) || hConc <= 0) { alert("Enter valid [H⁺] > 0"); return; }
-        ph = -Math.log10(hConc);
-        h = hConc;
-
-    }
-    else if(type === "oh") {
-        const phInput = parseFloat(document.getElementById("ohConc").value.trim());
-        if(isNaN(phInput) || phInput < 0 || phInput > 14) { alert("Enter valid pH 0-14"); return; }
-        ph = phInput;
-        h = Math.pow(10, -ph);
-    }
-    else if(type === "pOH") {
-        const pOH = parseFloat(document.getElementById("pOHValue").value.trim());
-        if(isNaN(pOH) || pOH < 0 || pOH > 14) { alert("Enter valid pOH between 0-14"); return; }
-        ph = 14 - pOH;
-        h = Math.pow(10, -ph);
+        if(type === "h") {
+            document.getElementById("hInput").classList.remove("hidden");
+        }
+        else if(type === "oh") {
+            document.getElementById("ohInput").classList.remove("hidden");
+        }
+        else if(type === "pOH") {
+            document.getElementById("pOHInput").classList.remove("hidden");
+        }
+        
+        // Clear previous results
+        document.getElementById("placeholder").classList.remove("hidden");
+        document.getElementById("resultValue").classList.add("hidden");
     }
 
-    poh = 14 - ph;
-    oh = Math.pow(10, -poh);
+    // Main calculation logic
+    function calculatePH() {
+        const type = document.getElementById("calcType").value;
+        const resultElement = document.getElementById("resultValue");
+        const phValueElement = document.getElementById("phValue");
+        const hResultElement = document.getElementById("hResult");
+        const ohResultElement = document.getElementById("ohResult");
+        const pohResultElement = document.getElementById("pohResult");
+        const classificationElement = document.getElementById("classification");
+        const warningElement = document.getElementById("warning");
+        
+        // Reset results
+        phValueElement.textContent = '0.00';
+        hResultElement.textContent = '';
+        ohResultElement.textContent = '';
+        pohResultElement.textContent = '';
+        classificationElement.textContent = '';
+        warningElement.textContent = '';
 
-    // classification + warnings
-    if (ph < 3) {
-        classification = "Strongly acidic (hazardous)";
-        warning = "⚠ Highly acidic: May be corrosive and UnSafe for handling without Protection.";
-    } else if (ph < 7) {
-        classification = "Moderately acidic";
-        warning = "";
-    } else if (ph === 7) {
-        classification = "Neutral";
-        warning = "";
-    } else if (ph <= 11) {
-        classification = "Moderately basic";
-        warning = "";
-    } else {
-        classification = "Strongly basic (hazardous)";
-        warning = "⚠ Highly basic: May be corrosive and UnSafe for handling without Protection.";
+        let pH, hConc, pOH, ohConc, classification;
+
+        if (type === 'h') {
+            const hInput = document.getElementById("hConc").value;
+            hConc = parseFloat(hInput);
+            
+            if (isNaN(hConc) || hConc <= 0) {
+                warningElement.textContent = '⚠️ Hydrogen ion concentration must be greater than 0. Logarithm of 0 or negative is undefined in real numbers.';
+                return;
+            }
+
+            if (hConc > 1) {
+                warningElement.textContent = '⚠️ The hydrogen ion concentration [H⁺] is too high for standard pH calculations. Please enter a value less than or equal to 1 mol/L.';
+                return;
+            }
+
+            pH = -Math.log10(hConc);
+            pOH = 14 - pH;
+            ohConc = 1e-14 / hConc;
+            classification = getPHClassification(pH);
+
+        } else if (type === 'oh') {
+            const pHInput = document.getElementById("ohConc").value;
+            pH = parseFloat(pHInput);
+
+            if (isNaN(pH) || pH < 0 || pH > 14) {
+                warningElement.textContent = '⚠️ pH must be a number between 0 and 14.';
+                return;
+            }
+
+            hConc = Math.pow(10, -pH);
+            pOH = 14 - pH;
+            ohConc = 1e-14 / hConc;
+            classification = getPHClassification(pH);
+            
+        } else if (type === 'pOH') {
+            const pOHInput = document.getElementById("pOHValue").value;
+            pOH = parseFloat(pOHInput);
+
+            if (isNaN(pOH) || pOH < 0 || pOH > 14) {
+                warningElement.textContent = '⚠️ pOH must be a number between 0 and 14.';
+                return;
+            }
+
+            pH = 14 - pOH;
+            hConc = Math.pow(10, -pH);
+            ohConc = Math.pow(10, -pOH);
+            classification = getPHClassification(pH);
+        }
+
+        // Update UI with results
+        phValueElement.textContent = pH.toFixed(4);
+        hResultElement.textContent = `[H⁺]: ${hConc.toExponential(4)} mol/L`;
+        ohResultElement.textContent = `[OH⁻]: ${ohConc.toExponential(4)} mol/L`;
+        pohResultElement.textContent = `pOH: ${pOH.toFixed(4)}`;
+        classificationElement.textContent = `Classification: ${classification}`;
+        
+        // Add safety warnings
+        warningElement.style.color = getFeedbackColor(pH);
+        warningElement.textContent = getPHFeedback(pH, classification);
+        
+        // Add specific safety recommendations
+        addSafetyRecommendations(pH);
+
+        // Show results
+        document.getElementById("placeholder").classList.add("hidden");
+        document.getElementById("resultValue").classList.remove("hidden");
     }
 
-    // update UI
-    document.getElementById("phValue").textContent = ph.toFixed(2);
-    document.getElementById("hResult").textContent = `[H⁺]: ${h.toExponential(2)} mol/L`;
-    document.getElementById("ohResult").textContent = `[OH⁻]: ${oh.toExponential(2)} mol/L`;
-    document.getElementById("pohResult").textContent = `pOH: ${poh.toFixed(2)}`;
-    document.getElementById("classification").textContent = `Classification: ${classification}`;
-    document.getElementById("warning").textContent = warning;
+    // Classification based on pH value
+    function getPHClassification(pH) {
+        if (pH < 0) return "Extremely acidic (beyond standard scale)";
+        if (pH < 3) return "Strongly acidic (hazardous)";
+        if (pH < 6.5) return "Acidic";
+        if (pH <= 7.5) return "Neutral (ideal for most life)";
+        if (pH < 9) return "Alkaline";
+        if (pH <= 14) return "Strongly alkaline";
+        return "Beyond standard scale";
+    }
 
-    document.getElementById("phValue").textContent = ph.toFixed(4);
-    document.getElementById("placeholder").classList.add("hidden");
-    document.getElementById("resultValue").classList.remove("hidden");
-}
+    // Feedback color
+    function getFeedbackColor(pH) {
+        if (pH < 3 || pH > 11) return 'red';
+        if (pH < 6.5 || pH > 7.5) return 'orange';
+        return 'green';
+    }
 
-function printReport() {
-    window.print();
-}
+    // Friendly feedback text
+    function getPHFeedback(pH, classification) {
+        if (pH < 3) return '⚠️ Highly acidic: May be corrosive and unsafe for handling without protection.';
+        if (pH < 6.5) return '⚠️ Acidic: Might be harmful to living organisms or cause metal corrosion.';
+        if (pH <= 7.5) return '✅ Near neutral: Suitable for most biological and environmental conditions.';
+        if (pH < 9) return '⚠️ Mildly alkaline: Generally safe, but can affect chemical reactions or aquatic life.';
+        if (pH <= 11) return '⚠️ Alkaline: Can be irritating to skin and eyes, handle with care.';
+        return '⚠️ Highly alkaline: May be caustic or damaging to tissues and materials.';
+    }
+
+    // Add safety recommendations based on pH
+    function addSafetyRecommendations(pH) {
+        const warningElement = document.getElementById("warning");
+        let additionalInfo = "";
+        
+        if (pH < 4 || pH > 10) {
+            additionalInfo += "\n\n🔒 Safety Protocols:";
+            
+            if (pH < 4 || pH > 10) {
+                additionalInfo += "\n• Implement secondary containment for storage";
+                additionalInfo += "\n• Maintain eyewash station and safety shower access";
+                additionalInfo += "\n• Review SDS before handling";
+            }
+            
+            if (pH < 3 || pH > 11) {
+                additionalInfo += "\n• Restrict access to trained personnel only";
+                additionalInfo += "\n• Conduct pre-task risk assessment";
+                additionalInfo += "\n• Implement spill response procedures";
+            }
+            
+            // Regulatory compliance notes
+            additionalInfo += "\n\n📋 Regulatory Notes:";
+            additionalInfo += "\n• OSHA 29 CFR 1910.1200: Hazard Communication Standard";
+            additionalInfo += "\n• EPA regulations may apply to discharges (typically require pH 6-9)";
+            additionalInfo += "\n• NFPA 704: Hazard Identification System rating may apply";
+        }
+        
+        warningElement.textContent += additionalInfo;
+    }
+
+    // Print function
+    function printReport() {
+        window.print();
+    }
+
+    // Setup listeners on load
+    window.onload = function () {
+        updateInputFields();
+        document.getElementById("calcType").addEventListener('change', updateInputFields);
+    };
 </script>
     <script src="{% static 'js/print.js' %}"></script>
 </body>

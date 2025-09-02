@@ -16,7 +16,7 @@
         .calculator-container {
             max-width: 1200px;
             margin: 20px auto;
-            padding: 20px;
+            padding:0 20px;
             border-radius: 12px;
         }
 
@@ -303,6 +303,35 @@
         .hidden { 
             display: none; 
         }
+
+
+
+        
+        .btn-container {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    margin: 30px 0;
+}
+
+.back-btn {
+    background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+    color: #ffffff; /* White text */
+    border: 2px solid #1560bd; /* Highlight border */
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none; /* Remove underline for link */
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    background-color: #1560bd; /* Highlight on hover */
+    color: #ffffff;
+    border-color: #000040;
+    transform: scale(1.05); /* Subtle hover effect */
+}
     </style>
 </head>
 <body>
@@ -310,6 +339,10 @@
 
     <!-- Include header/footer for print -->
     {% include "includes/print_header_footer.html" %}
+
+      <div class="btn-container">
+    <a href="{% url 'quality_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+</div>
 
         <div class="calculator-header">
             <h1>Correct the Conductivity of a Sample Calculator</h1>
@@ -355,7 +388,7 @@
                         <h2>Corrected Conductivity</h2>
                     </div>
                     <div class="rate-value" id="conductivityValue">0.00</div>
-                    <div class="rate-label">µS/cm</div>
+                    <div class="rate-label"><strong>µS/cm</strong></div>
                     
                     <div class="result-feedback">
                         <div class="feedback-title">Interpretation</div>
@@ -381,6 +414,15 @@
             </div>
 
             
+<div class="note-card">
+  <h3>📌 Input Validation</h3>
+  <ul class="note-list">
+    <li><strong>σ₂₅ (µS/cm):</strong> 0.1–2M; ≤ 3 decimals.</li>
+    <li><strong>α (per °C):</strong> 0.001–0.1; ≤ 4 decimals.</li>
+    <li><strong>T (°C):</strong> 0–100; ≤ 2 decimals.</li>
+
+  </ul>
+</div>
 
             <div class="note-card">
                 <h3>❓ Explanation of Parameters</h3>
@@ -409,14 +451,7 @@
                 </ul>
             </div>
             
-            <div class="note-card">
-                <h3>⚠️ Validation Rules</h3>
-                <ul class="note-list">
-                    <li><strong>Conductivity at 25°C (σ₂₅)</strong> must be a positive number (> 0)</li>
-                    <li><strong>Temperature Coefficient (α)</strong> must be a positive number (> 0)</li>
-                    <li><strong>Temperature (T)</strong> must be a valid numeric value</li>
-                </ul>
-            </div>
+            
             
             <div class="note-card">
                 <h3>💡 Conclusion</h3>
@@ -430,89 +465,194 @@
     </div>
 
     <script>
-        // Set current date for print header
-        document.addEventListener('DOMContentLoaded', function() {
-            const now = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
-        });
+function calculateCorrectedConductivity() {
+    const conductivity25Raw = document.getElementById('conductivity25').value.trim();
+    const alphaRaw = document.getElementById('temperatureCoefficient').value.trim();
+    const tempRaw = document.getElementById('temperature').value.trim();
 
-        function calculateCorrectedConductivity() {
-            const conductivity25 = document.getElementById('conductivity25').value.trim();
-            const temperatureCoefficient = document.getElementById('temperatureCoefficient').value.trim();
-            const temperature = document.getElementById('temperature').value.trim();
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const conductivityValue = document.getElementById('conductivityValue');
+    const feedbackContent = document.getElementById('feedbackContent');
 
-            const errorBox = document.getElementById('resultError');
-            const errorMessage = document.getElementById('errorMessage');
-            const placeholder = document.getElementById('placeholder');
-            const resultValue = document.getElementById('resultValue');
-            const conductivityValue = document.getElementById('conductivityValue');
-            const feedbackContent = document.getElementById('feedbackContent');
+    let errors = [];
+    let warnings = [];
 
-            let errors = [];
-            
-            // Validation
-            if (conductivity25 === "") {
-                errors.push("👉 Please enter the conductivity at 25°C.");
-            } else if (parseFloat(conductivity25) <= 0) {
-                errors.push("👉 Conductivity at 25°C must be greater than 0.");
-            }
-            
-            if (temperatureCoefficient === "") {
-                errors.push("👉 Please enter the temperature coefficient.");
-            } else if (parseFloat(temperatureCoefficient) <= 0) {
-                errors.push("👉 Temperature coefficient must be greater than 0.");
-            }
-            
-            if (temperature === "") {
-                errors.push("👉 Please enter the temperature.");
-            }
+    // Presence check
+    if (!conductivity25Raw) errors.push("👉 Enter conductivity at 25°C (µS/cm).");
+    if (!alphaRaw) errors.push("👉 Enter temperature coefficient (α).");
+    if (!tempRaw) errors.push("👉 Enter sample temperature (°C).");
 
-            if (errors.length > 0) {
-                errorMessage.innerHTML = errors.join("<br>");
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
-            } else {
-                errorBox.classList.add("hidden");
-            }
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
 
-            // Convert values to numbers
-            const conductivity25Num = parseFloat(conductivity25);
-            const temperatureCoefficientNum = parseFloat(temperatureCoefficient);
-            const temperatureNum = parseFloat(temperature);
+    // Parse numbers
+    const conductivity25 = Number(conductivity25Raw);
+    const alpha = Number(alphaRaw);
+    const temp = Number(tempRaw);
 
-            // Calculate corrected conductivity
-            const correctedConductivity = conductivity25Num * (1 + temperatureCoefficientNum * (temperatureNum - 25));
-            conductivityValue.textContent = correctedConductivity.toFixed(4);
+    // Input sanity checks
+    if (conductivity25 <= 0 || conductivity25 > 2000000) {
+        errors.push("👉 Conductivity at 25°C must be between 0.1 and 2,000,000 µS/cm.");
+    }
+    if (alpha <= 0 || alpha > 0.1) {
+        errors.push("👉 Temperature coefficient must be >0 and ≤0.1 (typical 0.01–0.03).");
+    }
+    if (temp < 0 || temp > 100) {
+        errors.push("👉 Temperature must be between 0 and 100°C for valid correction.");
+    }
 
-            // Provide feedback based on temperature difference
-            let feedback = "";
-            if (temperatureNum > 25) {
-                feedback = "Increased conductivity due to higher temperature";
-            } else if (temperatureNum < 25) {
-                feedback = "Decreased conductivity due to lower temperature";
-            } else {
-                feedback = "No change in conductivity (temperature is 25°C)";
-            }
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
 
-            feedbackContent.textContent = feedback;
+    // Compute corrected conductivity
+    const correctedConductivity = conductivity25 * (1 + alpha * (temp - 25));
 
-            placeholder.classList.add('hidden');
-            resultValue.classList.remove('hidden');
-        }
+    if (!Number.isFinite(correctedConductivity) || correctedConductivity < 0) {
+        errorMessage.innerHTML = "❌ Invalid calculation result (check inputs).";
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
 
-        function printReport() {
-            // Update date just before printing
-            const now = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
-            
-            window.print();
-        }
+    // Display result
+    conductivityValue.textContent = correctedConductivity.toFixed(3);
+
+    // Feedback interpretation
+    let feedback = "";
+    if (temp > 25) feedback = "Conductivity increased due to higher temperature.";
+    else if (temp < 25) feedback = "Conductivity decreased due to lower temperature.";
+    else feedback = "No correction needed at 25°C.";
+
+    // Add warnings for edge conditions
+    if (alpha < 0.01 || alpha > 0.03) {
+        warnings.push("⚠️ Temperature coefficient is outside typical water range (0.01–0.03).");
+    }
+    if (correctedConductivity > 200000) {
+        warnings.push("⚠️ Extremely high corrected conductivity — likely brine or input error.");
+    }
+
+    if (warnings.length > 0) {
+        feedback += " " + warnings.join(" ");
+        errorMessage.innerHTML = warnings.join("<br>");
+        errorBox.classList.remove("hidden"); // Show as soft alerts
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    feedbackContent.textContent = feedback;
+
+    placeholder.classList.add("hidden");
+    resultValue.classList.remove("hidden");
+}
+
     </script>
     <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
 {% endblock %}
+<!--
+Input Validation Rules (Real-World, QEHS/Fire Safety Aligned)
+Conductivity at 25°C (σ₂₅, µS/cm)
+
+Required.
+
+Type: Numeric (decimals allowed).
+
+Range (Hard Limits): 0.1 ≤ σ₂₅ ≤ 2,000,000 µS/cm
+
+Rationale:
+
+Ultra-pure water ~0.05 µS/cm
+
+Drinking water ~50–1500 µS/cm
+
+Industrial brines >1,000,000 µS/cm.
+
+Soft Warning Range: If σ₂₅ < 0.1 or σ₂₅ > 5000 µS/cm, flag as unusual for typical QA labs.
+
+Decimals: Up to 3 decimals recommended (false precision otherwise).
+
+Temperature Coefficient (α, per °C)
+
+Required.
+
+Type: Numeric, decimal allowed.
+
+Range (Hard Limits): 0.001 ≤ α ≤ 0.1 (0.1 = 10%/°C max).
+
+Typical Value: 0.02 (2%/°C) for water — warn if outside 0.01–0.03.
+
+Decimals: Up to 4 decimals.
+
+Temperature (T, °C)
+
+Required.
+
+Type: Numeric (decimal allowed).
+
+Range (Hard Limits): 0 ≤ T ≤ 100 °C (practical for water conductivity).
+
+Soft Warnings:
+
+T < 0 °C → likely unit error (Kelvin vs °C).
+
+T > 80 °C → caution: equipment/material safety limits.
+
+T > 100 °C → critical warning unless pressurized system.
+
+Decimals: Up to 2 decimals.
+
+2. Output Validation & Thresholds
+
+Formula:
+
+𝜎T = σ25 * (1 + α * (T−25))
+
+Corrected Conductivity (σ_T, µS/cm)
+
+Must be finite, positive, and realistic.
+
+Hard Limits: 0 ≤ σ_T ≤ 2,000,000 µS/cm.
+
+Interpretation Bands:
+
+< 1 µS/cm → ultrapure/RO water (used in power plants, labs).
+
+50–1500 µS/cm → potable water range (WHO guidelines).
+
+> 5000 µS/cm → industrial/high-salinity water.
+
+> 200,000 µS/cm → brines; flag as extreme.
+
+Safety Flags:
+
+If σ_T increases > 100% from σ₂₅ → show “check input — unrealistic correction.”
+
+3. Edge Case Validations
+
+Division by zero: Not present in formula, but α = 0 → meaningless → block.
+
+Negative σ₂₅: Block, conductivity cannot be negative.
+
+α = 0 or negative: Block, invalid physical input.
+
+Temperature way outside range (e.g., -273, 5000): Block as unit error.
+
+NaN or Infinity: Block.
+
+False precision: Warn if > 6 decimals entered (misleading in audit reports).
+-->
