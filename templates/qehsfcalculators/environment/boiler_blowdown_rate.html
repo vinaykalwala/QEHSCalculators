@@ -483,7 +483,7 @@
         </div>
 
         <div class="note-card">
-            <h3>⚠️ Validations</h3>
+            <h3>⚠️ Input Validations</h3>
             <p>
                 ✔️ Feedwater TDS (F) must be positive.<br>
                 ✔️ Steam Generation Rate (S) must be positive.<br>
@@ -518,10 +518,20 @@ function showErrors(errors) {
 }
 
 function calculateBlowdownRate() {
-  // safe reads
-  const Fraw = document.getElementById("feedwaterTDS")?.value.trim() ?? "";
-  const Sraw = document.getElementById("steamRate")?.value.trim() ?? "";
-  const Braw = document.getElementById("boilerTDS")?.value.trim() ?? "";
+  // Helper: read and parse tolerant numbers (strip commas)
+  function parseNumRaw(id) {
+    const el = document.getElementById(id);
+    if (!el) return null;
+    const raw = (el.value ?? "").toString().trim();
+    if (raw === "") return null;
+    const cleaned = raw.replace(/,/g, "");
+    const n = parseFloat(cleaned);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  const F = parseNumRaw("feedwaterTDS"); // ppm
+  const S = parseNumRaw("steamRate");     // kg/h (expected)
+  const B = parseNumRaw("boilerTDS");    // ppm
 
   const errorBox = document.getElementById("resultError");
   const errorMessage = document.getElementById("errorMessage");
@@ -530,7 +540,7 @@ function calculateBlowdownRate() {
   const rateEl = document.getElementById("rateValue");
   const feedbackEl = document.getElementById("feedbackContent");
 
-  // reset
+  // Reset UI
   if (errorBox) errorBox.classList.add("hidden");
   if (errorMessage) errorMessage.innerHTML = "";
   if (feedbackEl) feedbackEl.innerHTML = "";
@@ -538,76 +548,59 @@ function calculateBlowdownRate() {
   const errors = [];
   const warnings = [];
 
-  // required
-  if (Fraw === "") errors.push("👉 Enter Feedwater TDS (F) — same units as Boiler TDS (e.g., mg/L or ppm).");
-  if (Sraw === "") errors.push("👉 Enter Steam Generation Rate (S) — specify units (e.g., kg/h or m³/h).");
-  if (Braw === "") errors.push("👉 Enter Boiler Water TDS (B) — same units as F.");
+  // Required checks
+  if (F === null) errors.push("👉 Enter Feedwater TDS (F) — numeric (ppm).");
+  if (S === null) errors.push("👉 Enter Steam Generation Rate (S) — numeric (kg/h).");
+  if (B === null) errors.push("👉 Enter Boiler Water TDS (B) — numeric (ppm).");
+  if (errors.length) { showErrors(errors); return; }
 
-  if (errors.length > 0) {
-    showErrors(errors);
-    return;
-  }
+  // Numeric validation
+  if (!(F >= 0)) errors.push("👉 Feedwater TDS (F) must be ≥ 0 (ppm).");
+  if (!(S > 0)) errors.push("👉 Steam Generation Rate (S) must be > 0 (kg/h).");
+  if (!(B > 0)) errors.push("👉 Boiler Water TDS (B) must be > 0 (ppm).");
 
-  // parse
-  const F = parseFloat(Fraw);
-  const S = parseFloat(Sraw);
-  const B = parseFloat(Braw);
+  if (errors.length) { showErrors(errors); return; }
 
-  if (!Number.isFinite(F) || F < 0) errors.push("👉 Feedwater TDS (F) must be a non-negative number.");
-  if (!Number.isFinite(S) || S <= 0) errors.push("👉 Steam Rate (S) must be a positive number (check units).");
-  if (!Number.isFinite(B) || B <= 0) errors.push("👉 Boiler TDS (B) must be a positive number.");
-
-  if (errors.length > 0) {
-    showErrors(errors);
-    return;
-  }
-
-  // logical check: B must be greater than F (denominator > 0)
+  // Logical validation: denominator
   const denom = B - F;
   if (denom <= 0) {
-    showErrors(["👉 Boiler TDS (B) must be greater than Feedwater TDS (F). Denominator (B - F) must be > 0."]);
+    showErrors(["👉 Invalid TDS values: Boiler TDS (B) must be greater than Feedwater TDS (F)."]);
     return;
   }
-  // warn if denom very small (can produce huge blowdown)
-  if (denom < Math.max(1e-6, 0.01 * Math.abs(B))) {
-    warnings.push("⚠️ B − F is very small — small measurement errors produce very large blowdown calculations. Verify TDS values.");
+
+  // Warn if denom is tiny (risk of huge blowdown)
+  const tinyThreshold = Math.max(1e-6, 0.001 * Math.abs(B)); // 0.1% of B or absolute tiny
+  if (denom < tinyThreshold) {
+    warnings.push("⚠️ (B − F) is very small — small measurement errors produce very large blowdown values. Verify TDS readings and units.");
   }
 
-  // core formula
-  const blowdownRate = (F * S) / denom; // same units as S
-
+  // Core formula (units: same units as S)
+  const blowdownRate = (F * S) / denom; // kg/h (if S is kg/h and F,B in ppm)
   if (!Number.isFinite(blowdownRate) || blowdownRate < 0) {
-    showErrors(["⚠️ Computation invalid. Check input values for unit consistency and signs."]);
+    showErrors(["⚠️ Computation invalid. Check inputs and unit consistency."]);
     return;
   }
 
-  // blowdown as percentage of steam generation
-  const blowdownPercent = (blowdownRate / S) * 100;
+  // Accept BDR == 0 as valid (e.g., F == 0)
+  const blowdownPercent = (S === 0) ? 0 : (blowdownRate / S) * 100;
 
-  // sanity warnings
-  if (blowdownRate > S) {
-    warnings.push("⚠️ Calculated blowdown exceeds steam generation (blowdown > S). This is usually not feasible — check inputs.");
-  }
-  if (blowdownPercent > 50) {
-    warnings.push("⚠️ Blowdown > 50% of steam — likely indicates measurement/calculation problem or extreme conditions.");
-  }
+  // Warnings for unrealistic magnitudes
+  if (blowdownRate > S) warnings.push("⚠️ Calculated blowdown exceeds steam generation (BDR > S). This is usually infeasible; check inputs and units.");
+  if (blowdownPercent > 20) warnings.push("🚫 Blowdown > 20% of steam generation — critical condition; immediate investigation advised.");
+  if (blowdownPercent > 5 && blowdownPercent <= 20) warnings.push("⚠️ Blowdown > 5% — high water usage; verify water treatment and control.");
 
-  // Feedback categories (use percent for meaningful interpretation)
+  // User-friendly interpretation (example thresholds)
   let feedback = "";
-  // Example thresholds — adapt to your plant policies
-  if (blowdownPercent <= 1) {
-    feedback = `✅ Low blowdown (≈ ${blowdownPercent.toFixed(2)}% of steam) — efficient operation.`;
-  } else if (blowdownPercent <= 5) {
-    feedback = `⚠️ Moderate blowdown (≈ ${blowdownPercent.toFixed(2)}%) — monitor and optimize.`;
-  } else {
-    feedback = `🔴 High blowdown (≈ ${blowdownPercent.toFixed(2)}%) — investigate control/calibration and water chemistry.`;
-  }
+  if (blowdownPercent <= 2) feedback = `✅ Efficient: Blowdown ≈ ${blowdownPercent.toFixed(2)}% of steam.`;
+  else if (blowdownPercent <= 5) feedback = `⚠️ Moderate: Blowdown ≈ ${blowdownPercent.toFixed(2)}% — consider optimisation.`;
+  else feedback = `🔴 High: Blowdown ≈ ${blowdownPercent.toFixed(2)}% — investigate treatment/control issues.`;
 
-  // present results (absolute + percent) + warnings
+  // Build details
   let details = `<div>Blowdown Rate: <b>${blowdownRate.toFixed(3)}</b> (same units as S)</div>`;
   details += `<div>Blowdown (% of steam): <b>${blowdownPercent.toFixed(2)}%</b></div>`;
   if (warnings.length) details += `<div style="margin-top:6px;color:#b35d00;">Note: ${warnings.join(" | ")}</div>`;
 
+  // Update UI
   if (rateEl) rateEl.textContent = blowdownRate.toFixed(3);
   if (feedbackEl) feedbackEl.innerHTML = `<div>${feedback}</div>${details}`;
 
@@ -615,6 +608,7 @@ function calculateBlowdownRate() {
   if (resultValue) resultValue.classList.remove("hidden");
   if (errorBox) errorBox.classList.add("hidden");
 }
+
 
 function printReport() {
   const el = document.getElementById('printDate');
@@ -631,3 +625,31 @@ function printReport() {
 </body>
 </html>
 {% endblock %}
+
+
+<!-- 
+📌 Boiler Blowdown Rate (BDR) Calculator
+
+🔹 Formula:
+    Blowdown Rate (BDR) = (Evaporation Rate × (TDS_feed / TDS_blowdown)) ÷ (1 - (TDS_feed / TDS_blowdown))
+
+    Where:
+        • Evaporation Rate = Steam generation (kg/hr or TPH).
+        • TDS_feed = Total Dissolved Solids in feedwater (mg/L or ppm).
+        • TDS_blowdown = Maximum permissible TDS in boiler water (mg/L or ppm).
+
+    Simplified form (commonly used in industries):
+        % Blowdown = (TDS_feed / TDS_blowdown) × 100
+
+---
+
+🔹 Validations:
+    ✔️ Evaporation Rate > 0 (steam generation cannot be zero or negative).  
+    ✔️ TDS_feed ≥ 0 (feedwater quality parameter).  
+    ✔️ TDS_blowdown > TDS_feed (boiler water must handle more TDS than feedwater).  
+    ✔️ TDS_blowdown ≤ 10,000 ppm (beyond this, boiler operation becomes unsafe).  
+    ✔️ Values must be numeric (no text/NaN).  
+    ❌ If TDS_feed ≥ TDS_blowdown → invalid (blowdown calculation not possible).  
+
+---
+-->

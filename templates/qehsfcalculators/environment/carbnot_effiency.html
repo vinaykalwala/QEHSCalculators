@@ -469,16 +469,17 @@
         </div>
 
         <div class="note-card">
-            <h3>⚠️ Strong validations (what is checked)</h3>
-            <ul>
-                <li>Both temperature inputs are required and must be finite numbers.</li>
-                <li><strong>Tᵢ > 0</strong> and <strong>Tₑ > 0</strong> - Temperatures must be positive values (Kelvin).</li>
-                <li><strong>Tᵢ > Tₑ</strong> - Inlet temperature must be higher than exhaust temperature.</li>
-                <li><strong>Tᵢ ≤ 5000 K</strong> - Values above 5000 K will trigger warnings as potentially unrealistic.</li>
-                <li><strong>Tₑ ≥ 100 K</strong> - Values below 100 K will trigger warnings as potentially unrealistic.</li>
-                <li>Efficiency results > 100% are physically impossible and will be flagged.</li>
+            <h3>✅ Input Validation </h3>
+            <ul class="note-list">
+                <li>Both <b>Tᵢ</b> (inlet temperature) and <b>Tₑ</b> (exhaust temperature) are required.</li>
+                <li>Inputs must be <b>positive finite numbers</b> in Kelvin (K).</li>
+                <li><b>Tᵢ</b> must be strictly <b>greater than Tₑ</b> for a valid Carnot cycle.</li>
+                <li>Values outside <b>300 K – 5000 K</b> (for Tᵢ) or <b>100 K – 2000 K</b> (for Tₑ) trigger warnings.</li>
+                <li>Very small ΔT (< 50 K) triggers a low-efficiency warning.</li>
+                <li>Efficiency is always ≤ 100% — higher values are invalid.</li>
             </ul>
         </div>
+
 
         <div class="note-card">
             <h3>🔎 Interpretation</h3>
@@ -519,7 +520,6 @@ function showErrors(errors) {
 
 /* Main Carnot Efficiency calculation with strong validations */
 function calculateCarnotEfficiency() {
-  // safe reads
   const TiRaw = document.getElementById("Ti")?.value.trim() ?? "";
   const TeRaw = document.getElementById("Te")?.value.trim() ?? "";
 
@@ -534,8 +534,8 @@ function calculateCarnotEfficiency() {
   const warnings = [];
 
   // required checks
-  if (TiRaw === "") errors.push("👉 Enter temperature at turbine inlet (Tᵢ) in Kelvin.");
-  if (TeRaw === "") errors.push("👉 Enter temperature at turbine exhaust (Tₑ) in Kelvin.");
+  if (TiRaw === "") errors.push("👉 Enter turbine inlet temperature (Tᵢ) in Kelvin.");
+  if (TeRaw === "") errors.push("👉 Enter turbine exhaust temperature (Tₑ) in Kelvin.");
 
   if (errors.length > 0) { showErrors(errors); return; }
 
@@ -543,26 +543,27 @@ function calculateCarnotEfficiency() {
   const Ti = parseFloat(TiRaw);
   const Te = parseFloat(TeRaw);
 
-  // numeric & sign checks
+  // numeric validation
   if (!Number.isFinite(Ti) || Ti <= 0) errors.push("👉 Tᵢ must be a positive finite number (Kelvin).");
   if (!Number.isFinite(Te) || Te <= 0) errors.push("👉 Tₑ must be a positive finite number (Kelvin).");
 
   if (errors.length > 0) { showErrors(errors); return; }
 
-  // thermodynamic validity checks
+  // thermodynamic law
   if (Te >= Ti) {
-    errors.push("👉 Tₑ must be less than Tᵢ for a valid efficiency calculation.");
+    errors.push("👉 Tₑ must be less than Tᵢ for a valid Carnot cycle.");
     showErrors(errors);
     return;
   }
 
-  // warning checks
-  if (Ti > 5000) warnings.push("⚠️ Tᵢ value seems very high - verify units and measurement.");
-  if (Te < 100) warnings.push("⚠️ Tₑ value seems very low - verify units and measurement.");
-  if (Ti - Te < 50) warnings.push("⚠️ Very small temperature difference - efficiency will be low.");
-  
-  // compute Carnot efficiency (%)
-  // formula: η = (Tᵢ - Tₑ) / Tᵢ × 100
+  // engineering warnings
+  if (Ti < 300) warnings.push("⚠️ Tᵢ below 300 K – unusual for turbines. Check units.");
+  if (Ti > 5000) warnings.push("⚠️ Tᵢ above 5000 K – unrealistic. Verify input.");
+  if (Te < 100) warnings.push("⚠️ Tₑ below 100 K – unrealistic for exhaust. Check input.");
+  if (Te > 2000) warnings.push("⚠️ Tₑ above 2000 K – too high. Likely unit error.");
+  if (Ti - Te < 50) warnings.push("⚠️ Very small ΔT – efficiency will be negligible.");
+
+  // compute efficiency
   const efficiency = ((Ti - Te) / Ti) * 100;
 
   if (!Number.isFinite(efficiency) || efficiency <= 0) {
@@ -570,30 +571,29 @@ function calculateCarnotEfficiency() {
     return;
   }
 
-  // Additional warning for extreme results
   if (efficiency > 100) {
-    warnings.push("⚠️ Efficiency exceeds 100% - physically impossible. Check temperature values.");
+    showErrors(["❌ Efficiency exceeds 100% – physically impossible. Recheck inputs."]);
+    return;
   }
 
-  // classification based on efficiency values
+  // classification & suggestions
   let classification = "";
   let suggestion = "";
-  
   if (efficiency > 60) {
     classification = "High Efficiency";
-    suggestion = "✅ Large temperature difference indicates potential for high performance. This represents the theoretical maximum.";
-  } else if (efficiency >= 30 && efficiency <= 60) {
+    suggestion = "✅ Large ΔT – represents best-case theoretical potential.";
+  } else if (efficiency >= 30) {
     classification = "Moderate Efficiency";
-    suggestion = "✅ Reasonable temperature difference. Typical for many practical heat engines.";
-  } else if (efficiency >= 10 && efficiency < 30) {
+    suggestion = "✅ Typical range for practical turbines and engines.";
+  } else if (efficiency >= 10) {
     classification = "Low Efficiency";
-    suggestion = "⚠️ Small temperature difference. Consider ways to increase Tᵢ or decrease Tₑ for better performance.";
+    suggestion = "⚠️ Inefficient – consider raising Tᵢ or lowering Tₑ.";
   } else {
     classification = "Very Low Efficiency";
-    suggestion = "❌ Minimal temperature difference. Likely impractical for energy conversion applications.";
+    suggestion = "❌ Impractical for safe industrial use or energy recovery.";
   }
 
-  // compose feedback content
+  // build feedback
   let details = `<div>Carnot efficiency = <b>${efficiency.toFixed(2)}</b>%</div>`;
   details += `<div>Classification: <b>${classification}</b></div>`;
   details += `<div style="margin-top:6px;">${suggestion}</div>`;
@@ -605,13 +605,12 @@ function calculateCarnotEfficiency() {
   if (efficiencyEl) efficiencyEl.textContent = efficiency.toFixed(2);
   if (feedbackEl) feedbackEl.innerHTML = details;
 
-  // toggle display
   document.getElementById("placeholder").classList.add("hidden");
   document.getElementById("resultValue").classList.remove("hidden");
   document.getElementById("resultError").classList.add("hidden");
 }
 
-/* safe print guard */
+/* Print report with date */
 function printReport() {
   const el = document.getElementById('printDate');
   if (el) {
@@ -622,6 +621,50 @@ function printReport() {
   window.print();
 }
 </script>
+
 </body>
 </html>
 {% endblock %}
+
+
+<!-- 
+📘 Formula (Carnot Efficiency):
+
+    η (%) = ((Tᵢ - Tₑ) / Tᵢ) × 100
+
+    where:
+      Tᵢ = Turbine inlet temperature (Kelvin)
+      Tₑ = Turbine exhaust temperature (Kelvin)
+
+---
+
+📏 Input Validations:
+
+1. Required:
+   - Tᵢ must be entered (Kelvin).
+   - Tₑ must be entered (Kelvin).
+
+2. Numeric checks:
+   - Both Tᵢ and Tₑ must be finite, positive numbers.
+   - Tₑ must be strictly less than Tᵢ (Carnot law).
+
+3. Engineering warnings:
+   - Tᵢ < 300 K → unusual for turbines (verify units).
+   - Tᵢ > 5000 K → unrealistic (check input).
+   - Tₑ < 100 K → unrealistic for exhaust (check input).
+   - Tₑ > 2000 K → too high (likely unit error).
+   - ΔT (Tᵢ - Tₑ) < 50 K → efficiency will be negligible.
+
+---
+
+📤 Output Validations:
+
+1. Efficiency must be a finite positive number.
+2. Efficiency cannot exceed 100% (physically impossible).
+3. Classification categories:
+   - > 60% → High Efficiency ✅
+   - 30–60% → Moderate Efficiency ✅
+   - 10–30% → Low Efficiency ⚠️
+   - < 10% → Very Low Efficiency ❌
+
+-->

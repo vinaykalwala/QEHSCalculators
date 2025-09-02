@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Boiler Efficiency Calculator{% endblock %}
+{% block title %}Cooling Load Temperature Difference (CLTD) Calculator{% endblock %}
 {% block content %}
 {% load static %}
 
@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Boiler Efficiency Calculator</title>
+    <title>Cooling Load Temperature Difference (CLTD) Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
@@ -419,306 +419,340 @@
 </head>
 <body>
 
-    <div class="btn-container">
-        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
-    </div>
+        <div class="btn-container">
+            <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+        </div>
 
-
-    <div class="calculator-container printable" id="printArea">
-
+<div class="calculator-container printable" id="printArea">
     {% include "includes/print_header_footer.html" %}
 
+
     <div class="calculator-header">
-        <h1>Boiler Efficiency Calculator</h1>
-        <p>Calculate the <strong>Boiler Efficiency (%)</strong> to measure how effectively a boiler converts fuel energy into useful steam energy.</p>
+        <h1>Cooling Load Temperature Difference (CLTD) Calculator</h1>
+        <p>Estimate heat gain through a surface using CLTD. Result primary unit: <strong>BTU/hr</strong> (tons of cooling also shown).</p>
     </div>
 
     <div class="calc-content">
         <!-- Calculator -->
         <div class="calc-card">
-            <h2>Enter Data</h2>
+            <h2>Enter Data (use consistent units)</h2>
 
             <div class="form-group">
-                <label for="heatExported">Heat Exported in Steam (BTU/hr)</label>
-                <input type="number" id="heatExported" class="form-input" min="1" step="any" placeholder="e.g., 50000">
+                <label for="uValue">U-Factor (BTU/hr·ft²·°F)</label>
+                <input type="number" id="uValue" class="form-input" step="any" placeholder="e.g., 0.06" aria-label="U-Factor" />
             </div>
 
             <div class="form-group">
-                <label for="heatProvided">Heat Provided by Fuel (BTU/hr)</label>
-                <input type="number" id="heatProvided" class="form-input" min="1" step="any" placeholder="e.g., 60000">
+                <label for="area">Surface Area (ft²)</label>
+                <input type="number" id="area" class="form-input" step="any" placeholder="e.g., 1200" aria-label="Surface area in square feet" />
             </div>
-            
-            <button class="calculate-btn" onclick="calculateEfficiency()">Calculate Efficiency</button>
+
+            <div class="form-group">
+                <label for="cltd">CLTD (°F)</label>
+                <input type="number" id="cltd" class="form-input" step="any" placeholder="e.g., 60" aria-label="CLTD in degrees Fahrenheit" />
+            </div>
+
+            <button class="calculate-btn" onclick="calculateCoolingLoad()">Calculate Cooling Load</button>
         </div>
 
         <!-- Result Section -->
         <div class="result-card">
             <div class="result-placeholder" id="placeholder">
-                <img src="https://cdn-icons-png.flaticon.com/512/4727/4727260.png" alt="Boiler efficiency illustration">
-                <p>This tool will calculate the <strong>Boiler Efficiency (%)</strong>.</p>
+                <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Cooling load illustration">
+                <p>Enter U-Factor, surface area and CLTD to estimate the cooling load for that surface.</p>
             </div>
-            
-            <div class="result-error hidden" id="resultError">
+
+            <div class="result-error hidden" id="resultError" role="alert" aria-live="assertive">
                 <div class="error-icon">❌</div>
                 <div class="error-message" id="errorMessage"></div>
             </div>
-             
-            <div class="result-value hidden" id="resultValue">
-                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
-                    <h2>Calculated Boiler Efficiency</h2>
+
+            <div class="result-value hidden" id="resultValue" aria-live="polite">
+                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:8px; color:#1560bd;">
+                    <h2>Cooling Load</h2>
                 </div>
 
-                <div class="rate-display">
-                <div class="rate-value" id="rateValue">0.00<div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">%</div></div>
-                <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">%</div>
+                <div class="rate-display" style="flex-direction:column; gap:8px; align-items:center;">
+                    <div style="display:flex; gap:8px; align-items:baseline;">
+                        <div class="rate-value" id="coolingLoadValue">0</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:18px; font-weight:bold;">BTU/hr</div>
+                    </div>
+
+                    <div id="convertedCoolingValues" style="font-size:0.95rem; color:#333;"></div>
                 </div>
 
-                <div class="result-feedback">
-                    <div class="feedback-title">Assessment</div>
+                <div class="result-feedback" style="margin-top:12px;">
+                    <div class="feedback-title">Assessment & Notes</div>
                     <div class="feedback-content" id="feedbackContent"></div>
                 </div>
-                <div class="btn-wrapper">
+
+                <div class="btn-wrapper" style="margin-top:12px;">
                     <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Notes Section -->
+    <!-- Notes Section (concise, relevant to CLTD) -->
     <div class="note-section">
         <div class="note-card">
-            <h3>📘 About This Calculator</h3>
+            <h3>📘 About</h3>
             <p>
-                The <strong>Boiler Efficiency Calculator</strong> determines how effectively a boiler converts 
-                <strong>fuel energy</strong> into useful <strong>steam energy</strong>, reducing energy waste and operating costs.
+                This calculator estimates the heat gain through a building surface using the CLTD approach.
+                Provide U-factor in BTU/hr·ft²·°F, surface area in ft², and CLTD in °F (use values appropriate for your climate, orientation and time-of-day).
             </p>
         </div>
-        
+
         <div class="note-card">
-            <h3>📊 Interpretation</h3>
+            <h3>📏 Units & typical ranges</h3>
             <ul class="note-list">
-                <li><span class="bad">Efficiency &lt; 60%</span> → 🔴 Poor efficiency (High energy loss).</li>
-                <li><span class="average">60% ≤ Efficiency ≤ 85%</span> → ⚠️ Moderate efficiency (Needs optimization).</li>
-                <li><span class="good">Efficiency &gt; 85%</span> → ✅ High efficiency (Good fuel utilization).</li>
+                <li><strong>U-Factor</strong>: BTU/hr·ft²·°F — typical: 0.02 – 0.2 (very well insulated → high-loss assemblies outside this range trigger warnings).</li>
+                <li><strong>Surface Area</strong>: ft² — typical: 1 – 50,000 (roof and large façade areas possible; very small or huge entries will warn).</li>
+                <li><strong>CLTD</strong>: °F — typical: 20 – 120 (depends on material, orientation, time-of-day and climate).</li>
+                <li><strong>Result</strong>: BTU/hr and tons of cooling (1 ton = 12,000 BTU/hr).</li>
             </ul>
         </div>
 
-        
-
         <div class="note-card">
-            <h3>⚠️ Input Validations</h3>
-            <p>
-                ✔️ Heat Exported in Steam must be a positive value.<br>
-                ✔️ Heat Provided by Fuel must be a positive value.<br>
-                ❌ Zero or negative values are invalid.<br>
-                ❌ Non-numeric entries are invalid.
-            </p>
+        <h3>🛡️ Input Validations</h3>
+        <ul class="note-list">
+            <li>All fields (U-Factor, Area, CLTD) are required.</li>
+            <li>Values must be numeric and finite.</li>
+            <li>U-Factor must be greater than 0.</li>
+            <li>Surface Area must be greater than 0 ft².</li>
+            <li>CLTD must be greater than 0 °F.</li>
+            <li>Unusually high or low values trigger warnings (but still calculate).</li>
+            <li>Errors block calculation until corrected.</li>
+        </ul>
         </div>
 
+
         <div class="note-card">
-            <h3>🌍 Key Applications</h3>
+    <h3>🌍 Applications</h3>
             <ul class="note-list">
-                <li><strong>Power Plants:</strong> Efficiency monitoring and optimization.</li>
-                <li><strong>Industrial Boilers:</strong> Energy cost reduction & performance tracking.</li>
-                <li><strong>Energy Audits:</strong> Compliance with energy-saving standards.</li>
+                <li><strong>Building Design:</strong> Helps architects and engineers size walls, roofs, and windows for thermal efficiency.</li>
+                <li><strong>HVAC System Sizing:</strong> Used to estimate the cooling load needed for selecting air conditioners and chillers.</li>
+                <li><strong>Energy Efficiency Studies:</strong> Assists in evaluating insulation performance and reducing energy consumption.</li>
+                <li><strong>Green Building Projects:</strong> Supports sustainable design by analyzing heat gains and optimizing materials.</li>
             </ul>
         </div>
     </div>
 
+    <!-- Hidden fallback print date if print header doesn't include it -->
+    <span id="printDate" style="display:none;"></span>
 </div>
 
 <script>
-/* Helper: show errors consistently */
+/* Unified error display */
 function showErrors(errors) {
   const errorBox = document.getElementById("resultError");
   const errorMessage = document.getElementById("errorMessage");
   const placeholder = document.getElementById("placeholder");
   const resultValue = document.getElementById("resultValue");
 
-  if (errorMessage) errorMessage.innerHTML = errors.join("<br>");
+  if (errorMessage) {
+    errorMessage.innerHTML = `
+      <div class="note-card">
+        <h3>⚠️ Input Validation Errors</h3>
+        <ul class="note-list">
+          ${errors.map(err => `<li>${err}</li>`).join("")}
+        </ul>
+      </div>
+    `;
+  }
   if (errorBox) errorBox.classList.remove("hidden");
   if (placeholder) placeholder.classList.add("hidden");
   if (resultValue) resultValue.classList.add("hidden");
 }
 
-/* Helper: parse numeric tolerant (strip commas) */
-function parseNumeric(id) {
-  const el = document.getElementById(id);
-  if (!el) return null;
-  const raw = (el.value ?? "").toString().trim().replace(/,/g, "");
-  if (raw === "") return null;
-  const n = parseFloat(raw);
-  return Number.isFinite(n) ? n : null;
-}
-
-/* Main calculation with robust validations */
-function calculateEfficiency() {
-  // Read inputs safely
-  const heatExported = parseNumeric("heatExported"); // Q_out
-  const heatProvided = parseNumeric("heatProvided"); // Q_in
+/* CLTD-based cooling load calculation (with note-card validation) */
+function calculateCoolingLoad() {
+  // safe reads
+  const uRaw = document.getElementById("uValue")?.value.trim() ?? "";
+  const areaRaw = document.getElementById("area")?.value.trim() ?? "";
+  const cltdRaw = document.getElementById("cltd")?.value.trim() ?? "";
 
   const errorBox = document.getElementById("resultError");
-  const errorMessage = document.getElementById("errorMessage");
   const placeholder = document.getElementById("placeholder");
   const resultValue = document.getElementById("resultValue");
-  const rateEl = document.getElementById("rateValue");
+  const loadEl = document.getElementById("coolingLoadValue");
+  const convertedEl = document.getElementById("convertedCoolingValues");
   const feedbackEl = document.getElementById("feedbackContent");
 
-  // Reset UI
+  // reset UI
   if (errorBox) errorBox.classList.add("hidden");
-  if (errorMessage) errorMessage.innerHTML = "";
   if (feedbackEl) feedbackEl.innerHTML = "";
+  if (loadEl) loadEl.textContent = "0";
+  if (convertedEl) convertedEl.textContent = "";
 
   const errors = [];
   const warnings = [];
 
-  // Required presence checks
-  if (heatExported === null) errors.push("👉 Please enter Heat Exported in steam (same units as Heat Provided).");
-  if (heatProvided === null) errors.push("👉 Please enter Heat Provided by fuel (same units as Heat Exported).");
+  // required checks
+  if (uRaw === "") errors.push("Enter U-Factor (BTU/hr·ft²·°F).");
+  if (areaRaw === "") errors.push("Enter Surface Area (ft²).");
+  if (cltdRaw === "") errors.push("Enter CLTD (°F).");
+  if (errors.length) { showErrors(errors); return; }
 
-  if (errors.length > 0) {
-    showErrors(errors);
+  // parse
+  const U = parseFloat(uRaw);
+  const A = parseFloat(areaRaw);
+  const CLTD = parseFloat(cltdRaw);
+
+  // numeric checks
+  if (!Number.isFinite(U)) errors.push("U-Factor must be a finite number.");
+  if (!Number.isFinite(A)) errors.push("Area must be a finite number.");
+  if (!Number.isFinite(CLTD)) errors.push("CLTD must be a finite number.");
+  if (errors.length) { showErrors(errors); return; }
+
+  // sign checks
+  if (U <= 0) errors.push("U-Factor must be > 0.");
+  if (A <= 0) errors.push("Surface Area must be > 0 ft².");
+  if (CLTD <= 0) errors.push("CLTD must be > 0 °F.");
+  if (errors.length) { showErrors(errors); return; }
+
+  // plausibility warnings (non-blocking)
+  if (U < 0.001) warnings.push("U-Factor very low (<0.001) — check units.");
+  if (U > 5) warnings.push("U-Factor very high (>5) — possible unit error.");
+  if (A < 0.1) warnings.push("Area unusually small (<0.1 ft²).");
+  if (A > 100000) warnings.push("Area unusually large (>100,000 ft²).");
+  if (CLTD < 5) warnings.push("CLTD very small (<5 °F).");
+  if (CLTD > 300) warnings.push("CLTD very large (>300 °F).");
+
+  // compute cooling load (BTU/hr)
+  const coolingLoad = U * A * CLTD;
+
+  if (!Number.isFinite(coolingLoad) || coolingLoad <= 0) {
+    showErrors(["Computed cooling load is invalid. Check inputs."]);
     return;
   }
 
-  // Numeric & sign checks
-  if (!(heatExported >= 0)) errors.push("👉 Heat Exported must be a non-negative number.");
-  if (!(heatProvided > 0)) errors.push("👉 Heat Provided must be a positive number (cannot be zero).");
+  // result plausibility
+  if (coolingLoad < 100) warnings.push("Very small cooling load (<100 BTU/hr).");
+  if (coolingLoad > 1e6) warnings.push("Extremely large cooling load (>1,000,000 BTU/hr).");
 
-  if (errors.length > 0) {
-    showErrors(errors);
-    return;
-  }
+  // conversions
+  const tons = coolingLoad / 12000;
+  const cooling_kW = coolingLoad * 0.00029307107;
 
-  // Tiny denominator guard
-  const EPS = 1e-12;
-  if (Math.abs(heatProvided) < EPS) {
-    showErrors(["⚠️ Heat Provided is too small or zero — check units and input value."]);
-    return;
-  }
-
-  // Logical consistency: HeatExported must not exceed HeatProvided by large margin
-  const ratio = heatExported / heatProvided;
-  if (ratio > 1.05) {
-    showErrors(["❌ Invalid input: Heat Exported exceeds Heat Provided by more than 5% — check units and measurements."]);
-    return;
-  } else if (ratio > 1.0) {
-    warnings.push("⚠️ Heat Exported slightly greater than Heat Provided (≤5%): possible measurement or rounding differences.");
-  }
-
-  // Reasonableness warnings for magnitudes
-  if (heatProvided > 1e9 || heatExported > 1e9) warnings.push("⚠️ Very large energy values — verify units (BTU/hr vs kW etc.).");
-  if (heatProvided < 1e-6) warnings.push("⚠️ Very small Heat Provided — check units.");
-  // Compute efficiency
-  const efficiency = (heatExported / heatProvided) * 100; // percentage
-  const heatLoss = heatProvided - heatExported;
-  const heatLossPercent = (heatLoss / heatProvided) * 100;
-
-  // Post computation sanity checks
-  if (!Number.isFinite(efficiency)) {
-    showErrors(["⚠️ Calculation produced invalid efficiency. Check inputs."]);
-    return;
-  }
-
-  if (efficiency > 120) warnings.push("⚠️ Efficiency > 120% — likely unit mismatch or measurement error.");
-  if (efficiency < 5) warnings.push("⚠️ Extremely low efficiency (<5%) — verify instrumentation and energy accounting.");
-
-  // Feedback categorization (industry-generic)
-  let statusMsg = "";
-  if (efficiency < 60) {
-    statusMsg = "🔴 Poor efficiency (High energy loss).";
-  } else if (efficiency >= 60 && efficiency <= 85) {
-    statusMsg = "⚠️ Moderate efficiency (Needs optimization).";
+  // classification
+  let classification = "";
+  let suggestion = "";
+  if (coolingLoad < 10000) {
+    classification = "Small cooling load (<10,000 BTU/hr)";
+    suggestion = "Consider small packaged units or split systems.";
+  } else if (coolingLoad < 50000) {
+    classification = "Moderate load (10k–50k BTU/hr)";
+    suggestion = "Rooftop units or multiple splits are appropriate.";
+  } else if (coolingLoad < 200000) {
+    classification = "Large load (50k–200k BTU/hr)";
+    suggestion = "Central plant or multiple large units recommended.";
   } else {
-    statusMsg = "✅ High efficiency (Good fuel utilization).";
+    classification = "Very large (>200k BTU/hr)";
+    suggestion = "Requires detailed engineering and staged equipment.";
   }
 
-  // Build details HTML
-  let details = `<div>Efficiency: <b>${efficiency.toFixed(2)}%</b></div>`;
-  details += `<div>Heat loss: <b>${heatLoss.toFixed(3)}</b> (same units as inputs)</div>`;
-  details += `<div>Heat loss (%): <b>${heatLossPercent.toFixed(2)}%</b></div>`;
+  // build details
+  let details = `<div style="font-weight:600;">${classification}</div>`;
+  details += `<div style="margin-top:6px;">${suggestion}</div>`;
+  details += `<div style="margin-top:8px;">Inputs — U-Factor: <b>${U.toFixed(4)}</b>, Area: <b>${A.toFixed(2)} ft²</b>, CLTD: <b>${CLTD.toFixed(2)} °F</b></div>`;
+  if (warnings.length) {
+    details += `
+      <div class="note-card" style="margin-top:10px;">
+        <h3>⚠️ Warnings</h3>
+        <ul class="note-list">
+          ${warnings.map(w => `<li>${w}</li>`).join("")}
+        </ul>
+      </div>
+    `;
+  }
 
-  if (warnings.length) details += `<div style="margin-top:6px; color:#b35d00;">Note: ${warnings.join(" | ")}</div>`;
+  // update UI
+  loadEl.textContent = coolingLoad.toLocaleString(undefined, {maximumFractionDigits:2});
+  convertedEl.innerHTML = `${tons.toFixed(2)} tons · ${cooling_kW.toFixed(2)} kW`;
+  if (feedbackEl) feedbackEl.innerHTML = details;
 
-  // Update UI
-  if (rateEl) rateEl.textContent = efficiency.toFixed(2);
-  if (feedbackEl) feedbackEl.innerHTML = `<div>${statusMsg}</div>${details}`;
-
-  if (placeholder) placeholder.classList.add("hidden");
-  if (resultValue) resultValue.classList.remove("hidden");
+  // toggle display
+  placeholder.classList.add("hidden");
+  resultValue.classList.remove("hidden");
   if (errorBox) errorBox.classList.add("hidden");
 }
 
-/* printReport - safe guard for print label */
+/* safe print guard */
 function printReport() {
-  const el = document.getElementById('printDate');
-  if (el) {
-    const now = new Date();
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    el.textContent = now.toLocaleDateString('en-IN', options);
+  let el = document.getElementById('printDate');
+  if (!el) {
+    el = document.createElement('span');
+    el.id = 'printDate';
+    el.style.display = 'none';
+    document.body.appendChild(el);
   }
+  const now = new Date();
+  el.textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   window.print();
 }
 </script>
 
 
-<script src="{% static 'js/print.js' %}"></script>
 
+
+    <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
 {% endblock %}
 
 
-<!-- /*  
-========================================================
-📘 BOILER EFFICIENCY CALCULATOR FORMULA & VALIDATIONS
-========================================================
+<!-- ============================================================
+📌 Cooling Load (CLTD Method)
+------------------------------------------------------------
+Formula:
+    Q = U × A × CLTD
 
-🔹 Formula Used:
-   Efficiency (%) = ( Q_out / Q_in ) × 100
-   where,
-     Q_out = Heat Exported in Steam (BTU/hr or same units)
-     Q_in  = Heat Provided by Fuel (BTU/hr or same units)
+Where:
+    Q     = Cooling Load (BTU/hr)  
+    U     = Overall heat transfer coefficient (BTU/hr·ft²·°F)  
+    A     = Surface area (ft²)  
+    CLTD  = Cooling Load Temperature Difference (°F)  
 
-   Heat Loss = Q_in - Q_out  
-   Heat Loss (%) = ( Heat Loss / Q_in ) × 100  
+Conversions:
+    Tons of refrigeration = Q / 12,000  
+    Cooling power (kW)    = Q × 0.00029307107  
 
---------------------------------------------------------
-🔹 Input Validations:
-1. Required Checks:
-   - Heat Exported must be entered.
-   - Heat Provided must be entered.
+------------------------------------------------------------
+✅ Input Validations:
 
-2. Numeric & Sign Checks:
-   - Heat Exported ≥ 0 (non-negative).
-   - Heat Provided > 0 (strictly positive, cannot be zero).
-   - Non-numeric entries → invalid.
+- U-Factor (U):  
+  • Required, must be a finite number > 0  
+  • Warnings:  
+    - U < 0.001 → very low, check units  
+    - U > 5 → very high, possible unit error  
 
-3. Division Safety:
-   - Guard against denominator ≈ 0 (Heat Provided very small).
+- Surface Area (A):  
+  • Required, must be a finite number > 0  
+  • Warnings:  
+    - A < 0.1 ft² → unusually small  
+    - A > 100,000 ft² → unusually large  
 
-4. Logical Consistency:
-   - Heat Exported cannot exceed Heat Provided by large margin.
-     • If Q_out > Q_in × 1.05 → ❌ Invalid (units/measurement error).
-     • If Q_out > Q_in but within 5% → ⚠️ Warning (possible rounding error).
+- CLTD:  
+  • Required, must be a finite number > 0 °F  
+  • Warnings:  
+    - CLTD < 5 °F → very small  
+    - CLTD > 300 °F → extremely high  
 
-5. Range / Sanity Checks:
-   - Very large values ( > 1e9 ) → ⚠️ Check units (BTU/hr vs kW etc.).
-   - Very small values ( < 1e-6 ) → ⚠️ Likely unit error.
-   - Efficiency > 120% → ⚠️ Likely measurement or unit mismatch.
-   - Efficiency < 5% → ⚠️ Extremely low, check instrumentation.
+------------------------------------------------------------
+🎯 Output Validations:
 
---------------------------------------------------------
-🔹 Efficiency Assessment:
-   - Efficiency < 60%  → 🔴 Poor efficiency (High energy loss).
-   - 60% ≤ Efficiency ≤ 85% → ⚠️ Moderate efficiency (Needs optimization).
-   - Efficiency > 85%  → ✅ High efficiency (Good fuel utilization).
+- Q must be finite and > 0  
+- Warnings on computed load:  
+  • Q < 100 BTU/hr → very small  
+  • Q > 1,000,000 BTU/hr → extremely large, likely input error  
 
---------------------------------------------------------
-🌍 Key Applications:
-   - Power Plants → Efficiency monitoring.
-   - Industrial Boilers → Reduce fuel cost, track performance.
-   - Energy Audits → Compliance with energy standards.
+------------------------------------------------------------
+📊 Load Classification & Guidance:
 
-========================================================
-*/ -->
+- Q < 10,000 BTU/hr → Small load → Small packaged units / splits  
+- 10,000 ≤ Q < 50,000 BTU/hr → Moderate → Rooftop or multiple splits  
+- 50,000 ≤ Q < 200,000 BTU/hr → Large → Central plant / multiple units  
+- Q ≥ 200,000 BTU/hr → Very large → Requires staged equipment & engineering  
+
+============================================================ -->

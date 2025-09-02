@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Air Changes per Hour (ACH) Calculator{% endblock %}
+{% block title %}Cyclone Collection Particle Removal Efficiency Calculator{% endblock %}
 {% block content %}
 {% load static %}
 
@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Air Changes per Hour (ACH) Calculator</title>
+    <title>Cyclone Collection Particle Removal Efficiency Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
@@ -55,11 +55,15 @@
         }
 
         .calculator-header h1 {
-            color: #1560bd;
-            font-weight: 700;
-            margin-bottom: 10px;
-            font-size: 2.5rem;
-        }
+        color: #1560bd;
+        font-weight: 700;
+        margin-bottom: 10px;
+        font-size: clamp(1.5rem, 4vw, 2.5rem); /* responsive font size */
+        line-height: 1.2; /* reduce line spacing */
+        text-align: center;
+        word-break: break-word; /* prevent overflow */
+    }
+
         
         .calculator-header p {
             color: #7f8c8d;
@@ -421,15 +425,15 @@
 
         <div class="btn-container">
         <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
-    </div>
-
-    <div class="calculator-container printable" id="printArea">
-
+        </div>
+<div class="calculator-container printable" id="printArea">
     {% include "includes/print_header_footer.html" %}
 
+
+
     <div class="calculator-header">
-        <h1>Air Changes per Hour (ACH) Calculator</h1>
-        <p>Calculate how many times the air in a space is replaced per hour using airflow rate and room volume.</p>
+        <h1>Cyclone Collection Particle Removal Efficiency Calculator</h1>
+        <p>Calculate the <strong>Fractional Collection Efficiency (η)</strong> for cyclone separators in air pollution control systems.</p>
     </div>
 
     <div class="calc-content">
@@ -438,23 +442,25 @@
             <h2>Enter Data</h2>
 
             <div class="form-group">
-                <label for="airflowRate">Airflow Rate (m³/min)</label>
-                <input type="number" id="airflowRate" class="form-input" min="0.1" step="any" placeholder="e.g., 500">
+                <label for="particleDia">Particle Diameter (dₚ) [μm]:</label>
+                <input type="number" id="particleDia" class="form-input" min="0.001" step="any" placeholder="e.g., 5.0">
+                
             </div>
 
             <div class="form-group">
-                <label for="volume">Volume of Space (m³)</label>
-                <input type="number" id="volume" class="form-input" min="1" step="any" placeholder="e.g., 3000">
+                <label for="cutoffDia">Cut-off Diameter (dₚc) [μm]:</label>
+                <input type="number" id="cutoffDia" class="form-input" min="0.001" step="any" placeholder="e.g., 2.5">
+                
             </div>
             
-            <button class="calculate-btn" onclick="calculateACH()">Calculate ACH</button>
+            <button class="calculate-btn" onclick="calculateEfficiency()">Calculate Efficiency</button>
         </div>
 
         <!-- Result Section -->
         <div class="result-card">
             <div class="result-placeholder" id="placeholder">
-                <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Air flow illustration">
-                <p>This tool will calculate the <strong>Air Changes per Hour (ACH)</strong>.</p>
+                <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Cyclone efficiency illustration">
+                <p>This tool will calculate the <strong>Fractional Collection Efficiency (η)</strong>.</p>
             </div>
             
             <div class="result-error hidden" id="resultError">
@@ -464,16 +470,16 @@
              
             <div class="result-value hidden" id="resultValue">
                 <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
-                    <h2>Calculated ACH</h2>
+                    <h2>Calculated Collection Efficiency</h2>
                 </div>
 
                 <div class="rate-display">
-                <div class="rate-value" id="rateValue">0.00</div>
-                <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">Air Changes/hour</div>
+                    <div class="rate-value" id="rateValue">0.00</div>
+                    <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">%</div>
                 </div>
-                
+
                 <div class="result-feedback">
-                    <div class="feedback-title">Assessment</div>
+                    <div class="feedback-title">Performance Assessment</div>
                     <div class="feedback-content" id="feedbackContent"></div>
                 </div>
                 <div class="btn-wrapper">
@@ -488,50 +494,62 @@
         <div class="note-card">
             <h3>📘 About This Calculator</h3>
             <p>
-                The <strong>ACH Calculator</strong> determines the number of times per hour that the total volume of air 
-                in a space is replaced, based on the airflow rate and the space’s volume.
+                The <strong>Cyclone Collection Efficiency Calculator</strong> determines the efficiency with which
+                a cyclone separator captures particles of a specific size, based on the cut-off diameter.
             </p>
         </div>
         
-        
-
         <div class="note-card">
-            <h3>📊 Interpretation</h3>
+            <h3>📊 Efficiency Interpretation</h3>
             <ul class="note-list">
-                <li><span class="good">ACH ≥ 6</span> → 🌟 Excellent ventilation.</li>
-                <li><span class="average">ACH 4–6</span> → ✅ Good ventilation.</li>
-                <li><span class="average">ACH 2–4</span> → 🟢 Fair ventilation.</li>
-                <li><span class="bad">ACH &lt; 2</span> → 🔴 Poor ventilation.</li>
+                <li><span class="good">η ≥ 90%</span> → ✅ Excellent collection (Highly effective)</li>
+                <li><span class="average">70% ≤ η < 90%</span> → ⚠️ Good collection (Adequate for most applications)</li>
+                <li><span class="bad">η < 70%</span> → 🔴 Poor collection (Consider system improvements)</li>
             </ul>
         </div>
 
         <div class="note-card">
-            <h3>⚠️ Limitations</h3>
-            <p>
-                While ACH is a useful measure of ventilation effectiveness, it does not directly account for airflow 
-                distribution, filtration efficiency, or pollutant sources inside the space. Always combine ACH values 
-                with other indoor air quality assessments for accurate evaluation.
-            </p>
-        </div>
+            <h3>⚠️ Input Validations</h3>
+            <ul class="note-list">
+                <li>👉 <b>Particle Diameter (dₚ)</b> is required and must be > 0 μm</li>
+                <li>👉 <b>Cut-off Diameter (dₚc)</b> is required and must be > 0 μm</li>
+                <li>⚠️ Particle Diameter > 100 μm → warning: unusually large particle size</li>
+                <li>⚠️ Cut-off Diameter > 20 μm → warning: may indicate inefficient cyclone design</li>
+                <li>⚠️ Ratio (dₚ/dₚc) < 0.1 → warning: very small particles relative to cut-off size (low efficiency)</li>
+                <li>⚠️ Ratio (dₚ/dₚc) > 10 → warning: very large particles relative to cut-off size (high efficiency)</li>
+                <li>❌ Non-numeric, zero, or negative inputs are invalid</li>
+                <li>❌ Computed efficiency outside 0–100% is invalid</li>
+            </ul>
+            </div>
+
 
         <div class="note-card">
-            <h3>✔️ Input Validations</h3>
+            <h3>📏 Units & Typical Ranges</h3>
             <ul class="note-list">
-                <li><strong>Air Flow Rate (Q):</strong> Must be > 0 and ≤ 100,000 m³/h (practical HVAC/ventilation range).</li>
-                <li><strong>Room Volume (V):</strong> Must be > 0 and ≤ 50,000 m³ (typical for residential, commercial, or industrial spaces).</li>
-                <li><strong>Decimals:</strong> Up to 2 decimal places allowed for precision.</li>
-                <li><strong>Logical Check:</strong> If Room Volume = 0 → ACH cannot be calculated (division by zero).</li>
-                <li><strong>Practical Check:</strong> ACH values usually range from 2–20 for normal spaces; >20 indicates special environments like hospitals or labs.</li>
+                <li><strong>Particle Diameter (dₚ):</strong> Micrometers (μm), typical range: 0.1-100 μm</li>
+                <li><strong>Cut-off Diameter (dₚc):</strong> Micrometers (μm), typical range: 0.5-10 μm</li>
+                <li><strong>Collection Efficiency (η):</strong> Percentage (0-100%)</li>
             </ul>
         </div>
-
 
         <div class="note-card">
             <h3>🌍 Key Applications</h3>
             <ul class="note-list">
-                <li><strong>Hospitals:</strong> Infection control through air replacement.</li>
-                <li><strong>Laboratories & Cleanrooms:</strong> Ensuring contamination-free environments.</li>
-                <li><strong>Commercial & Residential Spaces:</strong> Maintaining healthy indoor air quality.</li>
+                <li><strong>Air Pollution Control:</strong> Designing and evaluating cyclone separators</li>
+                <li><strong>Industrial Processes:</strong> Dust collection in manufacturing facilities</li>
+                <li><strong>Powder Processing:</strong> Particle separation in pharmaceutical and chemical industries</li>
+                <li><strong>Environmental Monitoring:</strong> Assessing particulate matter control systems</li>
+                <li><strong>HVAC Systems:</strong> Evaluating air filtration efficiency</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h3>🔬 Technical Notes</h3>
+            <ul class="note-list">
+                <li>The formula is based on the classical cyclone efficiency model</li>
+                <li>Efficiency depends on the square of the particle diameter to cut-off diameter ratio</li>
+                <li>Small changes in dₚ/dₚc ratio significantly impact collection efficiency</li>
+                <li>Actual field performance may vary due to factors like particle shape, density, and gas viscosity</li>
             </ul>
         </div>
     </div>
@@ -539,161 +557,166 @@
 </div>
 
 <script>
-/* Helper to show error box consistently */
-
-/* Helper to show error messages */
+/* Show error messages */
 function showErrors(errors) {
-  const errorBox = document.getElementById('resultError');
-  const errorMessage = document.getElementById('errorMessage');
-  const placeholder = document.getElementById('placeholder');
-  const resultValue = document.getElementById('resultValue');
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
 
-  if (errorMessage) errorMessage.innerHTML = errors.join('<br>');
-  if (errorBox) errorBox.classList.remove('hidden');
-  if (placeholder) placeholder.classList.add('hidden');
-  if (resultValue) resultValue.classList.add('hidden');
+  errorMessage.innerHTML = errors.join("<br>");
+  errorBox.classList.remove("hidden");
+  placeholder.classList.add("hidden");
+  resultValue.classList.add("hidden");
 }
 
-/* ACH Calculator with industry-standard validations */
-function calculateACH() {
-  const airflowRaw = document.getElementById('airflowRate')?.value.trim() ?? "";
-  const volumeRaw  = document.getElementById('volume')?.value.trim() ?? "";
+function calculateEfficiency() {
+  const particleDiaRaw = document.getElementById("particleDia").value.trim();
+  const cutoffDiaRaw = document.getElementById("cutoffDia").value.trim();
 
-  const errorBox = document.getElementById('resultError');
-  const errorMessage = document.getElementById('errorMessage');
-  const placeholder = document.getElementById('placeholder');
-  const resultValue = document.getElementById('resultValue');
-  const rateEl = document.getElementById('rateValue');
-  const feedbackEl = document.getElementById('feedbackContent');
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+  const rateEl = document.getElementById("rateValue");
+  const feedbackEl = document.getElementById("feedbackContent");
 
-  // Reset UI
-  if (errorBox) errorBox.classList.add('hidden');
-  if (errorMessage) errorMessage.innerHTML = "";
-  if (feedbackEl) feedbackEl.innerHTML = "";
+  errorBox.classList.add("hidden");
+  errorMessage.innerHTML = "";
+  feedbackEl.innerHTML = "";
 
   const errors = [];
   const warnings = [];
 
-  // ✅ Required checks
-  if (airflowRaw === "") errors.push("👉 Please enter the Airflow Rate (m³/min).");
-  if (volumeRaw === "") errors.push("👉 Please enter the Volume (m³).");
-  if (errors.length > 0) return showErrors(errors);
+  // Empty field validation
+  if (particleDiaRaw === "") errors.push("👉 Please enter Particle Diameter (dₚ) in μm.");
+  if (cutoffDiaRaw === "") errors.push("👉 Please enter Cut-off Diameter (dₚc) in μm.");
+  if (errors.length) return showErrors(errors);
 
-  // ✅ Parse values
-  const airflowRate = parseFloat(airflowRaw);
-  const volume = parseFloat(volumeRaw);
+  const particleDia = parseFloat(particleDiaRaw);
+  const cutoffDia = parseFloat(cutoffDiaRaw);
 
-  if (!Number.isFinite(airflowRate) || !Number.isFinite(volume)) {
-    return showErrors(["⚠️ Enter valid numeric values for airflow rate and volume."]);
+  // Numeric and positivity checks
+  if (!Number.isFinite(particleDia) || particleDia <= 0) {
+    errors.push("👉 Particle Diameter must be a positive numeric value (> 0 μm).");
+  }
+  if (!Number.isFinite(cutoffDia) || cutoffDia <= 0) {
+    errors.push("👉 Cut-off Diameter must be a positive numeric value (> 0 μm).");
+  }
+  if (errors.length) return showErrors(errors);
+
+  // Range validations (based on QEHS/industry norms)
+  if (particleDia < 0.1) warnings.push("⚠️ Particle diameter is extremely fine (<0.1 μm). Cyclones are generally ineffective for ultrafine particles.");
+  if (particleDia > 100) warnings.push("⚠️ Particle diameter >100 μm. Large particles usually settle before cyclone entry. Verify data.");
+
+  if (cutoffDia < 0.5) warnings.push("⚠️ Cut-off diameter <0.5 μm is unrealistic for cyclone separators. Check system design assumptions.");
+  if (cutoffDia > 20) warnings.push("⚠️ Cut-off diameter >20 μm may indicate poor cyclone design or abnormal conditions.");
+
+  // Logical consistency
+  if (particleDia === cutoffDia) {
+    warnings.push("ℹ️ When dₚ = dₚc, efficiency should be ~50% by definition of cut-off diameter.");
   }
 
-  // ✅ Logical checks
-  if (airflowRate <= 0) errors.push("👉 Airflow Rate must be greater than 0 (m³/min).");
-  if (volume <= 0) errors.push("👉 Volume must be greater than 0 (m³).");
-  if (errors.length > 0) return showErrors(errors);
+  // Ratio checks
+  const ratio = particleDia / cutoffDia;
+  if (ratio < 0.1) warnings.push("⚠️ Very small particles relative to cut-off size – efficiency will be very low.");
+  if (ratio > 10) warnings.push("⚠️ Very large particles relative to cut-off size – efficiency will be very high (approaching 100%).");
 
-  // ✅ Sanity checks (likely data entry/unit errors)
-  if (airflowRate > 100000) warnings.push("⚠️ Very high airflow — check if you entered m³/h instead of m³/min.");
-  if (airflowRate < 0.01) warnings.push("⚠️ Extremely low airflow — check sensor or units.");
-  if (volume > 1000000) warnings.push("⚠️ Very large volume — verify units (m³).");
-  if (volume < 1) warnings.push("⚠️ Very small space — verify dimensions (m³).");
+  // Efficiency calculation
+  const efficiency = 1 / (1 + Math.pow(cutoffDia / particleDia, 2)); // Corrected formula: η = 1 / [1 + (dpc/dp)^2]
+  const efficiencyPercent = efficiency * 100;
 
-  // ✅ Core calculation
-  const ach = (airflowRate * 60) / volume;
-
-  if (!Number.isFinite(ach) || ach < 0) {
-    return showErrors(["⚠️ Calculation invalid. Check input values."]);
+  if (!Number.isFinite(efficiencyPercent) || efficiencyPercent < 0 || efficiencyPercent > 100) {
+    return showErrors(["⚠️ Computed efficiency is invalid. Check input values."]);
   }
 
-  // ✅ Interpret result
-  let feedback;
-  if (ach >= 6) {
-    feedback = "🌟 Excellent ventilation! Meets healthcare & lab standards.";
-  } else if (ach >= 4) {
-    feedback = "✅ Good ventilation. Suitable for most workplaces.";
-  } else if (ach >= 2) {
-    feedback = "🟢 Fair ventilation. Consider improvements.";
+  // Performance assessment thresholds
+  let statusMsg = "";
+  if (efficiencyPercent >= 90) {
+    statusMsg = "✅ Excellent collection efficiency (Highly effective cyclone performance)";
+  } else if (efficiencyPercent >= 70) {
+    statusMsg = "⚠️ Good collection efficiency (Adequate for most applications)";
   } else {
-    feedback = "🔴 Poor ventilation. Fails most safety standards.";
+    statusMsg = "🔴 Poor collection efficiency (Consider cyclone improvements or alternative technology)";
   }
 
-  // ✅ Display results
-  if (rateEl) rateEl.textContent = ach.toFixed(2);
-  let details = `<div>Calculated ACH: <b>${ach.toFixed(2)} per hour</b></div>`;
+  // Build result details
+  let details = `<div>Collection Efficiency: <b>${efficiencyPercent.toFixed(2)}%</b></div>`;
+  details += `<div>Particle Diameter (dₚ): <b>${particleDia.toFixed(2)}</b> μm</div>`;
+  details += `<div>Cut-off Diameter (dₚc): <b>${cutoffDia.toFixed(2)}</b> μm</div>`;
+  details += `<div>Ratio (dₚ/dₚc): <b>${ratio.toFixed(3)}</b></div>`;
+
   if (warnings.length) {
-    details += `<div style="margin-top:6px; color:#b35d00; font-size:0.95em;">Note: ${warnings.join(' | ')}</div>`;
+    details += `<div style="margin-top:8px; color:#b35d00; font-size:0.95em; border-top:1px solid #eee; padding-top:8px;">${warnings.join("<br>")}</div>`;
   }
-  if (feedbackEl) feedbackEl.innerHTML = `<div>${feedback}</div>${details}`;
 
-  // Toggle UI
-  if (placeholder) placeholder.classList.add('hidden');
-  if (resultValue) resultValue.classList.remove('hidden');
-  if (errorBox) errorBox.classList.add('hidden');
+  // Display results
+  rateEl.textContent = efficiencyPercent.toFixed(2);
+  feedbackEl.innerHTML = `<div>${statusMsg}</div>${details}`;
+  placeholder.classList.add("hidden");
+  resultValue.classList.remove("hidden");
+  errorBox.classList.add("hidden");
 }
 
-/* safe print guard */
 function printReport() {
   const el = document.getElementById('printDate');
   if (el) {
     const now = new Date();
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    el.textContent = now.toLocaleDateString('en-US', options);
+    el.textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   }
   window.print();
 }
 </script>
 
-<script src="{% static 'js/print.js' %}"></script>
+    <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
 {% endblock %}
 
 
-<!-- / 
+<!--
 ========================================================
-📘 ACH CALCULATOR FORMULA & VALIDATIONS (REFERENCE)
+🌪 Cyclone Separator – Collection Efficiency Documentation
 ========================================================
 
-🔹 Formula Used:
-   ACH = ( Q × 60 ) / V
-   where,
-     Q = Air Flow Rate (m³/min)   → converted to m³/h by multiplying ×60  
-     V = Room Volume (m³)  
-     ACH = Air Changes per Hour  
+📌 Formula:
+-----------
+Collection Efficiency (η) = 1 / [ 1 + (dₚc / dₚ)² ]
 
---------------------------------------------------------
-🔹 Input Validations:
-1. Required Inputs:
-   - Airflow Rate (Q) → must be entered (not empty).
-   - Room Volume (V) → must be entered (not empty).
+   where:
+     • dₚ  = Particle Diameter (μm)
+     • dₚc = Cut-off Diameter (μm)
+     • η   = Fractional efficiency (0–1)
+     • η%  = η × 100 (percentage efficiency)
 
-2. Data Type Checks:
-   - Both Q and V must be numeric and finite.
+📥 Input Validations:
+---------------------
+Required fields:
+  - Particle Diameter (dₚ, μm)
+  - Cut-off Diameter (dₚc, μm)
 
-3. Logical Checks:
-   - Q > 0 (Airflow Rate must be positive).
-   - V > 0 (Room Volume must be positive).
-   - Prevent division by zero (if V = 0 → invalid).
+Hard checks (errors):
+  - Both inputs must be positive finite numbers (>0)
+  - Reject if efficiency calculation gives NaN, <0%, or >100%
 
-4. Range / Sanity Checks (to catch unit or entry errors):
-   - Q > 100,000 m³/min → ⚠️ likely meant m³/h, check units.
-   - Q < 0.01 m³/min → ⚠️ unusually low airflow, check sensor/units.
-   - V > 1,000,000 m³ → ⚠️ extremely large space, verify input.
-   - V < 1 m³ → ⚠️ very small space, check dimensions.
+Soft checks (warnings):
+  - Particle Diameter < 0.1 μm → cyclone ineffective for ultrafine particles
+  - Particle Diameter > 100 μm → likely settles before cyclone entry
+  - Cut-off Diameter < 0.5 μm → unrealistic for cyclone design
+  - Cut-off Diameter > 20 μm → poor cyclone performance or abnormal system
+  - dₚ = dₚc → efficiency ≈ 50% by definition
+  - Ratio dₚ/dₚc < 0.1 → efficiency very low
+  - Ratio dₚ/dₚc > 10 → efficiency very high (≈100%)
 
-5. Practical Interpretation (based on ACH result):
-   - ACH ≥ 6  → 🌟 Excellent ventilation (hospitals, labs).
-   - 4 ≤ ACH < 6 → ✅ Good ventilation (workplaces, offices).
-   - 2 ≤ ACH < 4 → 🟢 Fair ventilation (residential, acceptable but improvable).
-   - ACH < 2   → 🔴 Poor ventilation (fails most safety standards).
+📤 Output Validations:
+----------------------
+- Efficiency (%) must be between 0 and 100
+- If outside range → throw error
 
---------------------------------------------------------
-⚠️ Note:
-ACH is a ventilation measure but does not account for:
-   - Airflow distribution
-   - Filtration efficiency
-   - Pollutant sources inside the space
-Always use ACH together with other IAQ (Indoor Air Quality) metrics.
+Classification (Performance thresholds):
+  - η% ≥ 90% → ✅ Excellent efficiency (highly effective cyclone)
+  - 70% ≤ η% < 90% → ⚠️ Good efficiency (adequate for most applications)
+  - η% < 70% → 🔴 Poor efficiency (consider improvements or alternatives)
 
 ========================================================
-/ -->
+-->

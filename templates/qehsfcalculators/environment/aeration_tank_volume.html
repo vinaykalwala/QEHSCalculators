@@ -510,13 +510,17 @@
         </div>
 
         <div class="note-card">
-            <h3>⚠️ Validations</h3>
+            <h3>Input Validations</h3>
             <p>
-                ✔️ All inputs must be positive values.<br>
-                ✔️ Influent concentration (S₀) must be greater than or equal to effluent concentration (S).<br>
-                ❌ Negative or unrealistic values are not acceptable.
+                ✔️ Flow Rate (Q) must be &gt; 0 and ≤ 100,000 m³/day.<br>
+                ✔️ Mixed Liquor Suspended Solids (MLSS) must be within 1000–5000 mg/L (typical design range).<br>
+                ✔️ Food-to-Microorganism Ratio (F/M) must be between 0.1–1.0 (kg BOD/kg MLSS·day).<br>
+                ✔️ Influent BOD (S₀) must be ≥ Effluent BOD (S).<br>
+                ❌ Negative, zero, or extreme outlier values are not acceptable.<br>
+                ❌ If MLSS = 0 → Tank volume cannot be calculated (division by zero).
             </p>
         </div>
+
 
         <div class="note-card">
             <h3>🌍 Key Applications</h3>
@@ -531,129 +535,142 @@
 </div>
 
 <script>
-/* Helper: consistent error display */
+/* showErrors: consistent error display */
 function showErrors(errors) {
   const errorBox = document.getElementById("resultError");
   const errorMessage = document.getElementById("errorMessage");
   const placeholder = document.getElementById("placeholder");
   const resultValue = document.getElementById("resultValue");
 
-  if (errorMessage) errorMessage.innerHTML = errors.join("<br>");
+  if (errorMessage) errorMessage.innerHTML = (errors && errors.length) ? errors.join("<br>") : "Unknown error";
   if (errorBox) errorBox.classList.remove("hidden");
   if (placeholder) placeholder.classList.add("hidden");
   if (resultValue) resultValue.classList.add("hidden");
 }
 
+/* Main calculation with defensive parsing & error handling */
 function calculateVolume() {
-  // safe reads
-  const Yraw = document.getElementById("Y")?.value.trim() ?? "";
-  const Qraw = document.getElementById("Q")?.value.trim() ?? "";
-  const thetaCraw = document.getElementById("thetaC")?.value.trim() ?? "";
-  const S0raw = document.getElementById("S0")?.value.trim() ?? "";
-  const Sraw = document.getElementById("S")?.value.trim() ?? "";
-  const kdraw = document.getElementById("kd")?.value.trim() ?? "";
-  const Xraw = document.getElementById("X")?.value.trim() ?? "";
+  try {
+    // Helper: parse tolerant numbers (strip commas, trim)
+    function parseNumRaw(id) {
+      const el = document.getElementById(id);
+      if (!el) return null;
+      const raw = (el.value ?? "").toString().trim();
+      if (raw === "") return null;
+      // allow comma thousands separators
+      const cleaned = raw.replace(/,/g, "");
+      const n = parseFloat(cleaned);
+      return Number.isFinite(n) ? n : null;
+    }
 
-  const errorBox = document.getElementById("resultError");
-  const errorMessage = document.getElementById("errorMessage");
-  const placeholder = document.getElementById("placeholder");
-  const resultValue = document.getElementById("resultValue");
-  const rateEl = document.getElementById("rateValue");
-  const feedbackEl = document.getElementById("feedbackContent");
+    // Read inputs
+    const Y = parseNumRaw("Y");        // yield
+    const Q = parseNumRaw("Q");        // flow (m3/day)
+    const thetaC = parseNumRaw("thetaC"); // days
+    const S0 = parseNumRaw("S0");      // mg/L
+    const S = parseNumRaw("S");        // mg/L
+    const kd = parseNumRaw("kd");      // d^-1
+    const X = parseNumRaw("X");        // mg/L
 
-  // reset UI
-  if (errorBox) errorBox.classList.add("hidden");
-  if (errorMessage) errorMessage.innerHTML = "";
-  if (feedbackEl) feedbackEl.innerHTML = "";
+    // UI refs
+    const errorBox = document.getElementById("resultError");
+    const errorMessage = document.getElementById("errorMessage");
+    const placeholder = document.getElementById("placeholder");
+    const resultValue = document.getElementById("resultValue");
+    const rateEl = document.getElementById("rateValue");
+    const feedbackEl = document.getElementById("feedbackContent");
 
-  const errors = [];
-  const warnings = [];
+    // Reset UI
+    if (errorBox) errorBox.classList.add("hidden");
+    if (errorMessage) errorMessage.innerHTML = "";
+    if (feedbackEl) feedbackEl.innerHTML = "";
 
-  // required field checks
-  if (Yraw === "") errors.push("👉 Enter Maximum Yield Coefficient (Y).");
-  if (Qraw === "") errors.push("👉 Enter Flow Rate Q (include units in label).");
-  if (thetaCraw === "") errors.push("👉 Enter Mean Cell Residence Time (θc).");
-  if (S0raw === "") errors.push("👉 Enter Influent substrate concentration S₀.");
-  if (Sraw === "") errors.push("👉 Enter Effluent substrate concentration S.");
-  if (kdraw === "") errors.push("👉 Enter Endogenous decay rate (kd).");
-  if (Xraw === "") errors.push("👉 Enter MLSS concentration X.");
+    const errors = [];
+    const warnings = [];
 
-  if (errors.length > 0) {
-    showErrors(errors);
-    return;
+    // Required checks
+    if (Y === null) errors.push("👉 Enter Maximum Yield Coefficient (Y).");
+    if (Q === null) errors.push("👉 Enter Flow Rate Q (m³/day).");
+    if (thetaC === null) errors.push("👉 Enter Mean Cell Residence Time (θc) (days).");
+    if (S0 === null) errors.push("👉 Enter Influent substrate concentration S₀ (mg/L).");
+    if (S === null) errors.push("👉 Enter Effluent substrate concentration S (mg/L).");
+    if (kd === null) errors.push("👉 Enter Endogenous decay rate kd (d⁻¹).");
+    if (X === null) errors.push("👉 Enter MLSS concentration X (mg/L).");
+    if (errors.length) { showErrors(errors); return; }
+
+    // Numeric & sign checks
+    if (!(Y > 0)) errors.push("👉 Y must be > 0 (typical 0.1–1.0).");
+    if (!(Q > 0)) errors.push("👉 Q must be > 0 (m³/day).");
+    if (!(thetaC > 0)) errors.push("👉 θc must be > 0 (days).");
+    if (!(S0 > 0)) errors.push("👉 S₀ must be > 0 (mg/L).");
+    if (!(S >= 0)) errors.push("👉 S must be ≥ 0 (mg/L).");
+    if (!(kd >= 0)) errors.push("👉 kd must be ≥ 0 (d⁻¹).");
+    if (!(X > 0)) errors.push("👉 X must be > 0 (mg/L).");
+
+    if (errors.length) { showErrors(errors); return; }
+
+    // Logical cross-field validations
+    if (!(S0 > S)) {
+      showErrors(["👉 Influent concentration S₀ must be greater than effluent S (S₀ > S)."]);
+      return;
+    }
+
+    // Reasonableness checks (warnings)
+    if (Y < 0.01 || Y > 2) warnings.push("⚠️ Y outside typical range (0.01–2.0). Check units/entry.");
+    if (Q > 1e7) warnings.push("⚠️ Q unusually large (>1×10⁷). Confirm units (m³/day vs m³/h).");
+    if (Q < 1e-6) warnings.push("⚠️ Q unusually small — verify units or measurement.");
+    if (thetaC > 50) warnings.push("⚠️ θc > 50 days — impractical for activated sludge; check units.");
+    if (thetaC < 0.1) warnings.push("⚠️ θc very small (<0.1 d) — check units.");
+    if (S0 > 1e5) warnings.push("⚠️ S₀ very large — confirm units (mg/L vs g/m³).");
+    if (S0 < 1) warnings.push("⚠️ S₀ unusually low (<1 mg/L) — verify measurement/units.");
+    if (kd > 1) warnings.push("⚠️ kd > 1 d⁻¹ — check time units.");
+    if (X < 50) warnings.push("⚠️ X unusually low — possible units mismatch (mg/L vs g/L).");
+    if (X > 20000) warnings.push("⚠️ X unusually high (>20,000 mg/L) — verify units.");
+
+    // Denominator guard
+    const denom = 1 + kd * thetaC;
+    const EPS = 1e-9;
+    if (!Number.isFinite(denom) || Math.abs(denom) < EPS) {
+      showErrors(["⚠️ Calculation unstable: denominator (1 + kd·θc) ≈ 0. Check kd and θc values and their time base."]);
+      return;
+    }
+
+    // Calculate V
+    const V = (Y * Q * thetaC * (S0 - S)) / (X * denom);
+
+    // Post-calculation sanity
+    if (!Number.isFinite(V) || V <= 0) {
+      showErrors(["⚠️ Computed tank volume is invalid (≤ 0). Check inputs and unit consistency."]);
+      return;
+    }
+
+    // Output categorization
+    let feedback = "";
+    if (V >= 1e5) {
+      feedback = "⚠️ Extremely large tank volume — likely unit mismatch or unrealistic parameters.";
+    } else if (V >= 1000) {
+      feedback = "⚠️ Large Tank Volume: check feasibility and consider staged treatment or optimization.";
+    } else if (V >= 10) {
+      feedback = "✅ Practical Tank Volume for many systems.";
+    } else {
+      feedback = "🔴 Very small Tank Volume: verify practicality for hydraulics and equipment.";
+    }
+
+    // Display results + warnings
+    let detailsHtml = `<div>Computed V: <b>${V.toFixed(3)}</b> (m³; depends on Q/X units)</div>`;
+    if (warnings.length) detailsHtml += `<div style="margin-top:6px; color:#b35d00; font-size:0.95em;">Note: ${warnings.join(" | ")}</div>`;
+
+    if (rateEl) rateEl.textContent = V.toFixed(3);
+    if (feedbackEl) feedbackEl.innerHTML = `<div>${feedback}</div>${detailsHtml}`;
+
+    if (placeholder) placeholder.classList.add("hidden");
+    if (resultValue) resultValue.classList.remove("hidden");
+    if (errorBox) errorBox.classList.add("hidden");
+  } catch (err) {
+    // Unexpected runtime error — display to user and console for debugging
+    console.error("calculateVolume runtime error:", err);
+    showErrors(["⚠️ Unexpected error occurred. See console for details."]);
   }
-
-  // parse numbers
-  const Y = parseFloat(Yraw);
-  const Q = parseFloat(Qraw);
-  const thetaC = parseFloat(thetaCraw);
-  const S0 = parseFloat(S0raw);
-  const S = parseFloat(Sraw);
-  const kd = parseFloat(kdraw);
-  const X = parseFloat(Xraw);
-
-  // numeric & sign checks
-  if (!Number.isFinite(Y) || Y <= 0) errors.push("👉 Y must be a positive number (typical 0.1–1.0).");
-  if (!Number.isFinite(Q) || Q <= 0) errors.push("👉 Q must be a positive number (check units: m³/d, m³/h, etc.).");
-  if (!Number.isFinite(thetaC) || thetaC <= 0) errors.push("👉 θc must be positive (time units — hrs/days).");
-  if (!Number.isFinite(S0) || S0 <= 0) errors.push("👉 S₀ must be positive (concentration units).");
-  if (!Number.isFinite(S) || S < 0) errors.push("👉 S must be non-negative (concentration units).");
-  if (S0 <= S) errors.push("👉 S₀ must be greater than S (there must be substrate removal).");
-  if (!Number.isFinite(kd) || kd < 0) errors.push("👉 kd must be non-negative (1/time).");
-  if (!Number.isFinite(X) || X <= 0) errors.push("👉 MLSS (X) must be positive (mass/volume).");
-
-  if (errors.length > 0) {
-    showErrors(errors);
-    return;
-  }
-
-  // warnings (non-blocking) to catch unit mistakes / unrealistic inputs
-  if (Y > 2) warnings.push("⚠️ Y > 2 is unusual — check that Y is a fraction (typical 0.1–1.0).");
-  if (thetaC > 1e4) warnings.push("⚠️ Very large θc — check time units (hrs vs days).");
-  if (Q > 1e9) warnings.push("⚠️ Very large Q — check units (m³/d vs m³/h vs L/s).");
-  if (X < 50) warnings.push("⚠️ Low MLSS (X) — units may be mg/L vs g/L; confirm units.");
-  if (S0 > 1e6 || S > 1e6) warnings.push("⚠️ Very large substrate concentrations — verify units (mg/L, g/m³ etc.).");
-
-  // denominator guard
-  const denom = 1 + kd * thetaC;
-  if (!Number.isFinite(denom) || Math.abs(denom) < 1e-9) {
-    showErrors(["⚠️ Calculation unstable: denominator (1 + kd·θc) ≈ 0. Check kd and θc values."]);
-    return;
-  }
-
-  // core formula (same as your original)
-  const V = (Y * Q * thetaC * (S0 - S)) / (X * denom);
-
-  if (!Number.isFinite(V) || V <= 0) {
-    showErrors(["⚠️ Computed tank volume is not physically valid (≤ 0). Check inputs — likely S₀ ≈ S or unit mismatch."]);
-    return;
-  }
-
-  // feedback based on practical magnitude (examples — change to your domain thresholds)
-  let feedback = "";
-  if (V >= 1e5) {
-    feedback = "⚠️ Extremely large tank volume — likely unit mismatch or unrealistic parameters.";
-  } else if (V >= 1000) {
-    feedback = "⚠️ Large Tank Volume: consider parameter optimization or staged treatment.";
-  } else if (V >= 10) {
-    feedback = "✅ Suitable Tank Volume for many practical systems.";
-  } else {
-    feedback = "🔴 Very Small Tank Volume: verify if this is practical for construction and hydraulics.";
-  }
-
-  // details + warnings
-  let detailsHtml = `<div>Computed V: <b>${V.toFixed(3)}</b> (units depend on Q/X units)</div>`;
-  if (warnings.length) {
-    detailsHtml += `<div style="margin-top:6px; color:#b35d00; font-size:0.95em;">Note: ${warnings.join(" | ")}</div>`;
-  }
-
-  // update UI
-  if (rateEl) rateEl.textContent = V.toFixed(3);
-  if (feedbackEl) feedbackEl.innerHTML = `<div>${feedback}</div>${detailsHtml}`;
-
-  if (placeholder) placeholder.classList.add("hidden");
-  if (resultValue) resultValue.classList.remove("hidden");
-  if (errorBox) errorBox.classList.add("hidden");
 }
 
 /* safe print guard */
@@ -668,7 +685,54 @@ function printReport() {
 }
 </script>
 
+
 <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
 {% endblock %}
+
+
+<!-- /*
+Aeration Tank Volume Formula:
+
+    V = (Q × (S₀ – S)) / (F/M × X)
+
+Where:
+    V   = Aeration Tank Volume (m³)
+    Q   = Influent Flow Rate (m³/day)
+    S₀  = Influent Substrate Concentration (mg/L BOD or COD)
+    S   = Effluent Substrate Concentration (mg/L BOD or COD)
+    F/M = Food to Microorganism Ratio (kg BOD/kg MLSS·day)
+    X   = Mixed Liquor Suspended Solids (MLSS, mg/L)
+
+Note:
+    - (S₀ – S) represents the BOD (or COD) removed.
+    - Units must be consistent (convert mg/L → kg/m³ if required).
+*/ -->
+
+
+<!-- /*
+Validations for Aeration Tank Volume Calculator:
+
+1. Flow Rate (Q):
+   ✔️ Must be > 0  
+   ✔️ Typical range: 1 – 100,000 m³/day
+
+2. Influent & Effluent Concentration (S₀, S):
+   ✔️ Both must be ≥ 0  
+   ✔️ Influent (S₀) ≥ Effluent (S)  
+   ❌ Negative values are not acceptable
+
+3. MLSS (X):
+   ✔️ Must be > 0  
+   ✔️ Typical operating range: 1000 – 5000 mg/L  
+   ❌ If X = 0 → Division by zero error
+
+4. Food-to-Microorganism Ratio (F/M):
+   ✔️ Must be > 0  
+   ✔️ Typical range: 0.1 – 1.0 (kg BOD/kg MLSS·day)
+
+5. Logical Checks:
+   ✔️ (S₀ – S) must be > 0 → Otherwise no BOD/COD removal
+   ✔️ Output volume (V) must be > 0 and realistic
+   ❌ Unrealistic large values (e.g., V > 100,000 m³) indicate wrong inputs -->

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Air Changes per Hour (ACH) Calculator{% endblock %}
+{% block title %}Continuity Equation Calculator{% endblock %}
 {% block content %}
 {% load static %}
 
@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Air Changes per Hour (ACH) Calculator</title>
+    <title>Continuity Equation Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
@@ -419,17 +419,19 @@
 </head>
 <body>
 
-        <div class="btn-container">
+
+    <div class="btn-container">
         <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
     </div>
-
-    <div class="calculator-container printable" id="printArea">
-
+    
+<div class="calculator-container printable" id="printArea">
     {% include "includes/print_header_footer.html" %}
 
+
+
     <div class="calculator-header">
-        <h1>Air Changes per Hour (ACH) Calculator</h1>
-        <p>Calculate how many times the air in a space is replaced per hour using airflow rate and room volume.</p>
+        <h1>Continuity Equation Calculator</h1>
+        <p>Compute the <strong>Flow Rate</strong> from fluid velocity and cross-sectional area. Result primary unit: <strong>m³/s</strong>. Converted values shown for readability.</p>
     </div>
 
     <div class="calc-content">
@@ -438,262 +440,298 @@
             <h2>Enter Data</h2>
 
             <div class="form-group">
-                <label for="airflowRate">Airflow Rate (m³/min)</label>
-                <input type="number" id="airflowRate" class="form-input" min="0.1" step="any" placeholder="e.g., 500">
+                <label for="velocity">Velocity (v) [m/s]</label>
+                <input type="number" id="velocity" class="form-input" step="any" placeholder="e.g., 2.5" aria-label="Velocity in meters per second">
             </div>
 
             <div class="form-group">
-                <label for="volume">Volume of Space (m³)</label>
-                <input type="number" id="volume" class="form-input" min="1" step="any" placeholder="e.g., 3000">
+                <label for="area">Cross-sectional Area (A) [m²]</label>
+                <input type="number" id="area" class="form-input" step="any" placeholder="e.g., 0.05" aria-label="Cross-sectional area in square meters">
             </div>
             
-            <button class="calculate-btn" onclick="calculateACH()">Calculate ACH</button>
+            <button class="calculate-btn" onclick="calculateFlowRate()">Calculate Flow Rate</button>
         </div>
 
         <!-- Result Section -->
         <div class="result-card">
             <div class="result-placeholder" id="placeholder">
-                <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Air flow illustration">
-                <p>This tool will calculate the <strong>Air Changes per Hour (ACH)</strong>.</p>
+                <img src="https://cdn-icons-png.flaticon.com/512/483/483361.png" alt="Flow icon">
+                <p>Enter velocity and area to compute the flow rate (displayed in multiple units).</p>
             </div>
             
-            <div class="result-error hidden" id="resultError">
+            <div class="result-error hidden" id="resultError" role="alert" aria-live="assertive">
                 <div class="error-icon">❌</div>
                 <div class="error-message" id="errorMessage"></div>
             </div>
              
-            <div class="result-value hidden" id="resultValue">
-                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
-                    <h2>Calculated ACH</h2>
+            <div class="result-value hidden" id="resultValue" aria-live="polite">
+                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:8px; color:#1560bd;">
+                    <h2>Flow Rate Result</h2>
                 </div>
 
-                <div class="rate-display">
-                <div class="rate-value" id="rateValue">0.00</div>
-                <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">Air Changes/hour</div>
+                <div class="rate-display" style="flex-direction:column; gap:8px; align-items:center;">
+                    <div style="display:flex; gap:8px; align-items:baseline;">
+                        <div class="rate-value" id="rateValue">0.0000</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:18px; font-weight:bold;" id="rateUnit">m³/s</div>
+                    </div>
+
+                    <div id="convertedValues" style="font-size:0.95rem; color:#333;"></div>
                 </div>
-                
-                <div class="result-feedback">
-                    <div class="feedback-title">Assessment</div>
+
+                <div class="result-feedback" style="margin-top:12px;">
+                    <div class="feedback-title">Assessment & Notes</div>
                     <div class="feedback-content" id="feedbackContent"></div>
                 </div>
-                <div class="btn-wrapper">
+                <div class="btn-wrapper" style="margin-top:12px;">
                     <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Notes Section -->
+    <!-- Notes Section (concise — NO formula shown) -->
     <div class="note-section">
         <div class="note-card">
-            <h3>📘 About This Calculator</h3>
+            <h3>📘 About</h3>
             <p>
-                The <strong>ACH Calculator</strong> determines the number of times per hour that the total volume of air 
-                in a space is replaced, based on the airflow rate and the space’s volume.
-            </p>
-        </div>
-        
-        
-
-        <div class="note-card">
-            <h3>📊 Interpretation</h3>
-            <ul class="note-list">
-                <li><span class="good">ACH ≥ 6</span> → 🌟 Excellent ventilation.</li>
-                <li><span class="average">ACH 4–6</span> → ✅ Good ventilation.</li>
-                <li><span class="average">ACH 2–4</span> → 🟢 Fair ventilation.</li>
-                <li><span class="bad">ACH &lt; 2</span> → 🔴 Poor ventilation.</li>
-            </ul>
-        </div>
-
-        <div class="note-card">
-            <h3>⚠️ Limitations</h3>
-            <p>
-                While ACH is a useful measure of ventilation effectiveness, it does not directly account for airflow 
-                distribution, filtration efficiency, or pollutant sources inside the space. Always combine ACH values 
-                with other indoor air quality assessments for accurate evaluation.
+                This calculator uses the continuity principle to compute volumetric flow through a cross-section.
+                Provide velocity and area using consistent SI units for accurate results.
             </p>
         </div>
 
-        <div class="note-card">
-            <h3>✔️ Input Validations</h3>
-            <ul class="note-list">
-                <li><strong>Air Flow Rate (Q):</strong> Must be > 0 and ≤ 100,000 m³/h (practical HVAC/ventilation range).</li>
-                <li><strong>Room Volume (V):</strong> Must be > 0 and ≤ 50,000 m³ (typical for residential, commercial, or industrial spaces).</li>
-                <li><strong>Decimals:</strong> Up to 2 decimal places allowed for precision.</li>
-                <li><strong>Logical Check:</strong> If Room Volume = 0 → ACH cannot be calculated (division by zero).</li>
-                <li><strong>Practical Check:</strong> ACH values usually range from 2–20 for normal spaces; >20 indicates special environments like hospitals or labs.</li>
-            </ul>
+       <div class="note-card">
+        <h3>✅ Input Validations</h3>
+        <ul class="note-list">
+            <li><strong>Required fields:</strong> Both <em>Velocity (v)</em> and <em>Area (A)</em> must be entered — empty values are not accepted.</li>
+            <li><strong>Numeric check:</strong> Inputs must be finite numbers (no text, symbols, NaN, or infinity).</li>
+            <li><strong>Area validation:</strong> A must be <em>> 0</em>. Zero or negative area is physically impossible and blocked.</li>
+            <li><strong>Velocity range:</strong> -200 ≤ v ≤ +200 m/s.  
+                Negative values indicate reverse flow (allowed, but flagged). Beyond ±200 m/s is implausible for incompressible flow and triggers warnings.</li>
+            
+        </ul>
         </div>
 
+        <div class="note-card">
+    <h3>🌍 Applications</h3>
+    <ul class="note-list">
+        <li><strong>Water Supply Systems:</strong> To calculate and manage water flow in pipelines.</li>
+        <li><strong>HVAC Systems:</strong> For estimating airflow in ducts of heating, ventilation, and air conditioning.</li>
+        <li><strong>Hydraulic Engineering:</strong> Used in dams, canals, and drainage system design.</li>
+        <li><strong>Industrial Applications:</strong> For process control in petrochemical, chemical, and food industries.</li>
+    </ul>
+</div>
+
+
 
         <div class="note-card">
-            <h3>🌍 Key Applications</h3>
+            <h3>🔎 Interpretation</h3>
             <ul class="note-list">
-                <li><strong>Hospitals:</strong> Infection control through air replacement.</li>
-                <li><strong>Laboratories & Cleanrooms:</strong> Ensuring contamination-free environments.</li>
-                <li><strong>Commercial & Residential Spaces:</strong> Maintaining healthy indoor air quality.</li>
+                <li><strong>Low flow:</strong> Q &lt; 0.001 m³/s (~&lt; 1 L/s) — may be slow for some applications.</li>
+                <li><strong>Moderate flow:</strong> 0.001 ≤ Q &lt; 0.1 m³/s — typical for many piping systems.</li>
+                <li><strong>High flow:</strong> Q ≥ 0.1 m³/s — large industrial or process flows.</li>
             </ul>
         </div>
     </div>
 
+    <!-- Hidden fallback print date if print header doesn't include it -->
+    <span id="printDate" style="display:none;"></span>
 </div>
 
 <script>
-/* Helper to show error box consistently */
-
-/* Helper to show error messages */
+/* Consistent error UI */
 function showErrors(errors) {
-  const errorBox = document.getElementById('resultError');
-  const errorMessage = document.getElementById('errorMessage');
-  const placeholder = document.getElementById('placeholder');
-  const resultValue = document.getElementById('resultValue');
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
 
-  if (errorMessage) errorMessage.innerHTML = errors.join('<br>');
-  if (errorBox) errorBox.classList.remove('hidden');
-  if (placeholder) placeholder.classList.add('hidden');
-  if (resultValue) resultValue.classList.add('hidden');
+  if (errorMessage) errorMessage.innerHTML = errors.join("<br>");
+  if (errorBox) errorBox.classList.remove("hidden");
+  if (placeholder) placeholder.classList.add("hidden");
+  if (resultValue) resultValue.classList.add("hidden");
 }
 
-/* ACH Calculator with industry-standard validations */
-function calculateACH() {
-  const airflowRaw = document.getElementById('airflowRate')?.value.trim() ?? "";
-  const volumeRaw  = document.getElementById('volume')?.value.trim() ?? "";
+/* Utility: normalize commas to dots, trim */
+function normalizeNumericInput(s) {
+  if (typeof s !== "string") return "";
+  return s.trim().replace(/,/g, "."); // allow "2,5" -> "2.5"
+}
 
-  const errorBox = document.getElementById('resultError');
-  const errorMessage = document.getElementById('errorMessage');
-  const placeholder = document.getElementById('placeholder');
-  const resultValue = document.getElementById('resultValue');
-  const rateEl = document.getElementById('rateValue');
-  const feedbackEl = document.getElementById('feedbackContent');
+/* Main continuity calculation: Q = v * A (SI) */
+function calculateFlowRate() {
+  // safe reads + normalization
+  let vRaw = document.getElementById("velocity")?.value ?? "";
+  let aRaw = document.getElementById("area")?.value ?? "";
+  vRaw = normalizeNumericInput(vRaw);
+  aRaw = normalizeNumericInput(aRaw);
 
-  // Reset UI
-  if (errorBox) errorBox.classList.add('hidden');
-  if (errorMessage) errorMessage.innerHTML = "";
+  const errorBox = document.getElementById("resultError");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+  const rateEl = document.getElementById("rateValue");
+  const unitEl = document.getElementById("rateUnit");
+  const convertedEl = document.getElementById("convertedValues");
+  const feedbackEl = document.getElementById("feedbackContent");
+
+  // reset UI
+  if (errorBox) errorBox.classList.add("hidden");
   if (feedbackEl) feedbackEl.innerHTML = "";
+  if (rateEl) rateEl.textContent = "0.0000";
+  if (unitEl) unitEl.textContent = "m³/s";
+  if (convertedEl) convertedEl.textContent = "";
 
   const errors = [];
   const warnings = [];
 
-  // ✅ Required checks
-  if (airflowRaw === "") errors.push("👉 Please enter the Airflow Rate (m³/min).");
-  if (volumeRaw === "") errors.push("👉 Please enter the Volume (m³).");
-  if (errors.length > 0) return showErrors(errors);
+  // required
+  if (vRaw === "") errors.push("👉 Please enter Velocity (v) in m/s.");
+  if (aRaw === "") errors.push("👉 Please enter Cross-sectional Area (A) in m².");
+  if (errors.length) { showErrors(errors); return; }
 
-  // ✅ Parse values
-  const airflowRate = parseFloat(airflowRaw);
-  const volume = parseFloat(volumeRaw);
+  // parse
+  const v = Number(vRaw);
+  const A = Number(aRaw);
 
-  if (!Number.isFinite(airflowRate) || !Number.isFinite(volume)) {
-    return showErrors(["⚠️ Enter valid numeric values for airflow rate and volume."]);
+  // numeric validation
+  if (!Number.isFinite(v)) errors.push("👉 Velocity must be a finite number (m/s).");
+  if (!Number.isFinite(A)) errors.push("👉 Area must be a finite number (m²).");
+  if (errors.length) { showErrors(errors); return; }
+
+  // field rules
+  if (A <= 0) { showErrors(["👉 Cross-sectional Area (A) must be > 0 (m²)."]); return; }
+
+  // plausible warnings (non-blocking)
+  // Velocity
+  if (Math.abs(v) < 0.001) warnings.push("⚠️ Velocity is very low (< 0.001 m/s). Check measurement sensitivity or units.");
+  if (Math.abs(v) > 200)   warnings.push("⚠️ Velocity is very high (> 200 m/s). This suggests compressible/high-speed flow or unit error.");
+
+  // Area
+  if (A < 1e-6) warnings.push("⚠️ Area is very small (< 1e-6 m²). Check units (mm² vs m²).");
+  if (A > 100)  warnings.push("⚠️ Area is very large (> 100 m²). Verify units and geometry.");
+
+  // Cross-field plausibility
+  if (Math.abs(v) > 100 && A > 1) {
+    warnings.push("⚠️ Very high velocity with large area is unusual for ducts/pipes. Re-check units/inputs.");
   }
 
-  // ✅ Logical checks
-  if (airflowRate <= 0) errors.push("👉 Airflow Rate must be greater than 0 (m³/min).");
-  if (volume <= 0) errors.push("👉 Volume must be greater than 0 (m³).");
-  if (errors.length > 0) return showErrors(errors);
+  // compute Q
+  const Q = v * A; // m³/s
+  if (!Number.isFinite(Q)) { showErrors(["⚠️ Computed flow rate is invalid. Check inputs."]); return; }
 
-  // ✅ Sanity checks (likely data entry/unit errors)
-  if (airflowRate > 100000) warnings.push("⚠️ Very high airflow — check if you entered m³/h instead of m³/min.");
-  if (airflowRate < 0.01) warnings.push("⚠️ Extremely low airflow — check sensor or units.");
-  if (volume > 1000000) warnings.push("⚠️ Very large volume — verify units (m³).");
-  if (volume < 1) warnings.push("⚠️ Very small space — verify dimensions (m³).");
+  const absQ = Math.abs(Q);
 
-  // ✅ Core calculation
-  const ach = (airflowRate * 60) / volume;
+  // checks on computed Q
+  if (absQ === 0) warnings.push("⚠️ Computed flow is zero. Possible stagnant flow or instrument at/below resolution.");
+  if (absQ < 1e-6) warnings.push("⚠️ Flow is extremely small (< 1e-6 m³/s). Verify units and measurement resolution.");
+  if (absQ > 1e6) warnings.push("⚠️ Flow is extremely large (> 1×10⁶ m³/s). Likely a unit/input error.");
 
-  if (!Number.isFinite(ach) || ach < 0) {
-    return showErrors(["⚠️ Calculation invalid. Check input values."]);
-  }
+  // conversions
+  const Q_m3s = Q;
+  const Q_Ls  = Q_m3s * 1000;   // L/s
+  const Q_m3h = Q_m3s * 3600;   // m³/h
 
-  // ✅ Interpret result
-  let feedback;
-  if (ach >= 6) {
-    feedback = "🌟 Excellent ventilation! Meets healthcare & lab standards.";
-  } else if (ach >= 4) {
-    feedback = "✅ Good ventilation. Suitable for most workplaces.";
-  } else if (ach >= 2) {
-    feedback = "🟢 Fair ventilation. Consider improvements.";
-  } else {
-    feedback = "🔴 Poor ventilation. Fails most safety standards.";
-  }
+  // classification (absolute flow magnitude)
+  let classification = "";
+  if (absQ < 0.001)      classification = "Low flow (may be too small for some applications).";
+  else if (absQ < 0.1)   classification = "Moderate flow (typical for many systems).";
+  else if (absQ < 10)    classification = "High flow (industrial applications).";
+  else                   classification = "Very high flow — verify system capacity and inputs.";
 
-  // ✅ Display results
-  if (rateEl) rateEl.textContent = ach.toFixed(2);
-  let details = `<div>Calculated ACH: <b>${ach.toFixed(2)} per hour</b></div>`;
+  // direction note
+  const directionNote = (v < 0)
+    ? "Direction: reverse flow (negative velocity)."
+    : "Direction: forward flow (positive velocity).";
+
+  // Display
+  rateEl.textContent = Q_m3s.toFixed(4);
+  unitEl.textContent = "m³/s";
+  convertedEl.innerHTML = `(${Q_Ls.toFixed(4)} L/s · ${Q_m3h.toFixed(4)} m³/h)`;
+
+  let details = `<div style="font-weight:600;">${classification}</div>`;
+  details += `<div style="margin-top:6px;">${directionNote}</div>`;
+  details += `<div style="margin-top:8px;">Inputs — Velocity: <b>${v.toFixed(6)} m/s</b>, Area: <b>${A.toExponential(6)} m²</b></div>`;
   if (warnings.length) {
-    details += `<div style="margin-top:6px; color:#b35d00; font-size:0.95em;">Note: ${warnings.join(' | ')}</div>`;
+    details += `<div style="margin-top:8px; color:#b35d00;">Note: ${warnings.join(" | ")}</div>`;
   }
-  if (feedbackEl) feedbackEl.innerHTML = `<div>${feedback}</div>${details}`;
+  if (feedbackEl) feedbackEl.innerHTML = details;
 
-  // Toggle UI
-  if (placeholder) placeholder.classList.add('hidden');
-  if (resultValue) resultValue.classList.remove('hidden');
-  if (errorBox) errorBox.classList.add('hidden');
+  // toggle UI
+  document.getElementById("placeholder")?.classList.add("hidden");
+  resultValue?.classList.remove("hidden");
+  errorBox?.classList.add("hidden");
 }
 
-/* safe print guard */
+/* Safe print helper */
 function printReport() {
-  const el = document.getElementById('printDate');
-  if (el) {
-    const now = new Date();
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    el.textContent = now.toLocaleDateString('en-US', options);
+  let el = document.getElementById('printDate');
+  if (!el) {
+    el = document.createElement('span');
+    el.id = 'printDate';
+    el.style.display = 'none';
+    document.body.appendChild(el);
   }
+  const now = new Date();
+  el.textContent = now.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
   window.print();
 }
 </script>
 
-<script src="{% static 'js/print.js' %}"></script>
+
+
+    <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
 {% endblock %}
 
 
-<!-- / 
-========================================================
-📘 ACH CALCULATOR FORMULA & VALIDATIONS (REFERENCE)
-========================================================
+<!-- ============================================================
+📌 Continuity Equation — Volumetric Flow Rate
+------------------------------------------------------------
+Formula:
+    Q = v × A
 
-🔹 Formula Used:
-   ACH = ( Q × 60 ) / V
-   where,
-     Q = Air Flow Rate (m³/min)   → converted to m³/h by multiplying ×60  
-     V = Room Volume (m³)  
-     ACH = Air Changes per Hour  
+Where:
+    Q = volumetric flow rate (m³/s)  
+    v = velocity (m/s)  
+    A = cross-sectional area (m²)  
 
---------------------------------------------------------
-🔹 Input Validations:
-1. Required Inputs:
-   - Airflow Rate (Q) → must be entered (not empty).
-   - Room Volume (V) → must be entered (not empty).
+------------------------------------------------------------
+✅ Input Validations:
 
-2. Data Type Checks:
-   - Both Q and V must be numeric and finite.
+- Velocity (v):  
+  • Must be a finite number (m/s)  
+  • Warnings:  
+    - |v| < 0.001 → very low velocity, check measurement sensitivity  
+    - |v| > 200   → very high velocity, suggests compressible/high-speed flow or unit error  
 
-3. Logical Checks:
-   - Q > 0 (Airflow Rate must be positive).
-   - V > 0 (Room Volume must be positive).
-   - Prevent division by zero (if V = 0 → invalid).
+- Area (A):  
+  • Must be a finite number (m²)  
+  • Must be > 0  
+  • Warnings:  
+    - A < 1e-6 m² → extremely small, likely unit error (mm² vs m²)  
+    - A > 100 m²  → extremely large, check units and geometry  
 
-4. Range / Sanity Checks (to catch unit or entry errors):
-   - Q > 100,000 m³/min → ⚠️ likely meant m³/h, check units.
-   - Q < 0.01 m³/min → ⚠️ unusually low airflow, check sensor/units.
-   - V > 1,000,000 m³ → ⚠️ extremely large space, verify input.
-   - V < 1 m³ → ⚠️ very small space, check dimensions.
+- Cross-field plausibility:  
+  • If |v| > 100 m/s AND A > 1 m² → unusual for ducts/pipes, re-check units  
 
-5. Practical Interpretation (based on ACH result):
-   - ACH ≥ 6  → 🌟 Excellent ventilation (hospitals, labs).
-   - 4 ≤ ACH < 6 → ✅ Good ventilation (workplaces, offices).
-   - 2 ≤ ACH < 4 → 🟢 Fair ventilation (residential, acceptable but improvable).
-   - ACH < 2   → 🔴 Poor ventilation (fails most safety standards).
+------------------------------------------------------------
+🎯 Output Validations:
 
---------------------------------------------------------
-⚠️ Note:
-ACH is a ventilation measure but does not account for:
-   - Airflow distribution
-   - Filtration efficiency
-   - Pollutant sources inside the space
-Always use ACH together with other IAQ (Indoor Air Quality) metrics.
+- Q must be finite  
+- Q may be negative → indicates reverse flow (negative velocity)  
+- Checks on Q magnitude:  
+  • Q = 0 → stagnant flow  
+  • |Q| < 1e-6 m³/s → extremely small, likely unit/measurement issue  
+  • |Q| > 1×10⁶ m³/s → extremely large, likely input/unit error  
 
-========================================================
-/ -->
+------------------------------------------------------------
+📊 Classification (by |Q| magnitude):
+- |Q| < 0.001 → Low flow (may be too small for some applications)  
+- 0.001 ≤ |Q| < 0.1 → Moderate flow (typical for many systems)  
+- 0.1 ≤ |Q| < 10 → High flow (industrial applications)  
+- |Q| ≥ 10 → Very high flow — verify system capacity and inputs  
+
+📌 Direction note:  
+- v < 0 → Reverse flow  
+- v ≥ 0 → Forward flow  
+============================================================ -->
