@@ -300,14 +300,14 @@ def payment_success(request):
         else:
             end_date = start_date + timedelta(days=plan.duration_days)
         
-        # Create subscription only after successful payment verification
+        # Create subscription - ALL PLANS REQUIRE APPROVAL NOW
         subscription = UserSubscription.objects.create(
             user=request.user,
             plan=plan,
             razorpay_order_id=order_id,
             razorpay_payment_id=payment_id,
             razorpay_signature=signature,
-            status="active" if plan.name.lower() == "individual" else "pending",
+            status="pending",  # Changed: All plans now have pending status
             start_date=start_date,
             end_date=end_date,
             amount_paid=Decimal(pending_subscription['amount']),
@@ -332,16 +332,11 @@ def payment_success(request):
             }
         )
         
-        # Set appropriate message based on plan type and upgrade status
-        requires_approval = plan.name.lower() != "individual"
-        
-        if requires_approval:
-            messages.success(request, "Payment successful! Waiting for admin approval.")
+        # Updated message - ALL plans require approval
+        if is_upgrade:
+            messages.success(request, f"Payment successful! Your upgrade to {plan.name} is pending admin approval.")
         else:
-            if is_upgrade:
-                messages.success(request, f"Payment successful! Your plan has been upgraded to {plan.name}.")
-            else:
-                messages.success(request, f"Payment successful! You are now subscribed to {plan.name}.")
+            messages.success(request, f"Payment successful! Your subscription to {plan.name} is pending admin approval.")
 
         # Clear the pending subscription from session
         if 'pending_subscription' in request.session:
@@ -349,7 +344,7 @@ def payment_success(request):
 
         return render(request, "payment_success.html", {
             "subscription": subscription,
-            "requires_approval": requires_approval,
+            "requires_approval": True,  # Changed: Always True now
             "is_upgrade": is_upgrade
         })
     else:
