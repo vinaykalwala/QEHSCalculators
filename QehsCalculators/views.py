@@ -123,7 +123,7 @@ def subscribe_plan(request, plan_id):
     
     # Calculate upgrade amount if user has an active subscription
     upgrade_amount = Decimal('0.00')
-    credit_amount = Decimal('0.00')  # Add credit amount calculation
+    credit_amount = Decimal('0.00')
     original_end_date = None
     is_upgrade = False
     
@@ -162,7 +162,7 @@ def subscribe_plan(request, plan_id):
     else:
         # Regular subscription - use full plan price
         upgrade_amount = plan.price
-        credit_amount = Decimal('0.00')  # No credit for new subscriptions
+        credit_amount = Decimal('0.00')
 
     is_allowed, device_message = check_device_limit(request.user, plan)
     if not is_allowed:
@@ -177,10 +177,10 @@ def subscribe_plan(request, plan_id):
             # Handle upgrade with minimal payment
             existing_subscription.mark_as_upgraded()
         
-        # Create new subscription with the SAME end date as previous subscription
-        start_date = timezone.now()
-        if is_upgrade and original_end_date:
-            end_date = original_end_date  # Use the original end date
+        # Create new subscription with current start date and same end date as previous subscription
+        start_date = timezone.now()  # Current time for both new and upgrade
+        if is_upgrade and existing_subscription and existing_subscription.end_date:
+            end_date = existing_subscription.end_date  # Use the existing subscription end date
         else:
             end_date = start_date + timedelta(days=plan.duration_days)
         
@@ -236,7 +236,7 @@ def subscribe_plan(request, plan_id):
         "error_url": request.build_absolute_uri(reverse('payment_failed')),
         "is_upgrade": is_upgrade,
         "upgrade_amount": upgrade_amount,
-        "credit_amount": credit_amount,  # Add credit amount to context
+        "credit_amount": credit_amount,
         "existing_plan": existing_subscription.plan if existing_subscription else None
     }
     return render(request, "subscribe_payment.html", context)
@@ -263,7 +263,6 @@ def payment_success(request):
         # Verify payment signature
         if not verify_payment_signature(order_id, payment_id, signature):
             messages.error(request, "Payment verification failed.")
-            # Clear the pending subscription from session
             if 'pending_subscription' in request.session:
                 del request.session['pending_subscription']
             return redirect("payment_failed")
@@ -301,13 +300,22 @@ def payment_success(request):
                 if original_end_date_str:
                     original_end_date = timezone.datetime.fromisoformat(original_end_date_str)
         
-        # Calculate start and end dates
-        start_date = timezone.now()
+        # Calculate start and end dates - ALWAYS use current time for start date
+        start_date = timezone.now()  # Current time for both new and upgrade
         
         # For upgrades, use the original end date from the previous subscription
-        if is_upgrade and original_end_date:
-            end_date = original_end_date
+        if is_upgrade:
+            # Priority 1: Use existing subscription's end date if available
+            if existing_subscription and existing_subscription.end_date:
+                end_date = existing_subscription.end_date
+            # Priority 2: Use stored original end date from session
+            elif original_end_date:
+                end_date = original_end_date
+            # Fallback: Calculate new end date (shouldn't happen in normal flow)
+            else:
+                end_date = start_date + timedelta(days=plan.duration_days)
         else:
+            # Regular subscription - use full duration
             end_date = start_date + timedelta(days=plan.duration_days)
         
         # Create subscription - ALL PLANS REQUIRE APPROVAL NOW
@@ -317,8 +325,8 @@ def payment_success(request):
             razorpay_order_id=order_id,
             razorpay_payment_id=payment_id,
             razorpay_signature=signature,
-            status="pending",  # Changed: All plans now have pending status
-            start_date=start_date,
+            status="pending",
+            start_date=start_date,  # Current time for both new and upgrade
             end_date=end_date,
             amount_paid=Decimal(pending_subscription['amount']),
             previous_subscription=existing_subscription if is_upgrade else None,
@@ -354,13 +362,14 @@ def payment_success(request):
 
         return render(request, "payment_success.html", {
             "subscription": subscription,
-            "requires_approval": True,  # Changed: Always True now
+            "requires_approval": True,
             "is_upgrade": is_upgrade
         })
     else:
         messages.error(request, "Invalid request method.")
         return redirect("dashboard")
-    
+
+
 def verify_payment_signature(order_id, payment_id, signature):
     try:
         client.utility.verify_payment_signature({
@@ -568,6 +577,68 @@ def logout_view(request):
     logout(request)
     messages.success(request, "Logged out successfully.")
     return redirect("home")
+
+
+
+from django.contrib.admin.views.decorators import staff_member_required
+
+@staff_member_required
+def manage_subscriptions(request):
+    """Superuser view to manage all subscriptions with filtering"""
+    # Get the status filter from request
+    status_filter = request.GET.get('status', 'all')
+    
+    # Base queryset
+    subscriptions = UserSubscription.objects.all().select_related('user', 'plan').order_by('-created_at')
+    
+    # Apply filter if specified
+    if status_filter != 'all':
+        subscriptions = subscriptions.filter(status=status_filter)
+    
+    # Also get counts for each status for the UI
+    status_counts = {}
+    for status_value, status_label in UserSubscription.STATUS_CHOICES:
+        status_counts[status_value] = UserSubscription.objects.filter(status=status_value).count()
+    
+    return render(request, "manage_subscriptions.html", {
+        "subscriptions": subscriptions,
+        "status_filter": status_filter,
+        "status_counts": status_counts,
+        "status_choices": UserSubscription.STATUS_CHOICES,
+        "total_count": UserSubscription.objects.count()
+    })
+
+@staff_member_required
+def approve_subscription(request, subscription_id):
+    """Approve a pending subscription"""
+    subscription = get_object_or_404(UserSubscription, id=subscription_id, status="pending")
+    
+    try:
+        # Use the fixed activate method that preserves dates for upgrades
+        subscription.activate()
+        messages.success(request, f"Subscription for {subscription.user.email} has been approved and activated.")
+    except Exception as e:
+        messages.error(request, f"Error activating subscription: {str(e)}")
+    
+    return redirect("manage_subscriptions")
+
+
+
+@staff_member_required
+def reject_subscription(request, subscription_id):
+    """Reject a pending subscription"""
+    subscription = get_object_or_404(UserSubscription, id=subscription_id, status="pending")
+    
+    try:
+        subscription.status = "rejected"
+        subscription.save(update_fields=['status'])
+        messages.success(request, f"Subscription for {subscription.user.email} has been rejected.Please Reach Out tp the Support")
+    except Exception as e:
+        messages.error(request, f"Error rejecting subscription: {str(e)}")
+    
+    return redirect("manage_subscriptions")
+
+
 
 def fire_calculator(request):
     return render(request, 'calculators/fire.html', {'title': 'Fire Calculator'})

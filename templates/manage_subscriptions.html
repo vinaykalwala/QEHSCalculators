@@ -1,0 +1,205 @@
+{% block content %}
+<div class="main-content">
+<div class="container mt-4">
+    <h2>Subscription Management</h2>
+    
+    <!-- Status Filter and Statistics -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5>Subscription Overview</h5>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <form method="get" class="d-flex">
+                        <select name="status" class="form-select me-2" onchange="this.form.submit()">
+                            <option value="all" {% if status_filter == 'all' %}selected{% endif %}>
+                                All Statuses ({{ total_count }})
+                            </option>
+                            {% for status_value, status_label in status_choices %}
+                            <option value="{{ status_value }}" {% if status_filter == status_value %}selected{% endif %}>
+                                {{ status_label }} (
+                                {% if status_value == 'pending' %}{{ status_counts.pending|default:0 }}
+                                {% elif status_value == 'active' %}{{ status_counts.active|default:0 }}
+                                {% elif status_value == 'rejected' %}{{ status_counts.rejected|default:0 }}
+                                {% elif status_value == 'expired' %}{{ status_counts.expired|default:0 }}
+                                {% elif status_value == 'cancelled' %}{{ status_counts.cancelled|default:0 }}
+                                {% elif status_value == 'upgraded' %}{{ status_counts.upgraded|default:0 }}
+                                {% else %}0{% endif %})
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <a href="{% url 'manage_subscriptions' %}" class="btn btn-outline-secondary">Clear Filter</a>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Status Badges -->
+            <div class="d-flex flex-wrap gap-2">
+                <a href="?status=all" class="text-decoration-none">
+                    <span class="badge bg-primary">
+                        All: {{ total_count }}
+                    </span>
+                </a>
+                <a href="?status=pending" class="text-decoration-none">
+                    <span class="badge bg-warning">
+                        Pending: {{ status_counts.pending|default:0 }}
+                    </span>
+                </a>
+                <a href="?status=active" class="text-decoration-none">
+                    <span class="badge bg-success">
+                        Active: {{ status_counts.active|default:0 }}
+                    </span>
+                </a>
+                <a href="?status=rejected" class="text-decoration-none">
+                    <span class="badge bg-danger">
+                        Rejected: {{ status_counts.rejected|default:0 }}
+                    </span>
+                </a>
+                <a href="?status=expired" class="text-decoration-none">
+                    <span class="badge bg-secondary">
+                        Expired: {{ status_counts.expired|default:0 }}
+                    </span>
+                </a>
+                <a href="?status=cancelled" class="text-decoration-none">
+                    <span class="badge bg-dark">
+                        Cancelled: {{ status_counts.cancelled|default:0 }}
+                    </span>
+                </a>
+                <a href="?status=upgraded" class="text-decoration-none">
+                    <span class="badge bg-info">
+                        Upgraded: {{ status_counts.upgraded|default:0 }}
+                    </span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subscriptions Table -->
+    <div class="card">
+        <div class="card-header 
+            {% if status_filter == 'pending' %}bg-warning text-dark
+            {% elif status_filter == 'active' %}bg-success text-white
+            {% elif status_filter == 'rejected' %}bg-danger text-white
+            {% elif status_filter == 'expired' %}bg-secondary text-white
+            {% elif status_filter == 'cancelled' %}bg-dark text-white
+            {% elif status_filter == 'upgraded' %}bg-info text-dark
+            {% else %}bg-primary text-white{% endif %}">
+            <h5>
+                {% if status_filter == 'all' %}
+                    All Subscriptions ({{ subscriptions.count }})
+                {% else %}
+                    {{ status_filter|title }} Subscriptions ({{ subscriptions.count }})
+                {% endif %}
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if subscriptions %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>User Email</th>
+                            <th>Plan</th>
+                            <th>Amount Paid</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Status</th>
+                            <th>Upgrade?</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sub in subscriptions %}
+                        <tr>
+                            <td>{{ sub.user.username }}</td>
+                            <td>{{ sub.user.email }}</td>
+                            <td>
+                                {% if sub.plan %}
+                                    {{ sub.plan.name|title }} (₹{{ sub.plan.price }})
+                                {% else %}
+                                    <span class="text-muted">No Plan</span>
+                                {% endif %}
+                            </td>
+                            <td>₹{{ sub.amount_paid }}</td>
+                            <td>
+                                {% if sub.start_date %}
+                                    {{ sub.start_date|date:"M d, Y" }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if sub.end_date %}
+                                    {{ sub.end_date|date:"M d, Y" }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge 
+                                    {% if sub.status == 'pending' %}bg-warning
+                                    {% elif sub.status == 'active' %}bg-success
+                                    {% elif sub.status == 'rejected' %}bg-danger
+                                    {% elif sub.status == 'expired' %}bg-secondary
+                                    {% elif sub.status == 'cancelled' %}bg-dark
+                                    {% elif sub.status == 'upgraded' %}bg-info
+                                    {% else %}bg-primary{% endif %}">
+                                    {{ sub.status }}
+                                </span>
+                            </td>
+                            <td>{% if sub.is_upgrade %}✅{% else %}❌{% endif %}</td>
+                            <td>{{ sub.created_at|date:"M d, Y H:i" }}</td>
+                            <td>
+                                {% if sub.status == 'pending' %}
+                                <div class="btn-group btn-group-sm">
+                                    <form method="post" action="{% url 'approve_subscription' sub.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-success btn-sm" 
+                                                onclick="return confirm('Approve this subscription?')">
+                                            Approve
+                                        </button>
+                                    </form>
+                                    <form method="post" action="{% url 'reject_subscription' sub.id %}" class="d-inline ms-1">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger btn-sm"
+                                                onclick="return confirm('Reject this subscription?')">
+                                            Reject
+                                        </button>
+                                    </form>
+                                </div>
+                                {% elif sub.status == 'active' %}
+                                <span class="text-success">✓ Active</span>
+                                {% else %}
+                                <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">No subscriptions found{% if status_filter != 'all' %} with status "{{ status_filter }}"{% endif %}.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+</div>  
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-submit the form when filter changes
+document.addEventListener('DOMContentLoaded', function() {
+    const statusSelect = document.querySelector('select[name="status"]');
+    if (statusSelect) {
+        statusSelect.addEventListener('change', function() {
+            this.form.submit();
+        });
+    }
+});
+</script>
+{% endblock %}

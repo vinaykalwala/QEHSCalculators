@@ -18,6 +18,10 @@ urlpatterns = [
     path('privacy/', privacy, name='privacy'),
     path("device-limit/", device_limit_exceeded, name="device_limit_exceeded"),
     path("subscription-expired/", subscription_expired, name="subscription_expired"),
+
+    path('approvalsubscriptions/', manage_subscriptions, name='manage_subscriptions'),
+    path('approvalsubscriptions/approve/<int:subscription_id>/', approve_subscription, name='approve_subscription'),
+    path('approvalsubscriptions/reject/<int:subscription_id>/', reject_subscription, name='reject_subscription'),
     path('accident_rate_calculator/', accident_rate_calculator, name='accident_rate_calculator'),
 
     path('dashboard/', dashboard, name='dashboard'),
