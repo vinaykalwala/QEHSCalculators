@@ -97,15 +97,11 @@ CALCULATORS = [
     {"name": "Age Shock Index (Age SI) Calculator", "url_name": "health_age_shock_index_age_si_calculator", "plan_type": "corporate", "category": "health"},
     
     {"name": "Alzheimer’s Life Expectancy Calculator", "url_name": "health_alzheimers_life_expectancy_calculator", "plan_type": "corporate", "category": "health"},
+    {"name": "Ankle-Brachial Index (ABI) Calculator", "url_name": "health_ankle_brachial_index_abi_calculator", "plan_type": "corporate", "category": "health"},
 
-    {"name": "Army Body Fat Calculator", "url_name": "health_army_body_fat_calculator", "plan_type": "corporate", "category": "health"},
-{"name": "Adjusted Body Weight Calculator", "url_name": "health_adjusted_body_weight_calculator", "plan_type": "corporate", "category": "health"},
-{"name": "A Body Shape Index (ABSI) Calculator", "url_name": "health_a_body_shape_index_absi_calculator", "plan_type": "corporate", "category": "health"},
-{"name": "A1c Calculator", "url_name": "health_a1c_hemoglobin_a1c_to_average_blood_sugar_calculator", "plan_type": "corporate", "category": "health"},
-{"name": "Age Shock Index (Age SI) Calculator", "url_name": "health_age_shock_index_age_si_calculator", "plan_type": "corporate", "category": "health"},
-{"name": "Alzheimer’s Life Expectancy Calculator", "url_name": "health_alzheimers_life_expectancy_calculator", "plan_type": "corporate", "category": "health"},
-{"name": "BMI Calculator", "url_name": "health_bmi_calculator", "plan_type": "corporate", "category": "health"},
-{"name": "BMI Calculator for Kids", "url_name": "health_bmi_for_kids_calculator", "plan_type": "corporate", "category": "health"},
+
+    {"name": "BMI Calculator", "url_name": "health_bmi_calculator", "plan_type": "corporate", "category": "health"},
+    {"name": "BMI Calculator for Kids", "url_name": "health_bmi_for_kids_calculator", "plan_type": "corporate", "category": "health"},
 
 
 
