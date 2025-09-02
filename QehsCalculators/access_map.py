@@ -199,11 +199,11 @@ CALCULATORS = [
 {"name": "BS 6759 Valves - Nozzle Gas Constant Calculator", "url_name": "safety_bs_6759_valves_nozzle_gas_constant_calculator", "plan_type": "corporate", "category": "safety"},
 
 
-{"name": "BS-6759 Minimum Orifice Area Calculator for Dry Gases", "url_name": "BS-6759 Minimum Orifice Area Calculator for Dry Gases", "plan_type": "corporate", "category": "safety"},
+{"name": "BS-6759 Minimum Orifice Area Calculator for Dry Gases", "url_name": "safety_bs_6759_minimum_orifice_area_for_dry_gases_calculator", "plan_type": "corporate", "category": "safety"},
 
-{"name": "BS EN 4126 Minimum Orifice Area Calculator for Air & Dry Gas", "url_name": "BS EN 4126 Minimum Orifice Area Calculator for Air & Dry Gas", "plan_type": "corporate", "category": "safety"},
+{"name": "BS EN 4126 Minimum Orifice Area Calculator for Air & Dry Gas", "url_name": "safety_bs_en_4126_minimum_orifice_area_for_air_and_dry_gas_calculator", "plan_type": "corporate", "category": "safety"},
 
-{"name": "BS EN 4126 Minimum Orifice Area Calculator for Liquids", "url_name": "BS EN 4126 Minimum Orifice Area Calculator for Liquids", "plan_type": "corporate", "category": "safety"},
+{"name": "BS EN 4126 Minimum Orifice Area Calculator for Liquids", "url_name": "safety_bs_en_4126_minimum_orifice_area_for_liquids_calculator", "plan_type": "corporate", "category": "safety"},
 
 {"name": "BS EN 4126 Valves - Minimum Orifice Area For Steam, Air And Dry Gas At Critical Flow Calculator", "url_name": "safety_bs_en_4126_valves_minimum_orifice_area_for_steam_air_and_dry_gas_at_critical_flow_calculator", "plan_type": "corporate", "category": "safety"},
 
