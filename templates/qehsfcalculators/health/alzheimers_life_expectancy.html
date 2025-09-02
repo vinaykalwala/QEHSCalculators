@@ -18,7 +18,7 @@
         .calculator-container {
             max-width: 1200px;
             margin: 20px auto;
-            padding: 20px;
+            padding:0 20px;
             border-radius: 12px;
         }
 
@@ -365,10 +365,35 @@
         .custom-table tr:nth-child(even) {
             background-color: #f9f9f9;
         }
-       
+         .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
+      <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
 <div class="calculator-container printable" id="printArea">
 
     {% include "includes/print_header_footer.html" with report_title="Alzheimer's Life Expectancy Report" %}
@@ -432,69 +457,73 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() { /* ... */ const printDateEl = document.getElementById('printDate'); if (printDateEl) { const now = new Date(); const options = { year: 'numeric', month: 'long', day: 'numeric' }; printDateEl.textContent = now.toLocaleDateString('en-US', options); } });
+   function calculateAlzheimersExpectancy() {
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValueDiv = document.getElementById('resultValue');
 
-    function calculateAlzheimersExpectancy() {
-        const errorBox = document.getElementById('resultError'), errorMessage = document.getElementById('errorMessage'), placeholder = document.getElementById('placeholder'), resultValueDiv = document.getElementById('resultValue');
-        const stage = document.getElementById("alzStage").value;
+    const stage = document.getElementById("alzStage").value;
 
-        if (!stage) {
-            errorMessage.innerHTML = "👉 Please select a valid stage from the dropdown.";
-            errorBox.classList.remove("hidden");
-            placeholder.classList.remove("hidden");
-            resultValueDiv.classList.add("hidden");
-            return;
-        } else {
-            errorBox.classList.add("hidden");
-        }
-        
-        // **** CORRECTED: The original switch logic is restored to format the main result text ****
-        let resultText = "";
-        let lifeExpectancy = "";
-        let meter = {};
+    // Validation check
+    if (!stage) {
+        errorMessage.innerHTML = "👉 Please select a valid stage from the dropdown.";
 
-        switch (stage) {
-            case "1":
-                resultText = `🧠 <strong>Stage 1 – No cognitive decline</strong><br>✅ Normal function. No memory loss or symptoms.<br>📆 Life Expectancy: <strong>Normal for age</strong><br>⏳ Duration: Not applicable`;
-                lifeExpectancy = "Normal"; meter = { width: "5%", color: "#27ae60" };
-                break;
-            case "2":
-                resultText = `🧠 <strong>Stage 2 – Very mild cognitive decline</strong><br>📆 Estimated Life Expectancy: <strong>> 10 years</strong><br>⏳ Average Duration of Stage: <strong>~15 years</strong>`;
-                lifeExpectancy = "> 10 years"; meter = { width: "15%", color: "#2ecc71" };
-                break;
-            case "3":
-                resultText = `🧠 <strong>Stage 3 – Mild cognitive decline</strong><br>📆 Estimated Life Expectancy: <strong>~10 years</strong><br>⏳ Average Duration of Stage: <strong>2–7 years</strong>`;
-                lifeExpectancy = "~10 years"; meter = { width: "30%", color: "#f1c40f" };
-                break;
-            case "4":
-                resultText = `🧠 <strong>Stage 4 – Moderate cognitive decline</strong><br>📆 Estimated Life Expectancy: <strong>3–8 years</strong><br>⏳ Average Duration of Stage: <strong>~2 years</strong>`;
-                lifeExpectancy = "3–8 years"; meter = { width: "45%", color: "#f39c12" };
-                break;
-            case "5":
-                resultText = `🧠 <strong>Stage 5 – Moderately severe cognitive decline</strong><br>📆 Estimated Life Expectancy: <strong>1.5–6.5 years</strong><br>⏳ Average Duration of Stage: <strong>~1.5 years</strong>`;
-                lifeExpectancy = "1.5–6.5 years"; meter = { width: "60%", color: "#e67e22" };
-                break;
-            case "6":
-                resultText = `🧠 <strong>Stage 6 – Severe cognitive decline</strong><br>📆 Estimated Life Expectancy: <strong>≤ 4 years</strong><br>⏳ Average Duration of Stage: <strong>~2.5 years</strong>`;
-                lifeExpectancy = "≤ 4 years"; meter = { width: "75%", color: "#d35400" };
-                break;
-            case "7":
-                resultText = `🧠 <strong>Stage 7 – Very severe cognitive decline</strong><br>📆 Estimated Life Expectancy: <strong>≤ 2.5 years</strong><br>⏳ Average Duration of Stage: <strong>1.5–2.5 years</strong>`;
-                lifeExpectancy = "≤ 2.5 years"; meter = { width: "90%", color: "#c0392b" };
-                break;
-        }
-
-        // Update the different parts of the result card
-        document.getElementById('lifeExpectancyValue').textContent = lifeExpectancy;
-        document.getElementById('feedbackContent').innerHTML = resultText;
-        
-        const meterFill = document.getElementById('meterFill');
-        meterFill.style.width = meter.width;
-        meterFill.style.backgroundColor = meter.color;
-
-        placeholder.classList.add('hidden');
-        resultValueDiv.classList.remove('hidden');
+        errorBox.classList.remove("hidden");      // Show error
+        placeholder.classList.add("hidden");      // Hide placeholder
+        resultValueDiv.classList.add("hidden");   // Hide results
+        return;
+    } else {
+        errorBox.classList.add("hidden");         // Hide error
+        placeholder.classList.add("hidden");      // Hide placeholder
+        resultValueDiv.classList.remove("hidden"); // Show result
     }
+
+    // Data for each stage
+    let resultText = "";
+    let lifeExpectancy = "";
+    let meter = {};
+
+    switch (stage) {
+        case "1":
+            resultText = `🧠 <strong>Stage 1 – No cognitive decline</strong><br>✅ Normal function. No memory loss or symptoms.<br>📆 Life Expectancy: <strong>Normal for age</strong><br>⏳ Duration: Not applicable`;
+            lifeExpectancy = "Normal"; meter = { width: "5%", color: "#27ae60" };
+            break;
+        case "2":
+            resultText = `🧠 <strong>Stage 2 – Very mild cognitive decline</strong><br>📆 Estimated Life Expectancy: <strong>> 10 years</strong><br>⏳ Average Duration of Stage: <strong>~15 years</strong>`;
+            lifeExpectancy = "> 10 years"; meter = { width: "15%", color: "#2ecc71" };
+            break;
+        case "3":
+            resultText = `🧠 <strong>Stage 3 – Mild cognitive decline</strong><br>📆 Estimated Life Expectancy: <strong>~10 years</strong><br>⏳ Average Duration of Stage: <strong>2–7 years</strong>`;
+            lifeExpectancy = "~10 years"; meter = { width: "30%", color: "#f1c40f" };
+            break;
+        case "4":
+            resultText = `🧠 <strong>Stage 4 – Moderate cognitive decline</strong><br>📆 Estimated Life Expectancy: <strong>3–8 years</strong><br>⏳ Average Duration of Stage: <strong>~2 years</strong>`;
+            lifeExpectancy = "3–8 years"; meter = { width: "45%", color: "#f39c12" };
+            break;
+        case "5":
+            resultText = `🧠 <strong>Stage 5 – Moderately severe cognitive decline</strong><br>📆 Estimated Life Expectancy: <strong>1.5–6.5 years</strong><br>⏳ Average Duration of Stage: <strong>~1.5 years</strong>`;
+            lifeExpectancy = "1.5–6.5 years"; meter = { width: "60%", color: "#e67e22" };
+            break;
+        case "6":
+            resultText = `🧠 <strong>Stage 6 – Severe cognitive decline</strong><br>📆 Estimated Life Expectancy: <strong>≤ 4 years</strong><br>⏳ Average Duration of Stage: <strong>~2.5 years</strong>`;
+            lifeExpectancy = "≤ 4 years"; meter = { width: "75%", color: "#d35400" };
+            break;
+        case "7":
+            resultText = `🧠 <strong>Stage 7 – Very severe cognitive decline</strong><br>📆 Estimated Life Expectancy: <strong>≤ 2.5 years</strong><br>⏳ Average Duration of Stage: <strong>1.5–2.5 years</strong>`;
+            lifeExpectancy = "≤ 2.5 years"; meter = { width: "90%", color: "#c0392b" };
+            break;
+    }
+
+    // Update results
+    document.getElementById('lifeExpectancyValue').textContent = lifeExpectancy;
+    document.getElementById('feedbackContent').innerHTML = resultText;
+
+    const meterFill = document.getElementById('meterFill');
+    meterFill.style.width = meter.width;
+    meterFill.style.backgroundColor = meter.color;
+}
+
 
     function printReport() { /* ... */ const printDateEl = document.getElementById('printDate'); if (printDateEl) { const now = new Date(); const options = { year: 'numeric', month: 'long', day: 'numeric' }; printDateEl.textContent = now.toLocaleDateString('en-US', options); } window.print(); }
 </script>
