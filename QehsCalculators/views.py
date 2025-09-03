@@ -474,6 +474,9 @@ def fire_calculators(request):
 def disclaimer(request):
     return render(request, 'disclaimer.html', {'title': 'Disclaimer'})
 
+def calendar(request):
+    return render(request,'calendar.html')
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .models import Contact
