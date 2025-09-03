@@ -1,0 +1,739 @@
+{% extends 'base.html' %}
+{% block title %}Energy Balance between Steam and Secondary Fluid of a Non-Flow Process caluculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy Balance between Steam and Secondary Fluid of a Non-Flow Process caluculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 38px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+<div class="btn-container">
+        <a href="{% url 'environment_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+<div class="calculator-container printable" id="printArea">
+
+
+{% include "includes/print_header_footer.html" %}
+
+<div class="calculator-header">
+  <h1>Energy Balance between Steam and Secondary Fluid of a Non-Flow Process caluculator</h1>
+  <p>Calculate the heat transfer rate supplied by steam. Result shown in kW.</p>
+</div>
+
+<div class="calc-content">
+  <!-- Calculator -->
+  <div class="calc-card">
+    <h2>Enter Parameters</h2>
+
+    
+      <div class="form-group">
+        <label for="steamRate">Mean Steam Consumption Rate (ṁₛ, kg/s)</label>
+        <input type="number" id="steamRate" class="form-input" step="any" min="0" placeholder="e.g., 0.75" aria-label="Steam mass flow rate">
+      </div>
+
+      <div class="form-group">
+        <label for="latentHeat">Specific Enthalpy of Evaporation (h<span style="vertical-align:sub;">fg</span>, kJ/kg)</label>
+        <input type="number" id="latentHeat" class="form-input" step="any" min="0" placeholder="e.g., 2257" aria-label="Latent heat of vaporization">
+      </div>
+    
+
+    <button class="calculate-btn" onclick="calculateHeatRate()">Calculate Heat Transfer Rate</button>
+  </div>
+
+  <!-- Result Section -->
+  <div class="result-card">
+    <div class="result-placeholder" id="placeholder">
+      <img src="https://cdn-icons-png.flaticon.com/512/9294/9294521.png" alt="Steam heat illustration">
+      <p>This tool estimates the heat transfer rate provided by steam.</p>
+    </div>
+
+    <div class="result-error hidden" id="resultError" role="alert" aria-live="polite">
+      <div class="error-icon">❌</div>
+      <div class="error-message" id="errorMessage"></div>
+    </div>
+
+    <div class="result-value hidden" id="resultValue" aria-live="polite">
+      <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+        <h2>Heat Transfer Rate</h2>
+      </div>
+
+      <div class="rate-display" style="gap:12px; align-items:center; justify-content:center;">
+        <div class="rate-value" id="heatRate">0.00</div>
+        <div class="rate-label" style="font-size:16px; color:#2980b9;">kW</div>
+      </div>
+
+      <div class="result-feedback">
+        <div class="feedback-title">System Assessment</div>
+        <div class="feedback-content" id="feedbackContent"></div>
+      </div>
+
+      <div class="btn-wrapper">
+        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Notes Section -->
+<div class="note-section">
+  <div class="note-card">
+    <h3>📘 About</h3>
+    <p>
+      This calculator estimates the heat transfer rate supplied by steam using the entered steam mass flow and the steam’s latent heat of vaporization. The result is displayed in kilowatts (kW), with helpful conversions for reporting.
+    </p>
+  </div>
+
+  <div class="note-card">
+    <h3>✅ Input Validations</h3>
+    <ul class="note-list">
+      <li><strong>Steam Rate (kg/s):</strong> Required, &gt; 0 and ≤ 200; ≤ 3 decimal places.</li>
+      <li><strong>Latent Heat (kJ/kg):</strong> Required, &gt; 0 and ≤ 4,000; ≤ 1 decimal place.</li>
+      <li><strong>Units Check:</strong> If latent heat appears to be in J/kg (e.g., &gt; 10,000), please convert to kJ/kg.</li>
+      <li><strong>Typical Ranges:</strong> h<sub>fg</sub> ≈ 1,300–2,600 kJ/kg depending on pressure; values &lt; 500 kJ/kg are unusual.</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>🔎 Heat Rate Classification</h3>
+    <ul class="note-list">
+      <li><strong>Low (&lt; 50 kW):</strong> Pilot/small duty.</li>
+      <li><strong>Moderate (50–500 kW):</strong> Common plant utilities.</li>
+      <li><strong>High (0.5–5 MW):</strong> Significant duty; review PRVs/condensate capacity.</li>
+      <li><strong>Very High (&gt; 5 MW):</strong> Utility scale; senior engineering review.</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>🏭 Applications</h3>
+    <ul class="note-list">
+      <li><strong>Boiler/Pump Sizing:</strong> Duty estimation.</li>
+      <li><strong>Process Safety:</strong> Overheat/overpressure risk review.</li>
+      <li><strong>Energy Accounting:</strong> KPI in kW and MJ/h.</li>
+      <li><strong>Condensate Return:</strong> Trap and line capacity checks.</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>🛑 Limitations</h3>
+    <ul class="note-list">
+      <li>Assumes latent heat duty only (no superheat/sensible heat).</li>
+      <li>Does not account for heat losses, wet steam (dryness fraction), or fouling.</li>
+      <li>For superheated steam or hot condensate recovery, use the appropriate enthalpy change.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+function showErrors(errors) {
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+
+  errorMessage.innerHTML = errors.join("<br>");
+  errorBox.classList.remove("hidden");
+  placeholder.classList.add("hidden");
+  resultValue.classList.add("hidden");
+}
+
+function countDecimals(numStr) {
+  if (!numStr || !numStr.includes(".")) return 0;
+  return numStr.split(".")[1].length;
+}
+
+function calculateHeatRate() {
+  const mRaw = document.getElementById("steamRate")?.value.trim();
+  const hRaw = document.getElementById("latentHeat")?.value.trim();
+
+  const heatEl = document.getElementById("heatRate");
+  const feedbackEl = document.getElementById("feedbackContent");
+  const errorBox = document.getElementById("resultError");
+  const errorMsgEl = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+
+  // reset view
+  errorBox.classList.add("hidden");
+  errorMsgEl.innerHTML = "";
+  feedbackEl.innerHTML = "";
+
+  const errors = [];
+  const warnings = [];
+
+  // Required
+  if (mRaw === "") errors.push("👉 Please enter the steam consumption rate (kg/s).");
+  if (hRaw === "") errors.push("👉 Please enter the latent heat of vaporization (kJ/kg).");
+  if (errors.length) return showErrors(errors);
+
+  // Decimal precision limits
+  if (countDecimals(mRaw) > 3) errors.push("👉 Steam rate: maximum 3 decimal places.");
+  if (countDecimals(hRaw) > 1) errors.push("👉 Latent heat: maximum 1 decimal place.");
+
+  const m = parseFloat(mRaw);
+  const hfg = parseFloat(hRaw);
+
+  if (!Number.isFinite(m)) errors.push("👉 Steam rate must be a valid number.");
+  if (!Number.isFinite(hfg)) errors.push("👉 Latent heat must be a valid number.");
+  if (errors.length) return showErrors(errors);
+
+  // Hard limits
+  if (m <= 0 || m > 200) errors.push("👉 Steam rate must be > 0 and ≤ 200 kg/s.");
+  if (hfg <= 0 || hfg > 4000) errors.push("👉 Latent heat must be > 0 and ≤ 4,000 kJ/kg.");
+  // Likely units mistake (J/kg typed into a kJ/kg field)
+  if (hfg > 10000) errors.push("👉 Latent heat appears to be in J/kg. Please enter the value in kJ/kg.");
+  if (errors.length) return showErrors(errors);
+
+  // Warnings (plausibility)
+  if (m < 0.001) warnings.push("⚠️ Very small steam rate (< 0.001 kg/s) – lab/pilot scale.");
+  if (m > 5) warnings.push("⚠️ Large steam rate (> 5 kg/s) – ensure boiler/PRV capacity.");
+  if (m > 20) warnings.push("⚠️ Very large steam rate (> 20 kg/s) – utility-scale duty.");
+
+  if (hfg < 500) warnings.push("⚠️ Very low latent heat (< 500 kJ/kg) – verify pressure/units.");
+  if (hfg < 1300) warnings.push("⚠️ Lower than typical saturated steam; check data source.");
+  if (hfg > 2600) warnings.push("⚠️ Higher than typical saturated steam; verify if superheat/sensible heat is included.");
+
+  // Calculation: Qdot in kW
+  const kW = m * hfg;        // kg/s * kJ/kg = kJ/s = kW
+  const MJ_per_h = kW * 3.6; // 1 kW = 3.6 MJ/h
+  const kg_per_h = m * 3600;
+
+  if (!Number.isFinite(kW) || kW <= 0) {
+    return showErrors(["⚠️ Computed heat rate is invalid. Check inputs."]);
+  }
+
+  // Classification
+  let classification = "", suggestion = "";
+  if (kW < 50) {
+    classification = "Low Duty";
+    suggestion = "✅ Suitable for small heaters/pilot operations.";
+  } else if (kW < 500) {
+    classification = "Moderate Duty";
+    suggestion = "⚠️ Typical plant utility load; confirm trap & condensate capacity.";
+  } else if (kW < 5000) {
+    classification = "High Duty";
+    suggestion = "❗ Review PRVs, interlocks, and heat-rejection capability.";
+  } else {
+    classification = "Very High Duty";
+    suggestion = "❗ Utility-scale duty – ensure layered protection and senior review.";
+  }
+  if (kW > 5000) warnings.push("⚠️ > 5 MW: verify boiler capacity, PRV sizing, and emergency shutdown procedures.");
+
+  // Present results
+  heatEl.textContent = kW.toFixed(2);
+
+  let details = `<div>Heat Rate: <b>${kW.toFixed(2)}</b> kW</div>`;
+  details += `<div>Steam Rate: <b>${m.toFixed(Math.min(3, countDecimals(mRaw)))}</b> kg/s (<b>${kg_per_h.toFixed(1)}</b> kg/h)</div>`;
+  details += `<div>Latent Heat: <b>${hfg.toFixed(Math.min(1, countDecimals(hRaw)))}</b> kJ/kg</div>`;
+  details += `<div>Energy Basis: <b>${MJ_per_h.toFixed(1)}</b> MJ/h</div>`;
+  details += `<div>Classification: <b>${classification}</b></div>`;
+  details += `<div style="margin-top:6px;">${suggestion}</div>`;
+  if (warnings.length) {
+    details += `<div style="margin-top:8px; color:#b35d00;">${warnings.join(" | ")}</div>`;
+  }
+
+  feedbackEl.innerHTML = details;
+  placeholder.classList.add("hidden");
+  resultValue.classList.remove("hidden");
+  errorBox.classList.add("hidden");
+}
+
+function printReport() {
+  const el = document.getElementById('printDate');
+  if (el) {
+    el.textContent = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  }
+  window.print();
+}
+</script>
+
+
+</body>
+</html>
+{% endblock %}
+
+<!--
+==========================================================
+Energy Balance between Steam and Secondary Fluid of a Non-Flow
+==========================================================
+
+📌 Formula Used:
+  - Inputs:
+        m   = steam mass flow rate (kg/s)
+        hfg = latent heat of vaporization (kJ/kg)
+
+  - Heat Rate (Q̇):
+        Q̇ = m × hfg
+          = (kg/s × kJ/kg)
+          = kJ/s
+          = kW
+
+  - Conversions:
+        MJ/h  = Q̇ × 3.6   (1 kW = 3.6 MJ/h)
+        kg/h  = m × 3600
+
+📌 Input Validations:
+  - Steam rate (m, kg/s):
+      • Required
+      • Numeric, max 3 decimal places
+      • 0 < m ≤ 200
+
+  - Latent heat (hfg, kJ/kg):
+      • Required
+      • Numeric, max 1 decimal place
+      • 0 < hfg ≤ 4000
+      • If > 10000 → likely entered in J/kg instead of kJ/kg
+
+📌 Output Validations:
+  - Heat rate (Q̇) must be finite and > 0
+  - If not, error shown: "Computed heat rate is invalid"
+
+📌 Warnings (plausibility checks):
+  - Steam rate (m):
+      < 0.001 → very small (lab/pilot scale)
+      > 5     → large load (check boiler/PRV capacity)
+      > 20    → very large (utility-scale)
+
+  - Latent heat (hfg):
+      < 500   → very low, check units/pressure
+      < 1300  → lower than typical saturated steam
+      > 2600  → higher than typical; may include superheat/sensible heat
+
+  - Duty:
+      > 5000 kW (5 MW) → extreme; verify boiler & PRV sizing, emergency shutdowns
+
+📌 Classification (by kW):
+  - < 50       → ✅ Low Duty (small heaters/pilot scale)
+  - 50 – 500   → ⚠️ Moderate Duty (typical utility load)
+  - 500 – 5000 → ❗ High Duty (review PRVs, interlocks, rejection systems)
+  - > 5000     → ❗ Very High Duty (utility-scale, layered protection needed)
+
+📌 Output Breakdown:
+  - Heat Rate (kW)
+  - Steam Rate (kg/s and kg/h)
+  - Latent Heat (kJ/kg)
+  - Energy Basis (MJ/h)
+  - Classification + Suggestion
+  - Warnings (if triggered)
+
+==========================================================
+-->
+
+
+
+
+
+
+

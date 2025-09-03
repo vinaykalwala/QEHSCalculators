@@ -1,0 +1,809 @@
+{% extends 'base.html' %}
+{% block title %}Dynamic Viscosity Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Viscosity Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+<style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+             /* display: flex;  */
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            /* overflow-y: auto;  */
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Input rows for better organization */
+        .input-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+        
+        @media (max-width: 600px) {
+            .input-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+                .rate-display {
+                display: flex;
+                gap: 20px;
+                justify-content: center;
+                align-items: center;
+                flex-wrap: wrap; /* responsive */
+                text-align: center;
+            }
+
+            .rate-block {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                min-width: 120px; /* keeps blocks same width */
+            }
+
+            .rate-label {
+                font-weight: bold;
+                font-size: 16px;
+                color: #444;
+                margin-bottom: 5px;
+            }
+
+            .rate-value {
+                font-size: 40px;
+                font-weight: 700;
+                color: #2980b9;
+                line-height: 1.2;
+            }
+
+            .rate-unit {
+                font-size: 14px;
+                color: #777;
+                margin-top: 4px;
+            }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+                .rate-value { font-size: 32px; }
+            }
+
+            @media (max-width: 480px) {
+                .rate-value { font-size: 26px; }
+                
+                .rate-unit { font-size: 12px; }
+                
+            }
+
+
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+                .result-feedback {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 18px 20px;
+    border-left: 4px solid #3498db;
+    text-align: left;
+    max-width: 800px; /* keeps it readable on large screens */
+    margin: 0 auto;   /* centers it */
+}
+
+.feedback-title {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #2c3e50;
+    font-size: 18px;
+}
+
+.feedback-content { 
+    color: #34495e; 
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 768px) {
+    .result-feedback {
+        padding: 15px;
+        font-size: 15px;
+    }
+
+    .feedback-title {
+        font-size: 16px;
+    }
+
+    .feedback-content {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .result-feedback {
+        padding: 12px;
+        border-left-width: 3px;
+    }
+
+    .feedback-title {
+        font-size: 15px;
+    }
+
+    .feedback-content {
+        font-size: 13px;
+    }
+}
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+<div class="btn-container">
+        <a href="{% url 'environment_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+<div class="calculator-container printable" id="printArea">
+
+
+{% include "includes/print_header_footer.html" %}
+
+<div class="calculator-header">
+    <h1>Dissolved Oxygen (DO) Deficit (Streeter-Phelps Model) Calculator</h1>
+    <p>Calculate the oxygen deficit in water bodies using the Streeter-Phelps model (result shown in mg/L).</p>
+</div>
+
+<div class="calc-content">
+    <!-- Calculator -->
+    <div class="calc-card">
+        <h2>Enter Parameters</h2>
+
+        <div class="input-row">
+            <div class="form-group">
+                <label for="reaerationRate">Reaeration Rate (k₂, 1/day)</label>
+                <input type="number" id="reaerationRate" class="form-input" step="any" min="0" placeholder="e.g., 0.4" aria-label="Reaeration rate">
+            </div>
+
+            <div class="form-group">
+                <label for="deoxygenationRate">Deoxygenation Rate (k₁, 1/day)</label>
+                <input type="number" id="deoxygenationRate" class="form-input" step="any" min="0" placeholder="e.g., 0.3" aria-label="Deoxygenation rate">
+            </div>
+        </div>
+
+        <div class="input-row">
+            <div class="form-group">
+                <label for="initialBOD">Initial Ultimate BOD (L₀, mg/L)</label>
+                <input type="number" id="initialBOD" class="form-input" step="any" min="0" placeholder="e.g., 20" aria-label="Initial BOD">
+            </div>
+
+            <div class="form-group">
+                <label for="initialDeficit">Initial DO Deficit (D₀, mg/L)</label>
+                <input type="number" id="initialDeficit" class="form-input" step="any" min="0" placeholder="e.g., 2" aria-label="Initial deficit">
+            </div>
+        </div>
+
+        <div class="input-row">
+            <div class="form-group">
+                <label for="time">Time (t, days)</label>
+                <input type="number" id="time" class="form-input" step="any" min="0" placeholder="e.g., 5" aria-label="Time">
+            </div>
+        </div>
+
+        <button class="calculate-btn" onclick="calculateDODeficit()">Calculate DO Deficit</button>
+    </div>
+
+    <!-- Result Section -->
+    <div class="result-card">
+        <div class="result-placeholder" id="placeholder">
+            <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="DO deficit illustration">
+            <p>This tool calculates the dissolved oxygen deficit in water bodies using the Streeter-Phelps model.</p>
+        </div>
+
+        <div class="result-error hidden" id="resultError" role="alert" aria-live="polite">
+            <div class="error-icon">❌</div>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <div class="result-value hidden" id="resultValue" aria-live="polite">
+            <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                <h2>DO Deficit</h2>
+            </div>
+
+            <div class="rate-display" style="gap:12px; align-items:center; justify-content:center;">
+                <div class="rate-value" id="doDeficit">0.00</div>
+                <div class="rate-label" style="font-size:16px; color: #2980b9;">mg/L</div>
+            </div>
+
+            <div class="result-feedback">
+                <div class="feedback-title">Water Quality Assessment</div>
+                <div class="feedback-content" id="feedbackContent"></div>
+            </div>
+
+            <div class="btn-wrapper">
+                <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notes Section -->
+<div class="note-section">
+    <div class="note-card">
+        <h3>📘 About</h3>
+        <p>
+            This calculator determines the dissolved oxygen deficit in water bodies using the Streeter-Phelps model. It predicts oxygen depletion due to organic pollution, which is critical for assessing water quality and ecosystem health.
+        </p>
+    </div>
+
+    <div class="note-card">
+        <h3>✅ Input Validations</h3>
+        <ul class="note-list">
+            <li><strong>Reaeration rate (k₂):</strong> Must be <em>greater than 0</em> and ≤ 5.0 1/day.</li>
+            <li><strong>Deoxygenation rate (k₁):</strong> Must be <em>greater than 0</em> and ≤ 2.0 1/day.</li>
+            <li><strong>Initial BOD (L₀):</strong> Must be <em>greater than 0</em> and ≤ 500 mg/L.</li>
+            <li><strong>Initial deficit (D₀):</strong> Must be <em>non-negative</em> and ≤ 20 mg/L.</li>
+            <li><strong>Time (t):</strong> Must be <em>non-negative</em> and ≤ 30 days.</li>
+            <li><strong>Rate comparison:</strong> k₂ must be greater than k₁ for valid calculation.</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>🔎 Water Quality Classification</h3>
+        <ul class="note-list">
+            <li><strong>Low deficit (&lt; 2 mg/L)</strong>: Good water quality, supports aquatic life.</li>
+            <li><strong>Moderate deficit (2-4 mg/L)</strong>: Moderate pollution, some stress on aquatic life.</li>
+            <li><strong>High deficit (4-6 mg/L)</strong>: Poor water quality, significant stress on aquatic life.</li>
+            <li><strong>Critical deficit (&gt; 6 mg/L)</strong>: Severe pollution, potential fish kills.</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>🌍 Applications</h3>
+        <ul class="note-list">
+            <li><strong>Wastewater Management:</strong> Predicting oxygen depletion from effluent discharges.</li>
+            <li><strong>Environmental Monitoring:</strong> Assessing impact of organic pollution on rivers and lakes.</li>
+            <li><strong>Regulatory Compliance:</strong> Ensuring water bodies meet quality standards.</li>
+            <li><strong>Ecological Risk Assessment:</strong> Evaluating potential harm to aquatic ecosystems.</li>
+            <li><strong>Treatment Plant Design:</strong> Sizing aeration systems for wastewater treatment.</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>🛑 Limitations</h3>
+        <ul class="note-list">
+            <li>Assumes complete mixing and constant temperature.</li>
+            <li>Valid for point source pollution in rivers with steady flow.</li>
+            <li>Does not account for photosynthetic oxygen production.</li>
+            <li>Assumes first-order kinetics for BOD degradation.</li>
+            <li>May not accurately predict oxygen sag in complex systems.</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+/* Helper: show errors consistently */
+function showErrors(errors) {
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+
+  if (errorMessage) errorMessage.innerHTML = errors.join("<br>");
+  if (errorBox) errorBox.classList.remove("hidden");
+  if (placeholder) placeholder.classList.add("hidden");
+  if (resultValue) resultValue.classList.add("hidden");
+}
+
+/* Main DO Deficit calculation with enhanced validations */
+function calculateDODeficit() {
+  // Safe reads with trimming
+  const k2 = parseFloat(document.getElementById("reaerationRate")?.value.trim());
+  const k1 = parseFloat(document.getElementById("deoxygenationRate")?.value.trim());
+  const L0 = parseFloat(document.getElementById("initialBOD")?.value.trim());
+  const D0 = parseFloat(document.getElementById("initialDeficit")?.value.trim());
+  const t  = parseFloat(document.getElementById("time")?.value.trim());
+
+  const deficitEl = document.getElementById("doDeficit");
+  const feedbackEl = document.getElementById("feedbackContent");
+
+  // reset UI
+  document.getElementById("resultError").classList.add("hidden");
+  if (feedbackEl) feedbackEl.innerHTML = "";
+
+  const errors = [];
+  const warnings = [];
+
+  // Required numeric checks
+  if (![k2, k1, L0, D0, t].every(Number.isFinite)) {
+    errors.push("👉 All inputs are required and must be numeric.");
+    showErrors(errors);
+    return;
+  }
+
+  // Input validations with real-world thresholds
+  if (k2 <= 0 || k2 > 5.0) errors.push("👉 Reaeration rate (k₂) must be >0 and ≤5.0 1/day (per OECD/ISO water modeling).");
+  if (k1 <= 0 || k1 > 2.0) errors.push("👉 Deoxygenation rate (k₁) must be >0 and ≤2.0 1/day (biodegradation kinetics limit).");
+  if (L0 <= 0 || L0 > 500) errors.push("👉 Initial BOD (L₀) must be >0 and ≤500 mg/L (regulatory design standard).");
+  if (D0 < 0 || D0 > 20) errors.push("👉 Initial deficit (D₀) must be ≥0 and ≤20 mg/L (oxygen solubility constraint).");
+  if (t < 0 || t > 30) errors.push("👉 Time (t) must be ≥0 and ≤30 days (model validity limit).");
+
+  // Edge case: excessive decimals
+  const decimalsExceeded = [k2, k1, L0, D0, t].some(v => (v.toString().split(".")[1] || "").length > 4);
+  if (decimalsExceeded) warnings.push("⚠️ Too many decimals entered. Results rounded to 4 places for reporting consistency.");
+
+  if (errors.length > 0) { showErrors(errors); return; }
+
+  // Critical validation: k₂ must be greater than k₁
+  if (k2 <= k1) {
+    errors.push("👉 Reaeration rate (k₂) must be greater than deoxygenation rate (k₁) to avoid oxygen collapse.");
+    showErrors(errors);
+    return;
+  }
+
+  // Warning checks (plausibility ranges, not hard errors)
+  if (k2 > 2.0) warnings.push("⚠️ High reaeration rate – typical values are 0.1–2.0 1/day.");
+  if (k1 > 1.0) warnings.push("⚠️ High deoxygenation rate – typical values are 0.05–1.0 1/day.");
+  if (L0 > 100) warnings.push("⚠️ High BOD loading – indicates severe organic pollution risk.");
+  if (D0 > 8) warnings.push("⚠️ High initial deficit – water may already be stressed.");
+  if (t > 15) warnings.push("⚠️ Long time period – model accuracy decreases beyond 15 days.");
+
+  // Compute DO deficit using Streeter-Phelps formula
+  let deficit;
+  try {
+    const term1 = (k1 * L0) / (k2 - k1);
+    const term2 = Math.exp(-k1 * t) - Math.exp(-k2 * t);
+    const term3 = D0 * Math.exp(-k2 * t);
+    deficit = term1 * term2 + term3;
+  } catch (e) {
+    showErrors(["⚠️ Calculation failed due to numerical instability."]);
+    return;
+  }
+
+  // Output validation
+  if (!Number.isFinite(deficit)) {
+    showErrors(["⚠️ Computed deficit is invalid (overflow/NaN)."]);
+    return;
+  }
+  if (deficit < 0) {
+    warnings.push("⚠️ Negative deficit adjusted to zero – indicates overcorrection by model.");
+    deficit = 0;
+  }
+  if (deficit > 20) {
+    warnings.push("⚠️ Deficit exceeds oxygen solubility limit (~20 mg/L). Results may be unrealistic.");
+  }
+
+  // Classification based on deficit values
+  let classification = "";
+  let suggestion = "";
+  if (deficit < 2) {
+    classification = "Good Water Quality";
+    suggestion = "✅ Low oxygen deficit. Water supports healthy aquatic life.";
+  } else if (deficit < 4) {
+    classification = "Moderate Pollution";
+    suggestion = "⚠️ Moderate oxygen deficit. Some stress on aquatic life.";
+  } else if (deficit < 6) {
+    classification = "Poor Water Quality";
+    suggestion = "❌ High oxygen deficit. Significant stress on aquatic life.";
+  } else {
+    classification = "Critical Condition";
+    suggestion = "❌ Severe oxygen deficit. Risk of fish kills and ecosystem damage.";
+  }
+
+  // Additional extreme case
+  if (deficit > 10) warnings.push("⚠️ Extremely high deficit – consider emergency oxygenation or regulatory reporting.");
+
+  // Build feedback
+  let details = `<div>DO Deficit = <b>${deficit.toFixed(4)}</b> mg/L</div>`;
+  details += `<div>Water Quality: <b>${classification}</b></div>`;
+  details += `<div style="margin-top:6px;">${suggestion}</div>`;
+  if (warnings.length) {
+    details += `<div style="margin-top:8px; color:#b35d00;">Note: ${warnings.join(" | ")}</div>`;
+  }
+
+  // Update UI
+  if (deficitEl) deficitEl.textContent = deficit.toFixed(4);
+  if (feedbackEl) feedbackEl.innerHTML = details;
+
+  // Toggle display
+  document.getElementById("placeholder").classList.add("hidden");
+  document.getElementById("resultValue").classList.remove("hidden");
+  document.getElementById("resultError").classList.add("hidden");
+}
+
+/* Safe print guard */
+function printReport() {
+  const el = document.getElementById('printDate');
+  if (el) {
+    const now = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    el.textContent = now.toLocaleDateString('en-US', options);
+  }
+  window.print();
+}
+</script>
+
+
+</body>
+</html>
+{% endblock %}
+
+
+<!-- 
+==============================================
+DO (Dissolved Oxygen) DEFICIT CALCULATOR - DOCUMENTATION
+==============================================
+
+📌 Formula Used (Streeter–Phelps Equation):
+  D(t) = [(k₁ × L₀) / (k₂ − k₁)] × (e^(−k₁t) − e^(−k₂t)) + D₀ × e^(−k₂t)
+
+  where:
+    D(t) = Oxygen deficit at time t (mg/L)
+    k₂   = Reaeration rate constant (1/day)
+    k₁   = Deoxygenation rate constant (1/day)
+    L₀   = Initial ultimate BOD (mg/L)
+    D₀   = Initial oxygen deficit (mg/L)
+    t    = Time (days)
+
+📌 Input Validations:
+  - Reaeration Rate (k₂):
+      • Required, numeric
+      • Must be > 0 and ≤ 5.0 (1/day)
+      • Must be greater than k₁
+      • Warning if > 2.0 (unusually high)
+
+  - Deoxygenation Rate (k₁):
+      • Required, numeric
+      • Must be > 0 and ≤ 2.0 (1/day)
+      • Warning if > 1.0 (unusually high)
+
+  - Initial BOD (L₀):
+      • Required, numeric
+      • Must be > 0 and ≤ 500 mg/L
+      • Warning if > 100 mg/L (severe pollution risk)
+
+  - Initial Deficit (D₀):
+      • Required, numeric
+      • Must be ≥ 0 and ≤ 20 mg/L
+      • Warning if > 8 mg/L (water already stressed)
+
+  - Time (t):
+      • Required, numeric
+      • Must be ≥ 0 and ≤ 30 days
+      • Warning if > 15 days (model accuracy decreases)
+
+📌 Output Validations:
+  - Computed deficit must be finite
+  - Negative values reset to 0 with warning
+  - Warning if deficit > 20 mg/L (exceeds oxygen solubility)
+  - Warning if deficit > 10 mg/L (emergency conditions)
+
+📌 Classification Rules:
+  - D(t) < 2 mg/L  → Good Water Quality 
+        ✅ Healthy aquatic life
+  - 2 ≤ D(t) < 4 mg/L → Moderate Pollution 
+        ⚠️ Some stress on aquatic life
+  - 4 ≤ D(t) < 6 mg/L → Poor Water Quality 
+        ❌ Significant stress on aquatic life
+  - D(t) ≥ 6 mg/L → Critical Condition 
+        ❌ Severe deficit, high risk of fish kills
+
+-->
