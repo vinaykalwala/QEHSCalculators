@@ -200,6 +200,17 @@ CALCULATORS = [
 {"name": "Daily Drinking Water Intake Calculator", "url_name": "health_daily_drinking_water_intake_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Dietary Reference Intake (DRI) Calculator", "url_name": "health_dietary_reference_intake_dri_calculator", "plan_type": "corporate", "category": "health"},
 
+{"name": "Diabetes Risk Calculator", "url_name":"health_diabetes_risk_estimate_your_75_year_risk_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Depression Screening (PHQ-2) Calculator", "url_name": "health_depression_screening_by_phq_2_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Dose-Response Probit Calculator", "url_name": "health_dose_response_probit_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Diet Risk Score Calculator", "url_name": "health_diet_risk_score_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Estimated Average Glucose (eAG) Calculator", "url_name": "health_estimated_average_glucose_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Epworth Sleepiness Scale (ESS) Calculator", "url_name": "health_epworth_sleepiness_scale_ess_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Fat-Free Mass Index (FFMI) Calculator", "url_name": "health_fat_free_mass_index_ffmi_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Fiber Intake Calculator", "url_name": "health_fiber_intake_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "GAD-7 Anxiety Assessment Calculator", "url_name": "health_generalized_anxiety_disorder_assessment_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Gupta Perioperative Risk Calculator", "url_name": "health_gupta_perioperative_risk_calculator", "plan_type": "corporate", "category": "health"},
+
 
 
 
