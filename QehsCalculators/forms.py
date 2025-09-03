@@ -48,3 +48,21 @@ class SubscriptionPlanForm(forms.ModelForm):
     class Meta:
         model = SubscriptionPlan
         fields = ['name', 'price', 'calculators_per_category', 'device_limit', 'duration_days', 'is_active']
+
+
+
+
+from django.contrib.auth.forms import SetPasswordForm, AuthenticationForm
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class ForgotPasswordForm(forms.Form):
+    email = forms.EmailField(label="Registered Email")
+
+class VerificationCodeForm(forms.Form):
+    code = forms.CharField(label="Verification Code", max_length=6)
+
+class CustomSetPasswordForm(SetPasswordForm):
+    # Inherits password1 and password2 fields
+    pass

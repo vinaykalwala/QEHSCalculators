@@ -536,6 +536,8 @@ def upgrade_required(request):
 
 def accident_rate_calculator(request):
     return render(request, 'qehsfcalculators/Safety/accident_rate_calculator.html')
+
+
 from .forms import CustomUserCreationForm, CustomAuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 
@@ -579,6 +581,151 @@ def logout_view(request):
     messages.success(request, "Logged out successfully.")
     return redirect("home")
 
+
+from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
+from django.utils.crypto import get_random_string
+
+from .forms import ForgotPasswordForm, VerificationCodeForm, CustomSetPasswordForm
+
+User = get_user_model()
+
+# Step 1: Forgot Password → Enter Email
+def forgot_password_view(request):
+    if request.method == "POST":
+        form = ForgotPasswordForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data["email"]
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                messages.error(request, "Email not registered.")
+                return redirect("forgot_password")
+
+            # Generate verification code
+            code = get_random_string(length=6, allowed_chars="0123456789")
+            request.session["reset_email"] = email
+            request.session["reset_code"] = code
+
+            # Send email
+            send_mail(
+                subject="Password Reset Verification Code",
+                message=f"Your verification code is: {code}",
+                from_email="noreply@example.com",
+                recipient_list=[email],
+            )
+            messages.success(request, "Verification code sent to your email.")
+            return redirect("verify_code")
+    else:
+        form = ForgotPasswordForm()
+    return render(request, "forgot_password.html", {"form": form})
+
+
+# Step 2: Verify Code
+def verify_code_view(request):
+    if request.method == "POST":
+        form = VerificationCodeForm(request.POST)
+        if form.is_valid():
+            code = form.cleaned_data["code"]
+            if request.session.get("reset_code") == code:
+                messages.success(request, "Code verified. You can now set a new password.")
+                return redirect("set_new_password")
+            else:
+                messages.error(request, "Invalid verification code.")
+    else:
+        form = VerificationCodeForm()
+    return render(request, "verify_code.html", {"form": form})
+
+
+# Step 3: Set New Password
+def set_new_password_view(request):
+    email = request.session.get("reset_email")
+    if not email:
+        messages.error(request, "Session expired. Please try again.")
+        return redirect("forgot_password")
+
+    user = User.objects.get(email=email)
+
+    if request.method == "POST":
+        form = CustomSetPasswordForm(user, request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Password changed successfully. Please log in.")
+            # Clear session
+            request.session.pop("reset_email", None)
+            request.session.pop("reset_code", None)
+            return redirect("login")
+    else:
+        form = CustomSetPasswordForm(user)
+    return render(request, "set_new_password.html", {"form": form})
+
+
+from django.contrib.auth import update_session_auth_hash
+
+@login_required
+def change_password_view(request):
+    """
+    Change password for logged-in users using verification code sent to their registered email.
+    Keeps the user signed in after password change.
+    """
+    user = request.user
+
+    # Step 1: Send verification code
+    if request.method == "POST" and "send_code" in request.POST:
+        code = get_random_string(length=6, allowed_chars="0123456789")
+        request.session["change_code"] = code
+
+        send_mail(
+            subject="Password Change Verification Code",
+            message=f"Your verification code is: {code}",
+            from_email="noreply@example.com",
+            recipient_list=[user.email],
+        )
+        messages.success(request, "Verification code sent to your email.")
+        return redirect("change_password")
+
+    # Step 2: Verify code
+    if request.method == "POST" and "verify_code" in request.POST:
+        code_form = VerificationCodeForm(request.POST)
+        if code_form.is_valid():
+            code = code_form.cleaned_data["code"]
+            if code == request.session.get("change_code"):
+                request.session["code_verified"] = True
+                messages.success(request, "Code verified. Set your new password below.")
+                return redirect("change_password")
+            else:
+                messages.error(request, "Invalid verification code.")
+    else:
+        code_form = VerificationCodeForm()
+
+    # Step 3: Set new password
+    if request.method == "POST" and "set_password" in request.POST:
+        if not request.session.get("code_verified"):
+            messages.error(request, "You must verify your email code first.")
+            return redirect("change_password")
+
+        form = CustomSetPasswordForm(user, request.POST)
+        if form.is_valid():
+            form.save()
+            update_session_auth_hash(request, user)  # Keeps the user logged in
+            messages.success(request, "Password changed successfully.")
+            # Clear session
+            request.session.pop("change_code", None)
+            request.session.pop("code_verified", None)
+            return redirect("dashboard")
+    else:
+        form = CustomSetPasswordForm(user)
+
+    return render(
+        request,
+        "change_password.html",
+        {
+            "form": form,
+            "code_form": code_form,
+            "code_sent": request.session.get("change_code") is not None,
+            "code_verified": request.session.get("code_verified", False),
+        },
+    )
 
 
 from django.contrib.admin.views.decorators import staff_member_required
@@ -680,6 +827,40 @@ def clear_all_transactions(request):
     Transaction.objects.all().delete()
     messages.success(request, "All transactions cleared successfully.")
     return redirect("transaction_list")
+
+
+
+@superuser_required
+def user_devices_list(request):
+    # Fetch users with an active subscription only
+    users = CustomUser.objects.filter(
+        is_superuser=False,
+        subscriptions__status="active",
+        subscriptions__end_date__gte=timezone.now()
+    ).distinct().prefetch_related("devices", "subscriptions__plan")
+
+    user_data = []
+    for user in users:
+        # Get the most recent active subscription
+        active_subscription = (
+            user.subscriptions.filter(status="active", end_date__gte=timezone.now())
+            .order_by("-created_at")
+            .first()
+        )
+
+        device_count = user.devices.count()
+        plan_name = active_subscription.plan.get_name_display() if active_subscription and active_subscription.plan else "No Active Plan"
+        device_limit = active_subscription.plan.device_limit if active_subscription and active_subscription.plan else 1
+
+        user_data.append({
+            "user": user,
+            "plan_name": plan_name,
+            "device_limit": device_limit,
+            "device_count": device_count,
+        })
+
+    return render(request, "user_devices_list.html", {"user_data": user_data})
+
 
 from django.shortcuts import render
 from django.utils import timezone

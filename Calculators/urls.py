@@ -22,7 +22,7 @@ urlpatterns = [
     path('transactions/', transaction_list, name='transaction_list'),
     path('transactions/delete/<int:pk>/', delete_transaction, name='delete_transaction'),
     path('transactions/clear/', clear_all_transactions, name='clear_all_transactions'),
-    
+    path('user-devices/', user_devices_list, name='user_devices_list'),
 
     path('approvalsubscriptions/', manage_subscriptions, name='manage_subscriptions'),
     path('approvalsubscriptions/approve/<int:subscription_id>/', approve_subscription, name='approve_subscription'),
@@ -36,6 +36,10 @@ urlpatterns = [
     path("signup/", signup_view, name="signup"),
     path("login/", login_view, name="login"),
     path("logout/", logout_view, name="logout"),
+    path('forgot-password/', forgot_password_view, name='forgot_password'),
+    path('verify-code/', verify_code_view, name='verify_code'),
+    path('set-new-password/', set_new_password_view, name='set_new_password'),
+    path('change-password/', change_password_view, name='change_password'),
     path('fire/', fire_calculator, name='fire_calculator'),
     path('co2/', co2_calculator, name='co2_calculator'),
 
