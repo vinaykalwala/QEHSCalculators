@@ -302,6 +302,34 @@
         .hidden { 
             display: none; 
         }
+<<<<<<< HEAD
+
+               .btn-container {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    margin: 30px 0;
+}
+
+.back-btn {
+    background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+    color: #ffffff; /* White text */
+    border: 2px solid #1560bd; /* Highlight border */
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none; /* Remove underline for link */
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    background-color: #1560bd; /* Highlight on hover */
+    color: #ffffff;
+    border-color: #000040;
+    transform: scale(1.05); /* Subtle hover effect */
+}
+=======
          .btn-container {
             display: flex;
             justify-content: center;
@@ -326,6 +354,7 @@
             border-color: #000040;
             transform: scale(1.05);
         }
+>>>>>>> 06383df6256b0c8e5d636769c537cdff1bc85bc9
     </style>
 </head>
 <body>
@@ -337,6 +366,10 @@
 
     <!-- Include header/footer for print -->
     {% include "includes/print_header_footer.html" %}
+            <div class="btn-container">
+    <a href="{% url 'quality_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+</div>
+
 
         <div class="calculator-header">
             <h1>Cost of Making (CM) Calculator</h1>
@@ -405,6 +438,19 @@
                 </p> 
             </div>
 
+
+            <div class="note-card">
+  <h3>📌 Input Validation  </h3>
+  <ul class="note-list">
+    <li><strong>Standard Minute Value (SMV):</strong> Required, ≥0.1, ≤10,000, max 2 decimals.</li>
+    <li><strong>Cost Per Minute (CPM):</strong> Required, ≥0.01, ≤1,000, max 4 decimals.</li>
+    <li><strong>Efficiency (%):</strong> Required, between 1% and 100%, max 2 decimals.</li>
+    <li><strong>Logical Consistency:</strong> No negative or zero values; efficiency cannot be 0; all fields must be numeric.</li>
+    
+  </ul>
+</div>
+
+
             <div class="note-card">
                 <h3>❓ Explanation of Parameters</h3>
                 <ul class="note-list">
@@ -434,25 +480,31 @@
     </div>
 
     <script>
-        // Set current date for print header
-        document.addEventListener('DOMContentLoaded', function() {
-            const now = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
-        });
+       function calculateCM() {
+    const smv = document.getElementById("smv").value.trim();
+    const cpm = document.getElementById("cpm").value.trim();
+    const efficiency = document.getElementById("efficiency").value.trim();
 
-        function calculateCM() {
-            const smv = document.getElementById("smv").value.trim();
-            const cpm = document.getElementById("cpm").value.trim();
-            const efficiency = document.getElementById("efficiency").value.trim();
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const outputValue = document.getElementById('cmValue');
+    const feedbackBox = document.getElementById('cmFeedback'); 
 
-            const errorBox = document.getElementById('resultError');
-            const errorMessage = document.getElementById('errorMessage');
-            const placeholder = document.getElementById('placeholder');
-            const resultValue = document.getElementById('resultValue');
-            const outputValue = document.getElementById('cmValue');
-            const feedbackBox = document.getElementById('cmFeedback'); 
+    let errors = [];
 
+<<<<<<< HEAD
+    // --- Validation Helper ---
+    function validate(value, field, min, max, decimals) {
+        if (value === "") return `👉 ${field} is required.`;
+        if (isNaN(value)) return `👉 ${field} must be a number.`;
+        const num = parseFloat(value);
+        if (num < min) return `👉 ${field} must be ≥ ${min}.`;
+        if (num > max) return `👉 ${field} must be ≤ ${max}.`;
+        if (value.includes('.') && value.split('.')[1].length > decimals) {
+            return `👉 ${field} must not exceed ${decimals} decimal places.`;
+=======
             let errors = [];
             if (smv === "") {
                 errors.push("👉 Please enter the Standard Minute Value (SMV).");
@@ -503,18 +555,241 @@ if (cm < 50) {
 
             placeholder.classList.add('hidden');
             resultValue.classList.remove('hidden');
+>>>>>>> 06383df6256b0c8e5d636769c537cdff1bc85bc9
         }
+        return null;
+    }
 
-        function printReport() {
-            // Update date just before printing
-            const now = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
-            
-            window.print();
+    // Input validations
+    const smvErr = validate(smv, "Standard Minute Value (SMV)", 0.1, 10000, 2);
+    const cpmErr = validate(cpm, "Cost Per Minute (CPM)", 0.01, 1000, 4);
+    const effErr = validate(efficiency, "Efficiency (%)", 1, 100, 2);
+
+    [smvErr, cpmErr, effErr].forEach(err => { if (err) errors.push(err); });
+
+    // Cross-field logic
+    if (errors.length === 0) {
+        const smvNum = parseFloat(smv);
+        const cpmNum = parseFloat(cpm);
+        const effNum = parseFloat(efficiency);
+
+        if (effNum === 0) errors.push("👉 Efficiency cannot be 0 (division by zero).");
+        if (effNum < 30) errors.push("⚠ Efficiency is very low (<30%). Check process safety/productivity.");
+        if ((smvNum * cpmNum) / (effNum / 100) < 0.0001) {
+            errors.push("👉 CM too low to be realistic — check inputs.");
         }
+        if (smvNum > 10000 && cpmNum > 100) {
+            errors.push("👉 Unrealistic input combination: very high SMV with high CPM.");
+        }
+    }
+
+    // Show errors
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // --- Calculation ---
+    const smvNum = parseFloat(smv);
+    const cpmNum = parseFloat(cpm);
+    const effNum = parseFloat(efficiency);
+    const cm = (smvNum * cpmNum) / (effNum / 100);
+    outputValue.textContent = cm.toFixed(4);
+
+    // --- Interpretation ---
+    let feedback = "";
+    if (cm <= 0.5) {
+        feedback = "✅ Excellent: Low cost, efficient process.";
+    } else if (cm <= 5) {
+        feedback = "📊 Normal: Within industry ranges, monitor regularly.";
+    } else if (cm <= 50) {
+        feedback = "⚠ High: Costly production, efficiency review needed.";
+    } else {
+        feedback = "🚨 Critical: Unrealistic cost — check data and process.";
+    }
+
+    feedbackBox.textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
     </script>
     <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
 {% endblock %}
+<!--
+Input Validation Rules (QEHS / Fire Safety Perspective)
+Standard Minute Value (SMV)
+
+Required: Cannot be empty.
+
+Range: ≥ 0.1 and ≤ 10,000 minutes (realistic task times in industrial audits).
+
+Decimals: Up to 2 allowed (0.01 minute precision = 0.6 seconds).
+
+Logic: SMV must represent an actual operation time. Zero/negative is invalid.
+
+Cost Per Minute (CPM)
+
+Required: Cannot be empty.
+
+Range: ≥ $0.01 and ≤ $1,000 (typical audited values in manufacturing).
+
+Decimals: Up to 4 allowed (to capture cents or sub-cent costs in lean costing).
+
+Logic: Must be >0, cannot exceed $1,000/min (extreme outlier = unrealistic).
+
+Expected Efficiency (%)
+
+Required: Cannot be empty.
+
+Range: ≥ 1% and ≤ 100% (ILO/ISO benchmarks for production efficiency).
+
+Decimals: Up to 2 decimals allowed.
+
+Logic: Cannot be negative, >100% is impossible, <1% = unrealistic operation.
+
+2️⃣ Cross-Field & Logical Consistency Rules
+
+Division by Zero: If efficiency = 0 → block (avoids infinite CM).
+
+CM floor check: If CM < $0.0001 → warn user (“Unrealistically low cost — check entries”).
+
+SMV × CPM sanity: If SMV > 10,000 AND CPM > $100 → outlier (would mean absurdly high labor burden).
+
+Efficiency stress: If efficiency < 30% → warning (“⚠ Low efficiency, unsafe/unproductive environment risk”).
+
+Audit compliance: Inputs must align with ISO 9001 cost traceability and ISO 45001 worker productivity monitoring.
+
+3️⃣ Output Validation Logic (CM Results)
+
+Formula:
+
+𝐶
+𝑀
+=
+𝑆
+𝑀
+𝑉
+×
+𝐶
+𝑃
+𝑀
+𝐸
+𝑓
+𝑓
+𝑖
+𝑐
+𝑖
+𝑒
+𝑛
+𝑐
+𝑦
+/
+100
+CM=
+Efficiency/100
+SMV×CPM
+	​
+
+Thresholds
+
+≤ $0.50 → ✅ Excellent: Highly efficient, lean cost control.
+
+$0.51 – $5.00 → 📊 Moderate: Normal efficiency, needs monitoring.
+
+> $5.00 → ⚠ High: Costly production, risk to profitability.
+
+> $50 → 🚨 Critical: Unrealistic, triggers audit red flag.
+
+Input Validation Rules (QEHS / Fire Safety Perspective)
+Standard Minute Value (SMV)
+
+Required: Cannot be empty.
+
+Range: ≥ 0.1 and ≤ 10,000 minutes (realistic task times in industrial audits).
+
+Decimals: Up to 2 allowed (0.01 minute precision = 0.6 seconds).
+
+Logic: SMV must represent an actual operation time. Zero/negative is invalid.
+
+Cost Per Minute (CPM)
+
+Required: Cannot be empty.
+
+Range: ≥ $0.01 and ≤ $1,000 (typical audited values in manufacturing).
+
+Decimals: Up to 4 allowed (to capture cents or sub-cent costs in lean costing).
+
+Logic: Must be >0, cannot exceed $1,000/min (extreme outlier = unrealistic).
+
+Expected Efficiency (%)
+
+Required: Cannot be empty.
+
+Range: ≥ 1% and ≤ 100% (ILO/ISO benchmarks for production efficiency).
+
+Decimals: Up to 2 decimals allowed.
+
+Logic: Cannot be negative, >100% is impossible, <1% = unrealistic operation.
+
+2️⃣ Cross-Field & Logical Consistency Rules
+
+Division by Zero: If efficiency = 0 → block (avoids infinite CM).
+
+CM floor check: If CM < $0.0001 → warn user (“Unrealistically low cost — check entries”).
+
+SMV × CPM sanity: If SMV > 10,000 AND CPM > $100 → outlier (would mean absurdly high labor burden).
+
+Efficiency stress: If efficiency < 30% → warning (“⚠ Low efficiency, unsafe/unproductive environment risk”).
+
+Audit compliance: Inputs must align with ISO 9001 cost traceability and ISO 45001 worker productivity monitoring.
+
+3️⃣ Output Validation Logic (CM Results)
+
+Formula:
+
+𝐶
+𝑀
+=
+𝑆
+𝑀
+𝑉
+×
+𝐶
+𝑃
+𝑀
+𝐸
+𝑓
+𝑓
+𝑖
+𝑐
+𝑖
+𝑒
+𝑛
+𝑐
+𝑦
+/
+100
+CM=
+Efficiency/100
+SMV×CPM
+	​
+
+Thresholds
+
+≤ $0.50 → ✅ Excellent: Highly efficient, lean cost control.
+
+$0.51 – $5.00 → 📊 Moderate: Normal efficiency, needs monitoring.
+
+> $5.00 → ⚠ High: Costly production, risk to profitability.
+
+> $50 → 🚨 Critical: Unrealistic, triggers audit red flag.
+-->

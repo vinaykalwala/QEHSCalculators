@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Cost Per Minute (CPM) Calculator{% endblock %}
+{% block title %}First Pass Yield (FPY) Calculator{% endblock %}
 {% block content %}
 {% load static %}
 
@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cost Per Minute (CPM) Calculator</title>
+    <title>First Pass Yield (FPY) Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
@@ -16,7 +16,7 @@
         .calculator-container {
             max-width: 1200px;
             margin: 20px auto;
-            padding: 20px;
+            padding: 0 20px;
             border-radius: 12px;
         }
 
@@ -302,25 +302,78 @@
         .hidden { 
             display: none; 
         }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+        
+        /* FPY-specific styles */
+        .feedback-content.excellent {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            color: #2e7d32;
+        }
+        
+        .feedback-content.very-good {
+            background: #f1f8e9;
+            border-left: 4px solid #8bc34a;
+            color: #558b2f;
+        }
+        
+        .feedback-content.good {
+            background: #fffde7;
+            border-left: 4px solid #ffeb3b;
+            color: #f57f17;
+        }
+        
+        .feedback-content.average {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            color: #ef6c00;
+        }
+        
+        .feedback-content.poor {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+            color: #c62828;
+        }
     </style>
 </head>
 <body>
-     <div class="btn-container">
-        <a href="{% url 'qualitycategory_calculators' %}" class="back-btn">Back To Quality Calculators</a>
-    </div>
-
    <div class="calculator-container printable" id="printArea">
 
     <!-- Include header/footer for print -->
     {% include "includes/print_header_footer.html" %}
 
-      <div class="btn-container">
-    <a href="{% url 'quality_calculators' %}" class="back-btn">Back To Quality Calculators</a>
-</div>
+        <div class="btn-container">
+            <a href="{% url 'quality_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+        </div>
 
         <div class="calculator-header">
-            <h1>Cost Per Minute (CPM) Calculator</h1>
-            <p>Calculates the cost efficiency of operations based on labor and operational costs divided by available work minutes</p>
+            <h1>First Pass Yield (FPY) Calculator</h1>
+            <p>Calculates the percentage of products manufactured correctly on the first attempt without needing rework</p>
         </div>
 
         <div class="calc-content">
@@ -328,28 +381,23 @@
             <div class="calc-card">
                 <h2>Enter Data</h2>
                 <div class="form-group">
-                    <label for="laborCost">Direct Labor Cost </label>
-                    <input type="number" id="laborCost" class="form-input" min="0.01" step="0.01" placeholder="Enter labor cost">
+                    <label for="totalUnits">Total Units Produced</label>
+                    <input type="number" id="totalUnits" class="form-input" min="1" step="1" placeholder="Enter Total Units">
                 </div>
 
                 <div class="form-group">
-                    <label for="operationalCost">Operational Cost </label>
-                    <input type="number" id="operationalCost" class="form-input" min="0.01" step="0.01" placeholder="Enter operational cost">
+                    <label for="defectiveUnits">Defective Units</label>
+                    <input type="number" id="defectiveUnits" class="form-input" min="0" step="1" placeholder="Enter Defective Units">
                 </div>
 
-                <div class="form-group">
-                    <label for="availableMinutes">Available Minutes</label>
-                    <input type="number" id="availableMinutes" class="form-input" min="0.01" step="0.01" placeholder="Enter available minutes">
-                </div>
-
-                <button class="calculate-btn" onclick="calculateCPM()">Calculate CPM</button>
+                <button class="calculate-btn" onclick="calculateFPY()">Calculate FPY</button>
             </div>
 
             <!-- Result Section -->
             <div class="result-card">
                 <div class="result-placeholder" id="placeholder">
-                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Cost efficiency illustration">
-                    <p>This tool calculates the <strong>Cost Per Minute (CPM)</strong>. Enter your cost data to see results.</p>
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Quality control illustration">
+                    <p>This tool calculates the <strong>First Pass Yield (FPY)</strong> percentage. Enter your production data to see results.</p>
                 </div>
 
                 <div class="result-error hidden" id="resultError">
@@ -359,14 +407,14 @@
 
                 <div class="result-value hidden" id="resultValue">
                     <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
-                        <h2> The Cost Per Minute</h2>
+                        <h2>First Pass Yield</h2>
                     </div>
-                    <div class="rate-value" id="cpmValue">0.00</div>
-                    <div class="rate-label"> per minute</div>
+                    <div class="rate-value" id="fpyValue">0.00</div>
+                    <div class="rate-label"><strong>%</strong></div>
                     
                     <div class="result-feedback">
-                        <div class="feedback-title">Cost Efficiency Interpretation</div>
-                        <div class="feedback-content" id="cpmFeedback"></div>
+                        <div class="feedback-title">Process Efficiency Interpretation</div>
+                        <div class="feedback-content" id="fpyFeedback"></div>
                     </div>
                     
                     <div class="btn-wrapper">
@@ -381,102 +429,91 @@
             <div class="note-card">
                 <h3>🔎 About This Calculator</h3>
                 <p>
-                    The <strong>Cost Per Minute (CPM) Calculator</strong> measures the cost efficiency of operations based on labor and operational costs divided by available work minutes. It helps companies optimize their resource allocation and identify areas for cost reduction.
+                    The <strong>First Pass Yield (FPY) Calculator</strong> is a powerful tool that helps evaluate the efficiency and quality of a process by measuring the percentage of products manufactured correctly on the first attempt—without needing rework or corrections. It is an essential metric in industries focused on optimizing production, reducing waste, and improving overall performance.
                 </p> 
             </div>
-<div class="note-card">
-  <h3>📌 Input Validation </h3>
-  <ul class="note-list">
-    <li><strong>Direct Labor Cost ($):</strong> Required, ≥0.01, ≤1,000,000,000, max 2 decimals.</li>
-    <li><strong>Operational Cost ($):</strong> Required, ≥0.01, ≤1,000,000,000, max 2 decimals.</li>
-    <li><strong>Available Minutes:</strong> Required, ≥1, ≤1,000,000, decimals allowed, not 0.</li>
-  </ul>
-</div>
 
+            <div class="note-card">
+                <h3>📌 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Total Units Produced:</strong> Required, must be ≥ 1</li>
+                    <li><strong>Defective Units:</strong> Required, must be ≥ 0</li>
+                    <li><strong>Logical Consistency:</strong> Defective units cannot exceed total units</li>
+                    <li><strong>Realistic Values:</strong> Defective units should be less than total units</li>
+                </ul>
+            </div>
 
             <div class="note-card">
                 <h3>❓ Explanation of Parameters</h3>
                 <ul class="note-list">
-                    <li><strong>Direct Labor Cost:</strong> The total wages paid to workers for a given period.</li>
-                    <li><strong>Operational Cost:</strong> Expenses required to keep operations running, such as rent, utilities, and materials.</li>
-                    <li><strong>Available Minutes:</strong> The total number of working minutes available in a given period.</li>
+                    <li><strong>Total Units Produced:</strong> The total number of units manufactured in a process.</li>
+                    <li><strong>Defective Units:</strong> The number of units that contain defects and require rework or scrapping.</li>
+                    <li><strong>First Pass Yield (FPY):</strong> The percentage of units successfully produced without rework, reflecting the efficiency and quality of your process.</li>
                 </ul>
             </div>
-
+      
             
-
+            
             <div class="note-card">
-                <h3>📊 Real-Life Applications</h3>
+                <h3>💡 Benefits of High FPY</h3>
                 <ul class="note-list">
-                    <li><strong>Production Lines:</strong> Measure efficiency and identify bottlenecks in manufacturing processes.</li>
-                    <li><strong>Call Centers:</strong> Optimize staffing levels and operational costs based on call volume.</li>
-                    <li><strong>Service Industries:</strong> Determine the cost efficiency of time-based services.</li>
-                    <li><strong>Resource Allocation:</strong> Make informed decisions about workforce and operational budgeting.</li>
+                    <li>Reduces waste and rework costs</li>
+                    <li>Increases production efficiency and throughput</li>
+                    <li>Improves customer satisfaction with higher quality products</li>
+                    <li>Enhances overall process capability and reliability</li>
+                    <li>Supports continuous improvement initiatives</li>
                 </ul>
-            </div>
-            
-            <div class="note-card">
-                <h3>💡 Conclusion</h3>
-                <p>Monitoring CPM is crucial for businesses to understand their operational efficiency. A lower CPM indicates better cost optimization relative to time usage, while a higher CPM suggests areas where costs can be reduced or processes can be made more efficient. Regular assessment helps companies maintain competitive advantage and improve profitability.</p>
             </div>
         </div>
     </div>
 
     <script>
-        function calculateCPM() {
-    const laborCost = document.getElementById("laborCost").value.trim();
-    const operationalCost = document.getElementById("operationalCost").value.trim();
-    const availableMinutes = document.getElementById("availableMinutes").value.trim();
+       function calculateFPY() {
+    const totalUnits = document.getElementById("totalUnits").value.trim();
+    const defectiveUnits = document.getElementById("defectiveUnits").value.trim();
 
     const errorBox = document.getElementById('resultError');
     const errorMessage = document.getElementById('errorMessage');
     const placeholder = document.getElementById('placeholder');
     const resultValue = document.getElementById('resultValue');
-    const outputValue = document.getElementById('cpmValue');
-    const feedbackBox = document.getElementById('cpmFeedback');
+    const outputValue = document.getElementById('fpyValue');
+    const feedbackBox = document.getElementById('fpyFeedback'); 
 
     let errors = [];
 
-    // --- Generic validator function ---
-    function validateInput(value, field, min, max, decimals) {
-        if (value === "") return `👉 Please enter ${field}.`;
-        if (isNaN(value)) return `👉 ${field} must be a valid number.`;
-        const num = parseFloat(value);
-        if (num < min) return `👉 ${field} must be at least ${min}.`;
-        if (num > max) return `👉 ${field} cannot exceed ${max.toLocaleString()}.`;
-        if ((value.includes('.') && value.split('.')[1].length > decimals)) {
-            return `👉 ${field} must not exceed ${decimals} decimal places.`;
-        }
-        return null;
+    // Validation: Total Units
+    if (totalUnits === "") {
+        errors.push("👉 Please enter the Total Units Produced.");
+    } else if (!Number.isInteger(Number(totalUnits))) {
+        errors.push("👉 Total Units must be a whole number.");
+    } else if (parseInt(totalUnits) < 1) {
+        errors.push("👉 Total Units must be at least 1.");
+    } else if (parseInt(totalUnits) > 1000000) {
+        errors.push("👉 Total Units cannot exceed 1,000,000 (unrealistic batch size).");
     }
 
-    // --- Validate each input ---
-    const laborErr = validateInput(laborCost, "Direct Labor Cost ($)", 0.01, 1000000000, 2);
-    const opErr = validateInput(operationalCost, "Operational Cost ($)", 0.01, 1000000000, 2);
-    const minErr = validateInput(availableMinutes, "Available Minutes", 1, 1000000, 2);
+    // Validation: Defective Units
+    if (defectiveUnits === "") {
+        errors.push("👉 Please enter the Defective Units.");
+    } else if (!Number.isInteger(Number(defectiveUnits))) {
+        errors.push("👉 Defective Units must be a whole number.");
+    } else if (parseInt(defectiveUnits) < 0) {
+        errors.push("👉 Defective Units cannot be negative.");
+    } else if (parseInt(defectiveUnits) > 1000000) {
+        errors.push("👉 Defective Units cannot exceed 1,000,000.");
+    }
 
-    [laborErr, opErr, minErr].forEach(err => { if (err) errors.push(err); });
-
-    // --- Cross-field sanity checks ---
+    // Cross-field validation
     if (errors.length === 0) {
-        const laborNum = parseFloat(laborCost);
-        const opNum = parseFloat(operationalCost);
-        const minutesNum = parseFloat(availableMinutes);
+        const totalNum = parseInt(totalUnits);
+        const defectiveNum = parseInt(defectiveUnits);
 
-        if (minutesNum <= 0) {
-            errors.push("👉 Available minutes must be greater than 0 to avoid division by zero.");
-        }
-
-        if ((laborNum + opNum) / minutesNum < 0.0001) {
-            errors.push("👉 CPM too low to be realistic — check inputs.");
-        }
-
-        if ((laborNum + opNum) > 1000000000 && minutesNum < 10) {
-            errors.push("👉 Extremely high cost with very low minutes — unrealistic.");
+        if (defectiveNum > totalNum) {
+            errors.push("👉 Defective Units cannot exceed Total Units.");
         }
     }
 
-    // --- Error handling ---
+    // Show errors
     if (errors.length > 0) {
         errorMessage.innerHTML = errors.join("<br>");
         errorBox.classList.remove("hidden");
@@ -487,16 +524,26 @@
         errorBox.classList.add("hidden");
     }
 
-    // --- Calculation ---
-    const cpm = (parseFloat(laborCost) + parseFloat(operationalCost)) / parseFloat(availableMinutes);
-    outputValue.textContent = cpm.toFixed(4);
+    const totalNum = parseInt(totalUnits);
+    const defectiveNum = parseInt(defectiveUnits);
 
-            let feedback = "";
-            if (cpm > 1) {
-                feedback = "⚠️ This CPM is relatively high. Consider optimizing labor or operational costs to improve efficiency.";
-            } else {
-                feedback = "✅ This is a cost-effective operation. Your costs are well-managed relative to available time.";
-            }
+    // FPY Calculation
+    const FPY = ((totalNum - defectiveNum) / totalNum) * 100;
+    outputValue.textContent = FPY.toFixed(2);
+
+    // Feedback Interpretation
+    let feedback = "";
+    if (FPY >= 99.9) {
+        feedback = "🌟 World-Class Process: Zero Defect Goal achieved.";
+    } else if (FPY >= 95) {
+        feedback = "✅ Excellent Process: Highly reliable, minimal defects.";
+    } else if (FPY >= 85) {
+        feedback = "👍 Good Process: Acceptable but needs continuous improvement.";
+    } else if (FPY >= 70) {
+        feedback = "⚠️ Average Process: Inefficient, review required for compliance.";
+    } else {
+        feedback = "❌ Poor Process: High defect rate, non-compliant, immediate corrective action needed.";
+    }
 
     feedbackBox.textContent = feedback;
 
@@ -510,84 +557,84 @@
 </html>
 {% endblock %}
 <!--
-Input Validation Rules (QEHS & Fire Safety Perspective)
-Direct Labor Cost ($)
+Input Validation Rules (Industry-Based)
+Total Units Produced
 
-Required: Cannot be empty.
+Must be required.
 
-Range: ≥ 0.01 and ≤ 1,000,000,000 (to prevent absurd inputs or data entry errors).
+Must be an integer ≥ 1 (you can’t produce 0 or negative units).
 
-Decimals: Up to 2 decimals (currency standard).
+Max cap: 1,000,000 per batch (reasonable industry threshold).
 
-Units: U.S. Dollars (explicitly displayed).
+No decimals allowed (units are whole products).
 
-Operational Cost ($)
+Defective Units
 
-Required: Cannot be empty.
+Must be required.
 
-Range: ≥ 0.01 and ≤ 1,000,000,000.
+Must be an integer ≥ 0.
 
-Decimals: Up to 2 decimals.
+Cannot exceed Total Units.
 
-Logic: Cannot be negative; must reflect actual overhead.
+Recommended max: 1,000,000 (aligns with total).
 
-Available Minutes
+Cross-Field Validations
 
-Required: Cannot be empty.
+Defective ≤ Total Units (logical consistency).
 
-Range: ≥ 1 and ≤ 1,000,000 (practical cap for workforce periods).
+If Defective = Total → FPY = 0% (catastrophic).
 
-Decimals: Up to 2 allowed (if fractional minutes are recorded from time systems).
+If Defective = 0 → FPY = 100% (ideal).
 
-Logic: Must always be > 0 (division by zero safety).
+3️⃣ Edge Case Validations
 
-Cross-field Rules
+Zero Division: Prevented (Total Units ≥ 1).
 
-Total cost (Labor + Operational) must be ≥ availableMinutes × $0.0001 (to avoid “zero CPM” anomalies).
+Negative Inputs: Blocked.
 
-If Available Minutes < 60, warn user: “⚠️ Very short analysis window may distort CPM values.”
+Extremes:
 
-Large mismatches (e.g., billions of dollars vs 10 minutes) flagged as outliers.
+FPY = 100% (world-class process, Six Sigma target).
 
-✅ 2. Output Validation & Thresholds
+FPY = 0% (total failure).
+
+Non-integers: Not allowed (fractions of units don’t exist).
+
+Huge numbers: If inputs exceed 1,000,000 → reject as unrealistic.
+
+4️⃣ Output Validation & Thresholds
 
 Formula:
 
-CPM
-=
-Labor Cost + Operational Cost
-Available Minutes
-CPM=
-Available Minutes
-Labor Cost + Operational Cost
-	​
+FPY = ((Total Units − Defective Units) ÷ Total Units) × 100
 
-Output Thresholds (Industry benchmarks)
+Interpretation (Industry Benchmark)
 
-≤ $0.50 CPM → Excellent ✅
-Highly cost-efficient operation.
+≥ 99.9% → 🌟 World-Class / Zero Defect (Six Sigma, aerospace/fire equipment standard).
 
-$0.51 – $1.00 CPM → Acceptable ⚖️
-Typical efficiency, monitor for improvements.
+95–99.8% → ✅ Excellent Process (compliant, highly reliable).
 
-$1.01 – $5.00 CPM → High ⚠️
-Overheads or labor utilization may be inefficient.
+85–94.9% → 👍 Good Process (acceptable, continuous improvement needed).
 
-> $5.00 CPM → Critical 🚨
-Urgent review required — cost inefficiency risks non-compliance with ISO/OSHA efficiency benchmarks.
-Edge Case Validations
+70–84.9% → ⚠️ Average Process (inefficient, safety risks possible).
 
-Empty input: Prompt user with required message.
+< 70% → ❌ Poor Process (non-compliant, high fire safety/quality risk).
 
-Negative values: Block (not possible in cost/time reporting).
 
-Zero minutes: Block (division by zero).
 
-Excessive decimals: Round to 2 for costs, 2 for minutes.
 
-Labor = 0, Ops = 0: Block — unrealistic in real audits.
 
-Extreme mismatch (e.g., $1B / 5 minutes): Warn user about outlier.
+<div class="note-card formula-card">
+                <h3>🧮 Formula</h3>
+                <p>The First Pass Yield is calculated using the following formula:</p>
+                <code>FPY = ((Total Units - Defective Units) / Total Units) × 100</code>
+                <p>Where:</p>
+                <ul class="note-list">
+                    <li>FPY = First Pass Yield (%)</li>
+                    <li>Total Units = Total number of units produced</li>
+                    <li>Defective Units = Number of defective units requiring rework</li>
+                </ul>
+            </div>
 
-Very low CPM (< $0.0001): Warn user — may be a unit mismatch (hours vs minutes).
+
 -->

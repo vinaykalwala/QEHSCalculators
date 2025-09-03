@@ -345,11 +345,41 @@
             display: none; 
         }
 
+<<<<<<< HEAD
+        
+=======
+>>>>>>> 06383df6256b0c8e5d636769c537cdff1bc85bc9
         .btn-container {
     display: flex;
     justify-content: center; /* Horizontally center */
     margin: 30px 0;
 }
+<<<<<<< HEAD
+
+.back-btn {
+    background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+    color: #ffffff; /* White text */
+    border: 2px solid #1560bd; /* Highlight border */
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none; /* Remove underline for link */
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    background-color: #1560bd; /* Highlight on hover */
+    color: #ffffff;
+    border-color: #000040;
+    transform: scale(1.05); /* Subtle hover effect */
+}
+
+       
+    </style>
+=======
+>>>>>>> 06383df6256b0c8e5d636769c537cdff1bc85bc9
 
 .back-btn {
     background:linear-gradient(#1560bd,#000040); /* Dark navy background */
@@ -379,6 +409,10 @@
 
     <!-- Include header/footer for print -->
     {% include "includes/print_header_footer.html" %}
+
+    <div class="btn-container">
+    <a href="{% url 'quality_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+</div>
 
     <div class="calculator-header">
         <h1>Boiler Horse Power From Heat Transfer Area Calculator</h1>
@@ -439,6 +473,16 @@
             </p>
             </div>
 
+            <div class="note-card">
+  <h3>📌 Input Validation</h3>
+  <ul class="note-list">
+    <li><strong>Input:</strong> Heat Transfer Area (ft²), required, positive number.</li>
+    <li><strong>Format:</strong> Decimals & scientific notation allowed; max 3 decimals.</li>
+    <li><strong>Range:</strong> 1 – 200,000 ft² (hard limits).</li>
+      </ul>
+</div>
+
+
         <div class="note-card">
             <h3><strong>Explanation of Parameters:</strong></h3>
              <ul class = "note-list">
@@ -475,41 +519,249 @@
 </div>
 <script>
 function calculateBoilerHP() {
-    const heatTransfer = parseFloat(document.getElementById("heatTransfer").value.trim());
+  const inputEl = document.getElementById("heatTransfer");
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+  const outputValue = document.getElementById("bhpValue");
 
-    const errorBox = document.getElementById('resultError');
-    const errorMessage = document.getElementById('errorMessage');
-    const placeholder = document.getElementById('placeholder');
-    const resultValue = document.getElementById('resultValue');
-    const outputValue = document.getElementById('bhpValue');
+  // ---- Configurable constants (document these in your SOP) ----
+  const MIN_AREA_FT2 = 1;            // hard minimum
+  const MAX_AREA_FT2 = 200000;       // hard maximum to catch typos
+  const SOFT_LOW_FT2 = 10;           // show warning if below
+  const SOFT_HIGH_FT2 = 50000;       // show warning if above
+  const FT2_PER_HP = 17;             // empirical factor -> 1 HP ≈ 17 ft² heating surface
+  const MAX_DECIMALS = 3;            // precision limit for area input
+  // -------------------------------------------------------------
 
-    let errors = [];
-    if (isNaN(heatTransfer) || heatTransfer <= 0) {
-        errors.push("👉 Please enter a valid Heat Transfer Area greater than 0.");
+  // Helpers
+  const clearError = () => {
+    errorMessage.innerHTML = "";
+    errorBox.classList.add("hidden");
+  };
+  const showError = (msgs) => {
+    errorMessage.innerHTML = msgs.join("<br>");
+    errorBox.classList.remove("hidden");
+    placeholder.classList.add("hidden");
+    resultValue.classList.add("hidden");
+  };
+  const countDecimals = (valueStr) => {
+    // handle scientific notation by converting to a normal number string first
+    if (!/e/i.test(valueStr)) {
+      const idx = valueStr.indexOf(".");
+      return idx >= 0 ? (valueStr.length - idx - 1) : 0;
     }
+    // convert and then count
+    const n = Number(valueStr);
+    if (!Number.isFinite(n)) return Infinity;
+    const parts = n.toString().split(".");
+    return parts.length === 2 ? parts[1].length : 0;
+  };
 
-    if (errors.length > 0) {
-        errorMessage.innerHTML = errors.join("<br>");
-        errorBox.classList.remove("hidden");
-        placeholder.classList.add("hidden");
-        resultValue.classList.add("hidden");
-        return;
-    } else {
-        errorBox.classList.add("hidden");
+  let errors = [];
+  let warnings = [];
+
+  // Raw input string (so we can validate before parse)
+  const raw = (inputEl.value || "").trim();
+
+  // Required
+  if (raw.length === 0) {
+    errors.push("👉 Heat Transfer Area (ft²) is required.");
+  }
+
+  // Numeric form only (allow decimals and scientific notation)
+  // Disallow commas and stray characters
+  if (raw.length > 0 && !/^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/.test(raw)) {
+    errors.push("👉 Enter a valid numeric value (decimals allowed; no commas or symbols).");
+  }
+
+  // Parse and numeric checks
+  const area = Number(raw);
+  if (raw.length > 0 && !Number.isFinite(area)) {
+    errors.push("👉 Value must be a finite number (not Infinity/NaN).");
+  }
+
+  // Decimal places
+  if (raw.length > 0 && countDecimals(raw) > MAX_DECIMALS) {
+    errors.push(`👉 Use at most ${MAX_DECIMALS} decimal places for area.`);
+  }
+
+  // Range checks
+  if (Number.isFinite(area)) {
+    if (area <= 0) errors.push("👉 Heat Transfer Area must be greater than 0 ft².");
+    if (area > 0 && area < MIN_AREA_FT2) {
+      errors.push(`👉 Minimum allowed area is ${MIN_AREA_FT2.toLocaleString()} ft².`);
     }
+    if (area > MAX_AREA_FT2) {
+      errors.push(`👉 Maximum allowed area is ${MAX_AREA_FT2.toLocaleString()} ft². Check units (ft² vs m²) and scope.`);
+    }
+  }
 
-    // Formula: Boiler HP = Heat Transfer Area / 17
-    const bhp = heatTransfer / 17;
+  // If any hard errors, show and exit
+  if (errors.length > 0) {
+    showError(errors);
+    return;
+  } else {
+    clearError();
+  }
 
-    // Update result
-    outputValue.textContent = bhp.toFixed(6);
+  // Safety: denominator guard
+  if (!Number.isFinite(FT2_PER_HP) || FT2_PER_HP <= 0) {
+    showError(["Internal configuration error: FT² per HP factor must be a positive number."]);
+    return;
+  }
 
-    placeholder.classList.add('hidden');
-    resultValue.classList.remove('hidden');
+  // Compute BHP
+  const bhp = area / FT2_PER_HP;
+
+  // Soft warnings for plausibility
+  if (area < SOFT_LOW_FT2) {
+    warnings.push("⚠️ Area is unusually low for a boiler. Verify the input and units (ft²).");
+  }
+  if (area > SOFT_HIGH_FT2) {
+    warnings.push("⚠️ Area is very large. Verify units (ft² vs m²) and whether this covers multiple units.");
+  }
+  if (bhp < 1) {
+    warnings.push("⚠️ Estimated capacity is < 1 HP; this is below typical industrial boiler scales.");
+  }
+  if (bhp > 10000) {
+    warnings.push("⚠️ Estimated capacity exceeds 10,000 HP; confirm heating surface and units.");
+  }
+
+  // Update result (2 decimals for display)
+  outputValue.textContent = bhp.toFixed(2);
+  placeholder.classList.add("hidden");
+  resultValue.classList.remove("hidden");
+
+  // Show warnings (non-blocking) in the existing error box as informational text
+  if (warnings.length > 0) {
+    errorMessage.innerHTML = warnings.join("<br>");
+    errorBox.classList.remove("hidden");
+    // (Optional) add a CSS class like 'warning' to style this differently from errors.
+    // e.g., errorBox.classList.add("warning");
+  } else {
+    clearError();
+  }
 }
 </script>
+
 
     <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
 {% endblock %}
+<!--
+
+Input: Heat Transfer Area (ft²)
+
+Required: Cannot be empty.
+
+Type: Positive real number only (no text, commas, or symbols).
+
+Format: Allow decimals and scientific notation (e.g., 1.2e3).
+
+Decimals: Up to 3 decimal places allowed.
+
+Range (hard limits):
+
+Minimum: 1 ft² (anything smaller not meaningful).
+
+Maximum: 200,000 ft² (catch fat-finger errors or wrong units).
+
+Plausibility checks (soft warnings):
+
+<10 ft² → unusually low → warn user to recheck units.
+
+50,000 ft² → unusually high → warn about ft² vs. m² confusion.
+
+Output: Boiler Horsepower (HP)
+
+Formula:
+
+BHP = (Heat Transfer Area (ft²))/17
+
+
+
+Display precision: 2 decimal places.
+
+Sanity checks:
+
+BHP < 1 → below typical industrial boiler scale.
+
+BHP > 10,000 → unusually high for single boiler, warn to confirm units.
+
+Division safety: Denominator (17) must remain a positive constant.
+
+2) Comprehensive input validation rules
+
+Field: Heat Transfer Area (ft²)
+
+Type & unit: Positive real number; unit must be square feet (ft²).
+
+Required: Must be provided.
+
+Allowed format: Decimal numeric only; disallow text, ±, currency, thousands separators. Scientific notation is allowed (e.g., 1.2e3) but must resolve to a finite number.
+
+Decimals: Up to 3 decimal places (engineering-reasonable precision for area inputs).
+
+Range (hard validation):
+
+Minimum: 1 ft² (anything smaller isn’t meaningful for boiler heating surface in industrial/comm HVAC contexts).
+
+Maximum: 200,000 ft² (upper bound to catch fat-finger inputs; even very large utility boilers are seldom above this heating surface in one unit).
+
+Plausibility (soft guidance/warning, not a block):
+
+< 10 ft²: Likely not a conventional boiler; warn user this is below typical packaged boiler surfaces.
+
+> 50,000 ft²: Uncommon; warn to double-check units (ft² vs m²) and system scope (single unit vs train).
+
+Cross-field dependencies: N/A (single input).
+
+UI text: Make sure label/help reads “Heat Transfer Area (ft²)” and your notes do not call it BTU/hr.
+
+General numeric hygiene (applies to all number fields)
+
+Reject NaN, Infinity, -Infinity.
+
+Trim whitespace; reject empty/blank input.
+
+Coerce commas to dots only if you explicitly support EU decimals; otherwise block commas.
+
+Disallow leading/trailing non-numeric characters.
+
+3) Edge-case validations to add
+
+Empty / whitespace: “Heat transfer area is required.”
+
+Zero or negative: “Must be > 0.”
+
+Too many decimals: More than 3 dp → reject with message.
+
+Out-of-range: <1 or >200,000 ft² → block with clear reason.
+
+Extreme outliers (soft warnings): <10 ft² or >50,000 ft² → compute but display a non-blocking warning to re-check units/scope.
+
+Scientific notation mishandled by browser: Parse safely and verify Number.isFinite(value).
+
+Accidental unit mix-up: If BHP result is > 10,000 HP (rare in single packaged units), show a warning to check whether the input was in m² instead of ft² (m² to ft² factor ≈ 10.764).
+
+Division safety: Constant denominator must be non-zero, numeric (guard against accidental edits/config).
+
+4) Output validation logic & thresholds (audit-friendly)
+
+Computation: BHP = Area / 17.
+
+Display precision: Show 2 decimal places to the user (HP is a capacity KPI; 2 dp is readable and adequate). Keep internal value at full precision if you later export/print.
+
+Result sanity flags (non-blocking):
+
+BHP < 1 HP: “Below typical industrial boiler scale—likely a lab/bench unit or input error.”
+
+BHP > 10,000 HP: “Unusually high for a single unit—verify area and units.”
+
+Compliance disclaimer (in your notes/print): “This is an estimate based on the area-rule (17 ft²/HP). For regulatory reporting (OSHA/ISO 45001/NFPA/air permits), use manufacturer nameplate or BTU/hr basis (33,475 BTU/hr per BHP).”
+
+Why this matters: ISO 45001 and OSHA data integrity expectations require correct units, documented assumptions, and validation to prevent decisions based on erroneous inputs. Auditable KPIs must be consistent, traceable, and not misleadin
+-->

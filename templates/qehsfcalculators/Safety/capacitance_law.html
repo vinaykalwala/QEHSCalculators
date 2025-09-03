@@ -1,0 +1,642 @@
+{% extends 'base.html' %}
+{% block title %}Capacitance Law Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capacitance Law Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+         .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            {% comment %} max-width: 700px; {% endcomment %}
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background:linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .capacitance-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #2980b9;
+            margin: 15px 0;
+        }
+        
+        .scientific-value {
+            font-size: 18px;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+        <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+
+
+   <div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Capacitance Law Calculator</h1>
+            <p>Calculate the capacitance of a parallel plate capacitor based on dielectric constant, plate area, and plate separation</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="dielectric">Dielectric Constant (K)</label>
+                    <input type="number" id="dielectric" class="form-input" min="0" step="any" placeholder="e.g., 3.5">
+                </div>
+                <div class="form-group">
+                    <label for="area">Plate Area (A) in m²</label>
+                    <input type="number" id="area" class="form-input" min="0" step="any" placeholder="e.g., 0.5">
+                </div>
+                <div class="form-group">
+                    <label for="distance">Distance Between Plates (D) in m</label>
+                    <input type="number" id="distance" class="form-input" min="0" step="any" placeholder="e.g., 0.001">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateCapacitance()">Calculate Capacitance</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Capacitance illustration">
+                    <p>This tool will calculate the <strong>Capacitance</strong> of a parallel plate capacitor. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Capacitance Result</h2></DIV>
+                    <div class="capacitance-value" id="capacitanceValue">0.00 F</div>
+                    <div class="scientific-value" id="scientificValue" style="color:#2980b9; font-size:20px; font-weight:bold; " >0.00e+0 F</div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Application Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Capacitance Law Calculator</strong> helps determine the capacitance of a parallel plate capacitor based on its physical properties.
+                </p>
+            </div>
+            <div class="note-card">
+                <h3>❓ What is Capacitance?</h3>
+                <p>Capacitance is the ability of a capacitor to store electrical energy in an electric field. It's measured in Farads (F).</p>
+            </div>
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Dielectric Constant (K):</strong> A material property that determines how well a dielectric medium can store electrical energy.</li>
+                    <li><strong>Plate Area (A):</strong> The surface area of the capacitor plates in square meters.</li>
+                    <li><strong>Distance Between Plates (D):</strong> The separation between the capacitor plates in meters.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Typical Capacitance Values</h3>
+                <ul class="note-list">
+                    <li><span class="good">Below 1pF (10⁻¹² F)</span> → Very small capacitors for high-frequency circuits</li>
+                    <li><span class="average">1pF - 1μF (10⁻¹² - 10⁻⁶ F)</span> → Common range for electronics</li>
+                    <li><span class="bad">Above 1μF (10⁻⁶ F)</span> → Large capacitors for power applications</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+    <h3>✅ Input Validation Rules</h3>
+    <ul class="note-list">
+        <li><strong>Dielectric Constant (K):</strong> must be between 1 and 100</li>
+        <li><strong>Plate Area (A):</strong> 1e-6 m² (1 mm²) to 10 m²</li>
+        <li><strong>Plate Distance (D):</strong> 1e-9 m (1 nm) to 0.1 m (10 cm)</li>
+        <li><strong>Example:</strong> 3.5e-9 F = 3.5 × 10⁻⁹ Farads</li>
+        <li><strong>Capacitance Range:</strong>
+            <ul>
+                <li>&lt; 1pF → RF/high-frequency only</li>
+                <li>1pF–1µF → Typical electronics</li>
+                <li>1µF–1F → Power electronics</li>
+                <li>&gt; 1F → Supercapacitors (rare)</li>
+            </ul>
+        </li>
+    </ul>
+</div>
+<div class="note-card">
+    <h3>ℹ️ About Small Numbers</h3>
+    <p>
+        This calculator sometimes uses very small values. Instead of showing scientific notation like <code>1e-9</code>, we show them as:
+    </p>
+    <ul>
+        <li><strong>0.000001 m²</strong> = 1 mm² (small plate area)</li>
+        <li><strong>0.000000001 m</strong> = 1 nanometer (tiny plate separation)</li>
+    </ul>
+    <p>
+        ✅ This makes it easier to understand without needing to read scientific notation.
+    </p>
+</div>
+
+
+            
+            <div class="note-card">
+                <h3>🔑 Key Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Electronics:</strong> Used in designing capacitors for circuits, filters, and power supplies</li>
+                    <li><strong>Energy Storage:</strong> Plays a crucial role in energy storage systems and supercapacitors</li>
+                    <li><strong>Sensor Technology:</strong> Capacitive sensors are used in touchscreens and proximity sensors</li>
+                    <li><strong>High-Frequency Circuits:</strong> Affects RF and microwave circuit design</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateCapacitance() {
+    const K = parseFloat(document.getElementById('dielectric').value.trim());
+    const A = parseFloat(document.getElementById('area').value.trim());
+    const D = parseFloat(document.getElementById('distance').value.trim());
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+
+    // ============================
+    // VALIDATIONS
+    // ============================
+
+   if (isNaN(K) || K < 1 || K > 100) {
+    errors.push("👉 Dielectric constant (K) must be between 1 and 100.");
+}
+
+if (isNaN(A) || A <= 0 || A > 10 || A < 0.000001) {
+    errors.push("👉 Plate area must be between 0.000001 m² (1 mm²) and 10 m².");
+}
+
+if (isNaN(D) || D <= 0 || D > 0.1 || D < 0.000000001) {
+    errors.push("👉 Plate separation must be between 0.000000001 m (1 nanometer) and 0.1 m (10 cm).");
+}
+
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // ============================
+    // CALCULATION
+    // ============================
+    const epsilon0 = 8.854e-12; // Permittivity of free space (F/m)
+    const capacitance = epsilon0 * K * (A / D);
+
+    if (!isFinite(capacitance) || capacitance <= 0) {
+        errorMessage.innerHTML = "❌ Invalid result: please check inputs.";
+        errorBox.classList.remove("hidden");
+        return;
+    }
+
+    // Format results
+    const normalValue = capacitance.toFixed(12);
+    const scientificValue = capacitance.toExponential(4);
+
+    document.getElementById('capacitanceValue').textContent = `${normalValue} Farads`;
+    document.getElementById('scientificValue').textContent = `${scientificValue} Farads`;
+
+    // ============================
+    // OUTPUT ASSESSMENT
+    // ============================
+    let feedback;
+    if (capacitance < 1e-12) {
+        feedback = "⚠️ Very low capacitance (<1pF), only useful in RF/high-frequency circuits.";
+    } else if (capacitance >= 1e-12 && capacitance < 1e-6) {
+        feedback = "✅ Typical capacitance for electronic circuits (pF–µF).";
+    } else if (capacitance >= 1e-6 && capacitance < 1) {
+        feedback = "✅ Common capacitance for power electronics (µF–F).";
+    } else {
+        feedback = "⚠️ Extremely high capacitance (>1F). Likely only in supercapacitors.";
+    }
+
+    document.getElementById('feedbackContent').textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+
+</body>
+</html>
+{% endblock %}
+
+
+{% comment %} 
+
+1. Formula (for code comments)
+/*
+Capacitance Law (Parallel Plate Capacitor):
+
+C = ε₀ × K × (A / D)
+
+Where:
+C   = Capacitance (Farads, F)
+ε₀  = Permittivity of free space = 8.854 × 10⁻¹² F/m
+K   = Relative dielectric constant of material (dimensionless, >0)
+A   = Plate area (m²)
+D   = Plate separation distance (m)
+
+Note:
+- Capacitance increases with larger plate area and higher dielectric constant.
+- Capacitance decreases with larger separation distance.
+*/
+
+
+👉 Your code is missing ε₀. Without it, results are off by 10⁻¹². You should multiply by 8.854e-12.
+
+2. Input Validation Rules (Industry / Physics Standards)
+Parameter	Units	Acceptable Range	Reason
+Dielectric Constant (K)	dimensionless	1 – 100	Vacuum = 1, air ≈1.0006, plastics 2–5, ceramics 10–100. Below 1 or above 100 is non-physical.
+Plate Area (A)	m²	1e-6 – 10	1 mm² to 10 m². Below = unrealistic nano-scale, above = impractical capacitor.
+Distance (D)	m	1e-9 – 0.1	1 nm (nano) to 10 cm. Larger gaps don’t make sense for capacitors, smaller is atomic scale.
+Decimals	–	up to 6 decimals	Needed for precision in nano-scale electronics.
+
+Cross-field rules:
+
+A > 0, D > 0 always.
+
+Capacitance > 0, otherwise invalid.
+
+3. Edge Case Validations
+
+D = 0 → Division by zero → error.
+
+Negative values → physically impossible.
+
+K < 1 → impossible dielectric → error.
+
+Extremely large C (>100 F) → unrealistic for parallel plates, likely input error.
+
+4. Output Validation Logic
+
+C < 1 pF (10⁻¹² F) → too small, only useful for RF/high-frequency circuits.
+
+1 pF – 1 µF (10⁻¹²–10⁻⁶ F) → typical for electronics.
+
+1 µF – 1 F (10⁻⁶–1 F) → common for power electronics.
+
+> 1 F → only possible in supercapacitors → check design validity. {% endcomment %}

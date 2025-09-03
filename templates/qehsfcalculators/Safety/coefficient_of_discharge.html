@@ -1,0 +1,794 @@
+{% extends 'base.html' %}
+{% block title %}Coefficient of Discharge Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coefficient of Discharge Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (min-width: 901px) {
+            .calc-content { 
+                flex-direction: row; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+            order: 2;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+             height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Input rows for side-by-side fields */
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        .error {
+            color: #ff6b6b;
+            font-size: 14px;
+            margin-top: 5px;
+            display: block;
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+            flex-wrap: wrap;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        /* Mobile-specific adjustments */
+        @media (max-width: 320px) {
+            .calculator-container {
+                padding: 10px;
+            }
+            
+            .calculator-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .calculator-header p {
+                font-size: 16px;
+            }
+            
+            .calc-card, .result-card {
+                padding: 20px 15px;
+                border-radius: 12px;
+            }
+            
+            .calc-card h2 {
+                font-size: 1.4rem;
+            }
+            
+            .form-input {
+                padding: 12px 14px;
+                font-size: 14px;
+            }
+            
+            .calculate-btn {
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+            
+            .result-placeholder img {
+                max-width: 180px;
+            }
+            
+            .rate-value {
+                font-size: 36px;
+            }
+            
+            .meter-labels span {
+                font-size: 10px;
+            }
+            
+            .note-card {
+                padding: 15px 18px;
+            }
+            
+            .note-card h3 {
+                font-size: 16px;
+            }
+            
+            .note-card p, .note-card li {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Coefficient of Discharge (K<sub>d</sub>) Calculator</h1>
+            <p>Calculate the efficiency of fluid flow systems by comparing actual to theoretical capacity</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                
+                <div class="form-group">
+                    <label for="actualFlow">Actual Flowing Capacity (m³/s)</label>
+                    <input type="number" id="actualFlow" class="form-input" min="0" step="0.01" placeholder="e.g., 0.85">
+                    <span class="error" id="actualFlowError"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="theoreticalFlow">Theoretical Flowing Capacity (m³/s)</label>
+                    <input type="number" id="theoreticalFlow" class="form-input" min="0" step="0.01" placeholder="e.g., 1.0">
+                    <span class="error" id="theoreticalFlowError"></span>
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateKd()">Calculate Coefficient of Discharge K<sub>d</sub></button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/4715/4715323.png" alt="Fluid dynamics illustration">
+                    <p>This tool will calculate the <strong>Coefficient of Discharge (K<sub>d</sub>)</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Coefficient of Discharge</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.000</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold; ">K<sub>d</sub> Value</div>
+                    </div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low Efficiency</span>
+                        <span>Moderate</span>
+                        <span>Good</span>
+                        <span>Excellent</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">System Efficiency Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Coefficient of Discharge (K<sub>d</sub>)</strong> is a crucial parameter in fluid dynamics, representing the efficiency of a system compared to its theoretical capacity. It accounts for energy losses due to friction, turbulence, and flow separation in real-world conditions.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Actual Flowing Capacity:</strong> The real flow rate measured in the system (m³/s).</li>
+                    <li><strong>Theoretical Flowing Capacity:</strong> The expected or ideal flow rate without losses (m³/s).</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <p>
+                    The Coefficient of Discharge ranges from 0 to 1, where:
+                </p>
+                <ul class="note-list">
+                    <li><span class="bad">Below 0.6</span> → Low efficiency; significant system losses</li>
+                    <li><span class="average">0.6 - 0.8</span> → Moderate efficiency</li>
+                    <li><span class="good">0.8 - 0.9</span> → Good efficiency</li>
+                    <li><span class="good">Above 0.9</span> → Excellent efficiency; minimal losses</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>🔍 Real-Life Applications</h3>
+                <p>
+                    The K<sub>d</sub> value is essential in various engineering applications:
+                </p>
+                <ul class="note-list">
+                    <li><strong>Fire Safety Systems:</strong> Determining fire hose and nozzle discharge efficiency</li>
+                    <li><strong>Pipeline Design:</strong> Assessing fluid flow efficiency in pipelines</li>
+                    <li><strong>Valve and Nozzle Engineering:</strong> Optimizing design to minimize energy losses</li>
+                    <li><strong>Water Supply Systems:</strong> Evaluating pump and distribution network performance</li>
+                </ul>
+            </div>
+            <div class="note-card">
+    <h3>✅ Input Validation Rules (Kd Calculator)</h3>
+    <ul class="note-list">
+        <li><strong>Actual Flow (Q_actual):</strong> Must be > 0, typically 0.01 – 1000 m³/s.</li>
+        <li><strong>Theoretical Flow (Q_theoretical):</strong> Must be > 0, typically 0.01 – 1000 m³/s.</li>
+        <li><strong>Q_actual ≤ Q_theoretical:</strong> Ensures Kd ≤ 1 (valid efficiency range).</li>
+        <li><strong>No negative or zero values:</strong> Flow rates must always be positive.</li>
+        <li><strong>Output (Kd):</strong> Must fall strictly between 0 and 1. Values outside this range are invalid.</li>
+    </ul>
+    <p><b>Note:</b> These rules align with <b>ISO 5167</b>, <b>API 520</b>, and <b>NFPA fluid dynamics practices</b>.</p>
+</div>
+
+
+            
+
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateKd() {
+    const actualFlow = document.getElementById('actualFlow').value.trim();
+    const theoreticalFlow = document.getElementById('theoreticalFlow').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    // Reset
+    let errors = [];
+
+    // === Validate Actual Flow ===
+    if (actualFlow === "") {
+        errors.push("👉 Please enter Actual Flowing Capacity (Q_actual).");
+    } else {
+        const actual = parseFloat(actualFlow);
+        if (isNaN(actual) || actual <= 0) {
+            errors.push("👉 Actual Flow must be a number greater than 0 (m³/s).");
+        } else if (actual < 0.01 || actual > 1000) {
+            errors.push("👉 Actual Flow must be between 0.01 and 1000 m³/s.");
+        }
+    }
+
+    // === Validate Theoretical Flow ===
+    if (theoreticalFlow === "") {
+        errors.push("👉 Please enter Theoretical Flowing Capacity (Q_theoretical).");
+    } else {
+        const theoretical = parseFloat(theoreticalFlow);
+        if (isNaN(theoretical) || theoretical <= 0) {
+            errors.push("👉 Theoretical Flow must be a number greater than 0 (m³/s).");
+        } else if (theoretical < 0.01 || theoretical > 1000) {
+            errors.push("👉 Theoretical Flow must be between 0.01 and 1000 m³/s.");
+        }
+    }
+
+    // === Cross-validation ===
+    if (errors.length === 0) {
+        const actual = parseFloat(actualFlow);
+        const theoretical = parseFloat(theoreticalFlow);
+
+        if (theoretical === 0) {
+            errors.push("👉 Division by zero error: Theoretical Flow cannot be 0.");
+        }
+
+        if (actual > theoretical) {
+            errors.push("👉 Actual Flow cannot exceed Theoretical Flow (Kd ≤ 1).");
+        }
+    }
+
+    // === Show Errors ===
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // === Perform Calculation ===
+    const actual = parseFloat(actualFlow);
+    const theoretical = parseFloat(theoreticalFlow);
+    const Kd = actual / theoretical;
+
+    if (Kd <= 0 || Kd > 1) {
+        errorMessage.innerHTML = "❌ Invalid result: Kd must be between 0 and 1.";
+        errorBox.classList.remove("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    // === Display Result ===
+    document.getElementById('rateValue').textContent = Kd.toFixed(3);
+
+    // === System Efficiency Assessment ===
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+
+    if (Kd < 0.6) {
+        meterWidth = "20%";
+        meterColor = "#e74c3c";
+        feedback = "❌ Low efficiency. Significant system losses detected. Inspect system for leaks, blockages, or frictional losses.";
+    } else if (Kd < 0.8) {
+        meterWidth = "45%";
+        meterColor = "#f39c12";
+        feedback = "⚠️ Moderate efficiency. System operating below optimal conditions. Consider maintenance or redesign.";
+    } else if (Kd < 0.9) {
+        meterWidth = "70%";
+        meterColor = "#2ecc71";
+        feedback = "✅ Good efficiency. Minor losses, acceptable for most operations.";
+    } else {
+        meterWidth = "95%";
+        meterColor = "#27ae60";
+        feedback = "🌟 Excellent efficiency. System operating near theoretical performance.";
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').textContent = feedback;
+
+    placeholder.classList.add("hidden");
+    resultValue.classList.remove("hidden");
+}
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+{% comment %} 
+1. Formula (with industry context)
+
+Coefficient of Discharge (K<sub>d</sub>):
+
+Kd = Q_actual / Q_theoretical
+
+
+Q_actual (Actual Flow Capacity, m³/s): Flow measured under real conditions.
+
+Q_theoretical (Theoretical Flow Capacity, m³/s): Flow if there were no energy losses.
+
+K<sub>d</sub> always ranges 0 < Kd ≤ 1 in valid conditions.
+
+2. Detailed Input Validation Rules (QEHS / Fire Safety)
+✅ Actual Flow Capacity (Q_actual, m³/s)
+
+Must be > 0 (no system can have zero or negative flow).
+
+Recommended practical range: 0.01 – 1000 m³/s (API, ISO fluid dynamics references).
+
+Must not exceed Theoretical Flow (otherwise unphysical).
+
+Allowed decimals: up to 3 (precision relevant in fluid testing).
+
+✅ Theoretical Flow Capacity (Q_theoretical, m³/s)
+
+Must be > 0.
+
+Practical range: 0.01 – 1000 m³/s.
+
+Must always be ≥ Actual Flow.
+
+Allowed decimals: up to 3.
+
+✅ Cross-field dependencies
+
+Q_actual ≤ Q_theoretical (by definition, efficiency cannot exceed 1).
+
+Division by zero (Q_theoretical = 0) → must throw error.
+
+3. Output Validation & Thresholds
+
+K<sub>d</sub> range: 0 – 1 (unitless).
+
+Interpretation:
+
+Kd < 0.6 → Poor efficiency (safety concern, possible leaks/obstructions).
+
+0.6 – 0.8 → Moderate efficiency.
+
+0.8 – 0.9 → Good efficiency.
+
+> 0.9 → Excellent efficiency (system near-ideal).
+
+⚠️ If Kd > 1 → input error (must reject).
+
+4. Corrected JavaScript Code (with Comments)
+
+Here’s your updated calculateKd() with compliance-grade validations:
+
+/*
+=========================================================
+Coefficient of Discharge (Kd) Formula:
+    Kd = Q_actual / Q_theoretical
+
+Where:
+- Q_actual = Actual Flowing Capacity (m³/s)
+- Q_theoretical = Theoretical Flowing Capacity (m³/s)
+
+Validation Rules (Based on ISO 5167, API 520, Fluid Mechanics Standards):
+1. Q_actual must be > 0 m³/s (range 0.01 – 1000).
+2. Q_theoretical must be > 0 m³/s (range 0.01 – 1000).
+3. Q_actual cannot exceed Q_theoretical (Kd ≤ 1).
+4. Division by zero (Q_theoretical = 0) is invalid.
+5. Input precision: allow up to 3 decimal places.
+6. Output Kd must be within 0 < Kd ≤ 1. If > 1, show error.
+=========================================================
+*/
+
+*/ {% endcomment %}
