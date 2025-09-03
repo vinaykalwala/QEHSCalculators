@@ -51,6 +51,30 @@ CALCULATORS = [
 
 {"name": "Directional Survey Calculator", "url_name": "quality_directional_survey_calculator", "plan_type": "corporate", "category": "quality"},
 
+{"name": "Dispersion Calculator", "url_name": "quality_dispersion_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Dilution Ventilation Rate for Contaminant Control Calculator", "url_name": "quality_dilution_ventilation_rate_for_contaminant_control_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Dry Film Thickness (DFT) Calculator", "url_name": "quality_dry_film_thickness_dft_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": " The Evaporation Factor Of A Boiler From Its 'From & At' Rating Calculator", "url_name": "quality_evaporation_factor_of_a_boiler_from_its_from_and_at_rating_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Electrical Resistance Calculator for Conductivity Probe", "url_name": "quality_electrical_resistance_for_conductivity_probe_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "First Pass Yield (FPY) Calculator", "url_name": "quality_first_pass_yield_fpy_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Fold of Increase Calculator", "url_name": "quality_fold_of_increase_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Facade Element Area Calculator", "url_name": "quality_facade_element_weight_calculator", "plan_type": "corporate", "category": "quality"},
+
+
 
 
     # Environment Calculators
@@ -125,6 +149,31 @@ CALCULATORS = [
 {"name": "Chemical Equilibrium Calculator", "url_name": "environment_chemical_equilibrium_calculator", "plan_type": "corporate", "category": "environment"},
         
 
+       
+{"name": "CMFR (Completely Mixed Flow Reactor) BOD (Biochemical Oxygen Demand) Removal Calculator", "url_name": "environment_cmfr_completely_mixed_flow_reactor_bod_biochemical_oxygen_demand_removal_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+
+{"name": "Digester Capacity (V) Calculator", "url_name": "environment_digester_capacity_v_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Dynamic Viscosity Calculator", "url_name": "environment_dynamic_viscosity_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Dissolved Oxygen (DO) Deficit (Streeter-Phelps Model) Calculator", "url_name": "environment_dissolved_oxygen_do_deficit_streeter_phelps_model_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Decreasing-Rate-of-Increase Growth Calculator", "url_name": "environment_decreasing_rate_of_increase_growth_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Darcy-Weisbach Head Loss Calculator", "url_name": "environment_darcy_weisbach_head_loss_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Daughter Product Activity Calculator", "url_name": "environment_daughter_product_activity_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Environmental impact Carbon Footprint Calculator", "url_name": "environment_environmental_impact_carbon_footprint_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Energy Consumption Calculator", "url_name": "environment_energy_consumption_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Exposure Level (Concentration) Calculator", "url_name": "environment_exposure_level_concentration_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Energy Balance between Steam and Secondary Fluid of a Non-Flow Process caluculator", "url_name": "environment_energy_balance_between_steam_and_secondary_fluid_of_a_non_flow_process_calculator", "plan_type": "corporate", "category": "environment"},
+
 
 
 
@@ -145,6 +194,11 @@ CALCULATORS = [
 
     {"name": "BMI Calculator", "url_name": "health_bmi_calculator", "plan_type": "corporate", "category": "health"},
     {"name": "BMI Calculator for Kids", "url_name": "health_bmi_for_kids_calculator", "plan_type": "corporate", "category": "health"},
+    {"name": "Bedridden Patient Weight Estimator", "url_name": "health_bedridden_patient_weight_estimator_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Baby Milk Intake Calculator", "url_name": "health_baby_milk_intake_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Cardiac Index Calculator", "url_name": "health_cardiac_index_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Daily Drinking Water Intake Calculator", "url_name": "health_daily_drinking_water_intake_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Dietary Reference Intake (DRI) Calculator", "url_name": "health_dietary_reference_intake_dri_calculator", "plan_type": "corporate", "category": "health"},
 
 
 
@@ -227,6 +281,25 @@ CALCULATORS = [
 
 {"name": "Cement Volume Calculator", "url_name": "safety_cement_volume_calculator", "plan_type": "corporate", "category": "safety"},
 
+{"name": "Cement Slurry Density Calculator", "url_name":"safety_cement_slurry_density_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Condensate Velocity Of a Pipe Calculator","url_name": "safety_condensate_velocity_of_a_pipe_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Cooling Water Flowrate Calculator for Desuperheater", "url_name":"safety_cooling_water_flowrate_for_desuperheater_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Capacitance Law  Calculator","url_name":"safety_capacitance_law_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Critical Pressure Ratio For Dry Steam And Gases Calculator","url_name":"safety_critical_pressure_ratio_dry_steam_gases", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Critical Pressure Ratio Calculator","url_name":"safety_critical_pressure_ratio", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Cold Differential Pressure Calculator", "url_name":"safety_cold_differential_pressure_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Coefficient of Discharge (K<sub>d</sub>) Calculator", "url_name":"safety_coefficient_of_discharge_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Curtain Area of Safety Valve Calculator", "url_name":"safety_curtain_area_of_safety_valve_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Compressibility Factor For Compressible Steam And Dry Gas Calculator", "url_name":"safety_compressibility_factor_for_compressible_steam_and_dry_gas_calculator", "plan_type": "corporate", "category": "safety"},
 
     
     # Fire Calculators

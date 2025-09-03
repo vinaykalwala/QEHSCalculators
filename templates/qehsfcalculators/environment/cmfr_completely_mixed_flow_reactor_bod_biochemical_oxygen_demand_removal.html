@@ -1,0 +1,778 @@
+{% extends 'base.html' %}
+{% block title %}CMFR (Completely Mixed Flow Reactor) BOD (Biochemical Oxygen Demand) Removal Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMFR (Completely Mixed Flow Reactor) BOD (Biochemical Oxygen Demand) Removal Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 38px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+    
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+
+    <div class="calculator-header">
+        <h1>CMFR BOD Removal Calculator</h1>
+        <p>Compute <strong>Effluent BOD (Le)</strong> using the CMFR first-order kinetics formula and show removal efficiency.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Calculator -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+
+            <div class="form-group">
+                <label for="li">Influent BOD, Li (mg/L)</label>
+                <input type="number" id="li" class="form-input" min="0.1" step="any" placeholder="e.g., 200">
+            </div>
+
+            <div class="form-group">
+                <label for="k1">BOD Rate Constant, k1 (1/day)</label>
+                <input type="number" id="k1" class="form-input" min="0.001" step="any" placeholder="e.g., 0.15">
+            </div>
+
+            <div class="form-group">
+                <label for="t">Detention Time, t (days)</label>
+                <input type="number" id="t" class="form-input" min="0.01" step="any" placeholder="e.g., 1.5">
+            </div>
+            
+            <button class="calculate-btn" onclick="calculateCMFR()">Calculate Effluent BOD</button>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="https://cdn-icons-png.flaticon.com/512/190/190411.png" alt="BOD illustration" style="width:80px">
+                <p>This tool calculates <strong>Effluent BOD (L<sub>e</sub>)</strong> and <strong>Removal Efficiency</strong> for a CMFR using first-order kinetics.</p>
+            </div>
+            
+            <div class="result-error hidden" id="resultError">
+                <div class="error-icon">❌</div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+             
+            <div class="result-value hidden" id="resultValue">
+                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Calculated Effluent BOD & Efficiency</h2>
+                </div>
+
+                <div class="rate-display" style="margin-bottom:8px;">
+                    <div style="font-size:20px; font-weight:700;">
+                        <span id="leValue" style="color: #2980b9;">0.0000 <small>mg/L</small>
+                    </div>
+                    <div style="margin-top:6px; font-size:16px;">
+                        Removal Efficiency: <span id="effValue">0.00</span> %
+                    </div>
+                </div>
+
+                <div class="result-feedback">
+                    <div class="feedback-title">Assessment</div>
+                    <div class="feedback-content" id="feedbackContent"></div>
+                </div>
+                <div class="btn-wrapper" style="margin-top:10px;">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="note-section">
+        <div class="note-card">
+            <h3>📘 About This Calculator</h3>
+            <p>
+                This calculator estimates the effluent BOD concentration from a Completely Mixed Flow Reactor (CMFR) based on the
+                influent BOD, reaction rate constant, and detention time. It also calculates the overall treatment efficiency
+                by showing the percentage of BOD removed.
+            </p>
+        </div>
+        
+        <div class="note-card">
+            <h3>📊 Interpretation (guideline)</h3>
+            <ul class="note-list">
+                <li>✅ <strong>High removal</strong>: Efficiency &gt; 85% — very good performance.</li>
+                <li>⚠️ <strong>Moderate removal</strong>: 50% ≤ Efficiency ≤ 85% — may be acceptable; check operating conditions.</li>
+                <li>🔴 <strong>Low removal</strong>: Efficiency &lt; 50% — investigate process, increase detention or treatment intensity.</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h3>⚠️ Input Validations</h3>
+            <ul>
+                <li>✔️ <strong>L<sub>i</sub> (Influent BOD)</strong> must be numeric and &gt; 0 mg/L. Typical domestic range: <strong>50–400 mg/L</strong>. Values &lt; 10 mg/L may indicate already-treated water; values &gt; 2000 mg/L should be double-checked (industrial waste).</li>
+                <li>✔️ <strong>k<sub>1</sub></strong> must be numeric and &gt; 0 (1/day). Typical for domestic wastewater at ambient temp: <strong>0.05–0.30 1/day</strong>. Values outside <strong>0.01–1.0</strong> 1/day will trigger a warning to verify.</li>
+                <li>✔️ <strong>t</strong> must be numeric and &gt; 0 (days). Typical reactor detention: <strong>0.1–10 days</strong>. Very short (&lt; 0.1 day) or extremely long (&gt; 30 days) values will trigger warnings.</li>
+                <li>❌ Non-numeric, zero, or negative inputs are invalid and will be rejected.</li>
+                <li>⚠️ If computed L<sub>e</sub> &ge; L<sub>i</sub> (unexpected), check inputs — may indicate wrong signs or invalid k<sub>1</sub>/t.</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h3>🌍 Key Applications</h3>
+            <ul class="note-list">
+                <li>Municipal aeration basins, stabilization ponds</li>
+                <li>Design and optimization of biological reactors</li>
+                <li>Performance evaluation and compliance checks</li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+
+<script>
+/* existing showErrors() left as-is (from your code) */
+function showErrors(errors) {
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+
+  errorMessage.innerHTML = errors.join("<br>");
+  errorBox.classList.remove("hidden");
+  placeholder.classList.add("hidden");
+  resultValue.classList.add("hidden");
+}
+
+/* helper: count decimals */
+function countDecimals(value) {
+  if (!isFinite(value)) return 0;
+  const text = value.toString();
+  if (text.indexOf('.') === -1) return 0;
+  return text.split('.')[1].length;
+}
+
+/* main calculation with robust validation */
+function calculateCMFR() {
+  const liRaw = document.getElementById("li").value.trim();
+  const k1Raw = document.getElementById("k1").value.trim();
+  const tRaw = document.getElementById("t").value.trim();
+
+  const errorBox = document.getElementById("resultError");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+  const leEl = document.getElementById("leValue");
+  const effEl = document.getElementById("effValue");
+  const feedbackEl = document.getElementById("feedbackContent");
+  const errorMessage = document.getElementById("errorMessage");
+
+  // Reset UI
+  errorBox.classList.add("hidden");
+  errorMessage.innerHTML = "";
+  feedbackEl.innerHTML = "";
+
+  const errors = [];
+  const warnings = [];
+
+  // Required checks
+  if (liRaw === "") errors.push("👉 Please enter Influent BOD (L\u2091) in mg/L.");
+  if (k1Raw === "") errors.push("👉 Please enter BOD rate constant k\u2081 (1/day).");
+  if (tRaw === "") errors.push("👉 Please enter Detention Time t (days).");
+
+  if (errors.length) return showErrors(errors);
+
+  // Parse floats
+  const Li = parseFloat(liRaw);
+  const k1 = parseFloat(k1Raw);
+  const t = parseFloat(tRaw);
+
+  // Numeric basic validation
+  if (!Number.isFinite(Li) || Number.isNaN(Li)) errors.push("👉 L\u2091 must be a valid number (mg/L).");
+  if (!Number.isFinite(k1) || Number.isNaN(k1)) errors.push("👉 k\u2081 must be a valid number (1/day).");
+  if (!Number.isFinite(t) || Number.isNaN(t)) errors.push("👉 t must be a valid number (days).");
+
+  if (errors.length) return showErrors(errors);
+
+  // Sign checks
+  if (Li <= 0) errors.push("👉 L\u2091 must be > 0 mg/L.");
+  if (k1 <= 0) errors.push("👉 k\u2081 must be > 0 1/day.");
+  if (t <= 0) errors.push("👉 t must be > 0 days.");
+
+  if (errors.length) return showErrors(errors);
+
+  // Hard absolute limits (block if violated)
+  if (Li < 0.01 || Li > 10000) errors.push("❌ L\u2091 outside hard limits (0.01 — 10,000 mg/L). Verify units/entry.");
+  if (k1 < 0.0001 || k1 > 10) errors.push("❌ k\u2081 outside hard limits (0.0001 — 10 1/day). Verify units/entry.");
+  if (t < 0.0001 || t > 365) errors.push("❌ t outside hard limits (0.0001 — 365 days). Verify entry.");
+
+  if (errors.length) return showErrors(errors);
+
+  // Decimal precision warnings
+  if (countDecimals(Li) > 3) warnings.push("⚠️ L\u2091 has >3 decimal places — round to sensible lab precision.");
+  if (countDecimals(k1) > 6) warnings.push("⚠️ k\u2081 has >6 decimal places — check significant figures.");
+  if (countDecimals(t) > 6) warnings.push("⚠️ t has >6 decimal places — check significant figures.");
+
+  // Soft recommended ranges (warnings)
+  if (Li < 10) warnings.push("⚠️ Very low influent BOD (<10 mg/L) — may be pre-treated or measurement issue.");
+  if (Li > 2000) warnings.push("⚠️ Very high influent BOD (>2000 mg/L) — verify sample or industrial source.");
+
+  if (k1 < 0.01 || k1 > 1.0) {
+    warnings.push("⚠️ k\u2081 outside typical domestic bounds (0.01—1.0 1/day). Verify temperature/conditions.");
+  }
+
+  if (t < 0.1) warnings.push("⚠️ Very short detention (&lt;0.1 day) — steady state assumption may not hold.");
+  if (t > 30) warnings.push("⚠️ Very long detention (&gt;30 days) — uncommon for typical treatment processes.");
+
+  // Cross-field logical checks
+  const denom = 1 + k1 * t;
+  if (!Number.isFinite(denom)) return showErrors(["⚠️ Computation produced non-finite denominator. Check inputs."]);
+  if (denom <= 0) {
+    return showErrors(["❌ Denominator (1 + k\u2081·t) <= 0 — unphysical. Check signs/units of k\u2081 and t."]);
+  }
+
+  // Compute
+  const Le = Li / denom;
+  if (!Number.isFinite(Le)) return showErrors(["⚠️ Computed L\u209A is not finite. Check inputs."]);
+
+  // Physical plausibility
+  const tol = 1e-9;
+  if (Le < -tol) return showErrors(["❌ Computed L\u209A is negative — check inputs."]);
+  if (Le - Li > 1e-6) {
+    // Le > Li by more than tiny numeric noise
+    warnings.push("⚠️ Computed L\u209A is greater than L\u2091 — check for unit/sign errors.");
+  }
+
+  // Efficiency
+  let efficiency = ((Li - Le) / Li) * 100;
+  if (!Number.isFinite(efficiency)) efficiency = 0;
+  if (efficiency < 0 && efficiency > -1e-9) efficiency = 0; // clamp minor negatives
+
+  // If efficiency outside [0,100] beyond tolerance -> warn/error
+  if (efficiency < -1e-6 || efficiency > 100 + 1e-6) {
+    warnings.push("⚠️ Computed removal efficiency outside [0,100]% — check inputs.");
+  }
+
+  // Formatting for display
+  const LeDisplay = (Math.abs(Le) < 0.0001) ? Le.toExponential(3) : Le.toFixed(4);
+  const effDisplay = (efficiency < 0.005 && efficiency > -0.005) ? Number(efficiency).toFixed(2) : Number(efficiency).toFixed(2);
+
+  // Assessment categories
+  let statusMsg = "";
+  let statusColor = "#000";
+  if (efficiency > 85) {
+    statusMsg = "✅ High removal efficiency — excellent performance.";
+    statusColor = "green";
+  } else if (efficiency >= 50) {
+    statusMsg = "⚠️ Moderate removal — acceptable but may be optimized.";
+    statusColor = "orange";
+  } else {
+    statusMsg = "🔴 Low removal — review process (increase t or improve biological activity).";
+    statusColor = "red";
+  }
+
+  // Build details for feedback
+  let details = `<div><strong>Assessment:</strong> <span style="color:${statusColor};">${statusMsg}</span></div>`;
+  details += `<div style="margin-top:6px;"><strong>L\u209A (Effluent BOD):</strong> ${LeDisplay} mg/L</div>`;
+  details += `<div><strong>Removal Efficiency:</strong> ${effDisplay}%</div>`;
+  details += `<div><strong>L\u2091 (Influent BOD):</strong> ${Li.toFixed(3)} mg/L</div>`;
+  details += `<div><strong>k\u2081 (rate constant):</strong> ${k1.toFixed(6)} 1/day</div>`;
+  details += `<div><strong>t (detention time):</strong> ${t.toFixed(6)} days</div>`;
+
+  if (warnings.length) {
+    details += `<div style="margin-top:8px; color:#b35d00; font-size:0.95em;">${warnings.join(" | ")}</div>`;
+  }
+
+  // Update UI
+  leEl.textContent = LeDisplay;
+  effEl.textContent = effDisplay;
+  feedbackEl.innerHTML = details;
+
+  placeholder.classList.add("hidden");
+  resultValue.classList.remove("hidden");
+  errorBox.classList.add("hidden");
+}
+
+/* Print helper (unchanged) */
+function printReport() {
+  const el = document.getElementById('printDate');
+  if (el) {
+    const now = new Date();
+    el.textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+  window.print();
+}
+</script>
+
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+<!--
+====================================================
+📘 CMFR (Completely Mixed Flow Reactor) BOD Model
+====================================================
+
+📌 Core Formula:
+-----------------
+1. **Effluent BOD (Le):**
+   Le = Li / (1 + k₁·t)
+
+   where:
+     • Li = Influent BOD (mg/L)  
+     • k₁ = BOD rate constant (1/day)  
+     • t  = detention time (days)  
+
+2. **Removal Efficiency (η):**
+   η = ((Li − Le) / Li) × 100 %
+
+📥 Input Validations:
+---------------------
+**Influent BOD (Li, mg/L):**
+- Must be > 0.  
+- Hard limits: 0.01 ≤ Li ≤ 10,000.  
+- Warning if Li < 10 (very low) or Li > 2000 (very high).  
+- Precision warning if >3 decimals.  
+
+**Rate Constant (k₁, 1/day):**
+- Must be > 0.  
+- Hard limits: 0.0001 ≤ k₁ ≤ 10.  
+- Warning if k₁ outside typical domestic bounds (0.01–1.0).  
+- Precision warning if >6 decimals.  
+
+**Detention Time (t, days):**
+- Must be > 0.  
+- Hard limits: 0.0001 ≤ t ≤ 365.  
+- Warning if t < 0.1 (too short) or t > 30 (uncommon).  
+- Precision warning if >6 decimals.  
+
+📤 Output Validations:
+----------------------
+**Effluent BOD (Le):**
+- Denominator check: (1 + k₁·t) must be > 0 and finite.  
+- Le must be ≥ 0 (allowing tiny negative numerical tolerance).  
+- Warning if Le > Li (unphysical).  
+- Display: exponential if |Le| < 1×10⁻⁴, else 4 decimals.  
+
+**Removal Efficiency (η, %):**
+- Must be finite.  
+- Clamp tiny negative to 0.  
+- Warning if η outside [0,100] beyond tolerance.  
+- Display with 2 decimals.  
+
+📊 Performance Assessment:
+--------------------------
+- η > 85% → ✅ High efficiency (excellent).  
+- 50% ≤ η ≤ 85% → ⚠️ Moderate efficiency (acceptable, may optimize).  
+- η < 50% → 🔴 Low efficiency (review process conditions).  
+
+====================================================
+-->

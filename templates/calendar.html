@@ -1,0 +1,485 @@
+{% extends 'base.html' %}
+{% block title %}Calendar{% endblock %}
+{% block content %}
+{% load static %}
+  <style>
+      
+        .calendar-container {
+        width: 95%;
+        margin: auto;
+        padding: 20px;
+        border-radius: 10px;
+        background-color:rgb(223, 241, 252);
+        color: white;
+        text-align: center;
+    }
+    
+    .months {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        justify-items: center;
+    }
+    
+    .month {
+        width: 100%;
+        max-width: 370px;
+        padding: 10px;
+        background: linear-gradient(45deg, #1560bd, #000040);
+         
+        border-radius: 8px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        color: white;
+    }
+   
+
+    
+    .month img {
+        width: 100%;
+        border-radius: 8px;
+        height: 190px;
+        object-fit: cover;
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: white;
+        color: black;
+    }
+    
+    th, td {
+        padding: 5px;
+        text-align: center;
+        border: 1px solid #ccc;
+    }
+    
+    th {
+        background-color: #a6d7fa;
+    }
+    
+    .safety-dates {
+    background: linear-gradient(135deg, #1560bd, #000040); /* Diagonal gradient */
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    max-width: 1200px;
+    margin: 20px auto;
+    text-align: center;
+}
+
+.safety-dates h3 {
+    color: white;
+    font-size: 1.4rem;
+    font-weight: normal;
+    margin-bottom: 10px;
+}
+
+.safety-dates ul {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 items in a row */
+    gap: 10px;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.safety-dates li {
+    background: rgba(255, 255, 255, 0.2); /* Slight white transparency */
+    color: white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.safety-dates li:nth-child(odd) {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 600px) {
+    .safety-dates ul {
+        grid-template-columns: repeat(1, 1fr); /* 1 item per row on small screens */
+    }
+}
+
+    @media (max-width: 1200px) {
+    .months {
+        grid-template-columns: repeat(2, 1fr); /* 2 months per row */
+        gap: 10px;
+    }
+    .month {
+        max-width: 350px;
+        padding: 10px;
+    }
+    .month img {
+        width: 100%;
+        height: 150px; /* Slightly bigger to avoid cutting */
+        object-fit: contain; /* Ensures the full image is visible */
+    }
+}
+
+@media (max-width: 768px) {
+    .months {
+        grid-template-columns: repeat(1, 1fr); /* 1 month per row */
+        gap: 5px;
+    }
+    .month {
+        max-width: 95%;
+        margin: auto;
+    }
+    .month img {
+        height: 180px; /* Increased height to fit properly */
+        object-fit: contain; /* No cropping */
+    }
+}
+
+@media (max-width: 480px) {
+    h2 {
+        font-size: 1.5rem;
+    }
+    h3 {
+        font-size: 1rem;
+    }
+    .month img {
+        height: 200px; /* Even bigger for small screens */
+        object-fit: contain;
+    }
+    table {
+        font-size: 12px;
+    }
+}
+td[data-event] {
+    background: #ffcccb; /* Highlight for special event days */
+    font-weight: bold;
+    position: relative;
+}
+
+td[data-event]:hover::after {
+    content: attr(data-event);
+    position: absolute;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #000040;
+    color: white;
+    padding: 5px 10px;
+    font-size: 12px;
+    white-space: nowrap;
+    border-radius: 4px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+}
+
+.heading-container {
+  text-align: center;
+  margin: 30px 0;
+}
+
+.heading {
+  font-family: 'Arial', sans-serif;
+  font-size: 36px;
+  font-weight: bold;
+  color: #2D2D2D;
+  background: linear-gradient(90deg, #1560bd, #012d64);
+  -webkit-background-clip: text;
+  color: transparent;
+  letter-spacing: 2px;
+ 
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+  animation: textEffect 2s ease-in-out infinite;
+}
+
+@keyframes textEffect {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.gallery-container {
+    position: relative;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+.gallery {
+    display: flex;
+    gap: 10px;
+    scroll-behavior: smooth;
+    overflow-x: auto;
+    -ms-overflow-style: none;  /* For Internet Explorer */
+    scrollbar-width: none;     /* For Firefox */
+}
+
+.gallery::-webkit-scrollbar {
+    display: none; /* Hides scrollbar in Chrome/Safari */
+}
+
+.gallery img {
+    width: 800px;
+    height: auto;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+/* Scroll buttons */
+.scroll-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(2, 7, 90, 0.5);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 24px;
+    border-radius: 50%;
+    transition: 0.3s ease-in-out;
+}
+
+.scroll-btn:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+/* Position buttons */
+.left {
+    left: 10px;
+}
+
+.right {
+    right: 10px;
+}
+
+@media (max-width: 768px) {
+    .heading-container {
+  text-align: center;
+  margin: 30px 30px;
+}
+}
+    </style>
+
+
+
+
+
+
+
+
+
+
+   
+      
+<div class="calendar-container">
+    <div >
+    <h4 style="color: #fff; background:linear-gradient(#000050,#1560bd); padding:15px 25px;display: inline-block; border-radius: 10px;"> MLC QEHS Calendar</h4>
+</div>
+
+    <label for="year" style="color: #010166; margin: 10px 0;">Select Year: </label>
+    <select id="year" onchange="generateCalendar()"></select>
+    
+    <div class="months" id="calendar">
+        
+    </div>
+
+    <div class="safety-dates">
+        
+        <h3 style="color: white;margin: 10px 0;">Important QEHS Dates</h3>
+        
+        <ul id="safety-list"></ul>
+    </div>
+</div>
+
+<div class="heading-container">
+    <h1 class="heading">Check Out the 2024 Calender Special</h1>
+  </div>
+  
+  <div class="gallery-container">
+    <button class="scroll-btn left" onclick="scrollGallery(-1)">&#10094;</button>
+    <div class="gallery">
+      <img src="{% static 'images/jan.png' %}" alt="January">
+<img src="{% static 'images/feb.png' %}" alt="February">
+<img src="{% static 'images/march.png' %}" alt="March">
+<img src="{% static 'images/april.png' %}" alt="April">
+<img src="{% static 'images/may.png' %}" alt="May">
+<img src="{% static 'images/june.png' %}" alt="June">
+<img src="{% static 'images/july.png' %}" alt="July">
+<img src="{% static 'images/aug.png' %}" alt="August">
+<img src="{% static 'images/september.png' %}" alt="September">
+<img src="{% static 'images/oct.png' %}" alt="October">
+<img src="{% static 'images/nov.png' %}" alt="November">
+<img src="{% static 'images/dec.png' %}" alt="December">
+    </div>
+    <button class="scroll-btn right" onclick="scrollGallery(1)">&#10095;</button>
+</div>
+
+  <br>
+  <script>
+    function scrollGallery(direction) {
+    const gallery = document.querySelector(".gallery");
+    const scrollAmount = 800; // Adjust based on image width
+    gallery.scrollBy({ left: direction * scrollAmount, behavior: "smooth" });
+}
+
+  </script>
+<script>
+    const safetyEvents = {
+        "01-24": "International Day of Education",
+        "01-26": "International Day of Clean Energy",
+        "01-26": "International Customs Day-Republic Day",
+        "01-11": "Road safety week Start",
+        "01-17": "Road safety week End",
+        "01-30": "World Neglected Tropical Diseases Day",
+        "01-30": "World Leprosy Day",
+        "02-02": "World Wetlands Day",
+        "02-04": "World Cancer Day",
+        "03-03": "World Wildlife Day",
+        "03-04": "National Safety Day (India)",
+        "03-08": "International Women’s Day",
+        "03-22": "World Water day",
+        "04-07": "World Health Day",
+        "04-22": "Earth Day",
+        "04-14": "fire Service Day",
+        "05-01": "International Workers’ Day (Labour Day)",
+        "05-22": "International Day for Biological Diversity",
+        "05-31": "Anti-Tobacco Day",
+        "06-05": "World Environment Day",
+        "06-08": "World Oceans Day",
+        "08-15": "Independence Day",
+        "09-16": "International Day for the Preservation of the Ozone Layer",
+        "10-02": "Ghandhi Jayanthi",
+        "10-06": "World WildLife Day",
+        "10-10": "World Mental Health Day",
+        "10-13": "The International Day for Disaster Risk Reduction",
+        "10-16": "World Food Day",
+        "11-01": "kannada rajyotsava",
+        "12-02": "National Pollution Control Day",
+        "12-05": "World Soil Day",
+        "12-11": "International Mountain Day"
+    };
+
+    const qehsThemes = [
+        "MLC ISO Certifications", "Mlc QEHS Documentation", "MLC Internal Audits", "MLC Employment Services",
+        "MLC Fire Consultancy Services ", "MLC PPE Services", "MLC QEHS Trainings", "MLC Safety Studies",
+        "MLC ESG Services", "MLC Incident Investigations", "MLC Power System Studies", "MLC Statutory Compliance"
+    ];
+
+    // Define a specific link for each image
+    const imageLinks = {
+    "January": "certification1.html",
+    "February": "documentation.html",
+    "March": "auditing.html",
+    "April": "employeehs.html",
+    "May": "mlcfiresystemservices.html",
+    "June": "ppesupply.html",
+    "July": "ehstrainings.html",
+    "August": "safetystudies.html",
+    "September": "Esg.html",
+    "October": "incidentinvestigation.html",
+    "November": "powersystem.html",
+    "December": "professionaltax.html"
+};
+
+
+    function generateCalendar() {
+        const year = document.getElementById("year").value;
+        const calendarDiv = document.getElementById("calendar");
+        const safetyList = document.getElementById("safety-list");
+        calendarDiv.innerHTML = "";
+        safetyList.innerHTML = "";
+
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        
+        months.forEach((month, index) => {
+            const monthDiv = document.createElement("div");
+            monthDiv.className = "month";
+
+            // Get the specific link for this month's image
+            let monthLink = imageLinks[month] || "#";  // Default to '#' if no link is provided
+
+            monthDiv.innerHTML = ` 
+                <h3 style="color: white; font-size:18px;">
+                    ${month} - ${qehsThemes[index]}
+                </h3>
+                <a href="${monthLink}">
+                  <img src="{% static 'images/' %}${month}.jpg" 
+     alt="${month} Image" 
+     style="margin:10px 0; cursor:pointer;">
+
+                </a>
+                ` + generateMonthTable(year, index);
+            
+            calendarDiv.appendChild(monthDiv);
+        });
+
+        // Safety event display logic
+        for (let date in safetyEvents) {
+            let fullDate = `${year}-${date}`; // Attach the selected year
+            let li = document.createElement("li");
+            li.textContent = `${fullDate}: ${safetyEvents[date]}`;
+            safetyList.appendChild(li);
+        }
+    }
+
+    function generateMonthTable(year, monthIndex) {
+        let date = new Date(year, monthIndex, 1);
+        let table = `<table><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr><tr>`;
+
+        for (let i = 0; i < date.getDay(); i++) {
+            table += "<td></td>";
+        }
+
+        while (date.getMonth() === monthIndex) {
+            let day = date.getDate();
+            let dateKey = `${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            let highlight = safetyEvents[dateKey] ? "background-color: #ffcccb; font-weight: bold;" : "";
+            let sundayHighlight = date.getDay() === 0 ? "background-color: #a6d7fa;" : "";
+            let tooltip = safetyEvents[dateKey] ? `data-event="${safetyEvents[dateKey]}"` : "";
+
+            table += `<td style="${highlight} ${sundayHighlight}" ${tooltip}>${day}</td>`;
+
+            if (date.getDay() === 6) {
+                table += "</tr><tr>";
+            }
+            date.setDate(day + 1);
+        }
+
+        table += "</tr></table>";
+        return table;
+    }
+
+    function populateYearOptions() {
+        let yearSelect = document.getElementById("year");
+        let currentYear = new Date().getFullYear();
+        for (let i = currentYear - 100; i <= currentYear + 50; i++) {
+            let option = document.createElement("option");
+            option.value = i;
+            option.textContent = i;
+            if (i === currentYear) option.selected = true;
+            yearSelect.appendChild(option);
+        }
+        generateCalendar();
+    }
+
+    populateYearOptions();
+</script>
+
+   
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+
+
+
+
+
+
+
+       
+
+{% endblock %}

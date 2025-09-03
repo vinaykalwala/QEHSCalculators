@@ -1,0 +1,794 @@
+{% extends 'base.html' %}
+{% block title %}Dynamic Viscosity Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Viscosity Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+<style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+             /* display: flex;  */
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            /* overflow-y: auto;  */
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Input rows for better organization */
+        .input-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+        
+        @media (max-width: 600px) {
+            .input-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+                .rate-display {
+                display: flex;
+                gap: 20px;
+                justify-content: center;
+                align-items: center;
+                flex-wrap: wrap; /* responsive */
+                text-align: center;
+            }
+
+            .rate-block {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                min-width: 120px; /* keeps blocks same width */
+            }
+
+            .rate-label {
+                font-weight: bold;
+                font-size: 16px;
+                color: #444;
+                margin-bottom: 5px;
+            }
+
+            .rate-value {
+                font-size: 40px;
+                font-weight: 700;
+                color: #2980b9;
+                line-height: 1.2;
+            }
+
+            .rate-unit {
+                font-size: 14px;
+                color: #777;
+                margin-top: 4px;
+            }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+                .rate-value { font-size: 32px; }
+            }
+
+            @media (max-width: 480px) {
+                .rate-value { font-size: 26px; }
+                
+                .rate-unit { font-size: 12px; }
+                
+            }
+
+
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+                .result-feedback {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 18px 20px;
+    border-left: 4px solid #3498db;
+    text-align: left;
+    max-width: 800px; /* keeps it readable on large screens */
+    margin: 0 auto;   /* centers it */
+}
+
+.feedback-title {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #2c3e50;
+    font-size: 18px;
+}
+
+.feedback-content { 
+    color: #34495e; 
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 768px) {
+    .result-feedback {
+        padding: 15px;
+        font-size: 15px;
+    }
+
+    .feedback-title {
+        font-size: 16px;
+    }
+
+    .feedback-content {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .result-feedback {
+        padding: 12px;
+        border-left-width: 3px;
+    }
+
+    .feedback-title {
+        font-size: 15px;
+    }
+
+    .feedback-content {
+        font-size: 13px;
+    }
+}
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+<div class="btn-container">
+        <a href="{% url 'environment_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+<div class="calculator-container printable" id="printArea">
+
+
+{% include "includes/print_header_footer.html" %}
+
+<div class="calculator-header">
+    <h1>Dynamic Viscosity Calculator</h1>
+    <p>Calculate the dynamic viscosity of a fluid using the falling sphere method (result shown in Pa·s).</p>
+</div>
+
+<div class="calc-content">
+    <!-- Calculator -->
+    <div class="calc-card">
+        <h2>Enter Parameters</h2>
+
+        <div class="input-row">
+            <div class="form-group">
+                <label for="densityDifference">Density Difference (Δρ, kg/m³)</label>
+                <input type="number" id="densityDifference" class="form-input" step="any" min="0" placeholder="e.g., 7800" aria-label="Density difference">
+            </div>
+
+            <div class="form-group">
+                <label for="radius">Radius of Sphere (r, m)</label>
+                <input type="number" id="radius" class="form-input" step="any" min="0" placeholder="e.g., 0.002" aria-label="Sphere radius">
+            </div>
+        </div>
+
+        <div class="input-row">
+            <div class="form-group">
+                <label for="distance">Distance Sphere Falls (d, m)</label>
+                <input type="number" id="distance" class="form-input" step="any" min="0" placeholder="e.g., 0.5" aria-label="Fall distance">
+            </div>
+
+            <div class="form-group">
+                <label for="time">Time Taken to Fall (t, s)</label>
+                <input type="number" id="time" class="form-input" step="any" min="0" placeholder="e.g., 12.5" aria-label="Fall time">
+            </div>
+        </div>
+
+        <div class="input-row">
+            <div class="form-group">
+                <label for="gravity">Gravity (g, m/s²)</label>
+                <input type="number" id="gravity" class="form-input" step="any" min="0" value="9.81" placeholder="e.g., 9.81" aria-label="Gravity" oninput="checkGravity()">
+            </div>
+        </div>
+
+        <button class="calculate-btn" onclick="calculateViscosity()">Calculate Viscosity</button>
+    </div>
+
+    <!-- Result Section -->
+    <div class="result-card">
+        <div class="result-placeholder" id="placeholder">
+            <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Viscosity illustration">
+            <p>This tool calculates the dynamic viscosity of fluids using the falling sphere method.</p>
+        </div>
+
+        <div class="result-error hidden" id="resultError" role="alert" aria-live="polite">
+            <div class="error-icon">❌</div>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <div class="result-value hidden" id="resultValue" aria-live="polite">
+            <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                <h2>Dynamic Viscosity</h2>
+            </div>
+
+            <div class="rate-display" style="gap:12px; align-items:center; justify-content:center;">
+                <div class="rate-value" id="viscosity">0.00</div>
+                <div class="rate-label" style="font-size:16px; color: #2980b9;">Pa·s</div>
+            </div>
+
+            <div class="result-feedback">
+                <div class="feedback-title">Fluid Classification</div>
+                <div class="feedback-content" id="feedbackContent"></div>
+            </div>
+
+            <div class="btn-wrapper">
+                <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notes Section -->
+<div class="note-section">
+    <div class="note-card">
+        <h3>📘 About</h3>
+        <p>
+            This calculator determines the dynamic viscosity of fluids using the falling sphere method based on Stokes' Law. It calculates the resistance of a fluid to flow when a sphere falls through it at terminal velocity.
+        </p>
+    </div>
+
+    <div class="note-card">
+        <h3>✅ Input Validations</h3>
+        <ul class="note-list">
+            <li><strong>Density difference (Δρ):</strong> Must be <em>greater than 0</em> and ≤ 20,000 kg/m³.</li>
+            <li><strong>Sphere radius (r):</strong> Must be <em>greater than 0</em> and ≤ 0.1 m.</li>
+            <li><strong>Fall distance (d):</strong> Must be <em>greater than 0</em> and ≤ 10 m.</li>
+            <li><strong>Fall time (t):</strong> Must be <em>greater than 0</em> and ≤ 600 s.</li>
+            <li><strong>Gravity (g):</strong> Must be positive; for Earth-based tests use ~9.81 m/s².</li>
+            <li><strong>Velocity check (d/t):</strong> Must be positive and within a realistic range (0.0001 – 10 m/s).</li>
+        </ul>
+        </div>
+
+
+    <div class="note-card">
+        <h3>🔎 Fluid Classification</h3>
+        <ul class="note-list">
+            <li><strong>Low viscosity (&lt; 0.1 Pa·s)</strong>: Water-like fluids (water, alcohol, gasoline).</li>
+            <li><strong>Medium viscosity (0.1-1 Pa·s)</strong>: Oil-like fluids (motor oil, syrup, cream).</li>
+            <li><strong>High viscosity (1-10 Pa·s)</strong>: Thick fluids (honey, molasses, glycerin).</li>
+            <li><strong>Very high viscosity (&gt; 10 Pa·s)</strong>: Semi-solids (pitch, bitumen, some polymers).</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>🌍 Applications of Dynamic Viscosity</h3>
+        <ul class="note-list">
+            <li><strong>Process Safety:</strong> Ensures safe pumping, mixing, and transfer of liquids in chemical and wastewater treatment plants.</li>
+            <li><strong>Fire Safety:</strong> Determines flow rates of fire suppression foams, gels, and retardants (NFPA compliance).</li>
+            <li><strong>Occupational Safety:</strong> Controls handling of hazardous fluids (e.g., oils, solvents) to prevent spills and exposure risks (OSHA/ISO 45001).</li>
+            <li><strong>Mechanical Systems:</strong> Essential for lubrication design in engines, turbines, and compressors to prevent wear and overheating.</li>
+            <li><strong>Food & Pharma:</strong> Critical for processing syrups, creams, and gels where flow behavior impacts quality and safety.</li>
+            <li><strong>Environmental Monitoring:</strong> Used in modeling oil spills and wastewater discharge to assess environmental impact.</li>
+        </ul>
+    </div>
+
+</div>
+
+<script>
+/* Helper: show errors consistently */
+function showErrors(errors) {
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+
+  if (errorMessage) errorMessage.innerHTML = errors.join("<br>");
+  if (errorBox) errorBox.classList.remove("hidden");
+  if (placeholder) placeholder.classList.add("hidden");
+  if (resultValue) resultValue.classList.add("hidden");
+}
+
+function checkGravity() {
+  const gravity = parseFloat(document.getElementById("gravity").value);
+  if (gravity < 9 || gravity > 10) {
+    alert("For Earth-based calculations, gravity is typically 9.81 m/s². Verify your value if calculating for other environments.");
+  }
+}
+
+/* Main Viscosity calculation with enhanced validations */
+function calculateViscosity() {
+  // safe reads
+  const deltaRho = parseFloat(document.getElementById("densityDifference")?.value.trim());
+  const radius = parseFloat(document.getElementById("radius")?.value.trim());
+  const distance = parseFloat(document.getElementById("distance")?.value.trim());
+  const time = parseFloat(document.getElementById("time")?.value.trim());
+  const gravity = parseFloat(document.getElementById("gravity")?.value.trim());
+
+  const viscosityEl = document.getElementById("viscosity");
+  const feedbackEl = document.getElementById("feedbackContent");
+
+  // reset UI
+  document.getElementById("resultError").classList.add("hidden");
+  if (feedbackEl) feedbackEl.innerHTML = "";
+
+  const errors = [];
+  const warnings = [];
+
+  // Required numeric checks
+  if (![deltaRho, radius, distance, time, gravity].every(Number.isFinite)) {
+    errors.push("👉 All inputs are required and must be numeric.");
+    showErrors(errors);
+    return;
+  }
+
+  // Input validations with thresholds
+  if (deltaRho <= 0 || deltaRho > 20000) errors.push("👉 Density difference (Δρ) must be >0 and ≤20,000 kg/m³.");
+  if (radius <= 0 || radius > 0.1) errors.push("👉 Sphere radius (r) must be >0 and ≤0.1 m.");
+  if (distance <= 0 || distance > 10) errors.push("👉 Fall distance (d) must be >0 and ≤10 m.");
+  if (time <= 0 || time > 600) errors.push("👉 Fall time (t) must be >0 and ≤600 s.");
+  if (gravity <= 0) errors.push("👉 Gravity (g) must be >0.");
+
+  if (errors.length > 0) { showErrors(errors); return; }
+
+  // Warning checks (plausibility ranges)
+  if (deltaRho > 5000) warnings.push("⚠️ Density difference unusually high – check units (kg/m³).");
+  if (radius > 0.01) warnings.push("⚠️ Sphere radius large – may invalidate Stokes’ law.");
+  if (distance > 1) warnings.push("⚠️ Long fall distance – verify experimental setup.");
+  if (time < 1 || time > 300) warnings.push("⚠️ Unusual fall time – verify measurement.");
+  if (gravity < 9 || gravity > 10) warnings.push("⚠️ Gravity differs from Earth's standard value (9.81 m/s²).");
+
+  // Velocity calculation & validation
+  const velocity = distance / time;
+  if (velocity <= 0) {
+    showErrors(["⚠️ Invalid velocity (d/t). Check inputs."]);
+    return;
+  }
+  if (velocity < 0.0001) warnings.push("⚠️ Very low velocity – possible stagnant condition.");
+  if (velocity > 10) warnings.push("⚠️ Very high velocity – turbulence invalidates Stokes’ law.");
+
+  // Compute viscosity (Pa·s)
+  const viscosity = (2 * deltaRho * gravity * Math.pow(radius, 2)) / (9 * velocity);
+
+  if (!Number.isFinite(viscosity) || viscosity <= 0) {
+    showErrors(["⚠️ Computed viscosity is invalid. Check input values."]);
+    return;
+  }
+
+  // Classification based on viscosity values
+  let classification = "";
+  let suggestion = "";
+  if (viscosity < 0.1) {
+    classification = "Low Viscosity Fluid";
+    suggestion = "✅ Water-like fluid (e.g., water, alcohol). Flows easily.";
+  } else if (viscosity < 1) {
+    classification = "Medium Viscosity Fluid";
+    suggestion = "✅ Oil-like fluid (e.g., motor oil, syrup). Moderate resistance.";
+  } else if (viscosity < 10) {
+    classification = "High Viscosity Fluid";
+    suggestion = "⚠️ Thick fluid (e.g., honey, molasses). Flows slowly.";
+  } else {
+    classification = "Very High Viscosity Fluid";
+    suggestion = "⚠️ Semi-solid material (e.g., pitch, bitumen). Flows extremely slowly.";
+  }
+
+  // Additional warning for extreme viscosities
+  if (viscosity > 100) warnings.push("⚠️ Extremely high viscosity – verify input values and units.");
+
+  // Build feedback
+  let details = `<div>Dynamic viscosity = <b>${viscosity.toFixed(6)}</b> Pa·s</div>`;
+  details += `<div>Classification: <b>${classification}</b></div>`;
+  details += `<div style="margin-top:6px;">${suggestion}</div>`;
+  details += `<div style="margin-top:8px; font-size:14px;">Velocity: ${velocity.toFixed(4)} m/s</div>`;
+  if (warnings.length) {
+    details += `<div style="margin-top:8px; color:#b35d00;">Note: ${warnings.join(" | ")}</div>`;
+  }
+
+  // Update UI
+  if (viscosityEl) viscosityEl.textContent = viscosity.toFixed(6);
+  if (feedbackEl) feedbackEl.innerHTML = details;
+
+  // Toggle display
+  document.getElementById("placeholder").classList.add("hidden");
+  document.getElementById("resultValue").classList.remove("hidden");
+  document.getElementById("resultError").classList.add("hidden");
+}
+
+/* Safe print guard */
+function printReport() {
+  const el = document.getElementById('printDate');
+  if (el) {
+    const now = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    el.textContent = now.toLocaleDateString('en-US', options);
+  }
+  window.print();
+}
+</script>
+
+</body>
+</html>
+{% endblock %}
+
+
+
+<!-- 
+==============================================
+VISCOSITY CALCULATOR - DOCUMENTATION
+==============================================
+
+📌 Formula Used:
+  η = (2 × Δρ × g × r²) / (9 × v)
+
+  where:
+    η = Dynamic viscosity (Pa·s)
+    Δρ = Density difference (kg/m³)
+    g  = Gravitational acceleration (m/s²)
+    r  = Sphere radius (m)
+    v  = Velocity = d / t  (m/s)
+    d  = Fall distance (m)
+    t  = Fall time (s)
+
+📌 Input Validations:
+  - Δρ (Density difference):
+      • Required, must be numeric
+      • Must be > 0 and ≤ 20,000
+      • Warning if > 5,000 (check units)
+
+  - r (Sphere radius):
+      • Required, must be numeric
+      • Must be > 0 and ≤ 0.1 m
+      • Warning if > 0.01 m (Stokes’ law may not hold)
+
+  - d (Fall distance):
+      • Required, must be numeric
+      • Must be > 0 and ≤ 10 m
+      • Warning if > 1 m (long fall distance)
+
+  - t (Fall time):
+      • Required, must be numeric
+      • Must be > 0 and ≤ 600 s
+      • Warning if < 1 s or > 300 s (unusual)
+
+  - g (Gravity):
+      • Required, must be numeric
+      • Must be > 0
+      • Warning if < 9 or > 10 (outside Earth’s normal 9.81 m/s²)
+
+📌 Velocity Validation:
+  - v = d / t
+  - Must be > 0
+  - Warning if v < 0.0001 (too low, stagnant)
+  - Warning if v > 10 (too high, turbulence invalidates Stokes’ law)
+
+📌 Output Validations:
+  - Viscosity must be finite and > 0
+  - Warning if viscosity > 100 Pa·s (extremely high)
+
+📌 Classification Rules:
+  - η < 0.1 Pa·s → Low Viscosity Fluid 
+      (water-like, e.g., water, alcohol)
+  - 0.1 ≤ η < 1 Pa·s → Medium Viscosity Fluid 
+      (oil-like, moderate resistance)
+  - 1 ≤ η < 10 Pa·s → High Viscosity Fluid 
+      (honey-like, thick fluid)
+  - η ≥ 10 Pa·s → Very High Viscosity Fluid 
+      (pitch-like, semi-solid)
+
+-->
