@@ -506,7 +506,7 @@
         
 
         <div class="note-card">
-            <h3>⚠️ Validations</h3>
+            <h3>⚠️ Input Validations</h3>
             <p>
                 ✔️ Heat Exported in Steam must be a positive value.<br>
                 ✔️ Heat Provided by Fuel must be a positive value.<br>
@@ -541,10 +541,21 @@ function showErrors(errors) {
   if (resultValue) resultValue.classList.add("hidden");
 }
 
+/* Helper: parse numeric tolerant (strip commas) */
+function parseNumeric(id) {
+  const el = document.getElementById(id);
+  if (!el) return null;
+  const raw = (el.value ?? "").toString().trim().replace(/,/g, "");
+  if (raw === "") return null;
+  const n = parseFloat(raw);
+  return Number.isFinite(n) ? n : null;
+}
+
+/* Main calculation with robust validations */
 function calculateEfficiency() {
-  // safe reads
-  const heatExportedRaw = document.getElementById("heatExported")?.value.trim() ?? "";
-  const heatProvidedRaw = document.getElementById("heatProvided")?.value.trim() ?? "";
+  // Read inputs safely
+  const heatExported = parseNumeric("heatExported"); // Q_out
+  const heatProvided = parseNumeric("heatProvided"); // Q_in
 
   const errorBox = document.getElementById("resultError");
   const errorMessage = document.getElementById("errorMessage");
@@ -553,7 +564,7 @@ function calculateEfficiency() {
   const rateEl = document.getElementById("rateValue");
   const feedbackEl = document.getElementById("feedbackContent");
 
-  // reset UI
+  // Reset UI
   if (errorBox) errorBox.classList.add("hidden");
   if (errorMessage) errorMessage.innerHTML = "";
   if (feedbackEl) feedbackEl.innerHTML = "";
@@ -561,66 +572,58 @@ function calculateEfficiency() {
   const errors = [];
   const warnings = [];
 
-  // required checks
-  if (heatExportedRaw === "") errors.push("👉 Please enter Heat Exported (same energy units as Heat Provided).");
-  if (heatProvidedRaw === "") errors.push("👉 Please enter Heat Provided by fuel.");
+  // Required presence checks
+  if (heatExported === null) errors.push("👉 Please enter Heat Exported in steam (same units as Heat Provided).");
+  if (heatProvided === null) errors.push("👉 Please enter Heat Provided by fuel (same units as Heat Exported).");
 
   if (errors.length > 0) {
     showErrors(errors);
     return;
   }
 
-  // parse
-  const heatExported = parseFloat(heatExportedRaw);
-  const heatProvided = parseFloat(heatProvidedRaw);
-
-  if (!Number.isFinite(heatExported) || heatExported < 0) errors.push("👉 Heat Exported must be a non-negative number.");
-  if (!Number.isFinite(heatProvided) || heatProvided <= 0) errors.push("👉 Heat Provided must be a positive number (check units).");
+  // Numeric & sign checks
+  if (!(heatExported >= 0)) errors.push("👉 Heat Exported must be a non-negative number.");
+  if (!(heatProvided > 0)) errors.push("👉 Heat Provided must be a positive number (cannot be zero).");
 
   if (errors.length > 0) {
     showErrors(errors);
     return;
   }
 
-  // tiny denominator guard
-  if (heatProvided < 1e-9) {
-    showErrors(["⚠️ Heat Provided is too small — check units and input value."]);
+  // Tiny denominator guard
+  const EPS = 1e-12;
+  if (Math.abs(heatProvided) < EPS) {
+    showErrors(["⚠️ Heat Provided is too small or zero — check units and input value."]);
     return;
   }
 
-  // check: exported > provided (physically suspicious)
-  // small measurement tolerances allowed; big exceedances are blocked
-if (heatExported > heatProvided) {
-    const ratio = heatExported / heatProvided;
-    if (ratio > 1.05) {
-        // >5% more exported than provided -> unrealistic, likely data issue
-        showErrors([
-          "❌ Invalid Input: Heat Exported cannot realistically exceed Heat Provided by more than 5%. Please recheck your measurements, fuel data, or unit conversions."
-        ]);
-        return;
-    } else {
-        // small exceedance -> warning but allow calculation
-        warnings.push(
-          "⚠️ Note: Heat Exported is slightly higher than Heat Provided. This may be due to minor measurement inaccuracies or rounding differences."
-        );
-    }
-}
+  // Logical consistency: HeatExported must not exceed HeatProvided by large margin
+  const ratio = heatExported / heatProvided;
+  if (ratio > 1.05) {
+    showErrors(["❌ Invalid input: Heat Exported exceeds Heat Provided by more than 5% — check units and measurements."]);
+    return;
+  } else if (ratio > 1.0) {
+    warnings.push("⚠️ Heat Exported slightly greater than Heat Provided (≤5%): possible measurement or rounding differences.");
+  }
 
-
-  // compute efficiency and heat loss
-  const efficiency = (heatExported / heatProvided) * 100; // %
-  const heatLoss = heatProvided - heatExported; // same energy units
+  // Reasonableness warnings for magnitudes
+  if (heatProvided > 1e9 || heatExported > 1e9) warnings.push("⚠️ Very large energy values — verify units (BTU/hr vs kW etc.).");
+  if (heatProvided < 1e-6) warnings.push("⚠️ Very small Heat Provided — check units.");
+  // Compute efficiency
+  const efficiency = (heatExported / heatProvided) * 100; // percentage
+  const heatLoss = heatProvided - heatExported;
   const heatLossPercent = (heatLoss / heatProvided) * 100;
 
-  // sanity warnings for unrealistic results
+  // Post computation sanity checks
   if (!Number.isFinite(efficiency)) {
-    showErrors(["⚠️ Computation produced invalid efficiency. Check inputs."]);
+    showErrors(["⚠️ Calculation produced invalid efficiency. Check inputs."]);
     return;
   }
-  if (efficiency > 120) warnings.push("⚠️ Efficiency > 120% — very likely unit mismatch or measurement error.");
-  if (efficiency < 5) warnings.push("⚠️ Extremely low efficiency (<5%) — check fuel measurements and energy accounting.");
 
-  // feedback categories (kept your original thresholds; tweak if you want)
+  if (efficiency > 120) warnings.push("⚠️ Efficiency > 120% — likely unit mismatch or measurement error.");
+  if (efficiency < 5) warnings.push("⚠️ Extremely low efficiency (<5%) — verify instrumentation and energy accounting.");
+
+  // Feedback categorization (industry-generic)
   let statusMsg = "";
   if (efficiency < 60) {
     statusMsg = "🔴 Poor efficiency (High energy loss).";
@@ -630,14 +633,12 @@ if (heatExported > heatProvided) {
     statusMsg = "✅ High efficiency (Good fuel utilization).";
   }
 
-  // Build details (show both absolute and percent loss)
+  // Build details HTML
   let details = `<div>Efficiency: <b>${efficiency.toFixed(2)}%</b></div>`;
   details += `<div>Heat loss: <b>${heatLoss.toFixed(3)}</b> (same units as inputs)</div>`;
-  details += `<div>Heat loss percentage: <b>${heatLossPercent.toFixed(2)}%</b></div>`;
+  details += `<div>Heat loss (%): <b>${heatLossPercent.toFixed(2)}%</b></div>`;
 
-  if (warnings.length) {
-    details += `<div style="margin-top:6px; color:#b35d00; font-size:0.95em;">Note: ${warnings.join(" | ")}</div>`;
-  }
+  if (warnings.length) details += `<div style="margin-top:6px; color:#b35d00;">Note: ${warnings.join(" | ")}</div>`;
 
   // Update UI
   if (rateEl) rateEl.textContent = efficiency.toFixed(2);
@@ -648,7 +649,7 @@ if (heatExported > heatProvided) {
   if (errorBox) errorBox.classList.add("hidden");
 }
 
-/* safe print */
+/* printReport - safe guard for print label */
 function printReport() {
   const el = document.getElementById('printDate');
   if (el) {
@@ -660,8 +661,64 @@ function printReport() {
 }
 </script>
 
+
 <script src="{% static 'js/print.js' %}"></script>
 
 </body>
 </html>
 {% endblock %}
+
+
+<!-- /*  
+========================================================
+📘 BOILER EFFICIENCY CALCULATOR FORMULA & VALIDATIONS
+========================================================
+
+🔹 Formula Used:
+   Efficiency (%) = ( Q_out / Q_in ) × 100
+   where,
+     Q_out = Heat Exported in Steam (BTU/hr or same units)
+     Q_in  = Heat Provided by Fuel (BTU/hr or same units)
+
+   Heat Loss = Q_in - Q_out  
+   Heat Loss (%) = ( Heat Loss / Q_in ) × 100  
+
+--------------------------------------------------------
+🔹 Input Validations:
+1. Required Checks:
+   - Heat Exported must be entered.
+   - Heat Provided must be entered.
+
+2. Numeric & Sign Checks:
+   - Heat Exported ≥ 0 (non-negative).
+   - Heat Provided > 0 (strictly positive, cannot be zero).
+   - Non-numeric entries → invalid.
+
+3. Division Safety:
+   - Guard against denominator ≈ 0 (Heat Provided very small).
+
+4. Logical Consistency:
+   - Heat Exported cannot exceed Heat Provided by large margin.
+     • If Q_out > Q_in × 1.05 → ❌ Invalid (units/measurement error).
+     • If Q_out > Q_in but within 5% → ⚠️ Warning (possible rounding error).
+
+5. Range / Sanity Checks:
+   - Very large values ( > 1e9 ) → ⚠️ Check units (BTU/hr vs kW etc.).
+   - Very small values ( < 1e-6 ) → ⚠️ Likely unit error.
+   - Efficiency > 120% → ⚠️ Likely measurement or unit mismatch.
+   - Efficiency < 5% → ⚠️ Extremely low, check instrumentation.
+
+--------------------------------------------------------
+🔹 Efficiency Assessment:
+   - Efficiency < 60%  → 🔴 Poor efficiency (High energy loss).
+   - 60% ≤ Efficiency ≤ 85% → ⚠️ Moderate efficiency (Needs optimization).
+   - Efficiency > 85%  → ✅ High efficiency (Good fuel utilization).
+
+--------------------------------------------------------
+🌍 Key Applications:
+   - Power Plants → Efficiency monitoring.
+   - Industrial Boilers → Reduce fuel cost, track performance.
+   - Energy Audits → Compliance with energy standards.
+
+========================================================
+*/ -->

@@ -370,6 +370,65 @@
         .hidden { 
             display: none; 
         }
+        @media (max-width: 420px) {
+    .result-card {
+        min-height: auto !important;
+        padding: 20px 15px !important;
+    }
+    
+    .rate-value {
+        font-size: 32px !important;
+    }
+    
+    .flow-indicator {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .flow-marker {
+        width: 100% !important;
+        margin-bottom: 5px;
+    }
+    
+    .current-flow {
+        position: static !important;
+        transform: none !important;
+        margin-top: 15px;
+        width: 100%;
+        text-align: center;
+    }
+    
+    .result-feedback {
+        padding: 12px !important;
+    }
+    
+    .feedback-title {
+        font-size: 14px;
+    }
+    
+    .feedback-content {
+        font-size: 13px;
+    }
+    
+    .print-btn {
+        padding: 10px 15px !important;
+        font-size: 14px !important;
+    }
+}
+
+/* Also add this for slightly larger screens */
+@media (max-width: 600px) and (min-width: 421px) {
+    .flow-marker {
+        font-size: 12px;
+        padding: 8px 5px;
+    }
+    
+    .current-flow {
+        bottom: -25px;
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+}
     </style>
 </head>
 <body>
@@ -492,7 +551,7 @@
                 </ul>
             </div>
              <div class="note-card">
-                <h3>🌍 Validations & Input Constraints</h3>
+                <h3>🌍 Input Constraints</h3>
                     <ul>
                      <li><strong>Specific Gravity must be positive:</strong> Ensures a valid fluid density comparison.</li>
                      <li><strong>Volume Flow must be greater than zero:</strong> Prevents invalid flow calculations.</li>
@@ -507,6 +566,18 @@
                     </li>
                    </ul>
             </div>
+            <div class="note-card">
+  <h3>🛡️ Input Validation Rules</h3>
+  <ul class="note-list">
+    <li><strong>Specific Gravity (G):</strong> 0.1 – 2.0 (dimensionless)</li>
+    <li><strong>Volume Flow (V̇):</strong> 0.01 – 1,000,000 U.S. gal/min</li>
+    <li><strong>Dynamic Viscosity (μ):</strong> 0.01 – 100,000 cP</li>
+    <li><strong>Discharge Area (A₀):</strong> 0.01 – 10,000 in²</li>
+    <li>⚠️ Unrealistic combinations (huge flow + tiny area) will be flagged.</li>
+    <li>⚠️ Constant <code>2800</code> is a **unit conversion factor**, NOT Euler’s “e”.</li>
+  </ul>
+</div>
+
              <div class="note-card">
                 <h3>📌 Conclusion</h3>
                     <p>This tool assists engineers and fluid mechanics specialists in determining the <strong>Reynolds Number (Re)</strong> for valve and piping systems. Proper analysis of the flow regime helps in optimizing system efficiency, selecting appropriate valves, and ensuring safe and reliable operation.</p>
@@ -524,97 +595,87 @@
         });
 
         function calculateReynoldsNumber() {
-            const specificGravity = document.getElementById('specificGravity').value.trim();
-            const volumeFlow = document.getElementById('volumeFlow').value.trim();
-            const viscosity = document.getElementById('viscosity').value.trim();
-            const dischargeArea = document.getElementById('dischargeArea').value.trim();
+    const G = parseFloat(document.getElementById('specificGravity').value.trim());
+    const V = parseFloat(document.getElementById('volumeFlow').value.trim());
+    const μ = parseFloat(document.getElementById('viscosity').value.trim());
+    const A = parseFloat(document.getElementById('dischargeArea').value.trim());
 
-            const errorBox = document.getElementById('resultError');
-            const errorMessage = document.getElementById('errorMessage');
-            const placeholder = document.getElementById('placeholder');
-            const resultValue = document.getElementById('resultValue');
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    let errors = [];
 
-            let errors = [];
-            
-            // Validate inputs
-            if (specificGravity === "") {
-                errors.push("👉 Please enter the specific gravity.");
-            } else if (parseFloat(specificGravity) <= 0) {
-                errors.push("👉 Specific gravity must be greater than 0.");
-            }
-            
-            if (volumeFlow === "") {
-                errors.push("👉 Please enter the volume flow.");
-            } else if (parseFloat(volumeFlow) <= 0) {
-                errors.push("👉 Volume flow must be greater than 0.");
-            }
-            
-            if (viscosity === "") {
-                errors.push("👉 Please enter the dynamic viscosity.");
-            } else if (parseFloat(viscosity) <= 0) {
-                errors.push("👉 Dynamic viscosity must be greater than 0.");
-            }
-            
-            if (dischargeArea === "") {
-                errors.push("👉 Please enter the discharge area.");
-            } else if (parseFloat(dischargeArea) <= 0) {
-                errors.push("👉 Discharge area must be greater than 0.");
-            }
+    // === INPUT VALIDATION ===
+    if (isNaN(G) || G <= 0) errors.push("👉 Specific Gravity must be > 0 (recommended 0.1–2.0).");
+    else if (G < 0.1 || G > 2.0) errors.push("👉 Specific Gravity outside realistic range (0.1–2.0).");
 
-            if (errors.length > 0) {
-                errorMessage.innerHTML = errors.join("<br>");
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
-            } else {
-                errorBox.classList.add("hidden");
-            }
+    if (isNaN(V) || V <= 0) errors.push("👉 Volume Flow must be > 0.");
+    else if (V > 1e6) errors.push("👉 Volume Flow too high (>1,000,000 gpm).");
 
-            // Calculate Reynolds Number
-            const G = parseFloat(specificGravity);
-            const V = parseFloat(volumeFlow);
-            const μ = parseFloat(viscosity);
-            const A = parseFloat(dischargeArea);
-            
-            const Re = (2800 * G * V) / (μ * Math.sqrt(A));
-            
-            document.getElementById('reValue').textContent = Re.toFixed(4);
+    if (isNaN(μ) || μ <= 0) errors.push("👉 Dynamic Viscosity must be > 0.");
+    else if (μ < 0.01) errors.push("👉 Viscosity too low (<0.01 cP).");
+    else if (μ > 100000) errors.push("👉 Viscosity too high (>100,000 cP).");
 
-            // Determine flow regime and set feedback
-            let flowType, feedback, indicatorPosition, indicatorColor;
-            
-            if (Re < 2000) {
-                flowType = "Laminar Flow";
-                feedback = "The flow is smooth and orderly with parallel layers. This is typical for highly viscous fluids or low flow rates.";
-                indicatorPosition = "15%";
-                indicatorColor = "#4caf50";
-            } else if (Re >= 2000 && Re <= 4000) {
-                flowType = "Transitional Flow";
-                feedback = "The flow is unstable and may fluctuate between laminar and turbulent characteristics. This region is often avoided in design.";
-                indicatorPosition = "50%";
-                indicatorColor = "#ff9800";
-            } else {
-                flowType = "Turbulent Flow";
-                feedback = "The flow is chaotic with mixing and eddies. This is common in high-velocity flows and less viscous fluids.";
-                indicatorPosition = "85%";
-                indicatorColor = "#f44336";
-            }
-            
-            // Update flow indicator
-            const indicator = document.getElementById('currentFlowIndicator');
-            indicator.textContent = flowType;
-            indicator.style.left = indicatorPosition;
-            indicator.style.backgroundColor = indicatorColor;
-            indicator.style.color = "white";
-            
-            // Update feedback
-            document.getElementById('feedbackContent').textContent = feedback;
+    if (isNaN(A) || A <= 0) errors.push("👉 Discharge Area must be > 0.");
+    else if (A < 0.01) errors.push("👉 Discharge Area too small (<0.01 in²).");
+    else if (A > 10000) errors.push("👉 Discharge Area too large (>10,000 in²).");
 
-            // Show results
-            placeholder.classList.add('hidden');
-            resultValue.classList.remove('hidden');
-        }
+    // Cross-field check
+    if (V > 100000 && A < 1) {
+        errors.push("👉 Unrealistic: very high flow with tiny discharge area. Recheck inputs.");
+    }
+
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // === CALCULATION ===
+    let Re = (2800 * G * V) / (μ * Math.sqrt(A));
+    if (Re > 1e9) Re = 1e9; // cap to avoid meaningless overflow
+
+    document.getElementById('reValue').textContent = Re.toFixed(2);
+
+    // === FLOW CLASSIFICATION ===
+    let flowType, feedback, indicatorPosition, indicatorColor;
+
+    if (Re < 2000) {
+        flowType = "Laminar Flow";
+        feedback = "Smooth and orderly flow, typical of viscous fluids or low flow rates.";
+        indicatorPosition = "15%";
+        indicatorColor = "#4caf50";
+    } else if (Re >= 2000 && Re <= 4000) {
+        flowType = "Transitional Flow";
+        feedback = "Unstable regime. API/ASME recommend designing away from this region.";
+        indicatorPosition = "50%";
+        indicatorColor = "#ff9800";
+    } else {
+        flowType = "Turbulent Flow";
+        feedback = "Chaotic, mixing flow. Common in relief valves, ensures discharge capacity.";
+        indicatorPosition = "85%";
+        indicatorColor = "#f44336";
+    }
+
+    // Update flow indicator
+    const indicator = document.getElementById('currentFlowIndicator');
+    indicator.textContent = flowType;
+    indicator.style.left = indicatorPosition;
+    indicator.style.backgroundColor = indicatorColor;
+    indicator.style.color = "white";
+
+    // Update feedback
+    document.getElementById('feedbackContent').textContent = feedback;
+
+    // Show results
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
 
         function printReport() {
             // Update date just before printing
@@ -630,3 +691,119 @@
 </body>
 </html>
 {% endblock %}
+
+{% comment %} 
+🔢 1. Formula (Imperial Units)
+
+From API RP 520 (Imperial adaptation):
+
+𝑅
+𝑒
+=
+2800
+⋅
+𝐺
+⋅
+𝑉
+𝜇
+⋅
+𝐴
+Re=
+μ⋅
+A
+	​
+
+2800⋅G⋅V
+	​
+
+
+Re → Reynolds Number (dimensionless)
+
+G → Specific Gravity (dimensionless, ≥ 0.1 typical fluids)
+
+V → Volumetric Flow Rate (U.S. gallons per minute)
+
+μ → Dynamic Viscosity (centipoise, cP)
+
+A → Discharge Area (square inches, in²)
+
+2800 → Conversion constant (unit correction factor; not Euler’s e).
+
+👉 Keep this formula in your code as a comment for engineers/auditors.
+
+🛠 2. Input Validation Rules (Based on QEHS & API RP 520 Practice)
+Specific Gravity (G)
+
+Min: 0.1 (light gases/fluids below this are rare in relief valve service)
+
+Max: 2.0 (dense fluids like heavy oils; >2 is unrealistic for pressure relief service)
+
+Decimals: up to 3
+
+Volume Flow (V̇, gal/min)
+
+Min: 0.01 gpm (to prevent divide-by-zero)
+
+Max: 1,000,000 gpm (upper bound for refinery/utility-scale flows; beyond this → unrealistic for relief valves)
+
+Decimals: up to 2
+
+Dynamic Viscosity (μ, cP)
+
+Min: 0.01 cP (lower bound, lighter than most gases)
+
+Max: 100,000 cP (very viscous materials like tar; API doesn’t recommend Reynolds-based analysis beyond this)
+
+Decimals: up to 2
+
+Discharge Area (A, in²)
+
+Min: 0.01 in² (tiny orifice)
+
+Max: 10,000 in² (very large vent; above this is structural, not valve sizing)
+
+Decimals: up to 3
+
+Cross-Field Dependencies
+
+Large V with tiny A → unrealistic (should trigger warning).
+
+Very high μ with high G and small A → calculation possible, but result interpretation must be flagged (“viscous regime – caution”).
+
+⚠️ 3. Edge Case Validations
+
+Zero/negative inputs → blocked.
+
+Extremely high Reynolds (>1e9) → cap at 1e9 to prevent meaningless results.
+
+μ > 10,000 cP → allow but warn: “Reynolds interpretation unreliable for highly viscous fluids.”
+
+Tiny discharge area (<0.05 in²) with huge flow → flag as “unrealistic sizing”.
+
+✅ 4. Output Validation Logic (Flow Regimes)
+
+Re < 2000 → Laminar (smooth, predictable).
+
+2000 ≤ Re ≤ 4000 → Transitional (unstable; avoid in design).
+
+Re > 4000 → Turbulent (expected in safety valve operation).
+
+From a compliance standpoint:
+
+These thresholds are industry standard (API/ASME).
+
+Safety audits require reporting not only the value but the classification.
+
+Transitional region is flagged because ASME/API recommend designing away from it. {% endcomment %}
+
+
+/*
+ FORMULA (API RP 520 - Imperial Units)
+ Re = (2800 * G * V) / (μ * sqrt(A))
+ where:
+   G = Specific Gravity (dimensionless, 0.1–2.0 typical)
+   V = Volumetric Flow (U.S. gal/min, 0.01–1,000,000)
+   μ = Dynamic Viscosity (cP, 0.01–100,000)
+   A = Discharge Area (in², 0.01–10,000)
+   2800 = Conversion constant (NOT Euler’s e)
+*/

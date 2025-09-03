@@ -1,0 +1,783 @@
+{% extends 'base.html' %}
+{% block title %}BS EN 4126 Valves - Minimum Orifice Area For Steam, Air And Dry Gas At Critical Flow Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BS EN 4126 Valves - Minimum Orifice Area Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        .btn-container {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    margin: 30px 0;
+}
+
+.back-btn {
+    background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+    color: #ffffff; /* White text */
+    border: 2px solid #1560bd; /* Highlight border */
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none; /* Remove underline for link */
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    background-color: #1560bd; /* Highlight on hover */
+    color: #ffffff;
+    border-color: #000040;
+    transform: scale(1.05); /* Subtle hover effect */
+}
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            {% comment %} max-width: 700px; {% endcomment %}
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            {% comment %} display: flex; {% endcomment %}
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            {% comment %} overflow-y: auto; {% endcomment %}
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+           
+        }
+        
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        .error {
+            color: #ff6b6b;
+            font-size: 14px;
+            margin-top: 5px;
+            
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        
+    </style>
+</head>
+<body>
+           <div class="btn-container">
+    <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+</div>
+   <div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+ 
+        <div class="calculator-header">
+            <h1>BS EN 4126 Valves - Minimum Orifice Area For Steam, Air And Dry Gas At Critical Flow Calculator</h1>
+            <p>Calculate the minimum orifice area for steam, air and dry gas at critical flow conditions</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="massFlowRate">Mass Flow Rate (ṁ) in kg/h</label>
+                        <input type="number" id="massFlowRate" class="form-input" min="0" step="any" placeholder="e.g., 5000">
+                        <div class="error" id="massError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="isentropicExponent">Function of Isentropic Exponent (C)</label>
+                        <input type="number" id="isentropicExponent" class="form-input" min="0" step="any" placeholder="e.g., 0.8">
+                        <div class="error" id="isentropicError"></div>
+                    </div>
+                </div>
+
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="coefficient">Coefficient of Discharge (Kdr)</label>
+                        <input type="number" id="coefficient" class="form-input" min="0" step="any" placeholder="e.g., 0.85">
+                        <div class="error" id="coefficientError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pressure">Relieving Pressure (P₀) in bar absolute</label>
+                        <input type="number" id="pressure" class="form-input" min="0" step="any" placeholder="e.g., 10">
+                        <div class="error" id="pressureError"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="specificVolume">Specific Volume (ν) in m³/kg</label>
+                    <input type="number" id="specificVolume" class="form-input" min="0" step="any" placeholder="e.g., 0.5">
+                    <div class="error" id="volumeError"></div>
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateArea()">Calculate Orifice Area</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <!-- Colorful gas/liquid droplet -->
+<img src="https://cdn-icons-png.flaticon.com/512/2917/2917995.png" alt="Colorful gas constant droplet" width="100">
+
+                    <p>This tool will calculate the <strong>Minimum Orifice Area</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Minimum Orifice Area</h2>
+                    </div>
+                    <div class='rate-display'>
+                    <div class="rate-value" id="areaValue">0.00</div>
+                    <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">mm²</div></div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    This calculator determines the <strong>minimum orifice area</strong> required for steam, air, or dry gas under <strong>critical flow conditions</strong> according to BS EN 4126 standards.
+                </p>
+            </div>
+            <div class="note-card">
+                <h3>❓ What is BS EN 4126?</h3>
+                <p>BS EN 4126 is a European standard that specifies requirements for safety relief valves used to protect pressurized systems by safely discharging excess gases or steam, preventing overpressure and ensuring system safety.</p>
+            </div>
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Mass Flow Rate (ṁ):</strong> The amount of gas passing through per hour.</li>
+                    <li><strong>Isentropic Exponent (C):</strong> A factor that represents gas properties.</li>
+                    <li><strong>Coefficient of Discharge (Kdr):</strong> A correction factor for real-world efficiency.</li>
+                    <li><strong>Relieving Pressure (P₀):</strong> The absolute pressure at which the gas is released.</li>
+                    <li><strong>Specific Volume (ν):</strong> The volume occupied by 1 kg of gas at given conditions.</li>
+                     <li><strong>Constant Value (0.2883):</strong> This is a derived factor used in gas flow calculations, particularly for critical flow conditions. It plays a key role in determining the minimum orifice area.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <ul class="note-list">
+                    <li><span class="good">Below 10 mm²</span> → Very small orifice, ensure proper valve selection</li>
+                    <li><span class="average">10 - 1000 mm²</span> → Standard orifice size range</li>
+                    <li><span class="bad">Above 1000 mm²</span> → Large orifice, verify input values</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>🔧 Real-life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Pressure Relief Valves:</strong> Ensuring safe discharge of excess pressure</li>
+                    <li><strong>Boiler Systems:</strong> Preventing overpressure in steam systems</li>
+                    <li><strong>Compressed Air Systems:</strong> Safety in industrial air management</li>
+                    <li><strong>Process Industries:</strong> Protecting equipment from overpressure scenarios</li>
+                </ul>
+            </div>
+            <div class="note-card">
+  <h3>✅ Input Validation Rules</h3>
+  <ul class="note-list">
+    <li><strong>Mass Flow Rate (ṁ):</strong> 1 – 10,000,000 kg/h</li>
+    <li><strong>Isentropic Exponent (C):</strong> 0.5 – 1.5 (dimensionless)</li>
+    <li><strong>Coefficient of Discharge (Kdr):</strong> 0.6 – 1.0</li>
+    <li><strong>Relieving Pressure (P₀):</strong> 1 – 400 bar abs</li>
+    <li><strong>Specific Volume (ν):</strong> 0.001 – 100 m³/kg</li>
+    <li>❌ Zero or negative values are invalid.</li>
+    <li>⚠️ Extreme combinations may indicate unit entry errors.</li>
+  </ul>
+</div>
+
+            <div class="note-card">
+                <h3>📝 Conclusion</h3>
+                 <p>This calculation ensures that gases can be safely discharged under high pressure, preventing <strong>explosions</strong> or system damage.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+       function calculateArea() {
+    const massFlowRate = parseFloat(document.getElementById('massFlowRate').value.trim());
+    const isentropicExponent = parseFloat(document.getElementById('isentropicExponent').value.trim());
+    const coefficient = parseFloat(document.getElementById('coefficient').value.trim());
+    const pressure = parseFloat(document.getElementById('pressure').value.trim());
+    const specificVolume = parseFloat(document.getElementById('specificVolume').value.trim());
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    // Clear previous errors
+    ["massError","isentropicError","coefficientError","pressureError","volumeError"].forEach(id=>{
+        document.getElementById(id).innerText = "";
+    });
+    let fieldErrors = false;
+
+    // Validation rules
+    if (isNaN(massFlowRate) || massFlowRate <= 0 || massFlowRate > 1e7) {
+        document.getElementById("massError").innerText = "Mass flow must be between 1 and 10,000,000 kg/h";
+        fieldErrors = true;
+    }
+    if (isNaN(isentropicExponent) || isentropicExponent < 0.5 || isentropicExponent > 1.5) {
+        document.getElementById("isentropicError").innerText = "C must be between 0.5 and 1.5";
+        fieldErrors = true;
+    }
+    if (isNaN(coefficient) || coefficient < 0.6 || coefficient > 1.0) {
+        document.getElementById("coefficientError").innerText = "Kdr must be between 0.6 and 1.0";
+        fieldErrors = true;
+    }
+    if (isNaN(pressure) || pressure < 1 || pressure > 400) {
+        document.getElementById("pressureError").innerText = "Pressure must be 1–400 bar abs";
+        fieldErrors = true;
+    }
+    if (isNaN(specificVolume) || specificVolume <= 0.001 || specificVolume > 100) {
+        document.getElementById("volumeError").innerText = "Specific volume must be 0.001–100 m³/kg";
+        fieldErrors = true;
+    }
+
+    if (fieldErrors) {
+        errorMessage.innerHTML = "Please correct the highlighted input values.";
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // Prevent division by zero
+    if (coefficient === 0 || isentropicExponent === 0 || pressure === 0 || specificVolume === 0) {
+        errorMessage.innerHTML = "Invalid input: Division by zero detected.";
+        errorBox.classList.remove("hidden");
+        return;
+    }
+
+    // Calculate orifice area
+    const area = massFlowRate / (0.2883 * isentropicExponent * coefficient * Math.sqrt(pressure / specificVolume));
+
+    document.getElementById('areaValue').textContent = area.toFixed(4);
+
+    // Feedback logic
+    let feedback = '';
+    if (area < 10) {
+        feedback = '⚠️ Very small orifice. Verify valve applicability.';
+    } else if (area > 1000) {
+        feedback = '🔍 Large orifice. Recheck input values (possible unit error).';
+    } else {
+        feedback = '✅ Orifice size within standard safety valve range.';
+    }
+    document.getElementById('feedbackContent').textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+
+</body>
+</html>
+{% endblock %}
+
+
+/*
+Formula Reference (BS EN 4126, critical flow):
+A = m / (0.2883 * C * Kdr * sqrt(P0 / v))
+
+Where:
+m = Mass Flow Rate [kg/h] (valid range: 1 – 1e7)
+C = Isentropic Exponent function [0.5 – 1.5]
+Kdr = Coefficient of Discharge [0.6 – 1.0]
+P0 = Relieving Pressure [bar abs] (1 – 400)
+v = Specific Volume [m³/kg] (0.001 – 100)
+
+Validations:
+- All values must be > 0
+- C, Kdr, P0, v must fall within industry ranges
+- Prevents division by zero and unrealistic orifice sizes
+*/
+
+
+{% comment %} 
+1. Formula (for code comments)
+
+The minimum orifice area 
+𝐴
+A according to BS EN 4126 for steam, air, and dry gas at critical flow is:
+
+𝐴
+=
+𝑚
+˙
+0.2883
+×
+𝐶
+×
+𝐾
+𝑑
+𝑟
+×
+𝑃
+0
+𝑣
+A=
+0.2883×C×K
+dr
+	​
+
+×
+v
+P
+0
+	​
+
+	​
+
+	​
+
+m
+˙
+	​
+
+
+Where:
+
+𝑚
+˙
+m
+˙
+ = Mass Flow Rate [kg/h]
+
+𝐶
+C = Function of Isentropic Exponent [dimensionless]
+
+𝐾
+𝑑
+𝑟
+K
+dr
+	​
+
+ = Coefficient of Discharge [dimensionless]
+
+𝑃
+0
+P
+0
+	​
+
+ = Relieving Pressure [bar abs]
+
+𝑣
+v = Specific Volume [m³/kg]
+
+Constant 
+0.2883
+0.2883 = Derived factor from BS EN 4126 for critical flow
+
+2. Input Validation Rules (real-world compliance ranges)
+Mass Flow Rate (ṁ, kg/h)
+
+Allowed: 
+1
+≤
+𝑚
+˙
+≤
+10
+7
+1≤
+m
+˙
+≤10
+7
+
+Decimals: Up to 2 acceptable (kg/h is usually rounded).
+
+Validation: Must be > 0, unrealistic flows flagged.
+
+Isentropic Exponent (C)
+
+Range: 0.5 – 1.5 (for gases, typical ~0.8–1.4).
+
+Decimals: Up to 3.
+
+Validation: Out-of-range → likely user input error.
+
+Coefficient of Discharge (Kdr)
+
+Range: 0.6 – 1.0 (per ISO/BS EN).
+
+Decimals: Up to 3.
+
+Validation: Below 0.6 or above 1.0 → invalid.
+
+Relieving Pressure (P₀, bar absolute)
+
+Range: 1 – 400 bar abs (covers most industrial boilers/compressors).
+
+Decimals: Up to 2.
+
+Validation: Must be ≥ 1 (cannot be 0 or vacuum unless using special relief design).
+
+Specific Volume (ν, m³/kg)
+
+Range: 0.001 – 100.0 (covers steam, air, light gases).
+
+Decimals: Up to 4.
+
+Validation: Must be > 0, large ν values suggest wrong units (check).
+
+3. Edge Case Validations
+
+Division by zero → If any denominator term = 0 → throw error.
+
+Negative or zero mass flow rate → reject.
+
+Unrealistic pairs (e.g., pressure 1 bar + ν = 100 m³/kg + flow = 10⁶ kg/h → enormous unrealistic area).
+
+Cross-field dependency: if P₀ < 1 bar abs → invalid (no vacuum relief in this model).
+
+4. Output Validation
+
+Interpret results for auditing/reporting:
+
+A < 10 mm² → ⚠️ Orifice too small, check calculation and valve type.
+
+10 ≤ A ≤ 1000 mm² → ✅ Standard valve range, acceptable.
+
+A > 1000 mm² → 🔍 Very large orifice, recheck inputs (may indicate wrong units or unrealistic process conditions). {% endcomment %}

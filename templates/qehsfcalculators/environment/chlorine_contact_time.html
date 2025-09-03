@@ -1,0 +1,786 @@
+{% extends 'base.html' %}
+{% block title %}Chlorine Contact Time Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chlorine Contact Time Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 38px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+    
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+
+    <div class="calculator-header">
+        <h1>Chlorine Contact Time Calculator</h1>
+        <p>Compute effective contact time and the disinfection credit (C × T). Primary units: <strong>minutes</strong> for time and <strong>mg·min/L</strong> for C×T.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Calculator -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+
+            <div class="form-group">
+                <label for="tdt">Theoretical Detention Time (TDT) [min]</label>
+                <input type="number" id="tdt" class="form-input" min="0.01" step="any" placeholder="e.g., 30" aria-label="Theoretical Detention Time in minutes">
+            </div>
+
+            <div class="form-group">
+                <label for="bf">Baffling Factor (BF)</label>
+                <input type="number" id="bf" class="form-input" min="0.01" max="1" step="any" placeholder="e.g., 0.7" aria-label="Baffling Factor (0 to 1)">
+            </div>
+
+            <div class="form-group">
+                <label for="concentration">Residual Disinfectant Concentration (C) [mg/L]</label>
+                <input type="number" id="concentration" class="form-input" min="0.001" step="any" placeholder="e.g., 1.5" aria-label="Residual disinfectant concentration in mg per liter">
+            </div>
+
+            <button class="calculate-btn" onclick="calculateContactTime()">Calculate Contact Time</button>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Chlorine contact time illustration">
+                <p>Enter TDT, baffling factor and residual chlorine to compute effective contact time and C×T (disinfection credit).</p>
+            </div>
+
+            <div class="result-error hidden" id="resultError" role="alert" aria-live="assertive">
+                <div class="error-icon">❌</div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+
+            <div class="result-value hidden" id="resultValue" aria-live="polite">
+                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:8px; color:#1560bd;">
+                    <h2>Contact Time Result</h2>
+                </div>
+
+                <div class="rate-display" style="flex-direction:column; gap:8px; align-items:center;">
+                    <div style="display:flex; gap:12px; align-items:baseline;">
+                        <div style="font-size:26px; font-weight:700;" id="contactTimeValue">0.00</div>
+                        <div style="color:#2980b9; font-size:16px; font-weight:bold;">min (Effective Contact Time)</div>
+                    </div>
+
+                    <div style="margin-top:6px; font-size:16px;">
+                        <strong>C × T:</strong> <span id="ctValue">0.00</span> <span style="color:#2980b9;">mg·min/L</span>
+                    </div>
+
+                    <div id="regulatoryNote" style="margin-top:6px; font-size:14px;"></div>
+                </div>
+
+                <div class="result-feedback" style="margin-top:12px; width:100%;">
+                    <div class="feedback-title">Assessment & Notes</div>
+                    <div class="feedback-content" id="feedbackContent"></div>
+                </div>
+
+                <div class="btn-wrapper" style="margin-top:12px;">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="note-section">
+        <div class="note-card">
+            <h3>📘 About</h3>
+            <p>
+                This tool computes the effective contact time available for disinfection and the disinfectant exposure (C × T).
+                Use it to quickly evaluate if a chlorine contact chamber (drinking water or effluent) meets disinfection targets.
+            </p>
+        </div>
+
+        <div class="note-card">
+            <h3>✅ Input Validations</h3>
+            <ul class="note-list">
+                <li><strong>Theoretical Detention Time (TDT):</strong> Must be > 0.01 min. Typical design range: 1–1440 min (1 minute to 24 hours). Values outside this trigger warnings.</li>
+                <li><strong>Baffling Factor (BF):</strong> Must be > 0 and ≤ 1. Typical operational range: 0.3–0.9. Values <0.15 or >0.95 are flagged as unrealistic.</li>
+                <li><strong>Residual Chlorine (C):</strong> Must be > 0 mg/L. Typical range: 0.2–2.0 mg/L for drinking water. Values <0.1 mg/L (too low) or >10 mg/L (too high) raise alerts.</li>
+                <li><strong>Numeric Validity:</strong> Inputs must be finite numbers; non-numeric, empty, or negative values are rejected.</li>
+                <li><strong>Cross-check:</strong> C × T must be realistic (0.01–5000 mg·min/L). Extreme outliers are flagged for unit errors or data entry mistakes.</li>
+            </ul>
+        </div>
+
+
+        <div class="note-card">
+            <h3>🌍 Key Applications</h3>
+            <ul class="note-list">
+                <li><strong>Drinking Water Treatment:</strong> Verify contact chamber performance to meet public-health disinfection targets.</li>
+                <li><strong>Wastewater Disinfection:</strong> Check effluent disinfection exposure to protect receiving waters.</li>
+                <li><strong>Emergency / Field Water Treatment:</strong> Rapid checks for operational decisions in temporary systems.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Hidden fallback print date if print header doesn't include it -->
+    <span id="printDate" style="display:none;"></span>
+</div>
+
+<script>
+/* Unified error display */
+function showErrors(errors) {
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+
+  if (errorMessage) errorMessage.innerHTML = errors.join("<br>");
+  if (errorBox) errorBox.classList.remove("hidden");
+  if (placeholder) placeholder.classList.add("hidden");
+  if (resultValue) resultValue.classList.add("hidden");
+}
+
+function sanitizeNumberInput(raw, fieldLabel, warnings) {
+  if (raw == null) return "";
+  let s = String(raw).trim();
+
+  // reject thousands separators; normalize single decimal comma
+  if (s.includes(",")) {
+    if (s.match(/^\d+,\d+$/)) {
+      s = s.replace(",", "."); // single decimal comma -> dot
+      warnings.push(`ℹ️ ${fieldLabel}: decimal comma normalized to dot.`);
+    } else {
+      // if it looks like thousands separators, block later on parse
+      // let it fall through; parseFloat will stop early — we catch non-finite
+    }
+  }
+
+  // Disallow internal spaces
+  if (/\s/.test(s)) {
+    return s.replace(/\s+/g, ""); // trim internal spaces (best effort)
+  }
+  return s;
+}
+
+/* Main Chlorine Contact Time calculation with reinforced validations */
+function calculateContactTime() {
+  const errorBox = document.getElementById("resultError");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+  const contactTimeEl = document.getElementById("contactTimeValue");
+  const ctEl = document.getElementById("ctValue");
+  const feedbackEl = document.getElementById("feedbackContent");
+
+  // reset UI
+  if (errorBox) errorBox.classList.add("hidden");
+  if (feedbackEl) feedbackEl.innerHTML = "";
+  if (contactTimeEl) contactTimeEl.textContent = "0.00";
+  if (ctEl) ctEl.textContent = "0.00";
+
+  const errors = [];
+  const warnings = [];
+
+  // safe reads & sanitation
+  const tdtRaw0 = document.getElementById("tdt")?.value ?? "";
+  const bfRaw0  = document.getElementById("bf")?.value ?? "";
+  const cRaw0   = document.getElementById("concentration")?.value ?? "";
+
+  const tdtRaw = sanitizeNumberInput(tdtRaw0, "TDT", warnings);
+  const bfRaw  = sanitizeNumberInput(bfRaw0, "BF", warnings);
+  const cRaw   = sanitizeNumberInput(cRaw0, "Residual C", warnings);
+
+  // required checks
+  if (tdtRaw === "") errors.push("👉 Enter Theoretical Detention Time (TDT) in minutes.");
+  if (bfRaw === "")  errors.push("👉 Enter Baffling Factor (BF).");
+  if (cRaw === "")   errors.push("👉 Enter Residual Disinfectant Concentration (C) in mg/L.");
+  if (errors.length) { showErrors(errors); return; }
+
+  // parse (allow scientific notation)
+  const TDT = Number(tdtRaw);
+  const BF  = Number(bfRaw);
+  const C   = Number(cRaw);
+
+  // numeric/finite checks
+  if (!Number.isFinite(TDT)) errors.push("👉 TDT must be a finite numeric value (minutes).");
+  if (!Number.isFinite(BF))  errors.push("👉 BF must be a finite numeric value (0–1).");
+  if (!Number.isFinite(C))   errors.push("👉 Residual C must be a finite numeric value (mg/L).");
+  if (errors.length) { showErrors(errors); return; }
+
+  // magnitude sanity (overflow / absurd input guard)
+  if (Math.abs(TDT) > 1e9 || Math.abs(BF) > 1e6 || Math.abs(C) > 1e9) {
+    showErrors(["❌ Inputs are excessively large — likely unit or paste error."]);
+    return;
+  }
+
+  // sign & range (blocking)
+  if (!(TDT > 0)) errors.push("👉 TDT must be > 0 minutes.");
+  if (!(BF > 0 && BF <= 1)) errors.push("👉 BF must be between 0 (exclusive) and 1 (inclusive).");
+  if (!(C > 0)) errors.push("👉 Residual C must be > 0 mg/L.");
+  if (errors.length) { showErrors(errors); return; }
+
+  // plausibility warnings (non-blocking)
+  if (TDT < 1) warnings.push("⚠️ TDT < 1 min — very short; confirm hydraulics vs. target organism.");
+  if (TDT > 1440) warnings.push("⚠️ TDT > 24 h — check units (min vs hr) and design basis.");
+
+  if (BF < 0.15) warnings.push("⚠️ BF < 0.15 — poor baffling; expect short-circuiting.");
+  if (BF > 0.95) warnings.push("⚠️ BF > 0.95 — near plug flow; verify via testing/CFD.");
+
+  if (C < 0.10) warnings.push("⚠️ Residual C < 0.10 mg/L — may be insufficient for common CT targets.");
+  if (C > 4) warnings.push("⚠️ Residual C > 4 mg/L — high for distribution; confirm process intent and regulations.");
+  if (C > 10) warnings.push("⚠️ Residual C > 10 mg/L — very high; check mg/L vs g/L and ensure safe handling (PPE/SDS).");
+
+  // compute
+  const T = TDT * BF;          // minutes
+  const CT = C * T;            // mg·min/L
+
+  if (!Number.isFinite(T) || !Number.isFinite(CT)) {
+    showErrors(["⚠️ Computation produced invalid numbers. Check inputs."]);
+    return;
+  }
+  if (Math.abs(T) > 1e12 || Math.abs(CT) > 1e12) {
+    showErrors(["❌ Result overflow — verify units (likely error)."]);
+    return;
+  }
+
+  // CT extreme sanity
+  if (CT < 1) warnings.push("⚠️ Very low CT (< 1 mg·min/L) — unlikely to meet pathogen log-inactivation targets.");
+  if (CT < 0.01) warnings.push("⚠️ Extremely low CT (< 0.01) — unit mismatch likely.");
+  if (CT > 5000) warnings.push("⚠️ Very high CT (> 5,000 mg·min/L) — verify units (mg/L vs g/L).");
+
+  // Regulatory-style interpretation (illustrative bands; confirm with official CT tables)
+  let regMessage = "";
+  let regColor = "black";
+  if (CT >= 45) {
+    regMessage = "✅ Typically compliant for common Giardia targets at moderate temp/pH — verify against official CT tables.";
+    regColor = "green";
+  } else if (CT >= 30) {
+    regMessage = "⚠️ Marginal/intermediate — may meet some inactivation targets; confirm with CT tables (temp/pH/log target).";
+    regColor = "orange";
+  } else {
+    regMessage = "❌ Likely non-compliant for Giardia-level targets — increase TDT, improve baffling, and/or increase residual C.";
+    regColor = "red";
+  }
+
+  // Build feedback (echo normalized inputs)
+  let details = `<div style="font-weight:600; color:${regColor};">${regMessage}</div>`;
+  details += `<div style="margin-top:8px;">Effective Contact Time (T): <b>${T.toFixed(2)}</b> min</div>`;
+  details += `<div>C × T (disinfection credit): <b>${CT.toFixed(2)}</b> mg·min/L</div>`;
+  details += `<div style="margin-top:8px;">Inputs — TDT: <b>${TDT.toFixed(3)}</b> min, BF: <b>${BF.toFixed(3)}</b>, C: <b>${C.toFixed(3)}</b> mg/L</div>`;
+  details += `<div style="margin-top:8px; font-size:0.95rem;">Note: Compliance requires organism-specific CT tables (temperature and pH dependent).</div>`;
+  if (warnings.length) details += `<div style="margin-top:8px; color:#b35d00;">Warnings: ${warnings.join(" | ")}</div>`;
+
+  // update UI
+  document.getElementById("contactTimeValue").textContent = T.toFixed(2);
+  document.getElementById("ctValue").textContent = CT.toFixed(2);
+  document.getElementById("feedbackContent").innerHTML = details;
+
+  // toggle UI
+  document.getElementById("placeholder").classList.add("hidden");
+  document.getElementById("resultValue").classList.remove("hidden");
+  if (errorBox) errorBox.classList.add("hidden");
+}
+
+/* safe print guard */
+function printReport() {
+  let el = document.getElementById('printDate');
+  if (!el) {
+    el = document.createElement('span');
+    el.id = 'printDate';
+    el.style.display = 'none';
+    document.body.appendChild(el);
+  }
+  const now = new Date();
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  el.textContent = now.toLocaleDateString('en-US', options);
+  window.print();
+}
+</script>
+
+
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+<!--
+📘 Chlorine Contact Time Calculator — Formula & Validations
+
+Formulas:
+---------
+1. Effective Contact Time (T):
+   T = TDT × BF
+   where:
+     - TDT = Theoretical Detention Time (minutes)
+     - BF  = Baffling Factor (0–1)
+
+2. CT Value (Disinfection Credit):
+   CT = C × T
+   where:
+     - C = Residual Disinfectant Concentration (mg/L)
+     - T = Effective Contact Time (minutes)
+
+   Units: CT in mg·min/L
+
+-------------------------------------------------------
+
+✅ Input Validations:
+---------------------
+- TDT:
+  • Required, must be numeric and finite
+  • Must be > 0
+  • Magnitude sanity: < 1e9
+  • Warnings:
+    – TDT < 1 min → very short
+    – TDT > 1440 min → unusually long (check hr vs min)
+
+- BF (Baffling Factor):
+  • Required, must be numeric and finite
+  • Range: 0 < BF ≤ 1
+  • Magnitude sanity: < 1e6
+  • Warnings:
+    – BF < 0.15 → poor baffling
+    – BF > 0.95 → near plug flow
+
+- C (Residual Chlorine):
+  • Required, must be numeric and finite
+  • Must be > 0
+  • Magnitude sanity: < 1e9
+  • Warnings:
+    – C < 0.10 mg/L → very low
+    – C > 4 mg/L → high for distribution
+    – C > 10 mg/L → extremely high (check mg/L vs g/L)
+
+-------------------------------------------------------
+
+✅ Output Validations:
+----------------------
+- T (Effective Contact Time):
+  • Must be finite and > 0
+  • Sanity guard: |T| < 1e12
+
+- CT (mg·min/L):
+  • Must be finite and > 0
+  • Sanity guard: |CT| < 1e12
+  • Warnings:
+    – CT < 1 → likely non-compliant
+    – CT < 0.01 → unit mismatch suspected
+    – CT > 5000 → extremely high, check units
+
+-------------------------------------------------------
+
+ℹ️ Regulatory-style Interpretation (Illustrative):
+--------------------------------------------------
+- CT ≥ 45 → ✅ Typically compliant (Giardia, moderate temp/pH)
+- 30 ≤ CT < 45 → ⚠️ Marginal/intermediate, confirm with CT tables
+- CT < 30 → ❌ Likely non-compliant, adjust TDT, BF, or C
+-->
+

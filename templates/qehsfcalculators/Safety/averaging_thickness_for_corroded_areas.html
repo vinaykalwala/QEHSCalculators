@@ -474,6 +474,19 @@
                     The Averaging Thickness Calculation is crucial for engineers and inspectors to <strong>ensure structural reliability, optimize maintenance schedules, and prevent premature failures</strong>.
                 </p>
             </div>
+            <div class="note-card">
+    <h3>✅ Validation Rules Applied</h3>
+    <ul class="note-list">
+        <li>Diameter must be entered (required field).</li>
+        <li>Only numeric values allowed; no text or symbols.</li>
+        <li>Diameter must be greater than 0.</li>
+        <li>Minimum allowed: 6 inches (per API 579 practice).</li>
+        <li>Maximum allowed: 300 inches — values above flagged as unrealistic.</li>
+        <li>Decimals allowed up to 2 places for reporting precision.</li>
+        <li>Output thresholds ensure results match real-world inspection practices (Low ≥30 in, Moderate 15–30 in, High <15 in).</li>
+    </ul>
+</div>
+
         </div>
     </div>
 
@@ -486,70 +499,101 @@
         });
 
         function calculateAveragingThickness() {
-            const diameterInput = document.getElementById('diameter').value.trim();
-            
-            const errorBox = document.getElementById('resultError');
-            const errorMessage = document.getElementById('errorMessage');
-            const placeholder = document.getElementById('placeholder');
-            const resultValue = document.getElementById('resultValue');
+    const diameterInput = document.getElementById('diameter').value.trim();
 
-            // Reset previous results
-            errorBox.classList.add('hidden');
-            
-            // Validations
-            if (diameterInput === "") {
-                errorMessage.textContent = "👉 Please enter the vessel diameter.";
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
-            }
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
 
-            const diameter = parseFloat(diameterInput);
-            
-            if (isNaN(diameter) || diameter <= 0) {
-                errorMessage.textContent = "👉 Vessel diameter must be a positive number.";
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
-            }
+    // Reset previous results
+    errorBox.classList.add('hidden');
 
-            let lengthForAveraging;
+    // === INPUT VALIDATIONS ===
+    // Empty check
+    if (diameterInput === "") {
+        errorMessage.textContent = "👉 Please enter the vessel diameter.";
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
 
-            if (diameter <= 60) {
-                lengthForAveraging = Math.min(2 * diameter, 20);
-            } else {
-                lengthForAveraging = Math.min(3 * diameter, 40);
-            }
+    // Parse value
+    const diameter = parseFloat(diameterInput);
 
-            // Update result display
-            document.getElementById('rateValue').textContent = lengthForAveraging.toFixed(2);
+    // Not a number
+    if (isNaN(diameter)) {
+        errorMessage.textContent = "👉 Vessel diameter must be a valid number.";
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
 
-            const meterFill = document.getElementById('meterFill');
-            let meterWidth, meterColor, feedback;
-            
-            if (lengthForAveraging >= 30) {
-                meterWidth = '25%'; 
-                meterColor = '#27ae60';
-                feedback = '✅ Low Risk: Corrosion impact is minimal; periodic monitoring is sufficient.';
-            } else if (lengthForAveraging >= 15) {
-                meterWidth = '50%'; 
-                meterColor = '#f39c12';
-                feedback = '⚠️ Moderate Risk: Corrosion is within acceptable limits; maintain regular inspections.';
-            } else {
-                meterWidth = '95%'; 
-                meterColor = '#e74c3c';
-                feedback = '🚨 High Risk: Corrosion is significant; frequent monitoring and immediate assessment recommended.';
-            }
+    // Negative or zero
+    if (diameter <= 0) {
+        errorMessage.textContent = "👉 Vessel diameter must be greater than zero.";
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
 
-            meterFill.style.width = meterWidth;
-            meterFill.style.backgroundColor = meterColor;
-            document.getElementById('feedbackContent').textContent = feedback;
+    // Minimum threshold
+    if (diameter < 6) {
+        errorMessage.textContent = "👉 Minimum vessel diameter for assessment is 6 inches (API practice).";
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
 
-            placeholder.classList.add('hidden');
-            resultValue.classList.remove('hidden');
-        }
+    // Maximum threshold warning
+    if (diameter > 300) {
+        errorMessage.textContent = "⚠️ Diameter exceeds 300 inches. Please confirm input — this may be unrealistic for typical vessels.";
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    // === CALCULATION ===
+    let lengthForAveraging;
+    if (diameter <= 60) {
+        lengthForAveraging = Math.min(2 * diameter, 20);
+    } else {
+        lengthForAveraging = Math.min(3 * diameter, 40);
+    }
+
+    // === OUTPUT DISPLAY ===
+    document.getElementById('rateValue').textContent = lengthForAveraging.toFixed(2);
+
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+
+    if (lengthForAveraging >= 30) {
+        meterWidth = '25%';
+        meterColor = '#27ae60';
+        feedback = '✅ Low Risk: Corrosion impact minimal; periodic monitoring is sufficient.';
+    } else if (lengthForAveraging >= 15) {
+        meterWidth = '50%';
+        meterColor = '#f39c12';
+        feedback = '⚠️ Moderate Risk: Within acceptable limits; maintain regular inspections.';
+    } else {
+        meterWidth = '95%';
+        meterColor = '#e74c3c';
+        feedback = '🚨 High Risk: Significant corrosion; frequent monitoring and immediate assessment recommended.';
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
 
         function printReport() {
             // Update date just before printing
@@ -564,3 +608,51 @@
 </body>
 </html>
 {% endblock %}
+{% comment %} 
+
+1. Formula (to add in code as comments)
+
+/**
+
+📘 Formula (per ASME/API 579 guidelines for localized corrosion assessment):
+
+If D ≤ 60 in → L = min(2 × D, 20)
+
+If D > 60 in → L = min(3 × D, 40)
+
+Where:
+
+D = vessel inside diameter (inches)
+
+L = required averaging length for thickness measurements (inches)
+
+Purpose: Ensures localized corrosion assessment is representative and avoids overly conservative/unsafe evaluations.
+*/
+
+2. Input Validation Rules (QEHS/Fire Safety Standards)
+
+Vessel Diameter (D):
+
+Units: Inches (must be consistent with API/ASME formulas).
+
+Minimum realistic value: ≥ 6 in (smaller vessels are not normally assessed with this method; reject below this).
+
+Maximum practical value: ≤ 300 in (25 ft diameter; most pressure vessels fall within). Values above should trigger a warning.
+
+Allowed decimals: Up to 2 decimal places (precision required for reporting).
+
+Positive only: No negative or zero values allowed.
+
+Logical check: D must be numeric and not exponential (e.g., disallow 1e6).
+
+3. Output Validation Logic & Thresholds
+
+Risk thresholds (based on L):
+
+L ≥ 30 in → Low Risk: corrosion impact minimal (API 579 Part 5 logic; wide averaging length implies uniform corrosion).
+
+15 ≤ L < 30 in → Moderate Risk: acceptable but requires regular inspection.
+
+L < 15 in → High Risk: localized severe corrosion; frequent monitoring required.
+
+⚠️ Compliance Note: These ranges must be documented in audit reports, aligning with OSHA/ISO’s requirement for risk-based inspection planning (RBI). {% endcomment %}

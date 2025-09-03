@@ -444,16 +444,18 @@
                     <li><strong>Regulatory Compliance:</strong> Ensures adherence to BS 6759 safety standards</li>
                 </ul>
             </div>
-             <div class="note-card">
-                <h3>🌍 Validations & Input Constraints</h3>
-                   <ul>
-                      <li><strong>Volumetric Flow Rate (V̇) must be positive:</strong> The discharged airflow must be a valid positive number.</li>
-                      <li><strong>Pressure (Pᵣ) must be greater than zero:</strong> Absolute relieving pressure must be a positive value.</li>
-                      <li><strong>Coefficient of Discharge (K<sub>dr</sub>) must be valid:</strong> Must be within the acceptable range (0-1).</li>
-                      <li><strong>Temperature (T) must be in Kelvin:</strong> Temperature must be a positive Kelvin value (above absolute zero).</li>
-                      <li><strong>Check for extreme Orifice Area values:</strong> Very small or large areas may indicate incorrect input values or improper valve selection.</li>
-                   </ul>
-            </div>
+             
+            <div class="note-card">
+    <h3>🛠️ Input Validation Rules</h3>
+    <ul class="note-list">
+        <li><strong>Volumetric Flow Rate (V̇):</strong> Must be > 0 l/s. Warning if > 100,000 l/s.</li>
+        <li><strong>Pressure (Pᵣ):</strong> Must be > 1 bar a. Warning if > 400 bar a.</li>
+        <li><strong>Kdr:</strong> Must be between 0.01 and 1.00 (default 0.85).</li>
+        <li><strong>Temperature (T):</strong> Must be ≥ 200 K and ≤ 2000 K.</li>
+        <li><strong>Cross-Checks:</strong> Unrealistic area sizes (<1 mm² or >10,000 mm²) trigger warnings.</li>
+    </ul>
+</div>
+
              <div class="note-card">
                 <h3>📌 BS 6759</h3>
                  <p><strong>BS 6759</strong> is a British Standard that specifies requirements for the performance, design, and testing of safety valves used in pressurized systems. It ensures that safety valves operate reliably to prevent overpressure in boilers, pipelines, and industrial equipment.</p>
@@ -476,82 +478,98 @@
         });
 
         function calculateOrificeArea() {
-            const volumetricFlow = document.getElementById('volumetricFlow').value.trim();
-            const pressure = document.getElementById('pressure').value.trim();
-            const kdr = document.getElementById('kdr').value.trim();
-            const temperature = document.getElementById('temperature').value.trim();
+    const volumetricFlow = document.getElementById('volumetricFlow').value.trim();
+    const pressure = document.getElementById('pressure').value.trim();
+    const kdr = document.getElementById('kdr').value.trim();
+    const temperature = document.getElementById('temperature').value.trim();
 
-            const errorBox = document.getElementById('resultError');
-            const errorMessage = document.getElementById('errorMessage');
-            const placeholder = document.getElementById('placeholder');
-            const resultValue = document.getElementById('resultValue');
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
 
-            let errors = [];
-            
-            // Validations
-            if (volumetricFlow === "") {
-                errors.push("👉 Please enter the volumetric flow rate.");
-            } else if (parseFloat(volumetricFlow) <= 0) {
-                errors.push("👉 Volumetric flow rate must be greater than 0.");
-            }
-            
-            if (pressure === "") {
-                errors.push("👉 Please enter the absolute relieving pressure.");
-            } else if (parseFloat(pressure) <= 0) {
-                errors.push("👉 Absolute relieving pressure must be greater than 0.");
-            }
-            
-            if (kdr === "") {
-                errors.push("👉 Please enter the derated coefficient of discharge.");
-            } else if (parseFloat(kdr) <= 0 || parseFloat(kdr) > 1) {
-                errors.push("👉 Derated coefficient of discharge must be between 0 and 1.");
-            }
-            
-            if (temperature === "") {
-                errors.push("👉 Please enter the inlet temperature.");
-            } else if (parseFloat(temperature) <= 0) {
-                errors.push("👉 Inlet temperature must be greater than 0 Kelvin.");
-            }
+    let errors = [];
 
-            if (errors.length > 0) {
-                errorMessage.innerHTML = errors.join("<br>");
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
-            } else {
-                errorBox.classList.add("hidden");
-            }
+    // Convert inputs
+    const V = parseFloat(volumetricFlow);
+    const P = parseFloat(pressure);
+    const K = parseFloat(kdr);
+    const T = parseFloat(temperature);
 
-            // Calculate orifice area
-            const V = parseFloat(volumetricFlow);
-            const P = parseFloat(pressure);
-            const K = parseFloat(kdr);
-            const T = parseFloat(temperature);
-            
-            const orificeArea = (V / (0.193 * P * K)) * Math.sqrt(T / 288);
-            document.getElementById('rateValue').textContent = orificeArea.toFixed(4);
+    // === Validations ===
+    // Volumetric Flow
+    if (isNaN(V) || V <= 0) {
+        errors.push("👉 Volumetric Flow Rate must be greater than 0 l/s.");
+    } else if (V > 100000) {
+        errors.push("👉 Flow rate exceeds realistic limits (>100,000 l/s). Check units.");
+    }
 
-            // Determine feedback
-            let feedback, feedbackColor;
-            
-            if (orificeArea < 50) {
-                feedback = '⚠️ <strong>Small Orifice Area:</strong> Ensure this is sufficient for air discharge.';
-                feedbackColor = '#3498db';
-            } else if (orificeArea >= 50 && orificeArea <= 2000) {
-                feedback = '✅ <strong>Optimal Orifice Area:</strong> This is within a typical range for safety valves.';
-                feedbackColor = '#27ae60';
-            } else {
-                feedback = '❌ <strong>Large Orifice Area:</strong> Ensure this matches the system design requirements.';
-                feedbackColor = '#e74c3c';
-            }
+    // Pressure
+    if (isNaN(P) || P <= 0) {
+        errors.push("👉 Absolute Relieving Pressure must be greater than 0 bar a.");
+    } else if (P < 1) {
+        errors.push("👉 Pressure cannot be less than 1 bar absolute (vacuum).");
+    } else if (P > 400) {
+        errors.push("👉 Pressure above 400 bar a is outside BS 6759 scope. Check units.");
+    }
 
-            document.getElementById('feedbackContent').innerHTML = feedback;
-            document.getElementById('feedbackContent').style.color = feedbackColor;
+    // Coefficient of Discharge
+    if (isNaN(K) || K <= 0 || K > 1) {
+        errors.push("👉 Derated Coefficient of Discharge (Kdr) must be between 0.01 and 1.00.");
+    }
 
-            placeholder.classList.add('hidden');
-            resultValue.classList.remove('hidden');
-        }
+    // Temperature
+    if (isNaN(T) || T <= 0) {
+        errors.push("👉 Inlet Temperature must be greater than 0 K.");
+    } else if (T < 200) {
+        errors.push("👉 Temperature below 200 K is not realistic for air systems.");
+    } else if (T > 2000) {
+        errors.push("👉 Temperature above 2000 K is outside engineering safety limits.");
+    }
+
+    // Show errors if any
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // === Calculation ===
+    const orificeArea = (V / (0.193 * P * K)) * Math.sqrt(T / 288);
+
+    document.getElementById('rateValue').textContent = orificeArea.toFixed(4);
+
+    // === Output Feedback ===
+    let feedback, feedbackColor;
+
+    if (orificeArea < 1) {
+        feedback = '⚠️ <strong>Unrealistically Small Orifice:</strong> Check input values.';
+        feedbackColor = '#f39c12';
+    } else if (orificeArea < 50) {
+        feedback = '⚠️ <strong>Small Orifice Area:</strong> Ensure this is sufficient for safe air discharge.';
+        feedbackColor = '#3498db';
+    } else if (orificeArea <= 2000) {
+        feedback = '✅ <strong>Optimal Orifice Area:</strong> Within typical BS 6759 range for safety valves.';
+        feedbackColor = '#27ae60';
+    } else if (orificeArea <= 10000) {
+        feedback = '❌ <strong>Large Orifice Area:</strong> Verify against system design requirements.';
+        feedbackColor = '#e74c3c';
+    } else {
+        feedback = '❌ <strong>Extremely Large Orifice:</strong> Likely input or unit error.';
+        feedbackColor = '#c0392b';
+    }
+
+    document.getElementById('feedbackContent').innerHTML = feedback;
+    document.getElementById('feedbackContent').style.color = feedbackColor;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
 
         function printReport() {
             // Update date just before printing
@@ -567,3 +585,74 @@
 </body>
 </html>
 {% endblock %}
+
+
+
+{% comment %} 
+1. Formula (with comment for future code)
+
+The calculator currently uses:
+
+𝐴
+=
+𝑉
+0.193
+×
+𝑃
+×
+𝐾
+×
+𝑇
+288
+A=
+0.193×P×K
+V
+	​
+
+×
+288
+T
+	​
+
+	​
+
+
+Where:
+
+𝐴
+A = Minimum Orifice Area (mm²)
+
+𝑉
+V = Volumetric Flow Rate (l/s)
+
+𝑃
+P = Absolute Relieving Pressure (bar a)
+
+𝐾
+K = Derated Coefficient of Discharge (0–1)
+
+𝑇
+T = Inlet Temperature (K)
+
+/* 
+Formula Reference (BS 6759 - Air Safety Valves):
+A = (V / (0.193 * P * K)) * sqrt(T / 288)
+
+Where:
+- V = Volumetric Flow Rate (l/s), must be > 0
+- P = Absolute Relieving Pressure (bar a), must be > 1 bar a
+- K = Derated Coefficient of Discharge, range 0.01–1.00
+- T = Absolute Temperature (K), must be ≥ 200 K (approx -73 °C), typically 250–350 K
+
+Units:
+- Orifice Area returned in mm²
+*/
+
+2. Detailed Input Validation Rules (Industry-Based)
+Parameter	Range/Validation	Why it matters (Compliance/Safety)
+Volumetric Flow (V̇)	> 0, typically 1 – 100,000 l/s	Zero or negative flow is physically meaningless; unrealistic high flows may indicate input error or wrong unit.
+Pressure (Pᵣ)	> 1 bar a, max practical ~ 400 bar a	Below 1 bar absolute is impossible (vacuum). Extremely high pressures suggest wrong units (e.g., MPa instead of bar).
+Kdr (Coefficient of Discharge)	0.01 – 1.00, default 0.85	Defined by valve design. Outside this range violates BS 6759, API RP 520.
+Temperature (T)	≥ 200 K and ≤ 2000 K	Absolute zero (0 K) impossible. Typical engineering ranges are 250–350 K. Extreme outliers must be flagged.
+Cross-field checks	If V̇ is very high but Pᵣ is very low → area explodes → flag unrealistic.	Prevents misleading results that would fail audits.
+Decimals	Allow up to 4 decimals, round output to 2–4	Prevents false precision in reports. {% endcomment %}

@@ -485,6 +485,20 @@
                     The isentropic coefficient must be greater than 0, with typical values ranging from 1.0 to 1.7 for common gases.
                 </p>
             </div>
+            <div class="note-card">
+    <h3>✅ Validation Rules for This Calculator</h3>
+    <ul class="note-list">
+        <li><strong>k must be entered:</strong> Cannot be blank.</li>
+        <li><strong>Valid range:</strong> 1.0 ≤ k ≤ 1.67 (typical gases).</li>
+        <li><strong>Numeric only:</strong> Text or symbols not allowed.</li>
+        <li><strong>Decimals:</strong> Up to 3 decimal places supported.</li>
+        <li><strong>k < 1:</strong> Invalid (thermodynamically impossible).</li>
+        <li><strong>k = 1:</strong> Special case, fixed Cg = 315.</li>
+        <li><strong>k > 2:</strong> Warning – outside normal range.</li>
+        <li><strong>Output check:</strong> Typical Cg = 250–400, if outside 200–600 → verify inputs.</li>
+    </ul>
+</div>
+
         </div>
 
     </div>
@@ -498,70 +512,92 @@
         });
 
         function calculateCg() {
-            const kValue = document.getElementById('k').value.trim();
-            
-            const errorBox = document.getElementById('resultError');
-            const errorMessage = document.getElementById('errorMessage');
-            const placeholder = document.getElementById('placeholder');
-            const resultValue = document.getElementById('resultValue');
+    const kInput = document.getElementById('k').value.trim();
 
-            let errors = [];
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
 
-            if (kValue === "") {
-                errors.push("👉 Please enter the isentropic coefficient (k).");
-            } else if (parseFloat(kValue) <= 0) {
-                errors.push("👉 The isentropic coefficient (k) must be greater than 0 because division by zero is undefined, and negative values do not apply to gas laws.");
-            }
+    let errors = [];
+    let warnings = [];
 
-            if (errors.length > 0) {
-                // Show error box
-                errorMessage.innerHTML = errors.join("<br>");
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
-            } else {
-                errorBox.classList.add("hidden"); // hide error box if valid
-            }
+    // Validation 1: Required
+    if (kInput === "") {
+        errors.push("👉 Please enter the isentropic coefficient (k).");
+    }
 
-            const k = parseFloat(kValue);
-            let Cg;
-            
-            if (k === 1) {
-                Cg = 315; // Default value for k = 1
-            } else {
-                Cg = 520 * Math.sqrt(k * Math.pow((2 / (k + 1)), (k + 1) / (k - 1)));
-            }
-            
-            document.getElementById('cgValue').textContent = Cg.toFixed(3);
+    // Validation 2: Numeric
+    if (isNaN(kInput)) {
+        errors.push("👉 k must be a numeric value.");
+    }
 
-            const meterFill = document.getElementById('meterFill');
-            let meterWidth, meterColor, feedback;
-            
-            if (Cg < 300) {
-                meterWidth = '10%'; meterColor = '#2ecc71';
-                feedback = 'Low gas discharge coefficient. This indicates restricted gas flow through the nozzle.';
-            } else if (Cg < 330) {
-                meterWidth = '30%'; meterColor = '#3498db';
-                feedback = 'Moderate gas discharge coefficient. Typical for many common gases.';
-            } else if (Cg < 360) {
-                meterWidth = '50%'; meterColor = '#f39c12';
-                feedback = 'Standard gas discharge coefficient. Common for many industrial applications.';
-            } else if (Cg < 400) {
-                meterWidth = '70%'; meterColor = '#e67e22';
-                feedback = 'High gas discharge coefficient. Indicates efficient gas flow through the nozzle.';
-            } else {
-                meterWidth = '90%'; meterColor = '#e74c3c';
-                feedback = 'Very high gas discharge coefficient. Excellent flow characteristics.';
-            }
+    const k = parseFloat(kInput);
 
-            meterFill.style.width = meterWidth;
-            meterFill.style.backgroundColor = meterColor;
-            document.getElementById('feedbackContent').textContent = feedback;
-
-            placeholder.classList.add('hidden');
-            resultValue.classList.remove('hidden');
+    if (!isNaN(k)) {
+        // Validation 3: Range check
+        if (k <= 0) {
+            errors.push("👉 k must be greater than 0.");
+        } else if (k < 1) {
+            errors.push("👉 k cannot be less than 1 (thermodynamically invalid).");
+        } else if (k > 2) {
+            warnings.push("⚠️ k value is outside typical range (1.0–1.67). Please verify input.");
         }
+    }
+
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // Calculation
+    let Cg;
+    if (k === 1) {
+        Cg = 315;
+    } else {
+        Cg = 520 * Math.sqrt(k * Math.pow((2 / (k + 1)), (k + 1) / (k - 1)));
+    }
+
+    // Output validation
+    if (Cg < 200 || Cg > 600) {
+        warnings.push("⚠️ Calculated Cg is outside typical industry range (200–600). Please verify inputs.");
+    }
+
+    document.getElementById('cgValue').textContent = Cg.toFixed(3);
+
+    // Meter/feedback display
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+
+    if (Cg < 300) {
+        meterWidth = '10%'; meterColor = '#2ecc71';
+        feedback = 'Low discharge efficiency – nozzle restricts flow.';
+    } else if (Cg < 330) {
+        meterWidth = '30%'; meterColor = '#3498db';
+        feedback = 'Moderate coefficient – typical for many gases.';
+    } else if (Cg < 360) {
+        meterWidth = '50%'; meterColor = '#f39c12';
+        feedback = 'Standard discharge coefficient – safe and typical.';
+    } else if (Cg < 400) {
+        meterWidth = '70%'; meterColor = '#e67e22';
+        feedback = 'High discharge coefficient – efficient gas flow.';
+    } else {
+        meterWidth = '90%'; meterColor = '#e74c3c';
+        feedback = 'Very high discharge coefficient – recheck inputs.';
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').textContent = feedback + (warnings.length ? " " + warnings.join(" ") : "");
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
 
         function printReport() {
             // Update date just before printing
@@ -577,3 +613,100 @@
 </body>
 </html>
 {% endblock %}
+
+
+
+/*
+Formula Reference (ASME API RP 520):
+------------------------------------
+Cg = 520 * sqrt( k * (2 / (k + 1)) ^ ((k + 1) / (k - 1)) )
+Special Case: if k = 1 → Cg = 315
+
+Validation Rules (QEHS / Fire Safety):
+--------------------------------------
+1. k is required (not blank).
+2. k must be numeric (no text/invalid chars).
+3. Acceptable range: 1.0 ≤ k ≤ 1.67 (typical gases).
+4. Decimals: up to 3 allowed.
+5. k < 1 → invalid (thermodynamically impossible).
+6. k > 2 → warning (outside typical range, flag user).
+7. Prevent division by zero (handled at k = 1).
+8. Cg results should normally fall between 250–400. 
+   If outside, display “Unusual value – recheck inputs.”
+*/
+
+{% comment %} 
+1. Formula Reference
+
+For ASME (API RP 520) Cg (Nozzle Gas Constant):
+
+𝐶
+𝑔
+=
+520
+⋅
+𝑘
+⋅
+(
+2
+𝑘
++
+1
+)
+𝑘
++
+1
+𝑘
+−
+1
+Cg=520⋅
+k⋅(
+k+1
+2
+	​
+
+)
+k−1
+k+1
+	​
+
+	​
+
+
+k = Cp/Cv (isentropic coefficient of gas).
+
+For k = 1, API recommends a fixed Cg = 315.
+
+2. Input Validation Rules (QEHS/Fire Safety)
+Input	Rule	Rationale (OSHA/NFPA/API/ISO)
+k (Isentropic Coefficient)	Required – cannot be blank.	Safety-critical; missing data invalidates calculation.
+	Range: 1.0 ≤ k ≤ 1.67	Most industrial gases fall here (air = 1.4, natural gas ≈ 1.31, steam ≈ 1.3, CO₂ ≈ 1.3). Outside range is unrealistic.
+	Decimals: up to 3 allowed	Needed for accuracy in audits (ISO 5167).
+	Must be numeric	Prevents injection/invalid entries.
+	Logical rule: If k < 1 → reject (not possible in thermodynamics).	Protects against invalid calculations.
+3. Output Validation Rules
+
+Expected Cg range:
+Typical: 250 ≤ Cg ≤ 400 (industrial gases).
+Outliers: 200–600 → warn user as “Unusual value – verify input.”
+
+Threshold Bands for Interpretation (Audit-friendly):
+
+< 300 → Restricted flow (low discharge efficiency)
+
+300–330 → Moderate (common for light gases)
+
+330–360 → Standard (industrial benchmark range)
+
+360–400 → High (efficient nozzle flow)
+
+> 400 → Very High (rare; recheck k, possible data issue)
+
+4. Edge Cases & Handling
+Edge Case	Handling
+Blank input	Error → "Please enter k."
+k ≤ 0	Error → "k must be > 0."
+k < 1	Error → "k cannot be less than 1 (thermodynamically impossible)."
+k > 2	Warning → "Value outside normal gas range – recheck."
+Non-numeric input	Error → "Enter numeric values only."
+Division by zero (k=1 in denominator)	Already handled → fixed Cg = 315. {% endcomment %}

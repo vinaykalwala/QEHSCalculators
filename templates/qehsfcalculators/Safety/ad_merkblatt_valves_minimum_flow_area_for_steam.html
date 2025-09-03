@@ -492,6 +492,19 @@
                     <li><strong>Health & Safety Regulations:</strong> Protects workers and equipment from hazardous overpressure situations.</li>
                 </ul>
             </div>
+            <div class="note-card">
+    <h3>✅ Validation Rules Applied</h3>
+    <ul class="note-list">
+        <li><b>χ (Pressure Medium Coefficient):</b> Must be 0.3–1.0 for steam (reject <0.1 or >1.5).</li>
+        <li><b>ṁ (Mass Flow Rate):</b> Must be 10–1,000,000 kg/h (reject <1 or >10,000,000).</li>
+        <li><b>αw (Outflow Coefficient):</b> Must be 0.7–1.0 (reject <0.1 or >1.2).</li>
+        <li><b>PR (Relieving Pressure):</b> Must be 1–320 bar a (reject <0.5 or >400).</li>
+        <li><b>All Inputs:</b> Must be positive and numeric (no blanks, NaN, or negative values).</li>
+        <li><b>Cross-check:</b> Ensure αw × PR ≠ 0 to prevent division errors.</li>
+        <li><b>Result A₀:</b> If > 50,000 mm², warn about possible wrong units (kg/s instead of kg/h).</li>
+    </ul>
+</div>
+
             
             <div class="note-card">
                 <h3>✅ Conclusion</h3>
@@ -513,92 +526,99 @@
         });
 
         function calculateFlowArea() {
-            const chi = document.getElementById('chi').value.trim();
-            const m_dot = document.getElementById('m_dot').value.trim();
-            const alpha_w = document.getElementById('alpha_w').value.trim();
-            const p_r = document.getElementById('p_r').value.trim();
+    const chi = parseFloat(document.getElementById('chi').value.trim());
+    const m_dot = parseFloat(document.getElementById('m_dot').value.trim());
+    const alpha_w = parseFloat(document.getElementById('alpha_w').value.trim());
+    const p_r = parseFloat(document.getElementById('p_r').value.trim());
 
-            const errorBox = document.getElementById('resultError');
-            const errorMessage = document.getElementById('errorMessage');
-            const placeholder = document.getElementById('placeholder');
-            const resultValue = document.getElementById('resultValue');
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
 
-            let errors = [];
+    let errors = [];
 
-            if (chi === "") {
-                errors.push("👉 Please enter the Pressure Medium Coefficient (χ).");
-            } else if (parseFloat(chi) <= 0) {
-                errors.push("👉 Pressure Medium Coefficient (χ) must be greater than 0.");
-            }
-            
-            if (m_dot === "") {
-                errors.push("👉 Please enter the Mass Flow Rate (ṁ).");
-            } else if (parseFloat(m_dot) <= 0) {
-                errors.push("👉 Mass Flow Rate (ṁ) must be greater than 0.");
-            }
-            
-            if (alpha_w === "") {
-                errors.push("👉 Please enter the Outflow Coefficient (αw).");
-            } else if (parseFloat(alpha_w) <= 0) {
-                errors.push("👉 Outflow Coefficient (αw) must be greater than 0.");
-            }
-            
-            if (p_r === "") {
-                errors.push("👉 Please enter the Absolute Relieving Pressure (PR).");
-            } else if (parseFloat(p_r) <= 0) {
-                errors.push("👉 Absolute Relieving Pressure (PR) must be greater than 0.");
-            }
+    // χ validation
+    if (isNaN(chi) || chi <= 0) {
+        errors.push("👉 Enter χ > 0 (Pressure Medium Coefficient).");
+    } else if (chi < 0.1 || chi > 1.5) {
+        errors.push("⚠️ χ is unrealistic (expected range: 0.3–1.0 for steam).");
+    }
 
-            if (errors.length > 0) {
-                errorMessage.innerHTML = errors.join("<br>");
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
-            } else {
-                errorBox.classList.add("hidden");
-            }
+    // ṁ validation
+    if (isNaN(m_dot) || m_dot <= 0) {
+        errors.push("👉 Enter Mass Flow Rate (ṁ) > 0 kg/h.");
+    } else if (m_dot < 1 || m_dot > 1e7) {
+        errors.push("⚠️ ṁ seems unrealistic (expected 10–1,000,000 kg/h).");
+    }
 
-            const chi_val = parseFloat(chi);
-            const m_dot_val = parseFloat(m_dot);
-            const alpha_w_val = parseFloat(alpha_w);
-            const p_r_val = parseFloat(p_r);
-            
-            const A0 = (chi_val * m_dot_val) / (alpha_w_val * p_r_val);
-            document.getElementById('rateValue').textContent = A0.toFixed(4);
+    // αw validation
+    if (isNaN(alpha_w) || alpha_w <= 0) {
+        errors.push("👉 Enter Outflow Coefficient (αw) > 0.");
+    } else if (alpha_w < 0.1 || alpha_w > 1.2) {
+        errors.push("⚠️ αw seems unrealistic (expected 0.7–1.0).");
+    }
 
-            const meterFill = document.getElementById('meterFill');
-            let meterWidth, meterColor, feedback;
-            
-            if (A0 < 10) {
-                meterWidth = '20%'; 
-                meterColor = '#27ae60';
-                feedback = '✅ The required valve size is small. A standard safety valve may be sufficient.';
-            } else if (A0 < 50) {
-                meterWidth = '40%'; 
-                meterColor = '#2ecc71';
-                feedback = 'ℹ️ Medium-sized valve required. Verify the flow conditions and system requirements.';
-            } else if (A0 < 100) {
-                meterWidth = '60%'; 
-                meterColor = '#f39c12';
-                feedback = '⚠️ Large safety valve needed. Review system constraints and consider multiple valves.';
-            } else if (A0 < 200) {
-                meterWidth = '80%'; 
-                meterColor = '#e67e22';
-                feedback = '🚨 Very large valve required. System may need redesign or pressure relief alternatives.';
-            } else {
-                meterWidth = '95%'; 
-                meterColor = '#e74c3c';
-                feedback = '❌ Critical size requirement. Immediate engineering review needed. Consider multiple relief paths.';
-            }
+    // PR validation
+    if (isNaN(p_r) || p_r <= 0) {
+        errors.push("👉 Enter Absolute Relieving Pressure (PR) > 0 bar a.");
+    } else if (p_r < 0.5 || p_r > 400) {
+        errors.push("⚠️ PR seems unrealistic (expected 1–320 bar a).");
+    }
 
-            meterFill.style.width = meterWidth;
-            meterFill.style.backgroundColor = meterColor;
-            document.getElementById('feedbackContent').textContent = feedback;
+    // Cross-field
+    if (alpha_w && p_r && (alpha_w * p_r === 0)) {
+        errors.push("❌ Division by zero detected (αw × PR).");
+    }
 
-            placeholder.classList.add('hidden');
-            resultValue.classList.remove('hidden');
-        }
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // ✅ Safe calculation
+    const A0 = (chi * m_dot) / (alpha_w * p_r);
+
+    document.getElementById('rateValue').textContent = A0.toFixed(4);
+
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+
+    if (A0 < 10) {
+        meterWidth = '20%';
+        meterColor = '#27ae60';
+        feedback = '✅ Small valve size sufficient.';
+    } else if (A0 < 50) {
+        meterWidth = '40%';
+        meterColor = '#2ecc71';
+        feedback = 'ℹ️ Medium valve required. Verify conditions.';
+    } else if (A0 < 100) {
+        meterWidth = '60%';
+        meterColor = '#f39c12';
+        feedback = '⚠️ Large valve required. Consider design review.';
+    } else if (A0 < 200) {
+        meterWidth = '80%';
+        meterColor = '#e67e22';
+        feedback = '🚨 Very large valve. Multiple relief paths may be required.';
+    } else {
+        meterWidth = '95%';
+        meterColor = '#e74c3c';
+        feedback = '❌ Critical valve size. Engineering redesign required.';
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
 
         function printReport() {
             // Update date just before printing
@@ -613,3 +633,82 @@
 </body>
 </html>
 {% endblock %}
+
+{% comment %} 
+1. Formula (comment for your code)
+/*
+AD-Merkblatt Minimum Flow Area for Steam:
+
+   A₀ = ( χ × ṁ ) / ( αw × PR )
+
+Where:
+- A₀  = Minimum flow area [mm²]
+- χ   = Pressure Medium Coefficient (dimensionless, ~0.3–1.0 for steam)
+- ṁ   = Mass flow rate [kg/h]
+- αw  = Outflow coefficient (dimensionless, typically 0.7–1.0)
+- PR  = Absolute relieving pressure [bar a]
+
+Purpose:
+- Used in safety valve design and selection to ensure sufficient discharge area
+- Prevents overpressure in boilers/steam systems
+- Compliance with AD-Merkblatt, ISO 4126, EN standards for pressure relief
+*/
+
+2. Input Validation Rules (Real-World QEHS / Fire Safety Standards)
+χ (Pressure Medium Coefficient)
+
+Must be > 0.
+
+Typical range: 0.3 – 1.0 (steam under AD-Merkblatt).
+
+Reject < 0.1 or > 1.5 (unrealistic).
+
+Allow 2 decimals.
+
+ṁ (Mass Flow Rate, kg/h)
+
+Must be > 0.
+
+Common industrial safety valves: 10 – 1,000,000 kg/h.
+
+Reject < 1 (too small) or > 10,000,000 (unit error likely).
+
+Allow 1 decimal.
+
+αw (Outflow Coefficient)
+
+Must be > 0.
+
+Typical engineering values: 0.7 – 1.0.
+
+Reject < 0.1 or > 1.2.
+
+Allow 2 decimals.
+
+PR (Absolute Relieving Pressure, bar a)
+
+Must be > 0.
+
+Common safety valve pressures: 1 – 320 bar a (boilers, steam drums, nuclear).
+
+Reject < 0.5 or > 400 bar a (unrealistic for AD-Merkblatt).
+
+Allow 1 decimal.
+
+3. Cross-Field & Logical Validations
+
+Denominator check → ensure (αw × PR) ≠ 0.
+
+Scaling consistency → if A₀ > 50,000 mm², warn “extreme valve size → review input units.”
+
+χ must be ≤ 1.0 for saturated steam cases (warn if > 1).
+
+ṁ too high + PR too low → likely input error (e.g., wrong units kg/s vs. kg/h).
+
+4. Output Validation Logic (Valve Size Categories)
+Flow Area (mm²)	Category	Safety interpretation
+< 10	Small	Standard valve size sufficient
+10 – 50	Medium	Larger valve but common
+50 – 100	Large	Careful design check required
+100 – 200	Very Large	Unusual, multiple valves may be needed
+> 200	Critical	Engineering review required, design modification {% endcomment %}

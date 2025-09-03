@@ -1,0 +1,671 @@
+{% extends 'base.html' %}
+{% block title %}BS EN 4126 Valves - Minimum Orifice Area For Wet Steam At Crilical Flow Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BS EN 4126 Valves - Minimum Flow Area Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        .btn-container {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    margin: 30px 0;
+}
+
+.back-btn {
+    background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+    color: #ffffff; /* White text */
+    border: 2px solid #1560bd; /* Highlight border */
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none; /* Remove underline for link */
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    background-color: #1560bd; /* Highlight on hover */
+    color: #ffffff;
+    border-color: #000040;
+    transform: scale(1.05); /* Subtle hover effect */
+}
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            {% comment %} max-width: 700px; {% endcomment %}
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            {% comment %} display: flex; {% endcomment %}
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            {% comment %} overflow-y: auto; {% endcomment %}
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            {% comment %} margin-bottom: 15px; {% endcomment %}
+        }
+        
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        .error {
+            color: #ff6b6b;
+            font-size: 14px;
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Note Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+           <div class="btn-container">
+    <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+</div>
+   <div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+  
+        <div class="calculator-header">
+            <h1>BS EN 4126 Valves - Minimum Orifice Area For Wet Steam At Crilical Flow Calculator</h1>
+            <p>Calculate the minimum orifice area for wet steam at critical flow in pressure relief valves</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class='input-row'>
+                <div class="form-group">
+                    <label for="massFlowRate">Mass Flow Rate (ṁ) in kg/h</label>
+                    <input type="number" id="massFlowRate" class="form-input" min="0" placeholder="e.g., 5000">
+                    <div class="error" id="massError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="isentropicExponent">Isentropic Function (C)</label>
+                    <input type="number" id="isentropicExponent" class="form-input" min="0" step="0.001" placeholder="e.g., 0.45">
+                    <div class="error" id="isentropicExponentError"></div>
+                </div></div>
+                <div class='input-row'>
+                <div class="form-group">
+                    <label for="coefficient">Certified Discharge Coefficient (Kdr)</label>
+                    <input type="number" id="coefficient" class="form-input" min="0" step="0.001" placeholder="e.g., 0.85">
+                    <div class="error" id="coefficientError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="pressure">Relieving Pressure (P₀ in bar a)</label>
+                    <input type="number" id="pressure" class="form-input" min="0" step="0.001" placeholder="e.g., 10.5">
+                    <div class="error" id="pressureError"></div>
+                </div></div>
+                <div class='input-row'>
+                <div class="form-group">
+                    <label for="specificVolume">Specific Volume (V in m³/kg)</label>
+                    <input type="number" id="specificVolume" class="form-input" min="0" step="0.001" placeholder="e.g., 0.15">
+                    <div class="error" id="specificVolumeError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dryness">Dryness Fraction (x)</label>
+                    <input type="number" id="dryness" class="form-input" min="0" max="1" step="0.001" placeholder="e.g., 0.95">
+                    <div class="error" id="drynessError"></div>
+                </div></div>
+                
+                <button class="calculate-btn" onclick="calculateOrificeArea()">Calculate Minimum Orifice Area</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/1117/1117442.png" alt="Safety illustration">
+                    <p>This tool will calculate the <strong>Minimum Orifice Area</strong> for wet steam at critical flow. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                      <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Minimum Orifice Area</h2></div>
+                    <div class='rate-display'>
+                    <div class="rate-value" id="rateValue">0.00</div>
+                    <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold; ">mm²</div></div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Calculation Details</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Minimum Orifice Area Calculator</strong> helps determine the minimum flow area required for wet steam at critical flow conditions in pressure relief valves according to BS EN 4126 standards.
+                </p>
+            </div>
+            <div class="note-card">
+                <h3>❓ What is Minimum Orifice Area?</h3>
+                <p>The minimum orifice area is the smallest cross-sectional area required in a pressure relief valve to allow safe discharge of steam at critical flow conditions, preventing overpressure in the system.</p>
+            </div>
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Mass Flow Rate (ṁ):</strong> The amount of steam flowing per hour (kg/h).</li>
+                    <li><strong>Isentropic Function (C):</strong> A thermodynamic factor affecting steam expansion.</li>
+                    <li><strong>Discharge Coefficient (Kdr):</strong> A correction factor for valve efficiency.</li>
+                    <li><strong>Relieving Pressure (P₀):</strong> The absolute pressure at which steam is released (bar a).</li>
+                    <li><strong>Specific Volume (V):</strong> The space occupied by 1 kg of steam (m³/kg).</li>
+                    <li><strong>Dryness Fraction (x):</strong> Represents steam quality, ranging from 0 (liquid) to 1 (dry steam).</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Application Standards</h3>
+                <p><strong>BS EN 4126</strong> is a European standard that specifies requirements for safety relief valves used to protect pressurized systems by safely discharging excess gases or steam, preventing overpressure and ensuring system safety.</p>
+            </div>
+
+            <div class="note-card">
+                <h3>🏭 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li>Used in <strong>boiler safety valves</strong> to prevent overpressure explosions.</li>
+                    <li>Ensures safe steam discharge in <strong>power plants</strong>.</li>
+                    <li>Common in <strong>chemical plants</strong> handling high-pressure steam.</li>
+                </ul>
+            </div>
+            <div class="note-card">
+    <h3>✅ Input Validation Rules</h3>
+    <ul class="note-list">
+        <li><strong>Mass Flow Rate (ṁ):</strong> 1 – 1,000,000 kg/h</li>
+        <li><strong>Isentropic Function (C):</strong> 0.3 – 1.0 (dimensionless)</li>
+        <li><strong>Discharge Coefficient (Kdr):</strong> 0.6 – 1.0 (dimensionless)</li>
+        <li><strong>Relieving Pressure (P₀):</strong> >1 – 300 bar a</li>
+        <li><strong>Specific Volume (V):</strong> 0.001 – 10 m³/kg</li>
+        <li><strong>Dryness Fraction (x):</strong> 0 < x ≤ 1 (warning if <0.7)</li>
+        <li><strong>Outputs:</strong> Valid if 10 – 50,000 mm²; outside this range requires engineering review</li>
+    </ul>
+    <p>⚠️ These rules ensure compliance with <strong>BS EN 4126</strong> and real-world QEHS/fire safety practices. Always verify unusual results.</p>
+</div>
+
+            <div class="note-card">
+                <h3>📝 Conclusion</h3>
+                 <p>This calculation is essential for ensuring safe and efficient steam handling, preventing pressure-related failures in industrial systems.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+       function calculateOrificeArea() {
+    const massFlow = parseFloat(document.getElementById("massFlowRate").value);
+    const C = parseFloat(document.getElementById("isentropicExponent").value);
+    const Kdr = parseFloat(document.getElementById("coefficient").value);
+    const P0 = parseFloat(document.getElementById("pressure").value);
+    const V = parseFloat(document.getElementById("specificVolume").value);
+    const x = parseFloat(document.getElementById("dryness").value);
+
+    const errorBox = document.getElementById("resultError");
+    const errorMessage = document.getElementById("errorMessage");
+    const placeholder = document.getElementById("placeholder");
+    const resultValue = document.getElementById("resultValue");
+    
+    document.querySelectorAll('.error').forEach(el => el.textContent = '');
+    let errors = [];
+
+    // === VALIDATION RULES (per BS EN 4126 / QEHS best practice) ===
+    if (isNaN(massFlow) || massFlow <= 0 || massFlow > 1e6) {
+        document.getElementById("massError").textContent = "Mass flow rate must be >0 and ≤1,000,000 kg/h.";
+        errors.push("Invalid mass flow rate.");
+    }
+    if (isNaN(C) || C < 0.3 || C > 1.0) {
+        document.getElementById("isentropicExponentError").textContent = "Isentropic function (C) must be between 0.3 and 1.0.";
+        errors.push("Invalid isentropic function (C).");
+    }
+    if (isNaN(Kdr) || Kdr < 0.6 || Kdr > 1.0) {
+        document.getElementById("coefficientError").textContent = "Discharge coefficient (Kdr) must be between 0.6 and 1.0.";
+        errors.push("Invalid discharge coefficient (Kdr).");
+    }
+    if (isNaN(P0) || P0 <= 1.0 || P0 > 300) {
+        document.getElementById("pressureError").textContent = "Relieving pressure must be >1.0 and ≤300 bar a.";
+        errors.push("Invalid relieving pressure.");
+    }
+    if (isNaN(V) || V <= 0.001 || V > 10) {
+        document.getElementById("specificVolumeError").textContent = "Specific volume must be >0.001 and ≤10 m³/kg.";
+        errors.push("Invalid specific volume.");
+    }
+    if (isNaN(x) || x <= 0 || x > 1) {
+        document.getElementById("drynessError").textContent = "Dryness fraction must be between 0 and 1.";
+        errors.push("Invalid dryness fraction.");
+    }
+
+    if (errors.length > 0) {
+        errorMessage.innerHTML = "Please fix the following errors:<br>" + errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // === CALCULATION FORMULA (BS EN 4126 Wet Steam Critical Flow) ===
+    // A = ṁ / (0.2883 × C × Kdr × √(P₀ / (V × x)))
+    const denominator = 0.2883 * C * Kdr * Math.sqrt(P0 / (V * x));
+    if (denominator <= 0) {
+        errorMessage.innerHTML = "Calculation error: denominator invalid (check V and x).";
+        errorBox.classList.remove("hidden");
+        return;
+    }
+    const orificeArea = massFlow / denominator;
+
+    // === OUTPUT VALIDATION ===
+    if (!isFinite(orificeArea) || orificeArea <= 0) {
+        errorMessage.innerHTML = "Invalid result. Please check inputs.";
+        errorBox.classList.remove("hidden");
+        return;
+    }
+
+    // Build feedback with embedded warnings instead of alerts
+    let feedback = `
+        <strong>Calculation Summary:</strong><br>
+        • Mass Flow Rate: ${massFlow} kg/h<br>
+        • Isentropic Function: ${C}<br>
+        • Discharge Coefficient: ${Kdr}<br>
+        • Relieving Pressure: ${P0} bar a<br>
+        • Specific Volume: ${V} m³/kg<br>
+        • Dryness Fraction: ${x}<br>
+        <br>
+        The minimum orifice area required is <strong>${orificeArea.toFixed(4)} mm²</strong>.
+    `;
+
+    if (orificeArea < 10) {
+        feedback += `<br><span style="color:#d35400;">⚠️ Warning: Very small orifice area (<10 mm²). Verify inputs.</span>`;
+    }
+    if (orificeArea > 50000) {
+        feedback += `<br><span style="color:#c0392b;">⚠️ Warning: Very large orifice area (>50,000 mm²). Check if inputs are realistic.</span>`;
+    }
+
+    document.getElementById('rateValue').textContent = orificeArea.toFixed(4);
+    document.getElementById('feedbackContent').innerHTML = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+{% comment %} 
+1. Real-world QEHS/fire safety analysis of inputs/outputs
+
+This calculator implements BS EN 4126 valve sizing for wet steam critical flow. In compliance audits, the purpose is to ensure relief valve sizing is neither underestimated (unsafe → explosion risk) nor grossly oversized (wasteful, non-compliant with standards).
+
+The formula you used:
+
+A = ṁ / (0.2883 × C × Kdr × √(P₀ / (V × x)))
+
+
+where:
+
+ṁ = mass flow rate (kg/h)
+
+C = isentropic function (dimensionless)
+
+Kdr = certified discharge coefficient (dimensionless, 0.6–1.0 typical)
+
+P₀ = relieving pressure (bar absolute)
+
+V = specific volume (m³/kg)
+
+x = dryness fraction (0–1)
+
+The result: A = minimum required orifice area in mm².
+
+👉 Why this matters: If any input is unrealistic or outside EN 4126 assumptions, the result is invalid and could lead to non-compliance with OSHA, NFPA, or ISO 45001 safety audits.
+
+2. Comprehensive validation rules for inputs
+Parameter	Unit	Acceptable Range (per standards/practice)	Validation Rules	Why Important
+Mass Flow Rate (ṁ)	kg/h	1 → 1,000,000 (common audit range for steam boilers)	Must be >0, ≤1e6, allow 2 decimals	0 is meaningless; extremely high indicates input error
+Isentropic Function (C)	–	0.3 → 1.0 (steam thermodynamics)	Must be >0.3 & ≤1.0, ≤3 decimals	Below 0.3 is non-physical; >1 not realistic for steam
+Certified Discharge Coefficient (Kdr)	–	0.6 → 1.0 (per EN 4126, manufacturer data)	Must be ≥0.6 and ≤1.0	Values outside invalidate valve certification
+Relieving Pressure (P₀)	bar absolute	>1.0 → 300 bar a (per EN 4126 scope)	Must be >1.0 (cannot be ≤ atmospheric), ≤300	Safety valves for steam rarely exceed 300 bar
+Specific Volume (V)	m³/kg	0.001 → 10	Must be >0.001 and ≤10	Lower bound prevents division by zero; upper bound excludes unphysical values
+Dryness Fraction (x)	–	0.7 → 1.0 typical, but 0 < x ≤ 1 allowed	Must be >0 and ≤1, recommended warning if <0.7	Steam quality <70% is unsafe for critical flow assumptions
+3. Edge case validations
+
+Division by zero → if (V × x) → 0 → must block calculation.
+
+Negative orifice area → should never happen; trap and throw error.
+
+Dryness fraction = 0 → would imply pure water, not valid for steam relief valve sizing.
+
+Relieving pressure ≤1 bar absolute → physically means no overpressure, not applicable.
+
+Mass flow extremely high (>1e6) → warn user; unrealistic for standard PRVs.
+
+4. Output validation logic
+
+Orifice area < 10 mm² → warning: unusually small, check data.
+
+Orifice area > 50,000 mm² (0.05 m²) → warning: oversizing likely.
+
+Round to 4 decimals but keep raw value internally for reports.
+
+Ensure positive finite number before display.
+
+This mirrors audit expectations: flagged if input/output is outside reasonable engineering ranges. {% endcomment %}

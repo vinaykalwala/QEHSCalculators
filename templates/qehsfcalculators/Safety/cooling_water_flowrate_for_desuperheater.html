@@ -1,0 +1,910 @@
+{% extends 'base.html' %}
+{% block title %}Cooling Water Flowrate Calculator for Desuperheater{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cooling Water Flowrate Calculator for Desuperheater</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            flex-direction: column;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (min-width: 901px) {
+            .calc-content { 
+                flex-direction: row; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+            order: 2;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            min-height: 320px;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Input rows for side-by-side fields */
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            {% comment %} margin-bottom: 15px; {% endcomment %}
+        }
+        
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        /* Mobile-specific adjustments */
+        @media (max-width: 320px) {
+            .calculator-container {
+                padding: 10px;
+            }
+            
+            .calculator-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .calculator-header p {
+                font-size: 16px;
+            }
+            
+            .calc-card, .result-card {
+                padding: 20px 15px;
+                border-radius: 12px;
+            }
+            
+            .calc-card h2 {
+                font-size: 1.4rem;
+            }
+            
+            .form-input {
+                padding: 12px 14px;
+                font-size: 14px;
+            }
+            
+            .calculate-btn {
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+            
+            .result-placeholder img {
+                max-width: 180px;
+            }
+            
+            .rate-value {
+                font-size: 36px;
+            }
+            
+            .note-card {
+                padding: 15px 18px;
+            }
+            
+            .note-card h3 {
+                font-size: 16px;
+            }
+            
+            .note-card p, .note-card li {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Cooling Water Flowrate Calculator for Desuperheater</h1>
+            <p>Calculate the required cooling water flowrate to achieve desired steam conditions</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class='input-row'>
+                <div class="form-group">
+                    <label for="massSteam">Mass Flowrate of Superheated Steam (ṁs) (kg/h)</label>
+                    <input type="number" id="massSteam" class="form-input" min="0" placeholder="e.g., 5000">
+                </div>
+                
+                <div class="form-group">
+                    <label for="enthalpySuperheat">Enthalpy at Superheat Condition (hs) (kJ/kg)</label>
+                    <input type="number" id="enthalpySuperheat" class="form-input" placeholder="e.g., 3200">
+                </div></div>
+                <div class='input-row'>
+                <div class="form-group">
+                    <label for="enthalpyDesuperheat">Enthalpy at Desuperheated Condition (hd) (kJ/kg)</label>
+                    <input type="number" id="enthalpyDesuperheat" class="form-input" placeholder="e.g., 2800">
+                </div>
+                
+                <div class="form-group">
+                    <label for="enthalpyCooling">Enthalpy of Cooling Water at Inlet (hcw) (kJ/kg)</label>
+                    <input type="number" id="enthalpyCooling" class="form-input" placeholder="e.g., 420">
+                </div></div>
+                
+                <button class="calculate-btn" onclick="calculateCoolingFlowrate()">Calculate Flowrate</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/869/869869.png" alt="Cooling water illustration">
+                    <p>This tool will calculate the <strong>Cooling Water Flowrate</strong> for a desuperheater. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Cooling Water Flowrate Result</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold; " >kg/h</div>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Calculation Details</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    This calculator determines the <strong>required cooling water flowrate</strong> for a desuperheater using the given steam flowrate and enthalpy values.
+                    A desuperheater is used in steam systems to reduce the temperature of superheated steam by mixing it with cooling water, ensuring proper temperature control in industrial processes.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>ṁs (kg/h):</strong> Mass Flowrate of Superheated Steam - The total mass of superheated steam flowing per hour.</li>
+                    <li><strong>hs (kJ/kg):</strong> Enthalpy of Superheated Steam - The energy content per unit mass of steam before desuperheating.</li>
+                    <li><strong>hd (kJ/kg):</strong> Enthalpy at Desuperheated Condition - The energy per unit mass of steam after the desuperheating process.</li>
+                    <li><strong>hcw (kJ/kg):</strong> Enthalpy of Cooling Water - The energy per unit mass of cooling water before mixing with steam.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>🏭 Where Is This Calculation Used?</h3>
+                <ul class="note-list">
+                    <li><strong>Steam Power Plants:</strong> Used to regulate steam temperature before entering turbines to prevent damage and improve efficiency.</li>
+                    <li><strong>Industrial Boilers:</strong> Helps in maintaining precise steam conditions for various process applications.</li>
+                    <li><strong>HVAC & Cooling Systems:</strong> Enhances performance in cooling towers and heat exchangers by optimizing cooling water requirements.</li>
+                    <li><strong>Petrochemical & Refinery Plants:</strong> Ensures safe and controlled steam temperatures in critical industrial operations.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>⚠️ Important Considerations</h3>
+                <ul class="note-list">
+                    <li>The cooling water flowrate must be carefully controlled to avoid excessive cooling, which may lead to condensation or inefficient steam utilization.</li>
+                    <li>The enthalpy values should be taken from accurate steam tables to ensure precise calculations.</li>
+                    <li>If the difference between <strong>hd</strong> and <strong>hcw</strong> is too small, a high amount of cooling water may be required.</li>
+                    <li>If <strong>hd = hcw</strong>, the calculation is invalid as division by zero occurs.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+    <h3>✅ Input Validation Rules</h3>
+    <ul class="note-list">
+        <li><strong>Steam Mass Flowrate (ṁs):</strong> 10 – 1,000,000 kg/h, >0, max 2 decimals.</li>
+        <li><strong>Superheated Steam Enthalpy (hs):</strong> 2500 – 4000 kJ/kg, must be greater than hd.</li>
+        <li><strong>Desuperheated Enthalpy (hd):</strong> 1800 – 3500 kJ/kg, must be less than hs and greater than hcw.</li>
+        <li><strong>Cooling Water Enthalpy (hcw):</strong> 50 – 1000 kJ/kg, must be less than hd.</li>
+        <li><strong>Division by Zero:</strong> hd ≠ hcw.</li>
+        <li><strong>Result Validation:</strong> ṁcw must be positive; warning if >10× steam flowrate.</li>
+    </ul>
+</div>
+
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateCoolingFlowrate() {
+    const massSteam = document.getElementById('massSteam').value.trim();
+    const hs = document.getElementById('enthalpySuperheat').value.trim();
+    const hd = document.getElementById('enthalpyDesuperheat').value.trim();
+    const hcw = document.getElementById('enthalpyCooling').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+    let warnings = [];
+
+    const decimalCheck = (val, maxDec) => (val.toString().split(".")[1] || "").length <= maxDec;
+
+    // Convert inputs
+    const ms = parseFloat(massSteam);
+    const hsNum = parseFloat(hs);
+    const hdNum = parseFloat(hd);
+    const hcwNum = parseFloat(hcw);
+
+    // ✅ Validate steam flow
+    if (isNaN(ms) || ms <= 0 || ms < 10 || ms > 1000000) {
+        errors.push("👉 Steam mass flowrate must be between 10 and 1,000,000 kg/h.");
+    } else if (!decimalCheck(ms, 2)) {
+        errors.push("👉 Steam flowrate must not exceed 2 decimal places.");
+    }
+
+    // ✅ Validate enthalpies
+    if (isNaN(hsNum) || hsNum < 2500 || hsNum > 4000) {
+        errors.push("👉 Superheated steam enthalpy (hs) must be 2500–4000 kJ/kg.");
+    }
+    if (isNaN(hdNum) || hdNum < 1800 || hdNum > 3500) {
+        errors.push("👉 Desuperheated enthalpy (hd) must be 1800–3500 kJ/kg.");
+    }
+    if (isNaN(hcwNum) || hcwNum < 50 || hcwNum > 1000) {
+        errors.push("👉 Cooling water enthalpy (hcw) must be 50–1000 kJ/kg.");
+    }
+
+    // ✅ Logical checks
+    if (hsNum <= hdNum) {
+        errors.push("👉 hs must be greater than hd.");
+    }
+    if (hdNum <= hcwNum) {
+        errors.push("👉 hd must be greater than hcw.");
+    }
+    if (hdNum === hcwNum) {
+        errors.push("👉 hd and hcw cannot be equal (division by zero).");
+    }
+
+    // Stop if errors
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // ✅ Calculate flowrate
+    const coolingWaterFlowrate = (ms * (hsNum - hdNum)) / (hdNum - hcwNum);
+
+    if (coolingWaterFlowrate <= 0) {
+        errorMessage.innerHTML = "❌ Negative/zero flowrate calculated. Check enthalpy values.";
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    if (coolingWaterFlowrate > ms * 10) {
+        warnings.push("⚠️ Cooling water flowrate is more than 10× steam flowrate. Recheck enthalpy inputs.");
+    }
+
+    // ✅ Display result
+    document.getElementById('rateValue').textContent = coolingWaterFlowrate.toFixed(2);
+
+    // ✅ Feedback
+    let feedback = `Based on your inputs:<br>
+    - Steam flowrate: ${ms} kg/h<br>
+    - Enthalpy change: ${(hsNum - hdNum).toFixed(2)} kJ/kg<br>
+    - Cooling water required: ${coolingWaterFlowrate.toFixed(2)} kg/h`;
+
+    if (warnings.length > 0) {
+        feedback += "<br><br><u>Warnings:</u><br>" + warnings.join("<br>");
+    }
+
+    document.getElementById('feedbackContent').innerHTML = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+
+
+/*
+📘 Formula:
+ṁcw = (ṁs × (hs - hd)) / (hd - hcw)
+
+✅ Validation Rules:
+- ṁs (kg/h): 10–1,000,000; >0; ≤2 decimals
+- hs (kJ/kg): 2500–4000; >hd; ≤1 decimal
+- hd (kJ/kg): 1800–3500; <hs, >hcw; ≤1 decimal
+- hcw (kJ/kg): 50–1000; <hd; ≤1 decimal
+⚠️ Edge Cases:
+- Division by zero if hd = hcw
+- Negative flowrate not allowed
+- Excessive cooling water (>10 × steam flow) = warning
+*/
+
+
+{% comment %} 
+
+📘 Formula Used
+𝑚
+˙
+𝑐
+𝑤
+=
+𝑚
+˙
+𝑠
+×
+(
+ℎ
+𝑠
+−
+ℎ
+𝑑
+)
+ℎ
+𝑑
+−
+ℎ
+𝑐
+𝑤
+m
+˙
+cw
+	​
+
+=
+h
+d
+	​
+
+−h
+cw
+	​
+
+m
+˙
+s
+	​
+
+×(h
+s
+	​
+
+−h
+d
+	​
+
+)
+	​
+
+
+Where:
+
+𝑚
+˙
+𝑠
+m
+˙
+s
+	​
+
+ = Mass flowrate of superheated steam (kg/h)
+
+ℎ
+𝑠
+h
+s
+	​
+
+ = Enthalpy of superheated steam (kJ/kg)
+
+ℎ
+𝑑
+h
+d
+	​
+
+ = Enthalpy of desuperheated steam (kJ/kg)
+
+ℎ
+𝑐
+𝑤
+h
+cw
+	​
+
+ = Enthalpy of cooling water at inlet (kJ/kg)
+
+𝑚
+˙
+𝑐
+𝑤
+m
+˙
+cw
+	​
+
+ = Cooling water mass flowrate (kg/h)
+
+✅ Input Validation Rules (QEHS & Fire Safety)
+1. Mass Flowrate of Steam (
+𝑚
+˙
+𝑠
+m
+˙
+s
+	​
+
+)
+
+Unit: kg/h
+
+Range: 10 – 1,000,000 kg/h
+
+Must be > 0 (no zero or negative flow).
+
+Allowed decimals: ≤ 2.
+
+Compliance note: Unrealistic flowrates can lead to process safety incidents (excess steam → overpressure, water hammer).
+
+2. Enthalpy of Superheated Steam (
+ℎ
+𝑠
+h
+s
+	​
+
+)
+
+Unit: kJ/kg
+
+Range: 2500 – 4000 kJ/kg (typical superheated steam).
+
+Must be greater than hd.
+
+Allowed decimals: ≤ 1.
+
+Compliance note: Wrong enthalpy values = wrong cooling water requirement → risk of condensation/thermal stress.
+
+3. Enthalpy at Desuperheated Condition (
+ℎ
+𝑑
+h
+d
+	​
+
+)
+
+Unit: kJ/kg
+
+Range: 1800 – 3500 kJ/kg.
+
+Must be less than hs.
+
+Must be greater than hcw.
+
+Allowed decimals: ≤ 1.
+
+Compliance note: Incorrect hd (below water enthalpy or above superheated enthalpy) invalidates calculation → process upset risk.
+
+4. Enthalpy of Cooling Water (
+ℎ
+𝑐
+𝑤
+h
+cw
+	​
+
+)
+
+Unit: kJ/kg
+
+Range: 50 – 1000 kJ/kg (approx. 10–90°C water).
+
+Must be less than hd.
+
+Allowed decimals: ≤ 1.
+
+Compliance note: Too high hcw → ineffective cooling; too low → risk of overcooling/condensation shock.
+
+⚠️ Edge Case Validations
+
+Division by zero: Reject if 
+ℎ
+𝑑
+=
+ℎ
+𝑐
+𝑤
+hd=hcw.
+
+Negative flow: Reject if calculated 
+𝑚
+˙
+𝑐
+𝑤
+m
+˙
+cw
+	​
+
+ < 0.
+
+Very high flow (>10 × steam flow): Warn about excessive water usage → possible condensation flood.
+
+Very small enthalpy difference (<20 kJ/kg): Warn that required water may be disproportionately high.
+
+📊 Output Validation Logic
+
+If 
+𝑚
+˙
+𝑐
+𝑤
+m
+˙
+cw
+	​
+
+ < 1000 → “Low water requirement, manageable risk.”
+
+1000–100,000 → “Moderate requirement, standard water supply system adequate.”
+
+100,000–1,000,000 → “High requirement, confirm system capacity & cooling tower design.”
+
+1,000,000 → “Unrealistic result, recheck enthalpy inputs.” {% endcomment %}

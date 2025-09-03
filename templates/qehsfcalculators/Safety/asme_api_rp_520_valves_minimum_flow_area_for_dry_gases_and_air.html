@@ -124,7 +124,7 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
-            margin-bottom: 15px;
+            {% comment %} margin-bottom: 15px; {% endcomment %}
         }
         
         @media (min-width: 480px) {
@@ -525,16 +525,17 @@
             
             <div class="note-card">
                 <h3>✅ Validations & Input Constraints</h3>
-                <ul class="note-list">
-                    <li><strong>Volume Flow must be positive</strong></li>
-                    <li><strong>Temperature must be greater than 0 °R</strong></li>
-                    <li><strong>Compressibility Factor (Z) must be between 0 and 1.5</strong></li>
-                    <li><strong>Specific Gravity must be positive</strong></li>
-                    <li><strong>Nozzle Gas Constant (C<sub>g</sub>) must be greater than 0</strong></li>
-                    <li><strong>Discharge Coefficient (K<sub>d</sub>) must be between 0 and 1</strong></li>
-                    <li><strong>Relieving Pressure (P<sub>R</sub>) must be positive</strong></li>
-                    <li><strong>Backpressure Correction Factor (K<sub>b</sub>) must be greater than 0</strong></li>
-                </ul>
+                  <ul class="note-list">
+    <li><strong>Volume Flow (V̇):</strong> Must be > 0 and ≤ 10,000,000 ft³/min.</li>
+    <li><strong>Relieving Temperature (T):</strong> 460 °R ≤ T ≤ 2000 °R.</li>
+    <li><strong>Compressibility Factor (Z):</strong> 0.1 ≤ Z ≤ 1.5.</li>
+    <li><strong>Specific Gravity (G):</strong> 0.1 ≤ G ≤ 10.</li>
+    <li><strong>Nozzle Gas Constant (Cg):</strong> > 0 and ≤ 4000.</li>
+    <li><strong>Discharge Coefficient (Kd):</strong> 0.62 ≤ Kd ≤ 1.0.</li>
+    <li><strong>Relieving Pressure (PR):</strong> 1.01 ≤ PR ≤ 700 bar abs.</li>
+    <li><strong>Backpressure Factor (Kb):</strong> 0.5 ≤ Kb ≤ 2.0.</li>
+    <li><strong>Calculated Flow Area (A₀):</strong> Must be > 0 and ≤ 100 in². Values above 100 suggest unrealistic data or unit mismatch.</li>
+  </ul>
             </div>
              <div class="note-card">
                 <h3>🏭 ASME (API RP 520) Standard</h3>
@@ -561,127 +562,95 @@
         });
 
         function calculateDischargeArea() {
-            const volumeFlow = document.getElementById('volumeFlow').value.trim();
-            const temperature = document.getElementById('temperature').value.trim();
-            const compressibility = document.getElementById('compressibility').value.trim();
-            const specificGravity = document.getElementById('specificGravity').value.trim();
-            const Cg = document.getElementById('Cg').value.trim();
-            const Kd = document.getElementById('Kd').value.trim();
-            const Pr = document.getElementById('Pr').value.trim();
-            const Kb = document.getElementById('Kb').value.trim();
+    const volumeFlow = parseFloat(document.getElementById('volumeFlow').value.trim());
+    const temperature = parseFloat(document.getElementById('temperature').value.trim());
+    const compressibility = parseFloat(document.getElementById('compressibility').value.trim());
+    const specificGravity = parseFloat(document.getElementById('specificGravity').value.trim());
+    const Cg = parseFloat(document.getElementById('Cg').value.trim());
+    const Kd = parseFloat(document.getElementById('Kd').value.trim());
+    const Pr = parseFloat(document.getElementById('Pr').value.trim());
+    const Kb = parseFloat(document.getElementById('Kb').value.trim());
 
-            const errorBox = document.getElementById('resultError');
-            const errorMessage = document.getElementById('errorMessage');
-            const placeholder = document.getElementById('placeholder');
-            const resultValue = document.getElementById('resultValue');
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    let errors = [];
 
-            let errors = [];
+    // ✅ Validation Rules
+    if (isNaN(volumeFlow) || volumeFlow <= 0 || volumeFlow > 1e7) {
+        errors.push("👉 Volume Flow must be > 0 and ≤ 10,000,000 ft³/min.");
+    }
+    if (isNaN(temperature) || temperature < 460 || temperature > 2000) {
+        errors.push("👉 Temperature must be between 460 °R and 2000 °R.");
+    }
+    if (isNaN(compressibility) || compressibility < 0.1 || compressibility > 1.5) {
+        errors.push("👉 Compressibility Factor (Z) must be between 0.1 and 1.5.");
+    }
+    if (isNaN(specificGravity) || specificGravity <= 0 || specificGravity > 10) {
+        errors.push("👉 Specific Gravity must be between 0.1 and 10.");
+    }
+    if (isNaN(Cg) || Cg <= 0 || Cg > 4000) {
+        errors.push("👉 Nozzle Gas Constant (Cg) must be > 0 and ≤ 4000.");
+    }
+    if (isNaN(Kd) || Kd < 0.62 || Kd > 1.0) {
+        errors.push("👉 Discharge Coefficient (Kd) must be between 0.62 and 1.0 (API RP 520).");
+    }
+    if (isNaN(Pr) || Pr < 1.01 || Pr > 700) {
+        errors.push("👉 Relieving Pressure (PR) must be between 1.01 and 700 bar abs.");
+    }
+    if (isNaN(Kb) || Kb < 0.5 || Kb > 2.0) {
+        errors.push("👉 Backpressure Factor (Kb) must be between 0.5 and 2.0.");
+    }
 
-            if (volumeFlow === "") {
-                errors.push("👉 Please enter the Volume Flow.");
-            } else if (parseFloat(volumeFlow) <= 0) {
-                errors.push("👉 Volume Flow must be greater than 0.");
-            }
-            
-            if (temperature === "") {
-                errors.push("👉 Please enter the Temperature.");
-            } else if (parseFloat(temperature) <= 0) {
-                errors.push("👉 Temperature must be greater than 0.");
-            }
-            
-            if (compressibility === "") {
-                errors.push("👉 Please enter the Compressibility Factor.");
-            } else if (parseFloat(compressibility) <= 0 || parseFloat(compressibility) > 1.5) {
-                errors.push("👉 Compressibility Factor must be between 0 and 1.5.");
-            }
-            
-            if (specificGravity === "") {
-                errors.push("👉 Please enter the Specific Gravity.");
-            } else if (parseFloat(specificGravity) <= 0) {
-                errors.push("👉 Specific Gravity must be greater than 0.");
-            }
-            
-            if (Cg === "") {
-                errors.push("👉 Please enter the Nozzle Gas Constant.");
-            } else if (parseFloat(Cg) <= 0) {
-                errors.push("👉 Nozzle Gas Constant must be greater than 0.");
-            }
-            
-            if (Kd === "") {
-                errors.push("👉 Please enter the Discharge Coefficient.");
-            } else if (parseFloat(Kd) <= 0 || parseFloat(Kd) > 1) {
-                errors.push("👉 Discharge Coefficient must be between 0 and 1.");
-            }
-            
-            if (Pr === "") {
-                errors.push("👉 Please enter the Relieving Pressure.");
-            } else if (parseFloat(Pr) <= 0) {
-                errors.push("👉 Relieving Pressure must be greater than 0.");
-            }
-            
-            if (Kb === "") {
-                errors.push("👉 Please enter the Backpressure Correction Factor.");
-            } else if (parseFloat(Kb) <= 0) {
-                errors.push("👉 Backpressure Correction Factor must be greater than 0.");
-            }
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
 
-            if (errors.length > 0) {
-                errorMessage.innerHTML = errors.join("<br>");
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
-            } else {
-                errorBox.classList.add("hidden");
-            }
+    // ✅ Calculation
+    const A0 = (volumeFlow * Math.sqrt(temperature * compressibility * specificGravity)) /
+               (1.175 * Cg * Kd * Pr * Kb);
 
-            // Calculate the minimum flow area
-            const V_dot = parseFloat(volumeFlow);
-            const T = parseFloat(temperature);
-            const Z = parseFloat(compressibility);
-            const G = parseFloat(specificGravity);
-            const C_g = parseFloat(Cg);
-            const K_d = parseFloat(Kd);
-            const P_R = parseFloat(Pr);
-            const K_b = parseFloat(Kb);
-            
-            // API RP 520 formula for gas discharge area
-            const A_O = (V_dot * Math.sqrt(T * Z * G)) / (1.175 * C_g * K_d * P_R * K_b);
-            
-            document.getElementById('rateValue').textContent = A_O.toFixed(4);
+    // ✅ Output validation
+    if (A0 <= 0 || !isFinite(A0)) {
+        errorMessage.innerHTML = "⚠️ Invalid calculation result. Please review inputs.";
+        errorBox.classList.remove("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
 
-            const meterFill = document.getElementById('meterFill');
-            let meterWidth, meterColor, feedback;
-            
-            if (A_O < 0.1) {
-                meterWidth = '20%'; 
-                meterColor = '#2ecc71';
-                feedback = 'Small flow area. Suitable for very low-flow conditions.';
-            } else if (A_O <= 0.5) {
-                meterWidth = '40%'; 
-                meterColor = '#27ae60';
-                feedback = 'Optimal flow area. The calculated value is within a typical range for industrial applications.';
-            } else if (A_O <= 1.0) {
-                meterWidth = '60%'; 
-                meterColor = '#f39c12';
-                feedback = 'Moderate flow area. Suitable for many industrial applications.';
-            } else if (A_O <= 3.0) {
-                meterWidth = '80%'; 
-                meterColor = '#e67e22';
-                feedback = 'Large flow area. Ensure the system is designed for higher flow.';
-            } else {
-                meterWidth = '95%'; 
-                meterColor = '#e74c3c';
-                feedback = 'Very large flow area. Check the system design to avoid over-sizing.';
-            }
+    if (A0 > 100) {
+        errorMessage.innerHTML = "⚠️ Flow area exceeds 100 in². Check input units or system design.";
+        errorBox.classList.remove("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
 
-            meterFill.style.width = meterWidth;
-            meterFill.style.backgroundColor = meterColor;
-            document.getElementById('feedbackContent').textContent = feedback;
+    document.getElementById('rateValue').textContent = A0.toFixed(4);
 
-            placeholder.classList.add('hidden');
-            resultValue.classList.remove('hidden');
-        }
+    // Meter feedback
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+    if (A0 < 0.1) { meterWidth='20%'; meterColor='#2ecc71'; feedback='Small flow area. Low-flow application.'; }
+    else if (A0 <= 0.5) { meterWidth='40%'; meterColor='#27ae60'; feedback='Optimal range. Typical PSV sizing.'; }
+    else if (A0 <= 1.0) { meterWidth='60%'; meterColor='#f39c12'; feedback='Moderate flow area. Suitable for most applications.'; }
+    else if (A0 <= 3.0) { meterWidth='80%'; meterColor='#e67e22'; feedback='Large flow area. Ensure design checks.'; }
+    else { meterWidth='95%'; meterColor='#e74c3c'; feedback='Very large area. Recheck data to avoid oversizing.'; }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
 
         function printReport() {
             // Update date just before printing
@@ -697,3 +666,64 @@
 </body>
 </html>
 {% endblock %}
+
+
+{% comment %} 
+1. Formula Used (from API RP 520, ASME standard)
+// API RP 520 formula for gas discharge area (Minimum Flow Area for Dry Gases & Air)
+//
+// A₀ = ( V̇ * √(T * Z * G) ) / (1.175 * Cg * Kd * PR * Kb)
+//
+// Where:
+//   A₀  = Minimum required flow area (in²)
+//   V̇   = Required volumetric flow (ft³/min)
+//   T   = Relieving temperature (°R, absolute Rankine)
+//   Z   = Compressibility factor (typically 0.85 – 1.1, max 1.5)
+//   G   = Specific gravity of gas (relative to air at standard conditions)
+//   Cg  = Gas nozzle coefficient (depends on k, ratio of Cp/Cv)
+//   Kd  = Effective discharge coefficient (0.62 ≤ Kd ≤ 1.0)
+//   PR  = Upstream relieving pressure (bar absolute)
+//   Kb  = Backpressure correction factor (0.8 – 1.2 typical)
+
+
+This is consistent with ASME/API RP 520 requirements for safety valve sizing.
+
+2. Detailed Input Validation Rules
+Parameter	Unit	Valid Range (Industry Practice)	Validation Rule	Why Needed (Compliance / Safety)
+Volume Flow (V̇)	ft³/min	> 0 and typically < 1e7	Must be positive, finite, ≤ 10,000,000	Negative/zero flow is meaningless; ensures realistic sizing
+Temperature (T)	°R	> 460 °R (absolute zero = 0 °R, but practical > 460) ≤ 2000 °R	Must be positive and ≥ 460	Gas temp can’t be below absolute zero; ensures safety margins
+Compressibility (Z)	–	0.1 ≤ Z ≤ 1.5	Must be between 0.1 and 1.5	Corrects for non-ideal gas; outside range means invalid gas model
+Specific Gravity (G)	–	0.1 ≤ G ≤ 10	Must be positive, realistic upper bound ~10	Ensures density ratio is realistic
+Gas Constant (Cg)	–	> 0 and ≤ 4000	Must be positive and below extreme values	Cg depends on k, prevents division blowup
+Coefficient of Discharge (Kd)	–	0.62 ≤ Kd ≤ 1.0	Must be within API RP 520 recommendation	Values below 0.62 unsafe; values >1 impossible
+Relieving Pressure (PR)	bar a	≥ 1.01 bar abs up to ~700 bar abs	Must be >1 and ≤700	Pressure must be absolute, not vacuum or negative
+Backpressure Factor (Kb)	–	0.5 ≤ Kb ≤ 2.0	Must be >0 and bounded	Very low or very high Kb leads to unrealistic correction
+3. Edge Case Validations
+
+Division by zero → If any denominator factor (Cg, Kd, PR, Kb) = 0 → show error.
+
+Extremely large flow area (A₀ > 100 in²) → warn user, may indicate wrong units or system design issue.
+
+Very small area (A₀ < 0.01 in²) → warn user, may indicate under-sizing or wrong data.
+
+PR < 1 bar abs → invalid (vacuum); reject input.
+
+Non-numeric / NaN / Infinity inputs → reject.
+
+Cross-dependency: If Z very high (>1.5) + G very high (>10) + PR very low → result may be unstable → show warning.
+
+4. Output Validation & Thresholds
+
+For reporting clarity:
+
+A₀ < 0.1 in² → small valves, suitable for low-flow relief (lab scale, instrument lines).
+
+0.1 – 1.0 in² → typical range for industrial PSV sizing.
+
+1.0 – 3.0 in² → large valves (chemical, refinery service).
+
+> 3.0 in² → very large, double-check process data.
+
+> 100 in² → reject as unrealistic, possible unit mismatch.
+
+This keeps outputs auditable and aligned with real safety reports. {% endcomment %}

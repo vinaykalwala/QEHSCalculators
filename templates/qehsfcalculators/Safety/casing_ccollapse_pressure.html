@@ -1,0 +1,674 @@
+{% extends 'base.html' %}
+{% block title %}Casing Collapse Pressure Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casing Collapse Pressure Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            {% comment %} max-width: 700px; {% endcomment %}
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .cost-breakdown {
+            width: 100%;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .cost-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-top: 10px;
+            padding-top: 15px;
+            color: #1560bd;
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+    
+        <div class="calculator-header">
+            <h1>Casing Collapse Pressure Calculator</h1>
+            <p>Calculate the external pressure at which casing will collapse based on material properties and dimensions</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="modulusElasticity">Modulus of Elasticity (E) (psi)</label>
+                    <input type="number" id="modulusElasticity" class="form-input" min="0" placeholder="e.g., 30000000">
+                </div>
+                <div class="form-group">
+                    <label for="outerDiameter">Outer Diameter (D<sub>o</sub>) (inches)</label>
+                    <input type="number" id="outerDiameter" class="form-input" min="0" step="0.001" placeholder="e.g., 9.625">
+                </div>
+                <div class="form-group">
+                    <label for="wallThickness">Wall Thickness (t) (inches)</label>
+                    <input type="number" id="wallThickness" class="form-input" min="0" step="0.001" placeholder="e.g., 0.545">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateCollapsePressure()">Calculate Collapse Pressure</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                   <img src="https://cdn-icons-png.flaticon.com/512/616/616490.png" alt="Liquid colorful drop" width="100">
+
+                    <p>This tool will calculate the <strong>Casing Collapse Pressure</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Casing Collapse Pressure</h2></div>
+                    <div class="rate-value" id="collapsePressureValue">0 psi</div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">Safety Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Casing Collapse Pressure Calculator</strong> helps determine the external pressure at which a casing will collapse based on its material properties and dimensions.
+                </p>
+            </div>
+            <div class="note-card">
+                <h3>❓ What is Casing Collapse Pressure?</h3>
+                <p>Casing collapse pressure is the external pressure at which the casing will collapse due to external forces. This is a critical parameter in industries like oil and gas where casing failure can lead to serious safety hazards.</p>
+            </div>
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Modulus of Elasticity (E):</strong> The material's stiffness, measured in psi (pounds per square inch).</li>
+                    <li><strong>Outer Diameter (D<sub>o</sub>):</strong> The external diameter of the casing, measured in inches.</li>
+                    <li><strong>Wall Thickness (t):</strong> The thickness of the casing wall, measured in inches.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <ul class="note-list">
+                    <li><span class="bad">Below 10,000 psi</span> → Very low collapse pressure, casing may fail under typical external pressures</li>
+                    <li><span class="average">10,000 – 50,000 psi</span> → Acceptable range, but monitor external pressures during operation</li>
+                    <li><span class="good">Above 50,000 psi</span> → High collapse pressure, indicating a strong casing</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Important Note</h3>
+                <p>
+                    This calculation assumes ideal conditions and does not account for factors like material defects, pressure cycling, or temperature variations. Always consult with engineers to ensure the casing design is appropriate for your specific operating conditions.
+                </p>
+            </div>
+            
+            <div class="note-card">
+                <h3>ℹ️ About PSI</h3>
+                <p>
+                    PSI stands for "Pounds per Square Inch" and is a unit of pressure commonly used in the United States to measure the intensity of force applied over an area. One psi is the pressure resulting from a force of one pound-force applied to an area of one square inch.
+                </p>
+            </div>
+            
+            <div class="note-card">
+                <h3>🔒 Safety Importance</h3>
+                <p>
+                    Calculating casing collapse pressure is critical for ensuring that casing can withstand external pressures without failing. In high-pressure environments like deep-well drilling, knowing the collapse pressure limits is vital to prevent potential disasters, protecting workers, the environment, and equipment.
+                </p>
+            </div>
+            <div class="note-card">
+  <h3>✅ Validation Rules Applied</h3>
+  <ul class="note-list">
+    <li>Modulus of Elasticity (E): 25,000,000 – 35,000,000 psi typical for steel.</li>
+    <li>Outer Diameter (Do): 2 – 48 inches.</li>
+    <li>Wall Thickness (t): 0.2 – 2.5 inches.</li>
+    <li>Wall thickness must be &lt; Do ÷ 2.</li>
+    <li>Aspect ratio (t/Do) must be between 0.02 and 0.3.</li>
+    <li>No blank, negative, or zero inputs allowed.</li>
+    <li>Calculated collapse pressure &gt; 1,000,000 psi is flagged as unrealistic.</li>
+  </ul>
+</div>
+
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateCollapsePressure() {
+    const modulusElasticityInput = document.getElementById('modulusElasticity').value.trim();
+    const outerDiameterInput = document.getElementById('outerDiameter').value.trim();
+    const wallThicknessInput = document.getElementById('wallThickness').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+
+    // Convert to numbers
+    const E = parseFloat(modulusElasticityInput);
+    const Do = parseFloat(outerDiameterInput);
+    const t = parseFloat(wallThicknessInput);
+
+    // Basic input checks
+    if (!modulusElasticityInput || isNaN(E) || E <= 0) {
+        errors.push("👉 Enter a valid modulus of elasticity (psi). Typical steel: 25,000,000–35,000,000 psi.");
+    }
+    if (!outerDiameterInput || isNaN(Do) || Do <= 0) {
+        errors.push("👉 Enter a valid outer diameter (inches). Acceptable range: 2–48 in.");
+    }
+    if (!wallThicknessInput || isNaN(t) || t <= 0) {
+        errors.push("👉 Enter a valid wall thickness (inches). Acceptable range: 0.2–2.5 in.");
+    }
+
+    // Cross-field validations
+    if (t >= Do / 2) {
+        errors.push("👉 Wall thickness must be less than half of the outer diameter.");
+    }
+    if (Do && t && (t / Do < 0.02 || t / Do > 0.3)) {
+        errors.push("👉 Wall thickness to diameter ratio (t/Do) must be between 0.02 and 0.3 for realistic casing.");
+    }
+    if (E && (E < 1e6 || E > 5e7)) {
+        errors.push("👉 Modulus of Elasticity outside realistic range (1,000,000–50,000,000 psi).");
+    }
+
+    // Handle errors
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // Calculate collapse pressure
+    const Pc = (2 * E * t) / Do;
+
+    // Output safety checks
+    const formatter = new Intl.NumberFormat('en-US');
+    let feedback = "";
+
+    if (Pc > 1e6) {
+        feedback = "⚠️ Unrealistic collapse pressure (>1,000,000 psi). Check your inputs.";
+    } else if (Pc < 10000) {
+        feedback = "❌ Very low collapse pressure (<10,000 psi). High risk of casing collapse.";
+    } else if (Pc >= 10000 && Pc <= 50000) {
+        feedback = "⚠️ Collapse pressure within acceptable range (10,000–50,000 psi). Monitor closely.";
+    } else if (Pc > 50000) {
+        feedback = "✅ High collapse pressure (>50,000 psi). Good design margin, verify other failure modes.";
+    }
+
+    document.getElementById('collapsePressureValue').textContent = `${formatter.format(Pc.toFixed(2))} psi`;
+    document.getElementById('feedbackContent').innerHTML = feedback;
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+{% comment %} 
+1. Formula & Its Compliance Basis
+
+Formula Used (as in your code):
+
+𝑃
+𝑐
+=
+2
+⋅
+𝐸
+⋅
+𝑡
+𝐷
+𝑜
+P
+c
+	​
+
+=
+D
+o
+	​
+
+2⋅E⋅t
+	​
+
+
+Where:
+
+𝑃
+𝑐
+P
+c
+	​
+
+ = Collapse Pressure (psi)
+
+𝐸
+E = Modulus of Elasticity (psi)
+
+𝑡
+t = Wall Thickness (inches)
+
+𝐷
+𝑜
+D
+o
+	​
+
+ = Outer Diameter (inches)
+
+⚠️ Note: This is a simplified elastic collapse model (from API/ASME thin-wall approximation). In practice, API 5C3 collapse ratings also include plastic, transition, and yield collapse modes. For educational/awareness calculators this simplified version is acceptable, but should be marked clearly as “idealized conditions.”
+
+2. Input Validation Rules (Real-world & QEHS Standards)
+Field	Unit	Valid Range	Allowed Decimals	Cross-Field/Logical Rules	Why It Matters (QEHS/Fire Safety)
+Modulus of Elasticity (E)	psi	25,000,000 – 35,000,000 psi (steel range, per API 5CT, ASTM A106)	No decimals needed	Must be positive	Unrealistic E values give meaningless collapse pressures. Prevents garbage-in → garbage-out during safety audits.
+Outer Diameter (Do)	inches	2 – 48 in (API casing range)	Up to 3 decimals	Must be > 2× wall thickness	Ensures casing is physically possible. Prevents collapse model from being applied to non-standard sizes.
+Wall Thickness (t)	inches	0.2 – 2.5 in (API practical limits)	Up to 3 decimals	Must be < Do ÷ 2	Prevents invalid geometries. Too-thin → unsafe casing, too-thick → physically impossible casing.
+Cross-field rule	–	t/Do must be between 0.02 and 0.3	–	Enforces realistic aspect ratio	Maintains model validity (thin-wall assumption).
+General	–	No blank, null, or negative inputs	–	Must handle bad user input	Prevents unsafe miscalculations or empty audit fields.
+3. Output Validation & Thresholds
+
+From a safety reporting/audit lens:
+
+< 10,000 psi → Very Low Risk Margin (Red Flag ⚠️)
+→ Casing may collapse under hydrostatic loads at shallow depths. Non-compliant with most API well safety designs.
+
+10,000 – 50,000 psi → Acceptable / Conditional Range (Caution ⚠️)
+→ Monitor operations. May be acceptable for shallow/intermediate casing, but requires continuous monitoring.
+
+> 50,000 psi → High Capacity (Good ✅)
+→ Casing is strong, but check for other failure modes (burst, tension, fatigue). {% endcomment %}
+
+
+/*
+======================================================
+ Casing Collapse Pressure Formula:
+ Pc = (2 * E * t) / Do
+ where:
+   Pc = Collapse Pressure (psi)
+   E  = Modulus of Elasticity (psi) [25,000,000–35,000,000 typical steel]
+   Do = Outer Diameter (inches) [2–48 in typical casing]
+   t  = Wall Thickness (inches) [0.2–2.5 in]
+======================================================
+
+ Validation Rules (per API 5CT, ASME B31.8, OSHA principles):
+ - E must be 25e6–35e6 psi (steel) → reject outside range
+ - Do must be 2–48 in
+ - t must be 0.2–2.5 in
+ - t < Do/2 always
+ - 0.02 ≤ t/Do ≤ 0.3 (realistic casing ratio)
+ - No zero, blank, or negative inputs
+ - Handle division by zero gracefully
+ - Collapse Pressure > 1,000,000 psi flagged as unrealistic
+======================================================
+*/

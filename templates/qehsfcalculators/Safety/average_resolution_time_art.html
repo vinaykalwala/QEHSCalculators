@@ -505,6 +505,17 @@
                     <li><strong>Service Industries:</strong> Evaluating service delivery performance.</li>
                 </ul>
             </div>
+            <div class="note-card">
+    <h3>✅ Input Validation Rules</h3>
+    <ul class="note-list">
+        <li><strong>Total Resolution Time (hrs):</strong> 0.01 – 8760 hrs, up to 2 decimals, must be numeric.</li>
+        <li><strong>Number of Issues:</strong> 1 – 10,000, whole number only.</li>
+        <li><strong>Cross-Check:</strong> Total time must be realistic for the number of issues (≥ 0.01 hr/issue).</li>
+        <li><strong>Edge Cases:</strong> Prevent division by zero, reject negative or blank inputs, reject illogical combinations.</li>
+    </ul>
+    <p><b>Note:</b> These validations align with QEHS, OSHA, and ISO 45001 best practices for KPI reporting.</p>
+</div>
+
         </div>
     </div>
 
@@ -515,77 +526,109 @@
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
             document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
         });
-
         function calculateAverageResolutionTime() {
-            const totalTime = document.getElementById('totalResolutionTime').value.trim();
-            const numberOfIssues = document.getElementById('numberOfIssues').value.trim();
+    const totalTimeInput = document.getElementById('totalResolutionTime').value.trim();
+    const numberOfIssuesInput = document.getElementById('numberOfIssues').value.trim();
 
-            const errorBox = document.getElementById('resultError');
-            const errorMessage = document.getElementById('errorMessage');
-            const placeholder = document.getElementById('placeholder');
-            const resultValue = document.getElementById('resultValue');
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
 
-            let errors = [];
+    let errors = [];
 
-            if (totalTime === "") {
-                errors.push("👉 Please enter the total resolution time.");
-            } else if (parseFloat(totalTime) < 0) {
-                errors.push("👉 Total resolution time cannot be negative.");
-            }
-            
-            if (numberOfIssues === "") {
-                errors.push("👉 Please enter the number of issues resolved.");
-            } else if (parseFloat(numberOfIssues) <= 0) {
-                errors.push("👉 Number of issues must be greater than 0.");
-            }
+    // --- Validation Rules (QEHS/Fire Safety Standard) ---
+    // Formula: ART = Total Resolution Time (hrs) ÷ Number of Issues Resolved
 
-            if (errors.length > 0) {
-                errorMessage.innerHTML = errors.join("<br>");
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
-            } else {
-                errorBox.classList.add("hidden");
-            }
-
-            const time = parseFloat(totalTime);
-            const issues = parseFloat(numberOfIssues);
-            const averageTime = time / issues;
-            document.getElementById('rateValue').textContent = averageTime.toFixed(2);
-
-            const meterFill = document.getElementById('meterFill');
-            let meterWidth, meterColor, feedback;
-            
-            if (averageTime < 2) {
-                meterWidth = '20%'; 
-                meterColor = '#27ae60';
-                feedback = '🌟 Outstanding performance! Your resolution time is excellent. Keep up the great work!';
-            } else if (averageTime < 4) {
-                meterWidth = '40%'; 
-                meterColor = '#2ecc71';
-                feedback = '👍 Good performance. Your resolution time is better than average.';
-            } else if (averageTime < 8) {
-                meterWidth = '60%'; 
-                meterColor = '#f39c12';
-                feedback = '⚠️ Moderate performance. Consider streamlining processes to improve resolution time.';
-            } else if (averageTime < 16) {
-                meterWidth = '80%'; 
-                meterColor = '#e67e22';
-                feedback = '🚨 Slow resolution time. Review processes and identify bottlenecks.';
-            } else {
-                meterWidth = '95%'; 
-                meterColor = '#e74c3c';
-                feedback = '❌ Critical performance issue. Immediate process review and corrective actions are needed.';
-            }
-
-            meterFill.style.width = meterWidth;
-            meterFill.style.backgroundColor = meterColor;
-            document.getElementById('feedbackContent').textContent = feedback;
-
-            placeholder.classList.add('hidden');
-            resultValue.classList.remove('hidden');
+    // Total Resolution Time (hours)
+    if (totalTimeInput === "") {
+        errors.push("👉 Please enter the total resolution time.");
+    } else {
+        const totalTime = parseFloat(totalTimeInput);
+        if (isNaN(totalTime)) {
+            errors.push("👉 Total resolution time must be a number.");
+        } else if (totalTime < 0.01) {
+            errors.push("👉 Total resolution time must be at least 0.01 hours (36 seconds).");
+        } else if (totalTime > 8760) {
+            errors.push("👉 Total resolution time cannot exceed 8760 hours (1 year).");
         }
+    }
+
+    // Number of Issues
+    if (numberOfIssuesInput === "") {
+        errors.push("👉 Please enter the number of issues resolved.");
+    } else {
+        const issues = parseFloat(numberOfIssuesInput);
+        if (isNaN(issues) || !Number.isInteger(Number(numberOfIssuesInput))) {
+            errors.push("👉 Number of issues must be a whole number.");
+        } else if (issues <= 0) {
+            errors.push("👉 Number of issues must be greater than 0.");
+        } else if (issues > 10000) {
+            errors.push("👉 Number of issues cannot exceed 10,000 (out of reporting scope).");
+        }
+    }
+
+    // Cross-field Validation
+    const totalTime = parseFloat(totalTimeInput);
+    const issues = parseFloat(numberOfIssuesInput);
+    if (!isNaN(totalTime) && !isNaN(issues) && issues > 0) {
+        if (totalTime < issues * 0.01) {
+            errors.push("👉 Total resolution time is too low for the number of issues. Please verify units.");
+        }
+    }
+
+    // Show Errors
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // --- Calculation ---
+    const averageTime = totalTime / issues;
+    document.getElementById('rateValue').textContent = averageTime.toFixed(2);
+
+    // --- Performance Assessment ---
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+
+    if (averageTime < 2) {
+        meterWidth = '20%'; 
+        meterColor = '#27ae60';
+        feedback = '🌟 Outstanding performance! Resolution time is excellent.';
+    } else if (averageTime < 4) {
+        meterWidth = '40%'; 
+        meterColor = '#2ecc71';
+        feedback = '👍 Good performance. Efficient resolution achieved.';
+    } else if (averageTime < 8) {
+        meterWidth = '60%'; 
+        meterColor = '#f39c12';
+        feedback = '⚠️ Moderate. Consider process streamlining.';
+    } else if (averageTime < 16) {
+        meterWidth = '80%'; 
+        meterColor = '#e67e22';
+        feedback = '🚨 Slow resolution. Review bottlenecks.';
+    } else {
+        meterWidth = '95%'; 
+        meterColor = '#e74c3c';
+        feedback = '❌ Critical delays. Immediate corrective action required.';
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+
+      
+
 
         function printReport() {
             // Update date just before printing
@@ -600,3 +643,29 @@
 </body>
 </html>
 {% endblock %}
+
+
+
+
+{% comment %}   
+ Formula:
+ ART = Total Resolution Time (hours) / Number of Issues Resolved
+
+ Validation Rules (QEHS / Fire Safety Compliance):
+ 1. Total Resolution Time (TRT)
+    - Numeric, >= 0
+    - Max recommended = 8760 hours (1 year)
+    - Up to 2 decimals allowed
+
+ 2. Number of Issues (NI)
+    - Integer only
+    - Min = 1
+    - Max recommended = 10000
+
+ 3. Cross-field validation
+    - NI cannot be 0 (avoid division by zero)
+    - If TRT < NI → warn (avg < 1 hr/issue, possible but unusual)
+    - If ART > 8760 → warn (longer than 1 year/issue → unrealistic)
+
+ 4. Outputs must align with ISO 45001/NFPA incident closure benchmarks
+ {% endcomment %}

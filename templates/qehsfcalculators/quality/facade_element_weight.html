@@ -1,0 +1,581 @@
+{% extends 'base.html' %}
+{% block title %}Facade Element Area Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facade Element Area Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+            justify-content: center;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+   <div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+
+        <div class="btn-container">
+            <a href="{% url 'quality_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+        </div>
+
+        <div class="calculator-header">
+            <h1>Facade Element Area Calculator</h1>
+            <p>Calculates the surface area of a square facade element based on its length measurement</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator Input Card -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="length">Length (m)</label>
+                    <input type="number" id="length" class="form-input" min="0" placeholder="Enter length">
+                </div>
+
+                <button class="calculate-btn" onclick="calculateArea()">Calculate Area</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Facade illustration">
+                    <p>This tool calculates the <strong>surface area</strong> of a square facade element in m². Enter the length to see results.</p>
+                </div>
+
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Facade Element Area</h2>
+                    </div>
+                    <div class="rate-value" id="areaValue">0.00</div>
+                    <div class="rate-label"><strong>m²</strong></div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">Area Interpretation</div>
+                        <div class="feedback-content" id="areaFeedback"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🔎 About This Calculator</h3>
+                <p>
+                    The <strong>Facade Element Area Calculator</strong> determines the total surface area of a square facade element based on its length measurement. This calculation is vital for design, material estimation, and ensuring safety and quality during construction.
+                </p> 
+            </div>
+
+            <div class="note-card">
+                <h3>📌 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Length (m):</strong> Required, must be > 0</li>
+                    <li><strong>Maximum Length:</strong> Typically ≤ 100 m for realistic facade elements</li>
+                    <li><strong>Units:</strong> Must be in meters (m) for accurate area calculation</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ Explanation of Parameters</h3>
+                <ul class="note-list">
+                    <li><strong>Length:</strong> The measurement of one side of the square facade element. It's crucial that this measurement is accurate to ensure correct area calculation.</li>
+                    <li><strong>Area:</strong> The total surface area of the facade element, calculated as length × length (for square elements).</li>
+                </ul>
+            </div>
+      
+
+            <div class="note-card">
+                <h3>📊 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Construction:</strong> Calculating the area of facade panels (e.g., cladding, glass) for material estimation, cutting, and installation planning.</li>
+                    <li><strong>Engineering:</strong> Designing structural elements (e.g., supporting frames, connections) for facade surfaces, ensuring stability and safety.</li>
+                    <li><strong>Architecture:</strong> Determining the aesthetic proportions and visual impact of facade elements on a building's overall appearance.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>🛡️ Safety Considerations</h3>
+                <ul class="note-list">
+                    <li><strong>Load Calculations:</strong> Area calculations contribute to determining the weight of facade elements, which is crucial for safe lifting and handling during installation.</li>
+                    <li><strong>Wind Load Resistance:</strong> Accurate area calculations are essential for structural engineers to design facades that can withstand wind forces, ensuring the safety of the building and its occupants.</li>
+                    <li><strong>Fire Safety:</strong> Area calculations can be relevant in determining the amount of fire-resistant materials required for the facade, contributing to building safety.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Conclusion</h3>
+                <p>Accurate area calculations are crucial for ensuring precise material usage, structural integrity, and overall safety and quality in facade construction. Incorrect area estimations can lead to wastage or shortages of materials, structural weaknesses, and potential safety hazards. This calculation is a fundamental step in the QEHSE process for facade projects.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function calculateArea() {
+    const length = document.getElementById("length").value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const areaValue = document.getElementById('areaValue');
+    const feedbackBox = document.getElementById('areaFeedback'); 
+
+    let errors = [];
+
+    // ✅ Length validation
+    if (length === "") {
+        errors.push("👉 Please enter the length (m).");
+    } else if (isNaN(length)) {
+        errors.push("👉 Length must be a valid number.");
+    } else {
+        const lengthNum = parseFloat(length);
+
+        if (lengthNum <= 0) {
+            errors.push("👉 Length must be greater than 0 m.");
+        } else if (lengthNum < 0.1) {
+            errors.push("👉 Length is unrealistically small (<0.1 m). Please recheck input.");
+        } else if (lengthNum > 100) {
+            errors.push("👉 Length exceeds maximum realistic value for façade elements (>100 m).");
+        }
+    }
+
+    // Show errors
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    const lengthNum = parseFloat(length);
+
+    // ✅ Calculate area
+    const area = lengthNum * lengthNum;
+    areaValue.textContent = area.toFixed(2);
+
+    // ✅ Feedback messages
+    let feedback = "";
+    if (area === 0) {
+        feedback = "❌ Invalid: The calculated area is zero. Please verify input.";
+    } else if (area <= 100) {
+        feedback = "✅ Safe range: Standard façade element size.";
+    } else if (area <= 400) {
+        feedback = "⚠️ Large façade area. Ensure bracing, wind load analysis, and fire-resistant material checks.";
+    } else {
+        feedback = "❌ Unrealistic façade element (>400 m²). Split into smaller panels for safety and compliance.";
+    }
+
+    feedbackBox.textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+function printReport() {
+    window.print();
+}
+
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+Input Validation Rules (Real-World QEHS/Fire Safety Context)
+Length (m)
+
+Required: Must not be left blank.
+
+Numeric check: Must be a number only.
+
+Minimum threshold: > 0 (zero-length elements are impossible in construction).
+
+Maximum threshold: ≤ 100 m (industry norm — panels beyond 100 m are unrealistic for façade elements; if larger, modularization is used).
+
+Allowed decimals: Up to 2 decimals (centimeter-level precision is practical for construction).
+
+Units: Always in meters (must warn users if they mistakenly enter cm/mm).
+
+Logical consistency:
+
+If length < 0.1 m → flag as unrealistic (too small to be a façade panel, risk of mis-entry).
+
+If length > 20 m → issue a warning (likely impractical for single panels — crane safety, fire spread considerations).
+
+2. Output Validation Logic & Threshold Explanations
+
+Formula:
+
+Area
+=
+Length
+2
+Area=Length
+2
+
+Thresholds & Interpretations:
+
+Area = 0 m² → Invalid (must not happen with correct inputs).
+
+0 < Area ≤ 100 m² → ✅ Normal panel range (safe for standard cladding/curtain walls).
+
+100 < Area ≤ 400 m² → ⚠️ Large element, requires structural bracing, wind-load analysis, and lifting plan.
+
+> 400 m² → ❌ Unrealistic; split into multiple panels (risk of wind collapse, crane overload, fire spread hazard).
+Edge Case Validations
+
+Length = 0 → Reject (no area possible).
+
+Length extremely small (<0.1 m) → Flag as error (input mistake or wrong unit like cm instead of m).
+
+Length extremely large (>100 m) → Reject (unrealistic façade element).
+
+Area > 400 m² → Warn user: not practical, violates safety/design standards.
+
+Non-numeric input (letters, symbols) → Reject.
+
+Decimal precision → Limit display to 2 decimals (industry practice).            
+<div class="note-card">
+                <h3>📐 Formula Explanation</h3>
+                <ul class ="note-list">
+                 <li>The formula used is: <strong>Area = Length × Length</strong></li>
+                   <li>This equation calculates the surface area of a square facade element.</li>
+                   <li>For rectangular elements, the formula would be Length × Width, but this calculator assumes square elements for simplicity.</li>
+                </ul>
+            </div>
+-->

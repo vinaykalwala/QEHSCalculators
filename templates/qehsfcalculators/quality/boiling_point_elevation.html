@@ -302,6 +302,35 @@
         .hidden { 
             display: none; 
         }
+<<<<<<< HEAD
+
+
+               .btn-container {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    margin: 30px 0;
+}
+
+.back-btn {
+    background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+    color: #ffffff; /* White text */
+    border: 2px solid #1560bd; /* Highlight border */
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none; /* Remove underline for link */
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    background-color: #1560bd; /* Highlight on hover */
+    color: #ffffff;
+    border-color: #000040;
+    transform: scale(1.05); /* Subtle hover effect */
+}
+=======
          .btn-container {
             display: flex;
             justify-content: center;
@@ -343,6 +372,7 @@
             padding-top: 15px;
             margin-top: 15px;
         }
+>>>>>>> 06383df6256b0c8e5d636769c537cdff1bc85bc9
     </style>
 </head>
 <body>
@@ -354,6 +384,11 @@
 
     <!-- Include header/footer for print -->
     {% include "includes/print_header_footer.html" %}
+
+
+      <div class="btn-container">
+    <a href="{% url 'quality_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+</div>
 
         <div class="calculator-header">
             <h1>Boiling Point Elevation Calculator</h1>
@@ -428,6 +463,14 @@
                     crucial for industrial processes and environmental monitoring.
                 </p> 
             </div>
+<div class="note-card">
+  <h3>📌 Input Validation</h3>
+  <ul class="note-list">
+    <li><strong>Molality (m):</strong> ≥ 0, ≤ 1000, max 6 decimals.</li>
+    <li><strong>Kₑ:</strong> > 0, ≤ 100, max 6 decimals.</li>
+    <li><strong>Pure BP (°C):</strong> -100 to 500, max 3 decimals.</li>
+  </ul>
+</div>
 
             <div class="note-card">
                 <h3>❓ Explanation of Parameters</h3>
@@ -496,96 +539,271 @@
     </div>
 
     <script>
-        // Set current date for print header
-        document.addEventListener('DOMContentLoaded', function() {
-            const now = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
-        });
+function calculateBPElevation() {
+    const molalityRaw = document.getElementById('molality').value.trim();
+    const kbRaw = document.getElementById('ebullioscopicConstant').value.trim();
+    const pureBPRaw = document.getElementById('pureSolventBP').value.trim();
 
-        function calculateBPElevation() {
-            const molality = document.getElementById('molality').value.trim();
-            const kb = document.getElementById('ebullioscopicConstant').value.trim();
-            const pureBP = document.getElementById('pureSolventBP').value.trim();
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const elevationValue = document.getElementById('elevationValue');
+    const newBPValue = document.getElementById('newBPValue');
+    const feedbackContent = document.getElementById('feedbackContent');
 
-            const errorBox = document.getElementById('resultError');
-            const errorMessage = document.getElementById('errorMessage');
-            const placeholder = document.getElementById('placeholder');
-            const resultValue = document.getElementById('resultValue');
-            const elevationValue = document.getElementById('elevationValue');
-            const newBPValue = document.getElementById('newBPValue');
-            const feedbackContent = document.getElementById('feedbackContent');
+    // Reset UI
+    errorBox.classList.add('hidden');
+    resultValue.classList.add('hidden');
+    placeholder.classList.remove('hidden');
+    errorMessage.innerHTML = "";
 
-            let errors = [];
-            
-            // Validation
-            if (molality === "") {
-                errors.push("👉 Please enter the molality of the solution.");
-            } else if (parseFloat(molality) < 0) {
-                errors.push("👉 Molality must be ≥ 0. Zero molality means no solute present.");
-            }
-            
-            if (kb === "") {
-                errors.push("👉 Please enter the ebullioscopic constant.");
-            } else if (parseFloat(kb) <= 0) {
-                errors.push("👉 Ebullioscopic constant must be greater than 0.");
-            }
-            
-            if (pureBP === "") {
-                errors.push("👉 Please enter the pure solvent boiling point.");
-            }
+    let errors = [];
+    let warnings = [];
 
-            if (errors.length > 0) {
-                errorMessage.innerHTML = errors.join("<br>");
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
-            } else {
-                errorBox.classList.add("hidden");
-            }
+    // Basic presence
+    if (molalityRaw === "") errors.push("👉 Enter molality (mol/kg).");
+    if (kbRaw === "") errors.push("👉 Enter ebullioscopic constant (Kₑ).");
+    if (pureBPRaw === "") errors.push("👉 Enter pure solvent boiling point (°C).");
 
-            // Convert values to numbers
-            const molalityNum = parseFloat(molality);
-            const kbNum = parseFloat(kb);
-            const pureBPNum = parseFloat(pureBP);
+    // Early return if missing
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        return;
+    }
 
-            // Calculate elevation
-            const deltaTb = kbNum * molalityNum;
-            const newBP = pureBPNum + deltaTb;
+    // Parse numbers
+    const molality = Number(molalityRaw);
+    const kb = Number(kbRaw);
+    const pureBP = Number(pureBPRaw);
 
-            // Display result
-            elevationValue.textContent = deltaTb.toFixed(3);
-            newBPValue.textContent = `New boiling point: ${newBP.toFixed(2)} °C`;
+    // Numeric sanity
+    if (!Number.isFinite(molality)) errors.push("👉 Molality must be a finite numeric value.");
+    if (!Number.isFinite(kb)) errors.push("👉 Ebullioscopic constant must be a finite numeric value.");
+    if (!Number.isFinite(pureBP)) errors.push("👉 Pure solvent BP must be a finite numeric value.");
 
-            // Provide feedback based on elevation magnitude
-            let feedback = "";
-            if (deltaTb === 0) {
-                feedback = "No boiling point elevation — this is pure solvent.";
-            } else if (deltaTb < 0.5) {
-                feedback = "✅ Minor elevation — typical for dilute solutions.";
-            } else if (deltaTb < 2) {
-                feedback = "⚠️ Moderate elevation — may impact thermal processing.";
-            } else {
-                feedback = "❗ Significant elevation — requires attention in process control.";
-            }
+    // Range checks
+    if (molality < 0) errors.push("👉 Molality cannot be negative (use ≥ 0).");
+    if (molality > 1000) {
+        errors.push("👉 Molality unusually high (>1000 mol/kg). Verify units and input.");
+    } else if (molality > 5) {
+        warnings.push("⚠️ Molality > 5 mol/kg — this is concentrated; verify process implications.");
+    }
 
-            feedbackContent.textContent = feedback;
+    if (kb <= 0) errors.push("👉 Ebullioscopic constant must be > 0.");
+    if (kb > 100) {
+        errors.push("👉 Ebullioscopic constant unusually large (>100). Verify units.");
+    } else if (kb > 5) {
+        warnings.push("⚠️ Kₑ > 5 — uncommon; verify solvent value.");
+    }
 
-            placeholder.classList.add('hidden');
-            resultValue.classList.remove('hidden');
-        }
+    if (pureBP < -100 || pureBP > 500) {
+        errors.push("👉 Pure solvent BP outside expected range (-100 to 500 °C). Check units (°C vs K).");
+    } else if (pureBP > 200) {
+        warnings.push("⚠️ Pure BP > 200°C — confirm solvent and equipment ratings.");
+    }
 
-        function printReport() {
-            // Update date just before printing
-            const now = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
-            
-            window.print();
-        }
+    // Decimal precision checks (informational)
+    const decimals = (s, max) => {
+        if (!s.includes(".")) return 0;
+        return s.split(".")[1].length <= max ? 0 : s.split(".")[1].length;
+    };
+    if (decimals(molalityRaw, 6)) warnings.push("⚠️ Molality has >6 decimal places — consider reducing precision.");
+    if (decimals(kbRaw, 6)) warnings.push("⚠️ Kₑ has >6 decimal places — consider reducing precision.");
+    if (decimals(pureBPRaw, 3)) warnings.push("⚠️ BP has >3 decimal places — consider reducing precision.");
+
+    // Present errors early
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        return;
+    }
+
+    // Calculation
+    const deltaTb = kb * molality;                // ΔT_b
+    const newBP = pureBP + deltaTb;
+
+    // Output sanity
+    if (!Number.isFinite(deltaTb) || deltaTb < 0) {
+        errorMessage.innerHTML = "❌ Calculation error: boiling point elevation invalid.";
+        errorBox.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        return;
+    }
+    if (deltaTb > 1000) {
+        errorMessage.innerHTML = "❌ Computed elevation unreasonably large (>1000 °C). Check inputs.";
+        errorBox.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        return;
+    }
+
+    // Safety warnings for outputs
+    if (newBP > 350) {
+        warnings.push("🚨 New boiling point > 350°C — extremely high; confirm inputs and engineering controls.");
+    } else if (newBP > 200) {
+        warnings.push("⚠️ New boiling point > 200°C — review equipment pressure & materials.");
+    }
+
+    // Display results
+    elevationValue.textContent = deltaTb.toFixed(4);
+    newBPValue.textContent = `New boiling point: ${newBP.toFixed(3)} °C`;
+
+    // Compose feedback
+    let feedback = "";
+    if (deltaTb === 0) {
+        feedback = "No elevation — pure solvent.";
+    } else if (deltaTb <= 0.5) {
+        feedback = "Minor elevation — typical for dilute solutions.";
+    } else if (deltaTb <= 2) {
+        feedback = "Moderate elevation — may impact thermal process controls.";
+    } else {
+        feedback = "Significant elevation — assess process pressure & safety.";
+    }
+
+    // Append warnings to feedback
+    if (warnings.length > 0) {
+        feedback += " | Warnings: " + warnings.join(" ");
+        // show warnings in error box as informational (you can style separately)
+        errorMessage.innerHTML = warnings.join("<br>");
+        errorBox.classList.remove('hidden');
+    } else {
+        errorBox.classList.add('hidden');
+    }
+
+    feedbackContent.textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
     </script>
     <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
 {% endblock %}
+
+<!--
+
+Detailed Input Validation Rules (QEHS / Audit style)
+
+Molality (m, mol·kg⁻¹)
+
+Required.
+
+Numeric (decimals allowed).
+
+Range (hard): 0 ≤ m ≤ 1000.
+
+Rationale: m = 0 means pure solvent. Extremely high molalities (>1000) are physically unrealistic for most industrial solutions and usually indicate unit error.
+
+Typical / soft-warning range: 0 < m ≤ 5 (dilute → typical labs/processes). Flag if m > 5.
+
+Decimal precision: up to 6 decimal places is acceptable.
+
+Ebullioscopic constant (Kₑ, K·kg·mol⁻¹)
+
+Required.
+
+Numeric > 0.
+
+Range (hard): 0 < Kₑ ≤ 100.
+
+Rationale: most solvents have Kₑ in 0.1–10 range; 100 is a defensive upper cap to catch unit mistakes.
+
+Soft-warning if Kₑ > 5.
+
+Decimal precision: up to 6 decimals.
+
+Pure solvent boiling point (°C)
+
+Required.
+
+Numeric (can be negative for low-boiling solvents).
+
+Range (hard): -100 ≤ BP ≤ 500 °C.
+
+Rationale: covers lab solvents and process fluids; >500°C likely unit error (Kelvin vs Celsius).
+
+Decimal precision: up to 3 decimals.
+
+Units & UI
+
+Label fields with units (mol/kg, K·kg/mol, °C).
+
+Disallow commas/currency symbols; accept step="any" style numeric strings but validate via JS.
+
+Display clear warning text for unit mismatches (e.g., if user inputs K instead of °C).
+
+2) Output Validation Logic & Thresholds
+
+Calculation:
+
+
+ΔTb = Ke ​× m
+
+New BP=Pure BP+ΔTb
+
+	​
+
+
+Output constraints / interpretation:
+
+ΔT_b must be finite and ≥ 0.
+
+0 ≤ ΔT_b ≤ 1000 (hard cap — huge elevations indicate input error).
+
+New BP should be flagged if:
+
+New BP > 200 °C → Process safety warning (equipment pressure rating, steam/venting, thermal decomposition risk).
+
+New BP > 350 °C → Critical: likely unit error or dangerous process conditions — require engineering review.
+
+Reporting bands for QA / process control (suggested):
+
+ΔT_b = 0 → Pure solvent (verify if solute expected).
+
+0 < ΔT_b ≤ 0.5 °C → Minor elevation (typical, dilute).
+
+0.5 < ΔT_b ≤ 2 °C → Moderate; may alter sterilization/processing temperature.
+
+> 2 °C → Significant elevation; review process/pressure & equipment safety.
+
+3) Edge-case Validations (what to catch & how to respond)
+
+Empty fields → block calculation, show clear message.
+
+Negative molality → block (invalid).
+
+Kₑ ≤ 0 → block (invalid physical constant).
+
+Molality extremely large (m > 1000) → block or require confirmation; show unit-check suggestion.
+
+Kₑ extremely large (>100) → warning / require confirmation.
+
+New BP > 200°C → show prominent safety warning (not block, but require user acknowledgement in UI if used in process docs).
+
+Non-finite results (NaN, Infinity) → error and do not show numeric results.
+
+Precision illusions: warn if user supplies many decimals implying false precision (e.g., more than 6 decimals) — show information message (not block).
+
+Unit mismatch suspicion: if pureBP >> 500 or user uses integer 373 (which equals 100°C in K), show suggestion: “Did you mean Kelvin?”
+
+Edge Cases & How the code handles them
+
+Empty fields → error message, block.
+
+Molality = 0 → returns ΔT = 0, “No elevation” feedback.
+
+Extremely large molality / kb → errors requiring confirmation.
+
+pureBP entered in Kelvin (e.g., 373) → triggers range warning "Check units (°C vs K)". Suggest user convert.
+
+Precision abuse → warnings about too many decimal places.
+
+Resulting newBP > 200°C → safety warning; >350°C → critical alarm requiring engineering review.
+
+Non-finite result (NaN/Infinity) → blocked and error message.
+-->

@@ -1,0 +1,615 @@
+{% extends 'base.html' %}
+{% block title %}Directional Survey Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Directional Survey Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+
+
+        .btn-container {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    margin: 30px 0;
+}
+
+.back-btn {
+    background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+    color: #ffffff; /* White text */
+    border: 2px solid #1560bd; /* Highlight border */
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none; /* Remove underline for link */
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    background-color: #1560bd; /* Highlight on hover */
+    color: #ffffff;
+    border-color: #000040;
+    transform: scale(1.05); /* Subtle hover effect */
+}
+    </style>
+</head>
+<body>
+   <div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+
+
+    <div class="btn-container">
+    <a href="{% url 'quality_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+</div>
+
+        <div class="calculator-header">
+            <h1>Directional Survey Calculator</h1>
+           <p>Calculates horizontal displacement of a wellbore based on measured depth and inclination angle</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator Input Card -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="measuredDepth">Measured Depth (MD) (feet)</label>
+                    <input type="number" id="measuredDepth" class="form-input" min="0" placeholder="Enter measured depth">
+                </div>
+
+
+                <div class="form-group">
+                                        <label for="inclination">Inclination Angle (I) (degrees)</label>
+                    <input type="number" id="inclination" class="form-input" min="0" max="90" placeholder="Enter inclination angle (0-90)">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateDisplacement()">Calculate Displacement</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Boiler illustration">
+                    <p>This tool calculates the <strong>Horizontal Displacement</strong> of a wellbore. Enter measured depth and inclination angle to see results.</p>
+                     </div>
+
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Horizontal Displacement</h2>
+                    </div>
+<div class="rate-value" id="displacementValue">0.00</div>
+                    <div class="rate-label">feet</div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">Interpretation</div>
+                        <div class="feedback-content" id="displacementFeedback"></div>
+                    </div>
+
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🔎 About This Calculator</h3>
+                <p>
+                    The <strong>Directional Survey Calculator</strong> determines the horizontal displacement (D) of a wellbore during drilling operations. Accurate directional surveys are essential for efficient well placement, collision avoidance, and maximizing reservoir contact.
+                </p>   
+            </div>
+
+            
+<div class="note-card">
+                <h3>📌 Validation Rules</h3>
+                <ul class="note-list">
+                    <li><strong>Measured Depth:</strong> Required, must be > 0</li>
+                    <li><strong>Inclination Angle:</strong> Required, must be between 0 and 90 degrees</li>
+                </ul>
+            </div>
+
+
+            <div class="note-card">
+                <h3>📋 Quality & ISO Compliance</h3>
+                <ul class="note-list">
+                         <li><strong>ISO 9001 (Quality Management):</strong> Ensures accuracy in directional surveys to meet drilling specifications.</li>
+                    <li><strong>ISO 14001 (Environmental Management):</strong> Prevents unintended environmental impact by optimizing well trajectories.</li>
+                    <li><strong>ISO 45001 (Occupational Health & Safety):</strong> Enhances drilling safety by minimizing risks of well collisions.</li>
+                </ul>
+            </div>
+            <div class="note-card">
+                <h3>📊 Real-Life Applications</h3>
+                <ul class="note-list">
+                            <li><strong>Well Placement:</strong> Accurately position wells within target reservoirs.</li>
+                    <li><strong>Collision Avoidance:</strong> Prevent well collisions during drilling operations.</li>
+                    <li><strong>Reservoir Management:</strong> Maximize reservoir contact and production efficiency.</li>
+                    <li><strong>Regulatory Compliance:</strong> Ensure wells stay within permitted boundaries.</li>
+                </ul>
+            </div>
+            
+        </div>
+    </div>
+
+
+    <script>
+    function calculateDisplacement() {
+    const measuredDepth = document.getElementById("measuredDepth").value.trim();
+    const inclination = document.getElementById("inclination").value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const outputValue = document.getElementById('displacementValue');
+    const feedbackBox = document.getElementById('displacementFeedback');
+
+    let errors = [];
+
+    // ✅ Validate Measured Depth
+    if (measuredDepth === "") {
+        errors.push("👉 Please enter the measured depth (ft).");
+    } else if (isNaN(measuredDepth)) {
+        errors.push("👉 Measured depth must be a number.");
+    } else if (parseFloat(measuredDepth) <= 0) {
+        errors.push("👉 Measured depth must be greater than 0.");
+    } else if (parseFloat(measuredDepth) > 40000) {
+        errors.push("👉 Measured depth exceeds realistic maximum (>40,000 ft). Please recheck input.");
+    }
+
+    // ✅ Validate Inclination
+    if (inclination === "") {
+        errors.push("👉 Please enter the inclination angle (°).");
+    } else if (isNaN(inclination)) {
+        errors.push("👉 Inclination must be a number.");
+    } else if (parseFloat(inclination) < 0 || parseFloat(inclination) > 90) {
+        errors.push("👉 Inclination must be between 0° and 90°.");
+    }
+
+    // ✅ Cross-field validation
+    const mdNum = parseFloat(measuredDepth);
+    const iNum = parseFloat(inclination);
+
+    if (!isNaN(mdNum) && !isNaN(iNum)) {
+        if (mdNum === 0 && iNum > 0) {
+            errors.push("👉 A horizontal or inclined well cannot have zero depth.");
+        }
+        if (iNum === 0 && mdNum > 0 && mdNum < 50) {
+            errors.push("👉 Very shallow vertical wells (<50 ft) are typically test cases only. Please confirm.");
+        }
+    }
+
+    // Show errors
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // ✅ Calculate Displacement
+    const iRadians = iNum * (Math.PI / 180);
+    const displacement = mdNum * Math.cos(iRadians);
+
+    // Output must never exceed MD
+    const safeDisplacement = (displacement > mdNum) ? mdNum : displacement;
+
+    outputValue.textContent = safeDisplacement.toFixed(2);
+
+    // Feedback
+    let feedback = "";
+    if (iNum <= 5) {
+        feedback = "Vertical well – negligible horizontal displacement.";
+    } else if (iNum <= 30) {
+        feedback = "Directional well – controlled deviation, safe operation.";
+    } else if (iNum <= 70) {
+        feedback = "High-angle well – monitor torque, drag, and casing wear.";
+    } else {
+        feedback = "Horizontal well – maximum reservoir exposure, higher operational risk.";
+    }
+
+    feedbackBox.textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+</script>
+   
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+<!--  
+. Input Validation Rules (QEHS / Fire Safety Context)
+
+✅ Measured Depth (MD – feet):
+
+Required.
+
+Minimum: > 0 ft (depth cannot be zero or negative).
+
+Maximum realistic range: 0 – 40,000 ft (deepest drilled wells are ~40,000 ft; higher = outlier flag).
+
+Decimals: Allowed up to 2 (survey tools have finite precision).
+
+Unit check: Must always be in feet (consistent reporting requirement).
+
+Cross-field dependency: If Inclination = 90°, displacement ≈ MD → system must not allow MD=0 with I=90° (illogical case).
+
+✅ Inclination Angle (I – degrees):
+
+Required.
+
+Range: 0° – 90°.
+
+0° = perfectly vertical.
+
+90° = perfectly horizontal.
+
+Decimals: Allowed up to 1 decimal (survey instruments read to ~0.1°).
+
+Logical dependency:
+
+If I = 0°, displacement must = 0 (safety check).
+
+If I = 90°, displacement = MD (horizontal case).
+
+2. Output Validation Logic & Thresholds
+
+Displacement Formula:
+
+𝐷
+=
+𝑀
+𝐷
+×
+cos
+⁡
+(
+𝐼
+)
+D=MD×cos(I)
+
+🔎 Checks:
+
+Displacement must never exceed measured depth. If it does → calculation error.
+
+If MD ≤ 500 ft → even at 90° angle, displacement ≤ 500 ft.
+
+If MD is large (≥20,000 ft) but angle < 5°, displacement ≈ MD (flag unrealistic drilling design).
+
+Interpretation bands (industry aligned):
+
+0° – 5° → “Vertical Well” (negligible displacement).
+
+5° – 30° → “Directional Well” (controlled deviation).
+
+30° – 70° → “High Angle Well” (increased risks: casing wear, torque).
+
+70° – 90° → “Horizontal Well” (max displacement, high safety requirements).
+
+3. Edge Case Validations
+
+Division by zero: Not applicable here (but formula must never divide).
+
+Empty inputs: Block calculation.
+
+Non-numeric values: Reject (NaN handling).
+
+Negative depth or inclination: Reject.
+
+Depth = 0 & Inclination > 0: Illogical → reject.
+
+Inclination = 90° but depth very small (≤10 ft): Flag as test input (not real drilling).
+
+Depth > 40,000 ft: Warn user of outlier (possible data entry error).-->

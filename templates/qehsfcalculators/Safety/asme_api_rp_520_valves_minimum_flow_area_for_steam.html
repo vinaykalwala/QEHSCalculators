@@ -451,14 +451,16 @@
             </div>
             
             <div class="note-card">
-                <h3>📋 Validations & Input Constraints</h3>
-                <ul class="note-list">
-                    <li><strong>Mass Flow Rate must be positive:</strong> The flow rate cannot be zero or negative.</li>
-                    <li><strong>Relieving Pressure must be greater than zero:</strong> Ensures the calculation remains physically valid.</li>
-                    <li><strong>Discharge Coefficient (K<sub>d</sub>) must be between 0 and 1:</strong> This represents the efficiency of flow through the valve.</li>
-                    <li><strong>Superheat Correction Factor (K<sub>SH</sub>) must be greater than zero:</strong> Adjusts for the presence of superheated steam.</li>
-                </ul>
-            </div>
+    <h3>🛡️ Input Validation Rules</h3>
+    <ul class="note-list">
+        <li><strong>Mass Flow Rate (ṁ):</strong> Must be > 0. Recommended range 100 – 10,000,000 lb/h.</li>
+        <li><strong>Upstream Relieving Pressure (P<sub>R</sub>):</strong> Must be > 14.7 psia. Typical design max ~5000 psia.</li>
+        <li><strong>Discharge Coefficient (K<sub>d</sub>):</strong> Must be between 0 and 1. Typical API RP 520 range 0.62 – 0.975.</li>
+        <li><strong>Superheat Correction Factor (K<sub>SH</sub>):</strong> Must be > 0. Usually ≥ 1.0 for superheated steam.</li>
+        <li><strong>Edge Cases:</strong> Division by zero, negative values, or unrealistic inputs will trigger error/warning.</li>
+    </ul>
+</div>
+
              <div class="note-card">
                 <h3>🏭 ASME (API RP 520) Standard</h3>
                 <p>
@@ -483,80 +485,85 @@
         });
 
         function calculateDischargeArea() {
-            const massFlow = document.getElementById('massFlow').value.trim();
-            const pressure = document.getElementById('pressure').value.trim();
-            const Kd = document.getElementById('Kd').value.trim();
-            const Ksh = document.getElementById('Ksh').value.trim();
+    const massFlow = parseFloat(document.getElementById('massFlow').value.trim());
+    const pressure = parseFloat(document.getElementById('pressure').value.trim());
+    const Kd = parseFloat(document.getElementById('Kd').value.trim());
+    const Ksh = parseFloat(document.getElementById('Ksh').value.trim());
 
-            const errorBox = document.getElementById('resultError');
-            const errorMessage = document.getElementById('errorMessage');
-            const placeholder = document.getElementById('placeholder');
-            const resultValue = document.getElementById('resultValue');
-            const rateValue = document.getElementById('rateValue');
-            const feedbackContent = document.getElementById('feedbackContent');
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const rateValue = document.getElementById('rateValue');
+    const feedbackContent = document.getElementById('feedbackContent');
 
-            let errors = [];
+    let errors = [];
+    let warnings = [];
 
-            if (massFlow === "") {
-                errors.push("👉 Please enter the mass flow rate.");
-            } else if (parseFloat(massFlow) <= 0) {
-                errors.push("👉 Mass flow rate must be greater than 0.");
-            }
-            
-            if (pressure === "") {
-                errors.push("👉 Please enter the upstream relieving pressure.");
-            } else if (parseFloat(pressure) <= 0) {
-                errors.push("👉 Upstream relieving pressure must be greater than 0.");
-            }
-            
-            if (Kd === "") {
-                errors.push("👉 Please enter the discharge coefficient.");
-            } else if (parseFloat(Kd) <= 0 || parseFloat(Kd) > 1) {
-                errors.push("👉 Discharge coefficient must be between 0 and 1.");
-            }
-            
-            if (Ksh === "") {
-                errors.push("👉 Please enter the superheat correction factor.");
-            } else if (parseFloat(Ksh) <= 0) {
-                errors.push("👉 Superheat correction factor must be greater than 0.");
-            }
+    // === Hard Validations ===
+    if (isNaN(massFlow) || massFlow <= 0) {
+        errors.push("👉 Mass flow rate must be greater than 0 lb/h.");
+    } else if (massFlow < 100 || massFlow > 10000000) {
+        warnings.push("⚠️ Mass flow is outside typical industrial range (100 – 10,000,000 lb/h). Please verify.");
+    }
 
-            if (errors.length > 0) {
-                errorMessage.innerHTML = errors.join("<br>");
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
-            } else {
-                errorBox.classList.add("hidden");
-            }
+    if (isNaN(pressure) || pressure <= 0) {
+        errors.push("👉 Upstream relieving pressure must be greater than 0 psia.");
+    } else if (pressure < 14.7) {
+        errors.push("👉 Pressure must be at least atmospheric (14.7 psia).");
+    } else if (pressure > 5000) {
+        warnings.push("⚠️ Pressure exceeds typical API RP 520 design range (> 5000 psia). Verify inputs.");
+    }
 
-            const m = parseFloat(massFlow);
-            const P = parseFloat(pressure);
-            const kd = parseFloat(Kd);
-            const ksh = parseFloat(Ksh);
-            
-            // Calculate Required Effective Discharge Area (A0)
-            const A0 = m / (51.5 * P * kd * ksh);
-            
-            // Format the result to 4 decimal places
-            rateValue.textContent = A0.toFixed(4);
-            
-            // Determine feedback
-            let feedback = "";
-            if (A0 < 0.1) {
-                feedback = "✅ <strong>Small Valve Size:</strong> Suitable for low-flow conditions.";
-            } else if (A0 >= 0.1 && A0 <= 2.0) {
-                feedback = "✅ <strong>Standard Valve Size:</strong> Acceptable for normal safety valve applications.";
-            } else {
-                feedback = "⚠️ <strong>Large Valve Size Required:</strong> Consider checking system design for excessive flow conditions.";
-            }
-            
-            feedbackContent.innerHTML = feedback;
-            
-            placeholder.classList.add('hidden');
-            resultValue.classList.remove('hidden');
-        }
+    if (isNaN(Kd) || Kd <= 0 || Kd > 1) {
+        errors.push("👉 Discharge coefficient (Kd) must be between 0 and 1.");
+    } else if (Kd < 0.62 || Kd > 0.975) {
+        warnings.push("⚠️ Kd is outside API RP 520 recommended range (0.62 – 0.975).");
+    }
+
+    if (isNaN(Ksh) || Ksh <= 0) {
+        errors.push("👉 Superheat correction factor (Ksh) must be greater than 0.");
+    } else if (Ksh < 1.0) {
+        warnings.push("⚠️ Ksh is typically ≥ 1.0 for superheated steam. Please check inputs.");
+    }
+
+    // === Handle Errors ===
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // === Perform Calculation ===
+    const A0 = massFlow / (51.5 * pressure * Kd * Ksh);
+    rateValue.textContent = A0.toFixed(4);
+
+    // === Output Feedback ===
+    let feedback = "";
+    if (A0 < 0.1) {
+        feedback = "✅ <strong>Small Valve Size:</strong> Suitable for very low-flow conditions.";
+    } else if (A0 >= 0.1 && A0 <= 2.0) {
+        feedback = "✅ <strong>Standard Valve Size:</strong> Acceptable for normal safety valve applications.";
+    } else if (A0 > 2.0 && A0 <= 10) {
+        feedback = "⚠️ <strong>Large Valve Size:</strong> System review recommended for excessive flow.";
+    } else {
+        feedback = "❌ <strong>Unusually Large Valve:</strong> A₀ > 10 in² indicates possible input error or abnormal system.";
+    }
+
+    // Append warnings
+    if (warnings.length > 0) {
+        feedback += "<br><br>" + warnings.join("<br>");
+    }
+
+    feedbackContent.innerHTML = feedback;
+
+    placeholder.classList.add("hidden");
+    resultValue.classList.remove("hidden");
+}
 
         function printReport() {
             // Update date just before printing
@@ -571,3 +578,108 @@
 </body>
 </html>
 {% endblock %}
+
+
+{% comment %} 
+1. Formula Reference (for code comments)
+
+The formula currently implemented in your calculator:
+
+A₀ = ṁ / (51.5 × P × Kd × Ksh)
+
+
+Where:
+
+A₀ = Required effective discharge area (in²)
+
+ṁ = Mass flow rate (lb/h)
+
+P = Upstream relieving pressure (psia)
+
+Kd = Effective discharge coefficient (dimensionless, 0 < Kd ≤ 1)
+
+Ksh = Superheat correction factor (dimensionless, ≥ 1 for superheated steam)
+
+This is consistent with API RP 520 Part I (steam relief sizing).
+
+2. Input Validation Rules (Real-World QEHS/Fire Safety)
+
+✅ Mass Flow Rate (ṁ, lb/h)
+
+Must be > 0 (cannot be zero/negative).
+
+Recommended range in practice: 100 – 10,000,000 lb/h.
+
+Allow up to 2 decimal places for precision.
+
+Too small (< 100 lb/h) or too high (> 10,000,000 lb/h) should trigger a warning, not hard error.
+
+✅ Upstream Relieving Pressure (PR, psia)
+
+Must be > 0 psia.
+
+Commonly ranges 15 psia – 5000 psia for industrial systems.
+
+Values below atmospheric (14.7 psia) are illogical unless vacuum design is intended → should throw validation error.
+
+Too high (> 5000 psia) → warn user to double-check inputs.
+
+✅ Discharge Coefficient (Kd)
+
+Must be between 0.62 and 0.975 in practice (API RP 520 values).
+
+Validation: enforce 0 < Kd ≤ 1 hard limit.
+
+Add warning if outside 0.62 – 0.975 (may be unrealistic).
+
+✅ Superheat Correction Factor (Ksh)
+
+Must be ≥ 1.0 (since for saturated steam it’s 1.0, higher for superheated).
+
+Hard limit: Ksh > 0.
+
+Warn if Ksh < 1.0 (physically non-sensical).
+
+3. Output Validation & Thresholds
+
+Your result interpretation already makes sense, but we’ll refine:
+
+A₀ < 0.1 in² → Small valve, verify design adequacy (good for lab or pilot systems).
+
+0.1 – 2.0 in² → Typical valve sizing, most compliant.
+
+2.0 – 10 in² → Large valve, system review required (warn user).
+
+> 10 in² → Extremely large → trigger red warning (possible input error or unusual industrial scenario like very high boilers).
+
+4. Edge Case Validations
+
+Division by zero → Prevent if P=0, Kd=0, or Ksh=0.
+
+Unrealistic combinations → e.g., very high flow with very low pressure → gives unreasonably large A₀. Should show warning.
+
+Negative or null values → reject input.
+
+Extreme outliers → warn user to double-check system design.
+
+5. Corrected JavaScript Validation Code
+
+Here’s the updated version with commented formula + validations:
+
+/*
+Formula Reference (API RP 520 - Steam Relief Valves):
+A₀ = ṁ / (51.5 × P × Kd × Ksh)
+
+Where:
+- A₀  = Required effective discharge area (in²)
+- ṁ   = Mass Flow Rate (lb/h) → must be > 0
+- P   = Upstream Relieving Pressure (psia) → must be > 14.7 (atmospheric)
+- Kd  = Discharge Coefficient (0 < Kd ≤ 1, API RP 520 typical: 0.62–0.975)
+- Ksh = Superheat Correction Factor (≥ 1.0, =1 for saturated steam)
+
+Validation Rules:
+- Mass Flow: > 0, recommended 100 – 10,000,000 lb/h
+- Pressure: > 14.7 psia, recommended max ~5000 psia
+- Kd: 0 < Kd ≤ 1, warning if outside 0.62 – 0.975
+- Ksh: > 0, must be ≥ 1.0 for superheated steam
+*/ {% endcomment %}

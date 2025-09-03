@@ -515,6 +515,18 @@
         </div>
 
         <div class="note-card">
+            <h3>✔️ Input Validations</h3>
+            <ul class="note-list">
+                <li><strong>Air Flow Rate (Q):</strong> Must be > 0 and ≤ 100,000 m³/h (practical HVAC/ventilation range).</li>
+                <li><strong>Room Volume (V):</strong> Must be > 0 and ≤ 50,000 m³ (typical for residential, commercial, or industrial spaces).</li>
+                <li><strong>Decimals:</strong> Up to 2 decimal places allowed for precision.</li>
+                <li><strong>Logical Check:</strong> If Room Volume = 0 → ACH cannot be calculated (division by zero).</li>
+                <li><strong>Practical Check:</strong> ACH values usually range from 2–20 for normal spaces; >20 indicates special environments like hospitals or labs.</li>
+            </ul>
+        </div>
+
+
+        <div class="note-card">
             <h3>🌍 Key Applications</h3>
             <ul class="note-list">
                 <li><strong>Hospitals:</strong> Infection control through air replacement.</li>
@@ -528,6 +540,8 @@
 
 <script>
 /* Helper to show error box consistently */
+
+/* Helper to show error messages */
 function showErrors(errors) {
   const errorBox = document.getElementById('resultError');
   const errorMessage = document.getElementById('errorMessage');
@@ -540,9 +554,8 @@ function showErrors(errors) {
   if (resultValue) resultValue.classList.add('hidden');
 }
 
-/* Main ACH calculator with robust validations */
+/* ACH Calculator with industry-standard validations */
 function calculateACH() {
-  // safe reads
   const airflowRaw = document.getElementById('airflowRate')?.value.trim() ?? "";
   const volumeRaw  = document.getElementById('volume')?.value.trim() ?? "";
 
@@ -553,7 +566,7 @@ function calculateACH() {
   const rateEl = document.getElementById('rateValue');
   const feedbackEl = document.getElementById('feedbackContent');
 
-  // reset UI
+  // Reset UI
   if (errorBox) errorBox.classList.add('hidden');
   if (errorMessage) errorMessage.innerHTML = "";
   if (feedbackEl) feedbackEl.innerHTML = "";
@@ -561,60 +574,50 @@ function calculateACH() {
   const errors = [];
   const warnings = [];
 
-  // required checks
+  // ✅ Required checks
   if (airflowRaw === "") errors.push("👉 Please enter the Airflow Rate (m³/min).");
   if (volumeRaw === "") errors.push("👉 Please enter the Volume (m³).");
-  if (errors.length > 0) {
-    showErrors(errors);
-    return;
-  }
+  if (errors.length > 0) return showErrors(errors);
 
-  // parse
+  // ✅ Parse values
   const airflowRate = parseFloat(airflowRaw);
   const volume = parseFloat(volumeRaw);
 
   if (!Number.isFinite(airflowRate) || !Number.isFinite(volume)) {
-    showErrors(["⚠️ Enter valid numeric values for airflow rate and volume."]);
-    return;
+    return showErrors(["⚠️ Enter valid numeric values for airflow rate and volume."]);
   }
 
-  // logical / physical checks
+  // ✅ Logical checks
   if (airflowRate <= 0) errors.push("👉 Airflow Rate must be greater than 0 (m³/min).");
   if (volume <= 0) errors.push("👉 Volume must be greater than 0 (m³).");
+  if (errors.length > 0) return showErrors(errors);
 
-  if (errors.length > 0) {
-    showErrors(errors);
-    return;
-  }
+  // ✅ Sanity checks (likely data entry/unit errors)
+  if (airflowRate > 100000) warnings.push("⚠️ Very high airflow — check if you entered m³/h instead of m³/min.");
+  if (airflowRate < 0.01) warnings.push("⚠️ Extremely low airflow — check sensor or units.");
+  if (volume > 1000000) warnings.push("⚠️ Very large volume — verify units (m³).");
+  if (volume < 1) warnings.push("⚠️ Very small space — verify dimensions (m³).");
 
-  // non-blocking sanity warnings (detect likely unit or entry mistakes)
-  // thresholds are heuristic — adjust to your domain if needed
-  if (airflowRate > 1e5) warnings.push("⚠️ Very large airflow rate — check units (maybe input was m³/h or L/min?).");
-  if (airflowRate < 0.001) warnings.push("⚠️ Very small airflow rate — check units (m³/min) or sensor reading.");
-  if (volume > 1e6) warnings.push("⚠️ Very large room volume — verify units (m³) or data entry.");
-  if (volume < 0.01) warnings.push("⚠️ Very small volume — verify units (m³).");
-
-  // core formula: ACH = (Q × 60) / V, where Q in m^3/min, V in m^3 -> ACH in 1/h
+  // ✅ Core calculation
   const ach = (airflowRate * 60) / volume;
 
   if (!Number.isFinite(ach) || ach < 0) {
-    showErrors(["⚠️ Calculation produced invalid result. Check input values."]);
-    return;
+    return showErrors(["⚠️ Calculation invalid. Check input values."]);
   }
 
-  // feedback categories (generic). You can adapt thresholds per building type.
+  // ✅ Interpret result
   let feedback;
   if (ach >= 6) {
-    feedback = "🌟 Excellent ventilation! Great air exchange (≥ 6 ACH).";
+    feedback = "🌟 Excellent ventilation! Meets healthcare & lab standards.";
   } else if (ach >= 4) {
-    feedback = "✅ Good ventilation (4–6 ACH).";
+    feedback = "✅ Good ventilation. Suitable for most workplaces.";
   } else if (ach >= 2) {
-    feedback = "🟢 Fair ventilation (2–4 ACH). Consider improvements for sensitive uses.";
+    feedback = "🟢 Fair ventilation. Consider improvements.";
   } else {
-    feedback = "🔴 Poor ventilation (<2 ACH). Air circulation is likely inadequate.";
+    feedback = "🔴 Poor ventilation. Fails most safety standards.";
   }
 
-  // show numeric + details (include warnings if any)
+  // ✅ Display results
   if (rateEl) rateEl.textContent = ach.toFixed(2);
   let details = `<div>Calculated ACH: <b>${ach.toFixed(2)} per hour</b></div>`;
   if (warnings.length) {
@@ -622,7 +625,7 @@ function calculateACH() {
   }
   if (feedbackEl) feedbackEl.innerHTML = `<div>${feedback}</div>${details}`;
 
-  // toggle UI
+  // Toggle UI
   if (placeholder) placeholder.classList.add('hidden');
   if (resultValue) resultValue.classList.remove('hidden');
   if (errorBox) errorBox.classList.add('hidden');
@@ -644,3 +647,53 @@ function printReport() {
 </body>
 </html>
 {% endblock %}
+
+
+<!-- / 
+========================================================
+📘 ACH CALCULATOR FORMULA & VALIDATIONS (REFERENCE)
+========================================================
+
+🔹 Formula Used:
+   ACH = ( Q × 60 ) / V
+   where,
+     Q = Air Flow Rate (m³/min)   → converted to m³/h by multiplying ×60  
+     V = Room Volume (m³)  
+     ACH = Air Changes per Hour  
+
+--------------------------------------------------------
+🔹 Input Validations:
+1. Required Inputs:
+   - Airflow Rate (Q) → must be entered (not empty).
+   - Room Volume (V) → must be entered (not empty).
+
+2. Data Type Checks:
+   - Both Q and V must be numeric and finite.
+
+3. Logical Checks:
+   - Q > 0 (Airflow Rate must be positive).
+   - V > 0 (Room Volume must be positive).
+   - Prevent division by zero (if V = 0 → invalid).
+
+4. Range / Sanity Checks (to catch unit or entry errors):
+   - Q > 100,000 m³/min → ⚠️ likely meant m³/h, check units.
+   - Q < 0.01 m³/min → ⚠️ unusually low airflow, check sensor/units.
+   - V > 1,000,000 m³ → ⚠️ extremely large space, verify input.
+   - V < 1 m³ → ⚠️ very small space, check dimensions.
+
+5. Practical Interpretation (based on ACH result):
+   - ACH ≥ 6  → 🌟 Excellent ventilation (hospitals, labs).
+   - 4 ≤ ACH < 6 → ✅ Good ventilation (workplaces, offices).
+   - 2 ≤ ACH < 4 → 🟢 Fair ventilation (residential, acceptable but improvable).
+   - ACH < 2   → 🔴 Poor ventilation (fails most safety standards).
+
+--------------------------------------------------------
+⚠️ Note:
+ACH is a ventilation measure but does not account for:
+   - Airflow distribution
+   - Filtration efficiency
+   - Pollutant sources inside the space
+Always use ACH together with other IAQ (Indoor Air Quality) metrics.
+
+========================================================
+/ -->

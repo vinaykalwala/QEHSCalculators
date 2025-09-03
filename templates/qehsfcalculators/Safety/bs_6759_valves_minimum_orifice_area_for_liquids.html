@@ -123,7 +123,7 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
-            margin-bottom: 15px;
+            {% comment %} margin-bottom: 15px; {% endcomment %}
         }
         
         @media (min-width: 480px) {
@@ -467,6 +467,19 @@
                     <li><strong>Fire Protection Systems:</strong> Calculates required nozzle sizes.</li>
                 </ul>
             </div>
+            <div class="note-card">
+    <h3>✅ Validation Rules Applied</h3>
+    <ul class="note-list">
+        <li><strong>Mass Flow Rate (ṁ):</strong> 0.01 – 10,000,000 kg/h</li>
+        <li><strong>Coefficient of Discharge (Kd):</strong> 0.01 – 1.0</li>
+        <li><strong>Viscosity Factor (Kv):</strong> 0.01 – 2.0 (typical 0.7–1.0)</li>
+        <li><strong>Density (ρ):</strong> 1 – 20,000 kg/m³</li>
+        <li><strong>ΔP (Pressure Difference):</strong> 0.01 – 500 bar</li>
+        <li><strong>Output Checks:</strong> Area must be >0; warnings if <10 mm² or >100,000 mm².</li>
+    </ul>
+    <p>⚠️ These validations prevent unrealistic or non-compliant inputs that could compromise valve sizing and safety compliance under BS 6759, ISO 4126, and OSHA PSM standards.</p>
+</div>
+
             
             <div class="note-card">
                 <h3>✅ Conclusion</h3>
@@ -485,105 +498,90 @@
         });
 
         function calculateOrificeArea() {
-            const massFlow = document.getElementById('massFlow').value.trim();
-            const Kd = document.getElementById('Kd').value.trim();
-            const Kv = document.getElementById('Kv').value.trim();
-            const density = document.getElementById('density').value.trim();
-            const pressureDiff = document.getElementById('pressureDiff').value.trim();
+    const massFlow = parseFloat(document.getElementById('massFlow').value.trim());
+    const Kd = parseFloat(document.getElementById('Kd').value.trim());
+    const Kv = parseFloat(document.getElementById('Kv').value.trim());
+    const density = parseFloat(document.getElementById('density').value.trim());
+    const pressureDiff = parseFloat(document.getElementById('pressureDiff').value.trim());
 
-            const errorBox = document.getElementById('resultError');
-            const errorMessage = document.getElementById('errorMessage');
-            const placeholder = document.getElementById('placeholder');
-            const resultValue = document.getElementById('resultValue');
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
 
-            // Reset error messages
-            document.getElementById("massFlowError").innerText = "";
-            document.getElementById("KdError").innerText = "";
-            document.getElementById("KvError").innerText = "";
-            document.getElementById("densityError").innerText = "";
-            document.getElementById("pressureDiffError").innerText = "";
+    // Reset errors
+    document.querySelectorAll(".error").forEach(e => e.innerText = "");
+    let errors = [];
 
-            let errors = [];
-            
-            // Validation with explanations
-            if (massFlow === "") {
-                errors.push("👉 Please enter the mass flow rate.");
-                document.getElementById("massFlowError").innerText = "Mass flow rate must be greater than 0.";
-            } else if (parseFloat(massFlow) <= 0) {
-                errors.push("👉 Mass flow rate must be greater than 0.");
-                document.getElementById("massFlowError").innerText = "Mass flow rate must be greater than 0. It represents the amount of fluid passing per unit time.";
-            }
-            
-            if (Kd === "") {
-                errors.push("👉 Please enter the coefficient of discharge.");
-                document.getElementById("KdError").innerText = "Coefficient of discharge is required.";
-            } else if (parseFloat(Kd) <= 0 || parseFloat(Kd) > 1) {
-                errors.push("👉 Coefficient of discharge must be between 0 and 1.");
-                document.getElementById("KdError").innerText = "Coefficient of discharge (Kd) must be between 0 and 1. It defines efficiency of fluid discharge.";
-            }
-            
-            if (Kv === "") {
-                errors.push("👉 Please enter the viscosity correction factor.");
-                document.getElementById("KvError").innerText = "Viscosity correction factor is required.";
-            } else if (parseFloat(Kv) <= 0) {
-                errors.push("👉 Viscosity correction factor must be greater than 0.");
-                document.getElementById("KvError").innerText = "Viscosity correction factor (Kv) must be greater than 0. It accounts for fluid resistance effects.";
-            }
-            
-            if (density === "") {
-                errors.push("👉 Please enter the density.");
-                document.getElementById("densityError").innerText = "Density is required.";
-            } else if (parseFloat(density) <= 0) {
-                errors.push("👉 Density must be greater than 0.");
-                document.getElementById("densityError").innerText = "Density (ρ) must be greater than 0. It determines fluid mass per unit volume.";
-            }
-            
-            if (pressureDiff === "") {
-                errors.push("👉 Please enter the pressure difference.");
-                document.getElementById("pressureDiffError").innerText = "Pressure difference is required.";
-            } else if (parseFloat(pressureDiff) <= 0) {
-                errors.push("👉 Pressure difference must be greater than 0.");
-                document.getElementById("pressureDiffError").innerText = "Pressure difference (ΔP) must be greater than 0. It drives fluid through the valve.";
-            }
+    /* ✅ Input Validation Rules (based on BS 6759 & QEHS practices) */
+    if (isNaN(massFlow) || massFlow <= 0 || massFlow > 1e7) {
+        errors.push("Mass Flow Rate must be between 0.01 and 10,000,000 kg/h.");
+        document.getElementById("massFlowError").innerText = "Enter realistic flow rate > 0 and ≤ 10,000,000.";
+    }
+    if (isNaN(Kd) || Kd <= 0 || Kd > 1) {
+        errors.push("Coefficient of Discharge (Kd) must be >0 and ≤1.");
+        document.getElementById("KdError").innerText = "Valid range: 0.01 – 1.0.";
+    }
+    if (isNaN(Kv) || Kv <= 0 || Kv > 2) {
+        errors.push("Viscosity Correction Factor (Kv) must be between 0.01 and 2.0.");
+        document.getElementById("KvError").innerText = "Usually between 0.7 and 1.0.";
+    }
+    if (isNaN(density) || density <= 0 || density > 20000) {
+        errors.push("Density must be between 1 and 20,000 kg/m³.");
+        document.getElementById("densityError").innerText = "Check fluid properties.";
+    }
+    if (isNaN(pressureDiff) || pressureDiff <= 0 || pressureDiff > 500) {
+        errors.push("Pressure Difference must be between 0.01 and 500 bar.");
+        document.getElementById("pressureDiffError").innerText = "Ensure safe realistic range.";
+    }
 
-            if (errors.length > 0) {
-                errorMessage.innerHTML = errors.join("<br>");
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
-            } else {
-                errorBox.classList.add("hidden");
-            }
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
 
-            // Perform calculation
-            const m = parseFloat(massFlow);
-            const kd = parseFloat(Kd);
-            const kv = parseFloat(Kv);
-            const p = parseFloat(density);
-            const dp = parseFloat(pressureDiff);
-            
-            const orificeArea = m / (1.61 * kd * kv * Math.sqrt(p * dp));
-            
-            // Display result
-            document.getElementById('rateValue').textContent = orificeArea.toFixed(4);
-            
-            // Provide feedback based on the result
-            let feedback = `Based on your inputs:
-            <ul>
-                <li>Mass Flow Rate: ${m} kg/h</li>
-                <li>Coefficient of Discharge: ${kd}</li>
-                <li>Viscosity Correction Factor: ${kv}</li>
-                <li>Density: ${p} kg/m³</li>
-                <li>Pressure Difference: ${dp} bar</li>
-            </ul>
-            The calculated minimum orifice area is <strong>${orificeArea.toFixed(4)} mm²</strong>.`;
-            
-            document.getElementById('feedbackContent').innerHTML = feedback;
+    // Perform calculation
+    const orificeArea = massFlow / (1.61 * Kd * Kv * Math.sqrt(density * pressureDiff));
 
-            placeholder.classList.add('hidden');
-            resultValue.classList.remove('hidden');
-        }
+    if (orificeArea <= 0 || !isFinite(orificeArea)) {
+        errorMessage.innerHTML = "Invalid result. Check inputs for unrealistic combination.";
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    // Display result
+    document.getElementById('rateValue').textContent = orificeArea.toFixed(4);
+
+    // Provide feedback with safety warnings
+    let warnings = "";
+    if (orificeArea < 10) warnings += "<li>⚠️ Very small orifice; may not be practical.</li>";
+    if (orificeArea > 100000) warnings += "<li>⚠️ Extremely large orifice; check data validity.</li>";
+
+    let feedback = `
+        Based on your inputs:
+        <ul>
+            <li>Mass Flow Rate: ${massFlow} kg/h</li>
+            <li>Kd: ${Kd}</li>
+            <li>Kv: ${Kv}</li>
+            <li>Density: ${density} kg/m³</li>
+            <li>ΔP: ${pressureDiff} bar</li>
+        </ul>
+        The calculated minimum orifice area is <strong>${orificeArea.toFixed(4)} mm²</strong>.
+        ${warnings ? `<ul>${warnings}</ul>` : ""}
+    `;
+    document.getElementById('feedbackContent').innerHTML = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
 
         function printReport() {
             // Update date just before printing
@@ -599,3 +597,45 @@
 </body>
 </html>
 {% endblock %}
+
+
+
+{% comment %} 
+
+1. Formula Reference (for comment in code ✅)
+/* 
+🔹 Formula (BS 6759 – Liquids Relief Valves):
+    A₀ = ṁ / (1.61 × Kd × Kv × √(ρ × ΔP))
+
+Where:
+    A₀ = Minimum Orifice Area (mm²)
+    ṁ  = Mass Flow Rate [kg/h]
+    Kd = Coefficient of Discharge (0 < Kd ≤ 1.0)
+    Kv = Viscosity Correction Factor (typically 0.7 ≤ Kv ≤ 1.0)
+    ρ  = Density [kg/m³]
+    ΔP = Pressure Difference across valve [bar]
+
+⚠️ Units:
+    - Mass flow rate must be in kg/h
+    - Density in kg/m³
+    - Pressure in bar
+    - Output: mm²
+*/
+
+2. Input Validation Rules (with QEHS/Fire Safety reasoning)
+Parameter	Allowed Range	Typical Range in Industry	Validation Logic	Compliance Reason
+Mass Flow Rate (ṁ)	> 0, ≤ 1e7 kg/h	1 – 1,000,000 kg/h	Must be >0 and not absurdly high (>10⁷). Allow 2 decimals.	Unrealistic flow would invalidate safety sizing.
+Coefficient of Discharge (Kd)	0.01 – 1.0	0.6 – 0.9 (API/BS typical)	Must be between 0.01 and 1.00.	Required by BS/API standards. Kd cannot exceed 1.
+Viscosity Factor (Kv)	0.01 – 2.0	Usually 0.7 – 1.0	Must be >0, and capped at 2.	Prevents invalid inputs (negative/zero).
+Density (ρ)	1 – 20000 kg/m³	500 – 1500 for liquids	Must be >0, capped at 20000.	Unrealistic densities (e.g., <1 or >20000) are not physically valid.
+ΔP (Pressure Difference)	> 0, ≤ 500 bar	0.5 – 100 bar typical	Must be >0, capped at 500.	Above 500 bar is outside BS 6759 practical application.
+3. Output Validation Rules
+
+Orifice Area should always be positive.
+If ≤0 → show error (“Inputs inconsistent; check density, ΔP, Kd, Kv”).
+
+Threshold check:
+
+< 10 mm² → warning: “Unusually small, may not be manufacturable.”
+
+100,000 mm² → warning: “Too large; review data, system sizing unlikely.” {% endcomment %}

@@ -468,26 +468,19 @@
         </div>
 
         <div class="note-card">
-            <h3>⚠️ Strong validations (what is checked)</h3>
-            <ul>
-                <li>SVI input is required and must be a finite number.</li>
-                <li><strong>SVI > 0</strong> - Must be a positive value (mL/g).</li>
-                <li><strong>SVI ≥ 10</strong> - Values below 10 mL/g will trigger warnings as potentially unrealistic.</li>
-                <li><strong>SVI ≤ 500</strong> - Values above 500 mL/g will trigger warnings as potentially problematic.</li>
-                <li>Results that are physically unrealistic (Xᵣ > 100,000 g/m³) will be flagged for review.</li>
-                <li>Division by zero is prevented (SVI cannot be 0).</li>
-            </ul>
+        <h3>✅ Input Validations</h3>
+        <ul class="note-list">
+            <li>SVI is <b>required</b> — cannot be left blank.</li>
+            <li>SVI must be a <b>positive finite number</b> (mL/g).</li>
+            <li>SVI <b>cannot be zero</b> (division by zero error).</li>
+            
+            <li>Computed biomass concentration must be a <b>valid positive number</b>.</li>
+            
+        </ul>
         </div>
 
-        <div class="note-card">
-            <h3>🔎 Interpretation</h3>
-            <ul class="note-list">
-                <li><strong>Low SVI (&lt; 100 mL/g)</strong>: Dense sludge, higher biomass concentration - may indicate old sludge or potential bulking issues.</li>
-                <li><strong>Optimal SVI (100-150 mL/g)</strong>: Good settling characteristics, appropriate biomass concentration.</li>
-                <li><strong>High SVI (&gt; 150 mL/g)</strong>: Light, fluffy sludge, lower biomass concentration - may indicate young sludge or bulking problems.</li>
-                <li><strong>Very High SVI (&gt; 200 mL/g)</strong>: Poor settling, likely bulking - requires operational adjustments.</li>
-            </ul>
-        </div>
+
+        
 
         <div class="note-card">
             <h3>🛑 Limitations</h3>
@@ -518,39 +511,39 @@ function showErrors(errors) {
 
 /* Main Biomass Concentration calculation with strong validations */
 function calculateBiomassConcentration() {
-  // safe reads
+  // Safe reads
   const sviRaw = document.getElementById("svi")?.value.trim() ?? "";
 
   const biomassEl = document.getElementById("biomassConcentration");
   const feedbackEl = document.getElementById("feedbackContent");
 
-  // reset UI
+  // Reset UI
   document.getElementById("resultError").classList.add("hidden");
   if (feedbackEl) feedbackEl.innerHTML = "";
 
   const errors = [];
   const warnings = [];
 
-  // required checks
+  // Required input check
   if (sviRaw === "") errors.push("👉 Enter Sludge Volume Index (SVI) in mL/g.");
 
   if (errors.length > 0) { showErrors(errors); return; }
 
-  // parse
+  // Parse number
   const svi = parseFloat(sviRaw);
 
-  // numeric & sign checks
+  // Numeric & sign checks
   if (!Number.isFinite(svi) || svi <= 0) errors.push("👉 SVI must be a positive finite number (mL/g).");
   if (svi === 0) errors.push("👉 SVI cannot be zero (division by zero error).");
 
   if (errors.length > 0) { showErrors(errors); return; }
 
-  // warning checks
+  // Warning checks
   if (svi < 10) warnings.push("⚠️ SVI value seems very low - verify measurement and units (typical range: 50-200 mL/g).");
   if (svi > 500) warnings.push("⚠️ SVI value seems very high - verify measurement and units, may indicate severe bulking.");
-  
-  // compute biomass concentration (g/m³)
-  // formula: Xᵣ = 1,000,000 / SVI
+
+  // Compute biomass concentration (g/m³)
+  // Formula: Xᵣ = 1,000,000 / SVI
   const biomassConc = 1000000 / svi;
 
   if (!Number.isFinite(biomassConc) || biomassConc <= 0) {
@@ -558,12 +551,12 @@ function calculateBiomassConcentration() {
     return;
   }
 
-  // Additional warning for extreme results
+  // Extreme results warning
   if (biomassConc > 100000) {
     warnings.push("⚠️ Extremely high biomass concentration - verify SVI measurement.");
   }
 
-  // classification based on SVI values
+  // Classification based on SVI values
   let classification = "";
   let suggestion = "";
   
@@ -581,7 +574,7 @@ function calculateBiomassConcentration() {
     suggestion = "❌ Significant settling problems likely. Investigate bulking causes and consider process adjustments.";
   }
 
-  // compose feedback content
+  // Compose feedback content
   let details = `<div>Biomass concentration (Xᵣ) = <b>${biomassConc.toFixed(0)}</b> g/m³</div>`;
   details += `<div>SVI classification: <b>${classification}</b></div>`;
   details += `<div style="margin-top:6px;">${suggestion}</div>`;
@@ -589,17 +582,17 @@ function calculateBiomassConcentration() {
     details += `<div style="margin-top:8px; color:#b35d00;">Note: ${warnings.join(" | ")}</div>`;
   }
 
-  // update UI
+  // Update UI
   if (biomassEl) biomassEl.textContent = biomassConc.toFixed(0);
   if (feedbackEl) feedbackEl.innerHTML = details;
 
-  // toggle display
+  // Toggle display
   document.getElementById("placeholder").classList.add("hidden");
   document.getElementById("resultValue").classList.remove("hidden");
   document.getElementById("resultError").classList.add("hidden");
 }
 
-/* safe print guard */
+/* Print-safe report with date */
 function printReport() {
   const el = document.getElementById('printDate');
   if (el) {
@@ -610,6 +603,48 @@ function printReport() {
   window.print();
 }
 </script>
+
 </body>
 </html>
 {% endblock %}
+
+
+
+<!-- ============================================================
+ 📌 Biomass Concentration (Xᵣ) Calculator Documentation
+ ------------------------------------------------------------
+ Formula:
+   Xᵣ = 1,000,000 / SVI
+
+ where:
+   Xᵣ  = biomass concentration (g/m³)
+   SVI = sludge volume index (mL/g)
+
+ ------------------------------------------------------------
+ ✅ Input Validations (from code):
+   • SVI is required (cannot be empty).
+   • Must be numeric, finite, and > 0.
+   • Must not equal 0 (prevents division by zero).
+   • Warning checks:
+       - SVI < 10  → too low, likely unrealistic (check units).
+       - SVI > 500 → too high, indicates possible bulking or input error.
+   • Typical operating range: 50–200 mL/g.
+
+ ------------------------------------------------------------
+ ✅ Output Validations (from code):
+   • Biomass concentration (Xᵣ) must be > 0 and finite.
+   • If Xᵣ > 100,000 g/m³ → flagged as extreme/unrealistic.
+   • Classification logic (based on SVI):
+       - SVI < 100 → Low SVI, dense sludge.
+       - 100–150   → Optimal SVI, good settling.
+       - 150–200   → High SVI, fair settling.
+       - >200      → Very high SVI, poor settling.
+   • Suggestions are shown depending on classification.
+   • Warnings are displayed if input/output outside expected ranges.
+
+ ------------------------------------------------------------
+ ⚠️ Limitations:
+   • Assumes standard activated sludge behavior.
+   • Does not account for sludge composition, temperature, or toxic shocks.
+   • Actual plant performance may vary by site conditions.
+ ============================================================ -->

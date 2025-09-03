@@ -1,0 +1,619 @@
+{% extends 'base.html' %}
+{% block title %}Electrical Resistance Calculator for Conductivity Probe{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electrical Resistance Calculator for Conductivity Probe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            color: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+    </style>
+</head>
+<body>
+   <div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+
+        <div class="btn-container">
+            <a href="{% url 'quality_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+        </div>
+
+        <div class="calculator-header">
+            <h1>Electrical Resistance Calculator for Conductivity Probe</h1>
+            <p>Calculates the electrical resistance based on cell constant and conductivity values</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator Input Card -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="cellConstant">Cell Constant (K) (cm⁻¹)</label>
+                    <input type="number" id="cellConstant" class="form-input" min="0" step="0.001" placeholder="Enter cell constant value">
+                </div>
+
+                <div class="form-group">
+                    <label for="conductivity">Conductivity (σ) (S/cm)</label>
+                    <input type="number" id="conductivity" class="form-input" min="0" step="0.001" placeholder="Enter conductivity value">
+                </div>
+
+                <button class="calculate-btn" onclick="calculateResistance()">Calculate Resistance</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Conductivity probe illustration">
+                    <p>This tool calculates the <strong>electrical resistance</strong> in Ω. Enter your cell constant and conductivity values to see results.</p>
+                </div>
+
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Electrical Resistance</h2>
+                    </div>
+                    <div class="rate-value" id="resistanceValue">0.00</div>
+                    <div class="rate-label"><strong>Ω</strong></div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">Resistance Interpretation</div>
+                        <div class="feedback-content" id="resistanceFeedback"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🔎 About This Calculator</h3>
+                <p>
+                    This calculator determines the <strong>Electrical Resistance (R)</strong> of a conductivity probe based on its conductivity (σ) and cell constant (K). It helps determine how well a solution resists electrical flow, which is crucial in various scientific and industrial applications.
+                </p> 
+            </div>
+
+            <div class="note-card">
+                <h3>📌 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Cell Constant (K):</strong> Required, must be > 0</li>
+                    <li><strong>Conductivity (σ):</strong> Required, must be > 0</li>
+                    <li><strong>No Negative Values:</strong> Both inputs must be positive numbers</li>
+                    <li><strong>Realistic Ranges:</strong> K typically 0.1-10 cm⁻¹, σ varies by solution type</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ Explanation of Parameters</h3>
+                <ul class="note-list">
+                    <li><strong>Conductivity (σ) (S/cm):</strong> Measures a solution's ability to conduct electricity. Higher conductivity means better conduction (lower resistance).</li>
+                    <li><strong>Cell Constant (K) (cm⁻¹):</strong> A fixed value based on the probe's physical structure. Used to standardize conductivity measurements.</li>
+                    <li><strong>Resistance (R) (Ω):</strong> Determines how much the solution resists electrical flow. Calculated using the formula: R = K / σ.</li>
+                </ul>
+            </div>
+      
+
+            <div class="note-card">
+                <h3>📊 Key Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Water Quality Testing:</strong> Helps evaluate water purity. High resistance means low conductivity (pure water), while low resistance means high conductivity (contaminated water).</li>
+                    <li><strong>Industrial and Chemical Analysis:</strong> Used in boilers, cooling systems, and wastewater treatment to monitor electrical properties of solutions.</li>
+                    <li><strong>Scientific Research & Electronics:</strong> Helps in understanding solution properties in laboratories and sensor calibration.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Important Notes</h3>
+                <ul class="note-list">
+                    <li>Resistance is always positive when valid inputs are used</li>
+                    <li>Negative or zero input values will result in error messages</li>
+                    <li>This tool enables accurate calculation of electrical resistance based on conductivity and cell constant</li>
+                    <li>Valid input values ensure reliable resistance measurements for various applications</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateResistance() {
+    const cellConstant = document.getElementById("cellConstant").value.trim();
+    const conductivity = document.getElementById("conductivity").value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const outputValue = document.getElementById('resistanceValue');
+    const feedbackBox = document.getElementById('resistanceFeedback'); 
+
+    let errors = [];
+
+    // --- Validation for Cell Constant (K) ---
+    if (cellConstant === "") {
+        errors.push("👉 Please enter the Cell Constant (K).");
+    } else if (isNaN(cellConstant)) {
+        errors.push("👉 Cell Constant must be a number.");
+    } else if (parseFloat(cellConstant) <= 0) {
+        errors.push("👉 Cell Constant must be greater than 0.");
+    } else if (parseFloat(cellConstant) > 20) {
+        errors.push("👉 Cell Constant seems unusually high (>20 cm⁻¹). Please verify.");
+    }
+
+    // --- Validation for Conductivity (σ) ---
+    if (conductivity === "") {
+        errors.push("👉 Please enter the Conductivity (σ).");
+    } else if (isNaN(conductivity)) {
+        errors.push("👉 Conductivity must be a number.");
+    } else if (parseFloat(conductivity) <= 0) {
+        errors.push("👉 Conductivity must be greater than 0.");
+    } else if (parseFloat(conductivity) > 20) {
+        errors.push("👉 Conductivity seems very high (>20 S/cm). Please verify.");
+    }
+
+    // Show errors
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    const K = parseFloat(cellConstant);
+    const σ = parseFloat(conductivity);
+
+    // --- Edge Case: Prevent division by zero ---
+    if (σ === 0) {
+        errorMessage.innerHTML = "❌ Conductivity cannot be zero (division by zero error).";
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    // --- Calculate resistance ---
+    const resistance = K / σ;
+    outputValue.textContent = resistance.toFixed(6);
+
+    // --- Feedback messages ---
+    let feedback = "";
+    if (resistance < 1) {
+        feedback = "✅ Low resistance (Highly conductive solution – strong electrolytes/saline water). Potential corrosion risk in fire systems.";
+    } else if (resistance >= 1 && resistance <= 100) {
+        feedback = "⚠️ Moderate resistance (Normal conductivity – safe range for potable/industrial water).";
+    } else if (resistance > 100 && resistance <= 1000) {
+        feedback = "📊 High resistance (Low conductivity – distilled/deionized water). Verify suitability for fire safety systems.";
+    } else {
+        feedback = "❌ Very high resistance (Ultra-pure or non-conductive fluid). May cause static buildup/corrosion issues.";
+    }
+
+    feedbackBox.textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!-- 
+Input Validation Rules (Industry-based)
+Cell Constant (K, cm⁻¹)
+
+Required: Yes
+
+Range: 0.1 – 10 cm⁻¹ (typical probe range; values >10 are specialized probes, rarely >20).
+
+Validation:
+
+> 0
+
+Recommend warning if K > 20 → likely incorrect entry.
+
+Decimal precision: Up to 3 decimals is practical.
+
+Conductivity (σ, S/cm)
+
+Required: Yes
+
+Range:
+
+Ultra-pure water: ~0.055 µS/cm (5.5 × 10⁻⁸ S/cm)
+
+Drinking water: 50 – 1500 µS/cm (0.00005 – 0.0015 S/cm)
+
+Industrial brine/saltwater: up to ~5 S/cm
+
+Acid/base solutions: up to 20 S/cm
+
+Validation:
+
+Must be > 0
+
+Suggest warning if σ > 20 S/cm (unrealistic for water-based systems).
+
+Decimal precision: Allow up to 6 decimals for lab-grade readings.
+
+3️⃣ Edge Case Validations
+
+Division by zero: σ = 0 → infinite resistance → must be blocked with error.
+
+Negative values: Physically meaningless → reject.
+
+Unrealistic combination: e.g., K = 100 and σ = 0.00001 → R = 10,000,000 Ω (not possible in standard water analysis). → Show warning: “Check input ranges; values may be unrealistic for standard water systems.”
+
+Empty inputs: Show error.
+
+4️⃣ Output Validation & Thresholds
+
+Resistance (R = K / σ) interpretation from a safety & audit perspective:
+
+R < 1 Ω → Highly conductive solution
+
+Typical for saline water, acids, strong electrolytes
+
+Safety risk: Corrosion, electrical conduction hazard
+
+1 Ω ≤ R ≤ 100 Ω → Normal conductivity range
+
+Typical for potable/process water
+
+Usually safe for industrial use
+
+100 Ω < R ≤ 1000 Ω → High resistance (low conductivity)
+
+Typical for distilled/deionized water
+
+Must check if acceptable for fire suppression water (too pure water is corrosive to steel)
+
+R > 1000 Ω → Very high resistance
+
+Ultra-pure or non-conductive liquid
+
+For QEHS → may cause static buildup and corrosion risks
+
+            <div class="note-card formula-card">
+                <h3>🧮 Formula</h3>
+                <p>The Electrical Resistance is calculated using the following formula:</p>
+                <code>R = K / σ</code>
+                <p>Where:</p>
+                <ul class="note-list">
+                    <li>R = Electrical Resistance (Ω)</li>
+                    <li>K = Cell Constant (cm⁻¹)</li>
+                    <li>σ = Conductivity (S/cm)</li>
+                </ul>
+            </div>
+
+-->

@@ -483,6 +483,18 @@
                     <li><strong>Nominal Valve Size:</strong> Size of closed metal-seated valves if applicable (optional).</li>
                 </ul>
             </div>
+            <div class="note-card">
+    <h3>✅ Validation Rules</h3>
+    <ul class="note-list">
+        <li><b>Pipe Length:</b> 10 – 100,000 ft (must be >0).</li>
+        <li><b>Pipe Diameter:</b> 0.5 – 120 in (must be >0).</li>
+        <li><b>Test Pressure:</b> 15 – 400 PSI (must be >0).</li>
+        <li><b>Valve Size (optional):</b> 0.5 – 60 in.</li>
+        <li><b>Cross-Check:</b> Large pipes (>24 in) cannot be tested in very short sections (<10 ft).</li>
+        <li><b>Units:</b> ft (length), in (diameter & valve), PSI (pressure).</li>
+    </ul>
+</div>
+
 
             <div class="note-card">
                 <h3>📊 Interpretation</h3>
@@ -495,6 +507,7 @@
                     <li><span class="bad">Above 2.0 gph</span> → Requires system review and potential repairs</li>
                 </ul>
             </div>
+            
             
             <!-- Reference Image -->
             <div class="image-container">
@@ -512,98 +525,129 @@
         });
 
         function calculateLeakage() {
-            const pipeLength = document.getElementById('pipeLength').value.trim();
-            const pipeDiameter = document.getElementById('pipeDiameter').value.trim();
-            const testPressure = document.getElementById('testPressure').value.trim();
-            const valveSize = document.getElementById('valveSize').value.trim();
+    const pipeLength = document.getElementById('pipeLength').value.trim();
+    const pipeDiameter = document.getElementById('pipeDiameter').value.trim();
+    const testPressure = document.getElementById('testPressure').value.trim();
+    const valveSize = document.getElementById('valveSize').value.trim();
 
-            const errorBox = document.getElementById('resultError');
-            const errorMessage = document.getElementById('errorMessage');
-            const placeholder = document.getElementById('placeholder');
-            const resultValue = document.getElementById('resultValue');
-            const additionalLeakageContainer = document.getElementById('additionalLeakageContainer');
-            const additionalLeakageValue = document.getElementById('additionalLeakageValue');
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const additionalLeakageContainer = document.getElementById('additionalLeakageContainer');
+    const additionalLeakageValue = document.getElementById('additionalLeakageValue');
 
-            let errors = [];
+    let errors = [];
 
-            if (pipeLength === "") {
-                errors.push("👉 Please enter the length of pipe tested.");
-            } else if (parseFloat(pipeLength) <= 0) {
-                errors.push("👉 Pipe length must be greater than 0.");
-            }
-            
-            if (pipeDiameter === "") {
-                errors.push("👉 Please enter the nominal diameter of the pipe.");
-            } else if (parseFloat(pipeDiameter) <= 0) {
-                errors.push("👉 Pipe diameter must be greater than 0.");
-            }
-            
-            if (testPressure === "") {
-                errors.push("👉 Please enter the average test pressure.");
-            } else if (parseFloat(testPressure) <= 0) {
-                errors.push("👉 Test pressure must be greater than 0.");
-            }
+    // --- Validation Rules (per QEHS/NFPA/AWWA standards) ---
+    // Pipe Length
+    if (pipeLength === "" || isNaN(pipeLength)) {
+        errors.push("👉 Please enter the pipe length (ft).");
+    } else if (parseFloat(pipeLength) <= 0) {
+        errors.push("👉 Pipe length must be greater than 0 ft.");
+    } else if (parseFloat(pipeLength) < 10 || parseFloat(pipeLength) > 100000) {
+        errors.push("👉 Pipe length must be between 10 ft and 100,000 ft.");
+    }
 
-            if (errors.length > 0) {
-                errorMessage.innerHTML = errors.join("<br>");
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
-            } else {
-                errorBox.classList.add("hidden");
-            }
+    // Pipe Diameter
+    if (pipeDiameter === "" || isNaN(pipeDiameter)) {
+        errors.push("👉 Please enter the pipe diameter (in).");
+    } else if (parseFloat(pipeDiameter) <= 0) {
+        errors.push("👉 Pipe diameter must be greater than 0 in.");
+    } else if (parseFloat(pipeDiameter) < 0.5 || parseFloat(pipeDiameter) > 120) {
+        errors.push("👉 Pipe diameter must be between 0.5 in and 120 in.");
+    }
 
-            const length = parseFloat(pipeLength);
-            const diameter = parseFloat(pipeDiameter);
-            const pressure = parseFloat(testPressure);
-            const valve = valveSize ? parseFloat(valveSize) : 0;
+    // Test Pressure
+    if (testPressure === "" || isNaN(testPressure)) {
+        errors.push("👉 Please enter the test pressure (PSI).");
+    } else if (parseFloat(testPressure) <= 0) {
+        errors.push("👉 Test pressure must be greater than 0 PSI.");
+    } else if (parseFloat(testPressure) < 15 || parseFloat(testPressure) > 400) {
+        errors.push("👉 Test pressure must be between 15 PSI and 400 PSI.");
+    }
 
-            // Calculate allowable leakage
-            const allowableLeakage = (length * diameter * Math.sqrt(pressure)) / 133200;
-            document.getElementById('rateValue').textContent = allowableLeakage.toFixed(4);
-
-            const meterFill = document.getElementById('meterFill');
-            let meterWidth, meterColor, feedback;
-            
-            if (allowableLeakage === 0) {
-                meterWidth = '5%'; 
-                meterColor = '#27ae60';
-                feedback = '🌟 Perfect system integrity. No detectable leakage.';
-            } else if (allowableLeakage < 0.5) {
-                meterWidth = '25%'; 
-                meterColor = '#2ecc71';
-                feedback = '👍 Excellent system integrity. Minimal leakage within acceptable limits.';
-            } else if (allowableLeakage <= 2.0) {
-                meterWidth = '50%'; 
-                meterColor = '#f39c12';
-                feedback = '⚠️ Moderate leakage. System may require minor improvements or monitoring.';
-            } else if (allowableLeakage <= 5.0) {
-                meterWidth = '75%'; 
-                meterColor = '#e67e22';
-                feedback = '🚨 High leakage. System review and potential repairs needed.';
-            } else {
-                meterWidth = '95%'; 
-                meterColor = '#e74c3c';
-                feedback = '❌ Critical leakage level. Immediate system inspection and repairs required.';
-            }
-
-            meterFill.style.width = meterWidth;
-            meterFill.style.backgroundColor = meterColor;
-            document.getElementById('feedbackContent').textContent = feedback;
-
-            // Calculate and display additional leakage if valve size is provided
-            if (valve > 0) {
-                const additionalLeakage = 0.0078 * valve;
-                additionalLeakageValue.textContent = `Additional leakage allowance for ${valve}-inch valve: ${additionalLeakage.toFixed(4)} gallons per hour.`;
-                additionalLeakageContainer.classList.remove('hidden');
-            } else {
-                additionalLeakageContainer.classList.add('hidden');
-            }
-
-            placeholder.classList.add('hidden');
-            resultValue.classList.remove('hidden');
+    // Valve Size (optional)
+    if (valveSize !== "" && !isNaN(valveSize)) {
+        if (parseFloat(valveSize) <= 0) {
+            errors.push("👉 Valve size must be greater than 0 in if provided.");
+        } else if (parseFloat(valveSize) < 0.5 || parseFloat(valveSize) > 60) {
+            errors.push("👉 Valve size must be between 0.5 in and 60 in.");
         }
+    }
+
+    // Cross-field dependency check
+    if (pipeLength !== "" && pipeDiameter !== "") {
+        if (parseFloat(pipeLength) < 10 && parseFloat(pipeDiameter) > 24) {
+            errors.push("👉 Large diameter pipe cannot be tested in very short sections (<10 ft).");
+        }
+    }
+
+    // --- Error Handling ---
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // --- Safe Calculations ---
+    const length = parseFloat(pipeLength);
+    const diameter = parseFloat(pipeDiameter);
+    const pressure = parseFloat(testPressure);
+    const valve = valveSize ? parseFloat(valveSize) : 0;
+
+    // Formula: Allowable Leakage (gph)
+    // L = (S * D * sqrt(P)) / 133200
+    const allowableLeakage = (length * diameter * Math.sqrt(pressure)) / 133200;
+    document.getElementById('rateValue').textContent = allowableLeakage.toFixed(4);
+
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+    
+    if (allowableLeakage === 0) {
+        meterWidth = '5%'; 
+        meterColor = '#27ae60';
+        feedback = '🌟 Perfect system integrity. No detectable leakage.';
+    } else if (allowableLeakage < 0.5) {
+        meterWidth = '25%'; 
+        meterColor = '#2ecc71';
+        feedback = '👍 Excellent system integrity. Minimal leakage within acceptable limits.';
+    } else if (allowableLeakage <= 2.0) {
+        meterWidth = '50%'; 
+        meterColor = '#f39c12';
+        feedback = '⚠️ Moderate leakage. System may require minor improvements or monitoring.';
+    } else if (allowableLeakage <= 5.0) {
+        meterWidth = '75%'; 
+        meterColor = '#e67e22';
+        feedback = '🚨 High leakage. System review and potential repairs needed.';
+    } else {
+        meterWidth = '95%'; 
+        meterColor = '#e74c3c';
+        feedback = '❌ Critical leakage level. Immediate system inspection and repairs required.';
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').textContent = feedback;
+
+    // Additional leakage for valves
+    if (valve > 0) {
+        const additionalLeakage = 0.0078 * valve;
+        additionalLeakageValue.textContent = 
+            `Additional leakage allowance for ${valve}-inch valve: ${additionalLeakage.toFixed(4)} gallons/hour.`;
+        additionalLeakageContainer.classList.remove('hidden');
+    } else {
+        additionalLeakageContainer.classList.add('hidden');
+    }
+
+    placeholder.classList.add("hidden");
+    resultValue.classList.remove("hidden");
+}
+
 
         function printReport() {
             // Update date just before printing

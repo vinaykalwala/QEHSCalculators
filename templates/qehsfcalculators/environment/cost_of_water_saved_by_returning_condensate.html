@@ -559,18 +559,15 @@
         </div>
 
         <div class="note-card">
-            <h3>⚠️ Strong validations (what is checked)</h3>
-            <ul>
-                <li>All inputs are required and must be finite numbers.</li>
-                <li><strong>X ≥ 0</strong> - Improvement percentage must be non-negative.</li>
-                <li><strong>C > 0</strong> - Evaporation rate must be positive.</li>
-                <li><strong>D > 0</strong> - Operational hours must be positive.</li>
-                <li><strong>W > 0</strong> - Water cost must be positive.</li>
-                <li><strong>X ≤ 100</strong> - Improvement percentage cannot exceed 100%.</li>
-                <li><strong>D ≤ 8760</strong> - Operational hours cannot exceed hours in a year.</li>
-                <li>Extreme values will trigger warnings for potential unit errors.</li>
+            <h3>✅ Input Validations</h3>
+            <ul class="note-list">
+                <li><b>X (Improvement in condensate return %):</b> Must be between <b>0–100</b>.</li>
+                <li><b>C (Boiler evaporation rate, kg/h):</b> Must be a positive number, typically <b>1–100,000</b>.</li>
+                <li><b>D (Operational hours per year):</b> Must be a positive number, maximum <b>8,760 hours</b>.</li>
+                <li><b>W (Cost of water, ₹/m³):</b> Must be a positive number, normally <b>1–500</b>.</li>
             </ul>
-        </div>
+            </div>
+
 
         <div class="note-card">
             <h3>🔎 Interpretation</h3>
@@ -628,7 +625,7 @@ function calculateWaterSavings() {
   const errors = [];
   const warnings = [];
 
-  // required checks
+  // === Required checks ===
   if (XRaw === "") errors.push("👉 Enter improvement in condensate return (X).");
   if (CRaw === "") errors.push("👉 Enter boiler evaporation rate (C).");
   if (DRaw === "") errors.push("👉 Enter operational hours per year (D).");
@@ -636,35 +633,35 @@ function calculateWaterSavings() {
 
   if (errors.length > 0) { showErrors(errors); return; }
 
-  // parse
+  // === Parse numbers ===
   const X = parseFloat(XRaw);
   const C = parseFloat(CRaw);
   const D = parseFloat(DRaw);
   const W = parseFloat(WRaw);
 
-  // numeric & sign checks
-  if (!Number.isFinite(X) || X < 0) errors.push("👉 Improvement in condensate return (X) must be a non-negative number.");
-  if (!Number.isFinite(C) || C <= 0) errors.push("👉 Boiler evaporation rate (C) must be a positive number.");
-  if (!Number.isFinite(D) || D <= 0) errors.push("👉 Operational hours per year (D) must be a positive number.");
-  if (!Number.isFinite(W) || W <= 0) errors.push("👉 Cost of water per m³ (W) must be a positive number.");
+  // === Numeric & sign checks ===
+  if (!Number.isFinite(X) || X < 0) errors.push("👉 X must be ≥ 0 and ≤ 100 (percentage).");
+  if (!Number.isFinite(C) || C <= 0) errors.push("👉 Boiler evaporation rate (C) must be > 0 (kg/h).");
+  if (!Number.isFinite(D) || D <= 0) errors.push("👉 Operational hours per year (D) must be > 0.");
+  if (!Number.isFinite(W) || W <= 0) errors.push("👉 Cost of water per m³ (W) must be > 0.");
 
   if (errors.length > 0) { showErrors(errors); return; }
 
-  // additional validation
+  // === Additional validation ===
   if (X > 100) {
     errors.push("👉 Improvement in condensate return (X) cannot exceed 100%.");
     showErrors(errors);
     return;
   }
 
-  // warning checks
-  if (X > 50) warnings.push("⚠️ Improvement percentage seems very high - verify value.");
-  if (C > 100000) warnings.push("⚠️ Evaporation rate seems very high - verify units (kg/h).");
+  // === Warning checks ===
+  if (X > 50) warnings.push("⚠️ Improvement % seems very high - verify value.");
+  if (C > 100000) warnings.push("⚠️ Evaporation rate seems very high - check units (kg/h).");
   if (D > 8760) warnings.push("⚠️ Operational hours exceed hours in a year - verify value.");
-  if (W > 500) warnings.push("⚠️ Water cost seems very high - verify units (₹/m³).");
-  
-  // compute water savings (₹/year)
-  // formula: S = (X * C * D * W) / 100000
+  if (W > 500) warnings.push("⚠️ Water cost seems very high - check units (₹/m³).");
+
+  // === Compute water savings (₹/year) ===
+  // Formula: S = (X * C * D * W) / 100000
   const savings = (X * C * D * W) / 100000;
 
   if (!Number.isFinite(savings) || savings < 0) {
@@ -672,30 +669,30 @@ function calculateWaterSavings() {
     return;
   }
 
-  // Additional warning for extreme results
+  // === Additional warning for extreme results ===
   if (savings > 5000000) {
     warnings.push("⚠️ Extremely high savings calculated - verify all input values.");
   }
 
-  // classification based on savings values
+  // === Classification logic ===
   let classification = "";
   let suggestion = "";
   
   if (savings > 500000) {
     classification = "High Savings Potential";
-    suggestion = "✅ Significant water cost reduction. Strong return on investment expected.";
+    suggestion = "✅ Significant water cost reduction. Strong ROI expected.";
   } else if (savings >= 50000 && savings <= 500000) {
     classification = "Moderate Savings Potential";
-    suggestion = "✅ Substantial water savings. Good investment opportunity.";
+    suggestion = "✅ Substantial savings. Good investment opportunity.";
   } else if (savings > 0 && savings < 50000) {
     classification = "Low Savings Potential";
-    suggestion = "⚠️ Modest water cost reduction. Evaluate implementation costs carefully.";
+    suggestion = "⚠️ Modest savings. Compare against implementation costs.";
   } else {
     classification = "No Savings";
-    suggestion = "ℹ️ No water savings calculated. Consider higher improvement percentage or review inputs.";
+    suggestion = "ℹ️ No savings calculated. Review input assumptions.";
   }
 
-  // compose feedback content
+  // === Feedback content ===
   let details = `<div>Annual water savings = <b>₹${savings.toFixed(2)}</b>/year</div>`;
   details += `<div>Classification: <b>${classification}</b></div>`;
   details += `<div style="margin-top:6px;">${suggestion}</div>`;
@@ -703,17 +700,17 @@ function calculateWaterSavings() {
     details += `<div style="margin-top:8px; color:#b35d00;">Note: ${warnings.join(" | ")}</div>`;
   }
 
-  // update UI
+  // === Update UI ===
   if (savingsEl) savingsEl.textContent = savings.toFixed(2);
   if (feedbackEl) feedbackEl.innerHTML = details;
 
-  // toggle display
+  // === Toggle display ===
   document.getElementById("placeholder").classList.add("hidden");
   document.getElementById("resultValue").classList.remove("hidden");
   document.getElementById("resultError").classList.add("hidden");
 }
 
-/* safe print guard */
+/* Print Report with date */
 function printReport() {
   const el = document.getElementById('printDate');
   if (el) {
@@ -724,6 +721,59 @@ function printReport() {
   window.print();
 }
 </script>
+
 </body>
 </html>
 {% endblock %}
+
+<!-- ============================================================
+ 📘 Water Savings Calculator Documentation
+ ------------------------------------------------------------
+ Formula:
+   S = (X × C × D × W) / 100,000
+
+ where:
+   S = Annual water savings (₹/year)
+   X = Improvement in condensate return (%)
+   C = Boiler evaporation rate (kg/h)
+   D = Operational hours per year (h)
+   W = Cost of water (₹/m³)
+
+ ------------------------------------------------------------
+ ✅ Input Validations:
+
+ 1. Required Inputs:
+    • X → Improvement in condensate return (%)  
+    • C → Boiler evaporation rate (kg/h)  
+    • D → Operational hours per year (h)  
+    • W → Cost of water (₹/m³)  
+
+ 2. Numeric & Range Checks:
+    • X: ≥ 0 and ≤ 100  
+    • C: > 0 (kg/h)  
+    • D: > 0 and ≤ 8,760 (hours/year)  
+    • W: > 0 (₹/m³)  
+
+ 3. Warning / Engineering Checks:
+    • X > 50% → unusually high improvement, verify input.  
+    • C > 100,000 → very high evaporation rate, check units.  
+    • D > 8,760 → exceeds total hours in a year.  
+    • W > 500 → suspiciously high water cost, check units.  
+
+ ------------------------------------------------------------
+ 📤 Output Validations:
+
+ 1. Computed savings (S) must be finite and ≥ 0.  
+ 2. S > 5,000,000 ₹/year → likely unrealistic, verify inputs.  
+ 3. Classification:
+    • > 500,000 ₹/year → High Savings Potential ✅  
+    • 50,000 – 500,000 ₹/year → Moderate Savings Potential ✅  
+    • 0 – 50,000 ₹/year → Low Savings Potential ⚠️  
+    • ≤ 0 → No Savings ℹ️  
+
+ ------------------------------------------------------------
+ ⚠️ Limitations:
+   • Assumes constant evaporation rate and water cost.  
+   • Does not consider seasonal/variable operating conditions.  
+   • Strictly for quick estimation, not detailed financial modeling.  
+ ============================================================ -->

@@ -505,6 +505,30 @@
                 <li><strong>Gas Constant (R):</strong> 0.0821 L·atm/(mol·K).</li>
             </ul>
         </div>
+
+        <div class="note-card">
+            <h3>✅ Input Validation</h3>
+            <ul class="note-list">
+                <li><b>Concentration (ppb):</b> must be between 0 and 1,000,000  
+                    <ul>
+                        <li>0 → results in 0 µg/m³ (no pollutant detected).</li>
+                    </ul>
+                </li>
+                <li><b>Pressure (atm):</b> must be between 0.1 and 10  
+                    <ul>
+                        <li>Typical ambient range: 0.8 – 1.2 atm (outside = warning).</li>
+                    </ul>
+                </li>
+                <li><b>Molecular Weight (g/mol):</b> must be between 2 and 300</li>
+                <li><b>Temperature (°C):</b> must be between -273.15 and 200  
+                    <ul>
+                        <li>Below -50 °C or above 60 °C → unusual for ambient air (warning).</li>
+                    </ul>
+                </li>
+                <li>All inputs must be valid <b>numeric values</b> (no text or symbols).</li>
+            </ul>
+        </div>
+
         
         <div class="note-card">
             <h3>📊 Interpretation</h3>
@@ -528,12 +552,12 @@
 </div>
 
 <script>
+
 function calculateConcentration() {
-  // safe reads (in case element missing)
-  const ppbRaw = document.getElementById("ppb")?.value.trim() ?? "";
-  const pressureRaw = document.getElementById("pressure")?.value.trim() ?? "";
-  const mwRaw = document.getElementById("molecularWeight")?.value.trim() ?? "";
-  const tempRaw = document.getElementById("temperature")?.value.trim() ?? "";
+  const ppb = parseFloat(document.getElementById("ppb").value);
+  const pressure = parseFloat(document.getElementById("pressure").value);
+  const mw = parseFloat(document.getElementById("molecularWeight").value);
+  const tempC = parseFloat(document.getElementById("temperature").value);
 
   const errorBox = document.getElementById("resultError");
   const errorMessage = document.getElementById("errorMessage");
@@ -543,96 +567,80 @@ function calculateConcentration() {
   const feedbackEl = document.getElementById("feedbackContent");
 
   // reset UI
-  if (errorBox) errorBox.classList.add("hidden");
-  if (errorMessage) errorMessage.innerHTML = "";
-  if (feedbackEl) feedbackEl.innerHTML = "";
+  errorBox.classList.add("hidden");
+  errorMessage.innerHTML = "";
+  feedbackEl.innerHTML = "";
 
   const errors = [];
   const warnings = [];
 
-  // Required / basic format checks
-  if (ppbRaw === "") errors.push("👉 Please enter concentration in ppb (parts per billion).");
-  if (pressureRaw === "") errors.push("👉 Please enter pressure (atm). If unknown, use 1 atm.");
-  if (mwRaw === "") errors.push("👉 Please enter molecular weight (g/mol).");
-  if (tempRaw === "") errors.push("👉 Please enter temperature (°C).");
+  // ✅ Input validation
+  if (isNaN(ppb) || ppb < 0 || ppb > 1_000_000) {
+    errors.push("Concentration must be between 0 and 1,000,000 ppb.");
+  }
+  if (isNaN(pressure) || pressure <= 0 || pressure > 10) {
+    errors.push("Pressure must be between 0.1 and 10 atm.");
+  }
+  if (isNaN(mw) || mw <= 0 || mw > 300) {
+    errors.push("Molecular weight must be between 2 and 300 g/mol.");
+  }
+  if (isNaN(tempC) || tempC <= -273.15 || tempC > 200) {
+    errors.push("Temperature must be between -273.15 °C and 200 °C.");
+  }
 
+  // show error if any
   if (errors.length > 0) {
-    if (errorMessage) errorMessage.innerHTML = errors.join("<br>");
-    if (errorBox) { errorBox.classList.remove("hidden"); }
-    if (placeholder) placeholder.classList.add("hidden");
-    if (resultValue) resultValue.classList.add("hidden");
+    errorMessage.innerHTML = errors.join("<br>");
+    errorBox.classList.remove("hidden");
+    placeholder.classList.add("hidden");
+    resultValue.classList.add("hidden");
     return;
   }
 
-  // parse numbers
-  const ppb = parseFloat(ppbRaw);
-  const pressure = parseFloat(pressureRaw);
-  const mw = parseFloat(mwRaw);
-  const tempC = parseFloat(tempRaw);
+  // ✅ Edge case warnings
+  if (ppb === 0) warnings.push("Result will be 0 µg/m³ (no pollutant detected).");
+  if (tempC < -50 || tempC > 60) warnings.push("Temperature outside normal ambient monitoring range.");
+  if (pressure < 0.8 || pressure > 1.2) warnings.push("Unusual pressure — verify measurement environment.");
 
-  if (!Number.isFinite(ppb) || ppb < 0) errors.push("👉 PPB must be a non-negative number.");
-  if (!Number.isFinite(pressure) || pressure <= 0) errors.push("👉 Pressure must be a positive number (atm).");
-  if (!Number.isFinite(mw) || mw <= 0) errors.push("👉 Molecular weight must be a positive number (g/mol).");
-  if (!Number.isFinite(tempC) || tempC <= -273.15) errors.push("👉 Temperature must be a valid number (°C) > -273.15.");
-
-  if (errors.length > 0) {
-    if (errorMessage) errorMessage.innerHTML = errors.join("<br>");
-    if (errorBox) { errorBox.classList.remove("hidden"); }
-    if (placeholder) placeholder.classList.add("hidden");
-    if (resultValue) resultValue.classList.add("hidden");
-    return;
-  }
-
-  // physical sanity warnings (non-blocking)
-  if (ppb === 0) warnings.push("❗ ppb = 0 → concentration will be 0 µg/m³.");
-  if (tempC < -50) warnings.push("⚠️ Very low temperature; verify units and measurement.");
-  if (tempC > 200) warnings.push("⚠️ Very high temperature; verify units and measurement.");
-  if (pressure > 10) warnings.push("⚠️ Very high pressure (>10 atm). Confirm units.");
-
-  // constants & conversion
+  // ✅ Calculation
   const tempK = 273.15 + tempC;
-  // Use a slightly more precise gas constant (L·atm·mol⁻¹·K⁻¹)
-  const R = 0.082057338; // L·atm/(mol·K)
-
-  // Formula: µg/m³ = ppb × (P × MW) / (R × T)
-  // (ppb is parts-per-billion by volume; P in atm; MW in g/mol; T in K)
-  const concentration = ppb * (pressure * mw) / (R * tempK);
+  const R = 0.082057; // L·atm/mol·K
+  const concentration = ppb * (pressure * mw) / (R * tempK); // µg/m³
 
   if (!Number.isFinite(concentration) || concentration < 0) {
-    if (errorMessage) errorMessage.innerHTML = "⚠️ Calculation produced invalid result. Check inputs and units.";
-    if (errorBox) errorBox.classList.remove("hidden");
-    if (placeholder) placeholder.classList.add("hidden");
-    if (resultValue) resultValue.classList.add("hidden");
+    errorMessage.innerHTML = "⚠️ Calculation failed. Check inputs.";
+    errorBox.classList.remove("hidden");
+    placeholder.classList.add("hidden");
+    resultValue.classList.add("hidden");
     return;
   }
 
-  // Provide both µg/m³ and mg/m³ for clarity
-  const conc_ugm3 = concentration; // µg/m³ as per formula
-  const conc_mgm3 = conc_ugm3 / 1000.0;
+  const conc_ugm3 = concentration;
+  const conc_mgm3 = conc_ugm3 / 1000;
 
-  // Feedback thresholds — NOTE: these are generic guidance only.
+  // ✅ Feedback logic
   let feedbackText = "";
   if (conc_ugm3 < 50) {
-    feedbackText = "✅ Low concentration (generic guidance).";
+    feedbackText = "✅ Low concentration — safe.";
   } else if (conc_ugm3 < 150) {
-    feedbackText = "⚠️ Moderate concentration — sensitive groups may be affected.";
+    feedbackText = "⚠️ Moderate concentration — caution advised.";
   } else {
-    feedbackText = "❌ High concentration — potential health risk. Refer to pollutant-specific standards.";
+    feedbackText = "❌ High concentration — health risk, regulatory concern.";
   }
 
-  // Add warnings to feedback (if any)
   if (warnings.length) {
     feedbackText += "<br><small style='color:#b35d00;'>Note: " + warnings.join(" | ") + "</small>";
   }
 
-  // show results
-  if (rateEl) rateEl.textContent = conc_ugm3.toFixed(2);
-  if (feedbackEl) feedbackEl.innerHTML = `${feedbackText}<div style="margin-top:6px;">Equivalent: <b>${conc_mgm3.toFixed(4)} mg/m³</b></div>`;
+  // ✅ Display results
+  rateEl.textContent = conc_ugm3.toFixed(2);
+  feedbackEl.innerHTML = `${feedbackText}<div style="margin-top:6px;">Equivalent: <b>${conc_mgm3.toFixed(4)} mg/m³</b></div>`;
 
-  if (placeholder) placeholder.classList.add("hidden");
-  if (resultValue) resultValue.classList.remove("hidden");
-  if (errorBox) errorBox.classList.add("hidden");
+  placeholder.classList.add("hidden");
+  resultValue.classList.remove("hidden");
+  errorBox.classList.add("hidden");
 }
+
 
 function printReport() {
   const el = document.getElementById('printDate');
@@ -649,3 +657,38 @@ function printReport() {
 </body>
 </html>
 {% endblock %}
+
+
+<!-- /*
+===========================================
+ Air Pollutant Concentration Calculator
+===========================================
+
+📌 Formula:
+------------
+Concentration (C) = m / V
+
+Where,
+- C = Pollutant concentration (mg/m³)
+- m = Mass of pollutant (mg)
+- V = Volume of air (m³)
+
+📌 Validations:
+---------------
+1. Mass of pollutant (m):
+   - Must be a number.
+   - Must be ≥ 0 (negative mass not possible).
+
+2. Volume of air (V):
+   - Must be a number.
+   - Must be > 0 (zero or negative volume not valid, since division by zero or negative space is not physically meaningful).
+
+3. Input type check:
+   - Only numeric values allowed (no text, symbols, etc.).
+
+4. Output:
+   - If all inputs are valid → Show concentration C in mg/m³ (rounded to suitable decimals).
+   - If invalid → Show user-friendly error message.
+
+===========================================
+*/ -->

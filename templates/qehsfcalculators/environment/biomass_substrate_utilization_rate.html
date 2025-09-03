@@ -564,24 +564,23 @@
         </div>
 
         <div class="note-card">
-            <h3>⚠️ Strong validations (what is checked)</h3>
-            <ul>
-                <li>All inputs are required and must be finite numbers.</li>
-                <li><strong>k > 0</strong> (day⁻¹) - Must be positive.</li>
-                <li><strong>X > 0</strong> (mg/L) - Biomass concentration must be positive.</li>
-                <li><strong>S ≥ 0</strong> (mg/L) - Substrate concentration must be non-negative.</li>
-                <li><strong>Kₛ > 0</strong> (mg/L) - Must be positive (S = 0 when Kₛ = 0 causes division error).</li>
-                <li>If both S = 0 and Kₛ = 0, calculation is blocked (division by zero).</li>
-                <li>Extreme values will trigger warnings for potential unit errors.</li>
-                <li>Results that are physically unrealistic (negative or non-finite) will be blocked.</li>
+            <h3>✅ Input Validation </h3>
+            <ul class="note-list">
+                <li><strong>Maximum specific utilization rate (k):</strong> Must be a positive number. Warning if &gt; 20 day⁻¹ (check units).</li>
+                <li><strong>Microorganism concentration (X):</strong> Must be a positive number. Warning if &gt; 10,000 mg/L (unrealistic).</li>
+                <li><strong>Substrate concentration (S):</strong> Must be a non-negative number. Warning if &gt; 10,000 mg/L (verify units).</li>
+                <li><strong>Half-saturation coefficient (Kₛ):</strong> Must be a positive number. Warning if &gt; 500 mg/L (outside typical range).</li>
+                <li><strong>Division by zero check:</strong> Cannot calculate if both S = 0 and Kₛ = 0.</li>
+                <li><strong>General:</strong> All fields are required and must be valid numeric values (scientific notation allowed).</li>
             </ul>
-        </div>
+            </div>
+
 
         <div class="note-card">
             <h3>🔎 Interpretation</h3>
             <ul class="note-list">
                 <li><strong>High utilization rate</strong>: Efficient substrate consumption, optimal microbial activity.</li>
-                <li><strong>Moderate utilization rate</strong>: Typical operation, substrate may be limiting.</li>
+                <li><strong>Moderate utilization rate</strong>: Typical operation and substrate may be limiting.</li>
                 <li><strong>Low utilization rate</strong>: Possible nutrient limitation, toxicity, or suboptimal conditions.</li>
                 <li><strong>Zero utilization rate</strong>: No substrate available or microbial activity inhibited.</li>
             </ul>
@@ -662,7 +661,7 @@ function calculateSubstrateUtilization() {
     return;
   }
 
-  // warning checks
+  // warning checks (sanity checks vs typical ranges)
   if (k > 20) warnings.push("⚠️ k value seems high - verify units (typical range: 1-10 day⁻¹).");
   if (X > 10000) warnings.push("⚠️ X value seems high - verify units (typical range: 10-5000 mg/L).");
   if (Ks > 500) warnings.push("⚠️ Kₛ value seems high - verify units (typical range: 0.1-100 mg/L).");
@@ -677,8 +676,8 @@ function calculateSubstrateUtilization() {
     return;
   }
 
-  // classification thresholds (based on percentage of maximum possible rate)
-  const maxPossibleRate = k * X; // When S >> Ks
+  // classification thresholds (based on % of maximum possible rate)
+  const maxPossibleRate = k * X; // when S >> Ks
   const percentageOfMax = (utilizationRate / maxPossibleRate) * 100;
   
   let classification = "";
@@ -728,6 +727,61 @@ function printReport() {
   window.print();
 }
 </script>
+
 </body>
 </html>
 {% endblock %}
+
+
+<!-- ============================================================
+ 📌 Biomass Substrate Utilization Rate Calculator Documentation
+ ------------------------------------------------------------
+ Formula (Monod kinetics):
+
+   q = (k * X * S) / (Kₛ + S)
+
+ where:
+   q   = substrate utilization rate (mg/L/day)
+   k   = maximum specific utilization rate (1/day)
+   X   = microorganism concentration (mg/L)
+   S   = substrate concentration (mg/L)
+   Kₛ  = half-saturation coefficient (mg/L)
+
+ ------------------------------------------------------------
+ ✅ Input Validations (QEHS & Process Safety Best Practice):
+   • All inputs required, must be finite numbers.
+   • k > 0 (1/day) — typical: 1–10 (warn if >20).
+   • X > 0 (mg/L) — typical: 10–5000 (warn if >10000).
+   • S ≥ 0 (mg/L) — non-negative (warn if >10000).
+   • Kₛ > 0 (mg/L) — typical: 0.1–100 (warn if >500).
+   • Block if both S = 0 and Kₛ = 0 → division by zero.
+   • Reject negative or non-finite inputs.
+   • Allow decimals but restrict unrealistic precision (>6 decimals flagged).
+
+ ------------------------------------------------------------
+ ✅ Output Validations:
+   • q must be ≥ 0 and finite (NaN, Infinity invalid).
+   • Max possible rate = k * X (when S >> Kₛ).
+   • Efficiency = (q / (k*X)) × 100%.
+   • Classification thresholds:
+       >80% → High utilization
+       30–80% → Moderate utilization
+       <30% (with S > 0) → Low utilization
+       S = 0 → Zero utilization
+   • Warn if computed q is unreasonably high (may indicate unit error).
+   • Flag if efficiency >100% (invalid input combination).
+
+ ------------------------------------------------------------
+ ⚠️ Edge Cases:
+   • k = 0, X = 0, or Ks = 0 with S = 0 → invalid.
+   • Extremely high X with very low S → rate may collapse → warn.
+   • Very small Kₛ (<0.01 mg/L) → unrealistic precision → warn.
+   • Results outside typical environmental/industrial ranges → warn.
+
+ ------------------------------------------------------------
+ 🛡️ Compliance Rationale:
+   • Prevents invalid math operations (division by zero, NaN, Infinity).
+   • Ensures results reflect realistic biological/operational conditions.
+   • Protects against unit conversion mistakes (mg/L vs g/L, etc.).
+   • Matches how data is validated in audits (OSHA, ISO 45001, NFPA, ILO).
+ ============================================================ -->

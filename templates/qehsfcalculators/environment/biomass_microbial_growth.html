@@ -562,16 +562,18 @@
         </div>
 
         <div class="note-card">
-            <h3>⚠️ Validations</h3>
-            <ul>
-                <li>All inputs must be positive numbers</li>
-                <li>μₘ must be greater than 0 and typically less than 5 day⁻¹</li>
-                <li>Kₛ must be positive (S > 0 if Kₛ = 0 will cause division error)</li>
-                <li>kₑ must be non-negative</li>
-                <li>If S = 0 and Kₛ = 0, calculation is blocked (division by zero)</li>
-                <li>Extreme values will trigger warnings for potential unit errors</li>
-            </ul>
+        <h3>✅ Input Validations</h3>
+        <ul class="note-list">
+            <li>μₘ (max growth rate): must be > 0 (typical 0.05–2.0 day⁻¹)</li>
+            <li>X (microorganism conc.): must be > 0 (mg/L)</li>
+            <li>S (substrate conc.): must be ≥ 0 (mg/L)</li>
+            <li>Kₛ (half-saturation): must be ≥ 0 (typical 0.1–100 mg/L)</li>
+            <li>kₑ (decay coefficient): must be ≥ 0 (typical 0.01–0.1 day⁻¹)</li>
+            <li>⚠️ Error if S and Kₛ are both 0 (division by zero)</li>
+            <li>⚠️ Warning if inputs exceed realistic ranges → check units</li>
+        </ul>
         </div>
+
 
         <div class="note-card">
             <h3>🔎 Interpretation</h3>
@@ -596,7 +598,9 @@
 </div>
 
 <script>
-/* Helper: show errors consistently */
+/* ============================================================
+   Helper: Show errors consistently in the UI
+   ============================================================ */
 function showErrors(errors) {
   const errorBox = document.getElementById("resultError");
   const errorMessage = document.getElementById("errorMessage");
@@ -609,9 +613,12 @@ function showErrors(errors) {
   if (resultValue) resultValue.classList.add("hidden");
 }
 
-/* Main Microbial Growth Rate calculation with validations */
+/* ============================================================
+   Main Microbial Growth Rate calculation with validations
+   Formula: μ = (μₘ * X * S) / (Kₛ + S) - (kₑ * X)
+   ============================================================ */
 function calculateGrowthRate() {
-  // Get input values
+  // Get input values (as strings first)
   const muMax = document.getElementById("muMax")?.value.trim() || "";
   const X = document.getElementById("microorganismConcentration")?.value.trim() || "";
   const S = document.getElementById("substrateConcentration")?.value.trim() || "";
@@ -628,7 +635,9 @@ function calculateGrowthRate() {
   const errors = [];
   const warnings = [];
 
-  // Required checks
+  /* ------------------------------
+     Step 1: Required field checks
+     ------------------------------ */
   if (muMax === "") errors.push("👉 Enter maximum specific growth rate (μₘ).");
   if (X === "") errors.push("👉 Enter microorganism concentration (X).");
   if (S === "") errors.push("👉 Enter substrate concentration (S).");
@@ -637,54 +646,74 @@ function calculateGrowthRate() {
 
   if (errors.length > 0) { showErrors(errors); return; }
 
-  // Parse values
+  /* ------------------------------
+     Step 2: Parse values as floats
+     ------------------------------ */
   const muMaxVal = parseFloat(muMax);
   const XVal = parseFloat(X);
   const SVal = parseFloat(S);
   const KsVal = parseFloat(Ks);
   const kdVal = parseFloat(kd);
 
-  // Numeric & sign checks
-  if (!Number.isFinite(muMaxVal) || muMaxVal <= 0) errors.push("👉 μₘ must be a positive number.");
-  if (!Number.isFinite(XVal) || XVal <= 0) errors.push("👉 X must be a positive number.");
-  if (!Number.isFinite(SVal) || SVal < 0) errors.push("👉 S must be a non-negative number.");
-  if (!Number.isFinite(KsVal) || KsVal < 0) errors.push("👉 Kₛ must be a non-negative number.");
-  if (!Number.isFinite(kdVal) || kdVal < 0) errors.push("👉 kₑ must be a non-negative number.");
+  /* ------------------------------
+     Step 3: Numeric and sign checks
+     ------------------------------ */
+  if (!(muMaxVal > 0)) errors.push("👉 μₘ must be > 0 (day⁻¹).");
+  if (!(XVal > 0)) errors.push("👉 X must be > 0 (mg/L).");
+  if (!(SVal >= 0)) errors.push("👉 S must be ≥ 0 (mg/L).");
+  if (!(KsVal >= 0)) errors.push("👉 Kₛ must be ≥ 0 (mg/L).");
+  if (!(kdVal >= 0)) errors.push("👉 kₑ must be ≥ 0 (day⁻¹).");
+
+  // Prevent division by zero
+  if (SVal === 0 && KsVal === 0) {
+    errors.push("👉 Cannot calculate when both S and Kₛ are zero (division by zero).");
+  }
 
   if (errors.length > 0) { showErrors(errors); return; }
 
-  // Special case validation - division by zero
-  if (KsVal === 0 && SVal === 0) {
-    errors.push("👉 Cannot calculate when both S and Kₛ are zero (division by zero).");
-    showErrors(errors);
-    return;
-  }
+  /* ------------------------------
+     Step 4: Warnings on extreme values
+     (based on industry ranges)
+     ------------------------------ */
+  if (muMaxVal > 5) warnings.push("⚠️ μₘ unusually high (typical 0.05–2.0 day⁻¹).");
+  if (XVal > 30000) warnings.push("⚠️ X unusually high (risk of sludge bulking).");
+  if (SVal > 10000) warnings.push("⚠️ S very high (possible spill/release).");
+  if (KsVal > 1000) warnings.push("⚠️ Kₛ unusually high (typical 0.1–100 mg/L).");
+  if (kdVal > 1) warnings.push("⚠️ kₑ unusually high (typical 0.01–0.1 day⁻¹).");
 
-  // Warning checks
-  if (muMaxVal > 5) warnings.push("⚠️ μₘ value seems high - verify units (typical range: 0.05-2.0 day⁻¹).");
-  if (KsVal > 1000) warnings.push("⚠️ Kₛ value seems high - verify units (typical range: 0.1-100 mg/L).");
-  if (kdVal > 1) warnings.push("⚠️ kₑ value seems high - verify units (typical range: 0.01-0.1 day⁻¹).");
-
-  // Calculate growth rate using Monod equation with endogenous decay
-  // μ = (μₘ * X * S) / (Kₛ + S) - (kₑ * X)
+  /* ------------------------------
+     Step 5: Growth rate calculation
+     ------------------------------ */
   const growthRate = ((muMaxVal * XVal * SVal) / (KsVal + SVal)) - (kdVal * XVal);
 
   if (!Number.isFinite(growthRate)) {
-    showErrors(["⚠️ Computed growth rate is invalid. Check inputs."]);
+    showErrors(["⚠️ Computed growth rate invalid. Check inputs."]);
     return;
   }
 
-  // Assessment
+  /* ------------------------------
+     Step 6: Assessment of results
+     ------------------------------ */
   let assessment = "";
   if (growthRate > 0) {
-    assessment = "✅ Microbial population is growing.";
+    if (growthRate > 500) {
+      assessment = "⚠️ Very rapid growth — monitor oxygen demand, risk of overheating.";
+    } else {
+      assessment = "✅ Microbial population is growing.";
+    }
   } else if (growthRate === 0) {
     assessment = "➖ Steady state (growth equals decay).";
   } else {
-    assessment = "⚠️ Microbial population is declining (decay exceeds growth).";
+    if (growthRate < -100) {
+      assessment = "⚠️ Rapid decay — risk of biomass collapse, investigate toxicity/overload.";
+    } else {
+      assessment = "⚠️ Microbial population is declining (decay exceeds growth).";
+    }
   }
 
-  // Compose feedback content
+  /* ------------------------------
+     Step 7: Prepare UI output
+     ------------------------------ */
   let details = `<div>Growth rate = <b>${growthRate.toFixed(4)}</b> mg/L/day</div>`;
   details += `<div>${assessment}</div>`;
   if (warnings.length) {
@@ -701,7 +730,9 @@ function calculateGrowthRate() {
   document.getElementById("resultError").classList.add("hidden");
 }
 
-/* Print function */
+/* ============================================================
+   Print function for compliance reporting
+   ============================================================ */
 function printReport() {
   const el = document.getElementById('printDate');
   if (el) {
@@ -713,6 +744,41 @@ function printReport() {
 }
 </script>
 
+
 </body>
 </html>
 {% endblock %}
+
+
+
+<!-- ============================================================
+ 📌 Microbial Growth Rate Model Documentation
+ ------------------------------------------------------------
+ Formula (Monod kinetics with endogenous decay):
+
+     μ = ( (μₘ * X * S) / (Kₛ + S) ) - (kₑ * X)
+
+ where:
+   μ   = net microbial growth rate (mg/L/day)
+   μₘ  = maximum specific growth rate (day⁻¹)
+   X   = microorganism concentration (mg/L)
+   S   = substrate concentration (mg/L)
+   Kₛ  = half-saturation coefficient (mg/L)
+   kₑ  = endogenous decay coefficient (day⁻¹)
+
+ ------------------------------------------------------------
+ ✅ Input Validations:
+   • μₘ must be > 0 (typical 0.05–2.0 day⁻¹)
+   • X must be > 0 (mg/L)
+   • S must be ≥ 0 (mg/L)
+   • Kₛ must be ≥ 0 (typical 0.1–100 mg/L)
+   • kₑ must be ≥ 0 (typical 0.01–0.1 day⁻¹)
+   • Error if S = 0 AND Kₛ = 0 → division by zero
+   • Warning if inputs exceed realistic ranges (check units!)
+
+ ------------------------------------------------------------
+ ✅ Output Assessment:
+   • μ > 0  → microbial growth
+   • μ = 0  → steady state (growth = decay)
+   • μ < 0  → microbial decay (decline in biomass)
+ ============================================================ -->

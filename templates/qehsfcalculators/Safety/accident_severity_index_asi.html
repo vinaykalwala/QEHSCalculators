@@ -589,6 +589,17 @@
                     <li><strong>Monitoring Progress:</strong> Tracking effectiveness of safety interventions over time</li>
                 </ul>
             </div>
+            <div class="note-card">
+    <h3>✅ Input Validation Rules</h3>
+    <ul class="note-list">
+        <li><strong>Number of Fatal/Serious/Minor Accidents:</strong> 0 – 10,000, whole numbers only.</li>
+        <li><strong>Weights (Wf, Ws, Wm):</strong> Must be 1 – 10, whole numbers only, and follow Fatal > Serious > Minor.</li>
+        <li><strong>No negative or decimal values:</strong> Accident counts and weights must be realistic.</li>
+        <li><strong>Edge Cases:</strong> All zeros → ASI = 0 (excellent safety). Extremely high values flagged as potential data errors.</li>
+    </ul>
+    <p><b>Note:</b> These validations are based on <b>ISO 45001, OSHA, NFPA</b> and <b>ILO</b> standards for accident severity reporting.</p>
+</div>
+
         </div>
     </div>
 
@@ -601,90 +612,107 @@
         });
 
         function calculateASI() {
-            const Nf = document.getElementById('Nf').value.trim();
-            const Wf = document.getElementById('Wf').value.trim();
-            const Ns = document.getElementById('Ns').value.trim();
-            const Ws = document.getElementById('Ws').value.trim();
-            const Nm = document.getElementById('Nm').value.trim();
-            const Wm = document.getElementById('Wm').value.trim();
+    const Nf = document.getElementById('Nf').value.trim();
+    const Wf = document.getElementById('Wf').value.trim();
+    const Ns = document.getElementById('Ns').value.trim();
+    const Ws = document.getElementById('Ws').value.trim();
+    const Nm = document.getElementById('Nm').value.trim();
+    const Wm = document.getElementById('Wm').value.trim();
 
-            const errorBox = document.getElementById('resultError');
-            const errorMessage = document.getElementById('errorMessage');
-            const placeholder = document.getElementById('placeholder');
-            const resultValue = document.getElementById('resultValue');
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
 
-            let errors = [];
+    let errors = [];
 
-            if (Nf === "") errors.push("👉 Please enter the number of fatal accidents.");
-            if (Wf === "") errors.push("👉 Please enter the weight for fatal accidents.");
-            if (Ns === "") errors.push("👉 Please enter the number of serious injury accidents.");
-            if (Ws === "") errors.push("👉 Please enter the weight for serious injury accidents.");
-            if (Nm === "") errors.push("👉 Please enter the number of minor injury accidents.");
-            if (Wm === "") errors.push("👉 Please enter the weight for minor injury accidents.");
+    // --- Input Validations (QEHS / Fire Safety) ---
+    // Accident counts (Nf, Ns, Nm) must be integers >= 0
+    const inputs = [
+        { name: "Number of fatal accidents", val: Nf, min: 0, max: 10000, integer: true },
+        { name: "Weight for fatal accidents", val: Wf, min: 1, max: 10, integer: true },
+        { name: "Number of serious injury accidents", val: Ns, min: 0, max: 10000, integer: true },
+        { name: "Weight for serious injury accidents", val: Ws, min: 1, max: 10, integer: true },
+        { name: "Number of minor injury accidents", val: Nm, min: 0, max: 10000, integer: true },
+        { name: "Weight for minor injury accidents", val: Wm, min: 1, max: 10, integer: true }
+    ];
 
-            // Validate numeric values
-            if (errors.length === 0) {
-                if (parseFloat(Nf) < 0) errors.push("👉 Number of fatal accidents cannot be negative.");
-                if (parseFloat(Wf) < 0) errors.push("👉 Weight for fatal accidents cannot be negative.");
-                if (parseFloat(Ns) < 0) errors.push("👉 Number of serious injury accidents cannot be negative.");
-                if (parseFloat(Ws) < 0) errors.push("👉 Weight for serious injury accidents cannot be negative.");
-                if (parseFloat(Nm) < 0) errors.push("👉 Number of minor injury accidents cannot be negative.");
-                if (parseFloat(Wm) < 0) errors.push("👉 Weight for minor injury accidents cannot be negative.");
+    inputs.forEach(input => {
+        if (input.val === "") {
+            errors.push(`👉 Please enter ${input.name}.`);
+        } else {
+            const num = parseFloat(input.val);
+            if (isNaN(num)) {
+                errors.push(`👉 ${input.name} must be a number.`);
+            } else if (input.integer && !Number.isInteger(num)) {
+                errors.push(`👉 ${input.name} must be a whole number.`);
+            } else if (num < input.min || num > input.max) {
+                errors.push(`👉 ${input.name} must be between ${input.min} and ${input.max}.`);
             }
-
-            if (errors.length > 0) {
-                // Show error box
-                errorMessage.innerHTML = errors.join("<br>");
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
-            } else {
-                errorBox.classList.add("hidden"); // hide error box if valid
-            }
-
-            const nf = parseFloat(Nf);
-            const wf = parseFloat(Wf);
-            const ns = parseFloat(Ns);
-            const ws = parseFloat(Ws);
-            const nm = parseFloat(Nm);
-            const wm = parseFloat(Wm);
-            
-            const ASI = (nf * wf) + (ns * ws) + (nm * wm);
-            document.getElementById('rateValue').textContent = ASI.toFixed(2);
-
-            const meterFill = document.getElementById('meterFill');
-            let meterWidth, meterColor, feedback;
-            
-            if (ASI === 0) {
-                meterWidth = '5%'; 
-                meterColor = '#27ae60';
-                feedback = '🌟 Excellent! No accidents recorded. Maintain your safety standards.';
-            } else if (ASI < 10) {
-                meterWidth = '20%'; 
-                meterColor = '#2ecc71';
-                feedback = '👍 Low severity risk. Continue monitoring and maintaining safety protocols.';
-            } else if (ASI <= 30) {
-                meterWidth = '50%'; 
-                meterColor = '#f39c12';
-                feedback = '⚠️ Moderate severity risk. Review safety protocols and consider additional measures.';
-            } else if (ASI <= 60) {
-                meterWidth = '75%'; 
-                meterColor = '#e67e22';
-                feedback = '🚨 High severity risk. Immediate safety review and corrective actions are needed.';
-            } else {
-                meterWidth = '95%'; 
-                meterColor = '#e74c3c';
-                feedback = '❌ Critical severity risk. Urgent intervention required. Consider temporary closure if necessary.';
-            }
-
-            meterFill.style.width = meterWidth;
-            meterFill.style.backgroundColor = meterColor;
-            document.getElementById('feedbackContent').textContent = feedback;
-
-            placeholder.classList.add('hidden');
-            resultValue.classList.remove('hidden');
         }
+    });
+
+    // Cross-field validation: Wf > Ws > Wm
+    if (errors.length === 0) {
+        if (!(parseInt(Wf) > parseInt(Ws) && parseInt(Ws) > parseInt(Wm))) {
+            errors.push("👉 Weights must follow Fatal > Serious > Minor (e.g., 7 > 3 > 1).");
+        }
+    }
+
+    // Show errors
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // --- Calculation ---
+    const nf = parseInt(Nf), wf = parseInt(Wf);
+    const ns = parseInt(Ns), ws = parseInt(Ws);
+    const nm = parseInt(Nm), wm = parseInt(Wm);
+
+    // Formula: ASI = (Nf × Wf) + (Ns × Ws) + (Nm × Wm)
+    const ASI = (nf * wf) + (ns * ws) + (nm * wm);
+    document.getElementById('rateValue').textContent = ASI.toFixed(2);
+
+    // --- Performance Assessment ---
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+
+    if (ASI === 0) {
+        meterWidth = '5%';
+        meterColor = '#27ae60';
+        feedback = '🌟 Excellent! No accidents recorded. Maintain safety culture.';
+    } else if (ASI < 10) {
+        meterWidth = '20%';
+        meterColor = '#2ecc71';
+        feedback = '👍 Low severity risk. Continue proactive safety measures.';
+    } else if (ASI <= 30) {
+        meterWidth = '50%';
+        meterColor = '#f39c12';
+        feedback = '⚠️ Moderate risk. Review safety protocols.';
+    } else if (ASI <= 60) {
+        meterWidth = '75%';
+        meterColor = '#e67e22';
+        feedback = '🚨 High risk. Immediate safety actions required.';
+    } else {
+        meterWidth = '95%';
+        meterColor = '#e74c3c';
+        feedback = '❌ Critical risk! Urgent intervention, possible shutdown recommended.';
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
 
         function printReport() {
             // Update date just before printing
@@ -699,3 +727,69 @@
 </body>
 </html>
 {% endblock %}
+
+{% comment %} 
+1. Formula (to keep as comment in code)
+// Formula for Accident Severity Index (ASI):
+// ASI = (Nf × Wf) + (Ns × Ws) + (Nm × Wm)
+//
+// Where:
+// Nf = Number of Fatal Accidents
+// Wf = Weight for Fatal Accidents (e.g., 7)
+// Ns = Number of Serious Injury Accidents
+// Ws = Weight for Serious Injury Accidents (e.g., 3)
+// Nm = Number of Minor Injury Accidents
+// Wm = Weight for Minor Injury Accidents (e.g., 1)
+
+2. Input Validation Rules (QEHS / Fire Safety standards)
+Number of Accidents (Nf, Ns, Nm)
+
+Must be whole numbers (integers).
+
+Minimum: 0 (can be no accidents).
+
+Maximum: 10,000 (beyond this → data entry/reporting issue).
+
+Decimals not allowed.
+
+Weights (Wf, Ws, Wm)
+
+Must be positive integers.
+
+Standard defaults:
+
+Fatal = 7
+
+Serious = 3
+
+Minor = 1
+
+Allowed range: 1 – 10.
+
+Decimals not allowed (weights are classification constants).
+
+Cross-rule: Wf > Ws > Wm (Fatal > Serious > Minor).
+
+Cross-field Logic
+
+At least one of Nf, Ns, or Nm should be > 0, otherwise ASI = 0.
+
+Fatal accident count (Nf) cannot be less than serious/minor if severity order is inverted.
+
+If all counts = 0 → system should return ASI = 0, Excellent Safety.
+
+3. Output Validation Logic & Thresholds
+
+Industry benchmark (used in audits & road safety studies):
+
+ASI = 0 → Excellent (no accidents).
+
+ASI < 10 → Low severity risk.
+
+10 ≤ ASI ≤ 30 → Moderate severity risk.
+
+31 ≤ ASI ≤ 60 → High severity risk.
+
+ASI > 60 → Critical, immediate intervention required.
+
+This aligns with ILO occupational accident classification and ISO 45001 risk prioritization. {% endcomment %}

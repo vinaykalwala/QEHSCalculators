@@ -16,7 +16,7 @@
         .calculator-container {
             max-width: 1200px;
             margin: 20px auto;
-            padding:0 20px;
+            padding: 20px;
             border-radius: 12px;
         }
 
@@ -302,30 +302,6 @@
         .hidden { 
             display: none; 
         }
-         .btn-container {
-            display: flex;
-            justify-content: center;
-            margin: 30px 0;
-        }
-         .back-btn {
-            background:linear-gradient(#1560bd,#000040);
-            color: #ffffff;
-            border: 2px solid #1560bd;
-            padding: 10px 20px;
-            font-size: 14px;
-            font-weight: 600;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .back-btn:hover {
-            background-color: #1560bd;
-            color: #ffffff;
-            border-color: #000040;
-            transform: scale(1.05);
-        }
     </style>
 </head>
 <body>
@@ -337,6 +313,10 @@
 
     <!-- Include header/footer for print -->
     {% include "includes/print_header_footer.html" %}
+
+      <div class="btn-container">
+    <a href="{% url 'quality_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+</div>
 
         <div class="calculator-header">
             <h1>Cost Per Minute (CPM) Calculator</h1>
@@ -404,6 +384,15 @@
                     The <strong>Cost Per Minute (CPM) Calculator</strong> measures the cost efficiency of operations based on labor and operational costs divided by available work minutes. It helps companies optimize their resource allocation and identify areas for cost reduction.
                 </p> 
             </div>
+<div class="note-card">
+  <h3>📌 Input Validation </h3>
+  <ul class="note-list">
+    <li><strong>Direct Labor Cost ($):</strong> Required, ≥0.01, ≤1,000,000,000, max 2 decimals.</li>
+    <li><strong>Operational Cost ($):</strong> Required, ≥0.01, ≤1,000,000,000, max 2 decimals.</li>
+    <li><strong>Available Minutes:</strong> Required, ≥1, ≤1,000,000, decimals allowed, not 0.</li>
+  </ul>
+</div>
+
 
             <div class="note-card">
                 <h3>❓ Explanation of Parameters</h3>
@@ -434,89 +423,171 @@
     </div>
 
     <script>
-        // Set current date for print header
-        document.addEventListener('DOMContentLoaded', function() {
-            const now = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
-        });
-
         function calculateCPM() {
-            const laborCost = document.getElementById("laborCost").value.trim();
-            const operationalCost = document.getElementById("operationalCost").value.trim();
-            const availableMinutes = document.getElementById("availableMinutes").value.trim();
+    const laborCost = document.getElementById("laborCost").value.trim();
+    const operationalCost = document.getElementById("operationalCost").value.trim();
+    const availableMinutes = document.getElementById("availableMinutes").value.trim();
 
-            const errorBox = document.getElementById('resultError');
-            const errorMessage = document.getElementById('errorMessage');
-            const placeholder = document.getElementById('placeholder');
-            const resultValue = document.getElementById('resultValue');
-            const outputValue = document.getElementById('cpmValue');
-            const feedbackBox = document.getElementById('cpmFeedback'); 
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const outputValue = document.getElementById('cpmValue');
+    const feedbackBox = document.getElementById('cpmFeedback');
 
-            let errors = [];
-            if (laborCost === "") {
-                errors.push("👉 Please enter the direct labor cost.");
-            } else if (parseFloat(laborCost) <= 0) {
-                errors.push("👉 Direct labor cost must be greater than 0.");
-            }
-            
-            if (operationalCost === "") {
-                errors.push("👉 Please enter the operational cost.");
-            } else if (parseFloat(operationalCost) <= 0) {
-                errors.push("👉 Operational cost must be greater than 0.");
-            }
-            
-            if (availableMinutes === "") {
-                errors.push("👉 Please enter the available minutes.");
-            } else if (parseFloat(availableMinutes) <= 0) {
-                errors.push("👉 Available minutes must be greater than 0.");
-            }
+    let errors = [];
 
-            if (errors.length > 0) {
-                errorMessage.innerHTML = errors.join("<br>");
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
+    // --- Generic validator function ---
+    function validateInput(value, field, min, max, decimals) {
+        if (value === "") return `👉 Please enter ${field}.`;
+        if (isNaN(value)) return `👉 ${field} must be a valid number.`;
+        const num = parseFloat(value);
+        if (num < min) return `👉 ${field} must be at least ${min}.`;
+        if (num > max) return `👉 ${field} cannot exceed ${max.toLocaleString()}.`;
+        if ((value.includes('.') && value.split('.')[1].length > decimals)) {
+            return `👉 ${field} must not exceed ${decimals} decimal places.`;
+        }
+        return null;
+    }
+
+    // --- Validate each input ---
+    const laborErr = validateInput(laborCost, "Direct Labor Cost ($)", 0.01, 1000000000, 2);
+    const opErr = validateInput(operationalCost, "Operational Cost ($)", 0.01, 1000000000, 2);
+    const minErr = validateInput(availableMinutes, "Available Minutes", 1, 1000000, 2);
+
+    [laborErr, opErr, minErr].forEach(err => { if (err) errors.push(err); });
+
+    // --- Cross-field sanity checks ---
+    if (errors.length === 0) {
+        const laborNum = parseFloat(laborCost);
+        const opNum = parseFloat(operationalCost);
+        const minutesNum = parseFloat(availableMinutes);
+
+        if (minutesNum <= 0) {
+            errors.push("👉 Available minutes must be greater than 0 to avoid division by zero.");
+        }
+
+        if ((laborNum + opNum) / minutesNum < 0.0001) {
+            errors.push("👉 CPM too low to be realistic — check inputs.");
+        }
+
+        if ((laborNum + opNum) > 1000000000 && minutesNum < 10) {
+            errors.push("👉 Extremely high cost with very low minutes — unrealistic.");
+        }
+    }
+
+    // --- Error handling ---
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // --- Calculation ---
+    const cpm = (parseFloat(laborCost) + parseFloat(operationalCost)) / parseFloat(availableMinutes);
+    outputValue.textContent = cpm.toFixed(4);
+
+            let feedback = "";
+            if (cpm > 1) {
+                feedback = "⚠️ This CPM is relatively high. Consider optimizing labor or operational costs to improve efficiency.";
             } else {
-                errorBox.classList.add("hidden");
+                feedback = "✅ This is a cost-effective operation. Your costs are well-managed relative to available time.";
             }
 
-            const laborCostNum = parseFloat(laborCost);
-            const operationalCostNum = parseFloat(operationalCost);
-            const availableMinutesNum = parseFloat(availableMinutes);
-            
-            const cpm = (laborCostNum + operationalCostNum) / availableMinutesNum;
-            outputValue.textContent = cpm.toFixed(4);
+    feedbackBox.textContent = feedback;
 
-           let feedback = "";
-if (cpm <= 10) {
-    feedback = "✅ Excellent: Your cost per minute is very low (₹" + cpm.toFixed(2) + "). Operations are highly cost-efficient.";
-} else if (cpm <= 50) {
-    feedback = "👍 Good: Your cost per minute is reasonable (₹" + cpm.toFixed(2) + "). Costs are managed well relative to available time.";
-} else if (cpm <= 100) {
-    feedback = "⚠️ Moderate: Your cost per minute is getting high (₹" + cpm.toFixed(2) + "). Consider reviewing labor or operational costs.";
-} else {
-    feedback = "❌ High: Your cost per minute is very high (₹" + cpm.toFixed(2) + "). Immediate action is recommended to improve cost efficiency.";
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
 }
 
-
-            feedbackBox.textContent = feedback;
-
-            placeholder.classList.add('hidden');
-            resultValue.classList.remove('hidden');
-        }
-
-        function printReport() {
-            // Update date just before printing
-            const now = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
-            
-            window.print();
-        }
     </script>
     <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
 {% endblock %}
+<!--
+Input Validation Rules (QEHS & Fire Safety Perspective)
+Direct Labor Cost ($)
+
+Required: Cannot be empty.
+
+Range: ≥ 0.01 and ≤ 1,000,000,000 (to prevent absurd inputs or data entry errors).
+
+Decimals: Up to 2 decimals (currency standard).
+
+Units: U.S. Dollars (explicitly displayed).
+
+Operational Cost ($)
+
+Required: Cannot be empty.
+
+Range: ≥ 0.01 and ≤ 1,000,000,000.
+
+Decimals: Up to 2 decimals.
+
+Logic: Cannot be negative; must reflect actual overhead.
+
+Available Minutes
+
+Required: Cannot be empty.
+
+Range: ≥ 1 and ≤ 1,000,000 (practical cap for workforce periods).
+
+Decimals: Up to 2 allowed (if fractional minutes are recorded from time systems).
+
+Logic: Must always be > 0 (division by zero safety).
+
+Cross-field Rules
+
+Total cost (Labor + Operational) must be ≥ availableMinutes × $0.0001 (to avoid “zero CPM” anomalies).
+
+If Available Minutes < 60, warn user: “⚠️ Very short analysis window may distort CPM values.”
+
+Large mismatches (e.g., billions of dollars vs 10 minutes) flagged as outliers.
+
+✅ 2. Output Validation & Thresholds
+
+Formula:
+
+CPM
+=
+Labor Cost + Operational Cost
+Available Minutes
+CPM=
+Available Minutes
+Labor Cost + Operational Cost
+	​
+
+Output Thresholds (Industry benchmarks)
+
+≤ $0.50 CPM → Excellent ✅
+Highly cost-efficient operation.
+
+$0.51 – $1.00 CPM → Acceptable ⚖️
+Typical efficiency, monitor for improvements.
+
+$1.01 – $5.00 CPM → High ⚠️
+Overheads or labor utilization may be inefficient.
+
+> $5.00 CPM → Critical 🚨
+Urgent review required — cost inefficiency risks non-compliance with ISO/OSHA efficiency benchmarks.
+Edge Case Validations
+
+Empty input: Prompt user with required message.
+
+Negative values: Block (not possible in cost/time reporting).
+
+Zero minutes: Block (division by zero).
+
+Excessive decimals: Round to 2 for costs, 2 for minutes.
+
+Labor = 0, Ops = 0: Block — unrealistic in real audits.
+
+Extreme mismatch (e.g., $1B / 5 minutes): Warn user about outlier.
+
+Very low CPM (< $0.0001): Warn user — may be a unit mismatch (hours vs minutes).
+-->

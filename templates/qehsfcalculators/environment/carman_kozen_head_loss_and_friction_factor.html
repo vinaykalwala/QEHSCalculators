@@ -1,0 +1,872 @@
+{% extends 'base.html' %}
+{% block title %}Carman-Kozen Head Loss & Friction Factor Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carman-Kozen Head Loss & Friction Factor Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+<style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+             /* display: flex;  */
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            /* overflow-y: auto;  */
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Input rows for better organization */
+        .input-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+        
+        @media (max-width: 600px) {
+            .input-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+                .rate-display {
+                display: flex;
+                gap: 20px;
+                justify-content: center;
+                align-items: center;
+                flex-wrap: wrap; /* responsive */
+                text-align: center;
+            }
+
+            .rate-block {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                min-width: 120px; /* keeps blocks same width */
+            }
+
+            .rate-label {
+                font-weight: bold;
+                font-size: 16px;
+                color: #444;
+                margin-bottom: 5px;
+            }
+
+            .rate-value {
+                font-size: 40px;
+                font-weight: 700;
+                color: #2980b9;
+                line-height: 1.2;
+            }
+
+            .rate-unit {
+                font-size: 14px;
+                color: #777;
+                margin-top: 4px;
+            }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+                .rate-value { font-size: 32px; }
+            }
+
+            @media (max-width: 480px) {
+                .rate-value { font-size: 26px; }
+                
+                .rate-unit { font-size: 12px; }
+                
+            }
+
+
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+                .result-feedback {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 18px 20px;
+    border-left: 4px solid #3498db;
+    text-align: left;
+    max-width: 800px; /* keeps it readable on large screens */
+    margin: 0 auto;   /* centers it */
+}
+
+.feedback-title {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #2c3e50;
+    font-size: 18px;
+}
+
+.feedback-content { 
+    color: #34495e; 
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 768px) {
+    .result-feedback {
+        padding: 15px;
+        font-size: 15px;
+    }
+
+    .feedback-title {
+        font-size: 16px;
+    }
+
+    .feedback-content {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .result-feedback {
+        padding: 12px;
+        border-left-width: 3px;
+    }
+
+    .feedback-title {
+        font-size: 15px;
+    }
+
+    .feedback-content {
+        font-size: 13px;
+    }
+}
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+<div class="btn-container">
+    <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+</div>
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+
+
+    <div class="calculator-header">
+        <h1>Carman-Kozen Head Loss & Friction Factor Calculator</h1>
+        <p>Compute overflow velocity, friction factor and head loss for sedimentation/porous-media flow. Use consistent SI units (see notes).</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Calculator -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+
+            <div class="input-row">
+            <div class="form-group">
+                <label for="surface_area">Surface Area (A) [m²]</label>
+                <input type="number" id="surface_area" class="form-input" step="any" placeholder="e.g., 1200" aria-label="Surface area in square meters">
+            </div>
+
+            <div class="form-group">
+                <label for="flow_rate">Flow Rate (Q) [m³/day]</label>
+                <input type="number" id="flow_rate" class="form-input" step="any" placeholder="e.g., 28800" aria-label="Flow rate in cubic meters per day">
+            </div>
+            </div>
+            <div class="input-row">
+            <div class="form-group">
+                <label for="porosity">Porosity (n) (0 &lt; n &lt; 1)</label>
+                <input type="number" id="porosity" class="form-input" step="any" placeholder="e.g., 0.35" aria-label="Porosity as decimal (0 to 1)">
+            </div>
+
+            <div class="form-group">
+                <label for="reynolds_number">Modified Reynolds Number (Ng)</label>
+                <input type="number" id="reynolds_number" class="form-input" step="any" placeholder="e.g., 200" aria-label="Modified Reynolds number">
+            </div>
+            </div>
+
+            <div class="input-row">
+            <div class="form-group">
+                <label for="particle_diameter">Particle Diameter (d<sub>g</sub>) [m]</label>
+                <input type="number" id="particle_diameter" class="form-input" step="any" placeholder="e.g., 0.0002" aria-label="Particle diameter in meters">
+            </div>
+
+            <div class="form-group">
+                <label for="shape_factor">Shape Factor (Φ)</label>
+                <input type="number" id="shape_factor" class="form-input" step="any" placeholder="e.g., 1.0" aria-label="Shape factor (dimensionless)">
+            </div>
+            </div>
+            <button class="calculate-btn" onclick="calculateCarmanKozeny()">Calculate</button>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Sedimentation tank illustration">
+                <p>Enter tank geometry, flow and particle properties to compute overflow velocity, friction factor and head loss.</p>
+            </div>
+
+            <div class="result-error hidden" id="resultError" role="alert" aria-live="assertive">
+                <div class="error-icon">❌</div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+
+            <div class="result-value hidden" id="resultValue" aria-live="polite">
+                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:8px; color:#1560bd;">
+                    <h2>Results</h2>
+                </div>
+
+                <div class="rate-display" style="flex-direction:column; gap:10px; align-items:center; text-align:center;">
+                    <div><strong>Overflow Velocity (v<sub>s</sub>):</strong> <span id="overflowValue" style="color:#2980b9; font-size:16px; font-weight:bold;">0.0000</span> <span style="color:#2980b9;">m/day</span> (<span id="overflow_mps">0.0000</span> m/s)</div>
+                    <div><strong>Friction Factor (f):</strong> <span id="frictionValue" style="color:#2980b9; font-size:16px; font-weight:bold;">0.0000</span></div>
+                    <div><strong>Head Loss (h):</strong> <span id="headLossValue" style="color:#2980b9; font-size:16px; font-weight:bold;">0.0000</span> <span style="color:#2980b9;">m</span></div>
+                </div>
+
+                <div class="result-feedback" style="margin-top:12px; width:100%;">
+                    <div class="feedback-title">Assessment & Suggestions</div>
+                    <div class="feedback-content" id="feedbackContent"></div>
+                </div>
+
+                <div class="btn-wrapper" style="margin-top:12px;">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section (relevant and concise; no raw formula display) -->
+    <div class="note-section">
+        <div class="note-card">
+            <h3>📘 About</h3>
+            <p>
+                This calculator estimates the <strong>overflow velocity</strong> (surface loading), a dimensionless <strong>friction factor</strong>,
+                and resulting <strong>head loss</strong> for flow through and over a porous/settling medium using Carman–Kozeny style relations.
+                Provide inputs using the units shown for consistent results.
+            </p>
+        </div>
+
+        <div class="note-card">
+        <h3>✅ Input Validations</h3>
+        <ul class="note-list">
+            <li><strong>Surface Area (A)</strong>: must be > 0 m². Block if <0.01 m². Warn if <0.1 or >1,000,000 m².</li>
+            <li><strong>Flow Rate (Q)</strong>: must be > 0 m³/day. Block if <1e-4 or >1e9. Warn if <0.01 or >1e8.</li>
+            <li><strong>Porosity (n)</strong>: must be between 0 and 0.95. Warn if <0.2 or >0.7.</li>
+            <li><strong>Modified Reynolds Number (Ng)</strong>: must be ≥ 1e-6. Warn if <1e-3 or >1e6.</li>
+            <li><strong>Particle Diameter (d<sub>g</sub>)</strong>: must be between 1e-7 m and 5e-2 m. Warn if <1e-6 m or >1e-2 m.</li>
+            <li><strong>Shape Factor (Φ)</strong>: must be between 0 and 5. Warn if <0.4 or >1.5.</li>
+            <li><strong>Overflow Velocity (v<sub>s</sub>)</strong>: blocked if >1000 m/day. Warn if >100 or <1 m/day.</li>
+            <li><strong>Head Loss (h)</strong>: warnings if &gt;1 m (high), critical warning if &gt;10 m.</li>
+            <li>All inputs must be <em>finite numbers</em> (no blanks, text, NaN, or infinity).</li>
+            <li>Division-by-zero and denominator stability checks enforced (Φ·n³·d<sub>g</sub> ≥ 1e-12).</li>
+        </ul>
+        </div>
+
+
+
+        <div class="note-card">
+            <h3>🌍 Applications</h3>
+            <ul class="note-list">
+                <li><strong>Municipal Water Treatment:</strong> Clarifier/settler performance checks and sizing.</li>
+                <li><strong>Industrial Effluent Management:</strong> Designing sedimentation basins and solids removal systems.</li>
+                <li><strong>Stormwater Control:</strong> Sizing detention basins and sedimentation ponds.</li>
+                <li><strong>Hydraulic & Environmental Engineering:</strong> Evaluating energy loss and flow resistance in porous media.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Hidden fallback print date if print header doesn't include it -->
+    <span id="printDate" style="display:none;"></span>
+</div>
+
+<script>
+function showErrors(errors) {
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+  if (errorMessage) errorMessage.innerHTML = errors.join("<br>");
+  if (errorBox) errorBox.classList.remove("hidden");
+  if (placeholder) placeholder.classList.add("hidden");
+  if (resultValue) resultValue.classList.add("hidden");
+}
+
+function calculateCarmanKozeny() {
+  // Safe reads
+  const get = id => (document.getElementById(id)?.value ?? "").toString().trim();
+  const ARaw  = get("surface_area");
+  const QRaw  = get("flow_rate");
+  const nRaw  = get("porosity");
+  const NgRaw = get("reynolds_number");
+  const dgRaw = get("particle_diameter");
+  const phiRaw= get("shape_factor");
+
+  // UI refs
+  const errorBox     = document.getElementById("resultError");
+  const placeholder  = document.getElementById("placeholder");
+  const resultValue  = document.getElementById("resultValue");
+  const overflowEl   = document.getElementById("overflowValue");
+  const overflowMpsEl= document.getElementById("overflow_mps");
+  const frictionEl   = document.getElementById("frictionValue");
+  const headEl       = document.getElementById("headLossValue");
+  const feedbackEl   = document.getElementById("feedbackContent");
+
+  // Reset UI
+  if (errorBox) errorBox.classList.add("hidden");
+  if (feedbackEl) feedbackEl.innerHTML = "";
+  if (overflowEl) overflowEl.textContent = "0.0000";
+  if (overflowMpsEl) overflowMpsEl.textContent = "0.0000";
+  if (frictionEl) frictionEl.textContent = "0.0000";
+  if (headEl) headEl.textContent = "0.0000";
+
+  const errors = [];
+  const warnings = [];
+
+  // Required fields
+  if (ARaw === "")  errors.push("👉 Enter Surface Area (A) in m².");
+  if (QRaw === "")  errors.push("👉 Enter Flow Rate (Q) in m³/day.");
+  if (nRaw === "")  errors.push("👉 Enter Porosity (n) (0 < n < 1).");
+  if (NgRaw === "") errors.push("👉 Enter Modified Reynolds Number (Ng).");
+  if (dgRaw === "") errors.push("👉 Enter Particle Diameter (d<sub>g</sub>) in m.");
+  if (phiRaw === "")errors.push("👉 Enter Shape Factor (Φ).");
+  if (errors.length) { showErrors(errors); return; }
+
+  // Parse numbers
+  const A   = Number(ARaw);
+  const Q   = Number(QRaw);
+  const n   = Number(nRaw);
+  const Ng  = Number(NgRaw);
+  const dg  = Number(dgRaw);
+  const phi = Number(phiRaw);
+
+  // Finite checks
+  (Number.isFinite(A)   ? 0 : errors.push("👉 Surface Area must be a finite number."));
+  (Number.isFinite(Q)   ? 0 : errors.push("👉 Flow Rate must be a finite number."));
+  (Number.isFinite(n)   ? 0 : errors.push("👉 Porosity must be a finite number."));
+  (Number.isFinite(Ng)  ? 0 : errors.push("👉 Modified Reynolds number (Ng) must be a finite number."));
+  (Number.isFinite(dg)  ? 0 : errors.push("👉 Particle diameter (d<sub>g</sub>) must be a finite number."));
+  (Number.isFinite(phi) ? 0 : errors.push("👉 Shape factor (Φ) must be a finite number."));
+  if (errors.length) { showErrors(errors); return; }
+
+  // Hard stops (safety & numerical)
+  if (A <= 0)  errors.push("👉 Surface Area (A) must be > 0 m².");
+  if (Q <= 0)  errors.push("👉 Flow Rate (Q) must be > 0 m³/day.");
+  if (n <= 0 || n >= 0.95) errors.push("👉 Porosity (n) must be between 0 and 0.95 (exclusive).");
+  if (Ng <= 0 || Ng < 1e-6) errors.push("👉 Modified Reynolds number (Ng) is too small; enter Ng ≥ 1e-6.");
+  if (dg <= 0 || dg < 1e-7 || dg > 5e-2) errors.push("👉 Particle diameter (d<sub>g</sub>) must be within 1e-7–5e-2 m.");
+  if (phi <= 0 || phi > 5) errors.push("👉 Shape factor (Φ) must be in (0, 5].");
+  if (A < 0.01) errors.push("👉 Surface Area is unrealistically small (<0.01 m²). Check units.");
+  if (Q < 1e-4 || Q > 1e9) errors.push("👉 Flow Rate must be within 1e-4–1e9 m³/day for credible operation.");
+  if (errors.length) { showErrors(errors); return; }
+
+  // Non-blocking warnings (audit trace)
+  if (A < 0.1) warnings.push("⚠️ Surface Area very small (<0.1 m²) — verify units.");
+  if (A > 1e6) warnings.push("⚠️ Surface Area very large (>1e6 m²) — verify geometry.");
+  if (Q < 0.01) warnings.push("⚠️ Flow Rate very small (<0.01 m³/day) — check resolution/units.");
+  if (Q > 1e8) warnings.push("⚠️ Flow Rate very large (>1e8 m³/day) — possible units mix-up.");
+  if (n < 0.2 || n > 0.7) warnings.push("⚠️ Porosity outside common packed-media range (0.2–0.7).");
+  if (Ng < 1e-3 || Ng > 1e6) warnings.push("⚠️ Ng is in an extreme regime — confirm definition/inputs.");
+  if (dg < 1e-6 || dg > 1e-2) warnings.push("⚠️ Particle diameter is atypical for engineered media (1e-6–1e-2 m).");
+  if (phi < 0.4 || phi > 1.5) warnings.push("⚠️ Shape factor (Φ) is atypical (0.4–1.5 common).");
+
+  // Compute overflow velocity
+  const vs = Q / A;                 // m/day
+  const vs_mps = vs / 86400;        // m/s
+
+  // Cross-field realism: surface loading
+  if (!Number.isFinite(vs) || vs <= 0) {
+    showErrors(["⚠️ Invalid overflow velocity computed. Check A and Q."]);
+    return;
+  }
+  if (vs > 1000) errors.push("👉 Overflow velocity too high (>1000 m/day). Likely a units error (Q must be m³/day).");
+  if (errors.length) { showErrors(errors); return; }
+  if (vs > 100) warnings.push("⚠️ Very high surface loading (>100 m/day) — verify process intent.");
+  if (vs < 1)   warnings.push("⚠️ Very low surface loading (<1 m/day) — potential under-utilization.");
+
+  // Friction factor
+  const f = (150 * (1 - n) / Ng) + 1.75;
+  if (!Number.isFinite(f)) {
+    showErrors(["⚠️ Invalid friction factor (f). Check n and Ng."]); return;
+  }
+  if (f < 1.75) {
+    showErrors(["⚠️ Computed friction factor below 1.75; Ng or n likely incorrect."]); return;
+  }
+  if (f > 1e6) warnings.push("⚠️ Very large friction factor (>1e6) — check Ng and porosity.");
+
+  // Head-loss denominator guard
+  const denom = phi * Math.pow(n, 3) * dg;
+  if (!Number.isFinite(denom) || denom <= 0 || denom < 1e-12) {
+    showErrors(["⚠️ Denominator too small/invalid for head loss (Φ·n³·d<sub>g</sub> ≤ 1e-12). Adjust n, Φ, or d<sub>g</sub>."]);
+    return;
+  }
+
+  // Head loss
+  const h = (f * (1 - n) * Math.pow(vs, 2)) / denom;
+  if (!Number.isFinite(h) || h < 0) {
+    showErrors(["⚠️ Invalid head loss. Check all inputs and units."]);
+    return;
+  }
+
+  // Output classification
+  let classification = "";
+  if (h > 10) {
+    classification = "❌ Critical head loss (>10 m) — strong design/safety review required.";
+  } else if (h > 3) {
+    classification = "❌ Very high head loss (>3 m) — check units, pump duty, and media geometry.";
+  } else if (h > 1) {
+    classification = "⚠️ High head loss (1–3 m) — review energy/operability and fouling risk.";
+  } else if (h >= 0.05) {
+    classification = "✅ Typical head loss (0.05–1.0 m) for many gravity porous-media applications.";
+  } else {
+    classification = "⚠️ Very low head loss (<0.05 m) — may indicate coarse media or under-loading.";
+  }
+
+  // Build feedback block (audit-friendly)
+  const details = [
+    `<div style="font-weight:600;">${classification}</div>`,
+    `<div style="margin-top:8px;">Inputs — A: <b>${A.toExponential(6)}</b> m², Q: <b>${Q.toExponential(6)}</b> m³/day, n: <b>${n.toFixed(4)}</b>, Ng: <b>${Ng.toExponential(6)}</b></div>`,
+    `<div style="margin-top:6px;">Particle d<sub>g</sub>: <b>${dg.toExponential(6)}</b> m, Φ: <b>${phi.toFixed(4)}</b></div>`,
+    warnings.length ? `<div style="margin-top:8px; color:#b35d00;">Note: ${warnings.join(" | ")}</div>` : ""
+  ].join("");
+
+  // Update UI
+  overflowEl.textContent   = vs.toFixed(6);
+  overflowMpsEl.textContent= vs_mps.toFixed(8);
+  frictionEl.textContent   = f.toFixed(6);
+  headEl.textContent       = h.toFixed(6);
+  if (feedbackEl) feedbackEl.innerHTML = details;
+
+  // Toggle display
+  if (placeholder) placeholder.classList.add("hidden");
+  if (resultValue) resultValue.classList.remove("hidden");
+  if (errorBox) errorBox.classList.add("hidden");
+}
+
+function printReport() {
+  let el = document.getElementById('printDate');
+  if (!el) {
+    el = document.createElement('span');
+    el.id = 'printDate';
+    el.style.display = 'none';
+    document.body.appendChild(el);
+  }
+  const now = new Date();
+  el.textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  window.print();
+}
+</script>
+
+
+</body>
+</html>
+{% endblock %}
+
+
+<!--
+📘 Carman–Kozeny Head Loss Calculator — Formula & Validations
+
+Formulas:
+---------
+1. Overflow (surface) velocity:
+   vₛ = Q / A             [m/day]
+   vₛ,SI = vₛ / 86400     [m/s]
+
+   where:
+     • Q = Flow rate (m³/day)
+     • A = Surface area (m²)
+
+2. Friction factor (empirical form):
+   f = (150 × (1 − n) / Ng) + 1.75
+
+   where:
+     • n  = Porosity (0 < n < 1)
+     • Ng = Modified Reynolds number
+
+3. Head loss:
+   h = [ f × (1 − n) × vₛ² ] ÷ ( Φ × n³ × d_g )
+
+   where:
+     • Φ  = Shape factor (0 < Φ ≤ 5)
+     • d_g = Particle diameter (m)
+
+-------------------------------------------------------
+
+✅ Input Validations:
+---------------------
+- Surface Area (A, m²)
+  • Required, > 0
+  • ≥ 0.01 (hard stop for realism)
+  • Warning: A < 0.1 (very small), A > 1e6 (very large)
+
+- Flow Rate (Q, m³/day)
+  • Required, > 0
+  • Range: 1e-4 ≤ Q ≤ 1e9
+  • Warning: Q < 0.01 (very small), Q > 1e8 (very large)
+
+- Porosity (n)
+  • Required, finite
+  • Range: 0 < n < 0.95
+  • Warning: outside 0.2–0.7 (uncommon for packed media)
+
+- Modified Reynolds number (Ng)
+  • Required, finite
+  • Ng ≥ 1e-6
+  • Warning: Ng < 1e-3 or Ng > 1e6 → extreme regime
+
+- Particle diameter (d_g, m)
+  • Required, finite
+  • Range: 1e-7 ≤ d_g ≤ 5e-2
+  • Warning: outside 1e-6–1e-2 (atypical for filter media)
+
+- Shape factor (Φ)
+  • Required, finite
+  • Range: 0 < Φ ≤ 5
+  • Warning: outside 0.4–1.5 (uncommon)
+
+-------------------------------------------------------
+
+✅ Output Validations:
+----------------------
+- Overflow velocity (vₛ)
+  • Must be finite and > 0
+  • Hard stop: vₛ > 1000 m/day → units error likely
+  • Warning: vₛ > 100 m/day (very high), vₛ < 1 m/day (very low)
+
+- Friction factor (f)
+  • Must be finite
+  • f ≥ 1.75 (the minimum in formula)
+  • Warning: f > 1e6 (extreme)
+
+- Head loss (h, m)
+  • Must be finite and ≥ 0
+  • Denominator guard: Φ·n³·d_g > 1e-12 required
+  • Classification:
+    – h < 0.05 → ⚠️ Very low head loss (coarse/underloaded media)
+    – 0.05 ≤ h ≤ 1.0 → ✅ Typical range for many gravity filters
+    – 1.0 < h ≤ 3.0 → ⚠️ High head loss, check energy/fouling
+    – 3.0 < h ≤ 10.0 → ❌ Very high, unit/geometry check needed
+    – h > 10.0 → ❌ Critical, redesign or safety review
+
+-------------------------------------------------------
+
+ℹ️ Notes:
+---------
+- Units must be consistent (Q in m³/day, A in m², d_g in m).
+- Validations are a mix of hard stops (errors) and soft warnings.
+- Classification helps contextualize the computed head loss.
+-->

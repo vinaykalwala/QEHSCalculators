@@ -1,0 +1,677 @@
+{% extends 'base.html' %}
+{% block title %}BS-6759 Minimum Orifice Area Calculator for Dry Gases{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BS-6759 Minimum Orifice Area Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        .btn-container {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    margin: 30px 0;
+}
+
+.back-btn {
+    background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+    color: #ffffff; /* White text */
+    border: 2px solid #1560bd; /* Highlight border */
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none; /* Remove underline for link */
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    background-color: #1560bd; /* Highlight on hover */
+    color: #ffffff;
+    border-color: #000040;
+    transform: scale(1.05); /* Subtle hover effect */
+}
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            {% comment %} max-width: 700px; {% endcomment %}
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            {% comment %} display: flex; {% endcomment %}
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+           
+        }
+        
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top:20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+           <div class="btn-container">
+    <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+</div>
+   <div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+ 
+        <div class="calculator-header">
+            <h1>BS-6759 Minimum Orifice Area Calculator for Dry Gases</h1>
+            <p>Calculate the minimum orifice area required for dry gases under critical flow conditions</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class='input-row'>
+                <div class="form-group">
+                    <label for="massFlow">Mass Flow Rate (ṁ) (kg/h)</label>
+                    <input type="number" id="massFlow" class="form-input" min="0" placeholder="e.g., 5000">
+                </div>
+                <div class="form-group">
+                    <label for="pressure">Absolute Relieving Pressure (Pᵣ) (bar a)</label>
+                    <input type="number" id="pressure" class="form-input" min="0.1" step="0.1" placeholder="e.g., 10.5">
+                </div>
+                </div>
+                <div class="input-row">
+                <div class="form-group">
+                    <label for="cg">Nozzle Gas Constant (C₉)</label>
+                    <input type="number" id="cg" class="form-input" min="0.1" step="0.1" placeholder="e.g., 0.039">
+                </div>
+                <div class="form-group">
+                    <label for="kdr">Derated Coefficient of Discharge (Kdr)</label>
+                    <input type="number" id="kdr" class="form-input" min="0.1" max="1" step="0.01" placeholder="e.g., 0.85">
+                </div>
+                </div>
+                <div class="input-row">
+                <div class="form-group">
+                    <label for="zFactor">Compressibility Factor (Z)</label>
+                    <input type="number" id="zFactor" class="form-input" min="0.1" step="0.01" placeholder="e.g., 1.0">
+                </div>
+                <div class="form-group">
+                    <label for="temperature">Inlet Temperature (T) (K)</label>
+                    <input type="number" id="temperature" class="form-input" min="1" step="0.1" placeholder="e.g., 293.15">
+                </div>
+                </div>
+                <div class="form-group">
+                    <label for="molarMass">Molar Mass (M) (kg/kmol)</label>
+                    <input type="number" id="molarMass" class="form-input" min="1" step="0.1" placeholder="e.g., 28.97">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateOrificeArea()">Calculate Orifice Area</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                  <img src="https://cdn-icons-png.flaticon.com/512/1146/1146869.png" alt="Abstract colorful liquid drop" width="100">
+
+                    <p>This tool will calculate the <strong>Minimum Orifice Area</strong> for dry gases. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Minimum Orifice Area</h2>
+                    </div>
+                    <div class='rate-display'>
+                    <div class="rate-value" id="rateValue">0.00</div>
+                    <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">mm²</div></div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>BS-6759 Minimum Orifice Area Calculator</strong> helps determine the minimum orifice area required for dry gases under critical flow conditions, primarily used in safety valve sizing.
+                </p>
+            </div>
+            <div class="note-card">
+                <h3>❓ What is Minimum Orifice Area?</h3>
+                <p>The minimum orifice area is the smallest cross-sectional area required for a safety valve to adequately relieve pressure from a system handling dry gases.</p>
+            </div>
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Mass Flow Rate (ṁ):</strong> The total mass of gas that needs to be discharged per hour (kg/h).</li>
+                    <li><strong>Absolute Relieving Pressure (Pᵣ):</strong> The pressure at which the valve relieves gas (bar a).</li>
+                    <li><strong>Nozzle Gas Constant (C₉):</strong> A factor representing gas expansion behavior.</li>
+                    <li><strong>Derated Coefficient of Discharge (Kdr):</strong> A correction factor for real-world discharge efficiency (0-1).</li>
+                    <li><strong>Compressibility Factor (Z):</strong> Adjusts for real gas behavior instead of ideal gas assumptions.</li>
+                    <li><strong>Inlet Temperature (T):</strong> The temperature of the gas entering the valve (K).</li>
+                    <li><strong>Molar Mass (M):</strong> The molecular weight of the gas (kg/kmol).</li>
+                     <li><strong>Flow Area (A₀) (mm²):</strong> The minimum required orifice area, calculated using standard formulas.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <ul class="note-list">
+                    <li><span class="good">Below 50 mm²</span> → Small orifice area, ensure it's sufficient for gas discharge</li>
+                    <li><span class="average">50 – 2000 mm²</span> → Optimal range for safety valves</li>
+                    <li><span class="bad">Above 2000 mm²</span> → Large orifice area, ensure it matches system design</li>
+                </ul>
+            </div>
+         
+            <div class="note-card">
+                <h3>📋 Key Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Gas Safety Valve Sizing:</strong> Ensures the valve can handle the required gas flow under relief conditions.</li>
+                    <li><strong>Industrial Gas Systems:</strong> Protects pressurized systems from overpressure scenarios.</li>
+                    <li><strong>Chemical & Petrochemical Plants:</strong> Ensures the safe discharge of process gases.</li>
+                    <li><strong>Regulatory Compliance:</strong> Aligns with standards such as BS 6759 for pressure relief devices.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>ℹ️ About BS 6759</h3>
+                <p><strong>BS 6759</strong> is a British Standard that specifies the requirements for safety valves used in various industrial applications. It outlines the design, performance, and testing requirements for valves that relieve excess pressure in systems handling gases, vapors, or steam.</p>
+            </div>
+            <div class="note-card">
+    <h3>🛡️ Validation Rules Applied</h3>
+    <ul class="note-list">
+        <li><strong>Mass Flow Rate (ṁ):</strong> > 0 and &lt; 10⁷ kg/h.</li>
+        <li><strong>Relieving Pressure (Pᵣ):</strong> Between 0.1 and 400 bar a.</li>
+        <li><strong>Nozzle Gas Constant (Cg):</strong> 0.01 – 0.2.</li>
+        <li><strong>Coefficient of Discharge (Kdr):</strong> 0.65 – 0.9.</li>
+        <li><strong>Compressibility Factor (Z):</strong> 0.5 – 2.</li>
+        <li><strong>Inlet Temperature (T):</strong> > 0 K (absolute).</li>
+        <li><strong>Molar Mass (M):</strong> 2 – 300 kg/kmol.</li>
+        <li><strong>Output Flagging:</strong> A₀ &lt; 50 mm² (small), 50–2000 mm² (optimal), A₀ &gt; 2000 mm² (large).</li>
+    </ul>
+</div>
+
+        
+             <div class="note-card">
+                <h3>✅ Conclusion</h3>
+                 <p>This calculation helps engineers and technicians determine the minimum orifice area required for a safety valve in gas systems. Proper valve sizing enhances safety, efficiency, and compliance with industrial standards.</p>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateOrificeArea() {
+    const massFlow = parseFloat(document.getElementById('massFlow').value.trim());
+    const pressure = parseFloat(document.getElementById('pressure').value.trim());
+    const cg = parseFloat(document.getElementById('cg').value.trim());
+    const kdr = parseFloat(document.getElementById('kdr').value.trim());
+    const zFactor = parseFloat(document.getElementById('zFactor').value.trim());
+    const temperature = parseFloat(document.getElementById('temperature').value.trim());
+    const molarMass = parseFloat(document.getElementById('molarMass').value.trim());
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+
+    // --- Validation Rules (BS 6759 + QEHS) ---
+    // Formula Reference:
+    // A0 = (ṁ / (Pr * Cg * Kdr)) * sqrt((Z * T) / M)
+
+    if (isNaN(massFlow) || massFlow <= 0 || massFlow > 1e7) {
+        errors.push("👉 Mass Flow Rate must be > 0 and < 10⁷ kg/h.");
+    }
+
+    if (isNaN(pressure) || pressure <= 0.1 || pressure > 400) {
+        errors.push("👉 Relieving Pressure must be between 0.1 and 400 bar a.");
+    }
+
+    if (isNaN(cg) || cg < 0.01 || cg > 0.2) {
+        errors.push("👉 Nozzle Gas Constant (Cg) must be 0.01 – 0.2.");
+    }
+
+    if (isNaN(kdr) || kdr < 0.65 || kdr > 0.9) {
+        errors.push("👉 Kdr must be 0.65 – 0.9 (per valve standards).");
+    }
+
+    if (isNaN(zFactor) || zFactor < 0.5 || zFactor > 2) {
+        errors.push("👉 Compressibility Factor (Z) must be 0.5 – 2.");
+    }
+
+    if (isNaN(temperature) || temperature <= 0) {
+        errors.push("👉 Temperature must be > 0 K.");
+    }
+
+    if (isNaN(molarMass) || molarMass < 2 || molarMass > 300) {
+        errors.push("👉 Molar Mass must be between 2 and 300 kg/kmol.");
+    }
+
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // --- Calculation ---
+    const orificeArea = (massFlow / (pressure * cg * kdr)) * Math.sqrt((zFactor * temperature) / molarMass);
+
+    // --- Output Validation ---
+    if (!isFinite(orificeArea) || orificeArea <= 0) {
+        errorMessage.innerHTML = "⚠️ Calculation error: invalid inputs.";
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    document.getElementById('rateValue').textContent = orificeArea.toFixed(4);
+
+    // --- Feedback ---
+    let feedback, feedbackColor;
+
+    if (orificeArea < 50) {
+        feedback = '⚠️ Small Orifice Area: Verify adequacy for gas discharge.';
+        feedbackColor = '#f39c12';
+    } else if (orificeArea <= 2000) {
+        feedback = '✅ Optimal Orifice Area: Within typical safety valve design range.';
+        feedbackColor = '#27ae60';
+    } else {
+        feedback = '❌ Large Orifice Area: Check against system design.';
+        feedbackColor = '#e74c3c';
+    }
+
+    document.getElementById('feedbackContent').innerHTML = feedback;
+    document.getElementById('feedbackContent').style.color = feedbackColor;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+
+</body>
+</html>
+{% endblock %}
+
+{% comment %} 
+📘 Formula Reference (BS 6759 – Dry Gases, Critical Flow)
+/*
+BS 6759 Minimum Orifice Area Formula (for dry gases under critical flow):
+
+    A₀ = (ṁ / (Pᵣ × Cg × Kdr)) × √((Z × T) / M)
+
+Where:
+    A₀   = Minimum Orifice Area [mm²]
+    ṁ    = Mass Flow Rate [kg/h]    (must be > 0, realistic upper bound ~1e7 kg/h)
+    Pᵣ   = Absolute Relieving Pressure [bar a] (must be > 0.1 bar a, < 400 bar a)
+    Cg   = Nozzle Gas Constant [dimensionless] (typical 0.01 – 0.2)
+    Kdr  = Derated Coefficient of Discharge [dimensionless] (0.65 – 0.9 recommended)
+    Z    = Compressibility Factor [dimensionless] (0.5 – 2, usually 0.8 – 1.2)
+    T    = Inlet Temperature [K]    (must be > 0 K, normally ≥ 273 K for ambient)
+    M    = Molar Mass [kg/kmol]     (must be 2 – 300 kg/kmol depending on gas)
+
+Outputs:
+    A₀ < 50 mm²   → Small orifice, check adequacy.
+    50 – 2000 mm² → Optimal valve range.
+    A₀ > 2000 mm² → Very large, check against system design.
+
+Edge Cases:
+    - Division by zero (Pᵣ, Cg, Kdr = 0) → Invalid.
+    - Negative or NaN results → Invalid.
+    - Unrealistic values (A₀ > 1e6 mm²) → Warning.
+*/
+
+✅ Input Validation Rules
+Parameter	Validation Rule	Typical Range
+Mass Flow (ṁ)	> 0 and < 1e7 kg/h	Plant safety valves seldom exceed ~1e6–1e7 kg/h
+Pressure (Pᵣ)	0.1 < Pᵣ < 400 bar a	Below 0.1 = invalid, above 400 = not standard
+Cg	0.01 – 0.2	Gas expansion constant for dry gases
+Kdr	0.65 – 0.9	Lower values unsafe; >0.9 unrealistic
+Z	0.5 – 2	Most gases fall 0.8–1.2
+Temperature (T)	> 0 K	Must be Kelvin (catch °C input errors if possible)
+Molar Mass (M)	2 – 300 kg/kmol	From hydrogen to heavy gases
+📊 Output Validation Rules
+
+A₀ < 50 mm² → ⚠️ Small orifice, verify adequacy.
+
+50 ≤ A₀ ≤ 2000 mm² → ✅ Within typical safety valve design range.
+
+A₀ > 2000 mm² → ❌ Large, check if valid for design.
+
+NaN / ∞ → ❌ Input error, invalid calculation. {% endcomment %}

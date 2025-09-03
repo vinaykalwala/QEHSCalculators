@@ -1,0 +1,558 @@
+{% extends 'base.html' %}
+{% block title %}Defects Per Million Opportunities (DPMO) and Six Sigma Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Defects Per Million Opportunities (DPMO) and Six Sigma Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+
+
+        .btn-container {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    margin: 30px 0;
+}
+
+.back-btn {
+    background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+    color: #ffffff; /* White text */
+    border: 2px solid #1560bd; /* Highlight border */
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none; /* Remove underline for link */
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    background-color: #1560bd; /* Highlight on hover */
+    color: #ffffff;
+    border-color: #000040;
+    transform: scale(1.05); /* Subtle hover effect */
+}
+    </style>
+</head>
+<body>
+   <div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+
+
+    <div class="btn-container">
+    <a href="{% url 'quality_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+</div>
+
+        <div class="calculator-header">
+            <h1>Defects Per Million Opportunities (DPMO) and Six Sigma Calculator</h1>
+           <p>Calculates process performance metrics to measure quality and identify improvement opportunities</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator Input Card -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="defects">Number of Defects</label>
+                    <input type="number" id="defects" class="form-input" min="0" step="1" placeholder="Enter Defects">
+                </div>
+
+                <div class="form-group">
+                    <label for="opportunities">Opportunities per Unit</label>
+                    <input type="number" id="opportunities" class="form-input" min="1" step="1" placeholder="Enter Opportunities">
+                </div>
+
+                    <div class="form-group">
+                        <label for="units">Number of Units</label>
+                    <input type="number" id="units" class="form-input" min="1" step="1" placeholder="Enter Units">
+                </div>
+
+                    
+
+                <button class="calculate-btn" onclick="calculateDPMO()">Calculate DPMO and Sigma Level</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Boiler illustration">
+                    <p>This tool calculates the <strong>DPMO and Sigma Level</strong> of your process. Enter your data to see results.</p>
+                </div>
+
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Process Performance</h2>
+                    </div>
+
+                    <div class="rate-value" id="dpmovalue">0.00</div>
+                    <div class="rate-label">DPMO</div>
+                    
+                    <div class="rate-value" id="sigmavalue" style="font-size: 36px; margin-top: 20px;">0.00</div>
+                    <div class="rate-label">Sigma Level</div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">Performance Interpretation</div>
+                        <div class="feedback-content" id="sigmaFeedback"></div>
+                    </div>
+                    
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🔎 About This Calculator</h3>
+                <p>
+                    The <strong>DPMO and Six Sigma Calculator</strong> helps determine the Defects Per Million Opportunities (DPMO) and the Sigma Level of a process. These metrics are critical for evaluating process performance and improving product quality. Achieving a higher Sigma Level reduces defects and enhances overall process efficiency.
+                </p> 
+            </div>
+
+            
+<div class="note-card">
+                <h3>❓ Explanation of Parameters</h3>
+                <ul class="note-list">
+                            <li><strong>Number of Defects:</strong> The total number of defects observed in the process. Fewer defects indicate better quality.</li>
+                    <li><strong>Number of Opportunities per Unit:</strong> The number of potential defect opportunities in each unit. More opportunities increase the chance of defects but also allow better tracking.</li>
+                    <li><strong>Number of Units:</strong> The total number of units produced or processed. Accurate unit tracking helps calculate process efficiency.</li>
+                </ul>
+            </div>
+
+
+            <div class="note-card">
+                <h3>📊 Interpretation </h3>
+                <ul class="note-list">
+                             <li><strong>6 Sigma:</strong> World-class quality—only 3.4 defects per million opportunities</li>
+                    <li><strong>5 Sigma:</strong> Excellent quality with very few defects (approx. 233 defects per million)</li>
+                    <li><strong>4 Sigma:</strong> Good quality but with noticeable defects (approx. 6,210 defects per million)</li>
+                    <li><strong>3 Sigma:</strong> Average quality—higher defect rates (approx. 66,800 defects per million)</li>
+                    <li><strong>Below 3 Sigma:</strong> Poor quality—immediate action needed to reduce defects</li>
+                </ul>
+            </div>
+            <div class="note-card">
+                <h3>📊 Real-Life Applications</h3>
+                <ul class="note-list">
+                             <li><strong>Manufacturing:</strong> Monitor production quality and identify areas for improvement</li>
+                    <li><strong>Service Industries:</strong> Measure service delivery quality and customer satisfaction</li>
+                    <li><strong>Healthcare:</strong> Track medical errors and improve patient safety</li>
+                    <li><strong>Software Development:</strong> Measure code quality and reduce bugs in applications</li>
+                </ul>
+            </div>
+            
+        </div>
+    </div>
+<script>
+        function calculateDPMO() {
+            const defects = document.getElementById("defects").value.trim();
+            const opportunities = document.getElementById("opportunities").value.trim();
+            const units = document.getElementById("units").value.trim();
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+            const dpmovalue = document.getElementById('dpmovalue');
+            const sigmavalue = document.getElementById('sigmavalue');
+            const feedbackBox = document.getElementById('sigmaFeedback'); 
+
+            let errors = [];
+            
+            // Input validation
+            if (defects === "") {
+                errors.push("👉 Please enter the number of defects.");
+            } else if (parseFloat(defects) < 0) {
+                errors.push("👉 Defects cannot be negative.");
+            }
+            
+            if (opportunities === "") {
+                errors.push("👉 Please enter the number of opportunities per unit.");
+            } else if (parseFloat(opportunities) <= 0) {
+                errors.push("👉 Opportunities must be greater than 0.");
+            }
+            
+            if (units === "") {
+                errors.push("👉 Please enter the number of units.");
+            } else if (parseFloat(units) <= 0) {
+                errors.push("👉 Units must be greater than 0.");
+            }
+
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden");
+            }
+
+            // Calculate DPMO
+            const defectsNum = parseFloat(defects);
+            const opportunitiesNum = parseFloat(opportunities);
+            const unitsNum = parseFloat(units);
+            
+            const DPMO = (defectsNum / (opportunitiesNum * unitsNum)) * 1000000;
+
+            // Calculate Sigma Level
+            const sigmaLevel = 1.5 + Math.sqrt(2) * erfInv(1 - (DPMO / 1000000));
+
+            dpmovalue.textContent = DPMO.toFixed(2);
+            sigmavalue.textContent = sigmaLevel.toFixed(2);
+
+            // Provide feedback based on sigma level
+            let feedback = "";
+            let feedbackClass = "";
+            
+            if (sigmaLevel >= 6) {
+                feedback = "🌟 World-Class Performance (6 Sigma): Outstanding quality!";
+                feedbackClass = "excellent";
+            } else if (sigmaLevel >= 5) {
+                feedback = "✅ Very Good Performance (5 Sigma): High-quality process!";
+                feedbackClass = "very-good";
+            } else if (sigmaLevel >= 4) {
+                feedback = "👍 Good Performance (4 Sigma): Capable but can improve.";
+                feedbackClass = "good";
+            } else if (sigmaLevel >= 3) {
+                feedback = "⚠️ Average Performance (3 Sigma): Needs significant improvement.";
+                feedbackClass = "average";
+            } else {
+                feedback = "❌ Poor Performance: Requires immediate action!";
+                feedbackClass = "poor";
+            }
+
+            feedbackBox.innerHTML = feedback;
+            feedbackBox.className = "feedback-content " + feedbackClass;
+
+            placeholder.classList.add('hidden');
+            resultValue.classList.remove('hidden');
+        }
+
+        // Inverse error function (erfInv) approximation
+        function erfInv(x) {
+            if (x <= 0 || x >= 1) return 0;
+            
+            var a = 0.147;
+            var sign = (x < 0) ? -1 : 1;
+            var temp = Math.log(1 - Math.pow(x, 2));
+            var part1 = (2 / (Math.PI * a)) + (temp / 2);
+            var part2 = Math.sqrt(Math.pow(part1, 2) - (temp / a));
+            return sign * Math.sqrt(part2 - part1);
+        }
+
+        function printReport() {
+            window.print();
+        }
+    </script>
+        <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
