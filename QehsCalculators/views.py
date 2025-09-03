@@ -18,6 +18,7 @@ from .access_map import CALCULATORS, PLAN_HIERARCHY, CATEGORIES
 from .decorators import subscription_required
 import json
 from django.db.models import Q
+from django.contrib.auth.decorators import user_passes_test
 
 
 # Razorpay client
@@ -643,6 +644,42 @@ def reject_subscription(request, subscription_id):
 def fire_calculator(request):
     return render(request, 'calculators/fire.html', {'title': 'Fire Calculator'})
 
+
+def superuser_required(view_func):
+    return user_passes_test(lambda u: u.is_superuser)(view_func)
+
+@superuser_required
+def transaction_list(request):
+    query = request.GET.get("q", "")
+    transactions = Transaction.objects.select_related("subscription__user").all()
+
+    if query:
+        transactions = transactions.filter(
+            Q(razorpay_order_id__icontains=query) |
+            Q(razorpay_payment_id__icontains=query) |
+            Q(amount__icontains=query) |
+            Q(subscription__user__email__icontains=query)
+        )
+
+    transactions = transactions.order_by("-created_at")
+
+    return render(request, "transaction_list.html", {
+        "transactions": transactions,
+        "query": query
+    })
+
+@superuser_required
+def delete_transaction(request, pk):
+    transaction = get_object_or_404(Transaction, pk=pk)
+    transaction.delete()
+    messages.success(request, "Transaction deleted successfully.")
+    return redirect("transaction_list")
+
+@superuser_required
+def clear_all_transactions(request):
+    Transaction.objects.all().delete()
+    messages.success(request, "All transactions cleared successfully.")
+    return redirect("transaction_list")
 
 from django.shortcuts import render
 from django.utils import timezone
