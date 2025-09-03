@@ -145,6 +145,11 @@ CALCULATORS = [
 
     {"name": "BMI Calculator", "url_name": "health_bmi_calculator", "plan_type": "corporate", "category": "health"},
     {"name": "BMI Calculator for Kids", "url_name": "health_bmi_for_kids_calculator", "plan_type": "corporate", "category": "health"},
+    {"name": "Bedridden Patient Weight Estimator", "url_name": "health_bedridden_patient_weight_estimator_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Baby Milk Intake Calculator", "url_name": "health_baby_milk_intake_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Cardiac Index Calculator", "url_name": "health_cardiac_index_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Daily Drinking Water Intake Calculator", "url_name": "health_daily_drinking_water_intake_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Dietary Reference Intake (DRI) Calculator", "url_name": "health_dietary_reference_intake_dri_calculator", "plan_type": "corporate", "category": "health"},
 
 
 
