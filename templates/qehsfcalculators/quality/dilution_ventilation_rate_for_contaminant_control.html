@@ -1,0 +1,672 @@
+{% extends 'base.html' %}
+{% block title %}Dilution Ventilation Rate for Contaminant Control Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dilution Ventilation Rate for Contaminant Control Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+    </style>
+</head>
+<body>
+   <div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+
+        <div class="btn-container">
+            <a href="{% url 'quality_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+        </div>
+
+        <div class="calculator-header">
+            <h1>Dilution Ventilation Rate for Contaminant Control Calculator</h1>
+            <p>Calculates the required airflow to maintain safe contaminant levels based on generation rate and concentration limits</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator Input Card -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="generationRate">Contaminant Generation Rate (G) in m³/s</label>
+                    <input type="number" id="generationRate" class="form-input" min="0" step="0.001" placeholder="Enter generation rate">
+                </div>
+
+                <div class="form-group">
+                    <label for="desiredConcentration">Desired Contaminant Concentration (C<sub>desired</sub>) in ppm</label>
+                    <input type="number" id="desiredConcentration" class="form-input" min="0" step="0.1" placeholder="Enter desired concentration">
+                </div>
+
+                <div class="form-group">
+                    <label for="ambientConcentration">Ambient Contaminant Concentration (C<sub>ambient</sub>) in ppm</label>
+                    <input type="number" id="ambientConcentration" class="form-input" min="0" step="0.1" placeholder="Enter ambient concentration">
+                </div>
+
+                <button class="calculate-btn" onclick="calculateVentilationRate()">Calculate Required Airflow</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Ventilation illustration">
+                    <p>This tool calculates the <strong>required airflow</strong> in m³/s. Enter your values to see results.</p>
+                </div>
+
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Required Airflow</h2>
+                    </div>
+                    <div class="rate-value" id="airflowValue">0.00</div>
+                    <div class="rate-label"><strong>m³/s</strong></div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">Ventilation Rate Interpretation</div>
+                        <div class="feedback-content" id="ventilationFeedback"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🔎 About This Calculator</h3>
+                <p>
+                    The <strong>Dilution Ventilation Rate Calculator</strong> determines the required airflow to maintain safe contaminant levels in an enclosed space. It helps assess ventilation needs, optimize air quality, and maintain safe operations in industrial and commercial settings.
+                </p> 
+            </div>
+
+            <div class="note-card">
+                <h3>📌 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Generation Rate (G):</strong> Required, must be > 0</li>
+                    <li><strong>Desired Concentration (C<sub>desired</sub>):</strong> Required, must be > 0</li>
+                    <li><strong>Ambient Concentration (C<sub>ambient</sub>):</strong> Required, must be ≥ 0</li>
+                    <li><strong>Concentration Difference:</strong> Desired concentration must be greater than ambient concentration</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ Explanation of Parameters</h3>
+                <ul class="note-list">
+                    <li><strong>Required Airflow (Q):</strong> The necessary airflow to achieve acceptable contaminant concentration, measured in m³/s.</li>
+                    <li><strong>Contaminant Generation Rate (G):</strong> The rate at which the contaminant is introduced into the air, measured in m³/s.</li>
+                    <li><strong>Desired Concentration (C<sub>desired</sub>):</strong> The maximum permissible concentration to ensure safety, measured in ppm.</li>
+                    <li><strong>Ambient Concentration (C<sub>ambient</sub>):</strong> The current contaminant level before ventilation is applied, measured in ppm.</li>
+                </ul>
+            </div>
+      
+
+            <div class="note-card">
+                <h3>📊 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Industrial Settings:</strong> Control fumes, dust, and chemical vapors in manufacturing facilities.</li>
+                    <li><strong>Laboratories:</strong> Maintain safe air quality when working with hazardous materials.</li>
+                    <li><strong>Commercial Buildings:</strong> Ensure proper ventilation for occupant health and comfort.</li>
+                    <li><strong>Environmental Compliance:</strong> Meet regulatory standards for indoor air quality.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Key Factors</h3>
+                <ul class="note-list">
+                    <li>Proper ventilation is crucial to maintaining air quality and controlling contaminants</li>
+                    <li>Understanding these factors helps determine appropriate ventilation rates</li>
+                    <li>Helps comply with safety regulations and create healthier environments</li>
+                    <li>Regular assessments help optimize energy use while maintaining safety standards</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>function calculateVentilationRate() {
+    const generationRate = document.getElementById("generationRate").value.trim();
+    const desiredConcentration = document.getElementById("desiredConcentration").value.trim();
+    const ambientConcentration = document.getElementById("ambientConcentration").value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const outputValue = document.getElementById('airflowValue');
+    const feedbackBox = document.getElementById('ventilationFeedback');
+
+    let errors = [];
+
+    // ---- VALIDATIONS ----
+    // Generation Rate
+    if (generationRate === "" || isNaN(generationRate)) {
+        errors.push("👉 Enter contaminant generation rate (m³/s).");
+    } else if (parseFloat(generationRate) <= 0) {
+        errors.push("👉 Generation rate must be greater than 0.");
+    } else if (parseFloat(generationRate) > 50) {
+        errors.push("👉 Generation rate is too high – verify input (LEV may be required).");
+    }
+
+    // Desired Concentration
+    if (desiredConcentration === "" || isNaN(desiredConcentration)) {
+        errors.push("👉 Enter desired concentration (ppm).");
+    } else if (parseFloat(desiredConcentration) <= 0) {
+        errors.push("👉 Desired concentration must be greater than 0.");
+    } else if (parseFloat(desiredConcentration) > 5000) {
+        errors.push("👉 Desired concentration exceeds typical occupational limits – verify input.");
+    }
+
+    // Ambient Concentration
+    if (ambientConcentration === "" || isNaN(ambientConcentration)) {
+        errors.push("👉 Enter ambient concentration (ppm).");
+    } else if (parseFloat(ambientConcentration) < 0) {
+        errors.push("👉 Ambient concentration cannot be negative.");
+    }
+
+    // Cross-field check
+    if (errors.length === 0) {
+        const desiredNum = parseFloat(desiredConcentration);
+        const ambientNum = parseFloat(ambientConcentration);
+        if (desiredNum <= ambientNum) {
+            errors.push("👉 Desired concentration must be greater than ambient concentration.");
+        }
+    }
+
+    // Show errors
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // ---- CALCULATION ----
+    const G = parseFloat(generationRate);
+    const C_desired = parseFloat(desiredConcentration);
+    const C_ambient = parseFloat(ambientConcentration);
+    const deltaC = C_desired - C_ambient;
+
+    if (deltaC <= 0) {
+        errorMessage.innerHTML = "⚠️ Invalid inputs: Desired concentration must be greater than ambient.";
+        errorBox.classList.remove("hidden");
+        return;
+    }
+
+    const Q = G / deltaC;
+
+    // Output result
+    outputValue.textContent = Q.toFixed(4);
+
+    // Feedback interpretation
+    let feedback = "";
+    if (Q < 0.1) {
+        feedback = "✅ Low Airflow (< 0.1 m³/s) – Suitable for small labs or minor contaminants.";
+    } else if (Q < 1) {
+        feedback = "📊 Moderate Airflow (0.1 – 1 m³/s) – Adequate for most small/medium rooms.";
+    } else if (Q < 5) {
+        feedback = "🔥 High Airflow (1 – 5 m³/s) – Industrial processes; ensure proper ducting.";
+    } else {
+        feedback = "🚨 Very High Airflow (>5 m³/s) – Verify inputs; consider LEV + explosion-proof ventilation.";
+    }
+
+    feedbackBox.textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+Input Validation Rules (Real-World Standards)
+a. Contaminant Generation Rate (G, m³/s)
+
+Required, must be > 0
+
+Min: 0.001 m³/s (anything below this is negligible in occupational air quality calculations).
+
+Max: 50 m³/s (beyond this requires engineering controls beyond dilution – e.g., local exhaust ventilation).
+
+Decimals: Up to 3.
+
+Unit: m³/s.
+
+Rationale: Prevents unrealistic or unsafe inputs that don’t match industrial contaminant generation profiles.
+
+b. Desired Contaminant Concentration (C_desired, ppm)
+
+Required, must be > 0.
+
+Min: 0.1 ppm (realistic sensitivity of measurement).
+
+Max: 5000 ppm (above IDLH for most gases; OSHA & NIOSH limits are usually < 1000 ppm for toxics).
+
+Decimals: Up to 1 decimal place.
+
+Unit: ppm.
+
+Rationale: Desired concentration should align with Occupational Exposure Limits (OELs) such as OSHA PEL, ACGIH TLV, or NIOSH REL.
+
+c. Ambient Concentration (C_ambient, ppm)
+
+Required, must be ≥ 0.
+
+Min: 0 ppm (fresh air baseline).
+
+Max: Must be strictly less than desired concentration (otherwise dilution is impossible).
+
+Decimals: Up to 1 decimal place.
+
+Rationale: Ensures logical difference (ΔC = C_desired – C_ambient > 0).
+
+d. Cross-Field Dependencies
+
+C_desired must be greater than C_ambient.
+
+If C_desired ≤ C_ambient → ERROR (ventilation cannot achieve control).
+
+If G = 0 → Q = 0 (no airflow required).
+
+2. Output Validation & Thresholds (Q in m³/s)
+
+Formula:
+
+𝑄
+=
+𝐺
+𝐶
+𝑑
+𝑒
+𝑠
+𝑖
+𝑟
+𝑒
+𝑑
+−
+𝐶
+𝑎
+𝑚
+𝑏
+𝑖
+𝑒
+𝑛
+𝑡
+Q=
+C
+desired
+	​
+
+−C
+ambient
+	​
+
+G
+	​
+
+
+Interpretation (aligned with NFPA & OSHA ventilation guidelines):
+
+Q < 0.1 m³/s → ✅ Low airflow – Suitable for small labs, offices.
+
+0.1 – 1 m³/s → 📊 Moderate airflow – Typical for workrooms or small shops.
+
+1 – 5 m³/s → 🔥 High airflow – Industrial processes, welding, chemical mixing.
+
+> 5 m³/s → 🚨 Very high airflow – Major industrial contaminant generation. Requires local exhaust + dilution and possibly explosion-proof ventilation (NFPA 91).
+
+3. Edge Case Validations
+
+Division by zero: If ΔC = 0, show error: “Desired and ambient concentrations cannot be equal.”
+
+Negative Q: If ΔC < 0, reject input (means desired < ambient).
+
+Extreme G values: Warn if G > 20 m³/s (“Unusually high generation rate – verify input or consider LEV instead of dilution.”).
+
+Very low G: If G < 0.001 m³/s, treat as negligible and output Q ≈ 0.
+
+            <div class="note-card formula-card">
+                <h3>🧮 Formula</h3>
+                <p>The required ventilation rate is calculated using the following formula:</p>
+                <code>Q = G / (C<sub>desired</sub> - C<sub>ambient</sub>)</code>
+                <p>Where:</p>
+                <ul class="note-list">
+                    <li>Q = Required Airflow (m³/s)</li>
+                    <li>G = Contaminant Generation Rate (m³/s)</li>
+                    <li>C<sub>desired</sub> = Desired Contaminant Concentration (ppm)</li>
+                    <li>C<sub>ambient</sub> = Ambient Contaminant Concentration (ppm)</li>
+                </ul>
+            </div>
+            -->
