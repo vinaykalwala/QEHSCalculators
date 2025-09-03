@@ -449,6 +449,9 @@ urlpatterns = [
     path('safety/condensate_velocity_of_a_pipe_calculator/', safety_condensate_velocity_of_a_pipe_calculator, name='safety_condensate_velocity_of_a_pipe_calculator'),
     path('safety/cooling_water_flowrate_for_desuperheater_calculator/', safety_cooling_water_flowrate_for_desuperheater_calculator, name='safety_cooling_water_flowrate_for_desuperheater_calculator'),
     path('safety/capacitance_law_calculator/', safety_capacitance_law_calculator, name='safety_capacitance_law_calculator'),
+    path('safety/critical_pressure_ratio_dry_steam_gases/', safety_critical_pressure_ratio_dry_steam_gases, name='safety_critical_pressure_ratio_dry_steam_gases'),
+    path('safety/critical_pressure_ratio/', safety_critical_pressure_ratio, name='safety_critical_pressure_ratio'),
+
     path('safety/cold_differential_pressure_calculator/', safety_cold_differential_pressure_calculator, name='safety_cold_differential_pressure_calculator'),
     path('safety/coefficient_of_discharge_calculator/', safety_coefficient_of_discharge_calculator, name='safety_coefficient_of_discharge_calculator'),
     path('safety/curtain_area_of_safety_valve_calculator/', safety_curtain_area_of_safety_valve_calculator, name='safety_curtain_area_of_safety_valve_calculator'),

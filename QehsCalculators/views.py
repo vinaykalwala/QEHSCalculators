@@ -2959,6 +2959,21 @@ def safety_capacitance_law_calculator(request):
 
 @login_required
 @subscription_required(plan_type="corporate")
+def safety_critical_pressure_ratio_dry_steam_gases(request):
+    return render(request, 'qehsfcalculators/safety/critical_pressure_ratio_dry_steam_gases.html', {
+        'title': 'Critical Pressure Ratio for Dry Steam and Gases Calculator'
+    })
+
+
+@login_required
+@subscription_required(plan_type="corporate")
+def safety_critical_pressure_ratio(request):
+    return render(request, 'qehsfcalculators/safety/critical_pressure_ratio.html', {
+        'title': 'Critical Pressure Ratio Calculator'
+    })
+
+@login_required
+@subscription_required(plan_type="corporate")
 def safety_cold_differential_pressure_calculator(request):
     return render(request, 'qehsfcalculators/safety/cold_differential_pressure.html', {'title': 'Cold Differential Pressure Calculator'})
 
