@@ -12,12 +12,37 @@
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
 <style>
-        /* Main container */
         .calculator-container {
             max-width: 1200px;
             margin: 20px auto;
-            padding: 20px;
+            padding: 0px 20px;
             border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
         }
 
         /* Header */
@@ -432,6 +457,10 @@
 </head>
 <body>
 
+        <div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+
     <div class="calculator-container printable" id="printArea">
 
     {% include "includes/print_header_footer.html" %}
@@ -450,13 +479,13 @@
                 <div class="form-group">
                     <label for="thickness">Thickness of Clay Liner (d) — <small>ft</small></label>
                     <input type="number" id="thickness" class="form-input" step="any" min="0" placeholder="e.g., 2.0" aria-label="Thickness d in feet">
-                    <small class="hint">Enter liner thickness in feet (ft).</small>
+                    
                 </div>
 
                 <div class="form-group">
                     <label for="porosity">Porosity (η) — <small>fraction</small></label>
                     <input type="number" id="porosity" class="form-input" step="any" min="0" max="1" placeholder="e.g., 0.15" aria-label="Porosity eta (fraction)">
-                    <small class="hint">Typical clay porosity ≈ 0.1–0.3 (dimensionless, 0–1).</small>
+                  
                 </div>
             </div>
 
@@ -464,13 +493,13 @@
                 <div class="form-group">
                     <label for="hydraulicConductivity">Hydraulic Conductivity (K) — <small>ft/yr</small></label>
                     <input type="number" id="hydraulicConductivity" class="form-input" step="any" min="0" placeholder="e.g., 1e-3" aria-label="Hydraulic conductivity K in ft per year">
-                    <small class="hint">Enter K in ft/year (convert if necessary).</small>
+                    
                 </div>
 
                 <div class="form-group">
                     <label for="hydraulicHead">Hydraulic Head (h) — <small>ft</small></label>
                     <input type="number" id="hydraulicHead" class="form-input" step="any" min="0" placeholder="e.g., 10" aria-label="Hydraulic head h in feet">
-                    <small class="hint">Driving head in feet (ft) above liner.</small>
+                    
                 </div>
             </div>
 
@@ -541,16 +570,17 @@
         </div>
 
         <div class="note-card">
-            <h3>⚠️ Strong validations (what is checked)</h3>
-            <ul>
-                <li>All inputs are required and must be finite numbers.</li>
-                <li><strong>d &gt; 0</strong> and <strong>h ≥ 0</strong> (feet).</li>
-                <li><strong>0 &lt; η &lt; 1</strong> (porosity must be a positive fraction). Values outside 0.01–0.6 will trigger warnings.</li>
-                <li><strong>K &gt; 0</strong> (ft/yr). Extremely small K (≤1e-9 ft/yr) or extremely large K (&gt;1e6 ft/yr) will trigger warnings — likely unit or data errors.</li>
-                <li>If (d+h) is extremely small the calculation is unstable and will be blocked.</li>
-                <li>Results that are physically unrealistic (negative or non-finite) will be blocked and flagged for review.</li>
+            <h3>✅ Input Validations </h3>
+            <ul class="note-list">
+                <li><strong>Thickness (d):</strong> Must be &gt; 0 ft. Warning if &lt; 0.1 ft (too thin) or &gt; 50 ft (check units).</li>
+                <li><strong>Porosity (η):</strong> Must be a fraction between 0 and 1. Warning if &lt; 0.10 or &gt; 0.30 (outside typical clay range). Values &lt;0.01 or &gt;0.60 are flagged as extreme.</li>
+                <li><strong>Hydraulic Conductivity (K):</strong> Must be &gt; 0 ft/yr. Warning if ≤ 1×10⁻⁹ (too small) or &gt; 1×10⁶ (too large). Extra warnings if values suggest ft/day or ft/s were entered instead of ft/yr.</li>
+                <li><strong>Hydraulic Head (h):</strong> Must be ≥ 0 ft. Warning if &gt; 1×10⁶ ft (unit mismatch likely) or if h ≫ d.</li>
+                <li><strong>Cross-checks:</strong> Denominator (d + h) must be &gt; 0. Computed breakthrough time must be finite and positive.</li>
+                <li><strong>General:</strong> All fields are required, must be finite numbers (scientific notation allowed). Units must be consistent.</li>
             </ul>
         </div>
+
 
         <div class="note-card">
             <h3>🔎 Interpretation</h3>
@@ -574,7 +604,7 @@
 </div>
 
 <script>
-/* Helper: show errors consistently */
+/* ---------- Helpers ---------- */
 function showErrors(errors) {
   const errorBox = document.getElementById("resultError");
   const errorMessage = document.getElementById("errorMessage");
@@ -587,110 +617,148 @@ function showErrors(errors) {
   if (resultValue) resultValue.classList.add("hidden");
 }
 
-/* Main Breakthrough Time calculation with strong validations */
+function showResult() {
+  document.getElementById("placeholder")?.classList.add("hidden");
+  document.getElementById("resultError")?.classList.add("hidden");
+  document.getElementById("resultValue")?.classList.remove("hidden");
+}
+
+function isFiniteNumber(x) {
+  return typeof x === "number" && Number.isFinite(x);
+}
+
+function parseRequiredNumber(raw) {
+  if (raw == null) return { ok: false, val: NaN };
+  const s = String(raw).trim();
+  if (s === "") return { ok: false, val: NaN };
+  const v = Number(s);
+  return { ok: isFiniteNumber(v), val: v };
+}
+
+/* ---------- Main calculation with strong validations ---------- */
 function calculateBreakthroughTime() {
-  // safe reads
-  const draw = document.getElementById("thickness")?.value.trim() ?? "";
-  const etaraw = document.getElementById("porosity")?.value.trim() ?? "";
-  const Kraw = document.getElementById("hydraulicConductivity")?.value.trim() ?? "";
-  const hraw = document.getElementById("hydraulicHead")?.value.trim() ?? "";
+  // Read
+  const draw  = document.getElementById("thickness")?.value ?? "";
+  const etaraw = document.getElementById("porosity")?.value ?? "";
+  const Kraw  = document.getElementById("hydraulicConductivity")?.value ?? "";
+  const hraw  = document.getElementById("hydraulicHead")?.value ?? "";
 
   const yearsEl = document.getElementById("breakthroughYears");
-  const daysEl = document.getElementById("breakthroughDays");
+  const daysEl  = document.getElementById("breakthroughDays");
   const classEl = document.getElementById("breakthroughClass");
   const feedbackEl = document.getElementById("feedbackContent");
 
-  // reset UI
-  document.getElementById("resultError").classList.add("hidden");
+  // Reset UI
+  document.getElementById("resultError")?.classList.add("hidden");
   if (feedbackEl) feedbackEl.innerHTML = "";
 
   const errors = [];
-  const warnings = [];
+  const warns  = [];
 
-  // required checks
-  if (draw === "") errors.push("👉 Enter thickness (d) in ft.");
-  if (etaraw === "") errors.push("👉 Enter porosity (η) as fraction (0–1).");
-  if (Kraw === "") errors.push("👉 Enter hydraulic conductivity (K) in ft/yr.");
-  if (hraw === "") errors.push("👉 Enter hydraulic head (h) in ft.");
+  // Required & parse checks
+  const dParsed   = parseRequiredNumber(draw);
+  const etaParsed = parseRequiredNumber(etaraw);
+  const KParsed   = parseRequiredNumber(Kraw);
+  const hParsed   = parseRequiredNumber(hraw);
 
-  if (errors.length > 0) { showErrors(errors); return; }
+  if (!dParsed.ok)   errors.push("👉 Enter thickness (d) as a finite number in ft.");
+  if (!etaParsed.ok) errors.push("👉 Enter porosity (η) as a finite fraction (0–1).");
+  if (!KParsed.ok)   errors.push("👉 Enter hydraulic conductivity (K) as a finite number in ft/yr.");
+  if (!hParsed.ok)   errors.push("👉 Enter hydraulic head (h) as a finite number in ft.");
 
-  // parse
-  const d = parseFloat(draw);
-  const eta = parseFloat(etaraw);
-  const K = parseFloat(Kraw);
-  const h = parseFloat(hraw);
+  if (errors.length) { showErrors(errors); return; }
 
-  // numeric & sign checks
-  if (!Number.isFinite(d) || d <= 0) errors.push("👉 Thickness d must be a positive finite number (ft).");
-  if (!Number.isFinite(eta) || eta <= 0 || eta >= 1) errors.push("👉 Porosity η must be a finite fraction > 0 and < 1.");
-  if (!Number.isFinite(K) || K <= 0) errors.push("👉 Hydraulic conductivity K must be a positive finite number (ft/yr).");
-  if (!Number.isFinite(h) || h < 0) errors.push("👉 Hydraulic head h must be a non-negative finite number (ft).");
+  const d   = dParsed.val;
+  const eta = etaParsed.val;
+  const K   = KParsed.val;
+  const h   = hParsed.val;
 
-  if (errors.length > 0) { showErrors(errors); return; }
+  // Sign & domain (blocking)
+  if (!(d > 0))           errors.push("👉 Thickness d must be > 0 ft.");
+  if (!(eta > 0 && eta < 1)) errors.push("👉 Porosity η must be > 0 and < 1 (fraction).");
+  if (!(K > 0))           errors.push("👉 Hydraulic conductivity K must be > 0 (ft/yr).");
+  if (!(h >= 0))          errors.push("👉 Hydraulic head h must be ≥ 0 ft.");
 
-  // stability checks & warnings (non-blocking)
-  if (eta < 0.01 || eta > 0.6) warnings.push("⚠️ Porosity outside common clay range — verify units and sample data.");
-  if (d < 0.1) warnings.push("⚠️ Very thin liner (<0.1 ft) — may be impractical.");
-  if (d > 50) warnings.push("⚠️ Very thick liner (>50 ft) — check units (ft vs m).");
-  if (K <= 1e-9) warnings.push("⚠️ Extremely low K — may produce extremely long breakthrough times; verify units.");
-  if (K > 1e6) warnings.push("⚠️ Very large K — likely unit mismatch (convert to ft/yr).");
-  if (h > 1e6) warnings.push("⚠️ Very large hydraulic head — verify units and scenario.");
+  if (errors.length) { showErrors(errors); return; }
 
-  if ((d + h) <= 0) {
-    showErrors(["⚠️ Denominator (d + h) must be > 0. Check thickness and head values."]);
+  // Plausibility warnings (non-blocking)
+  if (eta < 0.10 || eta > 0.30) warns.push("Porosity outside typical clay range (0.10–0.30).");
+  if (eta < 0.01 || eta > 0.60) warns.push("Porosity is extreme for clay—verify sample and units.");
+  if (d < 0.1) warns.push("Very thin liner (<0.1 ft) — impractical in practice.");
+  if (d > 50)  warns.push("Very thick liner (>50 ft) — check ft vs m.");
+  if (K <= 1e-9) warns.push("Extremely low K (≤1e-9 ft/yr) — may yield astronomical times; verify units.");
+  if (K > 1e6)  warns.push("Very large K (>1e6 ft/yr) — likely unit mismatch.");
+  // Unit-sniffing for K
+  if (K > 1e2 && K <= 1e5) warns.push("K is large; did you enter ft/day instead of ft/yr?");
+  if (K >= 3e7) warns.push("K ≈ ft/sec range; check units (1 ft/s ≈ 3.16e7 ft/yr).");
+  if (h > 1e6) warns.push("Very large head (>1e6 ft) — check units.");
+  if (h / d > 1000) warns.push("Driving head >> thickness (h/d > 1000) — verify scenario.");
+
+  // Denominator check
+  const denom = d + h;
+  if (!(denom > 0) || !isFiniteNumber(denom)) {
+    showErrors(["⚠️ Denominator (d + h) must be > 0 and finite."]); 
     return;
   }
 
-  // compute breakthrough time (years)
-  // internal formula used (not displayed): t = (d^2 * eta) / (K * (d + h))
-  const tYears = (d * d * eta) / (K * (d + h));
+  // Compute
+  const numerator = d * d * eta;
+  const denomK = K * denom;
 
-  if (!Number.isFinite(tYears) || tYears <= 0) {
-    showErrors(["⚠️ Computed breakthrough time is invalid. Check inputs and units."]);
+  // Numerical guardrails
+  if (!isFiniteNumber(numerator) || !isFiniteNumber(denomK) || denomK === 0) {
+    showErrors(["⚠️ Computation failed due to non-finite or zero divisor. Check inputs and units."]);
     return;
   }
 
-  // convert to days for convenience
+  const tYears = numerator / denomK;
+
+  if (!isFiniteNumber(tYears) || tYears <= 0) {
+    showErrors(["⚠️ Computed breakthrough time is invalid (≤ 0 or non-finite). Check inputs and units."]);
+    return;
+  }
+
+  if (tYears > 1e7) warns.push("Result > 10,000,000 years — likely unit/data issue. Treat as screening-only.");
+
+  // Convert
   const tDays = tYears * 365.25;
 
-  // classification thresholds (engineering judgement)
+  // Classification
   let classification = "";
   if (tYears > 100) classification = "Very Long";
   else if (tYears > 10) classification = "Moderate";
   else classification = "Short";
 
-  // actionable suggestions
+  // Suggestions
   let suggestion = "";
   if (tYears < 1) {
-    suggestion = "⚠️ Short breakthrough time (<1 year). Consider improving liner compaction, lowering K, or adding an engineered barrier.";
+    suggestion = "⚠️ Short breakthrough time (<1 year). Consider improving compaction, reducing K, thicker liner, or adding a geosynthetic barrier.";
   } else if (tYears <= 10) {
-    suggestion = "✅ Moderate protection — monitor performance and consider redundancy in high-risk sites.";
+    suggestion = "✅ Moderate protection — increase QA/QC, consider redundancy for high-risk sites.";
   } else {
-    suggestion = "ℹ️ Long breakthrough time — liner provides substantial delay; validate long-term behavior and construction quality.";
+    suggestion = "ℹ️ Long breakthrough time — verify long-term performance and construction quality; maintain monitoring.";
   }
 
-  // compose feedback content
-  let details = `<div>Breakthrough time = <b>${tYears.toFixed(3)}</b> years (${tDays.toFixed(1)} days).</div>`;
-  details += `<div>Classification: <b>${classification}</b></div>`;
-  details += `<div style="margin-top:6px;">${suggestion}</div>`;
-  if (warnings.length) {
-    details += `<div style="margin-top:8px; color:#b35d00;">Note: ${warnings.join(" | ")}</div>`;
+  // Compose feedback
+  let details = `
+    <div>Breakthrough time = <b>${tYears.toFixed(3)}</b> years (${tDays.toFixed(1)} days).</div>
+    <div>Classification: <b>${classification}</b></div>
+    <div style="margin-top:6px;">${suggestion}</div>
+  `;
+  if (warns.length) {
+    details += `<div style="margin-top:8px; color:#b35d00;">Note: ${warns.join(" | ")}</div>`;
   }
 
-  // update UI
+  // Update UI
   if (yearsEl) yearsEl.textContent = tYears.toFixed(3);
-  if (daysEl) daysEl.textContent = tDays.toFixed(1);
+  if (daysEl)  daysEl.textContent  = tDays.toFixed(1);
   if (classEl) classEl.textContent = classification;
   if (feedbackEl) feedbackEl.innerHTML = details;
 
-  // toggle display
-  document.getElementById("placeholder").classList.add("hidden");
-  document.getElementById("resultValue").classList.remove("hidden");
-  document.getElementById("resultError").classList.add("hidden");
+  showResult();
 }
 
-/* safe print guard */
+/* Print guard (unchanged) */
 function printReport() {
   const el = document.getElementById('printDate');
   if (el) {
@@ -701,6 +769,75 @@ function printReport() {
   window.print();
 }
 </script>
+
 </body>
 </html>
 {% endblock %}
+
+
+<!-- /* ------------------------------------------------------------------
+   📘 Breakthrough Time Calculator — Formula & Validation Notes
+   ------------------------------------------------------------------
+
+   🔹 Formula:
+       t = (d² · η) / (K · (d + h))
+
+       where:
+         d   = thickness of clay liner (ft)
+         η   = porosity (fraction, 0–1)
+         K   = hydraulic conductivity (ft/yr)
+         h   = hydraulic head (ft)
+         t   = breakthrough time (years)
+
+       Conversion:
+         days = t × 365.25
+
+   ------------------------------------------------------------------
+   🔹 Input Validation Rules:
+
+   1. Thickness (d):
+      - Must be > 0
+      - Warning if < 0.1 ft (too thin)
+      - Warning if > 50 ft (check unit mismatch, m vs ft)
+
+   2. Porosity (η):
+      - Must be between 0 and 1
+      - Typical clay: 0.10 – 0.30
+      - Warning if outside [0.10, 0.30]
+      - Extreme if < 0.01 or > 0.60 → unit/sample issue likely
+
+   3. Hydraulic Conductivity (K):
+      - Must be > 0 ft/yr
+      - Typical clay: ~1e-6 – 1e-2 ft/yr
+      - Warning if ≤ 1e-9 (too small → unrealistic)
+      - Warning if > 1e6 (too large → unit mismatch)
+      - Extra hints:
+          * 1 ft/day ≈ 365 ft/yr
+          * 1 ft/s   ≈ 3.16e7 ft/yr
+
+   4. Hydraulic Head (h):
+      - Must be ≥ 0
+      - Warning if > 1e6 ft (unit mismatch likely)
+      - Warning if h/d >> 1000 (unrealistic scenario)
+
+   5. Denominator check:
+      - (d + h) must be > 0 and finite
+      - Prevent division by zero or NaN
+
+   ------------------------------------------------------------------
+   🔹 Output Validation & Classification:
+
+   - Computed time (t) must be finite and > 0
+   - Flag if > 1e7 years (likely unit/data issue)
+
+   Classification thresholds:
+     * t > 100 years   → "Very Long" (good barrier, verify QA/QC)
+     * 10 < t ≤ 100    → "Moderate"
+     * t ≤ 10          → "Short" (potential risk)
+
+   Suggestions:
+     - < 1 year: ⚠️ High risk → improve liner / add geosynthetic barrier
+     - 1–10 years: ✅ Moderate → QA/QC & redundancy
+     - > 10 years: ℹ️ Long → monitor long-term, verify inputs
+
+   ------------------------------------------------------------------ */ -->

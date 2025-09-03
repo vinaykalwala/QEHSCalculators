@@ -13,12 +13,37 @@
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
 
     <style>
-        /* Main container */
         .calculator-container {
             max-width: 1200px;
             margin: 20px auto;
-            padding: 20px;
+            padding: 0px 20px;
             border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
         }
 
         /* Header */
@@ -371,6 +396,9 @@
 </head>
 <body>
 
+        <div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
 <div class="calculator-container printable" id="printArea">
 
     {% include "includes/print_header_footer.html" %}
@@ -473,14 +501,18 @@
         </div>
 
         <div class="note-card">
-            <h3>⚠️ Validations</h3>
-            <p>
-                ✔️ Velocity values (U₁, U₂) must be ≥ 0.<br>
-                ✔️ Density (ρ) must be positive (kg/m³).<br>
-                ✔️ Pressures (P₁, P₂) can be positive or negative but must be real numbers.<br>
-                ❌ Unrealistic inputs (e.g., ρ &lt; 100 or &gt; 20000) will trigger warnings.
-            </p>
+            <h3>⚠️ Input Validations</h3>
+            <ul class="note-list">
+                <li>✅ <strong>Pressure (P₁, P₂):</strong> Must be a valid number in Pa. Can be positive or negative but within reasonable limits (e.g., ±10,000,000 Pa).</li>
+                <li>✅ <strong>Velocity (U₁, U₂):</strong> Must be ≥ 0 m/s. Extremely high velocities (&gt;200 m/s) may trigger warnings.</li>
+                <li>✅ <strong>Fluid Density (ρ):</strong> Must be positive (kg/m³). Typical range: 50–20,000 kg/m³. Values outside this range will trigger a warning.</li>
+                <li>⚠️ <strong>Large Velocity Differences:</strong> If |U₁ - U₂| &gt; 100 m/s, a warning is displayed.</li>
+                <li>⚠️ <strong>Extreme Pressures:</strong> Pressures beyond ±10,000,000 Pa trigger a warning.</li>
+                <li>⚠️ <strong>Unusual Density:</strong> ρ &lt; 50 or &gt; 20,000 kg/m³ triggers a warning.</li>
+                <li>❌ Invalid or empty fields will stop calculation and show errors above results.</li>
+            </ul>
         </div>
+
 
         <div class="note-card">
             <h3>🌍 Key Applications</h3>
@@ -495,6 +527,7 @@
 </div>
 
 <script>
+/* Helper: show errors */
 function showErrors(errors) {
   const errorBox = document.getElementById("resultError");
   const errorMessage = document.getElementById("errorMessage");
@@ -508,11 +541,12 @@ function showErrors(errors) {
 }
 
 function calculateBernoulli() {
-  const P1 = parseFloat(document.getElementById("P1").value.trim());
-  const U1 = parseFloat(document.getElementById("U1").value.trim());
-  const P2 = parseFloat(document.getElementById("P2").value.trim());
-  const U2 = parseFloat(document.getElementById("U2").value.trim());
-  const rho = parseFloat(document.getElementById("rho").value.trim());
+  // Read inputs
+  const P1raw = document.getElementById("P1")?.value.trim();
+  const U1raw = document.getElementById("U1")?.value.trim();
+  const P2raw = document.getElementById("P2")?.value.trim();
+  const U2raw = document.getElementById("U2")?.value.trim();
+  const rhoraw = document.getElementById("rho")?.value.trim();
 
   const lhsEl = document.getElementById("lhsValue");
   const rhsEl = document.getElementById("rhsValue");
@@ -521,44 +555,57 @@ function calculateBernoulli() {
   const errors = [];
   const warnings = [];
 
+  // Convert inputs to floats
+  const P1 = parseFloat(P1raw);
+  const U1 = parseFloat(U1raw);
+  const P2 = parseFloat(P2raw);
+  const U2 = parseFloat(U2raw);
+  const rho = parseFloat(rhoraw);
+
+  // Required & numeric validations
   if (!Number.isFinite(P1)) errors.push("👉 Enter a valid Pressure P₁ (Pa).");
   if (!Number.isFinite(P2)) errors.push("👉 Enter a valid Pressure P₂ (Pa).");
   if (!Number.isFinite(U1) || U1 < 0) errors.push("👉 U₁ must be non-negative (m/s).");
   if (!Number.isFinite(U2) || U2 < 0) errors.push("👉 U₂ must be non-negative (m/s).");
   if (!Number.isFinite(rho) || rho <= 0) errors.push("👉 ρ must be positive (kg/m³).");
 
-  if (errors.length > 0) { showErrors(errors); return; }
+  if (errors.length) { showErrors(errors); return; }
 
-  if (rho < 100 || rho > 20000) warnings.push("⚠️ Unusual fluid density — check units (kg/m³ vs g/cm³).");
+  // Extreme value warnings
+  if (rho < 50 || rho > 20000) warnings.push("⚠️ Unusual fluid density — check units.");
+  if (U1 > 200 || U2 > 200) warnings.push("⚠️ Extremely high velocity — check input.");
+  if (Math.abs(P1) > 1e7 || Math.abs(P2) > 1e7) warnings.push("⚠️ Unusually high/low pressures — check units.");
+  if (Math.abs(U1 - U2) > 100) warnings.push("⚠️ Large velocity difference between points.");
 
+  // Bernoulli calculation (without height term)
   const LHS = P1 + 0.5 * rho * Math.pow(U1, 2);
   const RHS = P2 + 0.5 * rho * Math.pow(U2, 2);
-
-  const imbalance = Math.abs(LHS - RHS);
-  const tolerance = Math.max(0.01, 0.001 * Math.max(Math.abs(LHS), Math.abs(RHS)));
 
   lhsEl.textContent = LHS.toFixed(2);
   rhsEl.textContent = RHS.toFixed(2);
 
-  let feedback = "";
-  if (imbalance < tolerance) {
+// Imbalance check
+const imbalance = Math.abs(LHS - RHS);
+const tolerance = Math.max(0.01, 0.001 * Math.max(Math.abs(LHS), Math.abs(RHS)));
+
+let feedback = "";
+if (imbalance < tolerance) {
     feedback = "✅ Bernoulli’s Equation holds within tolerance.";
-  } else if (imbalance < 0.05 * Math.max(LHS, RHS)) {
-    feedback = "⚠️ Small imbalance detected. Likely due to measurement or rounding errors.";
-  } else {
-    feedback = "🔴 Significant imbalance — check input values or applicability of Bernoulli’s assumptions.";
-  }
+} else if (imbalance < 0.05 * Math.max(LHS, RHS)) {
+    feedback = "⚠️ Small imbalance detected — likely rounding/measurement errors.";
+} else {
+    feedback = "🔴 Significant imbalance — check inputs or Bernoulli assumptions.";
+}
 
-  if (warnings.length) {
-    feedback += "<br><span style='color:#b35d00'>" + warnings.join(" | ") + "</span>";
-  }
 
+  // Display results
   document.getElementById("placeholder").classList.add("hidden");
   document.getElementById("resultValue").classList.remove("hidden");
   document.getElementById("resultError").classList.add("hidden");
   feedbackEl.innerHTML = feedback;
 }
 
+/* Print helper */
 function printReport() {
   const el = document.getElementById('printDate');
   if (el) {
@@ -572,3 +619,81 @@ function printReport() {
 </body>
 </html>
 {% endblock %}
+
+
+<!-- 
+==============================================
+Bernoulli’s Equation Calculator
+==============================================
+
+Formula Used:
+-------------
+For a steady, incompressible flow with constant potential energy (ignoring height term):
+
+    P + 0.5 * ρ * U^2 = constant
+
+Where:
+    P  = Pressure at the point [Pa]
+    ρ  = Fluid density [kg/m³]
+    U  = Fluid velocity at the point [m/s]
+
+Calculation:
+-------------
+LHS = P1 + 0.5 * ρ * U1^2
+RHS = P2 + 0.5 * ρ * U2^2
+Imbalance = |LHS - RHS|
+
+Tolerance:
+----------
+The equation holds if:
+    Imbalance < max(0.01, 0.001 * max(|LHS|, |RHS|))
+
+Interpretation:
+---------------
+- ✅ LHS ≈ RHS (within tolerance): Bernoulli holds.
+- ⚠️ Small imbalance (<5% of max(LHS, RHS)): Likely rounding/measurement errors.
+- 🔴 Significant imbalance: Check inputs or Bernoulli assumptions.
+
+Input Validation Rules:
+-----------------------
+1. Pressure (P1, P2):
+   - Must be numeric (Pa).
+   - Typical range: -10,000,000 to 10,000,000 Pa.
+   - Invalid or empty values trigger errors.
+2. Velocity (U1, U2):
+   - Must be numeric, ≥ 0 m/s.
+   - Warning if > 200 m/s.
+   - Invalid or empty values trigger errors.
+3. Fluid Density (ρ):
+   - Must be numeric, > 0 kg/m³.
+   - Typical range: 50–20,000 kg/m³.
+   - Invalid or empty values trigger errors.
+4. Logical/Edge Case Checks:
+   - Large velocity difference (|U1-U2| > 100 m/s) triggers a warning.
+   - Extremely high or low pressures trigger a warning.
+
+Output Validation Rules:
+------------------------
+1. LHS and RHS:
+   - Must be finite numbers (Pa).
+   - If result is NaN or Infinity, calculation stops with error.
+2. Imbalance:
+   - Must be calculated and compared against tolerance.
+   - Feedback:
+       - ✅ Imbalance < tolerance → “Bernoulli holds”
+       - ⚠️ Imbalance < 5% of max(LHS, RHS) → “Small imbalance”
+       - 🔴 Imbalance ≥ 5% of max(LHS, RHS) → “Significant imbalance”
+3. Result Display:
+   - LHS and RHS values rounded to 2 decimals.
+   - Feedback message displayed clearly.
+   - Any warnings appended below the main feedback in highlighted style.
+
+Notes:
+------
+- This version ignores potential energy (ρgh term). 
+- Units must be consistent: Pa, m/s, kg/m³.
+- Warnings do not prevent calculation but alert the user of unrealistic inputs.
+- Invalid inputs block calculation and display errors above results.
+
+==============================================
+-->

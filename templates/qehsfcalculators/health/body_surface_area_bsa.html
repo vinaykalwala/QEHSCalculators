@@ -1,0 +1,620 @@
+{% extends 'base.html' %}
+{% block title %}Body Surface Area (BSA) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Body Surface Area (BSA) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-input-group {
+            display: flex;
+            gap: 10px;
+        }
+        .form-input-group .form-input {
+            flex-grow: 1;
+        }
+        .form-input-group .form-select {
+            flex-shrink: 0;
+            width: 80px;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: baseline;
+            justify-content: center;
+        }
+        .result-value {
+            width: 100%;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        .rate-label {
+            color: #2980b9;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        /* Table styles */
+        .custom-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .custom-table thead {
+            background-color: #1560bd;
+            color: white;
+        }
+        .custom-table th, .custom-table td {
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .custom-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+        /* Toggle helper */
+        .hidden {
+            display: none;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Body Surface Area (BSA) Calculator</h1>
+            <p>Calculate the total surface area of the body for medical assessments.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Enter Patient Data</h2>
+                <div class="form-group">
+                    <label for="weight">Weight</label>
+                    <div class="form-input-group">
+                        <input type="number" id="weight" class="form-input" placeholder="e.g., 70">
+                        <select id="weight-unit" class="form-select">
+                            <option value="kg">kg</option>
+                            <option value="lb">lb</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="height">Height</label>
+                    <div class="form-input-group">
+                        <input type="number" id="height" class="form-input" placeholder="e.g., 175">
+                        <select id="height-unit" class="form-select">
+                            <option value="cm">cm</option>
+                            <option value="in">in</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="formula">BSA Formula</label>
+                    <select id="formula" class="form-select">
+                        <option value="dubois">Du Bois</option>
+                        <option value="mosteller">Mosteller</option>
+                        <option value="haycock">Haycock</option>
+                        <option value="gehan">Gehan & George</option>
+                        <option value="fujimoto">Fujimoto</option>
+                    </select>
+                </div>
+                <button class="calculate-btn" onclick="calculateBSA()">Calculate BSA</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Enter patient data to calculate the <strong>Body Surface Area (BSA)</strong>.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div class="result-value hidden" id="resultValue">
+                    <h2>Body Surface Area (BSA)</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label" id="rateLabel">m²</div>
+                    </div>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Result</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+    <div class="note-card">
+        <h3>📌 What Is Body Surface Area (BSA)?</h3>
+        <p>
+            BSA is the total surface area of the human body, measured in square meters (m²). 
+            It's widely used in medical practice to calculate drug dosages, assess metabolic rate, 
+            and determine treatment protocols for conditions like burns or chemotherapy.
+        </p>
+    </div>
+
+    <div class="note-card">
+        <h3>📋 Average BSA Values</h3>
+        <div class="table-container">
+        </div>
+    </div>    
+        <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Average BSA (m²)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Newborn infants</td>
+                        <td>0.25</td>
+                    </tr>
+                    <tr>
+                        <td>2-year-old child</td>
+                        <td>0.5</td>
+                    </tr>
+                    <tr>
+                        <td>10-year-old child</td>
+                        <td>1.14</td>
+                    </tr>
+                    <tr>
+                        <td>Adult women</td>
+                        <td>1.6</td>
+                    </tr>
+                    <tr>
+                        <td>Adult men</td>
+                        <td>1.9</td>
+                    </tr>
+                    <tr>
+                        <td>Reference value (70kg adult)</td>
+                        <td>1.73</td>
+                    </tr>
+                </tbody>
+            </table>
+
+    <div class="note-card">
+        <h3>⚠️ Important Notes</h3>
+        <ul class="note-list">
+            <li><strong>Medical Use:</strong> BSA is particularly important for chemotherapy dosing and burn assessment.</li>
+            <li><strong>Limitations:</strong> BSA doesn't account for body composition (muscle vs. fat).</li>
+            <li><strong>Measurement Tips:</strong> For accurate results, measure height without shoes and weight with minimal clothing.</li>
+            <li><strong>Unit Conversion:</strong> The calculator automatically handles conversions between kg/lb and cm/in/ft.</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>📚 Why BSA Matters in Medicine</h3>
+        <p>
+            BSA provides a better indicator of metabolic mass than body weight alone, 
+            as it accounts for both height and weight. This makes it particularly useful for:
+        </p>
+        <ul class="note-list">
+            <li>Calculating drug dosages (especially chemotherapy)</li>
+            <li>Assessing burn size (rule of nines)</li>
+            <li>Evaluating cardiac index</li>
+            <li>Determining glomerular filtration rate (GFR)</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>🚨 When to Consult a Doctor</h3>
+        <p>
+            While BSA is a useful tool for health assessments, it should never replace 
+            professional medical advice. Always consult your doctor for:
+        </p>
+        <ul class="note-list">
+            <li>Precise medication dosing</li>
+            <li>Metabolic health concerns</li>
+            <li>Personalized health assessments</li>
+        </ul>
+    </div>
+</div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            if(document.getElementById('printDate')) {
+               document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
+        });
+
+        function calculateBSA() {
+            const weight = document.getElementById('weight').value.trim();
+            const weightUnit = document.getElementById('weight-unit').value;
+            const height = document.getElementById('height').value.trim();
+            const heightUnit = document.getElementById('height-unit').value;
+            const formula = document.getElementById('formula').value;
+            const formulaText = document.getElementById('formula').options[document.getElementById('formula').selectedIndex].text;
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+
+            let errors = [];
+            const weightVal = parseFloat(weight);
+            const heightVal = parseFloat(height);
+
+            // Validate weight
+            if (isNaN(weightVal) || weightVal <= 0) {
+                errors.push("👉 Please enter a valid numeric weight.");
+            } else {
+                if (weightUnit === "kg" && (weightVal < 2 || weightVal > 300)) {
+                    errors.push("👉 Weight must be between 2 and 300 kg.");
+                }
+                if (weightUnit === "lb" && (weightVal < 5 || weightVal > 660)) {
+                    errors.push("👉 Weight must be between 5 and 660 lb.");
+                }
+            }
+
+            // Validate height
+            if (isNaN(heightVal) || heightVal <= 0) {
+                errors.push("👉 Please enter a valid numeric height.");
+            } else {
+                if (heightUnit === "cm" && (heightVal < 30 || heightVal > 250)) {
+                    errors.push("👉 Height must be between 30 and 250 cm.");
+                }
+                if (heightUnit === "in" && (heightVal < 12 || heightVal > 98)) {
+                    errors.push("👉 Height must be between 12 and 98 inches.");
+                }
+            }
+
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden");
+            }
+
+            // Convert to metric
+            const weightKg = weightUnit === 'lb' ? weightVal * 0.453592 : weightVal;
+            const heightCm = heightUnit === 'in' ? heightVal * 2.54 : heightVal;
+
+            let bsa;
+            switch (formula) {
+                case 'mosteller': 
+                    bsa = Math.sqrt((heightCm * weightKg) / 3600); 
+                    break;
+                case 'haycock': 
+                    bsa = 0.024265 * Math.pow(weightKg, 0.5378) * Math.pow(heightCm, 0.3964); 
+                    break;
+                case 'gehan': 
+                    bsa = 0.0235 * Math.pow(weightKg, 0.51456) * Math.pow(heightCm, 0.42246); 
+                    break;
+                case 'fujimoto': 
+                    bsa = 0.008883 * Math.pow(weightKg, 0.444) * Math.pow(heightCm, 0.663); 
+                    break;
+                default: 
+                    bsa = 0.007184 * Math.pow(weightKg, 0.425) * Math.pow(heightCm, 0.725); 
+            }
+
+            document.getElementById('rateValue').textContent = bsa.toFixed(2);
+
+            const meterFill = document.getElementById('meterFill');
+            meterFill.style.width = '100%';
+            meterFill.style.backgroundColor = '#2980b9';
+
+            let interpretation;
+            if (bsa < 0.5) interpretation = "Typical for a young child (under 2 years).";
+            else if (bsa < 1.5) interpretation = "Typical for a child or small adult.";
+            else if (bsa < 2.0) interpretation = "Within the average range for an adult.";
+            else interpretation = "Typical for a large adult.";
+
+            document.getElementById('feedbackContent').innerHTML = 
+                `<strong>Category:</strong> ${interpretation}<br><strong>Formula Used:</strong> ${formulaText}`;
+
+            placeholder.classList.add('hidden');
+            resultValue.classList.remove('hidden');
+        }
+
+
+        function printReport() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            if(document.getElementById('printDate')) {
+               document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
+            window.print();
+        }
+    </script>
+</body>
+</html>
+{% endblock %}

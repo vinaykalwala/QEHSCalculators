@@ -1,0 +1,636 @@
+{% extends 'base.html' %}
+{% block title %}ASME (API RP 520) Valves - Backpressure Correction Factor{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASME (API RP 520) Valves - Backpressure Correction Factor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+                .btn-container {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    margin: 30px 0;
+}
+
+.back-btn {
+    background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+    color: #ffffff; /* White text */
+    border: 2px solid #1560bd; /* Highlight border */
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none; /* Remove underline for link */
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    background-color: #1560bd; /* Highlight on hover */
+    color: #ffffff;
+    border-color: #000040;
+    transform: scale(1.05); /* Subtle hover effect */
+}
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            {% comment %} max-width: 700px; {% endcomment %}
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            {% comment %} display: flex; {% endcomment %}
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+    <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+</div>
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>ASME (API RP 520) Valves - Backpressure Correction Factor</h1>
+            <p>Calculate the backpressure correction factor for pressure relief valves</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="C1">Capacity of valve with backpressure applied (C1)</label>
+                    <input type="number" id="C1" class="form-input" min="0" placeholder="e.g., 500">
+                </div>
+                <div class="form-group">
+                    <label for="C2">Capacity of valve discharging to atmosphere (C2)</label>
+                    <input type="number" id="C2" class="form-input" min="0" placeholder="e.g., 800">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateKb()">Calculate Kb</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                   <img src="https://cdn-icons-png.flaticon.com/512/5951/5951403.png" 
+     alt="Valve and calculator illustration" >
+                    <p>This tool will calculate the <strong>Backpressure Correction Factor (Kb)</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Backpressure Correction Factor</h2>
+                    </div>
+                    <div class="rate-display">
+                    <div class="rate-value" id="rateValue">0.000</div>
+                    <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">Backpressure Correction Factor (Kb)</div></div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Optimal</span><span>Good</span><span>Moderate</span><span>Reduced</span><span>Critical</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Performance Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Backpressure Correction Factor Calculator</strong> helps determine how much a valve's capacity is affected when backpressure is applied. It ensures safety valves perform efficiently even under fluctuating pressure conditions.
+                </p>
+            </div>
+            
+            <div class="note-card">
+                <h3>❓ What is the Backpressure Correction Factor (Kb)?</h3>
+                <p>
+                    The <strong>Kb</strong> formula is used to determine how much a valve's capacity is affected when <strong>backpressure</strong> is applied. It ensures <strong>safety valves</strong> perform efficiently even under fluctuating pressure conditions.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Kb (Backpressure Correction Factor):</strong> Measures the change in a valve's capacity under backpressure.</li>
+                    <li><strong>C1 (Capacity with backpressure applied):</strong> The valve's performance when there is <strong>pressure resistance</strong> from downstream.</li>
+                    <li><strong>C2 (Capacity when discharging to atmosphere):</strong> The valve's performance under <strong>normal atmospheric conditions</strong>.</li>
+                </ul>
+            </div>
+            
+        
+
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <p>
+                    <b>Backpressure Correction Factor values:</b>
+                </p>
+                <ul class="note-list">
+                    <li><span class="good">Kb = 1.0</span> → Backpressure has no effect on valve capacity</li>
+                    <li><span class="average">0.7 ≤ Kb < 1.0</span> → Moderate capacity reduction</li>
+                    <li><span class="bad">Kb < 0.7</span> → Significant capacity reduction, review needed</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>🏭 About ASME API RP 520</h3>
+                <p>
+                    <strong>ASME (API RP 520)</strong> stands for American Society of Mechanical Engineers (American Petroleum Institute Recommended Practice 520). It provides guidelines for designing and installing pressure relief systems to protect equipment from excessive pressure in industries like oil & gas and chemical processing.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>🔧 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Pressure Relief Systems:</strong> Ensures safety valves can handle <strong>backpressure variations</strong> in industries.</li>
+                    <li><strong>Fire Protection:</strong> Calculates the efficiency of gas release during <strong>fire emergencies</strong>.</li>
+                    <li><strong>Gas and Chemical Processing:</strong> Prevents overpressure in <strong>reactors, pipelines, and storage tanks</strong>.</li>
+                </ul>
+            </div>
+            <div class="note-card">
+    <h3>✅ Validation Rules Applied</h3>
+    <ul class="note-list">
+        <li>C1 (Capacity with backpressure): must be >0 and ≤1,000,000</li>
+        <li>C2 (Capacity to atmosphere): must be >0 and ≤1,000,000</li>
+        <li>C1 must always be ≤ C2 (backpressure reduces capacity)</li>
+        <li>Both inputs must be in the same units (e.g., kg/h, Nm³/h, SCFM)</li>
+        <li>Kb = C1 ÷ C2 → must result in a value between 0 and 1</li>
+        <li>Invalid, blank, negative, or zero values are not allowed</li>
+    </ul>
+    <p>⚠️ These rules follow <b>ASME API RP 520</b> and international QEHS safety practices to prevent mis-sizing of relief valves under backpressure conditions.</p>
+</div>
+
+
+            <div class="note-card">
+                <h3>✅ Conclusion</h3>
+                <p>
+                    The <strong>Kb formula</strong> is essential for <strong>industrial safety</strong>, ensuring that pressure relief valves function optimally <strong>even under backpressure conditions</strong>. It plays a crucial role in preventing <strong>system failures and hazards</strong>.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateKb() {
+    const C1 = parseFloat(document.getElementById('C1').value.trim());
+    const C2 = parseFloat(document.getElementById('C2').value.trim());
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    let errors = [];
+
+    // ✅ Validation rules based on API RP 520 / OSHA safe practice
+    if (isNaN(C1) || C1 <= 0 || C1 > 1e6) {
+        errors.push("👉 C1 (capacity with backpressure) must be between 1 and 1,000,000 (same units as C2).");
+    }
+    if (isNaN(C2) || C2 <= 0 || C2 > 1e6) {
+        errors.push("👉 C2 (capacity to atmosphere) must be between 1 and 1,000,000.");
+    }
+    if (C1 > 0 && C2 > 0 && C1 > C2) {
+        errors.push("👉 C1 cannot be greater than C2. Backpressure always reduces or equals capacity.");
+    }
+
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // ✅ Formula (API RP 520 / ASME)
+    // Kb = C1 / C2
+    const Kb = C1 / C2;
+
+    if (!isFinite(Kb) || Kb <= 0 || Kb > 1) {
+        errorMessage.innerHTML = "❌ Invalid Kb value. Check that C1 ≤ C2 and inputs are correct.";
+        errorBox.classList.remove("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    document.getElementById('rateValue').textContent = Kb.toFixed(4);
+
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+
+    if (Kb >= 0.9) {
+        meterWidth = '20%'; meterColor = '#27ae60';
+        feedback = '🌟 Optimal. Backpressure has minimal effect (<10% reduction).';
+    } else if (Kb >= 0.7) {
+        meterWidth = '40%'; meterColor = '#2ecc71';
+        feedback = '👍 Good. Acceptable backpressure influence (10–30% reduction).';
+    } else if (Kb >= 0.5) {
+        meterWidth = '60%'; meterColor = '#f39c12';
+        feedback = '⚠️ Moderate reduction (30–50%). Review valve sizing.';
+    } else if (Kb >= 0.3) {
+        meterWidth = '80%'; meterColor = '#e67e22';
+        feedback = '🚨 Severe reduction (>50%). Engineering reassessment required.';
+    } else {
+        meterWidth = '95%'; meterColor = '#e74c3c';
+        feedback = '❌ Critical. Backpressure renders valve ineffective. Immediate corrective action required.';
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+{% comment %} 
+1. Input Validation Rules (Real-World Practice)
+Parameter	Symbol	Unit	Validation Rules
+Capacity with backpressure	C1	Nm³/h, kg/h, SCFM (depends on service)	Must be >0. Cannot exceed C2. Should not exceed 1,000,000 (typical upper bound for API RP 520 service valves).
+Capacity to atmosphere	C2	Nm³/h, kg/h, SCFM	Must be >0. Represents full rated capacity. Must always be ≥ C1. Same units as C1.
+
+🔎 Cross-field dependency:
+
+C1 ≤ C2 (backpressure always reduces or equals atmospheric discharge capacity).
+
+Both must use the same units (user must confirm).
+
+2. Output Validation (Kb)
+
+Formula:
+
+Kb = C1 / C2
+
+
+Kb Range (based on ASME/API RP 520 practice):
+
+Kb ≈ 1.0 → No effect of backpressure (ideal).
+
+0.7 ≤ Kb < 1.0 → Acceptable / moderate derating.
+
+0.5 ≤ Kb < 0.7 → Significant reduction → requires design review.
+
+0.3 ≤ Kb < 0.5 → Severe reduction → may need redesign/multiple valves.
+
+Kb < 0.3 → Critical → unacceptable per OSHA/API safety margins.
+
+Validation:
+
+Kb must always be positive and ≤1.0.
+
+If outside [0,1] → invalid input combination. {% endcomment %}

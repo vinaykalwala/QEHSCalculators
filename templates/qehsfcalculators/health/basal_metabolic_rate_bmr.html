@@ -1,0 +1,507 @@
+{% extends 'base.html' %}
+{% block title %}Basal Metabolic Rate (BMR) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basal Metabolic Rate (BMR) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto; /* Adjusted for more fields */
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            justify-content: center;
+        }
+        .result-value {
+            width: 100%;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        .rate-label {
+            color: #7f8c8d;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        .responsive-image {
+            width: 100%;   /* Full width on small screens */
+            max-width: 48%; /* Allow side by side on larger screens */
+            height: auto;
+            border-radius: 8px;
+        }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+        /* Toggle helper */
+        .hidden {
+            display: none;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Basal Metabolic Rate (BMR) Calculator</h1>
+            <p>Calculate the calories your body needs at rest to perform basic life-sustaining functions.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="age">Age (years)</label>
+                    <input type="number" id="age" class="form-input" min="1" placeholder="e.g., 35">
+                </div>
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" class="form-select">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="height">Height (cm)</label>
+                    <input type="number" id="height" class="form-input" min="0" placeholder="e.g., 180">
+                </div>
+                <div class="form-group">
+                    <label for="weight">Weight (kg)</label>
+                    <input type="number" id="weight" class="form-input" min="0" placeholder="e.g., 75">
+                </div>
+                <button class="calculate-btn" onclick="calculateBMR()">Calculate BMR</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Enter your details to calculate your <strong>Basal Metabolic Rate</strong> and see your daily energy needs.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div class="result-value hidden" id="resultValue">
+                    <h2>Basal Metabolic Rate (BMR)</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">Calories/Day</div>
+                    </div>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Resting Energy Expenditure</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+    <div class="note-card">
+        <h3>📘 About Basal Metabolic Rate (BMR)</h3>
+        <p>BMR represents the number of calories your body needs to perform basic life-sustaining functions, such as breathing, circulating blood, and maintaining cell production, while at rest. It is influenced by several factors, including your age, gender, height, and weight.</p>
+    </div>
+    <div class="note-card">
+        <h3>⚙️ How to Estimate Total Calorie Needs</h3>
+         <p>BMR gives a baseline for calories needed at rest. To estimate your total daily calorie needs, multiply your BMR by an activity factor:</p>
+        <ul class="note-list">
+            <li><strong>Sedentary:</strong> Little or no exercise (BMR × 1.2)</li>
+            <li><strong>Lightly active:</strong> Light exercise 1-3 days/week (BMR × 1.375)</li>
+            <li><strong>Moderately active:</strong> Moderate exercise 3-5 days/week (BMR × 1.55)</li>
+            <li><strong>Very active:</strong> Hard exercise 6-7 days/week (BMR × 1.725)</li>
+            <li><strong>Extra active:</strong> Very hard exercise or a physical job (BMR × 1.9)</li>
+        </ul>
+    </div>
+    <div class="note-card">
+         <h3>🖼️ Visualizing BMR</h3>
+         <img src="{% static 'images/bmr.png' %}" alt="BMR Graph" class="responsive-image">
+         <img src="{% static 'images/bmr2.jpg' %}" alt="Activity Levels" class="responsive-image">
+    </div>
+
+    <!-- ✅ New Note Content Added -->
+    <div class="note-card">
+        <h3>📋 Note</h3>
+        <p><strong>Basal Metabolic Rate (BMR)</strong> represents the number of calories your body needs to perform basic life-sustaining functions, such as breathing, circulating blood, and maintaining cell production, while at rest. It is influenced by several factors, including your age, gender, height, and weight.</p>
+
+        <p><strong>Health & Safety Connection:</strong> Understanding your BMR and total calorie needs plays a vital role in maintaining a healthy lifestyle and preventing health risks. By knowing how many calories your body needs, you can:</p>
+        <ul class="note-list">
+            <li>Ensure you're eating enough to fuel your body’s essential functions.</li>
+            <li>Manage your weight effectively to prevent health issues.</li>
+            <li>Balance physical activity and calorie intake for a healthier lifestyle.</li>
+            <li>Avoid burnout or exhaustion by aligning calorie intake with activity level.</li>
+        </ul>
+
+        <p><strong>What Affects Your BMR?</strong></p>
+        <ul class="note-list">
+            <li><strong>Age:</strong> BMR decreases with age due to metabolic changes.</li>
+            <li><strong>Gender:</strong> Men usually have higher BMR due to muscle mass.</li>
+            <li><strong>Body composition:</strong> More muscle = higher BMR.</li>
+            <li><strong>Height & weight:</strong> Larger bodies typically have higher BMR.</li>
+        </ul>
+
+        <p><strong>How to Estimate Total Calorie Needs:</strong></p>
+        <ul class="note-list">
+            <li><strong>Sedentary:</strong> BMR × 1.2</li>
+            <li><strong>Lightly active:</strong> BMR × 1.375</li>
+            <li><strong>Moderately active:</strong> BMR × 1.55</li>
+            <li><strong>Very active:</strong> BMR × 1.725</li>
+            <li><strong>Extra active:</strong> BMR × 1.9</li>
+        </ul>
+
+            <p>Keep in mind that BMR is just a starting point. Adjust your diet and exercise based on your health goals (weight loss, maintenance, or gain).</p>
+        </div>
+    </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            if(document.getElementById('printDate')) {
+               document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
+        });
+
+        function calculateBMR() {
+            const age = document.getElementById('age').value.trim();
+            const gender = document.getElementById('gender').value;
+            const height = document.getElementById('height').value.trim();
+            const weight = document.getElementById('weight').value.trim();
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+
+            let errors = [];
+            if (age === "" || parseFloat(age) <= 0) errors.push("👉 Please enter a valid age.");
+            if (height === "" || parseFloat(height) <= 0) errors.push("👉 Please enter a valid height.");
+            if (weight === "" || parseFloat(weight) <= 0) errors.push("👉 Please enter a valid weight.");
+
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden");
+            }
+
+            const ageNum = parseFloat(age);
+            const heightNum = parseFloat(height);
+            const weightNum = parseFloat(weight);
+            
+            let bmr;
+            if (gender === "male") {
+                bmr = 88.362 + (13.397 * weightNum) + (4.799 * heightNum) - (5.677 * ageNum);
+            } else {
+                bmr = 447.593 + (9.247 * weightNum) + (3.098 * heightNum) - (4.330 * ageNum);
+            }
+
+            document.getElementById('rateValue').textContent = bmr.toFixed(0);
+            
+            const meterFill = document.getElementById('meterFill');
+            meterFill.style.width = '100%';
+            meterFill.style.backgroundColor = '#2980b9'; // Neutral color
+            
+            document.getElementById('feedbackContent').textContent = 'This is the energy your body requires for basic functions while at rest. Your total daily calorie need is higher and depends on your activity level.';
+
+            placeholder.classList.add('hidden');
+            resultValue.classList.remove('hidden');
+        }
+
+        function printReport() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+             if(document.getElementById('printDate')) {
+               document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
+            window.print();
+        }
+    </script>
+</body>
+</html>
+{% endblock %}

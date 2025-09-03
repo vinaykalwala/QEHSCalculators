@@ -18,6 +18,7 @@ from .access_map import CALCULATORS, PLAN_HIERARCHY, CATEGORIES
 from .decorators import subscription_required
 import json
 from django.db.models import Q
+from django.contrib.auth.decorators import user_passes_test
 
 
 # Razorpay client
@@ -51,6 +52,16 @@ def device_limit_exceeded(request):
 @login_required
 def dashboard(request):
     # Get the latest active or pending subscription
+    subscription = request.user.subscriptions.filter(
+        Q(status="active") | Q(status="pending")
+    ).order_by('-created_at').first()
+
+    # Check for expired subscriptions first
+    active_subs = request.user.subscriptions.filter(status="active")
+    for sub in active_subs:
+        sub.check_and_update_expiration()
+    
+    # Now get the latest active subscription
     subscription = request.user.subscriptions.filter(
         Q(status="active") | Q(status="pending")
     ).order_by('-created_at').first()
@@ -113,7 +124,7 @@ def subscribe_plan(request, plan_id):
     
     # Calculate upgrade amount if user has an active subscription
     upgrade_amount = Decimal('0.00')
-    credit_amount = Decimal('0.00')  # Add credit amount calculation
+    credit_amount = Decimal('0.00')
     original_end_date = None
     is_upgrade = False
     
@@ -152,7 +163,7 @@ def subscribe_plan(request, plan_id):
     else:
         # Regular subscription - use full plan price
         upgrade_amount = plan.price
-        credit_amount = Decimal('0.00')  # No credit for new subscriptions
+        credit_amount = Decimal('0.00')
 
     is_allowed, device_message = check_device_limit(request.user, plan)
     if not is_allowed:
@@ -167,10 +178,10 @@ def subscribe_plan(request, plan_id):
             # Handle upgrade with minimal payment
             existing_subscription.mark_as_upgraded()
         
-        # Create new subscription with the SAME end date as previous subscription
-        start_date = timezone.now()
-        if is_upgrade and original_end_date:
-            end_date = original_end_date  # Use the original end date
+        # Create new subscription with current start date and same end date as previous subscription
+        start_date = timezone.now()  # Current time for both new and upgrade
+        if is_upgrade and existing_subscription and existing_subscription.end_date:
+            end_date = existing_subscription.end_date  # Use the existing subscription end date
         else:
             end_date = start_date + timedelta(days=plan.duration_days)
         
@@ -226,7 +237,7 @@ def subscribe_plan(request, plan_id):
         "error_url": request.build_absolute_uri(reverse('payment_failed')),
         "is_upgrade": is_upgrade,
         "upgrade_amount": upgrade_amount,
-        "credit_amount": credit_amount,  # Add credit amount to context
+        "credit_amount": credit_amount,
         "existing_plan": existing_subscription.plan if existing_subscription else None
     }
     return render(request, "subscribe_payment.html", context)
@@ -253,7 +264,6 @@ def payment_success(request):
         # Verify payment signature
         if not verify_payment_signature(order_id, payment_id, signature):
             messages.error(request, "Payment verification failed.")
-            # Clear the pending subscription from session
             if 'pending_subscription' in request.session:
                 del request.session['pending_subscription']
             return redirect("payment_failed")
@@ -291,24 +301,33 @@ def payment_success(request):
                 if original_end_date_str:
                     original_end_date = timezone.datetime.fromisoformat(original_end_date_str)
         
-        # Calculate start and end dates
-        start_date = timezone.now()
+        # Calculate start and end dates - ALWAYS use current time for start date
+        start_date = timezone.now()  # Current time for both new and upgrade
         
         # For upgrades, use the original end date from the previous subscription
-        if is_upgrade and original_end_date:
-            end_date = original_end_date
+        if is_upgrade:
+            # Priority 1: Use existing subscription's end date if available
+            if existing_subscription and existing_subscription.end_date:
+                end_date = existing_subscription.end_date
+            # Priority 2: Use stored original end date from session
+            elif original_end_date:
+                end_date = original_end_date
+            # Fallback: Calculate new end date (shouldn't happen in normal flow)
+            else:
+                end_date = start_date + timedelta(days=plan.duration_days)
         else:
+            # Regular subscription - use full duration
             end_date = start_date + timedelta(days=plan.duration_days)
         
-        # Create subscription only after successful payment verification
+        # Create subscription - ALL PLANS REQUIRE APPROVAL NOW
         subscription = UserSubscription.objects.create(
             user=request.user,
             plan=plan,
             razorpay_order_id=order_id,
             razorpay_payment_id=payment_id,
             razorpay_signature=signature,
-            status="active" if plan.name.lower() == "individual" else "pending",
-            start_date=start_date,
+            status="pending",
+            start_date=start_date,  # Current time for both new and upgrade
             end_date=end_date,
             amount_paid=Decimal(pending_subscription['amount']),
             previous_subscription=existing_subscription if is_upgrade else None,
@@ -332,16 +351,11 @@ def payment_success(request):
             }
         )
         
-        # Set appropriate message based on plan type and upgrade status
-        requires_approval = plan.name.lower() != "individual"
-        
-        if requires_approval:
-            messages.success(request, "Payment successful! Waiting for admin approval.")
+        # Updated message - ALL plans require approval
+        if is_upgrade:
+            messages.success(request, f"Payment successful! Your upgrade to {plan.name} is pending admin approval.")
         else:
-            if is_upgrade:
-                messages.success(request, f"Payment successful! Your plan has been upgraded to {plan.name}.")
-            else:
-                messages.success(request, f"Payment successful! You are now subscribed to {plan.name}.")
+            messages.success(request, f"Payment successful! Your subscription to {plan.name} plan is pending admin approval.")
 
         # Clear the pending subscription from session
         if 'pending_subscription' in request.session:
@@ -349,13 +363,14 @@ def payment_success(request):
 
         return render(request, "payment_success.html", {
             "subscription": subscription,
-            "requires_approval": requires_approval,
+            "requires_approval": True,
             "is_upgrade": is_upgrade
         })
     else:
         messages.error(request, "Invalid request method.")
         return redirect("dashboard")
-    
+
+
 def verify_payment_signature(order_id, payment_id, signature):
     try:
         client.utility.verify_payment_signature({
@@ -419,6 +434,21 @@ def razorpay_webhook(request):
         return JsonResponse({"status": "ok"})
     return JsonResponse({"status": "invalid"}, status=400)
 
+
+
+def expire_if_needed(self):
+    """Expire the subscription if end_date is exceeded"""
+    if self.status == "active" and self.end_date and self.end_date < timezone.now():
+        self.status = "expired"
+        self.save(update_fields=['status'])
+        return True
+    return False
+
+
+def subscription_expired(request):
+    return render(request, "expired.html", {
+        "message": "Your subscription has expired. Please renew to continue using the service."
+    })
 # Other views (home, about, etc.) remain unchanged as per previous code
 def home(request):
     return render(request, 'home.html')
@@ -443,6 +473,9 @@ def fire_calculators(request):
 
 def disclaimer(request):
     return render(request, 'disclaimer.html', {'title': 'Disclaimer'})
+
+def calendar(request):
+    return render(request,'calendar.html')
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
@@ -506,6 +539,8 @@ def upgrade_required(request):
 
 def accident_rate_calculator(request):
     return render(request, 'qehsfcalculators/Safety/accident_rate_calculator.html')
+
+
 from .forms import CustomUserCreationForm, CustomAuthenticationForm
 from django.contrib.auth import login, logout, authenticate
 
@@ -549,8 +584,285 @@ def logout_view(request):
     messages.success(request, "Logged out successfully.")
     return redirect("home")
 
+
+from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
+from django.utils.crypto import get_random_string
+
+from .forms import ForgotPasswordForm, VerificationCodeForm, CustomSetPasswordForm
+
+User = get_user_model()
+
+# Step 1: Forgot Password → Enter Email
+def forgot_password_view(request):
+    if request.method == "POST":
+        form = ForgotPasswordForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data["email"]
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                messages.error(request, "Email not registered.")
+                return redirect("forgot_password")
+
+            # Generate verification code
+            code = get_random_string(length=6, allowed_chars="0123456789")
+            request.session["reset_email"] = email
+            request.session["reset_code"] = code
+
+            # Send email
+            send_mail(
+                subject="Password Reset Verification Code",
+                message=f"Your verification code is: {code}",
+                from_email="noreply@example.com",
+                recipient_list=[email],
+            )
+            messages.success(request, "Verification code sent to your email.")
+            return redirect("verify_code")
+    else:
+        form = ForgotPasswordForm()
+    return render(request, "forgot_password.html", {"form": form})
+
+
+# Step 2: Verify Code
+def verify_code_view(request):
+    if request.method == "POST":
+        form = VerificationCodeForm(request.POST)
+        if form.is_valid():
+            code = form.cleaned_data["code"]
+            if request.session.get("reset_code") == code:
+                messages.success(request, "Code verified. You can now set a new password.")
+                return redirect("set_new_password")
+            else:
+                messages.error(request, "Invalid verification code.")
+    else:
+        form = VerificationCodeForm()
+    return render(request, "verify_code.html", {"form": form})
+
+
+# Step 3: Set New Password
+def set_new_password_view(request):
+    email = request.session.get("reset_email")
+    if not email:
+        messages.error(request, "Session expired. Please try again.")
+        return redirect("forgot_password")
+
+    user = User.objects.get(email=email)
+
+    if request.method == "POST":
+        form = CustomSetPasswordForm(user, request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Password changed successfully. Please log in.")
+            # Clear session
+            request.session.pop("reset_email", None)
+            request.session.pop("reset_code", None)
+            return redirect("login")
+    else:
+        form = CustomSetPasswordForm(user)
+    return render(request, "set_new_password.html", {"form": form})
+
+
+from django.contrib.auth import update_session_auth_hash
+
+@login_required
+def change_password_view(request):
+    """
+    Change password for logged-in users using verification code sent to their registered email.
+    Keeps the user signed in after password change.
+    """
+    user = request.user
+
+    # Step 1: Send verification code
+    if request.method == "POST" and "send_code" in request.POST:
+        code = get_random_string(length=6, allowed_chars="0123456789")
+        request.session["change_code"] = code
+
+        send_mail(
+            subject="Password Change Verification Code",
+            message=f"Your verification code is: {code}",
+            from_email="noreply@example.com",
+            recipient_list=[user.email],
+        )
+        messages.success(request, "Verification code sent to your email.")
+        return redirect("change_password")
+
+    # Step 2: Verify code
+    if request.method == "POST" and "verify_code" in request.POST:
+        code_form = VerificationCodeForm(request.POST)
+        if code_form.is_valid():
+            code = code_form.cleaned_data["code"]
+            if code == request.session.get("change_code"):
+                request.session["code_verified"] = True
+                messages.success(request, "Code verified. Set your new password below.")
+                return redirect("change_password")
+            else:
+                messages.error(request, "Invalid verification code.")
+    else:
+        code_form = VerificationCodeForm()
+
+    # Step 3: Set new password
+    if request.method == "POST" and "set_password" in request.POST:
+        if not request.session.get("code_verified"):
+            messages.error(request, "You must verify your email code first.")
+            return redirect("change_password")
+
+        form = CustomSetPasswordForm(user, request.POST)
+        if form.is_valid():
+            form.save()
+            update_session_auth_hash(request, user)  # Keeps the user logged in
+            messages.success(request, "Password changed successfully.")
+            # Clear session
+            request.session.pop("change_code", None)
+            request.session.pop("code_verified", None)
+            return redirect("dashboard")
+    else:
+        form = CustomSetPasswordForm(user)
+
+    return render(
+        request,
+        "change_password.html",
+        {
+            "form": form,
+            "code_form": code_form,
+            "code_sent": request.session.get("change_code") is not None,
+            "code_verified": request.session.get("code_verified", False),
+        },
+    )
+
+
+from django.contrib.admin.views.decorators import staff_member_required
+
+@staff_member_required
+def manage_subscriptions(request):
+    """Superuser view to manage all subscriptions with filtering"""
+    # Get the status filter from request
+    status_filter = request.GET.get('status', 'all')
+    
+    # Base queryset
+    subscriptions = UserSubscription.objects.all().select_related('user', 'plan').order_by('-created_at')
+    
+    # Apply filter if specified
+    if status_filter != 'all':
+        subscriptions = subscriptions.filter(status=status_filter)
+    
+    # Also get counts for each status for the UI
+    status_counts = {}
+    for status_value, status_label in UserSubscription.STATUS_CHOICES:
+        status_counts[status_value] = UserSubscription.objects.filter(status=status_value).count()
+    
+    return render(request, "manage_subscriptions.html", {
+        "subscriptions": subscriptions,
+        "status_filter": status_filter,
+        "status_counts": status_counts,
+        "status_choices": UserSubscription.STATUS_CHOICES,
+        "total_count": UserSubscription.objects.count()
+    })
+
+@staff_member_required
+def approve_subscription(request, subscription_id):
+    """Approve a pending subscription"""
+    subscription = get_object_or_404(UserSubscription, id=subscription_id, status="pending")
+    
+    try:
+        # Use the fixed activate method that preserves dates for upgrades
+        subscription.activate()
+        messages.success(request, f"Subscription for {subscription.user.email} has been approved and activated.")
+    except Exception as e:
+        messages.error(request, f"Error activating subscription: {str(e)}")
+    
+    return redirect("manage_subscriptions")
+
+
+
+@staff_member_required
+def reject_subscription(request, subscription_id):
+    """Reject a pending subscription"""
+    subscription = get_object_or_404(UserSubscription, id=subscription_id, status="pending")
+    
+    try:
+        subscription.status = "rejected"
+        subscription.save(update_fields=['status'])
+        messages.success(request, f"Subscription for {subscription.user.email} has been rejected.Please Reach Out tp the Support")
+    except Exception as e:
+        messages.error(request, f"Error rejecting subscription: {str(e)}")
+    
+    return redirect("manage_subscriptions")
+
+
+
 def fire_calculator(request):
     return render(request, 'calculators/fire.html', {'title': 'Fire Calculator'})
+
+
+def superuser_required(view_func):
+    return user_passes_test(lambda u: u.is_superuser)(view_func)
+
+@superuser_required
+def transaction_list(request):
+    query = request.GET.get("q", "")
+    transactions = Transaction.objects.select_related("subscription__user").all()
+
+    if query:
+        transactions = transactions.filter(
+            Q(razorpay_order_id__icontains=query) |
+            Q(razorpay_payment_id__icontains=query) |
+            Q(amount__icontains=query) |
+            Q(subscription__user__email__icontains=query)
+        )
+
+    transactions = transactions.order_by("-created_at")
+
+    return render(request, "transaction_list.html", {
+        "transactions": transactions,
+        "query": query
+    })
+
+@superuser_required
+def delete_transaction(request, pk):
+    transaction = get_object_or_404(Transaction, pk=pk)
+    transaction.delete()
+    messages.success(request, "Transaction deleted successfully.")
+    return redirect("transaction_list")
+
+@superuser_required
+def clear_all_transactions(request):
+    Transaction.objects.all().delete()
+    messages.success(request, "All transactions cleared successfully.")
+    return redirect("transaction_list")
+
+
+
+@superuser_required
+def user_devices_list(request):
+    # Fetch users with an active subscription only
+    users = CustomUser.objects.filter(
+        is_superuser=False,
+        subscriptions__status="active",
+        subscriptions__end_date__gte=timezone.now()
+    ).distinct().prefetch_related("devices", "subscriptions__plan")
+
+    user_data = []
+    for user in users:
+        # Get the most recent active subscription
+        active_subscription = (
+            user.subscriptions.filter(status="active", end_date__gte=timezone.now())
+            .order_by("-created_at")
+            .first()
+        )
+
+        device_count = user.devices.count()
+        plan_name = active_subscription.plan.get_name_display() if active_subscription and active_subscription.plan else "No Active Plan"
+        device_limit = active_subscription.plan.device_limit if active_subscription and active_subscription.plan else 1
+
+        user_data.append({
+            "user": user,
+            "plan_name": plan_name,
+            "device_limit": device_limit,
+            "device_count": device_count,
+        })
+
+    return render(request, "user_devices_list.html", {"user_data": user_data})
 
 
 from django.shortcuts import render
@@ -2644,6 +2956,21 @@ def safety_cooling_water_flowrate_for_desuperheater_calculator(request):
 @subscription_required(plan_type="corporate")
 def safety_capacitance_law_calculator(request):
     return render(request, 'qehsfcalculators/safety/capacitance_law.html', {'title': 'capacitance law calculator'})
+
+@login_required
+@subscription_required(plan_type="corporate")
+def safety_critical_pressure_ratio_dry_steam_gases(request):
+    return render(request, 'qehsfcalculators/safety/critical_pressure_ratio_dry_steam_gases.html', {
+        'title': 'Critical Pressure Ratio for Dry Steam and Gases Calculator'
+    })
+
+
+@login_required
+@subscription_required(plan_type="corporate")
+def safety_critical_pressure_ratio(request):
+    return render(request, 'qehsfcalculators/safety/critical_pressure_ratio.html', {
+        'title': 'Critical Pressure Ratio Calculator'
+    })
 
 @login_required
 @subscription_required(plan_type="corporate")

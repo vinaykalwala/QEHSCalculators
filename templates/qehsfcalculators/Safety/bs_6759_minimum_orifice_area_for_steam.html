@@ -1,0 +1,647 @@
+{% extends 'base.html' %}
+{% block title %}BS-6759 Minimum Orifice Area for Steam{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BS-6759 Minimum Orifice Area for Steam</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+                .btn-container {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    margin: 30px 0;
+}
+
+.back-btn {
+    background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+    color: #ffffff; /* White text */
+    border: 2px solid #1560bd; /* Highlight border */
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none; /* Remove underline for link */
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    background-color: #1560bd; /* Highlight on hover */
+    color: #ffffff;
+    border-color: #000040;
+    transform: scale(1.05); /* Subtle hover effect */
+}
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            {% comment %} max-width: 700px; {% endcomment %}
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+    <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+</div>
+   <div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>BS-6759 Minimum Orifice Area for Steam Calculator</h1>
+            <p>Calculate the minimum orifice area required for steam safety valves based on BS-6759 standard</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="massFlow">Mass Flow Rate (ṁ) (kg/h)</label>
+                    <input type="number" id="massFlow" class="form-input" min="0" placeholder="e.g., 5000">
+                </div>
+                <div class="form-group">
+                    <label for="pressure">Absolute Relieving Pressure (Pᵣ) (bar a)</label>
+                    <input type="number" id="pressure" class="form-input" min="0" step="0.01" placeholder="e.g., 10.5">
+                </div>
+                <div class="form-group">
+                    <label for="kdr">Derated Coefficient of Discharge (Kdr)</label>
+                    <input type="number" id="kdr" class="form-input" min="0.01" max="1" step="0.01" placeholder="e.g., 0.85">
+                </div>
+                <div class="form-group">
+                    <label for="ksh">Superheat Correction Factor (Ksh)</label>
+                    <input type="number" id="ksh" class="form-input" min="0.01" step="0.01" placeholder="e.g., 1.0">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateOrificeArea()">Calculate Orifice Area</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Safety illustration">
+                    <p>This tool will calculate the <strong>Minimum Orifice Area for Steam</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Minimum Orifice Area</h2>
+                    </div>
+                    <div class='rate-display'>
+                    <div class="rate-value" id="rateValue">0.00</div>
+                    <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">mm²</div></div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>BS-6759 Minimum Orifice Area Calculator for Steam</strong> helps determine the minimum orifice area required for steam safety valves based on the BS-6759 standard.
+                </p>
+            </div>
+            <div class="note-card">
+                <h3>❓ What is Minimum Orifice Area?</h3>
+                <p>The minimum orifice area is the smallest flow area required for a safety valve to adequately discharge steam and prevent overpressure in a system.</p>
+            </div>
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Mass Flow Rate (ṁ):</strong> The total mass flow rate of steam that needs to be released (kg/h).</li>
+                    <li><strong>Absolute Relieving Pressure (Pᵣ):</strong> The total system pressure at which the valve will relieve steam (bar a).</li>
+                    <li><strong>Derated Coefficient of Discharge (Kdr):</strong> A correction factor accounting for discharge efficiency (0-1).</li>
+                    <li><strong>Superheat Correction Factor (Ksh):</strong> A factor adjusting for superheated steam conditions.</li>
+                </ul>
+            </div>
+     
+            
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <ul class="note-list">
+                    <li><span class="good">Below 50 mm²</span> → Small orifice area, ensure it's sufficient for steam discharge</li>
+                    <li><span class="average">50 – 2000 mm²</span> → Optimal range for most safety valves</li>
+                    <li><span class="bad">Above 2000 mm²</span> → Large orifice area, verify system design</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📋 Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Steam Safety Valve Sizing:</strong> Ensures the valve can handle the required steam flow</li>
+                    <li><strong>Boiler & Pressure Vessel Protection:</strong> Prevents hazardous overpressure situations</li>
+                    <li><strong>Industrial Steam Systems:</strong> Proper selection of steam safety valves</li>
+                    <li><strong>Regulatory Compliance:</strong> Adherence to safety standards such as BS 6759</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>ℹ️ About BS 6759</h3>
+                <p><strong>BS 6759</strong> is a British Standard that specifies requirements for the performance, design, and testing of safety valves used in pressurized systems. It ensures that safety valves operate reliably to prevent overpressure in boilers, pipelines, and industrial equipment.</p>
+            </div>
+             <div class="note-card">
+    <h3>✔️ Input Validation Rules</h3>
+    <ul class="note-list">
+        <li><strong>Mass Flow Rate (ṁ):</strong> Must be > 0 and ≤ 1,000,000 kg/h.</li>
+        <li><strong>Absolute Relieving Pressure (Pᵣ):</strong> Must be > 1.01 bar a and ≤ 320 bar a.</li>
+        <li><strong>Derated Coefficient of Discharge (Kdr):</strong> Must be between 0.65 and 1.0.</li>
+        <li><strong>Superheat Correction Factor (Ksh):</strong> Must be between 0.9 and 1.2.</li>
+        <li><strong>Orifice Area Results:</strong> <50 mm² = very small, 50–2000 mm² = optimal, 2000–8000 mm² = large, >8000 mm² = unrealistic.</li>
+        <li><strong>Invalid / extreme values:</strong> Blocked with error messages to ensure compliance with BS 6759 & ISO 4126.</li>
+    </ul>
+</div>
+
+             <div class="note-card">
+                <h3>✅ Conclusion</h3>
+                  <p>This tool helps engineers and technicians determine the minimum orifice area required for a safety valve in steam systems. Proper valve sizing enhances safety, efficiency, and compliance with industrial safety standards.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateOrificeArea() {
+    const massFlow = document.getElementById('massFlow').value.trim();
+    const pressure = document.getElementById('pressure').value.trim();
+    const kdr = document.getElementById('kdr').value.trim();
+    const ksh = document.getElementById('ksh').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+
+    // ---- Input Validations ----
+    // Mass Flow
+    if (massFlow === "") {
+        errors.push("👉 Please enter the mass flow rate.");
+    } else if (parseFloat(massFlow) <= 0) {
+        errors.push("👉 Mass flow rate must be greater than 0 kg/h.");
+    } else if (parseFloat(massFlow) > 1000000) {
+        errors.push("👉 Mass flow rate seems too high (> 1,000,000 kg/h). Check your input.");
+    }
+
+    // Pressure
+    if (pressure === "") {
+        errors.push("👉 Please enter the absolute relieving pressure.");
+    } else if (parseFloat(pressure) <= 1.01) {
+        errors.push("👉 Pressure must be greater than atmospheric (> 1.01 bar a).");
+    } else if (parseFloat(pressure) > 320) {
+        errors.push("👉 Pressure above 320 bar a is unrealistic for steam systems.");
+    }
+
+    // Kdr
+    if (kdr === "") {
+        errors.push("👉 Please enter the derated coefficient of discharge.");
+    } else if (parseFloat(kdr) < 0.65 || parseFloat(kdr) > 1) {
+        errors.push("👉 Kdr must be between 0.65 and 1.0.");
+    }
+
+    // Ksh
+    if (ksh === "") {
+        errors.push("👉 Please enter the superheat correction factor.");
+    } else if (parseFloat(ksh) < 0.9 || parseFloat(ksh) > 1.2) {
+        errors.push("👉 Ksh must be between 0.9 and 1.2.");
+    }
+
+    // ---- Show Errors ----
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // ---- Calculation ----
+    const m = parseFloat(massFlow);
+    const p = parseFloat(pressure);
+    const kd = parseFloat(kdr);
+    const ks = parseFloat(ksh);
+
+    // Formula (BS-6759)
+    // A = m / (0.525 × Pr × Kdr × Ksh)
+    const orificeArea = m / (0.525 * p * kd * ks);
+
+    document.getElementById('rateValue').textContent = orificeArea.toFixed(4);
+
+    // ---- Output Feedback ----
+    let feedback;
+    if (orificeArea < 50) {
+        feedback = '⚠️ <strong>Very Small Orifice Area:</strong> Verify against valve catalog.';
+    } else if (orificeArea <= 2000) {
+        feedback = '✅ <strong>Optimal Range:</strong> Suitable for standard safety valves.';
+    } else if (orificeArea <= 8000) {
+        feedback = '⚠️ <strong>Large Orifice Area:</strong> May require pilot-operated or multiple valves.';
+    } else {
+        feedback = '❌ <strong>Unrealistic Orifice Area:</strong> Recheck input data.';
+    }
+
+    document.getElementById('feedbackContent').innerHTML = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+
+</body>
+</html>
+{% endblock %}
+
+
+{% comment %} 
+1. Formula & Engineering Basis (for code comments)
+/*
+BS-6759 Minimum Orifice Area for Steam (A) Formula:
+    A = m / (0.525 × Pr × Kdr × Ksh)
+
+Where:
+    m   = Mass Flow Rate (kg/h)
+    Pr  = Absolute Relieving Pressure (bar a)
+    Kdr = Derated Coefficient of Discharge (0 < Kdr ≤ 1)
+    Ksh = Superheat Correction Factor (> 0, typically 0.9 – 1.2)
+
+Notes:
+- 0.525 is a BS-6759 constant (units conversion + steam properties).
+- Result A is in mm².
+*/
+
+2. Input Validation Rules (Industry-Aligned)
+Mass Flow Rate (ṁ, kg/h)
+
+Min: > 0 (steam must be flowing).
+
+Max (practical): 1,000,000 kg/h (very large utility boilers).
+
+Decimals: up to 1 decimal allowed.
+
+Compliance Rationale: Zero/negative values meaningless; too high values likely input error → could lead to undersized valves in design.
+
+Absolute Relieving Pressure (Pr, bar a)
+
+Min: > 1.01 bar a (must be above atmospheric).
+
+Max: 320 bar a (supercritical steam limit).
+
+Decimals: 2 allowed.
+
+Cross-field: Pressure must be consistent with industrial steam ranges.
+
+Derated Coefficient of Discharge (Kdr)
+
+Range: 0.65 – 1.0 (typical certified safety valves).
+
+Decimals: 2 allowed.
+
+Compliance Rationale: Too low (<0.65) is not realistic; >1 violates physics.
+
+Superheat Correction Factor (Ksh)
+
+Range: 0.9 – 1.2 (BS-6759 & ISO 4126 recommended).
+
+Decimals: 2 allowed.
+
+Compliance Rationale: Values outside → likely miscalculation of steam superheat correction.
+
+3. Output Validation & Thresholds
+Minimum Orifice Area (A, mm²)
+
+< 50 mm² → Very small; verify valve catalog limits.
+
+50 – 2000 mm² → Normal working range for industrial spring-loaded valves.
+
+2000 – 8000 mm² → Very large orifices (pilot-operated or multiple valves needed).
+
+> 8000 mm² → Likely input error or unrealistic system (flag for review). {% endcomment %}

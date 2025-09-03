@@ -14,14 +14,38 @@
     <style>
       
 
-        /* Main container */
         .calculator-container {
             max-width: 1200px;
             margin: 20px auto;
-            padding: 20px;
+            padding: 0px 20px;
             border-radius: 12px;
         }
 
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
         /* Header */
         .calculator-header {
             text-align: center;
@@ -359,6 +383,10 @@
     </style>
 </head>
 <body>
+
+        <div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+        </div>
    <div class="calculator-container printable" id="printArea">
 
     {% include "includes/print_header_footer.html" %}
@@ -447,6 +475,32 @@
             </div>
             
             <div class="note-card">
+            <h3>✅ Input Validation</h3>
+            <ul class="note-list">
+                <li><b>Air Volume (V):</b> must be ≥ 0 m³  
+                    <ul>
+                        <li>0 → results in zero airflow (warning).</li>
+                        <li>&gt; 1,000,000 m³ → unusually large, check units.</li>
+                    </ul>
+                </li>
+                <li><b>Time (t):</b> must be &gt; 0 seconds  
+                    <ul>
+                        <li>&lt; 0.5 s → may inflate flow rate (warning).</li>
+                        <li>&gt; 1,000,000 s → unusually large, check units.</li>
+                    </ul>
+                </li>
+                <li><b>Air Density (ρ):</b> optional input  
+                    <ul>
+                        <li>If provided → must be &gt; 0 kg/m³.</li>
+                        <li>Typical range: 0.8 – 1.4 kg/m³ (outside = warning).</li>
+                        <li>If not provided → defaults to 1.20 kg/m³ (noted in output).</li>
+                    </ul>
+                </li>
+                <li>All inputs must be valid <b>numeric values</b> (no text or symbols).</li>
+            </ul>
+        </div>
+
+            <div class="note-card">
                 <h3>📊 Interpretation</h3>
                 <ul class="note-list">
                     <li><span class="good">Higher flow rate</span> → Better ventilation / cooling efficiency</li>
@@ -459,12 +513,13 @@
     </div>
 
 <script>
+
 document.addEventListener('DOMContentLoaded', function() {
   const el = document.getElementById('printDate');
   if (el) {
     const now = new Date();
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    el.textContent = now.toLocaleDateString('en-US', options); // change to 'en-IN' if you prefer Indian format
+    el.textContent = now.toLocaleDateString('en-US', options);
   }
 });
 
@@ -480,126 +535,138 @@ function showErrors(errors) {
   if (resultValue) resultValue.classList.add('hidden');
 }
 
-function calculateAirFlow() {
-  // Safe reads
-  const airVolumeRaw = document.getElementById('airVolume')?.value.trim() ?? "";
-  const timeSecondsRaw = document.getElementById('timeSeconds')?.value.trim() ?? "";
-  const densityRaw = document.getElementById('airDensity')?.value.trim() ?? ""; // optional input
-
+function clearErrorsAndNotes() {
   const errorBox = document.getElementById('resultError');
   const errorMessage = document.getElementById('errorMessage');
-  const placeholder = document.getElementById('placeholder');
-  const resultValue = document.getElementById('resultValue');
-  const rateValueEl = document.getElementById('rateValue');
-  const meterFill = document.getElementById('meterFill');
   const feedbackEl = document.getElementById('feedbackContent');
-
-  // Reset UI
   if (errorBox) errorBox.classList.add('hidden');
   if (errorMessage) errorMessage.innerHTML = "";
   if (feedbackEl) feedbackEl.innerHTML = "";
+}
+
+function sanitizeNum(raw) {
+  // Accept decimals & scientific notation; trim whitespace
+  if (raw == null) return null;
+  const val = String(raw).trim();
+  if (val === "") return null;
+  const n = parseFloat(val);
+  return Number.isFinite(n) ? n : null;
+}
+
+function clampDecimals(n, dp = 4) {
+  return Number.isFinite(n) ? Number(n.toFixed(dp)) : n;
+}
+
+function calculateAirFlow() {
+  clearErrorsAndNotes();
+
+  // Safe reads
+  const airVolumeRaw   = document.getElementById('airVolume')?.value;
+  const timeSecondsRaw = document.getElementById('timeSeconds')?.value;
+  const densityRaw     = document.getElementById('airDensity')?.value; // optional hidden/absent is fine
+
+  const rateValueEl = document.getElementById('rateValue');
+  const meterFill   = document.getElementById('meterFill');
+  const feedbackEl  = document.getElementById('feedbackContent');
+  const placeholder = document.getElementById('placeholder');
+  const resultValue = document.getElementById('resultValue');
+  const errorBox    = document.getElementById('resultError');
 
   const errors = [];
   const warnings = [];
 
-  // Required checks
-  if (airVolumeRaw === "") errors.push("👉 Please enter the air volume (m³).");
-  if (timeSecondsRaw === "") errors.push("👉 Please enter the time (s).");
+  // Required fields
+  if (airVolumeRaw == null || String(airVolumeRaw).trim() === "") errors.push("👉 Please enter the air volume (m³).");
+  if (timeSecondsRaw == null || String(timeSecondsRaw).trim() === "") errors.push("👉 Please enter the time (s).");
 
-  if (errors.length > 0) {
-    showErrors(errors);
-    return;
+  if (errors.length) return showErrors(errors);
+
+  // Parse numbers
+  const V = sanitizeNum(airVolumeRaw);
+  const t = sanitizeNum(timeSecondsRaw);
+  let rho = sanitizeNum(densityRaw); // optional
+
+  if (V == null || t == null) return showErrors(["⚠️ Please enter valid numeric values for volume and time."]);
+
+  // Hard validation
+  if (V < 0) errors.push("👉 Volume cannot be negative.");
+  if (t <= 0) errors.push("👉 Time must be greater than 0 seconds.");
+
+  // Density handling (if field exists and has a value)
+  let massFlowNote = "";
+  const hasDensity = densityRaw != null && String(densityRaw).trim() !== "";
+  if (hasDensity) {
+    if (rho == null || rho <= 0) {
+      errors.push("👉 Air density must be a positive number if provided.");
+    } else if (rho < 0.8 || rho > 1.4) {
+      warnings.push("⚠️ Air density is outside typical ambient range (0.8–1.4 kg/m³). Confirm conditions.");
+    }
+  } else {
+    // If you still want to show an example mass flow, use default density with a clear disclaimer
+    rho = 1.20; // default for example only
   }
 
-  // Parse and numeric checks
-  const volume = parseFloat(airVolumeRaw);
-  const time = parseFloat(timeSecondsRaw);
+  if (errors.length) return showErrors(errors);
 
-  if (!Number.isFinite(volume) || !Number.isFinite(time)) {
-    showErrors(["⚠️ Please enter valid numeric values for volume and time."]);
-    return;
-  }
+  // Soft sanity warnings
+  if (V === 0) warnings.push("❗ Volume is zero — resulting flow will be zero.");
+  if (V > 1_000_000) warnings.push("⚠️ Very large volume (＞1e6 m³) — confirm units or data.");
+  if (t < 0.5) warnings.push("⚠️ Very small time value (＜0.5 s) may produce inflated flow — confirm timing method.");
+  if (t > 1_000_000) warnings.push("⚠️ Very large time (＞1e6 s) — confirm units (seconds).");
 
-  if (time <= 0) {
-    showErrors(["👉 Time must be greater than 0 seconds."]);
-    return;
-  }
-  if (volume < 0) {
-    showErrors(["👉 Volume cannot be negative."]);
-    return;
-  }
+  // Calculation with numeric stability guard
+  const EPS = 1e-12;
+  const Q = (t > EPS) ? (V / t) : 0;     // m³/s
+  const Q_disp = clampDecimals(Q, 4);
 
-  // Non-blocking warnings for suspicious values
-  if (volume === 0) warnings.push("❗ Volume is zero — resulting flow will be zero.");
-  if (time < 0.001) warnings.push("⚠️ Very small time value may produce extremely large flow (check units).");
-  if (volume > 1e6) warnings.push("⚠️ Very large volume — confirm units (m³) or data entry.");
-  if (time > 1e6) warnings.push("⚠️ Very large time — confirm units (seconds).");
+  // Optional mass flow (if density provided or defaulting to example)
+  const mdot = Q * rho;
+  const mdot_disp = clampDecimals(mdot, 4);
 
-  // core calculation
-  const flowRate = volume / time; // m^3/s
-  const EPS = 1e-9;
-
-  // Update rate display (safe)
-  if (rateValueEl) rateValueEl.textContent = flowRate.toFixed(4);
-
-  // meter logic (thresholds are generic; adapt as needed)
+  // Output meter & feedback
   let meterWidth = '25%', meterColor = '#e67e22', feedback = '';
-  if (Math.abs(flowRate) <= EPS) {
+  if (Q <= EPS) {
     meterWidth = '5%';
     meterColor = '#c0392b';
     feedback = '❌ No airflow detected.';
-  } else if (flowRate < 1.0) {
+  } else if (Q < 1.0) {
     meterWidth = '25%';
     meterColor = '#e67e22';
-    feedback = '⚠️ Low airflow rate. Ventilation may be insufficient.';
-  } else if (flowRate <= 5.0) {
+    feedback = '⚠️ Low airflow rate. Ventilation may be insufficient for most spaces.';
+  } else if (Q <= 5.0) {
     meterWidth = '50%';
     meterColor = '#f39c12';
-    feedback = '➖ Moderate airflow. Acceptable for small spaces.';
-  } else if (flowRate <= 10.0) {
+    feedback = '➖ Moderate airflow. Acceptable for small spaces/branches.';
+  } else if (Q <= 10.0) {
     meterWidth = '75%';
     meterColor = '#27ae60';
-    feedback = '✅ Good airflow rate.';
+    feedback = '✅ Good airflow rate for many applications.';
   } else {
     meterWidth = '95%';
     meterColor = '#2ecc71';
-    feedback = '🌟 Excellent airflow rate.';
+    feedback = '🌟 Very high airflow rate (large systems/industrial extraction).';
   }
 
-  // Apply meter UI safely
+  // Update UI
+  if (rateValueEl) rateValueEl.textContent = Q_disp.toFixed(4);
   if (meterFill) {
     meterFill.style.width = meterWidth;
     meterFill.style.backgroundColor = meterColor;
   }
 
-  // Optional mass flow calculation if density provided (or show default note)
-  let massFlowInfo = '';
-  const defaultDensity = 1.20; // kg/m^3 typical near 20-25°C
-  if (densityRaw !== "") {
-    const d = parseFloat(densityRaw);
-    if (Number.isFinite(d) && d > 0) {
-      const massFlow = flowRate * d;
-      massFlowInfo = `<br>Mass flow: <b>${massFlow.toFixed(4)} kg/s</b> (ρ=${d.toFixed(3)} kg/m³)`;
-    } else {
-      warnings.push("⚠️ Provided air density invalid — ignoring and using default density for info only.");
-      massFlowInfo = `<br>Mass flow (example): <b>${(flowRate * defaultDensity).toFixed(4)} kg/s</b> (using default ρ=${defaultDensity} kg/m³)`;
-    }
-  } else {
-    // show example mass flow using default density (non-blocking)
-    massFlowInfo = `<br>Mass flow (example): <b>${(flowRate * defaultDensity).toFixed(4)} kg/s</b> (default ρ=${defaultDensity} kg/m³)`;
-  }
+  // Build feedback + details
+  let densityLabel = hasDensity ? `ρ=${rho.toFixed(3)} kg/m³` : `ρ=${rho.toFixed(3)} kg/m³ (default shown for example)`;
+  let details = `<div>Volumetric flow: <b>${Q_disp.toFixed(4)} m³/s</b><br>Mass flow: <b>${mdot_disp.toFixed(4)} kg/s</b> (${densityLabel})</div>`;
+  if (warnings.length) details += `<div style="margin-top:6px; color:#b35d00; font-size:0.95em;">Note: ${warnings.join(" | ")}</div>`;
 
-  // Build feedback/details
-  let details = `<div>Volumetric flow: <b>${flowRate.toFixed(4)} m³/s</b>${massFlowInfo}</div>`;
-  if (warnings.length) {
-    details += `<div style="margin-top:6px; color:#b35d00; font-size:0.95em;">Note: ${warnings.join(" | ")}</div>`;
-  }
+  const feedbackEl2 = document.getElementById('feedbackContent');
+  if (feedbackEl2) feedbackEl2.innerHTML = `<div>${feedback}</div>${details}`;
 
-  if (feedbackEl) feedbackEl.innerHTML = `<div>${feedback}</div>${details}`;
-
-  // show result, hide placeholder & errors
-  if (placeholder) placeholder.classList.add('hidden');
-  if (resultValue) resultValue.classList.remove('hidden');
+  // Toggle blocks
+  const placeholderEl = document.getElementById('placeholder');
+  const resultEl = document.getElementById('resultValue');
+  if (placeholderEl) placeholderEl.classList.add('hidden');
+  if (resultEl) resultEl.classList.remove('hidden');
   if (errorBox) errorBox.classList.add('hidden');
 }
 
@@ -619,3 +686,44 @@ function printReport() {
 </body>
 </html>
 {% endblock %}
+
+
+
+<!-- ===============================================================================
+ AIR FLOW RATE (TIME-BASED) — FORMULA & VALIDATIONS (QEHS Reference Comment)
+ ------------------------------------------------------------------------------
+ Formulae:
+   Volumetric Flow (Q)  = Volume (V) / Time (t)         [Units: m³/s]
+   Mass Flow (ṁ)        = Q × Density (ρ)               [Units: kg/s]
+
+ Input expectations:
+   - V in m³ (0 to 1e6 typical upper bound for single test), ≤ 3 decimals.
+   - t in seconds (>0; 0.5–1e6 s suggested sanity band), ≤ 3 decimals.
+   - ρ in kg/m³ (>0; 0.8–1.4 typical ambient), ≤ 3 decimals (optional).
+
+ Hard errors (block calculation):
+   - Missing V or t.
+   - Non-numeric V or t.
+   - V < 0.
+   - t ≤ 0.
+   - ρ provided but ≤ 0 or non-numeric.
+
+ Soft warnings (allow calculation, annotate result):
+   - V = 0  → Q = 0 (no airflow).
+   - V > 1e6 m³ → likely unit/data error.
+   - t < 0.5 s → unrealistically short timing may inflate Q.
+   - t > 1e6 s → likely unit/data error.
+   - ρ outside 0.8–1.4 kg/m³ → unusual for ambient; confirm conditions.
+
+ Output bands (screening guidance; adjust per site):
+   - Q ≈ 0        → No airflow.
+   - 0 < Q < 1    → Low.
+   - 1 ≤ Q ≤ 5    → Moderate.
+   - 5 < Q ≤ 10   → Good.
+   - > 10         → Very high.
+
+ Compliance rationale:
+   - Prevents divide-by-zero and nonphysical inputs → reliable KPI.
+   - Flags outliers/unrealistic entries → reduces audit disputes.
+   - Clear units and precision → defensible records (OSHA/ISO 45001).
+=============================================================================== -->

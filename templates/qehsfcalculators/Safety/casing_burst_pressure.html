@@ -1,0 +1,637 @@
+{% extends 'base.html' %}
+{% block title %}Casing Burst Pressure Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casing Burst Pressure Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            {% comment %} max-width: 700px; {% endcomment %}
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .cost-breakdown {
+            width: 100%;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .cost-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-top: 10px;
+            padding-top: 15px;
+            color: #1560bd;
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+    
+        <div class="calculator-header">
+            <h1>Casing Burst Pressure Calculator</h1>
+            <p>Calculate the burst pressure of casing using Barlow's formula</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="tensileStrength">Tensile Strength (S<sub>t</sub>) (psi)</label>
+                    <input type="number" id="tensileStrength" class="form-input" min="0" placeholder="e.g., 80000">
+                </div>
+                <div class="form-group">
+                    <label for="outerDiameter">Outer Diameter (D<sub>o</sub>) (inches)</label>
+                    <input type="number" id="outerDiameter" class="form-input" min="0" step="0.001" placeholder="e.g., 9.625">
+                </div>
+                <div class="form-group">
+                    <label for="wallThickness">Wall Thickness (t) (inches)</label>
+                    <input type="number" id="wallThickness" class="form-input" min="0" step="0.001" placeholder="e.g., 0.545">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateBurstPressure()">Calculate Burst Pressure</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2927/2927883.png" alt="Casing Burst Pressure Calculator Icon" width="100">
+
+                    <p>This tool will calculate the <strong>Casing Burst Pressure</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Casing Burst Pressure</h2></div>
+                    <div class="rate-value" id="burstPressureValue">0 psi</div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">Pressure Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Casing Burst Pressure Calculator</strong> helps determine the pressure at which a casing is likely to rupture using Barlow's formula, which is widely used for calculating the burst pressure of thin-walled cylindrical structures.
+                </p>
+            </div>
+            <div class="note-card">
+                <h3>❓ What is Casing Burst Pressure?</h3>
+                <p>Casing burst pressure is the internal pressure at which a cylindrical casing will fail or rupture. It's a critical parameter in industries like oil and gas where casing integrity is essential for safety and operational efficiency.</p>
+            </div>
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Tensile Strength (S<sub>t</sub>):</strong> The material's resistance to tension, measured in psi (pounds per square inch).</li>
+                    <li><strong>Outer Diameter (D<sub>o</sub>):</strong> The external diameter of the casing, measured in inches.</li>
+                    <li><strong>Wall Thickness (t):</strong> The thickness of the casing wall, measured in inches.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <ul class="note-list">
+                    <li><span class="good">Below 5,000 psi</span> → Low burst pressure, suitable for low-pressure applications</li>
+                    <li><span class="average">5,000 – 15,000 psi</span> → Medium burst pressure, typical for many industrial applications</li>
+                    <li><span class="bad">Above 15,000 psi</span> → High burst pressure, requires special materials and design considerations</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Important Note</h3>
+                <p>
+                    This calculation uses Barlow's formula which assumes ideal conditions. Real-world performance may vary due to material defects, temperature variations, pressure cycling, and other factors. Always incorporate appropriate safety factors in engineering designs.
+                </p>
+            </div>
+            
+            <div class="note-card">
+                <h3>📝 About PSI</h3>
+                <p>
+                    PSI stands for "Pounds per Square Inch" and is a unit of pressure commonly used in the United States to measure the intensity of force applied over an area. One psi is the pressure resulting from a force of one pound-force applied to an area of one square inch.
+                </p>
+            </div>
+            <div class="note-card">
+    <h3>✅ Input Validation Rules</h3>
+    <ul class="note-list">
+        <li><strong>Tensile Strength (Sₜ):</strong> 10,000 – 200,000 psi</li>
+        <li><strong>Outer Diameter (Dₒ):</strong> 1 – 48 inches</li>
+        <li><strong>Wall Thickness (t):</strong> 0.1 – 2.0 inches, and <em>t &lt; Dₒ/2</em></li>
+        <li><strong>Formula:</strong> P<sub>b</sub> = (2 × Sₜ × t) / Dₒ</li>
+        <li><strong>Output Ranges:</strong>
+            <ul>
+                <li>&lt;500 psi → Invalid (check inputs)</li>
+                <li>&lt;5,000 psi → Low burst pressure</li>
+                <li>5,000 – 15,000 psi → Medium (typical industrial range)</li>
+                <li>15,000 – 30,000 psi → High (specialized casing)</li>
+                <li>&gt;30,000 psi → Likely input error</li>
+            </ul>
+        </li>
+    </ul>
+    <p>⚠️ These validations align with API 5CT and NFPA pressure vessel safety guidance. Always apply safety factors in engineering design.</p>
+</div>
+
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateBurstPressure() {
+    const tensileStrengthInput = parseFloat(document.getElementById('tensileStrength').value.trim());
+    const outerDiameterInput = parseFloat(document.getElementById('outerDiameter').value.trim());
+    const wallThicknessInput = parseFloat(document.getElementById('wallThickness').value.trim());
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+
+    // ============================
+    // VALIDATIONS
+    // ============================
+
+    // Tensile Strength
+    if (isNaN(tensileStrengthInput) || tensileStrengthInput < 10000 || tensileStrengthInput > 200000) {
+        errors.push("👉 Tensile strength must be between 10,000 and 200,000 psi.");
+    }
+
+    // Outer Diameter
+    if (isNaN(outerDiameterInput) || outerDiameterInput < 1 || outerDiameterInput > 48) {
+        errors.push("👉 Outer diameter must be between 1 and 48 inches.");
+    }
+
+    // Wall Thickness
+    if (isNaN(wallThicknessInput) || wallThicknessInput < 0.1 || wallThicknessInput > 2) {
+        errors.push("👉 Wall thickness must be between 0.1 and 2.0 inches.");
+    }
+
+    // Cross-field validation
+    if (!isNaN(outerDiameterInput) && !isNaN(wallThicknessInput) &&
+        wallThicknessInput >= outerDiameterInput / 2) {
+        errors.push("👉 Wall thickness must be less than half the outer diameter.");
+    }
+
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // ============================
+    // CALCULATION
+    // ============================
+    const burstPressure = (2 * tensileStrengthInput * wallThicknessInput) / outerDiameterInput;
+
+    if (!isFinite(burstPressure) || burstPressure <= 0) {
+        errorMessage.innerHTML = "❌ Calculation error: invalid result. Please check inputs.";
+        errorBox.classList.remove("hidden");
+        return;
+    }
+
+    // Format with commas
+    const formattedBurstPressure = burstPressure.toLocaleString('en-US', {
+        maximumFractionDigits: 2,
+        minimumFractionDigits: 2
+    });
+
+    document.getElementById('burstPressureValue').textContent = `${formattedBurstPressure} psi`;
+
+    // ============================
+    // OUTPUT ASSESSMENT
+    // ============================
+    let feedback = "";
+    if (burstPressure < 500) {
+        feedback = "❌ Extremely low burst pressure (<500 psi). Likely invalid inputs.";
+    } else if (burstPressure < 5000) {
+        feedback = "✅ Low burst pressure (<5,000 psi). Suitable for shallow or low-pressure applications.";
+    } else if (burstPressure < 15000) {
+        feedback = "⚠️ Medium burst pressure (5,000–15,000 psi). Typical for industrial casings. Ensure safety factors.";
+    } else if (burstPressure < 30000) {
+        feedback = "🚨 High burst pressure (15,000–30,000 psi). Specialized casing. Verify specifications carefully.";
+    } else {
+        feedback = "❌ Unrealistic burst pressure (>30,000 psi). Please review your input values.";
+    }
+
+    document.getElementById('feedbackContent').innerHTML = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+{% comment %} 
+1. Formula (for comments in your code)
+/*
+Barlow’s Formula for Casing Burst Pressure:
+P_b = (2 * S_t * t) / D_o
+
+Where:
+P_b = Burst Pressure (psi)
+S_t = Tensile Strength (psi)
+t   = Wall Thickness (inches)
+D_o = Outer Diameter (inches)
+
+Assumptions:
+- Thin-walled cylinder (t << D_o/2)
+- Uniform material properties
+- No defects, corrosion, or stress concentrations
+- Safety factors must be applied in real-world design
+*/
+
+2. Input Validation Rules (Industry-Based)
+Parameter	Units	Acceptable Range	Compliance Rationale
+Tensile Strength (Sₜ)	psi	10,000 – 200,000	API 5CT casing steels typically 55,000–140,000 psi. Below 10,000 → unrealistic. Above 200,000 → exotic alloys.
+Outer Diameter (Dₒ)	inches	1 – 48	Oilfield casings range 4.5–20 inches. Lower → unrealistic for casings. Above 48 inches → outlier.
+Wall Thickness (t)	inches	0.1 – 2.0	API casing thickness typically 0.2–1.0 in. If ≥ Dₒ/2 → violates thin-wall assumption.
+Cross-field Dependency	–	t < Dₒ/2	Prevents invalid geometry (solid pipe).
+Decimals	–	Allow 3 decimals	Industry data often reported with thousandths precision.
+3. Edge Case Validations
+
+Division by zero → if Dₒ = 0.
+
+Wall thickness ≥ Dₒ/2 → geometry invalid.
+
+Unrealistically high burst pressure (>300,000 psi) → likely input error.
+
+Unrealistically low burst pressure (<500 psi) → casing would fail under atmospheric + minor load, likely error.
+
+4. Output Validation Thresholds (Assessment Logic)
+
+P_b < 5,000 psi → Low rating, only suitable for shallow/low-pressure service.
+
+5,000 – 15,000 psi → Medium rating, common for industrial and oilfield casings.
+
+15,000 – 30,000 psi → High rating, specialized casing, high-risk operations.
+
+>30,000 psi → Unrealistic in practice, inputs must be reviewed. {% endcomment %}

@@ -1,0 +1,615 @@
+{% extends 'base.html' %}
+{% block title %}Accident Rate Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accident Rate Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            {% comment %} max-width: 700px; {% endcomment %}
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+    
+        <div class="calculator-header">
+            <h1>Accident Rate Calculator</h1>
+            <p>Calculate the accident rate per 1,000,000 hours worked to assess workplace safety performance</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="numAccidents">Number of Accidents</label>
+                    <input type="number" id="numAccidents" class="form-input" min="0" placeholder="e.g., 5">
+                </div>
+                <div class="form-group">
+                    <label for="totalHours">Total Hours Worked</label>
+                    <input type="number" id="totalHours" class="form-input" min="0" placeholder="e.g., 250000">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateAccidentRate()">Calculate Accident Rate</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/609/609361.png" alt="Accident rate illustration">
+                    <p>This tool will calculate the <strong>Accident Rate</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Accident Rate Result</h2></div>
+                    <div class="rate-value" id="accidentRateValue">0.00</div>
+                    <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold; ">accidents per 1,000,000 hours worked</div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Safety Performance Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Accident Rate Calculator</strong> helps determine the frequency of workplace accidents per 1,000,000 hours worked, 
+                    providing a standardized metric to assess safety performance.
+                </p>
+            </div>
+            <div class="note-card">
+                <h3>❓ What is Accident Rate?</h3>
+                <p>The Accident Rate is a key safety metric that measures how many accidents occur per 1,000,000 hours worked, allowing for comparison across different organizations and industries.</p>
+            </div>
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Number of Accidents:</strong> This includes reportable workplace accidents such as injuries, fatalities, and lost-time incidents.</li>
+                    <li><strong>Total Hours Worked:</strong> The total number of hours worked by all employees over a specific period.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <ul class="note-list">
+                    <li><span class="good">0.0</span> → Excellent safety performance with no accidents</li>
+                    <li><span class="good">Below 1.0</span> → Good safety performance with minimal accidents</li>
+                    <li><span class="average">1.0 – 5.0</span> → Moderate safety performance needing improvement</li>
+                    <li><span class="bad">Above 5.0</span> → Poor safety performance requiring immediate action</li>
+                </ul>
+            </div>
+            <div class="note-card">
+    <h3>✅ Input Validation Rules</h3>
+    <ul class="note-list">
+        <li><strong>Number of Accidents:</strong> Must be a whole number (0–1000). Decimals or negative values not allowed.</li>
+        <li><strong>Total Hours Worked:</strong> Must be a positive number greater than 0 and less than 1,000,000,000.</li>
+        <li><strong>Cross-check:</strong> Accidents > 0 requires total hours > 0.</li>
+        <li><strong>Unrealistic Data:</strong> Accident Rate above 100 will trigger a warning to recheck input values.</li>
+    </ul>
+</div>
+
+            
+            <div class="note-card">
+                <h3>💡 Important Note</h3>
+                <p>
+                    A lower accident rate indicates better safety performance. Regular monitoring of this metric helps organizations 
+                    identify safety issues and implement preventive measures to protect workers.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateAccidentRate() {
+    const numAccidentsInput = document.getElementById('numAccidents').value.trim();
+    const totalHoursInput = document.getElementById('totalHours').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+
+    // Validation: Number of Accidents
+    if (numAccidentsInput === "") {
+        errors.push("👉 Please enter the number of accidents.");
+    } else if (!Number.isInteger(Number(numAccidentsInput))) {
+        errors.push("👉 Number of accidents must be an integer (no decimals).");
+    } else if (parseInt(numAccidentsInput) < 0) {
+        errors.push("👉 Number of accidents cannot be negative.");
+    } else if (parseInt(numAccidentsInput) > 1000) {
+        errors.push("👉 Number of accidents entered is unusually high. Please recheck.");
+    }
+
+    // Validation: Total Hours Worked
+    if (totalHoursInput === "") {
+        errors.push("👉 Please enter the total hours worked.");
+    } else if (isNaN(totalHoursInput) || parseFloat(totalHoursInput) <= 0) {
+        errors.push("👉 Total hours worked must be a positive number greater than zero.");
+    } else if (parseFloat(totalHoursInput) > 1000000000) {
+        errors.push("👉 Total hours worked exceeds realistic thresholds. Please recheck.");
+    }
+
+    // Display errors if any
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    const numAccidents = parseInt(numAccidentsInput);
+    const totalHours = parseFloat(totalHoursInput);
+
+    // Calculate Accident Rate
+    const accidentRate = (numAccidents / totalHours) * 1000000;
+    document.getElementById('accidentRateValue').textContent = accidentRate.toFixed(2);
+
+    let feedback = "";
+
+    if (accidentRate === 0) {
+        feedback = "✅ <strong>Excellent safety performance!</strong> No accidents reported.";
+    } else if (accidentRate < 1.0) {
+        feedback = "✅ <strong>Good safety performance.</strong> Minimal accidents reported.";
+    } else if (accidentRate >= 1.0 && accidentRate <= 5.0) {
+        feedback = "⚠️ <strong>Moderate safety performance.</strong> Needs improvement.";
+    } else if (accidentRate > 5.0 && accidentRate <= 100.0) {
+        feedback = "🚨 <strong>Concerning safety performance.</strong> Immediate action required.";
+    } else {
+        feedback = "❌ <strong>Critical!</strong> Extremely high accident rate. Verify inputs and investigate urgently.";
+    }
+
+    document.getElementById('feedbackContent').innerHTML = feedback;
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+/*
+Accident Rate Formula (per 1,000,000 hours worked):
+AR = (Number of Accidents / Total Hours Worked) * 1,000,000
+
+Validation Rules:
+- Number of Accidents: integer, ≥0, ≤1000
+- Total Hours Worked: >0, ≤1,000,000,000, decimals allowed up to 2
+- Cross-checks: accidents >0 requires totalHours >0
+- Prevent division by zero
+- Flag unrealistic combinations (e.g., AR > 100)
+*/
+
+
+
+{% comment %} 
+1️⃣ Formula Used
+
+Accident Rate (AR) is typically defined as:
+
+𝐴
+𝑅
+=
+Number of Accidents
+Total Hours Worked
+×
+1
+,
+000
+,
+000
+AR=
+Total Hours Worked
+Number of Accidents
+	​
+
+×1,000,000
+
+Numerator: Reportable accidents (lost-time injuries, fatalities, major recordable cases as per OSHA/ILO).
+
+Denominator: Total hours worked by all employees (including part-time/contractual staff) in a defined period.
+
+Multiplier: Standardized at 1,000,000 hours to normalize across industries and workforce sizes.
+
+👉 I’ll add this as a code comment for future reference.
+
+2️⃣ Input Validation Rules (QEHS & Fire Safety Best Practice)
+Number of Accidents (numAccidents)
+
+Type: Integer only (fractions not logical).
+
+Min: 0 (can’t have negative accidents).
+
+Max: 1000 (very high, anything above requires investigation, flag as unrealistic).
+
+Decimal places: Not allowed.
+
+Cross-field check: If accidents > 0, totalHours must also be > 0.
+
+Total Hours Worked (totalHours)
+
+Type: Positive number.
+
+Min: > 0 (cannot be zero, division by zero risk).
+
+Max: 1e9 (1 billion hours; beyond this, likely input error).
+
+Decimal places: Up to 2 allowed (though usually whole numbers).
+
+Cross-field check: If totalHours < 160 (one worker’s monthly hours), warn as unrealistic.
+
+3️⃣ Output Validation & Thresholds
+Meaningful Ranges:
+
+0.0 → Perfect, no accidents.
+
+< 1.0 → Good (acceptable per ISO/ILO benchmarking).
+
+1.0 – 5.0 → Moderate concern (needs attention).
+
+5.0 – 100.0 → Poor safety (serious corrective action).
+
+> 100.0 → Critical — unrealistic in most industries, needs verification.
+
+👉 These align with OSHA DART/incident rate comparisons used in audits. {% endcomment %}

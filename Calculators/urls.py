@@ -6,6 +6,7 @@ urlpatterns = [
     path('', home, name='home'),
     path('about/', about, name='about'),
     path('contact/', contact, name='contact'),
+    path('calendar/', calendar, name='calendar'),
     path('contact/list/', contact_list, name='contact_list'),
     path('contact/delete/<int:pk>/', delete_contact, name='delete_contact'),
     path('quality/', quality_calculators, name='quality_calculators'),
@@ -17,6 +18,16 @@ urlpatterns = [
     path('terms/', terms, name='terms'),
     path('privacy/', privacy, name='privacy'),
     path("device-limit/", device_limit_exceeded, name="device_limit_exceeded"),
+    path("subscription-expired/", subscription_expired, name="subscription_expired"),
+
+    path('transactions/', transaction_list, name='transaction_list'),
+    path('transactions/delete/<int:pk>/', delete_transaction, name='delete_transaction'),
+    path('transactions/clear/', clear_all_transactions, name='clear_all_transactions'),
+    path('user-devices/', user_devices_list, name='user_devices_list'),
+
+    path('approvalsubscriptions/', manage_subscriptions, name='manage_subscriptions'),
+    path('approvalsubscriptions/approve/<int:subscription_id>/', approve_subscription, name='approve_subscription'),
+    path('approvalsubscriptions/reject/<int:subscription_id>/', reject_subscription, name='reject_subscription'),
     path('accident_rate_calculator/', accident_rate_calculator, name='accident_rate_calculator'),
 
     path('dashboard/', dashboard, name='dashboard'),
@@ -26,6 +37,10 @@ urlpatterns = [
     path("signup/", signup_view, name="signup"),
     path("login/", login_view, name="login"),
     path("logout/", logout_view, name="logout"),
+    path('forgot-password/', forgot_password_view, name='forgot_password'),
+    path('verify-code/', verify_code_view, name='verify_code'),
+    path('set-new-password/', set_new_password_view, name='set_new_password'),
+    path('change-password/', change_password_view, name='change_password'),
     path('fire/', fire_calculator, name='fire_calculator'),
     path('co2/', co2_calculator, name='co2_calculator'),
 
@@ -434,6 +449,9 @@ urlpatterns = [
     path('safety/condensate_velocity_of_a_pipe_calculator/', safety_condensate_velocity_of_a_pipe_calculator, name='safety_condensate_velocity_of_a_pipe_calculator'),
     path('safety/cooling_water_flowrate_for_desuperheater_calculator/', safety_cooling_water_flowrate_for_desuperheater_calculator, name='safety_cooling_water_flowrate_for_desuperheater_calculator'),
     path('safety/capacitance_law_calculator/', safety_capacitance_law_calculator, name='safety_capacitance_law_calculator'),
+    path('safety/critical_pressure_ratio_dry_steam_gases/', safety_critical_pressure_ratio_dry_steam_gases, name='safety_critical_pressure_ratio_dry_steam_gases'),
+    path('safety/critical_pressure_ratio/', safety_critical_pressure_ratio, name='safety_critical_pressure_ratio'),
+
     path('safety/cold_differential_pressure_calculator/', safety_cold_differential_pressure_calculator, name='safety_cold_differential_pressure_calculator'),
     path('safety/coefficient_of_discharge_calculator/', safety_coefficient_of_discharge_calculator, name='safety_coefficient_of_discharge_calculator'),
     path('safety/curtain_area_of_safety_valve_calculator/', safety_curtain_area_of_safety_valve_calculator, name='safety_curtain_area_of_safety_valve_calculator'),
