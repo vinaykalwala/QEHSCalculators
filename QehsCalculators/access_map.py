@@ -215,7 +215,7 @@ CALCULATORS = [
 
 {"name": "Boyle's Vent Area Calculator", "url_name": "safety_boyles_vent_area_calculator", "plan_type": "corporate", "category": "safety"},
 
-{"name": "Change in Entropy Calculator", "url_name": "afety_change_in_entropy_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Change in Entropy Calculator", "url_name": "safety_change_in_entropy_calculator", "plan_type": "corporate", "category": "safety"},
 
 {"name": "Cost of Accident Calculator", "url_name": "safety_cost_of_an_accident_calculator", "plan_type": "corporate", "category": "safety"},
 
