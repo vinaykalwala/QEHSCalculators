@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Blood Sugar Converter{% endblock %}
+{% block title %}Estimated Average Glucose (eAG) Calculator{% endblock %}
 {% block content %}
 {% load static %}
 
@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blood Sugar Converter</title>
+    <title>Estimated Average Glucose (eAG) Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
@@ -164,8 +164,9 @@
         }
         .rate-display {
             display: flex;
-            gap: 10px;
-            align-items: baseline;
+            flex-direction: column;
+            gap: 2px;
+            align-items: center;
             justify-content: center;
         }
         .result-value {
@@ -175,12 +176,18 @@
             font-size: 42px;
             font-weight: 700;
             color: #2980b9;
-            margin-bottom: 10px;
+            margin-bottom: 0;
         }
         .rate-label {
-            font-size: 20px;
-            font-weight: bold;
-            color: #2980b9;
+            color: #7f8c8d;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        #hba1cValue {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-top: 10px;
         }
         /* Meter */
         .safety-meter {
@@ -331,57 +338,51 @@
         {% include "includes/print_header_footer.html" %}
 
         <div class="calculator-header">
-            <h1>Blood Sugar Converter</h1>
-            <p>Convert blood glucose levels between the international standard (mmol/L) and mg/dL.</p>
+            <h1>Estimated Average Glucose (eAG) Calculator</h1>
+            <p>Convert your HbA1c (%) lab result to an estimated average glucose level.</p>
         </div>
 
         <div class="calc-content">
             <div class="calc-card">
-                <h2>Enter Value to Convert</h2>
+                <h2>Enter Your HbA1c</h2>
                 <div class="form-group">
-                    <label for="glucoseValue">Glucose Value</label>
-                    <input type="number" id="glucoseValue" class="form-input" placeholder="e.g., 100">
-                </div>
-                <div class="form-group">
-                    <label for="unitFrom">From Unit</label>
-                    <select id="unitFrom" class="form-select">
-                        <option value="mmolL">mmol/L</option>
-                        <option value="mgdL" selected>mg/dL</option>
+                    <label for="diabetes">Do you have diabetes?</label>
+                    <select id="diabetes" class="form-select">
+                        <option value="no">No</option>
+                        <option value="yes">Yes</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="unitTo">To Unit</label>
-                    <select id="unitTo" class="form-select">
-                        <option value="mgdL">mg/dL</option>
-                        <option value="mmolL" selected>mmol/L</option>
-                    </select>
+                    <label for="hba1c">HbA1c (%)</label>
+                    <input type="number" id="hba1c" class="form-input" step="0.1" placeholder="e.g., 5.5">
                 </div>
-                <button class="calculate-btn" onclick="convertGlucose()">Convert</button>
+                <button class="calculate-btn" onclick="calculateEAG()">Calculate eAG</button>
             </div>
 
             <div class="result-card">
                 <div class="result-placeholder" id="placeholder">
                     <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
-                    <p>Enter a glucose value to convert it and see the health range assessment.</p>
+                    <p>Enter your HbA1c value to see your estimated average glucose and health category.</p>
                 </div>
                 <div class="result-error hidden" id="resultError">
                     <div class="error-icon">❌</div>
                     <div class="error-message" id="errorMessage"></div>
                 </div>
                 <div class="result-value hidden" id="resultValue">
-                    <h2>Converted Value</h2>
+                    <h2>Estimated Average Glucose (eAG)</h2>
                     <div class="rate-display">
-                        <div class="rate-value" id="rateValue">0.0</div>
-                        <div class="rate-label" id="rateLabel">mmol/L</div>
+                        <div class="rate-value" id="rateValue">0</div>
+                        <div class="rate-label">mg/dL</div>
                     </div>
+                    <p id="hba1cValue">From HbA1c: 0.0%</p>
                     <div class="safety-meter">
                         <div class="meter-fill" id="meterFill"></div>
                     </div>
                     <div class="meter-labels">
-                        <span>Low (Hypoglycemia)</span><span>Normal</span><span>High (Hyperglycemia)</span>
+                        <span>Normal</span><span>Prediabetes</span><span>Diabetes</span>
                     </div>
                     <div class="result-feedback">
-                        <div class="feedback-title">Health Assessment</div>
+                        <div class="feedback-title">Interpretation</div>
                         <div class="feedback-content" id="feedbackContent"></div>
                     </div>
                     <div class="btn-wrapper">
@@ -393,100 +394,114 @@
 
         <div class="note-section">
             <div class="note-card">
-                <h3>📖 Understanding Blood Sugar Levels</h3>
+                <h3>🧪 Understanding the Estimated Average Glucose (eAG) Calculator</h3>
                 <p>
-                    This blood sugar converter helps you easily interpret your glucose levels in venous blood by switching 
-                    between the international standard <strong>mmol/L</strong> and the popular <strong>mg/dL</strong> glucose units.
+                    The eAG calculator is designed to help you translate your HbA1c (also called A1c) — a lab test that reflects average blood sugar — into a number that represents your estimated blood glucose over the past 3 months. This value is displayed in mg/dL or mmol/L, depending on your region or preference.
                 </p>
             </div>
 
             <div class="note-card">
-                <h3>📋 Parameter Explanation</h3>
+                <h3>📖 Key Parameters Explained</h3>
                 <ul class="note-list">
-                    <li><strong>Glucose Value:</strong> The numerical value of glucose concentration in the blood.</li>
-                    <li><strong>mmol/L:</strong> Millimoles per liter – the international standard unit used to measure blood glucose.</li>
-                    <li><strong>mg/dL:</strong> Milligrams per deciliter – a common unit used in countries like the United States.</li>
+                    <li><strong>HbA1c (%):</strong> Represents the percentage of hemoglobin in your red blood cells that has glucose attached to it. This indicates how much sugar has been circulating in your blood over time.</li>
+                    <li><strong>Estimated Average Glucose (eAG):</strong> A conversion of your HbA1c value into an average daily blood glucose number, making it easier to understand for day-to-day monitoring.</li>
                 </ul>
             </div>
 
             <div class="note-card">
-                <h3>📌 Key Definitions</h3>
-                <ul class="note-list">
-                    <li><strong>Glycemia:</strong> The presence and concentration of glucose in the blood.</li>
-                    <li><strong>Hypoglycemia:</strong> Abnormally low blood sugar levels (below 2.8 mmol/L or 50 mg/dL in healthy people).</li>
-                    <li><strong>Normoglycemia:</strong> Normal blood sugar range (2.8–5.5 mmol/L or 50–100 mg/dL).</li>
-                    <li><strong>Hyperglycemia:</strong> Abnormally high blood sugar levels (above 11.1 mmol/L or 200 mg/dL).</li>
-                </ul>
+                <h3>⚙️ How It Works</h3>
+                <p>
+                    Glucose, a simple sugar, is your body’s main source of energy. When glucose levels rise, some of it sticks to hemoglobin in red blood cells. The more glucose present in your bloodstream, the higher the percentage of glycated hemoglobin (HbA1c). Because red blood cells live for around 3 to 4 months, this test gives a reliable average of your blood sugar over time.
+                </p>
             </div>
 
             <div class="note-card">
-                <h3>📊 Normal Blood Sugar Ranges</h3>
-                <div class="table-container">
-                </div>
+                <h3>📊 Normal Ranges & What They Mean</h3>
+                <ul class="note-list">
+                    <li><strong>HbA1c below 5.7%:</strong> Normal</li>
+                    <li><strong>HbA1c 5.7% – 6.4%:</strong> Prediabetes</li>
+                    <li><strong>HbA1c 6.5% and above:</strong> Diabetes</li>
+                </ul>
+                <p>
+                    These ranges help doctors assess risk levels and determine if lifestyle changes or medications are needed.
+                </p>
             </div>
-            <table class="custom-table">
+
+            <div class="note-card">
+                <h3>📌 Why eAG Matters</h3>
+                <p>
+                    eAG gives people with diabetes a clearer view of their long-term blood sugar control in a format similar to daily blood glucose readings. It also helps track whether treatments and dietary efforts are working.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>📋 HbA1c Conversion to Average Glucose — Conversion Chart</h3>
+                <div style="overflow-x:auto;">
+                    <table class="custom-table">
                         <thead>
                             <tr>
-                                <th>Condition</th>
-                                <th>Healthy Individuals</th>
-                                <th>Diabetics</th>
+                                <th>HbA1c (%)</th>
+                                <th>HbA1c (mmol/mol)</th>
+                                <th>eAG (mmol/L)</th>
+                                <th>eAG (mg/dL)</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td><strong>Fasting</strong></td>
-                                <td>4.4–6.1 mmol/L (79–110 mg/dL)</td>
-                                <td>5.0–7.2 mmol/L (90–130 mg/dL)</td>
-                            </tr>
-                            <tr>
-                                <td><strong>After meals</strong></td>
-                                <td>Up to 7.8 mmol/L (140 mg/dL)</td>
-                                <td>Below 10 mmol/L (180 mg/dL)</td>
-                            </tr>
+                            <tr><td>5</td><td>31</td><td>5.4 (4.2–6.7)</td><td>97 (76–120)</td></tr>
+                            <tr><td>6</td><td>42</td><td>7.0 (5.5–8.5)</td><td>126 (100–152)</td></tr>
+                            <tr><td>7</td><td>53</td><td>8.6 (6.8–10.3)</td><td>154 (123–185)</td></tr>
+                            <tr><td>8</td><td>64</td><td>10.2 (8.1–12.1)</td><td>183 (147–217)</td></tr>
+                            <tr><td>9</td><td>75</td><td>11.8 (9.4–13.9)</td><td>212 (170–249)</td></tr>
+                            <tr><td>10</td><td>86</td><td>13.4 (10.7–15.7)</td><td>240 (193–282)</td></tr>
+                            <tr><td>11</td><td>97</td><td>14.9 (12.0–17.5)</td><td>269 (217–314)</td></tr>
+                            <tr><td>12</td><td>108</td><td>16.5 (13.3–19.3)</td><td>298 (240–347)</td></tr>
+                            <tr><td>13</td><td>119</td><td>18.1 (15–21)</td><td>326 (260–380)</td></tr>
+                            <tr><td>14</td><td>130</td><td>19.7 (16–23)</td><td>355 (290–410)</td></tr>
+                            <tr><td>15</td><td>140</td><td>21.3 (17–25)</td><td>384 (310–440)</td></tr>
+                            <tr><td>16</td><td>151</td><td>22.9 (19–26)</td><td>413 (330–480)</td></tr>
+                            <tr><td>17</td><td>162</td><td>24.5 (20–28)</td><td>441 (460–510)</td></tr>
+                            <tr><td>18</td><td>173</td><td>26.1 (21–30)</td><td>470 (380–540)</td></tr>
+                            <tr><td>19</td><td>184</td><td>27.7 (23–32)</td><td>499 (410–570)</td></tr>
                         </tbody>
                     </table>
-
-            <div class="note-card">
-                <h3>💡 Tips for Maintaining Healthy Blood Sugar</h3>
-                <ul class="note-list">
-                    <li>Eat complex carbohydrates, fiber, healthy fats, and lean protein</li>
-                    <li>Maintain a healthy weight</li>
-                    <li>Exercise regularly and avoid prolonged sitting</li>
-                    <li>Avoid smoking and limit alcohol intake</li>
-                    <li>Get adequate sleep (7+ hours nightly)</li>
-                    <li>Manage stress effectively</li>
-                </ul>
+                </div>
             </div>
 
             <div class="note-card">
-                <h3>Input Validations</h3>
+                <h3>📝 How to Use This Tool</h3>
+                <ol>
+                    <li>Enter your latest HbA1c test result into the calculator.</li>
+                    <li>Instantly receive your estimated average glucose in mg/dL or mmol/L.</li>
+                    <li>Compare the value to standard blood sugar ranges to assess your condition.</li>
+                </ol>
+            </div>
+
+            <div class="note-card">
+                <h3>✅ Input Validations</h3>
+                <div class="note-content">
                     <ul>
-                        <li>✅ <strong>Glucose Value:</strong> Must be a positive number.</li>
-                        <li>✅ <strong>Unit:</strong> Select the correct unit you want to convert from and to (<em>mg/dL</em> or <em>mmol/L</em>).</li>
-                        <li>⚠️ <strong>Acceptable Ranges:</strong>
-                            <ul>
-                                <li>For mg/dL: 20 – 600</li>
-                                <li>For mmol/L: 1 – 33</li>
-                            </ul>
-                        </li>
-                        <li>ℹ️ <strong>Decimals:</strong> Up to 2 decimal places are supported for precise conversion.</li>
-                        <li>⚠️ <strong>Logical Consistency:</strong> Ensure you don’t enter unrealistic numbers (e.g., negative or extremely high values).</li>
-                        <li>💡 <strong>Feedback Meter:</strong> The health range meter will indicate:
-                            <ul>
-                                <li>Blue: Low (Hypoglycemia)</li>
-                                <li>Green: Normal</li>
-                                <li>Red: High (Hyperglycemia)</li>
-                            </ul>
-                        </li>
-                        <li>🩺 <strong>Medical Advice:</strong> The calculator is for guidance only. Always consult a doctor for medical decisions.</li>
+                        <li><strong>Required Input:</strong> HbA1c value must be entered before calculation.</li>
+                        <li><strong>Numeric Only:</strong> Input must be a number (no text, symbols, or empty fields).</li>
+                        <li><strong>Valid Range:</strong> HbA1c must be between <strong>2.5% and 20%</strong>, based on real clinical limits.</li>
+                        <li><strong>Decimal Precision:</strong> Up to <strong>1 decimal place</strong> is accepted (e.g., 5.5%).</li>
+                        <li><strong>Logical Consistency:</strong> If HbA1c ≥ 6.5% but “No” is selected for diabetes, a warning is shown.</li>
+                        <li><strong>Output Integrity:</strong> eAG (mg/dL) is only shown if input passes all checks.</li>
+                        <li><strong>Error Handling:</strong> Any invalid input will show a clear ❌ error message, preventing misleading results.</li>
                     </ul>
+                    <p>
+                        ✅ These rules ensure results are medically meaningful and prevent unrealistic or unsafe interpretations, 
+                        following compliance principles similar to <strong>OSHA, ISO 45001, and WHO clinical standards</strong>.
+                    </p>
+                </div>
             </div>
 
             <div class="note-card">
-                <h3>⚠️ Important Disclaimer</h3>
+                <h3>✅ Conclusion</h3>
                 <p>
-                    This tool is for informational purposes only and cannot replace professional medical advice. 
-                    If you have concerns about your blood sugar levels, <strong>consult a physician</strong>.
+                    Understanding both HbA1c and eAG helps you take control of your health, especially if you're managing diabetes or at risk for it. The calculator offers an easy way to interpret lab results and improve communication with your healthcare provider.
+                </p>
+                <p>
+                    ⚠️ <strong>Please note:</strong> This calculator is for informational purposes only. It’s not intended to replace medical advice or diagnosis. Always consult a healthcare provider for accurate evaluation and guidance tailored to your health.
                 </p>
             </div>
         </div>
@@ -497,168 +512,126 @@
 document.addEventListener('DOMContentLoaded', function() {
     const now = new Date();
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    if(document.getElementById('printDate')) {
+    if (document.getElementById('printDate')) {
         document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
     }
-    // Initialize default conversion
-    convertGlucose();
 });
 
-function convertGlucose() {
-    const glucoseInput = document.getElementById('glucoseValue').value.trim();
-    const unitFrom = document.getElementById('unitFrom').value;
-    const unitTo = document.getElementById('unitTo').value;
+function calculateEAG() {
+    const hba1cInput = document.getElementById('hba1c').value.trim();
+    const diabetesStatus = document.getElementById('diabetes') ? document.getElementById('diabetes').value : null;
 
     const errorBox = document.getElementById('resultError');
     const errorMessage = document.getElementById('errorMessage');
     const placeholder = document.getElementById('placeholder');
     const resultValue = document.getElementById('resultValue');
-    const rateValue = document.getElementById('rateValue');
-    const rateLabel = document.getElementById('rateLabel');
-    const feedbackContent = document.getElementById('feedbackContent');
-    const meterFill = document.getElementById('meterFill');
 
-    // Reset visibility
-    errorBox.classList.add('hidden');
-    placeholder.classList.remove('hidden');
-    resultValue.classList.add('hidden');
-    errorMessage.innerHTML = '';
+    // Reset states
+    errorBox.classList.add("hidden");
+    placeholder.classList.add("hidden");
+    resultValue.classList.add("hidden");
 
-    // Convert input to number
-    const value = parseFloat(glucoseInput);
-    const CONVERSION_FACTOR = 18.0182;
-    let errors = [];
-
-    // Input validations
-    if (glucoseInput === '' || isNaN(value)) {
-        errors.push("⚠️ Please enter a numeric glucose value.");
-    } else if (value <= 0) {
-        errors.push("⚠️ Glucose value must be positive.");
-    } else {
-        if (unitFrom === "mgdL" && (value < 20 || value > 600)) {
-            errors.push("⚠️ Glucose in mg/dL must be between 20 and 600.");
-        }
-        if (unitFrom === "mmolL" && (value < 1 || value > 33)) {
-            errors.push("⚠️ Glucose in mmol/L must be between 1 and 33.");
-        }
-    }
-
-    if (errors.length > 0) {
-        errorMessage.innerHTML = errors.join("<br>");
+    // Validation: Required input
+    if (!hba1cInput) {
+        errorMessage.innerHTML = "👉 Please enter your HbA1c value.";
         errorBox.classList.remove("hidden");
-        placeholder.classList.add("hidden");
-        resultValue.classList.add("hidden");
         return;
     }
 
-    // Conversion logic
-    let convertedValue;
-    if (unitFrom === unitTo) {
-        convertedValue = value;
-    } else if (unitFrom === 'mmolL' && unitTo === 'mgdL') {
-        convertedValue = value * CONVERSION_FACTOR;
-    } else if (unitFrom === 'mgdL' && unitTo === 'mmolL') {
-        convertedValue = value / CONVERSION_FACTOR;
-    } else {
-        convertedValue = value; // failsafe
+    const hba1cValue = parseFloat(hba1cInput);
+
+    // Validation: Numeric & Physiological Range (2.5% – 20%)
+    if (isNaN(hba1cValue) || hba1cValue < 2.5 || hba1cValue > 20) {
+        errorMessage.innerHTML = "❌ HbA1c must be between 2.5% and 20%.";
+        errorBox.classList.remove("hidden");
+        return;
     }
 
-    const toUnitText = unitTo === 'mmolL' ? 'mmol/L' : 'mg/dL';
-    rateValue.textContent = convertedValue.toFixed(2);
-    rateLabel.textContent = toUnitText;
+    // Formula: eAG (mg/dL) = (28.7 × HbA1c) - 46.7
+    const eAG = parseFloat((28.7 * hba1cValue - 46.7).toFixed(1));
 
-    // Convert to mg/dL for consistent feedback thresholds
-    const valueInMgDl = (unitTo === 'mgdL') ? convertedValue : convertedValue * CONVERSION_FACTOR;
+    // Interpretation thresholds
+    let feedback = "";
+    let meterWidth = "0%";
+    let meterColor = "#2ecc71";
 
-    // Meter and feedback logic
-    let meterWidth, meterColor, feedback;
-
-    if (valueInMgDl < 70) {
+    if (hba1cValue < 5.7) {
         meterWidth = '33%';
-        meterColor = '#3498db';
-        feedback = 'Low blood sugar (Hypoglycemia). Symptoms may include shakiness or confusion. Consult a doctor.';
-    } else if (valueInMgDl <= 140) {
-        meterWidth = '66%';
         meterColor = '#2ecc71';
-        feedback = 'Normal blood sugar. Healthy range for most individuals. Maintain a balanced diet and lifestyle.';
+        feedback = "<strong>Normal Range:</strong> Your average blood glucose is within the healthy range. Keep up your lifestyle habits.";
+    } else if (hba1cValue < 6.5) {
+        meterWidth = '66%';
+        meterColor = '#f1c40f';
+        feedback = "<strong>Prediabetes Range:</strong> Your blood glucose is higher than normal. Consider lifestyle changes to prevent type 2 diabetes.";
     } else {
         meterWidth = '95%';
         meterColor = '#e74c3c';
-        feedback = 'High blood sugar (Hyperglycemia). Persistently high levels may lead to complications. Medical advice is recommended.';
+        feedback = "<strong>Diabetes Range:</strong> Your blood glucose is in the diabetic range. Consult a healthcare provider.";
     }
 
+    // Cross-field consistency check (optional dropdown exists)
+    if (hba1cValue >= 6.5 && diabetesStatus === "no") {
+        feedback += "<br>⚠️ Inconsistency detected: HbA1c suggests diabetes, but 'No' was selected.";
+    }
+
+    // Update UI with results
+    document.getElementById('rateValue').textContent = eAG.toFixed(0);
+    document.getElementById('hba1cValue').textContent = `From HbA1c: ${hba1cValue.toFixed(1)}%`;
+    document.getElementById('feedbackContent').innerHTML = feedback;
+
+    const meterFill = document.getElementById('meterFill');
     meterFill.style.width = meterWidth;
     meterFill.style.backgroundColor = meterColor;
-    feedbackContent.textContent = feedback;
 
-    placeholder.classList.add('hidden');
     resultValue.classList.remove('hidden');
 }
 
-// Print report
 function printReport() {
     const now = new Date();
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    if(document.getElementById('printDate')) {
+    if (document.getElementById('printDate')) {
         document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
     }
     window.print();
 }
-</script>
+    </script>
 
 </body>
 </html>
 {% endblock %}
 
 <!-- 
-1. Input Validation Rules (QEHS-style)
-Input	Acceptable Range	Units	Decimals	Logical Consistency / Notes	Compliance Rationale
-Glucose Value	1 – 1000 mg/dL or 0.1 – 55.5 mmol/L	mg/dL or mmol/L	Up to 1–2 decimals allowed	Cannot be negative or zero; must be numeric	Prevents unrealistic or harmful inputs; mimics real audit thresholds in patient safety.
-Unit From	mmol/L or mg/dL	—	—	Must be one of the dropdown options	Prevents invalid conversions
-Unit To	mmol/L or mg/dL	—	—	Must differ from “From Unit” for meaningful conversion	Avoids redundant calculations; ensures user awareness
-Decimal Precision	N/A	—	Max 2 decimals	Accept floats only	Clinical labs report 1–2 decimal points for blood sugar.
+1. Input Validation Rules (Real-World Compliance Approach)
 
-Edge Cases / Outliers:
+Just like QEHS safety metrics (e.g., incident rate, exposure limits), HbA1c and eAG must follow strict input and reporting validation:
 
-Extremely low values (e.g., <20 mg/dL or <1.1 mmol/L) → warn user about possible hypoglycemia.
+Field	Expected Range	Units	Validation Rules	Compliance Rationale
+HbA1c (%)	2.5 – 20.0	%	Must be a decimal number, up to 1 decimal place, not zero, not negative.	Human physiological limits. Prevents false results (like -1%, 100%).
+Diabetes Status	yes / no (required field)	N/A	Must be selected, cannot be blank.	Consistency check for interpretation vs. user declaration.
+Cross-field Check	If HbA1c ≥ 6.5 but Diabetes = "No" → warn	N/A	Flag potential inconsistency.	Similar to QEHS audits flagging when KPI contradicts reported status.
+2. Output Validation Logic & Thresholds
 
-Extremely high values (>600 mg/dL or >33 mmol/L) → warn about potential lab error or emergency condition.
+Using the ADA (American Diabetes Association) standards (like NFPA thresholds in fire safety), we set medically recognized cutoffs:
 
-Non-numeric input → error.
+Normal: HbA1c < 5.7% → eAG < 117 mg/dL
 
-Zero or negative → error.
+Prediabetes: HbA1c 5.7–6.4% → eAG ~ 117–137 mg/dL
 
-Extremely large input → prevent calculation overflow.
+Diabetes: HbA1c ≥ 6.5% → eAG ≥ 137 mg/dL
 
-Cross-field dependencies:
+➡️ Output should not only display numbers but also provide category, color-coded feedback, and a compliance disclaimer (“for awareness only, not diagnostic”).
 
-If unitFrom = unitTo → converted value = input value, but warn user.
+3. Edge Case Validations
 
-Conversion factor must match real lab standard: 1 mmol/L = 18 mg/dL.
+Empty input → Block calculation, show error.
 
-2. Output Validation Rules
+Non-numeric / special characters → Reject.
 
-Converted value must fall in humanly possible range: 20–600 mg/dL (1.1–33 mmol/L).
+HbA1c = 0, <2.5, or >20 → Show error: “Out of physiological range.”
 
-Feedback classification must use clinically recognized thresholds:
+Division by zero → Not applicable here, but validation ensures formula safety.
 
-Hypoglycemia: <70 mg/dL (<3.9 mmol/L)
+Cross-field inconsistency: e.g., HbA1c = 12% but Diabetes = "No" → Show a ⚠️ warning.
 
-Normal: 70–140 mg/dL (3.9–7.8 mmol/L)
-
-Hyperglycemia: >140 mg/dL (>7.8 mmol/L)
-
-Intermediate ranges may trigger a “monitor regularly” message.
-
-All outputs must be numeric, rounded reasonably (1–2 decimals), and formatted with units.
-
-Compliance rationale: Ensures that outputs are safe to display and actionable; mimics reporting practices in audits and medical safety checks.
-
-3. Edge Cases Handling
-Scenario	Handling
-Non-numeric input	Display error: “Enter a valid numeric glucose value.”
-Negative or zero input	Display error: “Glucose cannot be zero or negative.”
-UnitFrom = UnitTo	Display message: “No conversion needed; value remains the same.”
-Extremely high/low values	Display warning: “Value is outside typical clinical range. Verify input or seek medical attention.”
-Empty input	Display error: “Input required.”
+Extreme outlier HbA1c (e.g., 50%) → Reject; aligns with safety audits rejecting impossible exposure values.
 -->

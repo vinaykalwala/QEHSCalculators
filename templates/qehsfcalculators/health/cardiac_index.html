@@ -1,0 +1,658 @@
+{% extends 'base.html' %}
+{% block title %}Cardiac Index Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cardiac Index Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: baseline;
+            justify-content: center;
+        }
+        .result-value {
+            width: 100%;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        .rate-label {
+            color: #2980b9;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        /* Table styles */
+        .custom-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .custom-table thead {
+            background-color: #1560bd;
+            color: white;
+        }
+        .custom-table th, .custom-table td {
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .custom-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+        /* Toggle helper */
+        .hidden {
+            display: none;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Cardiac Index Calculator</h1>
+            <p>Assess heart performance by relating cardiac output to body surface area.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Enter Patient Data</h2>
+                <div class="form-group">
+                    <label for="height">Height (cm)</label>
+                    <input type="number" id="height" class="form-input" placeholder="e.g., 175">
+                </div>
+                 <div class="form-group">
+                    <label for="weight">Weight (kg)</label>
+                    <input type="number" id="weight" class="form-input" placeholder="e.g., 70">
+                </div>
+                <div class="form-group">
+                    <label for="knowCO">Do you know the cardiac output?</label>
+                    <select id="knowCO" class="form-select" onchange="toggleCOInput()">
+                        <option value="yes">Yes</option>
+                        <option value="no">No, calculate it for me</option>
+                    </select>
+                </div>
+                <div class="form-group" id="knownCOGroup">
+                    <label for="cardiacOutput">Cardiac Output (L/min)</label>
+                    <input type="number" id="cardiacOutput" class="form-input" placeholder="e.g., 5.0">
+                </div>
+                <div id="coInputGroup" class="hidden">
+                    <div class="form-group">
+                        <label for="strokeVolume">Stroke Volume (mL/beat)</label>
+                        <input type="number" id="strokeVolume" class="form-input" placeholder="e.g., 70">
+                    </div>
+                    <div class="form-group">
+                        <label for="heartRate">Heart Rate (beats/min)</label>
+                        <input type="number" id="heartRate" class="form-input" placeholder="e.g., 72">
+                    </div>
+                </div>
+                <button class="calculate-btn" onclick="calculateCardiacIndex()">Calculate</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Enter patient data to calculate the <strong>Cardiac Index</strong>.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div class="result-value hidden" id="resultValue">
+                    <h2>Cardiac Index (CI)</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label" id="rateLabel">L/min/m²</div>
+                    </div>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low</span><span>Normal</span><span>High</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🫀 Understanding Cardiac Index (CI)</h3>
+                <p>The cardiac index (CI) is a measure of heart performance that evaluates how effectively the heart pumps blood relative to a patient’s body size. It is calculated using the amount of blood the heart ejects in one minute (cardiac output) and the patient’s body surface area (BSA). This metric is widely used in intensive care medicine and cardiac monitoring to determine whether the heart is supplying enough blood to meet the body's oxygen needs.</p>
+            </div>
+
+            <div class="note-card">
+                <h3>📊 How Is Cardiac Index Measured?</h3>
+                <p>The cardiac index is derived by comparing the heart’s blood output to the patient’s body size. This allows for a more accurate assessment of heart function across individuals of different sizes.</p>
+            </div>
+
+            <div class="note-card">
+                <h3>✅ Normal Cardiac Index Range</h3>
+                <ul class="note-list">
+                    <li><strong>Healthy Range:</strong> 2.5 to 4.0 L/min/m² – Indicates normal heart function.</li>
+                    <li><strong>Low Cardiac Index:</strong> Less than 2.0 L/min/m² – May suggest cardiogenic shock or heart dysfunction.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>🔍 Why Is Cardiac Index Important?</h3>
+                <ul class="note-list">
+                    <li><strong>Personalized Heart Assessment:</strong> Adjusts cardiac output for body size, offering a precise measure of heart function.</li>
+                    <li><strong>Early Detection:</strong> Helps identify heart failure, cardiogenic shock, or inadequate blood flow.</li>
+                    <li><strong>Critical Care Management:</strong> Guides treatment decisions in intensive care units (ICUs).</li>
+                    <li><strong>Monitor Heart Efficiency:</strong> Evaluates how effectively the heart delivers oxygen-rich blood to the body.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>Parameters in Cardiac Index Calculation</h3>
+                <ul class="note-list">
+                    <li><strong>Cardiac Index (CI):</strong> Measures heart efficiency, expressed in L/min/m².</li>
+                    <li><strong>Cardiac Output (CO):</strong> Total blood volume pumped by the heart in one minute, in L/min.</li>
+                    <li><strong>Body Surface Area (BSA):</strong> Patient's body surface area, calculated from height and weight, in m².</li>
+                    <li><strong>Stroke Volume (SV):</strong> Blood volume pumped per heartbeat, in mL.</li>
+                    <li><strong>Heart Rate (HR):</strong> Number of heartbeats per minute, in bpm.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📌 Factors Affecting Cardiac Index</h3>
+                <ul class="note-list">
+                    <li><strong>Heart Rate:</strong> Faster or slower heart rate impacts total blood pumped.</li>
+                    <li><strong>Stroke Volume:</strong> Amount of blood pushed out with each heartbeat.</li>
+                    <li><strong>Body Surface Area (BSA):</strong> Varies based on height and weight.</li>
+                    <li><strong>Medical Conditions:</strong> Heart disease, dehydration, or blood loss can lower cardiac index.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <div class="note-container">
+                    <h3>📝 Input Guidelines & Validations</h3>
+                    <p>To ensure accurate Cardiac Index calculations, please follow these input rules:</p>
+                    <ul>
+                        <li><strong>Height (cm):</strong> Enter a value between <strong>100 cm and 220 cm</strong>. This range covers realistic adult heights.</li>
+                        <li><strong>Weight (kg):</strong> Enter a value between <strong>30 kg and 200 kg</strong>. Extremely low or high weights may lead to unrealistic results.</li>
+                        <li><strong>Cardiac Output (L/min):</strong> If known, enter a value between <strong>1 and 15 L/min</strong>.</li>
+                        <li><strong>Stroke Volume (mL/beat):</strong> If calculating cardiac output, use a value between <strong>20 and 200 mL/beat</strong>.</li>
+                        <li><strong>Heart Rate (beats/min):</strong> If calculating cardiac output, use a value between <strong>30 and 220 beats/min</strong>.</li>
+                        <li><strong>BMI sanity check:</strong> The combination of height and weight must result in a realistic BMI (15–50). This prevents unrealistic or accidental inputs.</li>
+                    </ul>
+                    <p>⚠️ <strong>Important:</strong> If any input is outside the valid ranges, the calculator will display an error. Please correct the values before proceeding.</p>
+                    <p>Following these guidelines ensures your Cardiac Index calculation is accurate and meaningful for medical assessment purposes.</p>
+                </div>
+            </div>
+
+            <div class="note-card">
+                <h3>⚠️ Disclaimer</h3>
+                <p>This information is intended for educational purposes only and should not replace professional medical advice. Always consult a qualified healthcare provider for medical assessments and decisions.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const now = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    if(document.getElementById('printDate')) {
+        document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+    }
+    toggleCOInput();
+});
+
+function toggleCOInput() {
+    const knowCO = document.getElementById('knowCO').value;
+    document.getElementById('coInputGroup').classList.toggle('hidden', knowCO === 'yes');
+    document.getElementById('knownCOGroup').classList.toggle('hidden', knowCO === 'no');
+}
+
+function calculateCardiacIndex() {
+    const knowCO = document.getElementById('knowCO').value;
+    const height = document.getElementById('height').value.trim();
+    const weight = document.getElementById('weight').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    // Reset UI
+    errorBox.classList.add("hidden");
+    resultValue.classList.add("hidden");
+    placeholder.classList.remove("hidden");
+
+    let errors = [];
+
+    // Strict validations
+    if (height === "" || isNaN(height) || parseFloat(height) < 100 || parseFloat(height) > 220) 
+        errors.push("👉 Height must be between 100 cm and 220 cm.");
+    if (weight === "" || isNaN(weight) || parseFloat(weight) < 30 || parseFloat(weight) > 200) 
+        errors.push("👉 Weight must be between 30 kg and 200 kg.");
+
+    let CO;
+
+    if (knowCO === 'yes') {
+        const cardiacOutput = document.getElementById('cardiacOutput').value.trim();
+        if (cardiacOutput === "" || isNaN(cardiacOutput) || parseFloat(cardiacOutput) < 1 || parseFloat(cardiacOutput) > 15) {
+            errors.push("👉 Cardiac Output must be between 1 and 15 L/min.");
+        }
+        CO = parseFloat(cardiacOutput);
+    } else {
+        const strokeVolume = document.getElementById('strokeVolume').value.trim();
+        const heartRate = document.getElementById('heartRate').value.trim();
+
+        if (strokeVolume === "" || isNaN(strokeVolume) || parseFloat(strokeVolume) < 20 || parseFloat(strokeVolume) > 200) 
+            errors.push("👉 Stroke Volume must be between 20 and 200 mL/beat.");
+        if (heartRate === "" || isNaN(heartRate) || parseFloat(heartRate) < 30 || parseFloat(heartRate) > 220) 
+            errors.push("👉 Heart Rate must be between 30 and 220 beats/min.");
+
+        if (errors.length === 0) CO = (parseFloat(strokeVolume) * parseFloat(heartRate)) / 1000; // mL to L
+    }
+
+    // Strict BMI sanity check
+    if (errors.length === 0) {
+        const heightM = parseFloat(height) / 100;
+        const BMI = parseFloat(weight) / (heightM * heightM);
+        if (BMI < 15 || BMI > 50) {
+            errors.push("👉 The combination of height and weight is unrealistic (BMI out of range 15–50).");
+        }
+    }
+
+    // Display errors if any
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    // Haycock formula for BSA
+    const BSA = 0.024265 * Math.pow(parseFloat(height), 0.3964) * Math.pow(parseFloat(weight), 0.5378);
+
+    // Final validation
+    if (CO <= 0 || BSA <= 0) {
+        errorMessage.textContent = "❌ Invalid cardiac output or BSA calculation.";
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        return;
+    }
+
+    // Calculate Cardiac Index
+    const CI = CO / BSA;
+    document.getElementById('rateValue').textContent = CI.toFixed(2);
+
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+
+    if (CI < 2.0) {
+        meterWidth = '33%'; 
+        meterColor = '#e74c3c';
+        feedback = "<strong>Low Cardiac Index.</strong> This may indicate inadequate blood circulation or cardiogenic shock. Consultation with a healthcare provider is critical.";
+    } else if (CI <= 4.0) {
+        meterWidth = '66%'; 
+        meterColor = '#2ecc71';
+        feedback = "<strong>Normal Cardiac Index.</strong> Your heart is pumping blood efficiently relative to your body size.";
+    } else {
+        meterWidth = '95%'; 
+        meterColor = '#f39c12';
+        feedback = "<strong>High Cardiac Index.</strong> This can occur in certain conditions like sepsis or severe anemia. It's recommended to discuss this with a healthcare professional.";
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').innerHTML = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+function printReport() {
+    const now = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    if(document.getElementById('printDate')) {
+        document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+    }
+    window.print();
+}
+</script>
+
+
+</body>
+</html>
+{% endblock %}
+
+<!-- 
+1. Input Analysis & Validation Rules
+Input	Units	Recommended Range	Allowed Decimals	Logical/Cross-field Checks	QEHS Compliance Rationale
+Height	cm	50 – 250	0–1	Must be numeric; must match realistic human height	Prevents unrealistic anthropometry that could skew BSA calculation
+Weight	kg	3 – 300	0–1	Must be numeric; cross-check weight-to-height ratio	Avoids impossible BMI or BSA values; ensures meaningful cardiac index
+Stroke Volume	mL/beat	20 – 200	0–1	Required only if CO unknown	Prevents impossible cardiac output calculations
+Heart Rate	beats/min	30 – 220	0–0	Required only if CO unknown	Ensures physiologically plausible CO calculation
+Cardiac Output	L/min	1 – 15	0–1	Required only if CO known	Prevents extreme or implausible cardiac index values
+Known CO	yes/no	N/A	N/A	Toggles CO vs Stroke Volume/HR inputs	Avoids missing or double input errors
+
+Cross-field validations:
+
+If CO unknown, both Stroke Volume and Heart Rate must be provided and numeric.
+
+Extremely high weight with very low height is invalid (e.g., >200 kg and <120 cm).
+
+Division by zero is prevented in CI calculation (BSA cannot be zero).
+
+2. Output Validation & Thresholds
+
+Cardiac Index (CI = CO / BSA)
+
+CI (L/min/m²)	Interpretation	Notes
+< 2.0	Low	May indicate cardiogenic shock or inadequate circulation; urgent clinical attention needed
+2.0 – 4.0	Normal	Heart is pumping efficiently
+> 4.0	High	Could indicate hyperdynamic circulation or compensation; monitor patient
+
+Compliance rationale:
+
+Ensures CI values are medically meaningful.
+
+Alerts highlight unsafe conditions for QEHS/clinical monitoring.
+
+Protects against extreme outputs from invalid inputs.
+
+3. Edge Case Handling
+
+Division by zero: Prevent BSA = 0, weight/height = 0 → error.
+
+Extreme outliers: Weight > 300 kg, height < 50 cm → reject inputs.
+
+Missing fields: CO, Stroke Volume, or Heart Rate empty → prompt error.
+
+Cross-field inconsistencies: Stroke Volume too high or HR too low → flag as unusual.
+
+Non-numeric input: Reject with user-friendly message.
+-->

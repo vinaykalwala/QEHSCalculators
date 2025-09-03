@@ -464,6 +464,29 @@
                 </tbody>
             </table>
 
+            <div class="note-card">
+                <h3>✅ Input Validations</h3>
+                <p>To ensure accurate Body Surface Area (BSA) calculation, please follow these guidelines:</p>
+                <ul class="note-list">
+                    <li><strong>Weight:</strong> Enter a numeric value greater than 0.
+                        <ul>
+                            <li>If in <strong>kg</strong>: acceptable range 2 – 300 kg</li>
+                            <li>If in <strong>lb</strong>: acceptable range 5 – 660 lb</li>
+                        </ul>
+                    </li>
+                    <li><strong>Height:</strong> Enter a numeric value greater than 0.
+                        <ul>
+                            <li>If in <strong>cm</strong>: acceptable range 30 – 250 cm</li>
+                            <li>If in <strong>inches</strong>: acceptable range 12 – 100 in</li>
+                        </ul>
+                    </li>
+                    <li><strong>Formula Selection:</strong> Choose one of the valid BSA formulas: Du Bois, Mosteller, Haycock, Gehan & George, Fujimoto.</li>
+                    <li><strong>Cross-check:</strong> Extremely high weight with very low height may be invalid. Ensure values are realistic.</li>
+                    <li><strong>Units:</strong> Make sure to select the correct weight and height units (kg/lb, cm/in).</li>
+                </ul>
+                <p>Following these rules helps prevent calculation errors and ensures the result is medically meaningful.</p>
+            </div>
+
     <div class="note-card">
         <h3>⚠️ Important Notes</h3>
         <ul class="note-list">
@@ -509,112 +532,152 @@
             const now = new Date();
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
             if(document.getElementById('printDate')) {
-               document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
             }
         });
 
         function calculateBSA() {
-            const weight = document.getElementById('weight').value.trim();
+            const weightInput = document.getElementById('weight').value.trim();
             const weightUnit = document.getElementById('weight-unit').value;
-            const height = document.getElementById('height').value.trim();
+            const heightInput = document.getElementById('height').value.trim();
             const heightUnit = document.getElementById('height-unit').value;
             const formula = document.getElementById('formula').value;
-            const formulaText = document.getElementById('formula').options[document.getElementById('formula').selectedIndex].text;
 
-            const errorBox = document.getElementById('resultError');
-            const errorMessage = document.getElementById('errorMessage');
+            const errorDiv = document.getElementById('resultError');
+            const errorMsg = document.getElementById('errorMessage');
+            const valueDiv = document.getElementById('resultValue');
             const placeholder = document.getElementById('placeholder');
-            const resultValue = document.getElementById('resultValue');
+            const meterFill = document.getElementById('meterFill');
+
+            // Reset display
+            errorDiv.classList.add("hidden");
+            valueDiv.classList.add("hidden");
+            placeholder.classList.remove("hidden");
 
             let errors = [];
-            const weightVal = parseFloat(weight);
-            const heightVal = parseFloat(height);
 
-            // Validate weight
-            if (isNaN(weightVal) || weightVal <= 0) {
-                errors.push("👉 Please enter a valid numeric weight.");
-            } else {
-                if (weightUnit === "kg" && (weightVal < 2 || weightVal > 300)) {
-                    errors.push("👉 Weight must be between 2 and 300 kg.");
-                }
-                if (weightUnit === "lb" && (weightVal < 5 || weightVal > 660)) {
-                    errors.push("👉 Weight must be between 5 and 660 lb.");
-                }
-            }
+            let weight = parseFloat(weightInput);
+            let height = parseFloat(heightInput);
 
-            // Validate height
-            if (isNaN(heightVal) || heightVal <= 0) {
-                errors.push("👉 Please enter a valid numeric height.");
-            } else {
-                if (heightUnit === "cm" && (heightVal < 30 || heightVal > 250)) {
-                    errors.push("👉 Height must be between 30 and 250 cm.");
-                }
-                if (heightUnit === "in" && (heightVal < 12 || heightVal > 98)) {
-                    errors.push("👉 Height must be between 12 and 98 inches.");
-                }
-            }
+            // Basic validations
+            if (isNaN(weight) || weight <= 0) errors.push("❌ Enter a valid weight greater than 0.");
+            if (isNaN(height) || height <= 0) errors.push("❌ Enter a valid height greater than 0.");
+
+            // Range validation by unit
+            if (weightUnit === "kg" && (weight < 2 || weight > 300)) errors.push("❌ Weight must be between 2 and 300 kg.");
+            if (weightUnit === "lb" && (weight < 5 || weight > 660)) errors.push("❌ Weight must be between 5 and 660 lb.");
+            if (heightUnit === "cm" && (height < 30 || height > 250)) errors.push("❌ Height must be between 30 and 250 cm.");
+            if (heightUnit === "in" && (height < 12 || height > 100)) errors.push("❌ Height must be between 12 and 100 inches.");
 
             if (errors.length > 0) {
-                errorMessage.innerHTML = errors.join("<br>");
-                errorBox.classList.remove("hidden");
+                errorMsg.innerHTML = errors.join("<br>");
+                errorDiv.classList.remove("hidden");
                 placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
                 return;
-            } else {
-                errorBox.classList.add("hidden");
             }
 
-            // Convert to metric
-            const weightKg = weightUnit === 'lb' ? weightVal * 0.453592 : weightVal;
-            const heightCm = heightUnit === 'in' ? heightVal * 2.54 : heightVal;
+            // Unit conversion
+            const weightKg = weightUnit === 'lb' ? weight * 0.453592 : weight;
+            const heightCm = heightUnit === 'in' ? height * 2.54 : height;
 
+            // Cross-check anthropometry
+            if (weightKg > 150 && heightCm < 100) {
+                errorMsg.textContent = "❌ Weight/height combination seems inconsistent. Please check your inputs.";
+                errorDiv.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                return;
+            }
+
+            // Calculate BSA
             let bsa;
             switch (formula) {
-                case 'mosteller': 
-                    bsa = Math.sqrt((heightCm * weightKg) / 3600); 
+                case 'mosteller':
+                    bsa = Math.sqrt((heightCm * weightKg) / 3600);
                     break;
-                case 'haycock': 
-                    bsa = 0.024265 * Math.pow(weightKg, 0.5378) * Math.pow(heightCm, 0.3964); 
+                case 'haycock':
+                    bsa = 0.024265 * Math.pow(weightKg, 0.5378) * Math.pow(heightCm, 0.3964);
                     break;
-                case 'gehan': 
-                    bsa = 0.0235 * Math.pow(weightKg, 0.51456) * Math.pow(heightCm, 0.42246); 
+                case 'gehan':
+                    bsa = 0.0235 * Math.pow(weightKg, 0.51456) * Math.pow(heightCm, 0.42246);
                     break;
-                case 'fujimoto': 
-                    bsa = 0.008883 * Math.pow(weightKg, 0.444) * Math.pow(heightCm, 0.663); 
+                case 'fujimoto':
+                    bsa = 0.008883 * Math.pow(weightKg, 0.444) * Math.pow(heightCm, 0.663);
                     break;
-                default: 
-                    bsa = 0.007184 * Math.pow(weightKg, 0.425) * Math.pow(heightCm, 0.725); 
+                default: // Du Bois
+                    bsa = 0.007184 * Math.pow(weightKg, 0.425) * Math.pow(heightCm, 0.725);
             }
 
-            document.getElementById('rateValue').textContent = bsa.toFixed(2);
+            bsa = parseFloat(bsa.toFixed(2));
 
-            const meterFill = document.getElementById('meterFill');
-            meterFill.style.width = '100%';
-            meterFill.style.backgroundColor = '#2980b9';
+            if (bsa < 0.2 || bsa > 3.0) {
+                errorMsg.textContent = "❌ Calculated BSA is outside the realistic range (0.2–3.0 m²). Please verify inputs.";
+                errorDiv.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                return;
+            }
 
+            // Interpretation
             let interpretation;
-            if (bsa < 0.5) interpretation = "Typical for a young child (under 2 years).";
-            else if (bsa < 1.5) interpretation = "Typical for a child or small adult.";
-            else if (bsa < 2.0) interpretation = "Within the average range for an adult.";
-            else interpretation = "Typical for a large adult.";
+            if (bsa < 0.5) interpretation = "Infant";
+            else if (bsa < 1.14) interpretation = "Child (under 10 years)";
+            else if (bsa < 1.6) interpretation = "Adolescent or small adult";
+            else if (bsa < 1.9) interpretation = "Average adult";
+            else interpretation = "Large adult";
 
-            document.getElementById('feedbackContent').innerHTML = 
-                `<strong>Category:</strong> ${interpretation}<br><strong>Formula Used:</strong> ${formulaText}`;
+            // Display result
+            document.getElementById('rateValue').textContent = bsa.toFixed(2);
+            document.getElementById('rateLabel').textContent = "m²";
+            document.getElementById('feedbackContent').textContent = interpretation;
 
-            placeholder.classList.add('hidden');
-            resultValue.classList.remove('hidden');
+            // Set meter fill based on BSA (0.2–3.0 m²)
+            let fillPercent = ((bsa - 0.2) / (3.0 - 0.2)) * 100;
+            meterFill.style.width = fillPercent + "%";
+            meterFill.style.background = "#2980b9";
+
+            valueDiv.classList.remove("hidden");
+            placeholder.classList.add("hidden");
         }
-
 
         function printReport() {
             const now = new Date();
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
             if(document.getElementById('printDate')) {
-               document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
             }
             window.print();
         }
     </script>
+
 </body>
 </html>
 {% endblock %}
+
+<!-- 
+1. Input Analysis & Validation Rules
+Input	Units	Recommended Range	Allowed Decimals	Cross-field / Logical Checks	QEHS Rationale
+Weight	kg / lb	20–300 kg (44–660 lb)	up to 2 decimal points	Must be positive; if lb selected, convert to kg for calculation	Ensures realistic human weight for safety & health planning; prevents extreme inputs that break calculation
+Height	cm / in	100–250 cm (39–98 in)	up to 1 decimal	Must be positive; if in selected, convert to cm	Prevents nonsensical height inputs that invalidate BSA and subsequent clinical or safety interpretations
+BSA Formula	N/A	Only provided formulas	N/A	Must be one of the valid formulas	Ensures correct formula application for standard reporting
+Logical Consistency	N/A	Weight-to-height ratio	N/A	Prevent impossible combinations, e.g., extremely high weight with very low height	Avoids unrealistic KPIs in audits and safety reports
+
+Edge Cases to Handle:
+
+Empty, zero, negative, or non-numeric values.
+
+Extremely high or low weight or height outside humanly plausible ranges.
+
+Division by zero (height = 0 in calculations).
+
+User selecting wrong units accidentally (lb vs kg, in vs cm).
+
+2. Output Validation & Thresholds
+
+BSA (m²) must always be positive and realistically between 0.5 m² and 3 m² for humans.
+
+If calculated BSA is outside this range → show warning/error for unrealistic input.
+
+Each formula (Du Bois, Mosteller, Haycock, Gehan, Fujimoto) should produce results in the same approximate range, otherwise flag input issues.
+
+Compliance Rationale:
+Accurate BSA is critical for medication dosing, exposure limits, PPE sizing, and clinical assessments in occupational health audits. Invalid outputs could lead to health risks or non-compliance.
+-->

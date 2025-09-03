@@ -1,0 +1,803 @@
+{% extends 'base.html' %}
+{% block title %}Bedridden Patient Weight Estimator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bedridden Patient Weight Estimator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            justify-content: center;
+        }
+        .result-value {
+            width: 100%;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        .rate-label {
+            color: #2980b9;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        /* Image CSS */
+        .measurement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+        .measurement-block {
+            background: #f9f9f9;
+            border-left: 4px solid #1560bd;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .measurement-block h4 {
+          font-size: 16px;
+          color: #1560bd;
+          margin-bottom: 8px;
+        }
+        .measurement-block p {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .measurement-block img {
+             display: block;
+             max-width: 100%;
+             height: auto;
+             border-radius: 8px;
+             margin-top: 10px;
+        }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+        /* Toggle helper */
+        .hidden {
+            display: none;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Bedridden Patient Weight Estimator</h1>
+            <p>Estimate weight for immobile patients using various anthropometric formulas.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Select Formula and Enter Data</h2>
+                <div class="form-group">
+                    <label for="weightFormula">Select Formula</label>
+                    <select id="weightFormula" class="form-select" onchange="renderWeightInputs()">
+                        <option value="chumlea">Chumlea et al.</option>
+                        <option value="rabito1">Rabito et al. (Full)</option>
+                        <option value="rabito2">Rabito et al. (Simplified)</option>
+                        <option value="rabito3">Rabito et al. (Sex-adjusted)</option>
+                        <option value="ross">Ross Laboratories</option>
+                    </select>
+                </div>
+                <div id="weightInputFields"></div>
+                <button class="calculate-btn" onclick="calculateWeight()">Estimate Weight</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Select a formula and enter measurements to estimate the patient's weight.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div class="result-value hidden" id="resultValue">
+                    <h2>Estimated Weight</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.0</div>
+                        <div class="rate-label">kg</div>
+                    </div>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Estimation</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Formula Used</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+
+            <div class="note-card">
+                <h3>⚖️ Why Estimate Weight?</h3>
+                <p>
+                    Accurate weight estimation is crucial for medication dosing, nutritional assessment, fluid balance, and treatment planning in immobile patients. These validated anthropometric methods use body measurements to estimate weight when direct measurement isn't possible.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>🧠 Weight Estimation Formulas Explained</h3>
+                <ul class="note-list">
+                    <li><strong>Chumlea et al.:</strong> Designed for elderly or immobile patients, using <strong>knee height</strong> and <strong>mid-arm circumference (MAC)</strong>. Widely used in geriatric settings due to reliability.</li>
+                    <li><strong>Rabito et al. (Full Model):</strong> Incorporates <strong>age, sex, MAC, calf circumference</strong>, and interactions. High accuracy in clinical environments.</li>
+                    <li><strong>Rabito et al. (Simplified):</strong> Only uses <strong>MAC and calf circumference</strong>, ideal for bedside use or resource-limited settings.</li>
+                    <li><strong>Rabito et al. (Sex-adjusted):</strong> Adjusts estimates based on sex using simplified variables.</li>
+                    <li><strong>Ross Laboratories:</strong> Uses <strong>MAC and subscapular skinfold thickness</strong>, originally for pediatric/clinical trials but adaptable for adults.</li>
+                </ul>
+                <p><strong>Note:</strong> All formulas are estimation tools and should be used along with clinical judgment.</p>
+            </div>
+
+            <div class="note-card">
+                <h3>📏 Measurement Guide for Bedridden Patients</h3>
+                <div class="measurement-grid">
+
+                    <div class="measurement-block">
+                        <h4>Semi-span (Demi-span)</h4>
+                        <p>Measure from the middle of the sternal notch to the tip of the middle finger. Keep the arm aligned with the shoulder.</p>
+                        <img src="{% static 'images/arm2.jpg' %}" alt="Semi-span measurement">
+                    </div>
+
+                    <div class="measurement-block">
+                        <h4>Forearm Length</h4>
+                        <p>Measure from the tip of the elbow to the midpoint of the wrist bone. Keep the forearm straight.</p>
+                        <img src="{% static 'images/arm1.jpg' %}" alt="Forearm length measurement">
+                    </div>
+
+                    <div class="measurement-block">
+                        <h4>Recumbent Height</h4>
+                        <p>Measure from the top of the head to the heel with the patient lying flat using a special measuring scale.</p>
+                        <img src="{% static 'images/arm4.jpg' %}" alt="Recumbent height measurement">
+                    </div>
+
+                    <div class="measurement-block">
+                        <h4>Knee Height</h4>
+                        <p>Use a sliding caliper from under the heel to the top of the thigh while the patient is lying or sitting.</p>
+                        <img src="{% static 'images/arm5.jpg' %}" alt="Knee height measurement">
+                    </div>
+
+                    <div class="measurement-block">
+                        <h4>Calf Circumference</h4>
+                        <p>Measure the widest part of the calf on the non-dominant leg. Ensure the leg is relaxed.</p>
+                        <img src="{% static 'images/arm6.jpg' %}" alt="Calf circumference measurement">
+                    </div>
+
+                    <div class="measurement-block">
+                        <h4>Arm Circumference (MAC)</h4>
+                        <p>Measure halfway between the shoulder and the elbow (mid-upper arm).</p>
+                        <img src="{% static 'images/arm7.jpg' %}" alt="Arm circumference measurement">
+                    </div>
+
+                    <div class="measurement-block">
+                        <h4>Subscapular Skinfold</h4>
+                        <p>Use calipers to measure a diagonal skinfold just below the bottom angle of the shoulder blade.</p>
+                        <img src="{% static 'images/arm8.gif' %}" alt="Subscapular skinfold measurement">
+                    </div>
+
+                    <div class="measurement-block">
+                        <h4>Arm Length</h4>
+                        <p>Measure from the upper edge of the acromion process to the midpoint of the elbow, from the back side of the patient.</p>
+                        <img src="{% static 'images/arm3.jpg' %}" alt="Arm length measurement">
+                    </div>
+
+                    <div class="measurement-block">
+                        <h4>Abdominal Circumference</h4>
+                        <p>Measure around the abdomen at the midpoint between the last rib and the top of the hip bone. Ensure a relaxed posture.</p>
+                        <img src="{% static 'images/arm9.webp' %}" alt="Abdominal circumference measurement">
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="note-card">
+                <h3>💡 Importance of Accurate Weight Estimation</h3>
+                <ul class="note-list">
+                    <li><strong>Medication Dosing:</strong> Correct drug doses per kg prevent under- or overdosing.</li>
+                    <li><strong>Nutritional Assessment:</strong> Evaluates malnutrition, obesity, or cachexia.</li>
+                    <li><strong>Fluid Balance:</strong> Tracks retention or loss in critical patients.</li>
+                    <li><strong>Dialysis Dosing:</strong> Helps adjust sessions and prevent hypotension.</li>
+                    <li><strong>Anesthesia Safety:</strong> Prevents overdose risks during procedures.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📝 Tips for Better Weight Estimation</h3>
+                <ul class="note-list">
+                    <li>Take multiple measurements and average them when possible.</li>
+                    <li>Use consistent technique, tape tension, and anatomical landmarks.</li>
+                    <li>Document asymmetries (e.g., amputations, edema) and adjust accordingly.</li>
+                    <li>Cross-check with BMI and clinical observation when in doubt.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>✅ Input Validation</h3>
+                <p>To ensure accurate weight estimation, please enter measurements within realistic ranges. Here’s a quick guide:</p>
+                <ul class="note-list">
+                    <li><strong>Calf Circumference:</strong> 15–60 cm. Measure at the widest part with leg relaxed.</li>
+                    <li><strong>Knee Height:</strong> 25–60 cm. Measure heel to top of thigh, knee at 90°.</li>
+                    <li><strong>Arm Circumference:</strong> 15–50 cm. Mid-upper arm, halfway between shoulder and elbow.</li>
+                    <li><strong>Abdominal Circumference:</strong> 40–180 cm. Midpoint between last rib and hip bone.</li>
+                    <li><strong>Subscapular Skinfold:</strong> 5–50 mm. Measure diagonal skinfold below shoulder blade.</li>
+                    <li><strong>Gender:</strong> Select Male or Female.</li>
+                    <li><strong>Race:</strong> Select White or Black for Ross formula.</li>
+                </ul>
+                <p>⚠️ Please do not enter negative or zero values. Follow measurement techniques for accuracy.</p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚠️ Limitations to Keep in Mind</h3>
+                <ul class="note-list">
+                    <li>Formulas may overestimate in obese patients or underestimate with muscle atrophy.</li>
+                    <li>Edema, ascites, or contractures may distort actual mass.</li>
+                    <li>Always interpret results along with clinical judgment and visual assessment.</li>
+                </ul>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const now = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        if(document.getElementById('printDate')) {
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        }
+        renderWeightInputs();
+    });
+
+    // Render input fields based on formula
+    function renderWeightInputs() {
+        const formula = document.getElementById("weightFormula").value;
+        const container = document.getElementById("weightInputFields");
+        container.innerHTML = "";
+
+        const addField = (id, label) => {
+            const unit = id === 'subscap' ? 'mm' : 'cm';
+            container.innerHTML += `
+            <div class="form-group">
+                <label for="${id}">${label}</label>
+                <input type="number" id="${id}" class="form-input" placeholder="Enter value in ${unit}">
+                <small class="note-text" id="${id}-note"></small>
+            </div>`;
+        };
+
+        const addSelect = (id, label, options) => {
+            const optionsHTML = options.map(o => `<option value="${o.value}">${o.label}</option>`).join("");
+            container.innerHTML += `
+            <div class="form-group">
+                <label for="${id}">${label}</label>
+                <select id="${id}" class="form-select">${optionsHTML}</select>
+            </div>`;
+        };
+
+        switch(formula) {
+            case "chumlea":
+                addSelect("wSex", "Gender", [{value:1,label:"Male"},{value:2,label:"Female"}]);
+                addField("calf", "Calf Circumference");
+                addField("knee", "Knee Height");
+                addField("arm", "Arm Circumference");
+                addField("subscap", "Subscapular Skinfold");
+                break;
+            case "rabito1":
+                addField("arm", "Arm Circumference");
+                addField("abdominal", "Abdominal Circumference");
+                addField("calf", "Calf Circumference");
+                addField("subscap", "Subscapular Skinfold");
+                break;
+            case "rabito2":
+                addField("arm", "Arm Circumference");
+                addField("abdominal", "Abdominal Circumference");
+                addField("calf", "Calf Circumference");
+                break;
+            case "rabito3":
+                addSelect("wSex", "Gender", [{value:1,label:"Male"},{value:2,label:"Female"}]);
+                addField("arm", "Arm Circumference");
+                addField("abdominal", "Abdominal Circumference");
+                addField("calf", "Calf Circumference");
+                break;
+            case "ross":
+                addSelect("race", "Race", [{value:1,label:"White"},{value:2,label:"Black"}]);
+                addSelect("wSex", "Gender", [{value:1,label:"Male"},{value:2,label:"Female"}]);
+                addField("knee", "Knee Height");
+                addField("arm", "Arm Circumference");
+                break;
+        }
+
+        // Add notes for guidance
+        const notes = {
+            calf: "Typical range: 15–60 cm. Measure at the widest part, leg relaxed.",
+            knee: "Typical range: 25–60 cm. Measure with knee at 90°.",
+            arm: "Typical range: 15–50 cm. Mid-upper arm, halfway between shoulder and elbow.",
+            abdominal: "Typical range: 40–180 cm. Midpoint between last rib and hip bone.",
+            subscap: "Typical range: 5–50 mm. Diagonal skinfold below shoulder blade."
+        };
+
+        for (let key in notes) {
+            const noteEl = document.getElementById(`${key}-note`);
+            if (noteEl) noteEl.textContent = notes[key];
+        }
+
+        // Set scrolling if inputs exceed 3
+        if(container.children.length > 3){
+            container.style.maxHeight = "300px";
+            container.style.overflowY = "auto";
+            container.style.paddingRight = "10px";
+        } else {
+            container.style.maxHeight = "none";
+            container.style.overflowY = "visible";
+            container.style.paddingRight = "0";
+        }
+    }
+
+    // Calculate weight with full validation
+    function calculateWeight() {
+        const formula = document.getElementById("weightFormula").value;
+        const formulaText = document.getElementById("weightFormula").options[document.getElementById("weightFormula").selectedIndex].text;
+
+        const errorBox = document.getElementById('resultError');
+        const errorMessage = document.getElementById('errorMessage');
+        const placeholder = document.getElementById('placeholder');
+        const resultValue = document.getElementById('resultValue');
+
+        let errors = [];
+        let weight = 0;
+
+        const getVal = (id, min, max, unit) => {
+            const input = document.getElementById(id);
+            if (!input) return null;
+            const val = input.value.trim();
+            const label = document.querySelector(`label[for=${id}]`).textContent;
+            if (val === "" || isNaN(parseFloat(val)) || parseFloat(val) <= 0) {
+                errors.push(`👉 Please enter a valid ${label}.`);
+                return null;
+            }
+            const num = parseFloat(val);
+            if (num < min || num > max) errors.push(`👉 ${label} should be between ${min}-${max} ${unit}.`);
+            return num;
+        };
+
+        const calf = document.getElementById("calf") ? getVal("calf", 15, 60, "cm") : 0;
+        const knee = document.getElementById("knee") ? getVal("knee", 25, 60, "cm") : 0;
+        const arm = document.getElementById("arm") ? getVal("arm", 15, 50, "cm") : 0;
+        const abdominal = document.getElementById("abdominal") ? getVal("abdominal", 40, 180, "cm") : 0;
+        const subscap = document.getElementById("subscap") ? getVal("subscap", 5, 50, "mm") : 0;
+        const sex = document.getElementById("wSex") ? parseInt(document.getElementById("wSex").value) : 1;
+        const race = document.getElementById("race") ? parseInt(document.getElementById("race").value) : 1;
+
+        if(errors.length > 0){
+            errorMessage.innerHTML = errors.join("<br>");
+            errorBox.classList.remove("hidden");
+            placeholder.classList.add("hidden");
+            resultValue.classList.add("hidden");
+            return;
+        }
+
+        try {
+            switch(formula){
+                case "chumlea":
+                    weight = sex === 1 ? (0.98*calf)+(1.16*knee)+(1.73*arm)+(0.37*subscap)-81.69
+                                        : (1.27*calf)+(0.87*knee)+(0.98*arm)+(0.4*subscap)-62.35;
+                    break;
+                case "rabito1":
+                    weight = (0.503*arm)+(0.5634*abdominal)+(1.318*calf)+(0.0339*subscap)-43.156;
+                    break;
+                case "rabito2":
+                    weight = (0.4808*arm)+(0.5646*abdominal)+(1.316*calf)-42.245;
+                    break;
+                case "rabito3":
+                    weight = (0.5759*arm)+(0.5263*abdominal)+(1.2452*calf)-(4.8689*sex)+32.9241;
+                    break;
+                case "ross":
+                    if(race===1){ // White
+                        weight = sex===1 ? (1.19*knee)+(3.21*arm)-86.82 : (1.01*knee)+(2.81*arm)-66.04;
+                    } else { // Black
+                        weight = sex===1 ? (1.09*knee)+(3.14*arm)-83.72 : (1.24*knee)+(2.81*arm)-82.48;
+                    }
+                    break;
+            }
+        } catch(e) {
+            errors.push("Error in calculation. Check inputs.");
+        }
+
+        if(weight < 20 || weight > 200) errors.push("Calculated weight is outside realistic human range (20–200 kg).");
+
+        if(errors.length > 0){
+            errorMessage.innerHTML = errors.join("<br>");
+            errorBox.classList.remove("hidden");
+            placeholder.classList.add("hidden");
+            resultValue.classList.add("hidden");
+            return;
+        }
+
+        errorBox.classList.add("hidden");
+        document.getElementById('rateValue').textContent = weight.toFixed(1);
+        document.getElementById('feedbackContent').textContent = formulaText;
+        placeholder.classList.add("hidden");
+        resultValue.classList.remove('hidden');
+    }
+
+    // Print function
+    function printReport() {
+        const now = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        if(document.getElementById('printDate')) document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        window.print();
+    }
+</script>
+
+</body>
+</html>
+{% endblock %}
+
+<!-- 1. Analysis of Inputs & Outputs (QEHS Perspective)
+
+Inputs:
+
+Sex: Male/Female → important for sex-specific formulas.
+
+Race: For Ross formula only → weight prediction differs by race.
+
+Anthropometric measures:
+
+Calf Circumference: cm
+
+Knee Height: cm
+
+Arm Circumference: cm
+
+Abdominal Circumference: cm
+
+Subscapular Skinfold: mm
+
+Outputs:
+
+Estimated weight (kg)
+
+Should reflect realistic human weights for bedridden patients (typically 20–200 kg).
+
+QEHS Perspective:
+
+Weight estimation is critical in patient handling, lifting, and fall-prevention planning.
+
+Ensuring realistic input ranges prevents unsafe handling decisions (e.g., underestimating weight for transfer lifts).
+
+2. Input Validation Rules
+Input	Unit	Acceptable Range	Notes / Logic
+Calf Circumference	cm	15 – 60	Adult human calf; below 15 cm unrealistic; above 60 cm extreme
+Knee Height	cm	25 – 60	Common for bedridden patients; ensures formula validity
+Arm Circumference	cm	15 – 50	Adult limb girth; cross-check against body size
+Abdominal Circumference	cm	40 – 180	Extreme obesity/underweight handled
+Subscapular Skinfold	mm	5 – 50	Typical adult range
+Age (if required)	years	1 – 120	Biological feasibility
+Sex	1 / 2	Required	Must select male/female
+Race	1 / 2	Required for Ross	White/Black
+
+Validation Logic:
+
+All inputs must be positive numeric values.
+
+No empty fields.
+
+Decimals allowed (e.g., 25.5 cm).
+
+Cross-field checks: calf > 0, knee > 0, etc.
+
+3. Output Validation
+
+Weight (kg) must be realistic:
+
+Minimum: 20 kg (very small adult or malnourished patient)
+
+Maximum: 200 kg (extreme obesity)
+
+If outside this range → show error message.
+
+Compliance Rationale:
+
+Ensures patient handling decisions (manual lifting, hoists, beds) are based on safe estimates.
+
+Prevents risks of underestimating patient weight in fire/emergency evacuation or occupational safety plans.
+
+4. Edge Case Handling
+
+Division by zero → not applicable here (no division in formulas).
+
+Negative or zero measurements → invalid, error message.
+
+Extreme outliers → measurements outside biological norms trigger warnings.
+
+Missing values → cannot compute → show “check all measurements”.
+
+NaN → formula error caught and displayed.
+
+Cross-check logic: e.g., if subscapular skinfold unusually high (>50 mm) or limb measures inconsistent (knee height > calf circumference), warn user. -->

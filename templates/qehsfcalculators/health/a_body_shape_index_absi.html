@@ -416,38 +416,74 @@
         </div>
 
         <div class="result-card">
+            <!-- Placeholder Section -->
             <div class="result-placeholder" id="placeholder">
                 <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Safety illustration">
                 <p>Your ABSI results and mortality risk assessment will be displayed here.</p>
             </div>
-            
-            <div class="result-error hidden" id="resultError"><div class="error-message" id="errorMessage"></div></div>
-                
-            <div class="result-value hidden" id="resultValue">
-                <div class="rate-value" id="absiZScoreValue">0.00</div>
-                <div class="rate-value" id="absiValue"></div>
 
+           <!-- Error Section -->
+            <div class="result-error hidden" id="resultError">
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-value hidden" id="resultValue">
+
+                <!-- ABSI z-score -->
+                <div>
+                    <div class="rate-value" id="absiZScoreValue">0.00</div>
+                    <div class="rate-label">ABSI z-score</div>
+                </div>
+
+                <!-- ABSI Value -->
+                <div>
+                    <div class="rate-value" id="absiValue">—</div>
+                    <div class="rate-label">ABSI Value</div>
+                </div>
+
+                <!-- Safety Meter -->
                 <div class="safety-meter">
                     <div class="meter-fill" id="meterFill"></div>
                 </div>
                 <div class="meter-labels">
-                    <span>Low</span><span>Average</span><span>Moderate</span><span>High</span><span>Very High</span>
+                    <span>Low</span>
+                    <span>Average</span>
+                    <span>Moderate</span>
+                    <span>High</span>
+                    <span>Very High</span>
                 </div>
 
+                <!-- Feedback Section -->
                 <div class="result-feedback">
                     <div class="feedback-title">Risk Assessment</div>
                     <div class="feedback-content" id="feedbackContent"></div>
                 </div>
+
 
                 <div class="btn-wrapper">
                     <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
                 </div>
             </div>
         </div>
-    </div>
+    </div>   
 
     <div class="note-section">
         <div class="note-card"><h3>What is A Body Shape Index (ABSI)?</h3><p>ABSI is a measure of body shape that uses waist circumference, height, and weight to assess health risks. Unlike BMI, ABSI accounts for fat distribution, particularly abdominal fat, making it a more accurate predictor of mortality risk.</p></div>
+        <div class="note-card">
+            <h3>⚠️ Input Validation</h3>
+            <ul>
+                <li><strong>Gender:</strong> Must be selected (Male or Female).</li>
+                <li><strong>Age:</strong> Allowed range is <strong>2 – 120 years</strong>. Values outside this range will trigger an error.</li>
+                <li><strong>Height:</strong> Must be between <strong>50 cm – 272 cm</strong> (human extremes, from shortest to tallest recorded).</li>
+                <li><strong>Weight:</strong> Must be between <strong>2 kg – 635 kg</strong> (medical safe bounds).</li>
+                <li><strong>Waist Circumference:</strong> Must be between <strong>20 cm – 200 cm</strong>. Anything below/above is unrealistic.</li>
+                <li><strong>BMI Check:</strong> If the calculated BMI is <strong>outside 10 – 80</strong>, the inputs are invalid and an error will show.</li>
+                <li><strong>Required Fields:</strong> All fields must be completed; blank inputs are not allowed.</li>
+                <li><strong>Units:</strong> Height and waist in <strong>centimeters</strong>, weight in <strong>kilograms</strong>.</li>
+                <li>Any invalid or missing data will prevent calculation and display an <span style="color:#c62828;font-weight:600;">error message</span>.</li>
+            </ul>
+        </div>
         <div class="note-card"><h3>What is ABSI z-score?</h3><p>The ABSI z-score compares your ABSI to a reference population of the same age and sex. A score of 0 is average. Positive scores indicate higher risk, while negative scores indicate lower risk than the average person.</p></div>
         <div class="note-card"><h3>Explanation of Parameters:</h3><ul><li><strong>Waist Circumference:</strong> The key input that reflects abdominal fat, a critical predictor of metabolic and cardiovascular risk.</li><li><strong>Age & Gender:</strong> Used for z-score comparison against a reference population, as body shape risk changes with age and differs between sexes.</li><li><strong>Height & Weight:</strong> Used to calculate BMI, which is a component of the ABSI formula.</li></ul></div>
         <div class="note-card"><h3>What Can You Do?</h3><p>If your ABSI z-score indicates an elevated risk, consider the following steps:</p><ul><li><strong>Consult a Doctor:</strong> Seek professional medical advice for a comprehensive health evaluation.</li><li><strong>Adopt a Healthy Lifestyle:</strong> Focus on a balanced diet, regular exercise, and stress management.</li><li><strong>Monitor Progress:</strong> Track your waist circumference and overall health regularly.</li></ul></div>
@@ -466,87 +502,88 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function calculateABSI() {
-    const errorBox = document.getElementById('resultError');
-    const errorMessage = document.getElementById('errorMessage');
-    const placeholder = document.getElementById('placeholder');
-    const resultValueDiv = document.getElementById('resultValue');
-
+    const sex = document.getElementById('sex').value;
     const age = parseFloat(document.getElementById('age').value);
     const height = parseFloat(document.getElementById('height').value);
     const weight = parseFloat(document.getElementById('weight').value);
     const waist = parseFloat(document.getElementById('waist').value);
 
-    let errors = [];
-    if (isNaN(age) || age <= 0) errors.push("👉 Please enter a valid age.");
-    if (isNaN(height) || height <= 0) errors.push("👉 Please enter a valid height.");
-    if (isNaN(weight) || weight <= 0) errors.push("👉 Please enter a valid weight.");
-    if (isNaN(waist) || waist <= 0) errors.push("👉 Please enter a valid waist circumference.");
-
-    // If there are validation errors
-    if (errors.length > 0) {
-        errorMessage.innerHTML = errors.join("<br>");
-        errorBox.classList.remove("hidden");      // Show error box
-        placeholder.classList.add("hidden");      // Hide default image/text
-        resultValueDiv.classList.add("hidden");   // Hide previous results
-        return;
-    } else {
-        errorBox.classList.add("hidden");         // Hide error box
-    }
-
-    // ABSI Calculation
-    const heightM = height / 100;
-    const waistM = waist / 100;
-    const bmi = weight / (heightM * heightM);
-    const absi = waistM / (Math.pow(bmi, 2 / 3) * Math.pow(heightM, 1 / 2));
-
-    // Reference values for z-score
-    const absiMean = 0.0803; 
-    const absiStdDev = 0.0048; 
-    const absiZScore = (absi - absiMean) / absiStdDev;
-
-    const absiRounded = parseFloat(absi.toFixed(5));
-    const absiZScoreRounded = parseFloat(absiZScore.toFixed(2));
-
-    // Display ABSI value
-document.getElementById('absiValue').textContent = `ABSI Value: ${absiRounded}`;
-
-// Display ABSI Z-score
-document.getElementById('absiZScoreValue').textContent = `ABSI Z-score: ${absiZScoreRounded}`;
-
-
-    // Risk meter and feedback
+    const placeholder = document.getElementById('placeholder');
+    const resultError = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const resultValue = document.getElementById('resultValue');
+    const absiValueEl = document.getElementById('absiValue');
+    const absiZScoreValueEl = document.getElementById('absiZScoreValue');
+    const feedbackContentEl = document.getElementById('feedbackContent');
     const meterFill = document.getElementById('meterFill');
-    let meterWidth, meterColor, feedback;
 
-    if (absiZScoreRounded < -1) {
-        meterWidth = '10%'; 
-        meterColor = '#27ae60'; 
-        feedback = '✅ Your body shape indicates a <strong>low risk</strong> of premature mortality compared to the average.';
-    } else if (absiZScoreRounded <= 1) {
-        meterWidth = '30%'; 
-        meterColor = '#2ecc71'; 
-        feedback = '👍 Your body shape indicates an <strong>average risk</strong> of premature mortality.';
-    } else if (absiZScoreRounded <= 2) {
-        meterWidth = '50%'; 
-        meterColor = '#f39c12'; 
-        feedback = '⚠️ Your body shape indicates a <strong>moderate risk</strong> of premature mortality. Consider lifestyle improvements.';
-    } else if (absiZScoreRounded <= 3) {
-        meterWidth = '70%'; 
-        meterColor = '#e67e22'; 
-        feedback = '🚨 Your body shape indicates a <strong>high risk</strong> of premature mortality. It is advisable to consult a healthcare provider.';
-    } else {
-        meterWidth = '90%'; 
-        meterColor = '#e74c3c'; 
-        feedback = '❌ Your body shape indicates a <strong>very high risk</strong> of premature mortality. Please consult a healthcare provider promptly.';
+    // Reset visibility
+    placeholder.classList.add("hidden");
+    resultError.classList.add("hidden");
+    resultValue.classList.add("hidden");
+
+    // Validation helper
+    function showError(msg) {
+        errorMessage.textContent = msg;
+        resultError.classList.remove("hidden");
     }
 
-    meterFill.style.width = meterWidth;
-    meterFill.style.backgroundColor = meterColor;
-    document.getElementById('feedbackContent').innerHTML = feedback;
+    // Input validations
+    if (sex !== "male" && sex !== "female") {
+        return showError("Please select your sex.");
+    }
+    if (isNaN(age) || age < 2 || age > 120) {
+        return showError("Age must be between 2 and 120 years.");
+    }
+    if (isNaN(height) || height < 50 || height > 272) {
+        return showError("Height must be between 50 cm and 272 cm.");
+    }
+    if (isNaN(weight) || weight < 2 || weight > 635) {
+        return showError("Weight must be between 2 kg and 635 kg.");
+    }
+    if (isNaN(waist) || waist < 20 || waist > 200) {
+        return showError("Waist circumference must be between 20 cm and 200 cm.");
+    }
 
-    // Show result, hide placeholder
-    placeholder.classList.add('hidden');
-    resultValueDiv.classList.remove('hidden');
+    // Convert units
+    const heightM = height / 100; // cm → m
+    const waistM = waist / 100;   // cm → m
+
+    // BMI
+    const bmi = weight / (heightM * heightM);
+    if (bmi < 10 || bmi > 80) {
+        return showError("Calculated BMI is outside the valid range (10–80). Please check your inputs.");
+    }
+
+    // ABSI calculation
+    const absi = waistM / (Math.pow(bmi, 2/3) * Math.pow(heightM, 0.5));
+
+    // Approximate z-score (normalised ABSI)
+    const meanABSI = 0.080;
+    const sdABSI = 0.005;
+    const absiZScore = (absi - meanABSI) / sdABSI;
+
+    // Display results
+    absiValueEl.textContent = absi.toFixed(5);
+    absiZScoreValueEl.textContent = absiZScore.toFixed(2);
+
+    // Feedback message
+    let feedback = "";
+    if (absiZScore < -0.5) {
+        feedback = "Your ABSI indicates a lower risk than average.";
+    } else if (absiZScore >= -0.5 && absiZScore <= 0.5) {
+        feedback = "Your ABSI is within the average risk range.";
+    } else {
+        feedback = "Your ABSI indicates a higher risk than average.";
+    }
+    feedbackContentEl.textContent = feedback;
+
+    // Update risk meter (range -3 to +3 mapped to 0%–100%)
+    const percent = Math.max(0, Math.min(100, ((absiZScore + 3) / 6) * 100));
+    meterFill.style.width = percent + "%";
+
+    // Show result box
+    resultValue.classList.remove("hidden");
 }
 
 function printReport() { 
@@ -563,3 +600,89 @@ function printReport() {
 </body>
 </html>
 {% endblock %}
+
+<!-- 1. Input Validation Rules
+
+These rules ensure your calculator is reliable, prevents abuse, and aligns with real-world occupational health data:
+
+(a) Age (years)
+
+Valid range: 18 – 120
+(Army/NFPA & occupational health standards typically do not apply below adult age; maximum reflects human longevity and prevents statistical distortion).
+
+Decimals: Not allowed. Age is whole years.
+
+Error handling: Reject ages <18 with:
+"Age must be between 18 and 120 years for valid ABSI calculation."
+
+(b) Height (cm)
+
+Valid range: 120 – 250 cm
+(Below 120 → dwarfism/extreme condition, outside normal BMI/ABSI scope; above 250 unrealistic).
+
+Decimals: Allowed up to 1 decimal (e.g., 170.5 cm).
+
+Cross-check: Height must not be less than waist circumference.
+
+(c) Weight (kg)
+
+Valid range: 30 – 300 kg
+(OSHA weight-handling standards + CDC anthropometric databases).
+
+Decimals: Allowed up to 1 decimal.
+
+Cross-check: Weight must align logically with height (BMI check, 10 ≤ BMI ≤ 80).
+(BMI <10 → starvation, >80 → input error).
+
+(d) Waist Circumference (cm)
+
+Valid range: 30 – 200 cm
+(ILO/CDC reference data for waist circumference distribution).
+
+Decimals: Allowed up to 1 decimal.
+
+Cross-check:
+
+Waist must be less than height × 0.9 for males, < height × 1.1 for females (biological plausibility).
+
+Waist must be ≥ 20% of height (waist smaller than a child’s limb = wrong input).
+
+(e) Sex
+
+Must be either "male" or "female".
+
+Reject anything else.
+
+2. Output Validation & Thresholds
+
+The ABSI formula outputs a dimensionless ratio. To make it meaningful:
+
+ABSI typical range: 0.060 – 0.090 (based on published NHANES data).
+
+Z-score: Centered at mean = 0.0760, SD = 0.004.
+
+|z| > 3 → outlier → warn: "Your data appears outside normal human ranges. Please check inputs."
+
+Interpretation bands:
+
+< -1 → Low risk
+
+-1 to +1 → Average risk
+
++1 to +2 → Moderate risk
+
++2 to +3 → High risk
+
+3 → Very high risk
+
+3. Edge Case Validations
+
+Division by zero: HeightMeters = 0 or BMI = 0 → block.
+
+Waist = 0: Reject.
+
+Negative inputs: Reject.
+
+Extreme outliers: (e.g., 500 kg with 120 cm height → unrealistic BMI).
+
+Blank inputs: Block calculation with descriptive error. -->

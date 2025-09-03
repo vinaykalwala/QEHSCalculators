@@ -431,6 +431,18 @@
             <p>Adjusted Body Weight (AjBW) is a measure used to estimate a person's nutritional needs more accurately, especially for individuals who are overweight or obese. Since fat tissue (adipose tissue) is less metabolically active than muscle tissue, using actual body weight to calculate energy requirements can overestimate the needs of individuals with excess body fat. Adjusted Body Weight accounts for this by adjusting the actual body weight to better reflect metabolic activity.</p>
         </div>
         <div class="note-card">
+            <h3>Input Validations</h3>
+            <ul class="note-list">
+                <li><strong>Gender:</strong> Must be selected as either <span class="good">Male</span> or <span class="good">Female</span>. No other values are accepted.</li>
+                <li><strong>Height:</strong> Enter between <span class="good">120 – 250 cm</span>. Values outside this range are not physiologically realistic for adults.</li>
+                <li><strong>Weight:</strong> Enter between <span class="good">30 – 300 kg</span>. Below 30 kg or above 300 kg is outside safe adult ranges.</li>
+                <li><strong>IBW (Ideal Body Weight):</strong> The calculated value must fall between <span class="good">20 – 150 kg</span>. Out-of-range IBW values will trigger an error.</li>
+                <li><strong>AjBW (Adjusted Body Weight):</strong> Final results must fall between <span class="good">20 – 300 kg</span>. Invalid outputs indicate incorrect inputs.</li>
+                <li><strong>Empty Fields:</strong> If any required input is left blank, the calculator will not run until all values are filled.</li>
+            </ul>
+            <p><em>These rules ensure safe, realistic, and clinically relevant calculations, aligned with standard dietetic and clinical practice.</em></p>
+        </div>
+        <div class="note-card">
             <h3>How is Adjusted Body Weight Calculated?</h3>
             <p>Adjusted Body Weight is calculated using a formula that combines <strong>Ideal Body Weight (IBW)</strong> and <strong>Actual Body Weight (ABW)</strong>. The calculation involves two main steps:</p>
             <ol>
@@ -464,10 +476,166 @@
 <script>
     // All JS functions remain the same
     document.addEventListener('DOMContentLoaded', function() { /* ... */ const printDateEl = document.getElementById('printDate'); if (printDateEl) { const now = new Date(); const options = { year: 'numeric', month: 'long', day: 'numeric' }; printDateEl.textContent = now.toLocaleDateString('en-US', options); } });
-    function calculateAdjustedBodyWeight() { /* ... */ const errorBox = document.getElementById('resultError'); const errorMessage = document.getElementById('errorMessage'); const placeholder = document.getElementById('placeholder'); const resultValueDiv = document.getElementById('resultValue'); const sex = document.getElementById('sex').value; const height = parseFloat(document.getElementById('height').value); const weight = parseFloat(document.getElementById('weight').value); let errors = []; if (isNaN(height) || height <= 0) { errors.push("👉 Please enter a valid height."); } if (isNaN(weight) || weight <= 0) { errors.push("👉 Please enter a valid weight."); } if (errors.length > 0) { errorMessage.innerHTML = errors.join("<br>"); errorBox.classList.remove("hidden"); placeholder.classList.remove("hidden"); resultValueDiv.classList.add("hidden"); return; } else { errorBox.classList.add("hidden"); } const heightInches = height / 2.54; let ibw; if (heightInches < 60) { ibw = (sex === 'male') ? 52 * Math.pow(heightInches/60, 2) : 49 * Math.pow(heightInches/60, 2); } else { if (sex === 'male') { ibw = 52 + 1.9 * (heightInches - 60); } else { ibw = 49 + 1.7 * (heightInches - 60); } } const ajbw = ibw + 0.4 * (weight - ibw); const ibwRounded = parseFloat(ibw.toFixed(2)); const ajbwRounded = parseFloat(ajbw.toFixed(2)); document.getElementById('ajbwValue').textContent = ajbwRounded + ' kg'; document.getElementById('ibwValue').textContent = 'Ideal Body Weight: ' + ibwRounded + ' kg'; document.getElementById('feedbackContent').innerHTML = `For planning your diet and nutrition, you should aim for the calorie intake of someone weighing <strong>${ajbwRounded} kg</strong>, even though your actual weight is <strong>${weight} kg</strong>.`; placeholder.classList.add('hidden'); resultValueDiv.classList.remove('hidden'); }
+    function calculateAdjustedBodyWeight() {
+    const sex = document.getElementById('sex').value.toLowerCase();
+    const height = parseFloat(document.getElementById('height').value);
+    const weight = parseFloat(document.getElementById('weight').value);
+
+    // Result containers
+    const placeholder = document.getElementById('placeholder');
+    const errorBox   = document.getElementById('resultError');
+    const errorMsg   = document.getElementById('errorMessage');
+    const resultBox  = document.getElementById('resultValue');
+    const ibwValue   = document.getElementById('ibwValue');
+    const ajbwValue  = document.getElementById('ajbwValue');
+    const feedback   = document.getElementById('feedbackContent');
+
+    // Reset all states
+    placeholder.classList.add("hidden");
+    errorBox.classList.add("hidden");
+    resultBox.classList.add("hidden");
+    errorMsg.textContent = "";
+    ibwValue.textContent = "";
+    ajbwValue.textContent = "";
+    feedback.textContent = "";
+
+    // --- Input Validations ---
+    if (sex !== "male" && sex !== "female") {
+        errorMsg.textContent = "❌ Invalid gender selected.";
+        errorBox.classList.remove("hidden");
+        return;
+    }
+    if (isNaN(height) || height < 120 || height > 250) {
+        errorMsg.textContent = "❌ Please enter a valid height between 120–250 cm.";
+        errorBox.classList.remove("hidden");
+        return;
+    }
+    if (isNaN(weight) || weight < 30 || weight > 300) {
+        errorMsg.textContent = "❌ Please enter a valid weight between 30–300 kg.";
+        errorBox.classList.remove("hidden");
+        return;
+    }
+
+    // --- IBW Calculation ---
+    const heightInches = height / 2.54;
+    let ibw = (sex === "male")
+        ? 52 + 1.9 * (heightInches - 60)
+        : 49 + 1.7 * (heightInches - 60);
+
+    if (ibw <= 0 || ibw > 150) {
+        errorMsg.textContent = "❌ Calculated Ideal Body Weight is out of realistic range.";
+        errorBox.classList.remove("hidden");
+        return;
+    }
+
+    // --- AjBW Calculation ---
+    let ajbw;
+    if (weight > ibw) {
+        ajbw = ibw + 0.4 * (weight - ibw);
+    } else {
+        ajbw = weight; // no adjustment needed
+    }
+
+    // Round
+    const ibwRounded = parseFloat(ibw.toFixed(2));
+    const ajbwRounded = parseFloat(ajbw.toFixed(2));
+
+    // --- Output Validation ---
+    if (ajbwRounded < 20 || ajbwRounded > 300) {
+        errorMsg.textContent = "❌ Adjusted Body Weight calculation is not valid. Check your inputs.";
+        errorBox.classList.remove("hidden");
+        return;
+    }
+
+    // --- Display Results ---
+    ajbwValue.textContent = `${ajbwRounded} kg`;
+    ibwValue.textContent = `Ideal Body Weight (IBW): ${ibwRounded} kg`;
+
+    if (weight <= ibw) {
+        feedback.innerHTML = `Your weight is below or equal to your IBW (${ibwRounded} kg). No adjustment required.`;
+    } else {
+        feedback.innerHTML = `Your adjusted weight for nutritional purposes is <strong>${ajbwRounded} kg</strong>. This is used for diet and nutrition planning instead of your actual weight (${weight} kg).`;
+    }
+
+    resultBox.classList.remove("hidden");
+}
     function printReport() { /* ... */ const printDateEl = document.getElementById('printDate'); if (printDateEl) { const now = new Date(); const options = { year: 'numeric', month: 'long', day: 'numeric' }; printDateEl.textContent = now.toLocaleDateString('en-US', options); } window.print(); }
 </script>
 
 </body>
 </html>
 {% endblock %}
+
+<!-- 
+1. Input Validation Rules (QEHS & Safety-Compliant)
+
+From a safety and compliance perspective, inputs must be restricted to humanly possible, medically relevant, and logically consistent ranges.
+
+a. Gender (sex)
+
+Allowed values: "male", "female".
+
+No blanks or invalid strings.
+
+Case-insensitive enforcement.
+
+b. Height (height, cm)
+
+Range: 120 – 250 cm (below = unsafe/extreme dwarfism, above = unrealistic outlier).
+
+Decimals allowed: up to 1 decimal place (e.g., 175.5 cm).
+
+Must be numeric and positive.
+
+c. Actual Weight (weight, kg)
+
+Range: 30 – 300 kg (below = severe malnutrition, above = medical extreme).
+
+Decimals allowed: up to 1 decimal place.
+
+Must be numeric and positive.
+
+Must logically exceed 30% of IBW (to prevent division by zero or negative AjBW).
+
+2. Output Validation Logic & Thresholds
+
+Ideal Body Weight (IBW) should:
+
+Be > 0 and within a realistic range for humans (40–120 kg for average adults).
+
+If calculated IBW is < 30 kg or > 150 kg, flag as “⚠️ Data likely invalid.”
+
+Adjusted Body Weight (AjBW) should:
+
+Always fall between IBW and Actual Weight.
+
+If not, return error (prevents negative AjBW or meaningless results).
+
+Interpretation Rules:
+
+If weight <= IBW → AjBW is not required → show: “No adjustment needed.”
+
+If weight > IBW → AjBW used for nutrition planning.
+
+3. Edge Case Validations
+
+Division by zero / log of negative numbers → Prevent by checking IBW validity.
+
+Height < 120 cm or > 250 cm → Reject with error.
+
+Weight < 30 kg or > 300 kg → Reject with error.
+
+IBW negative (e.g., very short height) → Reject with error.
+
+AjBW < 0 or > 300 kg → Reject with error.
+
+All inputs blank → Prompt user to enter values.
+
+4. Why These Validations Are Critical (Compliance View)
+
+OSHA / ISO 45001 Principle: Prevent misuse or unsafe assumptions in health monitoring tools.
+
+NFPA / ILO Requirement: Risk-based validation avoids misleading health assessments that could impact worker placement or nutrition programs.
+
+Audit-Readiness: Validations ensure outputs are credible, defensible, and align with real-world occupational health screening practices.
+-->

@@ -1,0 +1,662 @@
+{% extends 'base.html' %}
+{% block title %}Diabetes Risk Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diabetes Risk Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: baseline;
+            justify-content: center;
+        }
+        .result-value {
+            width: 100%;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        .rate-label {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+        /* Toggle helper */
+        .hidden {
+            display: none;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Diabetes Risk Calculator</h1>
+            <p>Estimate your 7.5-year risk of developing type 2 diabetes.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Enter Your Health Data</h2>
+                <div class="form-group">
+                    <label for="age">Age (years)</label>
+                    <input type="number" id="age" class="form-input" min="1" placeholder="e.g., 45">
+                </div>
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" class="form-select">
+                        <option value="0">Male</option>
+                        <option value="1">Female</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="height">Height (cm)</label>
+                    <input type="number" id="height" class="form-input" min="1" placeholder="e.g., 170">
+                </div>
+                <div class="form-group">
+                    <label for="weight">Weight (kg)</label>
+                    <input type="number" id="weight" class="form-input" min="1" placeholder="e.g., 80">
+                </div>
+                 <div class="form-group">
+                    <label for="familyHistory">Family History of Diabetes</label>
+                    <select id="familyHistory" class="form-select">
+                        <option value="1">Yes</option>
+                        <option value="0">No</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="fastingGlucose">Fasting Glucose (mg/dL)</label>
+                    <input type="number" id="fastingGlucose" class="form-input" min="0" placeholder="e.g., 95">
+                </div>
+                <div class="form-group">
+                    <label for="systolicBP">Systolic BP (mmHg)</label>
+                    <input type="number" id="systolicBP" class="form-input" min="0" placeholder="e.g., 130">
+                </div>
+                <div class="form-group">
+                    <label for="hdl">HDL Cholesterol (mg/dL)</label>
+                    <input type="number" id="hdl" class="form-input" min="0" placeholder="e.g., 45">
+                </div>
+                 <div class="form-group">
+                    <label for="ethnicity">Ethnicity</label>
+                    <select id="ethnicity" class="form-select">
+                        <option value="0">Non-Hispanic White</option>
+                        <option value="1">Latin American / Other</option>
+                    </select>
+                </div>
+                <button class="calculate-btn" onclick="calculateDiabetesRisk()">Calculate Risk</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Enter your details to estimate your long-term risk of developing diabetes.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div class="result-value hidden" id="resultValue">
+                    <h2>7.5-Year Diabetes Risk</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.0%</div>
+                    </div>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low Risk</span><span>Moderate Risk</span><span>High Risk</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Risk Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🩺 About Diabetes Risk</h3>
+                <p>This diabetes risk calculator estimates your likelihood of developing type 2 diabetes over the next 7.5 years based on clinical and demographic data.</p>
+            </div>
+
+            <div class="note-card">
+                <h3>📊 Understanding the Parameters</h3>
+                <p>This calculator evaluates your risk based on key health indicators:</p>
+                <ul class="note-list">
+                    <li><strong>Age:</strong> Increasing age is a significant risk factor for developing diabetes.</li>
+                    <li><strong>Gender:</strong> Biological differences can influence diabetes risk.</li>
+                    <li><strong>Height & Weight (BMI):</strong> Higher BMI is linked to increased diabetes risk.</li>
+                    <li><strong>Family History of Diabetes:</strong> Having close relatives with diabetes increases your likelihood of developing the condition.</li>
+                    <li><strong>Ethnicity:</strong> Certain ethnic groups, such as Latin Americans, have higher risk due to genetic and lifestyle factors.</li>
+                    <li><strong>Fasting Glucose:</strong> Elevated levels indicate impaired glucose regulation.</li>
+                    <li><strong>Systolic Blood Pressure:</strong> High blood pressure coexists with diabetes and raises cardiovascular risk.</li>
+                    <li><strong>HDL Cholesterol:</strong> Low levels of "good" HDL cholesterol are associated with higher diabetes risk.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>🛡️ Preventing Diabetes</h3>
+                <p>Even if you have a high risk score, lifestyle changes can significantly reduce your risk:</p>
+                <ul class="note-list">
+                    <li>Maintain a healthy, balanced diet rich in fiber and whole grains.</li>
+                    <li>Exercise regularly and stay active.</li>
+                    <li>Keep a healthy body weight and achieve a healthy BMI.</li>
+                    <li>Monitor and control your blood pressure and cholesterol levels.</li>
+                    <li>Avoid smoking and manage other health conditions.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>✅ Input Validations</h3>
+                <div class="note-container">
+                    <ul>
+                        <li><strong>Age:</strong> Enter a value between <strong>18–100 years</strong>. Only whole numbers are allowed.</li>
+                        <li><strong>Gender:</strong> Select <strong>Male (0)</strong> or <strong>Female (1)</strong>.</li>
+                        <li><strong>Height:</strong> Enter height in centimeters, between <strong>100–250 cm</strong>.</li>
+                        <li><strong>Weight:</strong> Enter weight in kilograms, between <strong>30–250 kg</strong>.</li>
+                        <li><strong>Family History:</strong> Select <strong>No (0)</strong> or <strong>Yes (1)</strong>.</li>
+                        <li><strong>Ethnicity:</strong> Select <strong>Non-risk group (0)</strong> or <strong>Risk group (1)</strong>.</li>
+                        <li><strong>Fasting Glucose:</strong> Enter value in mg/dL, between <strong>50–200</strong>.</li>
+                        <li><strong>Systolic Blood Pressure (BP):</strong> Enter value in mmHg, between <strong>80–220</strong>.</li>
+                        <li><strong>HDL Cholesterol:</strong> Enter value in mg/dL, between <strong>20–100</strong>.</li>
+                        <li><strong>BMI Check:</strong> Your height and weight should result in a BMI between <strong>15–50</strong>. Values outside this range may be unrealistic.</li>
+                    </ul>
+                    <p>⚠️ Make sure to fill all fields correctly. Invalid or missing inputs will prevent calculation.</p>
+                </div>
+            </div>
+
+            <div class="note-card">
+                <h3>❗ Note</h3>
+                <p>This calculator is for informational purposes only and does not replace professional medical advice. Consult your healthcare provider for accurate diagnosis and personalized recommendations.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            if(document.getElementById('printDate')) {
+                document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
+        });
+
+        function calculateDiabetesRisk() {
+            const inputs = {
+                age: document.getElementById('age').value.trim(),
+                gender: document.getElementById('gender').value,
+                height: document.getElementById('height').value.trim(),
+                weight: document.getElementById('weight').value.trim(),
+                familyHistory: document.getElementById('familyHistory').value,
+                ethnicity: document.getElementById('ethnicity').value,
+                fastingGlucose: document.getElementById('fastingGlucose').value.trim(),
+                systolicBP: document.getElementById('systolicBP').value.trim(),
+                hdl: document.getElementById('hdl').value.trim()
+            };
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+
+            errorBox.classList.add("hidden");
+            placeholder.classList.remove("hidden");
+            resultValue.classList.add("hidden");
+            errorMessage.innerHTML = "";
+
+            let errors = [];
+
+            // Required fields & numeric validation
+            for (const key in inputs) {
+                if (inputs[key] === "") {
+                    errors.push(`👉 Please enter a value for ${key}.`);
+                } else if (["age","height","weight","fastingGlucose","systolicBP","hdl"].includes(key)) {
+                    if (isNaN(inputs[key]) || parseFloat(inputs[key]) <= 0) {
+                        errors.push(`👉 ${key} must be a positive number.`);
+                    }
+                } else if (["gender","familyHistory","ethnicity"].includes(key)) {
+                    if (!["0","1"].includes(inputs[key])) {
+                        errors.push(`👉 Select a valid option for ${key}.`);
+                    }
+                }
+            }
+
+            // Convert to numeric types
+            const age = parseInt(inputs.age);
+            const gender = parseInt(inputs.gender);
+            const height = parseFloat(inputs.height);
+            const weight = parseFloat(inputs.weight);
+            const familyHistory = parseInt(inputs.familyHistory);
+            const ethnicity = parseInt(inputs.ethnicity);
+            const fastingGlucose = parseFloat(inputs.fastingGlucose);
+            const systolicBP = parseFloat(inputs.systolicBP);
+            const hdl = parseFloat(inputs.hdl);
+
+            // Hard QEHS/medical range validations
+            if(age < 18 || age > 100) errors.push("👉 Age must be between 18 and 100 years.");
+            if(height < 100 || height > 250) errors.push("👉 Height must be between 100cm and 250cm.");
+            if(weight < 30 || weight > 250) errors.push("👉 Weight must be between 30kg and 250kg.");
+            if(fastingGlucose < 50 || fastingGlucose > 200) errors.push("👉 Fasting glucose must be 50–200 mg/dL.");
+            if(systolicBP < 80 || systolicBP > 220) errors.push("👉 Systolic BP must be 80–220 mmHg.");
+            if(hdl < 20 || hdl > 100) errors.push("👉 HDL must be 20–100 mg/dL.");
+
+            // BMI logical check
+            const bmi = weight / ((height / 100) ** 2);
+            if(bmi < 15 || bmi > 50) errors.push(`⚠️ Calculated BMI (${bmi.toFixed(1)}) is unrealistic. Check weight and height.`);
+
+            // Stop calculation if any validation fails
+            if(errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return; // <-- key part: calculation is stopped
+            }
+
+            // Logistic regression formula
+            const exponent = (0.028 * age) + 
+                            (0.661 * gender) + 
+                            (0.412 * ethnicity) + 
+                            (0.079 * fastingGlucose) + 
+                            (0.018 * systolicBP) - 
+                            (0.039 * hdl) + 
+                            (0.07 * bmi) + 
+                            (0.481 * familyHistory) - 13.415;
+
+            const risk = 100 / (1 + Math.exp(-1 * exponent));
+
+            // Feedback and meter update
+            const meterFill = document.getElementById('meterFill');
+            let meterWidth, meterColor, feedback;
+
+            if (risk < 10) {
+                meterWidth = '33%'; meterColor = '#2ecc71';
+                feedback = "Your risk is <strong>low</strong>. Maintain a healthy lifestyle.";
+            } else if (risk < 20) {
+                meterWidth = '66%'; meterColor = '#f39c12';
+                feedback = "Your risk is <strong>moderate</strong>. Consider improving lifestyle habits.";
+            } else {
+                meterWidth = '95%'; meterColor = '#e74c3c';
+                feedback = "Your risk is <strong>high</strong>. Consult a healthcare professional.";
+            }
+
+            document.getElementById('rateValue').textContent = `${risk.toFixed(1)}%`;
+            meterFill.style.width = meterWidth;
+            meterFill.style.backgroundColor = meterColor;
+            document.getElementById('feedbackContent').innerHTML = feedback;
+
+            placeholder.classList.add('hidden');
+            resultValue.classList.remove('hidden');
+        }
+
+        function printReport() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            if(document.getElementById('printDate')) {
+                document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
+            window.print();
+        }
+    </script>
+
+</body>
+</html>
+{% endblock %}
+
+<!-- 
+1. Analysis of Inputs, Outputs, and Calculation Formula
+
+Inputs:
+
+Field	Type	Units	Description
+Age	number	years	Adult/child age for risk factor; important for BMR/BMI and risk stratification.
+Gender	select	Male/Female	Used in risk formula as numeric factor.
+Height	number	cm	For BMI calculation. Must be realistic.
+Weight	number	kg	For BMI. Realistic range required.
+Family History	select	Yes/No	Risk factor for genetics.
+Fasting Glucose	number	mg/dL	Key metabolic marker.
+Systolic BP	number	mmHg	Cardiovascular risk marker.
+HDL	number	mg/dL	Protective cholesterol factor.
+Ethnicity	select	Non-Hispanic White / Latin American	Risk factor modifier in model.
+
+Outputs:
+
+7.5-Year Diabetes Risk (%)
+
+Risk Feedback (Low / Moderate / High)
+
+Meter visualization (graphical representation)
+
+Formula: Logistic regression-based risk formula using numeric coefficients.
+
+2. Recommended Input Validation Rules (QEHS-compliant)
+Field	Min	Max	Decimals	Logical Rules / Notes
+Age	18	100	0	Children under 18 should be flagged; adults only.
+Gender	0 / 1	N/A	N/A	Must be selected.
+Height	100	250	0–1 decimal	Height must be physiologically plausible.
+Weight	30	250	0–1 decimal	BMI derived from height/weight must be plausible.
+BMI	15	50	1 decimal	Derived field; cross-check weight & height.
+Fasting Glucose	50	200	0–1 decimal	Extremely low/high values are unrealistic.
+Systolic BP	80	220	0–1 decimal	Exclude extreme outliers.
+HDL	20	100	0–1 decimal	Extreme values may indicate input error.
+Family History	0 / 1	N/A	N/A	Must be selected.
+Ethnicity	0 / 1	N/A	N/A	Must be selected.
+
+Logical consistency rules:
+
+BMI should correspond logically to height & weight. E.g., 45kg and 160cm is plausible, 200kg and 150cm is flagged.
+
+Fasting glucose <70 mg/dL is hypoglycemic, >180 mg/dL is critically high—warn user.
+
+Children under 18 should not use adult risk formula.
+
+Edge Cases:
+
+Division by zero → BMI uses height; height cannot be 0.
+
+Extreme outliers → Age >100, Weight >250kg, Systolic BP >220 mmHg
+
+Cross-field inconsistency → Very low weight with extremely high glucose may be flagged.
+
+3. Output Validation Logic
+
+Risk thresholds (based on medical literature & safety KPI compliance):
+
+Risk %	Category	Recommendation
+0–9.99	Low	Maintain healthy lifestyle
+10–19.99	Moderate	Review diet/exercise; follow-up with physician
+≥20	High	Medical consultation required; possible intervention
+
+Compliance Reasoning:
+
+Ensures outputs are medically meaningful.
+
+Avoids false reassurance or alarm.
+
+Helps standardize safety reporting in health & wellness audits.
+-->

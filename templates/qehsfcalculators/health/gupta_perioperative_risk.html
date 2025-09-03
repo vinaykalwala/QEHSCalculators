@@ -1,0 +1,738 @@
+{% extends 'base.html' %}
+{% block title %}Gupta Perioperative Risk Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gupta Perioperative Risk Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            max-height: 420px;
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: baseline;
+            justify-content: center;
+        }
+        .result-value {
+            width: 100%;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        .rate-label {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+        /* Toggle helper */
+        .hidden {
+            display: none;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+        .parameter-detail{
+            font-size: smaller;  
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Gupta Perioperative Risk Calculator</h1>
+            <p>Predicts 30-day risk of Myocardial Infarction or Cardiac Arrest (MICA) after non-cardiac surgery.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Enter Patient Data</h2>
+                <div class="form-group">
+                    <label for="age">Age (years)</label>
+                    <input type="number" id="age" class="form-input" min="18" placeholder="e.g., 65">
+                </div>
+                <div class="form-group">
+                    <label for="asa">ASA Class</label>
+                    <select id="asa" class="form-select">
+                        <option value="-5.17">Class 1: Healthy</option>
+                        <option value="-3.29">Class 2: Mild systemic disease</option>
+                        <option value="-1.92">Class 3: Severe systemic disease</option>
+                        <option value="-0.95">Class 4: Life-threatening disease</option>
+                        <option value="0">Class 5: Moribund</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="creatinine">Serum Creatinine (mg/dL)</label>
+                    <input type="number" id="creatinine" class="form-input" step="0.1" placeholder="e.g., 1.2">
+                </div>
+                 <div class="form-group">
+                    <label for="status">Functional Status</label>
+                    <select id="status" class="form-select">
+                        <option value="0">Totally independent</option>
+                        <option value="0.65">Partially dependent</option>
+                        <option value="1.03">Totally dependent</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="surgery">Surgery Type</label>
+                    <select id="surgery" class="form-select">
+                        <option value="1.6">Aortic</option>
+                        <option value="1.4">Brain</option>
+                        <option value="1.39">Foregut / HPB</option>
+                        <option value="1.14">Intestinal</option>
+                        <option value="1.13">Abdomen (Other)</option>
+                        <option value="1.01">Cardiac</option>
+                        <option value="0.86">Peripheral Vascular</option>
+                        <option value="0.8">Orthopedic</option>
+                        <option value="0.76">Obstetric / Gyn</option>
+                        <option value="0.71">ENT</option>
+                        <option value="0.59">Gallbladder / Appendix</option>
+                        <option value="0.54">Skin</option>
+                        <option value="0.4">Thoracic</option>
+                        <option value="0.21">Spine</option>
+                        <option value="0.18">Neck (Thyroid, etc.)</option>
+                        <option value="0">Hernia</option>
+                        <option value="-0.16">Anorectal</option>
+                        <option value="-0.25">Bariatric</option>
+                        <option value="-0.26">Urology</option>
+                        <option value="-1.09">Vein</option>
+                        <option value="-1.61">Breast</option>
+                    </select>
+                </div>
+                <button class="calculate-btn" onclick="calculateGuptaRisk()">Calculate Risk</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Enter patient data to calculate the perioperative cardiac risk.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div class="result-value hidden" id="resultValue">
+                    <h2>Perioperative Cardiac Risk</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00%</div>
+                    </div>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low</span><span>Moderate</span><span>Elevated</span><span>High</span><span>Critical</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Risk Interpretation</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+
+            <div class="note-card">
+                <h3>🩺 Understanding Gupta Perioperative Risk Assessment</h3>
+                <p>
+                    The <strong>Gupta Perioperative Risk Calculator</strong> is a clinical tool designed to predict the likelihood of major 
+                    cardiac complications (Myocardial Infarction or Cardiac Arrest - MICA) within 30 days after non-cardiac surgery. 
+                    Developed through extensive research by Gupta et al., this validated tool helps clinicians stratify patient risk and 
+                    optimize perioperative care.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>📌 Clinical Use</h3>
+                <ul class="note-list">
+                    <li>Identify high-risk surgical candidates</li>
+                    <li>Guide decisions about cardiac monitoring</li>
+                    <li>Determine need for specialist consultations</li>
+                    <li>Optimize perioperative management strategies</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Key Parameters Explained</h3>
+
+                <div class="parameter-detail">
+                    <h4>1. Age</h4>
+                    <p>Advanced age increases physiological vulnerability. Risk adjustment begins at 40 years with progressive weighting for older patients.</p>
+                </div>
+
+                <div class="parameter-detail">
+                    <h4>2. Functional Status</h4>
+                    <ul>
+                        <li><strong>Independent:</strong> Full self-care ability</li>
+                        <li><strong>Partially Dependent:</strong> Requires some assistance</li>
+                        <li><strong>Totally Dependent:</strong> Complete care dependency</li>
+                    </ul>
+                    <p>Reflects overall health resilience and recovery capacity.</p>
+                </div>
+
+                <div class="parameter-detail">
+                    <h4>3. ASA Physical Status Classification</h4>
+                    <ul>
+                        <li><strong>Class 1:</strong> Healthy patient</li>
+                        <li><strong>Class 2:</strong> Mild systemic disease</li>
+                        <li><strong>Class 3:</strong> Severe systemic disease</li>
+                        <li><strong>Class 4:</strong> Life-threatening illness</li>
+                        <li><strong>Class 5:</strong> Moribund patient</li>
+                    </ul>
+                </div>
+
+                <div class="parameter-detail">
+                    <h4>4. Serum Creatinine</h4>
+                    <p>Marker of renal function. Elevated levels (>1.5 mg/dL) indicate impaired kidney function, associated with increased cardiovascular risk.</p>
+                </div>
+
+                <div class="parameter-detail">
+                    <h4>5. Surgical Procedure Risk</h4>
+                    <p>Different operations carry varying cardiac stress levels. High-risk procedures include:</p>
+                    <ul>
+                        <li>Major vascular surgery</li>
+                        <li>Intraperitoneal procedures</li>
+                        <li>Intrathoracic operations</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="note-card">
+                <h3>🌟 Why This Calculator Matters</h3>
+                <ul class="note-list">
+                    <li>Provides evidence-based risk stratification</li>
+                    <li>Helps allocate limited monitoring resources</li>
+                    <li>Facilitates patient-specific care planning</li>
+                    <li>Supports shared decision-making with patients</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📊 Interpretation Guide</h3>
+                <ul class="note-list">
+                    <li><strong>&lt;0.05%:</strong> Low risk - Routine monitoring</li>
+                    <li><strong>0.05-0.14%:</strong> Moderate risk - Enhanced observation</li>
+                    <li><strong>0.14-1.47%:</strong> Elevated risk - Consider cardiology consult</li>
+                    <li><strong>1.47-2.60%:</strong> High risk - Intensive monitoring recommended</li>
+                    <li><strong>2.60-7.69%:</strong> Very high risk - Post-op ICU consideration</li>
+                    <li><strong>&gt;7.69%:</strong> Critical risk - Urgent intervention needed</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>⚠️ Important Limitations</h3>
+                <ul class="note-list">
+                    <li>Does not replace clinical judgment</li>
+                    <li>Less accurate for emergency surgeries</li>
+                    <li>Does not account for all comorbidities</li>
+                    <li>Should be supplemented with clinical evaluation</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>✅ Input Validations</h3>
+                <div class="note-list">
+                    <p>
+                        Input validation helps ensure the information you enter is <strong>accurate, safe, and meaningful</strong>.  
+                        Here are some common validation checks:
+                    </p>
+                    <ul>
+                        <li><strong>Age:</strong> Must be a whole number within a realistic range (e.g., 18–120 years).</li>
+                        <li><strong>Numbers:</strong> Should not allow negative values if they represent things like weight, height, or lab results.</li>
+                        <li><strong>Required Fields:</strong> Empty inputs should show a clear message like “This field is required.”</li>
+                        <li><strong>Dropdowns:</strong> Default option (e.g., “Select…”) should not be accepted as valid.</li>
+                        <li><strong>Text Fields:</strong> No random symbols or invalid characters (e.g., name should only have letters).</li>
+                        <li><strong>Range Checks:</strong> Values should fall within safe/expected limits (e.g., creatinine ≥ 0).</li>
+                    </ul>
+                    <p>
+                        ✅ Good validation prevents mistakes, protects data integrity, and guides you with <strong>helpful error messages</strong>.
+                    </p>
+                </div>
+            </div>
+
+            <div class="note-card">
+                <h3>❗ Clinical Disclaimer</h3>
+                <p>
+                    This tool provides statistical probabilities, not definitive outcomes. Always consider individual patient 
+                    factors and institutional protocols. Results should be interpreted by qualified healthcare professionals 
+                    within the complete clinical context.
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const now = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        if (document.getElementById('printDate')) {
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        }
+    });
+
+    function calculateGuptaRisk() {
+        const age = document.getElementById('age').value.trim();
+        const status = parseFloat(document.getElementById('status').value);
+        const asa = parseFloat(document.getElementById('asa').value);
+        const creatinine = document.getElementById('creatinine').value.trim();
+        const surgery = parseFloat(document.getElementById('surgery').value);
+
+        const errorBox = document.getElementById('resultError');
+        const errorMessage = document.getElementById('errorMessage');
+        const placeholder = document.getElementById('placeholder');
+        const resultValue = document.getElementById('resultValue');
+
+        let errors = [];
+
+        // ✅ Age validation
+        if (age === "" || isNaN(age) || !Number.isInteger(Number(age)) || Number(age) < 18 || Number(age) > 120) {
+            errors.push("👉 Age must be an integer between 18 and 120.");
+        }
+
+        // ✅ Creatinine validation
+        if (creatinine === "" || isNaN(creatinine) || parseFloat(creatinine) < 0.1 || parseFloat(creatinine) > 20) {
+            errors.push("👉 Creatinine must be between 0.1 and 20.0 mg/dL.");
+        }
+
+        // ✅ Dropdown tampering prevention
+        const validASA = [-5.17, -3.29, -1.92, -0.95, 0];
+        const validStatus = [0, 0.65, 1.03];
+        const validSurgery = [1.6, 1.4, 1.39, 1.14, 1.13, 1.01, 0.86, 0.8, 0.76, 0.71, 0.59, 0.54, 0.4, 0.21, 0.18, 0, -0.16, -0.25, -0.26, -1.09, -1.61];
+
+        if (!validASA.includes(asa)) errors.push("👉 Invalid ASA class selection.");
+        if (!validStatus.includes(status)) errors.push("👉 Invalid Functional Status selection.");
+        if (!validSurgery.includes(surgery)) errors.push("👉 Invalid Surgery Type selection.");
+
+        // Show errors if any
+        if (errors.length > 0) {
+            errorMessage.innerHTML = errors.join("<br>");
+            errorBox.classList.remove("hidden");
+            placeholder.classList.add("hidden");
+            resultValue.classList.add("hidden");
+            return;
+        }
+        errorBox.classList.add("hidden");
+
+        // ✅ Risk Calculation
+        const ageComponent = Number(age) * 0.02;
+        const creatinineComponent = parseFloat(creatinine) > 1.5 ? 0.61 : 0;
+        const x = ageComponent + status + asa + creatinineComponent + surgery - 5.25;
+        const risk = (Math.exp(x) / (1 + Math.exp(x))) * 100;
+
+        // Clamp to 0–100
+        if (risk < 0 || risk > 100) {
+            errorMessage.innerHTML = "❌ Calculation error. Risk out of valid range.";
+            errorBox.classList.remove("hidden");
+            resultValue.classList.add("hidden");
+            return;
+        }
+
+        document.getElementById('rateValue').textContent = `${risk.toFixed(2)}%`;
+
+        const meterFill = document.getElementById('meterFill');
+        let meterWidth, meterColor, feedback;
+
+        if (risk < 0.05) {
+            meterWidth = '15%'; meterColor = '#2ecc71';
+            feedback = "<strong>Low Risk (&lt;25th percentile):</strong> Routine monitoring and care are appropriate.";
+        } else if (risk <= 0.14) {
+            meterWidth = '30%'; meterColor = '#27ae60';
+            feedback = "<strong>Moderate Risk (26th-50th percentile):</strong> Enhanced observation may be considered.";
+        } else if (risk <= 1.47) {
+            meterWidth = '50%'; meterColor = '#f1c40f';
+            feedback = "<strong>Elevated Risk (51st-90th percentile):</strong> Consider a cardiology consultation and closer monitoring.";
+        } else if (risk <= 2.60) {
+            meterWidth = '70%'; meterColor = '#e67e22';
+            feedback = "<strong>High Risk (91st-95th percentile):</strong> Intensive perioperative monitoring is recommended.";
+        } else if (risk <= 7.69) {
+            meterWidth = '85%'; meterColor = '#e74c3c';
+            feedback = "<strong>Very High Risk (96th-97th percentile):</strong> Post-operative ICU or step-down unit care should be considered.";
+        } else {
+            meterWidth = '95%'; meterColor = '#c0392b';
+            feedback = "<strong>Critical Risk (&gt;97th percentile):</strong> Urgent intervention and optimization are required. Surgery may need to be reconsidered.";
+        }
+
+        meterFill.style.width = meterWidth;
+        meterFill.style.backgroundColor = meterColor;
+        document.getElementById('feedbackContent').innerHTML = feedback;
+
+        placeholder.classList.add("hidden");
+        resultValue.classList.remove("hidden");
+    }
+
+    function printReport() {
+        const now = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        if (document.getElementById('printDate')) {
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        }
+        window.print();
+    }
+    </script>
+
+</body>
+</html>
+{% endblock %}
+
+<!-- 
+✅ 1. Input Validation Rules (QEHS/Fire Safety Perspective)
+
+Even though this is a medical calculator, the validation philosophy is similar to safety KPIs:
+garbage in → garbage out. We enforce numeric, range, and logical integrity.
+
+Inputs
+
+Age (years)
+
+Range: 18–120 years (adult patients only; pediatric use invalid here).
+
+Validation: Must be an integer; no decimals allowed.
+
+Edge Cases:
+
+Age <18 → reject ("Not valid for pediatric population").
+
+Age >120 → reject as unrealistic.
+
+ASA Class (pre-coded as weights)
+
+Must match one of the predefined dropdown values (-5.17 to 0).
+
+Validation: Reject manual tampering (no arbitrary values).
+
+Compliance Rationale: Prevents manipulating class severity for “favorable” results, similar to falsifying fire risk severity in audits.
+
+Serum Creatinine (mg/dL)
+
+Range: 0.1–20.0 mg/dL (clinical plausible range).
+
+Decimals: Allow 1 decimal place (step=0.1 is correct).
+
+Validation:
+
+Empty or negative → reject.
+
+Creatinine >20 → reject as unrealistic/outlier.
+
+Functional Status
+
+Dropdown only (0, 0.65, 1.03).
+
+Must not accept free-form entries.
+
+Surgery Type
+
+Dropdown only, fixed mapping (-1.61 to 1.6).
+
+Prevents manipulation or “blank” selection.
+
+✅ 2. Output Validation Logic & Thresholds
+
+Current formula:
+
+Risk (%) = [ e^x / (1 + e^x) ] × 100
+
+Validation Rules for Outputs
+
+Risk must always be between 0% and 100%.
+
+If outside → flag error.
+
+Ensure toFixed(2) rounding → prevents misleading decimals.
+
+Threshold Interpretation (like safety KPIs)
+
+<0.05% → Low risk (like "green zone" in fire risk).
+
+0.05–0.14% → Moderate.
+
+0.15–1.47% → Elevated.
+
+1.48–2.60% → High.
+
+2.61–7.69% → Very High.
+
+7.69% → Critical.
+
+This mirrors risk bands in OSHA safety pyramid models: minor, major, catastrophic.
+-->

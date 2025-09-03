@@ -1,0 +1,734 @@
+{% extends 'base.html' %}
+{% block title %}Fiber Intake Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiber Intake Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            align-items: center;
+            justify-content: center;
+        }
+        .result-value {
+            width: 100%;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 0;
+        }
+        .rate-label {
+            color: #7f8c8d;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .secondary-result {
+            font-size: 16px;
+            color: #2c3e50;
+            margin-top: 10px;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        .food-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        .food-box {
+            width: 100%;
+            max-width: 150px;
+            text-align: center;
+        }
+        .food-box img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .food-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 8px;
+            color: #1560bd;
+        }
+        /* Table styles */
+        .custom-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .custom-table thead {
+            background-color: #1560bd;
+            color: white;
+        }
+        .custom-table th, .custom-table td {
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .custom-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+        /* Toggle helper */
+        .hidden {
+            display: none;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Fiber Intake Calculator</h1>
+            <p>Calculate your recommended daily fiber intake based on your energy needs.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Enter Your Details</h2>
+                 <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" class="form-select">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="age">Age (years)</label>
+                    <input type="number" id="age" class="form-input" min="1" placeholder="e.g., 35">
+                </div>
+                <div class="form-group">
+                    <label for="height">Height (cm)</label>
+                    <input type="number" id="height" class="form-input" min="1" placeholder="e.g., 175">
+                </div>
+                <div class="form-group">
+                    <label for="weight">Weight (kg)</label>
+                    <input type="number" id="weight" class="form-input" min="1" placeholder="e.g., 70">
+                </div>
+                <div class="form-group">
+                    <label for="activity">Activity Level</label>
+                    <select id="activity" class="form-select">
+                        <option value="1.2">Little/no exercise</option>
+                        <option value="1.375">Light exercise (1-2 times/week)</option>
+                        <option value="1.55">Moderate exercise (3-5 times/week)</option>
+                        <option value="1.725">Heavy exercise (6-7 times/week)</option>
+                        <option value="1.9">Athlete</option>
+                    </select>
+                </div>
+                <button class="calculate-btn" onclick="calculateFiber()">Calculate Fiber Intake</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Enter your details to calculate your recommended daily fiber intake.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div class="result-value hidden" id="resultValue">
+                    <h2>Recommended Daily Fiber</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0</div>
+                        <div class="rate-label">grams / day</div>
+                    </div>
+                    <p class="secondary-result" id="calorieResult">Based on 0 kcal/day</p>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Recommendation</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <!-- What is Fiber -->
+            <div class="note-card">
+                <h3>🥦 What is Fiber and Why is it Important?</h3>
+                <p>
+                    Fiber is a dietary nutrient found in plant-based foods that aids in digestion, helps maintain bowel health, 
+                    and can reduce the risk of heart disease and colorectal cancer. It is essential for a healthy diet and 
+                    comes in two forms: soluble and insoluble.
+                </p>
+            </div>
+
+            <!-- How to Use the Calculator -->
+            <div class="note-card">
+                <h3>🧮 How to Use the Fiber Calculator</h3>
+                <p>Follow these steps to calculate your recommended daily fiber intake:</p>
+                <ol>
+                    <li><strong>Select Your Sex:</strong> Choose "Male" or "Female" from the dropdown menu.</li>
+                    <li><strong>Enter Your Height:</strong> Input your height in centimeters (cm).</li>
+                    <li><strong>Enter Your Weight:</strong> Input your weight in kilograms (kg).</li>
+                    <li><strong>Enter Your Age:</strong> Input your age in years.</li>
+                    <li><strong>Select Your Activity Level:</strong> Choose the option that best describes your weekly activity level.</li>
+                </ol>
+                <div style="overflow-x:auto;">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Activity Level</th>
+                                <th>Multiplier</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Little/no exercise</td><td>1.2</td></tr>
+                            <tr><td>Exercise 1-2 times/week</td><td>1.4</td></tr>
+                            <tr><td>Exercise 2-3 times/week</td><td>1.6</td></tr>
+                            <tr><td>Exercise 3-5 times/week</td><td>1.75</td></tr>
+                            <tr><td>Exercise 6-7 times/week</td><td>2.0</td></tr>
+                            <tr><td>Professional athlete</td><td>2.3</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p><strong>Calculate:</strong> Click "Calculate Fiber Intake" to see your recommended daily intake.</p>
+            </div>
+
+            <!-- How is Fiber Intake Calculated -->
+            <div class="note-card">
+                <h3>📊 How is Fiber Intake Calculated?</h3>
+                <p>
+                    The calculator uses your daily calorie intake to determine your recommended fiber intake. 
+                    The general guideline is to consume <strong>14 grams of fiber for every 1,000 calories</strong> per day.
+                </p>
+                <p><strong>Recommended Daily Fiber Intake:</strong></p>
+                <ul>
+                    <li><strong>Women:</strong> 25 grams per day</li>
+                    <li><strong>Men:</strong> 38 grams per day</li>
+                </ul>
+            </div>
+
+            <!-- Foods High in Fiber -->
+            <div class="note-card">
+                <h3>🥗 Foods High in Fiber</h3>
+                <p>To meet your daily fiber needs, consider adding these fiber-rich foods to your diet:</p>
+                <div class="food-container">
+                    <div class="food-box">
+                        <img src="{% static 'images/fruits.jpg' %}" alt="Fruits">
+                        <div class="food-title">Fruits</div>
+                        <div class="food-list">Apples, bananas, berries, pears, oranges.</div>
+                    </div>
+                    <div class="food-box">
+                        <img src="{% static 'images/veg.jpg' %}" alt="Vegetables">
+                        <div class="food-title">Vegetables</div>
+                        <div class="food-list">Broccoli, carrots, spinach, sweet potatoes.</div>
+                    </div>
+                    <div class="food-box">
+                        <img src="{% static 'images/legumes.jpg' %}" alt="Legumes">
+                        <div class="food-title">Legumes</div>
+                        <div class="food-list">Lentils, chickpeas, black beans, peas.</div>
+                    </div>
+                    <div class="food-box">
+                        <img src="{% static 'images/nuts.png' %}" alt="Nuts and Seeds">
+                        <div class="food-title">Nuts & Seeds</div>
+                        <div class="food-list">Almonds, chia seeds, flaxseeds, sunflower seeds.</div>
+                    </div>
+                    <div class="food-box">
+                        <img src="{% static 'images/graines.jpg' %}" alt="Whole Grains">
+                        <div class="food-title">Whole Grains</div>
+                        <div class="food-list">Oats, quinoa, brown rice, whole wheat bread.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="note-card">
+                <div class="note-list">
+                    <h3>✅ Input Validations</h3>
+                    <p>To ensure accurate and meaningful results, please follow these rules while entering your details:</p>
+                    <ul>
+                    <li><strong>Gender:</strong> Select <em>Male</em> or <em>Female</em> only.</li>
+                    <li><strong>Age:</strong> Must be between <em>1 and 120 years</em>. (No negatives, decimals, or unrealistic ages).</li>
+                    <li><strong>Height:</strong> Enter in <em>centimeters</em>, range <em>50 – 250 cm</em>. (Avoid unrealistic values).</li>
+                    <li><strong>Weight:</strong> Enter in <em>kilograms</em>, range <em>10 – 300 kg</em>. (No negatives or zeros).</li>
+                    <li><strong>Activity Level:</strong> Choose from the provided list only. (e.g., sedentary to athlete).</li>
+                    </ul>
+                    <p><strong>Important:</strong> Inputs outside these ranges will show an error message ❌ and prevent calculation, helping ensure results are safe, valid, and compliant with health standards.</p>
+                </div>
+                </div>
+
+            <!-- Disclaimer -->
+            <div class="note-card">
+                <h3>⚠️ Disclaimer</h3>
+                <p>
+                    This calculator provides estimates for informational purposes only. 
+                    It should not replace medical advice or diagnosis. 
+                    Always consult a healthcare provider for personalized dietary recommendations.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const now = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        if (document.getElementById('printDate')) {
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        }
+    });
+
+    function calculateFiber() {
+        const gender = document.getElementById('gender').value;
+        const height = document.getElementById('height').value.trim();
+        const weight = document.getElementById('weight').value.trim();
+        const age = document.getElementById('age').value.trim();
+        const activity = document.getElementById('activity').value;
+
+        const errorBox = document.getElementById('resultError');
+        const errorMessage = document.getElementById('errorMessage');
+        const placeholder = document.getElementById('placeholder');
+        const resultValue = document.getElementById('resultValue');
+
+        let errors = [];
+
+        // ✅ Input Validations
+        if (!["male", "female"].includes(gender)) errors.push("👉 Please select a valid gender.");
+        if (age === "" || isNaN(age) || parseInt(age) < 1 || parseInt(age) > 120) errors.push("👉 Age must be between 1 and 120 years.");
+        if (height === "" || isNaN(height) || parseFloat(height) < 50 || parseFloat(height) > 250) errors.push("👉 Height must be between 50 and 250 cm.");
+        if (weight === "" || isNaN(weight) || parseFloat(weight) < 10 || parseFloat(weight) > 300) errors.push("👉 Weight must be between 10 and 300 kg.");
+        if (![1.2, 1.375, 1.55, 1.725, 1.9].includes(parseFloat(activity))) errors.push("👉 Please select a valid activity level.");
+
+        if (errors.length > 0) {
+            errorMessage.innerHTML = errors.join("<br>");
+            errorBox.classList.remove("hidden");
+            placeholder.classList.add("hidden");
+            resultValue.classList.add("hidden");
+            return;
+        }
+        errorBox.classList.add("hidden");
+
+        // ✅ BMR Calculation (Mifflin-St Jeor)
+        let bmr = gender === "male"
+            ? 10 * parseFloat(weight) + 6.25 * parseFloat(height) - 5 * parseInt(age) + 5
+            : 10 * parseFloat(weight) + 6.25 * parseFloat(height) - 5 * parseInt(age) - 161;
+
+        if (bmr < 800 || bmr > 3500) {
+            showError("❌ Calculated BMR is outside realistic range. Please recheck inputs.");
+            return;
+        }
+
+        // ✅ TDEE Calculation
+        const tdee = bmr * parseFloat(activity);
+        if (tdee < 1000 || tdee > 7000) {
+            showError("❌ Calculated calorie needs are unrealistic. Please review inputs.");
+            return;
+        }
+
+        // ✅ Fiber Intake (14 g per 1000 kcal, WHO/USDA)
+        let fiberIntake = (tdee / 1000) * 14;
+        fiberIntake = Math.min(Math.max(fiberIntake, 10), 100); // Clamp within realistic range
+
+        // Update UI
+        document.getElementById('rateValue').textContent = fiberIntake.toFixed(0);
+        document.getElementById('calorieResult').innerHTML =
+            `Based on an estimated <strong>${tdee.toFixed(0)} kcal/day</strong>`;
+
+        const meterFill = document.getElementById('meterFill');
+        meterFill.style.width = '100%';
+        meterFill.style.backgroundColor = '#2980b9';
+
+        const generalRec = gender === 'male' ? 38 : 25;
+        document.getElementById('feedbackContent').textContent =
+            fiberIntake < generalRec
+                ? `⚠️ Your intake is below general guidelines (${generalRec}g/day).`
+                : fiberIntake > 50
+                    ? `⚠️ Your intake is higher than typical recommendations. Adjust per dietitian advice.`
+                    : `✅ Your intake aligns with recommended guidelines (~${generalRec}g/day).`;
+
+        placeholder.classList.add('hidden');
+        resultValue.classList.remove('hidden');
+
+        function showError(msg) {
+            errorMessage.innerHTML = msg;
+            errorBox.classList.remove("hidden");
+            placeholder.classList.add("hidden");
+            resultValue.classList.add("hidden");
+        }
+    }
+
+    function printReport() {
+        const now = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        if (document.getElementById('printDate')) {
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        }
+        window.print();
+    }
+    </script>
+
+</body>
+</html>
+{% endblock %}
+
+<!-- 
+1. Input Validation Rules (Compliance-Aligned)
+Gender
+
+Allowed values: "male", "female".
+
+Why: Gender-specific formulas (Mifflin-St Jeor) depend on this. Invalid values could produce misleading results.
+
+Validation: Reject blank or unrecognized entries.
+
+Age (years)
+
+Range: 1 – 120 years.
+
+Allowed decimals: None (must be integer).
+
+Why: Human biological range. Children under 1 year require different formulas, and values >120 are unrealistic.
+
+Safety tie-in: Data integrity – prevents statistical distortion in population health & safety audits.
+
+Height (cm)
+
+Range: 50 – 250 cm.
+
+Allowed decimals: One decimal place max.
+
+Why: Below 50 cm (newborns) and above 250 cm (extreme outliers) are invalid for standard adult-based dietary references.
+
+Compliance: Out-of-range values could falsely inflate fiber recommendations, affecting nutrition & workplace health records.
+
+Weight (kg)
+
+Range: 10 – 300 kg.
+
+Allowed decimals: One decimal place max.
+
+Why: Below 10 kg indicates child/newborn; above 300 kg not realistic for TDEE studies.
+
+Safety tie-in: Prevents calculation anomalies (e.g., excessively high BMR values impacting diet recommendations in audits).
+
+Activity Level
+
+Allowed values: 1.2, 1.375, 1.55, 1.725, 1.9.
+
+Why: These correspond to established physical activity multipliers in the WHO & OSHA nutritional guidelines for worker health.
+
+Validation: Reject modified, blank, or custom values.
+
+2. Output Validation Rules
+Basal Metabolic Rate (BMR)
+
+Expected Range: 800 – 3,500 kcal/day.
+
+Why: Physiological safe limits. Values outside this suggest input errors.
+
+Total Daily Energy Expenditure (TDEE)
+
+Expected Range: 1,000 – 7,000 kcal/day.
+
+Why: Values below/above are unrealistic for humans in occupational health context.
+
+Fiber Intake
+
+Formula: 14 g per 1,000 kcal (USDA/WHO).
+
+Expected Range: 10 – 100 g/day.
+
+Why: Consistent with dietary guidelines; prevents nonsense recommendations.
+
+3. Edge Case Validations
+
+Division by zero: Prevent if TDEE = 0 (should never occur if inputs validated).
+
+Blank inputs: Must reject with clear error messages.
+
+Extreme BMI: If BMI < 10 or > 60, flag as unrealistic combination (height/weight mismatch).
+
+Logical consistency: If age < 18, add advisory note: “Fiber intake for children should be calculated with pediatric guidelines.”
+-->

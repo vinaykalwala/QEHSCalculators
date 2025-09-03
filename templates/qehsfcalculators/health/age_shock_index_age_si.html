@@ -387,6 +387,40 @@
             border-color: #000040;
             transform: scale(1.05);
         }
+        .table-container {
+            width: 100%;
+            overflow-x: auto; /* ✅ horizontal scroll on small screens */
+        }
+
+        .table-container table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            min-width: 600px; /* ✅ keeps structure readable */
+        }
+
+        .table-container th,
+        .table-container td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .table-container th {
+            background: #1976d2;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .table-container table {
+                font-size: 12px;
+            }
+            .table-container th,
+            .table-container td {
+                padding: 6px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -425,7 +459,9 @@
                 <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Cardiovascular health icon">
                 <p>The patient's Age Shock Index and risk interpretation will appear here.</p>
             </div>
-            <div class="result-error hidden" id="resultError"><div class="error-message" id="errorMessage"></div></div>
+            <div class="result-error hidden" id="resultError">
+                <div class="error-message" id="errorMessage"></div>
+            </div>
             <div class="result-value hidden" id="resultValue">
                 <div class="rate-value" id="ageSiValue">0.00</div>
                 <div class="rate-label">Age Shock Index</div>
@@ -451,60 +487,197 @@
         <div class="note-card"><h3>📌 Explanation of Parameters</h3><ul><li><strong>Age (years):</strong> Older individuals generally have a higher baseline risk for cardiovascular issues, adding crucial context to vital signs.</li><li><strong>Heart Rate (beats/min):</strong> A high heart rate can signal physiological stress or shock.</li><li><strong>Systolic Blood Pressure (mmHg):</strong> Low systolic pressure may indicate poor organ perfusion and potential circulatory failure.</li></ul></div>
         <div class="note-card"><h3>How Is It Calculated?</h3><p>The Age SI is calculated with the formula: <strong>(Age × Heart Rate) / Systolic Blood Pressure</strong>. By combining these three parameters, the Age SI provides a clearer and more immediate picture of how well the cardiovascular system is handling stress.</p></div>
         <div class="note-card"><h3>Why It Matters</h3><p>In fast-paced clinical environments, the Age Shock Index helps healthcare professionals make quick, informed decisions. It provides rapid risk stratification at the bedside, with predictive power similar to more complex scoring systems.</p></div>
+        <div class="note-card">
+            <h3>Validation Rules & Compliance</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>Expected Range</th>
+                            <th>Units</th>
+                            <th>Validation Rules</th>
+                            <th>Compliance Rationale</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Age</td>
+                            <td>1 – 120 years</td>
+                            <td>Years</td>
+                            <td>Must be an integer ≥1 and ≤120</td>
+                            <td>Human biological limits; prevents nonsense inputs (e.g., negative or 999 years).</td>
+                        </tr>
+                        <tr>
+                            <td>Heart Rate (HR)</td>
+                            <td>30 – 220 bpm</td>
+                            <td>Beats/min</td>
+                            <td>Accept only values in this physiologically possible range</td>
+                            <td>OSHA/medical references consider &lt;30 or &gt;220 bpm invalid/extreme.</td>
+                        </tr>
+                        <tr>
+                            <td>Systolic BP (SBP)</td>
+                            <td>50 – 300 mmHg</td>
+                            <td>mmHg</td>
+                            <td>Must be within 50–300 mmHg</td>
+                            <td>SBP &lt;50 = incompatible with life; &gt;300 is extreme outlier.</td>
+                        </tr>
+                        <tr>
+                            <td>Decimals</td>
+                            <td>Age = integer only, HR and SBP = integers only</td>
+                            <td>-</td>
+                            <td>Restrict input to whole numbers</td>
+                            <td>Medical measurement units are integers in practice.</td>
+                        </tr>
+                        <tr>
+                            <td>Cross-field dependencies</td>
+                            <td>SBP must be &gt; HR (normally). Flag if HR ≫ SBP.</td>
+                            <td>-</td>
+                            <td>Warn if inputs suggest physiologically implausible state</td>
+                            <td>e.g., HR 180, SBP 60</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
     </div>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() { /* ... */ const printDateEl = document.getElementById('printDate'); if (printDateEl) { const now = new Date(); const options = { year: 'numeric', month: 'long', day: 'numeric' }; printDateEl.textContent = now.toLocaleDateString('en-US', options); } });
+document.addEventListener('DOMContentLoaded', function() {
+    const printDateEl = document.getElementById('printDate');
+    if (printDateEl) {
+        const now = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        printDateEl.textContent = now.toLocaleDateString('en-US', options);
+    }
+});
 
-    function calculateAgeShockIndex() {
-        const errorBox = document.getElementById('resultError'), errorMessage = document.getElementById('errorMessage'), placeholder = document.getElementById('placeholder'), resultValueDiv = document.getElementById('resultValue');
-        const age = parseFloat(document.getElementById('age').value);
-        const HR = parseFloat(document.getElementById('heartRate').value);
-        const SBP = parseFloat(document.getElementById('systolicBP').value);
+function calculateAgeShockIndex() {
+    const age = parseInt(document.getElementById('age').value, 10);
+    const HR = parseInt(document.getElementById('heartRate').value, 10);
+    const SBP = parseInt(document.getElementById('systolicBP').value, 10);
 
-        let errors = [];
-        if (isNaN(age) || age <= 0) errors.push("👉 Please enter a valid age.");
-        if (isNaN(HR) || HR <= 0) errors.push("👉 Please enter a valid heart rate.");
-        if (isNaN(SBP) || SBP <= 0) errors.push("👉 Please enter a valid systolic BP.");
+    const placeholder = document.getElementById('placeholder');
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const resultBox = document.getElementById('resultValue');
+    const ageSiValue = document.getElementById('ageSiValue');
+    const feedbackContent = document.getElementById('feedbackContent');
+    const meterFill = document.getElementById('meterFill');
 
-        if (errors.length > 0) {
-            errorMessage.innerHTML = errors.join("<br>");
-            errorBox.classList.remove("hidden");
-            placeholder.classList.remove("hidden");
-            resultValueDiv.classList.add("hidden");
-            return;
-        } else {
-            errorBox.classList.add("hidden");
-        }
+    // Reset visibility
+    placeholder.classList.add('hidden');
+    errorBox.classList.add('hidden');
+    resultBox.classList.add('hidden');
 
-        const ageSI = (age * HR) / SBP;
-        document.getElementById('ageSiValue').textContent = ageSI.toFixed(2);
+    let errorMsg = "";
 
-        const meterFill = document.getElementById('meterFill');
-        let meterWidth, meterColor, feedback, interpretation;
-
-        if (ageSI > 50) {
-            meterWidth = '85%'; meterColor = '#e74c3c'; // Red
-            interpretation = "⚠️ Elevated";
-            feedback = `<strong>${interpretation}:</strong> Indicates a potentially higher risk of mortality and may require urgent medical attention.`;
-        } else {
-            meterWidth = '25%'; meterColor = '#27ae60'; // Green
-            interpretation = "✅ Normal";
-            feedback = `<strong>${interpretation}:</strong> Suggests a stable cardiovascular status with a lower risk for serious cardiac events.`;
-        }
-        
-        meterFill.style.width = meterWidth;
-        meterFill.style.backgroundColor = meterColor;
-        document.getElementById('feedbackContent').innerHTML = feedback;
-
-        placeholder.classList.add('hidden');
-        resultValueDiv.classList.remove('hidden');
+    // Input validations
+    if (isNaN(age) || isNaN(HR) || isNaN(SBP)) {
+        errorMsg = "❌ Please enter all required values.";
+    } else if (age < 1 || age > 120) {
+        errorMsg = "❌ Age must be between 1 and 120 years.";
+    } else if (HR < 30 || HR > 220) {
+        errorMsg = "❌ Heart Rate must be between 30 and 220 bpm.";
+    } else if (SBP < 50 || SBP > 300) {
+        errorMsg = "❌ Systolic BP must be between 50 and 300 mmHg.";
     }
 
-    function printReport() { /* ... */ const printDateEl = document.getElementById('printDate'); if (printDateEl) { const now = new Date(); const options = { year: 'numeric', month: 'long', day: 'numeric' }; printDateEl.textContent = now.toLocaleDateString('en-US', options); } window.print(); }
+    if (errorMsg) {
+        errorMessage.textContent = errorMsg;
+        errorBox.classList.remove('hidden');
+        return;
+    }
+
+    // Calculation
+    const ageSI = (age * HR) / SBP;
+    ageSiValue.textContent = ageSI.toFixed(2);
+
+    let interpretation = "";
+    let fillPercent = 0;
+
+    // Interpretation thresholds
+    if (ageSI > 50) {
+        interpretation = "⚠️ Elevated: Increased risk of mortality — possible cardiovascular compromise.";
+        fillPercent = 100;
+    } else {
+        interpretation = "✅ Normal: Suggests stable cardiovascular status.";
+        fillPercent = (ageSI / 50) * 100;
+    }
+
+    // Outlier flagging
+    if ((age > 100 && HR > 180) || (SBP < 60 && HR > 150)) {
+        interpretation += "<br>⚠️ Warning: Values appear physiologically extreme — verify input.";
+    }
+
+    // Update feedback & meter
+    feedbackContent.innerHTML = interpretation;
+    meterFill.style.width = fillPercent + "%";
+
+    // Show result
+    resultBox.classList.remove('hidden');
+}
+
+function printReport() {
+    const printDateEl = document.getElementById('printDate');
+    if (printDateEl) {
+        const now = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        printDateEl.textContent = now.toLocaleDateString('en-US', options);
+    }
+    window.print();
+}
 </script>
 
 </body>
 </html>
 {% endblock %}
+
+<!-- 🔎 2. Output Validation Logic
+
+Formula:
+
+𝐴
+𝑔
+𝑒
+ 
+𝑆
+𝐼
+=
+𝐴
+𝑔
+𝑒
+×
+𝐻
+𝑅
+𝑆
+𝐵
+𝑃
+Age SI=
+SBP
+Age×HR
+	​
+
+
+Thresholds (based on peer-reviewed studies & audits)
+
+≤ 50 → ✅ Normal (lower mortality risk, stable hemodynamics).
+
+> 50 → ⚠️ Elevated (associated with shock, acute myocardial infarction, trauma risk).
+
+Compliance perspective:
+
+Avoids false reassurance: Always provide a disclaimer that Age SI is a screening tool not a diagnostic conclusion.
+
+Aligns with ISO 45001 and OSHA incident reporting principles — “accurate, validated, and reliable data entry prevents misreporting in health & safety audits.”
+
+🔎 3. Edge Case Validations
+Edge Case	Handling Rule
+Division by zero (SBP = 0)	Prevented by SBP ≥ 50 rule.
+Extreme elderly + extreme vitals (e.g., Age 120, HR 220, SBP 50)	Calculate, but display warning “Unrealistic physiological combination.”
+Missing fields	Block calculation with user-friendly error message.
+Negative / non-numeric inputs	Auto-reject with validation.
+Outliers (e.g., HR=20, SBP=300)	Allow calculation but flag as “outlier — check input.” -->

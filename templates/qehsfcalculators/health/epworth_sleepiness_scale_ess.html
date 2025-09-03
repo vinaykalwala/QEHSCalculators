@@ -1,0 +1,571 @@
+{% extends 'base.html' %}
+{% block title %}Epworth Sleepiness Scale (ESS) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Epworth Sleepiness Scale (ESS) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            max-height: 420px; 
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+            line-height: 1.4;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: baseline;
+            justify-content: center;
+        }
+        .result-value {
+            width: 100%;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        .rate-label {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+        /* Toggle helper */
+        .hidden {
+            display: none;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Epworth Sleepiness Scale (ESS)</h1>
+            <p>What are the chances of you dozing off or falling asleep in the following situations?</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>ESS Questionnaire</h2>
+                <div class="form-group">
+                    <label for="q1">1. Sitting and reading?</label>
+                    <select id="q1" class="form-select"><option value="0">Never</option><option value="1">Slight</option><option value="2">Moderate</option><option value="3">High</option></select>
+                </div>
+                <div class="form-group">
+                    <label for="q2">2. Watching TV?</label>
+                    <select id="q2" class="form-select"><option value="0">Never</option><option value="1">Slight</option><option value="2">Moderate</option><option value="3">High</option></select>
+                </div>
+                <div class="form-group">
+                    <label for="q3">3. Sitting inactive in a public place (e.g., a meeting)?</label>
+                    <select id="q3" class="form-select"><option value="0">Never</option><option value="1">Slight</option><option value="2">Moderate</option><option value="3">High</option></select>
+                </div>
+                <div class="form-group">
+                    <label for="q4">4. As a passenger in a car for an hour without a break?</label>
+                    <select id="q4" class="form-select"><option value="0">Never</option><option value="1">Slight</option><option value="2">Moderate</option><option value="3">High</option></select>
+                </div>
+                <div class="form-group">
+                    <label for="q5">5. Lying down to rest in the afternoon?</label>
+                    <select id="q5" class="form-select"><option value="0">Never</option><option value="1">Slight</option><option value="2">Moderate</option><option value="3">High</option></select>
+                </div>
+                 <div class="form-group">
+                    <label for="q6">6. Sitting and talking to someone?</label>
+                    <select id="q6" class="form-select"><option value="0">Never</option><option value="1">Slight</option><option value="2">Moderate</option><option value="3">High</option></select>
+                </div>
+                 <div class="form-group">
+                    <label for="q7">7. Sitting quietly after lunch (without alcohol)?</label>
+                    <select id="q7" class="form-select"><option value="0">Never</option><option value="1">Slight</option><option value="2">Moderate</option><option value="3">High</option></select>
+                </div>
+                 <div class="form-group">
+                    <label for="q8">8. In a car, while stopped for a few minutes in traffic?</label>
+                    <select id="q8" class="form-select"><option value="0">Never</option><option value="1">Slight</option><option value="2">Moderate</option><option value="3">High</option></select>
+                </div>
+                <button class="calculate-btn" onclick="calculateESS()">Calculate Score</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Please answer all questions to calculate your Epworth Sleepiness Score.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div class="result-value hidden" id="resultValue">
+                    <h2>Your Sleepiness Score</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0</div>
+                        <div class="rate-label">ESS Score</div>
+                    </div>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Normal</span><span>Mild</span><span>Moderate</span><span>Severe</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Interpretation</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+
+            <div class="note-card">
+                <div class="note-list">
+                    <h3>📋 Input Validation Rules</h3>
+                    <ul>
+                        <li>✔️ Each question (<strong>Q1 – Q8</strong>) must be answered before calculating the score.</li>
+                        <li>✔️ Only values between <strong>0 and 3</strong> are allowed:
+                            <ul>
+                                <li>0 – Never</li>
+                                <li>1 – Slight chance</li>
+                                <li>2 – Moderate chance</li>
+                                <li>3 – High chance</li>
+                            </ul>
+                        </li>
+                        <li>✔️ No blanks, negative numbers, or values above 3 are accepted.</li>
+                        <li>✔️ Final score will always be between <strong>0 and 24</strong>.</li>
+                        <li>⚠️ If answers are missing or invalid, an error message will appear instead of a score.</li>
+                        <li>📌 Interpretation categories:
+                            <ul>
+                                <li>0–6 → Normal Sleepiness</li>
+                                <li>7–10 → Higher Normal</li>
+                                <li>11–14 → Mild Excessive</li>
+                                <li>15–18 → Moderate Excessive</li>
+                                <li>19–24 → Severe Excessive</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="note-card">
+                <h3>❗ Important Note</h3>
+                <p>
+                    The Epworth Sleepiness Scale (ESS) is a simple screening tool designed to assess daytime sleepiness. It is not a substitute for a professional evaluation or diagnosis. If you have concerns about your sleep patterns or excessive daytime sleepiness, please consult with a healthcare provider. This tool is adapted from validated resources like the ESS and other sleep health frameworks.
+                </p>
+                <p>
+                    Your experience may differ, and only a professional can offer personalized advice. Always prioritize reaching out to a medical or sleep specialist for any concerns you may have.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            if (document.getElementById('printDate')) {
+                document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
+        });
+
+        function calculateESS() {
+            let score = 0;
+            let unanswered = [];
+
+            // Validation loop for all 8 questions
+            for (let i = 1; i <= 8; i++) {
+                const el = document.getElementById(`q${i}`);
+                if (!el) continue;
+
+                let value = el.value;
+
+                // Check if empty
+                if (value === "" || value === null) {
+                    unanswered.push(i);
+                    continue;
+                }
+
+                // Convert to integer safely
+                value = parseInt(value, 10);
+
+                // Validate range (0–3 only)
+                if (isNaN(value) || value < 0 || value > 3) {
+                    document.getElementById("errorMessage").innerText =
+                        `Invalid input at Question ${i}. Only values between 0 and 3 are allowed.`;
+                    document.getElementById("resultError").classList.remove("hidden");
+                    document.getElementById("resultValue").classList.add("hidden");
+                    return;
+                }
+
+                score += value;
+            }
+
+            // Handle unanswered questions
+            if (unanswered.length > 0) {
+                document.getElementById("errorMessage").innerText =
+                    `Please answer all questions. Missing: ${unanswered.join(", ")}`;
+                document.getElementById("resultError").classList.remove("hidden");
+                document.getElementById("resultValue").classList.add("hidden");
+                return;
+            }
+
+            // Results placeholders
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+            document.getElementById('rateValue').textContent = score;
+
+            const meterFill = document.getElementById('meterFill');
+            let meterWidth, meterColor, feedback;
+
+            // Interpretation logic
+            if (score <= 6) {
+                meterWidth = '20%'; meterColor = '#27ae60';
+                feedback = "<strong>Normal Daytime Sleepiness:</strong> Your score suggests you are likely getting enough quality sleep.";
+            } else if (score <= 10) {
+                meterWidth = '40%'; meterColor = '#2ecc71';
+                feedback = "<strong>Higher Normal Daytime Sleepiness:</strong> Your score is in the upper range of normal. It might be beneficial to review your sleep habits.";
+            } else if (score <= 14) {
+                meterWidth = '60%'; meterColor = '#f1c40f';
+                feedback = "<strong>Mild Excessive Daytime Sleepiness:</strong> You may be experiencing mild sleepiness. Consider speaking with a healthcare provider.";
+            } else if (score <= 18) {
+                meterWidth = '80%'; meterColor = '#e67e22';
+                feedback = "<strong>Moderate Excessive Daytime Sleepiness:</strong> It is recommended to consult a healthcare provider or sleep specialist for evaluation.";
+            } else {
+                meterWidth = '95%'; meterColor = '#e74c3c';
+                feedback = "<strong>Severe Excessive Daytime Sleepiness:</strong> It is strongly recommended to seek a professional evaluation from a sleep specialist.";
+            }
+
+            // Apply results
+            meterFill.style.width = meterWidth;
+            meterFill.style.backgroundColor = meterColor;
+            document.getElementById('feedbackContent').innerHTML = feedback;
+
+            // Show result card, hide placeholder & error
+            placeholder.classList.add('hidden');
+            document.getElementById("resultError").classList.add("hidden");
+            resultValue.classList.remove('hidden');
+        }
+
+        function printReport() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            if (document.getElementById('printDate')) {
+                document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
+            window.print();
+        }
+    </script>
+
+</body>
+</html>
+{% endblock %}
+
+<!-- 
+1. Real-World QEHS/Fire Safety Perspective
+
+Although ESS is a clinical self-assessment tool, the validation principles are directly applicable to safety-critical calculators (like TRIR, LTIFR, accident rates, fatigue risk scores).
+
+Inputs must be valid, bounded, and consistent, to prevent misleading results in audits or compliance reports.
+
+Outputs must map correctly to thresholds, so users can interpret risk categories the same way regulators would interpret TRIR or incident frequency data.
+
+2. Input Validation Rules
+Field	Expected Range	Validation Rule	Compliance Rationale
+q1–q8 (ESS Questions)	0–3 (integer only)	Must be numeric, integer, no blanks. Reject non-numeric or out-of-range entries.	Prevents garbage data entry; aligns with standard ESS questionnaire scoring.
+All Questions Answered	Mandatory	No field can be skipped. User must provide a response for all 8 questions.	Missing data = incomplete assessment, same as missing accident records in safety KPIs.
+Data Type	Integer only	Disallow decimals or text.	Ensures calculation integrity, avoids parsing errors.
+Logical Consistency	N/A	No cross-field conflicts (since all are independent).	Each input represents a distinct risk scenario, so no overlap validation needed.
+3. Output Validation & Thresholds
+
+ESS total score = 0–24.
+Interpretation (mirroring how OSHA/ISO classify TRIR bands):
+
+0–6 = Normal → No fatigue risk.
+
+7–10 = Mild sleepiness → Equivalent to “monitoring required” in safety KPIs.
+
+11–14 = Moderate → Flag for medical review (like leading indicator thresholds).
+
+15–18 = Moderate Excessive → Escalation required (similar to regulatory action threshold).
+
+19–24 = Severe Excessive → Urgent intervention required (like critical safety breach).
+
+4. Edge Case Validations
+Edge Case	Handling Rule
+Missing selection	Show error → “All questions must be answered.”
+Non-integer/invalid input (e.g., text injected)	Reject and reset to safe default (0).
+Score < 0 or > 24 (due to tampering)	Block and reset.
+All answers = 0	Show message “No signs of daytime sleepiness” (valid edge).
+All answers = 3 (Max 24)	Show severe message + recommend urgent consultation.
+-->

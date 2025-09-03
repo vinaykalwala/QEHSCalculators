@@ -1,0 +1,646 @@
+{% extends 'base.html' %}
+{% block title %}Fat-Free Mass Index (FFMI) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fat-Free Mass Index (FFMI) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            align-items: center;
+            justify-content: center;
+        }
+        .result-value {
+            width: 100%;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 0;
+        }
+        .rate-label {
+            color: #7f8c8d;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .secondary-results p {
+            font-size: 16px;
+            color: #2c3e50;
+            margin: 4px 0;
+        }
+        .secondary-results strong {
+            color: #1560bd;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        /* Table styles */
+        .custom-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .custom-table thead {
+            background-color: #1560bd;
+            color: white;
+        }
+        .custom-table th, .custom-table td {
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .custom-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+        /* Toggle helper */
+        .hidden {
+            display: none;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Fat-Free Mass Index (FFMI) Calculator</h1>
+            <p>Assess your muscle mass relative to your height and weight.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Enter Your Data</h2>
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" class="form-select">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="height">Height (cm)</label>
+                    <input type="number" id="height" class="form-input" placeholder="e.g., 180">
+                </div>
+                <div class="form-group">
+                    <label for="weight">Weight (kg)</label>
+                    <input type="number" id="weight" class="form-input" placeholder="e.g., 80">
+                </div>
+                <div class="form-group">
+                    <label for="bodyFat">Body Fat (%)</label>
+                    <input type="number" id="bodyFat" class="form-input" placeholder="e.g., 15">
+                </div>
+                <button class="calculate-btn" onclick="calculateFFMI()">Calculate FFMI</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Enter your details to calculate your <strong>Fat-Free Mass Index</strong>.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div class="result-value hidden" id="resultValue">
+                    <h2>Your FFMI Results</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.0</div>
+                        <div class="rate-label">FFMI (kg/m²)</div>
+                    </div>
+                     <div class="secondary-results">
+                        <p id="normalizedResult">Normalized FFMI: 0.0 kg/m²</p>
+                        <p id="ffmResult">Fat-Free Mass: 0.0 kg</p>
+                    </div>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Below Avg</span><span>Average</span><span>Above Avg</span><span>Excellent</span><span>Superior</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Interpretation</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <!-- Understanding FFMI -->
+            <div class="note-card">
+                <h3>💪 Understanding FFMI</h3>
+                <p>
+                    The Fat-Free Mass Index (FFMI) is a measure of an individual's muscle mass relative to their height and weight. 
+                    It provides a clearer picture of body composition than the standard Body Mass Index (BMI). 
+                    While BMI only considers total weight, FFMI differentiates between muscle mass and fat mass. 
+                    This makes FFMI especially useful for athletes and fitness enthusiasts, as it accounts for the impact of muscle on body composition.
+                </p>
+            </div>
+
+            <!-- Why is FFMI Important -->
+            <div class="note-card">
+                <h3>📌 Why is FFMI Important?</h3>
+                <p>
+                    FFMI is a valuable tool for assessing physical development, tracking muscle growth, and evaluating whether an individual's 
+                    muscle mass is within a natural range. For competitive athletes or bodybuilders, FFMI can indicate if their muscle mass 
+                    is attainable through natural means or potentially influenced by performance-enhancing substances.
+                </p>
+            </div>
+
+            <!-- FFMI Interpretation -->
+            <div class="note-card">
+                <h3>📊 FFMI Interpretation</h3>
+                <p>
+                    FFMI values vary between men and women due to physiological differences in muscle distribution. 
+                    Below is a categorized breakdown of FFMI interpretations:
+                </p>
+                <div style="overflow-x:auto;">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>FFMI Range (Men)</th>
+                                <th>FFMI Range (Women)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Below Average</td><td>Below 18</td><td>Below 15</td></tr>
+                            <tr><td>Average</td><td>18 - 20</td><td>15 - 17</td></tr>
+                            <tr><td>Above Average</td><td>20 - 22</td><td>17 - 18</td></tr>
+                            <tr><td>Excellent</td><td>22 - 23</td><td>18 - 19</td></tr>
+                            <tr><td>Superior</td><td>23 - 26</td><td>19 - 21.5</td></tr>
+                            <tr><td>Suspicion of Steroid Use</td><td>26 - 28</td><td>21.5 - 25</td></tr>
+                            <tr><td>Likely Steroid Use</td><td>Above 28</td><td>Above 25</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Limitations -->
+            <div class="note-card">
+                <h3>⚠️ Limitations of FFMI</h3>
+                <p>
+                    While FFMI is a helpful indicator, it is not a perfect measure. 
+                    Factors such as genetics, training intensity, and body type can influence FFMI results. 
+                    It is also important to remember that FFMI does not directly measure muscle quality or physical performance. 
+                    Always consider consulting with healthcare professionals for an in-depth analysis of your health and fitness levels.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <div class="note-title">ℹ️ Input Validations Guide</div>
+                <div class="note-content">
+                    <ul>
+                        <li><strong>Gender:</strong> Select either <em>Male</em> or <em>Female</em>.</li>
+                        <li><strong>Height:</strong> Must be between <em>100 cm and 250 cm</em>. (Example: 175 cm)</li>
+                        <li><strong>Weight:</strong> Must be between <em>30 kg and 250 kg</em>. (Example: 70 kg)</li>
+                        <li><strong>Body Fat %:</strong> Must be between <em>3% and 60%</em>. Typical healthy ranges:
+                            <ul>
+                                <li>Men: 8% – 20%</li>
+                                <li>Women: 18% – 30%</li>
+                            </ul>
+                        </li>
+                        <li><strong>Logical Checks:</strong>
+                            <ul>
+                                <li>Fat-Free Mass must always be greater than <em>0</em>.</li>
+                                <li>Fat Mass cannot exceed <em>Total Body Weight</em>.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Decimals:</strong> Inputs can include up to 1 decimal place (e.g., <em>72.5 kg</em>).</li>
+                        <li><strong>Invalid Inputs:</strong> Blank fields, negative values, or unrealistic entries will trigger error messages.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Disclaimer -->
+            <div class="note-card">
+                <h3>📝 Disclaimer</h3>
+                <p>
+                    This FFMI calculator provides estimates for educational purposes. 
+                    It should not replace medical advice or diagnosis. 
+                    Always seek guidance from healthcare professionals for a comprehensive assessment of your body composition and health.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            if (document.getElementById('printDate')) {
+                document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
+        });
+
+        function calculateFFMI() {
+            const gender = document.getElementById('gender').value;
+            const height = document.getElementById('height').value.trim();
+            const weight = document.getElementById('weight').value.trim();
+            const bodyFat = document.getElementById('bodyFat').value.trim();
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+
+            let errors = [];
+
+            // Input validation with real-world safe ranges
+            if (!gender) errors.push("👉 Please select gender.");
+            if (height === "" || isNaN(height) || parseFloat(height) < 100 || parseFloat(height) > 250)
+                errors.push("👉 Height must be between 100 cm and 250 cm.");
+            if (weight === "" || isNaN(weight) || parseFloat(weight) < 30 || parseFloat(weight) > 250)
+                errors.push("👉 Weight must be between 30 kg and 250 kg.");
+            if (bodyFat === "" || isNaN(bodyFat) || parseFloat(bodyFat) < 3 || parseFloat(bodyFat) > 60)
+                errors.push("👉 Body fat percentage must be between 3% and 60%.");
+
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            }
+
+            errorBox.classList.add("hidden");
+
+            const h = parseFloat(height) / 100;
+            const w = parseFloat(weight);
+            const bf = parseFloat(bodyFat);
+
+            const fatMass = (w * bf) / 100;
+            const fatFreeMass = w - fatMass;
+
+            // Logical consistency checks
+            if (fatFreeMass <= 0) {
+                showError("❌ Fat-Free Mass cannot be zero or negative. Please recheck inputs.");
+                return;
+            }
+            if (fatMass > w) {
+                showError("❌ Fat Mass cannot exceed total body weight.");
+                return;
+            }
+
+            const ffmi = fatFreeMass / (h * h);
+            const normalizedFFMI = ffmi + 6.1 * (1.8 - h);
+
+            document.getElementById('rateValue').textContent = ffmi.toFixed(1);
+            document.getElementById('normalizedResult').innerHTML = `<strong>Normalized FFMI:</strong> ${normalizedFFMI.toFixed(1)} kg/m²`;
+            document.getElementById('ffmResult').innerHTML = `<strong>Fat-Free Mass:</strong> ${fatFreeMass.toFixed(1)} kg (Fat Mass: ${fatMass.toFixed(1)} kg)`;
+
+            const meterFill = document.getElementById('meterFill');
+            let meterWidth, meterColor, feedback;
+
+            // Male thresholds
+            if (gender === 'male') {
+                if (ffmi < 18) { meterWidth = '16%'; meterColor = '#3498db'; feedback = "Your muscle mass is below average for men."; }
+                else if (ffmi < 20) { meterWidth = '33%'; meterColor = '#2ecc71'; feedback = "Your muscle mass is average for men."; }
+                else if (ffmi < 22) { meterWidth = '50%'; meterColor = '#f1c40f'; feedback = "Your muscle mass is above average for men."; }
+                else if (ffmi < 23) { meterWidth = '66%'; meterColor = '#e67e22'; feedback = "Your muscle mass is in the excellent range for men."; }
+                else if (ffmi < 26) { meterWidth = '83%'; meterColor = '#e74c3c'; feedback = "Your muscle mass is in the superior range for men."; }
+                else if (ffmi <= 28) { meterWidth = '90%'; meterColor = '#c0392b'; feedback = "⚠️ Suspicion of steroid use."; }
+                else { meterWidth = '95%'; meterColor = '#8e44ad'; feedback = "⚠️ Steroid use likely (extremely high FFMI)."; }
+            }
+            // Female thresholds
+            else {
+                if (ffmi < 15) { meterWidth = '16%'; meterColor = '#3498db'; feedback = "Your muscle mass is below average for women."; }
+                else if (ffmi < 17) { meterWidth = '33%'; meterColor = '#2ecc71'; feedback = "Your muscle mass is average for women."; }
+                else if (ffmi < 18) { meterWidth = '50%'; meterColor = '#f1c40f'; feedback = "Your muscle mass is above average for women."; }
+                else if (ffmi < 19) { meterWidth = '66%'; meterColor = '#e67e22'; feedback = "Your muscle mass is in the excellent range for women."; }
+                else if (ffmi < 21.5) { meterWidth = '83%'; meterColor = '#e74c3c'; feedback = "Your muscle mass is in the superior range for women."; }
+                else if (ffmi <= 25) { meterWidth = '90%'; meterColor = '#c0392b'; feedback = "⚠️ Suspicion of steroid use."; }
+                else { meterWidth = '95%'; meterColor = '#8e44ad'; feedback = "⚠️ Steroid use likely (extremely high FFMI)."; }
+            }
+
+            meterFill.style.width = meterWidth;
+            meterFill.style.backgroundColor = meterColor;
+            document.getElementById('feedbackContent').innerHTML = feedback;
+
+            placeholder.classList.add('hidden');
+            resultValue.classList.remove('hidden');
+
+            function showError(message) {
+                errorMessage.innerHTML = message;
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+            }
+        }
+
+        function printReport() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            if (document.getElementById('printDate')) {
+                document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
+            window.print();
+        }
+    </script>
+
+</body>
+</html>
+{% endblock %}
+
+<!-- 
+1. Input Validation Rules (Real-world Compliance-Oriented)
+
+In QEHS/Fitness-Health KPIs, values must reflect biological limits, regulatory reporting standards, and data integrity.
+
+Field	Expected Range	Unit	Validation Rule	Compliance Rationale
+Gender	Male / Female only	-	Mandatory selection, default must not auto-assign	Avoids biased assumptions in compliance/health reporting
+Height	100 – 250 cm (1–2.5 m)	cm	Must be numeric, integer/decimal allowed up to 1 decimal, no negatives	Outside range is unrealistic & would distort FFMI like incorrect exposure hours in audits
+Weight	30 – 250 kg	kg	Must be numeric, decimals ≤1, cannot exceed safe max	Ensures data integrity like limiting man-hour entries
+Body Fat %	3 – 60% (below 3% = unsafe, >60% = unrealistic)	%	Must be numeric, decimals ≤1, between 3–60 inclusive	Aligns with WHO/NFPA occupational health safe ranges
+Cross-Checks	Body fat % must logically correlate with weight/FFM	-	Fat-Free Mass must be >0, and Fat Mass cannot exceed total weight	Like cross-field checks in risk audits: prevents contradictory inputs
+2. Output Validation & Thresholds
+
+Outputs must flag outliers like we do in OSHA/NFPA reporting:
+
+FFMI (kg/m²) → normal human FFMI ranges are ~15–26. Values >28 require a compliance warning (possible steroid enhancement).
+
+Normalized FFMI → should not deviate >5 units from raw FFMI unless extreme height input.
+
+Fat-Free Mass (kg) → cannot be ≤0.
+
+Fat Mass (kg) → cannot exceed total body weight.
+
+These thresholds are equivalent to safety bands in fire load calculations: green = safe, red = violation.
+-->

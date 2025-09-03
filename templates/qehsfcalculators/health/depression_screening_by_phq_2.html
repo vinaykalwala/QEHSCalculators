@@ -1,0 +1,664 @@
+{% extends 'base.html' %}
+{% block title %}Depression Screening (PHQ-2) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Depression Screening (PHQ-2) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+            line-height: 1.4;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: baseline;
+            justify-content: center;
+        }
+        .result-value {
+            width: 100%;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        .rate-label {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        /* Table styles */
+        .custom-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .custom-table thead {
+            background-color: #1560bd;
+            color: white;
+        }
+        .custom-table th, .custom-table td {
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .custom-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+        /* Toggle helper */
+        .hidden {
+            display: none;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Depression Screening (PHQ-2)</h1>
+            <p>This 2-question tool helps screen for depression. Over the last 2 weeks, how often have you been bothered by the following problems?</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>PHQ-2 Questionnaire</h2>
+                <div class="form-group">
+                    <label for="q1">1. Little interest or pleasure in doing things:</label>
+                    <select id="q1" class="form-select">
+                        <option value="0">Not at all</option>
+                        <option value="1">Several days</option>
+                        <option value="2">More than half the days</option>
+                        <option value="3">Nearly every day</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="q2">2. Feeling down, depressed, or hopeless:</label>
+                    <select id="q2" class="form-select">
+                        <option value="0">Not at all</option>
+                        <option value="1">Several days</option>
+                        <option value="2">More than half the days</option>
+                        <option value="3">Nearly every day</option>
+                    </select>
+                </div>
+                <button class="calculate-btn" onclick="calculatePHQ2()">Calculate Score</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Please answer the two questions to see your PHQ-2 score and interpretation.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div class="result-value hidden" id="resultValue">
+                    <h2>PHQ-2 Screening Result</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0</div>
+                        <div class="rate-label">PHQ-2 Score</div>
+                    </div>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low Likelihood</span>
+                        <span>Further Evaluation Recommended</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Interpretation</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+    <div class="note-card">
+        <h3>📘 About PHQ-2</h3>
+        <p>
+            The <strong>PHQ-2 (Patient Health Questionnaire-2)</strong> is a brief and validated screening tool used to identify potential signs of depression.  
+            It consists of 2 core questions that evaluate:
+        </p>
+        <ul class="note-list">
+            <li>Little interest or pleasure in doing things</li>
+            <li>Feeling down, depressed, or hopeless</li>
+        </ul>
+        <p>
+            The goal of the PHQ-2 is not to diagnose depression, but to serve as an initial step in identifying individuals who may benefit from a more in-depth evaluation, such as the PHQ-9.
+        </p>
+        <p>
+            <strong>Using the Calculator:</strong> Select your responses to the two questions in the PHQ-2 form above.  
+            Based on your score (0 to 6), you will receive a recommendation for whether further assessment is needed.
+        </p>
+    </div>
+
+    <div class="note-card">
+        <h3>📑 Scoring Guide</h3>
+        <ul class="note-list">
+            <li><strong>0–2:</strong> Low likelihood of a depressive disorder</li>
+            <li><strong>3 or higher:</strong> Possible depression – further screening (such as PHQ-9) is recommended</li>
+        </ul>
+        <p>
+            If you’re concerned about your mental health, we encourage you to reach out to a licensed mental health professional.  
+            Seeking help early can make a meaningful difference.
+        </p>
+    </div>
+
+    <div class="note-card">
+        <h3>📊 PHQ-2 Score Statistics</h3>
+        <p>
+            The table below shows the <strong>Positive Predictive Value (PPV)</strong> and <strong>Likelihood Ratio (LR)</strong> for different PHQ-2 scores based on research data.
+        </p>
+        <p>
+            <strong>PPV (Positive Predictive Value):</strong> Indicates the probability that a person actually has a depressive disorder at a given score.  
+            A low PPV (15–20%) means symptoms are present but clinical depression is less likely.  
+            A high PPV (above 75%) suggests strong likelihood of depression and the need for further evaluation.
+        </p>
+        <p>
+            <strong>LR (Likelihood Ratio):</strong> Shows how much a score changes the odds of having depression.  
+            - LR = 1 → No change in risk.  
+            - LR &lt; 1 → Suggests lower risk.  
+            - LR &gt; 1 → Suggests higher risk (e.g., LR = 10 means 10× more likely than average).
+        </p>
+        <p>
+            These values are shown for:  
+            <ul class="note-list">
+                <li><strong>Major Depressive Disorder:</strong> Severe depression with persistent low mood and loss of interest.</li>
+                <li><strong>Any Depressive Disorder:</strong> Includes both major depression and milder forms (e.g., dysthymia).</li>
+            </ul>
+        </p>
+        <div style="overflow-x:auto;">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th rowspan="2">PHQ-2 Score</th>
+                        <th colspan="2">Major Depressive Disorder</th>
+                        <th colspan="2">Any Depressive Disorder</th>
+                    </tr>
+                    <tr>
+                        <th style="color:#1560bd;">PPV</th>
+                        <th style="color:#1560bd;">LR</th>
+                        <th style="color:#1560bd;">PPV</th>
+                        <th style="color:#1560bd;">LR</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>1</td><td>15.4%</td><td>0.3</td><td>36.9%</td><td>0.6</td></tr>
+                    <tr><td>2</td><td>21.1%</td><td>0.6</td><td>48.3%</td><td>1.3</td></tr>
+                    <tr><td>3</td><td>38.4%</td><td>2.9</td><td>75.0%</td><td>5.4</td></tr>
+                    <tr><td>4</td><td>45.4%</td><td>5.5</td><td>81.2%</td><td>15.7</td></tr>
+                    <tr><td>5</td><td>56.4%</td><td>10.3</td><td>84.6%</td><td>17.9</td></tr>
+                    <tr><td>6</td><td>78.6%</td><td>48.2</td><td>92.9%</td><td>58.1</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <p>
+            Understanding these statistics helps in identifying how likely someone is truly experiencing a depressive condition and whether they should pursue further mental health assessment.  
+            Even low scores do not completely rule out emotional distress — they simply suggest a lower clinical likelihood.
+        </p>
+    </div>
+
+    <div class="note-card">
+        <h3>✅ Input Validations</h3>
+        <div class="note-container">
+            <ul>
+                <li><strong>Question 1:</strong> "Little interest or pleasure in doing things"  
+                    - Select a value between <strong>0–3</strong>:  
+                    0 = Not at all, 1 = Several days, 2 = More than half the days, 3 = Nearly every day.
+                </li>
+                <li><strong>Question 2:</strong> "Feeling down, depressed, or hopeless"  
+                    - Select a value between <strong>0–3</strong>:  
+                    0 = Not at all, 1 = Several days, 2 = More than half the days, 3 = Nearly every day.
+                </li>
+                <li><strong>Completeness:</strong> Both questions must be answered before you can calculate a result.</li>
+                <li><strong>Valid Range:</strong> Each response must be an integer between <strong>0 and 3</strong>.  
+                    The total score will always fall between <strong>0 and 6</strong>.</li>
+                <li><strong>No decimals or text:</strong> Only the provided options are valid. Manual input outside 0–3 is not accepted.</li>
+            </ul>
+            <h4>📊 Score Interpretation</h4>
+            <ul>
+                <li><strong>Score 0–2:</strong> Low likelihood of clinical depression. Monitor mood and wellbeing.</li>
+                <li><strong>Score ≥3:</strong> Positive screen — further evaluation is recommended (e.g., PHQ-9).</li>
+            </ul>
+            <p>⚠️ <em>This screening tool does not provide a medical diagnosis. If you are concerned about your mental health, please consult a qualified healthcare professional.</em></p>
+        </div>
+    </div>
+
+    <div class="note-card">
+        <h3>❗ Important Disclaimer</h3>
+        <p>
+            This tool is for educational purposes only and does not constitute a medical diagnosis.  
+            If you are concerned about your mental health, please consult a qualified healthcare professional.
+        </p>
+    </div>
+        </div>
+
+    </div>
+
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const now = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    if(document.getElementById('printDate')) {
+        document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+    }
+});
+
+function calculatePHQ2() {
+    const q1 = document.getElementById('q1').value;
+    const q2 = document.getElementById('q2').value;
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const meterFill = document.getElementById('meterFill');
+    const rateValue = document.getElementById('rateValue');
+    const feedbackContent = document.getElementById('feedbackContent');
+
+    // Reset UI
+    errorBox.classList.add("hidden");
+    placeholder.classList.remove("hidden");
+    resultValue.classList.add("hidden");
+    errorMessage.innerHTML = "";
+
+    let errors = [];
+
+    // Validation: completeness
+    if (q1 === "" || q2 === "") {
+        errors.push("👉 Please answer both questions before submitting.");
+    }
+
+    // Validation: numeric & range (0–3)
+    const q1Int = parseInt(q1);
+    const q2Int = parseInt(q2);
+
+    if (isNaN(q1Int) || q1Int < 0 || q1Int > 3) {
+        errors.push("👉 Question 1 must be an integer between 0 and 3.");
+    }
+    if (isNaN(q2Int) || q2Int < 0 || q2Int > 3) {
+        errors.push("👉 Question 2 must be an integer between 0 and 3.");
+    }
+
+    // Stop calculation if errors exist
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    // PHQ-2 score calculation
+    const score = q1Int + q2Int;
+    let feedback = "";
+    let meterWidth = "";
+    let meterColor = "";
+
+    if (score < 3) {
+        feedback = "✅ Low likelihood of depression. Monitor mood and seek support if needed.";
+        meterWidth = "40%";
+        meterColor = "#2ecc71"; // Green
+    } else {
+        feedback = "⚠️ Possible depression. Further evaluation (PHQ-9) recommended.";
+        meterWidth = "80%";
+        meterColor = "#f39c12"; // Orange
+    }
+
+    // Update UI
+    rateValue.textContent = score;
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    feedbackContent.innerHTML = feedback;
+
+    placeholder.classList.add("hidden");
+    resultValue.classList.remove("hidden");
+}
+
+function printReport() {
+    const now = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    if(document.getElementById('printDate')) {
+        document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+    }
+    window.print();
+}
+    </script>
+
+
+</body>
+</html>
+{% endblock %}
+
+<!-- 
+1. Analysis from a QEHS / Fire Safety Perspective
+
+Even though PHQ-2 is a mental health tool rather than a fire safety metric, a QEHS expert would approach it like a KPI calculator for employee wellbeing:
+
+Inputs must be complete, consistent, and in expected ranges. Missing or invalid inputs can cause misclassification of mental health risk, which could affect safety audits and workplace monitoring.
+
+Outputs must be meaningful and actionable, with thresholds aligned to validated clinical standards (PHQ-2 score ≥3 suggests further evaluation).
+
+Data integrity is critical, as reports might be used in occupational health audits, insurance claims, or compliance reviews.
+
+Edge cases such as missing, non-numeric, or out-of-range selections must be handled to prevent errors in reporting or misleading results.
+
+2. Recommended Input Validation Rules
+Field	Allowed Values	Units / Type	Acceptable Range	Compliance Rationale
+Q1: Little interest or pleasure	0, 1, 2, 3	Integer	0–3	Ensures only validated PHQ-2 scoring options are selected. Prevents invalid mental health classification.
+Q2: Feeling down, depressed, or hopeless	0, 1, 2, 3	Integer	0–3	Same rationale as above. Must align with validated PHQ-2 scoring.
+Cross-field check	Q1 + Q2	Integer	0–6	Total score should logically not exceed PHQ-2 max of 6.
+Completeness	Both questions answered	N/A	Non-empty	Ensures calculator only runs with full input, preventing misreporting.
+
+Additional Considerations:
+
+No decimals allowed (PHQ-2 scores are integers).
+
+No negative numbers.
+
+Prevent any text inputs that could break the calculation or UI.
+
+Ensure HTML <select> elements are used to enforce valid options (already implemented).
+
+3. Output Validation and Threshold Logic
+
+PHQ-2 scoring logic:
+
+Score < 3: Low likelihood of clinical depression. Suggest monitoring.
+
+Score ≥ 3: Possible depression. Recommend PHQ-9 follow-up assessment.
+
+Compliance rationale:
+
+Using validated thresholds ensures consistency with clinical standards.
+
+Feedback must be clear, non-alarming, and actionable for workplace mental health programs.
+
+4. Edge Case Validations
+Edge Case	Handling	Rationale
+Missing Q1 or Q2	Show error “Please answer all questions.”	Prevents calculation with incomplete data.
+Non-integer input (manually tampered HTML)	Parse as integer; if NaN, show error	Ensures data integrity for reporting.
+Score exceeding max (6)	Clamp value to 6, show error	Prevents unrealistic results from tampering.
+Negative score	Show error, stop calculation	Prevents unrealistic results.
+Extreme user actions (e.g., selecting all “Nearly every day” repeatedly)	Acceptable, as 0–3 per question is valid	PHQ-2 scoring validated up to 6.
+-->

@@ -408,7 +408,7 @@
             <h2>Enter Your Data</h2>
             <div class="form-group">
                 <label for="a1cValue">Hemoglobin A1c Value (%):</label>
-<input type="number" id="a1cValue" class="form-input" placeholder="e.g., 6.5" step="0.1" min="0" max="100">
+                <input type="number" id="a1cValue" class="form-input" placeholder="e.g., 6.5" step="0.1" min="0" max="100">
             </div>
             <button class="calculate-btn" onclick="convertA1c()">Convert A1c</button>
         </div>
@@ -444,6 +444,17 @@
         <div class="note-card"><h3>When Should You Get Your A1c Test?</h3><p>You should consider testing your A1c levels if:</p><ul><li>You're over 45 years old or under 45 and overweight.</li><li>You have a family history of diabetes.</li><li>You engage in low physical activity (less than 3 times a week).</li><li>You have high blood pressure or cholesterol levels.</li><li>You have a history of gestational diabetes or delivered a baby weighing over 9 pounds.</li></ul></div>
         <div class="note-card"><h3>Normal A1c Range – A1c Levels Chart</h3></div>
         <table class="custom-table"><thead><tr><th>Condition</th><th>A1c (%)</th><th>Average Blood Sugar (mg/dL)</th></tr></thead><tbody><tr><td>Normal</td><td>Below 5.7%</td><td>Below 117 mg/dL</td></tr><tr><td>Prediabetes</td><td>5.7% - 6.4%</td><td>117 - 137 mg/dL</td></tr><tr><td>Diabetes</td><td>6.5% or above</td><td>Above 137 mg/dL</td></tr></tbody></table>
+        <div class="note-card">
+            <h3>⚠️ Input Validation Rules</h3>
+            <ul class="note-list">
+                <li><strong>HbA1c Value (%):</strong> Must be entered as a numeric value with up to 1 decimal place.</li>
+                <li><strong>Minimum Allowed:</strong> 3.0% (below this is not physiologically valid).</li>
+                <li><strong>Maximum Allowed:</strong> 20.0% (values above are outside measurable laboratory limits).</li>
+                <li><strong>Empty Input:</strong> If left blank, results will not be calculated.</li>
+                <li><strong>Estimated Average Glucose (eAG):</strong> Must calculate between <strong>50 – 600 mg/dL</strong>. If outside this range, inputs are invalid.</li>
+                <li>Any invalid entry will display a <span class="bad">red error message</span> and stop the calculation until corrected.</li>
+            </ul>
+        </div>
         <div class="note-card"><h3>Risks of Chronic High Blood Glucose</h3><p>Consistently high A1c levels may lead to serious health complications, including:</p><ul><li>Increased risk of heart disease and stroke.</li><li>Chronic kidney disease or failure.</li><li>Nerve damage (neuropathy) and loss of sensation.</li><li>Retinopathy leading to vision loss.</li><li>Frequent infections and poor wound healing.</li></ul></div>
         <div class="note-card"><h3>How to Lower Your A1c</h3><p>Effective strategies to manage and reduce your A1c levels include:</p><ul><li>Maintain a balanced diet with low sugar and high fiber.</li><li>Exercise regularly to manage blood glucose.</li><li>Monitor blood sugar levels consistently.</li><li>Follow medical advice and prescribed medication.</li><li>Stay hydrated and manage stress effectively.</li></ul></div>
         <div class="note-card"><h3>⚠️ Disclaimer</h3><p>This calculator is for informational purposes only and should not replace professional medical advice. Consult your healthcare provider for accurate diagnosis and guidance.</p></div>
@@ -451,76 +462,98 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Set print date if element exists
-    const printDateEl = document.getElementById('printDate');
-    if (printDateEl) {
-        const now = new Date();
-        const options = { year: 'numeric', month: 'long', day: 'numeric' };
-        printDateEl.textContent = now.toLocaleDateString('en-US', options);
+document.addEventListener("DOMContentLoaded", function () {
+    const a1cInput = document.getElementById("a1cValue");
+    const placeholder = document.getElementById("placeholder");
+    const resultError = document.getElementById("resultError");
+    const errorMessage = document.getElementById("errorMessage");
+    const resultValue = document.getElementById("resultValue");
+    const bloodSugarValue = document.getElementById("bloodSugarValue");
+    const meterFill = document.getElementById("meterFill");
+    const feedbackContent = document.getElementById("feedbackContent");
+
+    function resetViews() {
+        placeholder.classList.add("hidden");
+        resultError.classList.add("hidden");
+        resultValue.classList.add("hidden");
     }
 
-    // Hide error box when typing
-    const a1cInput = document.getElementById('a1cValue');
-    a1cInput.addEventListener('input', function() {
-        const errorBox = document.getElementById('resultError');
-        const placeholder = document.getElementById('placeholder');
-        if (!errorBox.classList.contains('hidden')) {
-            errorBox.classList.add('hidden');
-            placeholder.classList.remove('hidden');
+    function convertA1c() {
+        let a1cValue = parseFloat(a1cInput.value);
+
+        resetViews();
+
+        // Empty input → show placeholder
+        if (!a1cInput.value.trim()) {
+            placeholder.classList.remove("hidden");
+            return;
+        }
+
+        // Validation rules
+        if (isNaN(a1cValue)) {
+            errorMessage.textContent = "⚠ Please enter a numeric HbA1c value.";
+            resultError.classList.remove("hidden");
+            return;
+        }
+        if (a1cValue < 3.0) {
+            errorMessage.textContent = "⚠ HbA1c cannot be below 3.0% (not physiologically valid).";
+            resultError.classList.remove("hidden");
+            return;
+        }
+        if (a1cValue > 20.0) {
+            errorMessage.textContent = "⚠ HbA1c cannot exceed 20.0% (outside measurable limits).";
+            resultError.classList.remove("hidden");
+            return;
+        }
+
+        // Round to 1 decimal
+        a1cValue = parseFloat(a1cValue.toFixed(1));
+
+        // Formula
+        const avgBloodSugar = (a1cValue * 28.7 - 46.7).toFixed(0);
+
+        // eAG sanity check
+        if (avgBloodSugar < 50 || avgBloodSugar > 600) {
+            errorMessage.textContent = "⚠ eAG result out of realistic range (50–600 mg/dL). Check input.";
+            resultError.classList.remove("hidden");
+            return;
+        }
+
+        // Range feedback
+        let feedback, fillColor, fillWidth;
+        if (a1cValue < 5.7) {
+            feedback = "Normal range";
+            fillColor = "#2e7d32";
+            fillWidth = "33%";
+        } else if (a1cValue <= 6.4) {
+            feedback = "Prediabetes range - Monitor closely";
+            fillColor = "#f9a825";
+            fillWidth = "66%";
+        } else {
+            feedback = "Diabetes range - Consult a doctor";
+            fillColor = "#c62828";
+            fillWidth = "100%";
+        }
+
+        // Output
+        bloodSugarValue.textContent = avgBloodSugar;
+        feedbackContent.textContent = feedback;
+        meterFill.style.width = fillWidth;
+        meterFill.style.backgroundColor = fillColor;
+        resultValue.classList.remove("hidden");
+    }
+
+    // Attach button
+    document.querySelector(".calculate-btn").addEventListener("click", convertA1c);
+
+    // Reset on clear
+    a1cInput.addEventListener("input", function () {
+        if (!a1cInput.value.trim()) {
+            resetViews();
+            placeholder.classList.remove("hidden");
         }
     });
 });
-
-function convertA1c() {
-    const errorBox = document.getElementById('resultError');
-    const errorMessage = document.getElementById('errorMessage');
-    const placeholder = document.getElementById('placeholder');
-    const resultValueDiv = document.getElementById('resultValue');
-    const a1cValue = parseFloat(document.getElementById('a1cValue').value);
-
-    // Validate input
-   if (isNaN(a1cValue) || a1cValue < 0 || a1cValue > 100) {
-    errorMessage.innerHTML = "👉 Please enter a valid A1c percentage between 0 and 100.";
-    errorBox.classList.remove("hidden");
-    placeholder.classList.add("hidden");
-    resultValueDiv.classList.add("hidden");
-    return;
-}
-
-
-    // Hide error box if input is valid
-    errorBox.classList.add("hidden");
-
-    // Calculate estimated average glucose
-    const avgBloodSugar = (a1cValue * 28.7 - 46.7).toFixed(0);
-    document.getElementById('bloodSugarValue').textContent = avgBloodSugar;
-
-    // Meter settings & feedback
-    const meterFill = document.getElementById('meterFill');
-    let meterWidth, meterColor, feedback;
-
-    if (a1cValue < 5.7) {
-        meterWidth = '25%';
-        meterColor = '#27ae60';
-        feedback = '✅ Your A1c level is in the <strong>Normal</strong> range.';
-    } else if (a1cValue <= 6.4) {
-        meterWidth = '50%';
-        meterColor = '#f39c12';
-        feedback = '⚠️ Your A1c level is in the <strong>Prediabetes</strong> range. It is recommended to monitor your levels and consult a doctor.';
-    } else {
-        meterWidth = '85%';
-        meterColor = '#e74c3c';
-        feedback = '❌ Your A1c level is in the <strong>Diabetes</strong> range. Please consult a healthcare provider for guidance and treatment.';
-    }
-
-    meterFill.style.width = meterWidth;
-    meterFill.style.backgroundColor = meterColor;
-    document.getElementById('feedbackContent').innerHTML = feedback;
-
-    placeholder.classList.add('hidden');
-    resultValueDiv.classList.remove('hidden');
-}
 
 function printReport() {
     const printDateEl = document.getElementById('printDate');
@@ -531,7 +564,51 @@ function printReport() {
     }
     window.print();
 }
+
 </script>
+
+
+
 </body>
 </html>
 {% endblock %}
+
+<!-- 1. Input Validation Rules (Based on QEHS Principles)
+
+Even though this is a medical calculator, from a QEHS and fire safety perspective, the same principles apply:
+
+Accuracy (values must fall within recognized physiological or regulatory limits)
+
+Reliability (prevent errors that could mislead reporting/audits)
+
+Compliance (outputs should align with recognized standards, like ADA/CDC for HbA1c-to-eAG conversion)
+
+✅ Rules:
+
+Allowed Units: HbA1c in percent (%). No other unit permitted.
+
+Minimum threshold: 3.0% (below this is incompatible with life → similar to “below LFL” in fire safety — unrealistic).
+
+Maximum threshold: 20.0% (above this extremely rare, like reporting >100% oxygen — flag as invalid).
+
+Precision: 1 decimal place allowed (ISO reporting standard for health KPIs is one decimal).
+
+Logical Consistency: Input must be numeric, not negative, not text.
+
+Cross-check with output: The calculated eAG must be in the range 50–600 mg/dL (as per ADA guidelines).
+
+Empty field: Show placeholder, not stale data.
+
+2. Output Validation Logic & Thresholds
+
+Calculation formula: eAG (mg/dL) = (28.7 × HbA1c) – 46.7 → ADA-approved formula.
+
+Meaningful ranges:
+
+Normal (<5.7%) → eAG typically <117 mg/dL.
+
+Prediabetes (5.7–6.4%) → eAG 117–137 mg/dL.
+
+Diabetes (≥6.5%) → eAG usually ≥140 mg/dL.
+
+Sanity check: If eAG <50 or >600 → error, as this indicates bad input (like a fire risk index going negative or exceeding the model scale) -->

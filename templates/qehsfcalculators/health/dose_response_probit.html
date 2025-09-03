@@ -1,0 +1,677 @@
+{% extends 'base.html' %}
+{% block title %}Dose-Response Probit Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dose-Response Probit Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: baseline;
+            justify-content: center;
+        }
+        .result-value {
+            width: 100%;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        .rate-label {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+        /* Toggle helper */
+        .hidden {
+            display: none;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Dose-Response Probit Calculator</h1>
+            <p>Model the relationship between exposure dose and population response for risk assessment.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Enter Probit Parameters</h2>
+                <div class="form-group">
+                    <label for="k1">Toxicity Constant (k₁)</label>
+                    <input type="number" id="k1" class="form-input" placeholder="e.g., -8.61">
+                </div>
+                <div class="form-group">
+                    <label for="k2">Slope Factor (k₂)</label>
+                    <input type="number" id="k2" class="form-input" placeholder="e.g., 2.15">
+                </div>
+                <div class="form-group">
+                    <label for="dose">Exposure Dose (V)</label>
+                    <input type="number" id="dose" class="form-input" min="0.0001" step="any" placeholder="e.g., 5000">
+                </div>
+                <button class="calculate-btn" onclick="calculateProbit()">Calculate Response</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Enter substance-specific constants and dose to calculate the probit response.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div class="result-value hidden" id="resultValue">
+                    <h2>Probit Response Value</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label">Probit (Y)</div>
+                    </div>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Minimal</span><span>Moderate</span><span>High</span><span>Extreme</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Risk Interpretation</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🧪 Understanding the Probit Function</h3>
+                <p>
+                    The Probit function, <strong>Y = k₁ + k₂ * ln(V)</strong>, is a cornerstone of toxicology and risk assessment. 
+                    It models the relationship between the dose of a substance and the probable response of a population. 
+                    It's fundamental for quantitative risk assessment of toxic substances, 
+                    setting occupational exposure limits, and emergency planning.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Key Parameters</h3>
+                <ul class="note-list">
+                    <li><strong>K₁ (Intercept):</strong> Substance-specific constant representing baseline toxicity.</li>
+                    <li><strong>K₂ (Slope):</strong> Substance-specific constant representing dose-response steepness.</li>
+                    <li><strong>Dose Variable (V):</strong> Exposure measure (ppm·min for gases, Pa·s for overpressure, etc.).</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>🌍 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Chemical Safety:</strong> Setting exposure limits for hazardous substances.</li>
+                    <li><strong>Industrial Hygiene:</strong> Evaluating workplace exposure risks.</li>
+                    <li><strong>Emergency Planning:</strong> Predicting casualties from chemical releases.</li>
+                    <li><strong>Explosion Safety:</strong> Assessing blast overpressure effects.</li>
+                    <li><strong>Environmental Risk:</strong> Modeling population impacts from pollution.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📊 Interpretation Guidelines</h3>
+                <ul class="note-list">
+                    <li><strong>Y &lt; 2.67:</strong> Less than 1% affected (NOAEL range).</li>
+                    <li><strong>Y ≈ 5.0:</strong> 50% affected (median response).</li>
+                    <li><strong>Y &gt; 7.33:</strong> More than 99% affected (LOAEL range).</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📖 Why This Calculation is Important?</h3>
+                <p>
+                    It enables safety professionals to predict the percentage of a population that would be affected 
+                    by specific exposure levels, forming the basis for exposure limits and safety standards.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>💡 Input Validations</h3>
+                <div class="note-container">
+                    <ul>
+                        <li><strong>Toxicity Constant (k₁):</strong>  
+                            • Must be a valid number.  
+                            • Acceptable range: <strong>-20 to +20</strong>.  
+                            • Represents a chemical/substance-specific constant used in toxicology studies.
+                        </li>
+                        <li><strong>Slope Factor (k₂):</strong>  
+                            • Must be a valid positive number.  
+                            • Acceptable range: <strong>0 &lt; k₂ ≤ 10</strong>.  
+                            • Determines how quickly the risk increases with dose.
+                        </li>
+                        <li><strong>Exposure Dose (V):</strong>  
+                            • Must be a valid positive number.  
+                            • Acceptable range: <strong>&gt; 0 and ≤ 10,000,000</strong>.  
+                            • Units should be consistent (e.g., ppm, mg/m³, mg/kg) depending on your dataset.  
+                            • Zero or negative values are invalid because they imply no exposure.
+                        </li>
+                        <li><strong>Completeness:</strong> All three fields (<em>k₁, k₂, V</em>) are required before calculation.</li>
+                        <li><strong>Data Type:</strong> Only numeric input is accepted. Decimals are allowed, text or special characters are rejected.</li>
+                    </ul>
+
+                    <h4>📊 Output Interpretation (Probit Value, Y)</h4>
+                    <ul>
+                        <li><strong>Y &lt; 2.67:</strong> ✅ Minimal Risk (Less than 1% of population affected)</li>
+                        <li><strong>2.67 ≤ Y &lt; 5.0:</strong> ⚠️ Moderate Risk (1–50% of population affected)</li>
+                        <li><strong>5.0 ≤ Y &lt; 7.33:</strong> ⚠️ High Risk (50–99% of population affected)</li>
+                        <li><strong>Y ≥ 7.33:</strong> ❗ Extreme Risk (Over 99% of population affected)</li>
+                    </ul>
+
+                    <p>⚠️ <em>Note: This model is based on standardized probit equations used in toxicology and industrial safety risk assessments. Results should be interpreted in context with material safety data, OSHA/ILO exposure limits, and site-specific emergency response planning.</em></p>
+                </div>
+            </div>
+
+
+            <div class="note-card">
+                <h3>🛡️ Why in Health & Safety Calculator?</h3>
+                <p>
+                    Probit functions are the mathematical foundation for modern occupational exposure limits 
+                    and safety standards, making them essential for health and safety professionals.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>📚 Industry Standards & Guidelines</h3>
+                <p>
+                    Widely used in <strong>EPA risk assessments</strong>, 
+                    <strong>OSHA’s Process Safety Management</strong>, 
+                    and <strong>AIChE’s CCPS guidelines</strong>. 
+                    They form the basis for many chemical exposure standards worldwide.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>✅ Conclusion</h3>
+                <p>
+                    The probit function provides a scientifically rigorous way to quantify health risks from exposures, 
+                    enabling data-driven safety decisions and evidence-based exposure limits.
+                </p>
+            </div>
+                </div>
+
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const now = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        if (document.getElementById('printDate')) {
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        }
+    });
+
+    function calculateProbit() {
+        const k1 = document.getElementById('k1').value.trim();
+        const k2 = document.getElementById('k2').value.trim();
+        const dose = document.getElementById('dose').value.trim();
+
+        const errorBox = document.getElementById('resultError');
+        const errorMessage = document.getElementById('errorMessage');
+        const placeholder = document.getElementById('placeholder');
+        const resultValue = document.getElementById('resultValue');
+
+        let errors = [];
+
+        // ---- Input Validations ----
+        if (k1 === "" || isNaN(parseFloat(k1))) {
+            errors.push("👉 Toxicity Constant (k₁) must be a valid number.");
+        } else if (parseFloat(k1) < -20 || parseFloat(k1) > 20) {
+            errors.push("👉 Toxicity Constant (k₁) must be between -20 and +20.");
+        }
+
+        if (k2 === "" || isNaN(parseFloat(k2))) {
+            errors.push("👉 Slope Factor (k₂) must be a valid number.");
+        } else if (parseFloat(k2) <= 0 || parseFloat(k2) > 10) {
+            errors.push("👉 Slope Factor (k₂) must be > 0 and ≤ 10.");
+        }
+
+        if (dose === "" || isNaN(parseFloat(dose))) {
+            errors.push("👉 Exposure Dose (V) must be a valid number.");
+        } else if (parseFloat(dose) <= 0) {
+            errors.push("👉 Exposure Dose (V) must be greater than 0.");
+        } else if (parseFloat(dose) > 1e7) {
+            errors.push("👉 Exposure Dose (V) must be ≤ 10,000,000.");
+        }
+
+        // ---- Error Handling ----
+        if (errors.length > 0) {
+            errorMessage.innerHTML = errors.join("<br>");
+            errorBox.classList.remove("hidden");
+            placeholder.classList.add("hidden");
+            resultValue.classList.add("hidden");
+            return;
+        }
+        errorBox.classList.add("hidden");
+
+        // ---- Calculation ----
+        const K1 = parseFloat(k1);
+        const K2 = parseFloat(k2);
+        const V = parseFloat(dose);
+
+        const Y = K1 + K2 * Math.log(V);
+
+        if (isNaN(Y) || !isFinite(Y)) {
+            errorMessage.innerHTML = "❌ Invalid calculation. Please check your inputs.";
+            errorBox.classList.remove("hidden");
+            resultValue.classList.add("hidden");
+            return;
+        }
+
+        // ---- Display Result ----
+        document.getElementById('rateValue').textContent = Y.toFixed(2);
+
+        const meterFill = document.getElementById('meterFill');
+        let meterWidth, meterColor, feedback;
+
+        if (Y < 2.67) {
+            meterWidth = '25%'; meterColor = '#2ecc71';
+            feedback = '<strong>Minimal Risk:</strong> Less than 1% of the population is expected to be affected.';
+        } else if (Y < 5.0) {
+            meterWidth = '50%'; meterColor = '#f1c40f';
+            feedback = '<strong>Moderate Risk:</strong> Between 1% and 50% of the population is expected to be affected.';
+        } else if (Y < 7.33) {
+            meterWidth = '75%'; meterColor = '#e67e22';
+            feedback = '<strong>High Risk:</strong> Between 50% and 99% of the population is expected to be affected.';
+        } else if (Y <= 10) {
+            meterWidth = '95%'; meterColor = '#e74c3c';
+            feedback = '<strong>Extreme Risk:</strong> Over 99% of the population is expected to be affected.';
+        } else {
+            meterWidth = '100%'; meterColor = '#8e44ad';
+            feedback = '<strong>⚠️ Warning:</strong> Probit value outside typical range. Please verify your inputs.';
+        }
+
+        meterFill.style.width = meterWidth;
+        meterFill.style.backgroundColor = meterColor;
+        document.getElementById('feedbackContent').innerHTML = feedback;
+
+        placeholder.classList.add('hidden');
+        resultValue.classList.remove('hidden');
+    }
+
+    function printReport() {
+        const now = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        if (document.getElementById('printDate')) {
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        }
+        window.print();
+    }
+    </script>
+
+</body>
+</html>
+{% endblock %}
+
+<!-- 
+1. Input Validation Rules (Real-World QEHS / Fire Safety Standards)
+a) Toxicity Constant (k₁)
+
+Expected Range: -20 ≤ k₁ ≤ +20
+
+Allowed Decimals: Up to 3 decimal places
+
+Unit: Dimensionless constant (chemical/substance-specific)
+
+Validation Rule: Must be a real number, cannot be null/empty.
+
+Rationale: Substance constants are usually derived experimentally. Extreme values (< -20 or > +20) are not physically meaningful and indicate input/data entry error.
+
+b) Slope Factor (k₂)
+
+Expected Range: 0.1 ≤ k₂ ≤ 10
+
+Allowed Decimals: Up to 3 decimal places
+
+Unit: Dimensionless constant
+
+Validation Rule: Must be a positive number.
+
+Rationale: Negative slopes would imply decreasing risk with increasing dose, which violates toxicological principles.
+
+c) Exposure Dose (V)
+
+Expected Range: 0.0001 ≤ V ≤ 1e7 (depending on unit basis, e.g., ppm, mg/m³, or mg/kg)
+
+Allowed Decimals: Up to 4 decimal places
+
+Validation Rule: Must be strictly > 0. Cannot be Infinity, NaN, or negative.
+
+Cross-field Dependency:
+
+If V < 1, ensure user confirms units (e.g., ppm vs mg/m³).
+
+If V exceeds 1e7, flag as unrealistic (possible input error).
+
+Rationale: Ensures values remain within experimental and regulatory safety ranges.
+
+2. Output Validation and Thresholds
+
+The probit model:
+
+𝑌
+=
+𝑘
+1
++
+𝑘
+2
+⋅
+ln
+⁡
+(
+𝑉
+)
+Y=k
+1
+	​
+
++k
+2
+	​
+
+⋅ln(V)
+
+Valid Probit Range: ~2.67 to 8.09 (corresponding to 1%–99.9% mortality/response in population studies).
+
+Risk Bands:
+
+< 2.67: Minimal risk (<1% affected).
+
+2.67–5.00: Moderate risk (1–50%).
+
+5.00–7.33: High risk (50–99%).
+
+> 7.33: Extreme risk (>99%).
+
+Validation: If Y falls outside [0,10], issue a warning (“Unrealistic probit value — check inputs”).
+
+Compliance Rationale: Safety officers must report only scientifically valid ranges to avoid misrepresentation in audits.
+-->

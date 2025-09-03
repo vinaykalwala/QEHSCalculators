@@ -1,0 +1,689 @@
+{% extends 'base.html' %}
+{% block title %}Diet Risk Score Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diet Risk Score Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            max-height: 420px;
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: baseline;
+            justify-content: center;
+        }
+        .result-value {
+            width: 100%;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        .rate-label {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+        /* Toggle helper */
+        .hidden {
+            display: none;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Diet Risk Score Calculator</h1>
+            <p>How often do you eat the following foods? Answer to assess your diet's health risk.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Diet Questionnaire</h2>
+
+                <!-- Fast Food -->
+                <div class="form-group">
+                <label for="fastFood">Fast food 🍕:</label>
+                <select id="fastFood" class="form-select">
+                    <option value="3">Daily</option>
+                    <option value="2">2–3 times a week</option>
+                    <option value="1">Once a week</option>
+                    <option value="0">Never</option>
+                </select>
+                </div>
+
+                <!-- Bread -->
+                <div class="form-group">
+                <label for="bread">Bread, rolls 🥪:</label>
+                <select id="bread" class="form-select">
+                    <option value="3">Daily</option>
+                    <option value="2">2–3 times a week</option>
+                    <option value="1">Once a week</option>
+                    <option value="0">Never</option>
+                </select>
+                </div>
+
+                <!-- Snacks -->
+                <div class="form-group">
+                <label for="snacks">Chips, salty snacks 🥨:</label>
+                <select id="snacks" class="form-select">
+                    <option value="3">Daily</option>
+                    <option value="2">2–3 times a week</option>
+                    <option value="1">Once a week</option>
+                    <option value="0">Never</option>
+                </select>
+                </div>
+
+                <!-- Processed Meat -->
+                <div class="form-group">
+                <label for="processedMeat">Hot dogs, sausages 🌭:</label>
+                <select id="processedMeat" class="form-select">
+                    <option value="3">Daily</option>
+                    <option value="3">2–3 times a week</option>
+                    <option value="3">Once a week</option>
+                    <option value="0">Never</option>
+                </select>
+                </div>
+
+                <!-- Sugary Drinks -->
+                <div class="form-group">
+                <label for="sweetDrinks">Sugary drinks 🥤:</label>
+                <select id="sweetDrinks" class="form-select">
+                    <option value="3">Daily</option>
+                    <option value="2">2–3 times a week</option>
+                    <option value="1">Once a week</option>
+                    <option value="0">Never</option>
+                </select>
+                </div>
+
+                <!-- Nuts -->
+                <div class="form-group">
+                <label for="nuts">Nuts, seeds, peanut butter 🥜:</label>
+                <select id="nuts" class="form-select">
+                    <option value="0">Daily</option>
+                    <option value="0">2–3 times a week</option>
+                    <option value="2">Once a week</option>
+                    <option value="3">Never</option>
+                </select>
+                </div>
+
+                <!-- Fish -->
+                <div class="form-group">
+                <label for="fish">Fish, shellfish 🐟:</label>
+                <select id="fish" class="form-select">
+                    <option value="0">Daily</option>
+                    <option value="0">2–3 times a week</option>
+                    <option value="1">Once a week</option>
+                    <option value="3">Never</option>
+                </select>
+                </div>
+
+                <!-- Vegetables -->
+                <div class="form-group">
+                <label for="vegetables">Vegetables 🥕:</label>
+                <select id="vegetables" class="form-select">
+                    <option value="0">Daily</option>
+                    <option value="3">2–3 times a week</option>
+                    <option value="3">Once a week</option>
+                    <option value="3">Never</option>
+                </select>
+                </div>
+
+                <!-- Fruits -->
+                <div class="form-group">
+                <label for="fruit">Fruits 🍎:</label>
+                <select id="fruit" class="form-select">
+                    <option value="0">Daily</option>
+                    <option value="3">2–3 times a week</option>
+                    <option value="3">Once a week</option>
+                    <option value="3">Never</option>
+                </select>
+                </div>
+
+                <!-- Submit Button -->
+                <button class="calculate-btn" onclick="calculateDietRisk()">Calculate Score</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Answer the questions to see your <strong>Diet Risk Score</strong> and receive personalized feedback.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div class="result-value hidden" id="resultValue">
+                    <h2>Your Diet Risk Score</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0</div>
+                        <div class="rate-label">Points</div>
+                    </div>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Excellent</span><span>Okay</span><span>High Risk</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Assessment & Recommendations</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <div class="note-card">
+                <h3>❔ Why This Matters</h3>
+                <p>
+                    Your daily food choices have a long-term impact on your health. 
+                    This quick quiz helps you understand if your eating habits may be increasing your dietary risk.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>📊 How Your Score Is Calculated</h3>
+                <p>
+                    We assign scores based on how often you consume certain types of food. 
+                    High-risk foods (like fast food and sugary drinks) raise your score, 
+                    while nutritious items (like fruits and veggies) help lower it.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>📏 Risk Score Guide</h3>
+                <ul class="note-list">
+                    <li><strong>0–9:</strong> 👍 You’re making great food choices! Keep it up.</li>
+                    <li><strong>10–18:</strong> ⚖️ You’re in the middle zone. A few tweaks can boost your health significantly.</li>
+                    <li><strong>19 or above:</strong> ⚠️ Your diet may be putting you at higher risk. Let’s take some steps to turn that around!</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>💡 What Can You Do?</h3>
+                <ul class="note-list">
+                    <li>✨ Replace fast food meals with easy homemade options or healthy meal kits.</li>
+                    <li>🥦 Include veggies in every meal – even a handful of salad counts!</li>
+                    <li>🍇 Snack smart: try fresh fruit, yogurt, or nuts instead of chips.</li>
+                    <li>💧 Stay hydrated with water, herbal teas, or fruit-infused drinks.</li>
+                    <li>🐟 Add fish to your weekly menu — it’s packed with good fats and protein.</li>
+                    <li>📅 Start small — even one healthy swap a week makes a difference over time!</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>✅ Input Validations</h3>
+                <div class="note-list">
+                    <p>Each dropdown reflects your <strong>weekly eating habits</strong>. Please select the option that best matches your diet. The calculator assigns a score between <strong>0 (healthy)</strong> and <strong>3 (high-risk)</strong> for each category.</p>
+                    
+                    <ul>
+                    <li><strong>Fast Food 🍕, Bread 🥪, Snacks 🥨, Processed Meat 🌭, Sugary Drinks 🥤:</strong><br>
+                        0 = Never, 1 = Once a week, 2 = 2–3 times a week, 3 = Daily<br>
+                        ➝ Higher frequency = higher risk score.</li>
+                    
+                    <li><strong>Nuts 🥜, Fish 🐟, Vegetables 🥕, Fruits 🍎:</strong><br>
+                        0 = Daily (best choice), 1 = Once a week, 2 = 2–3 times a week, 3 = Never<br>
+                        ➝ Lower frequency = higher risk score.</li>
+                    
+                    <li><strong>Valid Range:</strong> Only values 0–3 are allowed per field. Anything outside this range will trigger an error.</li>
+                    
+                    <li><strong>All Questions Required:</strong> If you skip any field, you will be prompted to complete it before calculation.</li>
+                    </ul>
+                    
+                    <p>⚠️ <strong>Important:</strong> This tool is a <em>dietary risk awareness aid</em>, not a medical diagnostic device. Always consult a qualified nutritionist or doctor for personalized advice.</p>
+                </div>
+                </div>
+
+            <div class="note-card">
+                <h3>ℹ️ Important Note</h3>
+                <p>
+                    This assessment is for awareness only and not a medical diagnosis. 
+                    If you have health conditions or special dietary needs, it’s best to consult a doctor or nutritionist.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const now = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    if (document.getElementById('printDate')) {
+        document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+    }
+});
+
+function calculateDietRisk() {
+    const fields = [
+        'fastFood', 'bread', 'snacks',
+        'processedMeat', 'sweetDrinks',
+        'nuts', 'fish', 'vegetables', 'fruit'
+    ];
+
+    let totalScore = 0;
+    let errors = [];
+
+    for (let field of fields) {
+        const elem = document.getElementById(field);
+        if (!elem) {
+            errors.push(`❌ Missing field: ${field}`);
+            continue;
+        }
+
+        const value = parseInt(elem.value, 10);
+
+        // Validation: must be number and in range
+        if (isNaN(value)) {
+            errors.push(`❌ Invalid entry in ${field}: not a number`);
+        } else if (value < 0 || value > 3) {
+            errors.push(`❌ Invalid entry in ${field}: must be between 0 and 3`);
+        } else {
+            totalScore += value;
+        }
+    }
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    // Clear errors
+    errorBox.classList.add("hidden");
+
+    // Show score
+    document.getElementById('rateValue').textContent = totalScore;
+
+    // Feedback & meter logic
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+
+    if (totalScore <= 9) {
+        meterWidth = '33%'; meterColor = '#2ecc71';
+        feedback = `
+            <p>🌟 <strong>Excellent! Your diet is wholesome and heart-friendly.</strong></p>
+            <p>You’re consistently choosing nourishing foods that support your energy, immune system, and long-term health. Keep eating a variety of fruits, vegetables, and lean proteins.</p>
+        `;
+    } else if (totalScore <= 18) {
+        meterWidth = '66%'; meterColor = '#f1c40f';
+        feedback = `
+            <p>🧩 <strong>You're doing okay! Just a few mindful swaps could enhance your nutrition.</strong></p>
+            <p>You’re on the right track, but some processed items might be appearing too often. Try swapping one snack or drink for a healthier option this week.</p>
+        `;
+    } else {
+        meterWidth = '95%'; meterColor = '#e74c3c';
+        feedback = `
+            <p>🚨 <strong>High Dietary Risk: Your eating pattern could increase health risks.</strong></p>
+            <p>This score is a helpful signal to make positive changes. Start by adding one more serving of vegetables to your day or replacing one sugary drink with water.</p>
+        `;
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').innerHTML = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+function printReport() {
+    const now = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    if (document.getElementById('printDate')) {
+        document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+    }
+    window.print();
+}
+    </script>
+
+</body>
+</html>
+{% endblock %}
+
+<!-- 
+1️⃣ Analysis of Inputs & Outputs (from QEHS perspective)
+
+Your calculator captures dietary risk factors (fast food, bread, snacks, processed meat, sugary drinks, nuts, fish, vegetables, fruits).
+
+From a safety & compliance lens:
+
+These are leading indicators (like unsafe acts in safety audits).
+
+Output (Diet Risk Score) is a lagging indicator (comparable to incident rates).
+
+Results should be interpretable, auditable, and standardized (so two auditors calculate the same score from the same answers).
+
+2️⃣ Input Validation Rules
+Field	Expected Range	Allowed Values	Units / Context	Validation Rationale
+Fast Food	0–3	Integer only	Frequency scale (Never → Daily)	Prevents out-of-scale scoring.
+Bread	0–3	Integer only	Frequency scale	Same logic as above.
+Snacks	0–3	Integer only	Frequency scale	Must be mapped correctly.
+Processed Meat	0–3	Integer only	Frequency scale	Currently all options =3 (bug!). Needs correction.
+Sugary Drinks	0–3	Integer only	Frequency scale	Same as above.
+Nuts	0–3	Integer only	Frequency scale (reverse scored, healthier = lower)	Prevents illogical scoring (e.g., negative).
+Fish	0–3	Integer only	Frequency scale (reverse scored)	Healthy → low score, Unhealthy → high score.
+Vegetables	0–3	Integer only	Frequency scale (reverse scored)	Needs correction (currently wrong mapping).
+Fruits	0–3	Integer only	Frequency scale (reverse scored)	Needs correction.
+
+🔑 Compliance requirement: Only 0–3 integers should be accepted. No text, decimals, or blank values.
+
+3️⃣ Edge Case Validations
+
+Division by zero → Not applicable here, but prevent empty/NaN totals.
+
+All fields left blank → Show error: “Please answer all questions before scoring.”
+
+Unrealistic input combinations → E.g., “Daily fast food + Never vegetables” should still be valid, but flagged as High Risk automatically.
+
+Extreme outliers → Since only 0–3 allowed, protect against 999, -5, etc.
+
+Data tampering → If someone edits the DOM to bypass dropdown values, validation must block it.
+
+4️⃣ Output Validation & Thresholds
+
+Currently:
+
+<10 = Excellent
+
+10–18 = Okay
+
+≥19 = High Risk
+
+✅ These thresholds are good but need justification:
+
+Excellent (<10): Equivalent to best-practice compliance (like <1 OSHA incident rate).
+
+Okay (10–18): Minor deficiencies, needs continuous improvement.
+
+High Risk (≥19): Serious deficiencies; corrective action required (like OSHA Recordable Incident).
+-->

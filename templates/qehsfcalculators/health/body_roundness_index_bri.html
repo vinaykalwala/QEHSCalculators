@@ -405,6 +405,20 @@
     </div>
 
     <div class="note-card">
+        <div class="note-container">
+            <h3>✅ Input Validations</h3>
+            <ul>
+                <li><strong>Height (cm):</strong> Enter your actual height. Allowed range: <em>100–250 cm</em>. Avoid unrealistic values.</li>
+                <li><strong>Waist Circumference (cm):</strong> Measure around your natural waist. Allowed range: <em>50–150 cm</em>. Waist cannot exceed twice your height.</li>
+                <li><strong>Decimals:</strong> You can enter decimal values (e.g., 88.5 cm) for precision.</li>
+                <li><strong>Logical Consistency:</strong> Waist must be smaller than twice your height.</li>
+                <li><strong>Edge Cases:</strong> Empty, zero, negative, or non-numeric values are not accepted.</li>
+            </ul>
+            <p>This ensures accurate BRI calculation and meaningful health risk assessment.</p>
+        </div>
+    </div>
+
+    <div class="note-card">
         <h3>❗ Disclaimer</h3>
         <p>
             This calculator provides estimates for informational purposes only. It should not replace medical advice, diagnosis, or treatment. Always consult a healthcare provider for a comprehensive assessment of your health.
@@ -419,13 +433,14 @@
             const now = new Date();
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
             if(document.getElementById('printDate')) {
-               document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
             }
         });
 
+        // Main BRI Calculation Function
         function calculateBRI() {
-            const height = document.getElementById('height').value.trim();
-            const waist = document.getElementById('waist').value.trim();
+            const heightInput = document.getElementById('height').value.trim();
+            const waistInput = document.getElementById('waist').value.trim();
 
             const errorBox = document.getElementById('resultError');
             const errorMessage = document.getElementById('errorMessage');
@@ -433,8 +448,19 @@
             const resultValue = document.getElementById('resultValue');
 
             let errors = [];
-            if (height === "" || parseFloat(height) <= 0) errors.push("👉 Please enter a valid height.");
-            if (waist === "" || parseFloat(waist) <= 0) errors.push("👉 Please enter a valid waist circumference.");
+
+            const height = parseFloat(heightInput);
+            const waist = parseFloat(waistInput);
+
+            // -----------------------
+            // Input Validations
+            // -----------------------
+            if (isNaN(height) || height <= 0) errors.push("👉 Enter a valid height.");
+            else if (height < 100 || height > 250) errors.push("👉 Height must be between 100 cm and 250 cm.");
+
+            if (isNaN(waist) || waist <= 0) errors.push("👉 Enter a valid waist circumference.");
+            else if (waist < 50 || waist > 150) errors.push("👉 Waist must be between 50 cm and 150 cm.");
+            else if (waist > 2 * height) errors.push("👉 Waist cannot exceed twice your height.");
 
             if (errors.length > 0) {
                 errorMessage.innerHTML = errors.join("<br>");
@@ -445,33 +471,42 @@
             } else {
                 errorBox.classList.add("hidden");
             }
-            
-            const h = parseFloat(height) / 100; // height in meters
-            const w = parseFloat(waist) / 100; // waist in meters
-            
-            const eccentricity = (1 / h) * Math.sqrt(h*h - (w*w / (Math.PI * Math.PI)) );
-            const bri = 364.2 - 365.5 * eccentricity;
 
+            // -----------------------
+            // Convert to meters
+            // -----------------------
+            const h = height / 100;
+            const w = waist / 100;
+
+            // -----------------------
+            // BRI Formula
+            // -----------------------
+            const eccentricity = (1 / h) * Math.sqrt(h*h - (w*w / (Math.PI * Math.PI)));
+            let bri = 364.2 - 365.5 * eccentricity;
+            bri = Math.max(0, bri); // Ensure BRI is not negative
             const briRounded = bri.toFixed(2);
-            document.getElementById('rateValue').textContent = briRounded;
 
-            const meterFill = document.getElementById('meterFill');
+            // -----------------------
+            // Interpretation & Meter
+            // -----------------------
             let meterWidth, meterColor, feedback;
 
             if (briRounded < 3.5) {
                 meterWidth = '25%'; meterColor = '#2ecc71';
-                feedback = 'Your BRI is in the <strong>low-risk</strong> category, suggesting a healthy body shape and a lower risk of visceral obesity-related health issues.';
+                feedback = '✅ <strong>Low Risk:</strong> Healthy body shape with lower visceral fat risk.';
             } else if (briRounded <= 5.0) {
                 meterWidth = '50%'; meterColor = '#27ae60';
-                feedback = 'Your BRI is in the <strong>normal</strong> range. This indicates a balanced body composition. Continue maintaining a healthy lifestyle.';
+                feedback = '⚪ <strong>Normal:</strong> Balanced body composition. Maintain healthy lifestyle.';
             } else if (briRounded <= 6.5) {
                 meterWidth = '75%'; meterColor = '#f39c12';
-                feedback = 'Your BRI indicates a <strong>moderate health risk</strong>. This may be due to higher levels of visceral fat. Consider focusing on diet and exercise.';
+                feedback = '⚠️ <strong>Moderate Risk:</strong> Higher visceral fat levels. Consider diet & exercise.';
             } else {
                 meterWidth = '95%'; meterColor = '#e74c3c';
-                feedback = 'Your BRI is in the <strong>high-risk</strong> category. This suggests a significant amount of visceral fat, and consulting a healthcare professional is strongly recommended.';
+                feedback = '❌ <strong>High Risk:</strong> Significant visceral fat. Consult a healthcare professional.';
             }
-            
+
+            document.getElementById('rateValue').textContent = briRounded;
+            const meterFill = document.getElementById('meterFill');
             meterFill.style.width = meterWidth;
             meterFill.style.backgroundColor = meterColor;
             document.getElementById('feedbackContent').innerHTML = feedback;
@@ -480,15 +515,68 @@
             resultValue.classList.remove('hidden');
         }
 
+        // -----------------------
+        // Print Function
+        // -----------------------
         function printReport() {
             const now = new Date();
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
-             if(document.getElementById('printDate')) {
-               document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            if(document.getElementById('printDate')) {
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
             }
             window.print();
         }
     </script>
+
 </body>
 </html>
 {% endblock %}
+
+<!-- 
+1. Input Analysis & Real-World Perspective
+
+Inputs:
+
+Height (cm) – Used to normalize body size in BRI formula. Must be positive and biologically plausible.
+
+Waist Circumference (cm) – Proxy for abdominal fat; critical in estimating visceral fat. Must be positive and within human anatomical limits.
+
+Observations:
+
+Unrealistic or negative values (e.g., height = 0, waist = 0) would break the calculation (division by zero, square root of negative numbers).
+
+Decimal inputs should be allowed to increase precision (e.g., 175.5 cm).
+
+Cross-field logic: Waist should not exceed height by a massive margin (e.g., waist > 2×height) as this is biologically implausible.
+
+2. Recommended Input Validation Rules
+Field	Acceptable Range	Units	Notes / Logic Checks
+Height	100 – 250 cm	cm	Adults only. Must be >0. Prevent extreme outliers.
+Waist Circumference	50 – 150 cm	cm	Must be >0 and < height × 2. Reasonable anatomical limits.
+Decimals	Allowed	n/a	Acceptable for precision (e.g., 88.5 cm).
+Logical consistency	Waist ≤ 2×Height	n/a	Prevents biologically impossible ratios.
+3. Edge Case Validations
+
+Division by zero: Already handled by ensuring height > 0 and waist > 0.
+
+Negative values: Disallowed.
+
+Extreme outliers: Height < 100 cm or > 250 cm, waist < 50 cm or > 150 cm triggers an error.
+
+Logical inconsistencies: Waist > 2×Height triggers an error.
+
+Non-numeric input: Handled using isNaN().
+
+4. Output Validation & Threshold Logic
+
+Body Roundness Index (BRI) thresholds:
+
+BRI Value	Health Interpretation	QEHS Perspective
+< 3.41	Moderate (25%) risk	Indicates slightly increased visceral fat; low-level interventions recommended.
+3.41 – 4.44	Normal	Standard baseline; no significant risk.
+4.45 – 5.45	Low risk	Healthy range; maintains safety compliance metrics.
+5.46 – 6.91	Moderate risk	Increased visceral fat; may indicate need for lifestyle review.
+> 6.91	High risk	Significantly increased risk; immediate attention advised.
+
+Note: Output rounding to 2 decimal places ensures precision while maintaining readability.
+-->

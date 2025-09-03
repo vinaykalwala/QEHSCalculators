@@ -1,0 +1,571 @@
+{% extends 'base.html' %}
+{% block title %}Dietary Reference Intake (DRI) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dietary Reference Intake (DRI) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .result-value {
+            width: 100%;
+            text-align: left;
+        }
+        .result-value h2 {
+            text-align: center;
+            color: #1560bd;
+        }
+        .result-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .result-list li {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #34495e;
+            border-left: 4px solid #3498db;
+        }
+        .result-list strong {
+            color: #2c3e50;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+        /* Toggle helper */
+        .hidden {
+            display: none;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Dietary Reference Intake (DRI) Calculator</h1>
+            <p>Estimate your daily calorie and macronutrient needs for a balanced diet.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Enter Your Details</h2>
+                 <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" class="form-select">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="age">Age (years)</label>
+                    <input type="number" id="age" class="form-input" min="1" placeholder="e.g., 30">
+                </div>
+                 <div class="form-group">
+                    <label for="height">Height (cm)</label>
+                    <input type="number" id="height" class="form-input" min="1" placeholder="e.g., 175">
+                </div>
+                <div class="form-group">
+                    <label for="weight">Weight (kg)</label>
+                    <input type="number" id="weight" class="form-input" min="1" placeholder="e.g., 70">
+                </div>
+                <div class="form-group">
+                    <label for="activityLevel">Activity Level</label>
+                    <select id="activityLevel" class="form-select">
+                        <option value="1.2">Sedentary (Little or no exercise)</option>
+                        <option value="1.375">Lightly active (1-3 days/week)</option>
+                        <option value="1.55" selected>Moderately active (3-5 days/week)</option>
+                        <option value="1.725">Very active (6-7 days/week)</option>
+                        <option value="1.9">Super active (Athlete, intense daily exercise)</option>
+                    </select>
+                </div>
+                <button class="calculate-btn" onclick="calculateDRI()">Calculate DRI</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Enter your details to get your personalized <strong>Dietary Reference Intake</strong> estimation.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div class="result-value hidden" id="resultValue">
+                    <h2>Your Estimated Daily Needs</h2>
+                    <ul class="result-list" id="resultList">
+                        </ul>
+                     <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+    <div class="note-card">
+        <h3>🥗 Understanding Your Dietary Reference Intake (DRI)</h3>
+        <p>The <strong>Dietary Reference Intake (DRI)</strong> helps individuals estimate their daily <strong>energy and nutrient needs</strong> based on personal factors such as <strong>age, gender, weight, height, and activity level</strong>.  
+        It is used to plan <strong>healthy diets</strong> that support <strong>energy balance, muscle maintenance, and overall well-being</strong>.</p>
+    </div>
+
+    <div class="note-card">
+        <h3>🌱 What Does DRI Include?</h3>
+        <ul class="note-list">
+            <li><strong>Energy Requirement:</strong> The estimated daily calorie intake needed to maintain body functions and support your activity level.</li>
+            <li><strong>Macronutrients:</strong> The recommended daily intake of proteins, carbohydrates, and fats to fuel your body and support overall health.</li>
+            <li><strong>Metabolism Factor:</strong> Energy needs vary based on individual metabolic rate and lifestyle.</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>🔥 How Energy Needs Are Estimated</h3>
+        <ul class="note-list">
+            <li><strong>Resting Energy Use:</strong> Energy required to sustain basic body functions, such as breathing and digestion.</li>
+            <li><strong>Activity Energy Use:</strong> Additional calories required for movement, exercise, and daily tasks.</li>
+        </ul>
+        <p>By combining these, we estimate your total <strong>daily energy expenditure (TDEE)</strong>, which helps determine how much food energy you need daily.</p>
+    </div>
+
+    <div class="note-card">
+        <h3>🍽️ Macronutrient Breakdown</h3>
+        <p>Your daily energy intake is divided among three key macronutrients:</p>
+        <ul class="note-list">
+            <li><strong>Proteins:</strong> Essential for muscle repair, immune function, and hormone production.</li>
+            <li><strong>Carbohydrates:</strong> The primary source of quick energy for the body.</li>
+            <li><strong>Fats:</strong> Support cell function, hormone production, and long-term energy storage.</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>🏃‍♂️ Impact of Activity Level</h3>
+        <p>Your energy needs change based on your daily activity level. <strong>More active individuals</strong> require higher calorie intake, while <strong>sedentary individuals</strong> need fewer calories to maintain balance.</p>
+    </div>
+
+    <div class="note-card">
+        <h3>📊 Why Use This Calculator?</h3>
+        <ul class="note-list">
+            <li>Understand <strong>how much energy</strong> you need daily.</li>
+            <li>Plan <strong>nutritionally balanced meals</strong> for better health.</li>
+            <li>Ensure <strong>adequate nutrient intake</strong> based on your body type and lifestyle.</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+    <h3>📌 Input Validations</h3>
+    <div class="note-list">
+        <ul>
+            <li>👶 <strong>Age:</strong> Enter a number between <strong>1 and 120 years</strong>.</li>
+            <li>⚖️ <strong>Weight:</strong> Enter weight in kilograms between <strong>3kg and 250kg</strong>.</li>
+            <li>📏 <strong>Height:</strong> Enter height in centimeters between <strong>50cm and 250cm</strong>.</li>
+            <li>🧑‍🤝‍🧑 <strong>Gender:</strong> Select either <strong>Male</strong> or <strong>Female</strong>.</li>
+            <li>🏃‍♂️ <strong>Activity Level:</strong> Choose one of the following:
+                <ul>
+                    <li> Sedentary – little or no exercise</li>
+                    <li> Light – light exercise 1–3 days/week</li>
+                    <li> Moderate – moderate exercise 3–5 days/week</li>
+                    <li> Active – hard exercise 6–7 days/week</li>
+                    <li> Very Active – very hard exercise or physically demanding job</li>
+                </ul>
+            </li>
+            <li>⚠️ <strong>Logical Checks:</strong> Height or weight should be realistic for your age. Example: a teenager should not be over 200cm or 100kg.</li>
+            <li>📊 <strong>BMI Check:</strong> The system will alert if your BMI is extremely low (<10) or very high (>50) to ensure realistic values.</li>
+        </ul>
+        <p>✅ Follow these guidelines to get accurate Dietary Reference Intake (DRI) results.</p>
+    </div>
+</div>
+
+    <div class="note-card">
+        <h3>❗ Disclaimer</h3>
+        <p>The values provided are estimates based on standard formulas. Individual nutritional needs can vary. This tool is for informational purposes only and should not replace advice from a registered dietitian or healthcare professional.</p>
+    </div>
+</div>
+
+
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const now = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    if(document.getElementById('printDate')) {
+        document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+    }
+});
+
+function calculateDRI() {
+    const ageInput = document.getElementById('age').value.trim();
+    const weightInput = document.getElementById('weight').value.trim();
+    const heightInput = document.getElementById('height').value.trim();
+    const gender = document.getElementById('gender').value.toLowerCase();
+    const activityLevelInput = parseFloat(document.getElementById('activityLevel').value); // numeric value
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const resultList = document.getElementById('resultList');
+
+    // Reset UI
+    if(errorBox) errorBox.classList.add('hidden');
+    placeholder.classList.remove('hidden');
+    resultValue.classList.add('hidden');
+    resultList.innerHTML = '';
+
+    let errors = [];
+
+    const age = parseInt(ageInput);
+    const weight = parseFloat(weightInput);
+    const height = parseFloat(heightInput);
+
+    // Validations
+    if (!ageInput || isNaN(age) || age < 1 || age > 120) errors.push("👉 Age must be between 1 and 120 years.");
+    if (!weightInput || isNaN(weight) || weight < 3 || weight > 250) errors.push("👉 Weight must be between 3kg and 250kg.");
+    if (!heightInput || isNaN(height) || height < 50 || height > 250) errors.push("👉 Height must be between 50cm and 250cm.");
+    if (!["male","female"].includes(gender)) errors.push("👉 Select a valid gender.");
+    if (!activityLevelInput || isNaN(activityLevelInput)) errors.push("👉 Select a valid activity level.");
+
+    // Logical consistency
+    if(age < 18 && (height > 200 || weight > 100)) {
+        errors.push("⚠️ Height or weight unrealistic for a child/teen.");
+    }
+
+    // BMI check
+    if(!isNaN(weight) && !isNaN(height)) {
+        const bmi = weight / ((height/100)**2);
+        if(bmi < 10 || bmi > 50) errors.push(`⚠️ Your BMI is unrealistic (${bmi.toFixed(1)}). Check height and weight.`);
+    }
+
+    if(errors.length > 0) {
+        if(errorBox && errorMessage) {
+            errorMessage.innerHTML = errors.join("<br>");
+            errorBox.classList.remove("hidden");
+        } else {
+            alert(errors.join("\n"));
+        }
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    // BMR calculation (Mifflin-St Jeor)
+    let bmr = (gender === "male")
+        ? 10 * weight + 6.25 * height - 5 * age + 5
+        : 10 * weight + 6.25 * height - 5 * age - 161;
+
+    const tdee = bmr * activityLevelInput; // use numeric value directly
+
+    // Protein/fat/carb adjustments
+    const protein = Math.min(weight * 1.5, tdee * 0.3 / 4); 
+    const carbs = tdee * 0.5 / 4; 
+    const fats = tdee * 0.25 / 9; 
+
+    resultList.innerHTML = `
+        <li>🔥 <strong>Daily Calories:</strong> ${tdee.toFixed(0)} kcal</li>
+        <li>🥩 <strong>Protein:</strong> ${protein.toFixed(0)} g</li>
+        <li>🍞 <strong>Carbohydrates:</strong> ${carbs.toFixed(0)} g</li>
+        <li>🥑 <strong>Fats:</strong> ${fats.toFixed(0)} g</li>
+    `;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+function printReport() {
+    const now = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    if(document.getElementById('printDate')) {
+        document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+    }
+    window.print();
+}
+</script>
+
+
+
+
+</body>
+</html>
+{% endblock %}
+
+<!-- 
+1️⃣ Input Validation Rules
+
+From a QEHS and health audit perspective, user inputs must be validated to avoid unrealistic or unsafe outputs:
+
+Field	Units	Acceptable Range	Validation Rules	Rationale
+Age	years	1 – 120	Must be integer ≥ 1 and ≤ 120	Ensures biologically possible human age. Prevents division errors and unrealistic DRI.
+Height	cm	50 – 250	Must be numeric; allow 1 decimal; ≥50 & ≤250	Prevents physiologically impossible height entries.
+Weight	kg	3 – 300	Must be numeric; allow 1 decimal; ≥3 & ≤300	Prevents unrealistic body weights; ensures safe calculation of calories/macros.
+Gender	male/female	predefined	Must select either male or female	Ensures correct BMR formula selection.
+Activity Level	multiplier	1.2 – 1.9	Must select from allowed dropdown values	Ensures TDEE calculation stays within physiologically plausible limits.
+
+Cross-field validation:
+
+BMI sanity check: BMI = weight / (height/100)^2
+
+Acceptable BMI: 10 – 60
+
+Prevents extreme outlier combinations (e.g., 250 kg / 50 cm height).
+
+2️⃣ Output Validation and Thresholds
+
+BMR (Basal Metabolic Rate): should be > 500 kcal/day for adults.
+
+TDEE (Total Daily Energy Expenditure): should not exceed ~10,000 kcal/day.
+
+Protein intake: 0.8 – 3 g/kg/day; if outside, flag.
+
+Carbohydrate intake: 45–65% of total calories.
+
+Fat intake: 20–35% of total calories.
+
+Purpose: Ensures the calculator outputs audit-friendly and physiologically plausible results.
+
+3️⃣ Edge Case Handling
+
+Missing fields → show clear error.
+
+Negative numbers or zero → error.
+
+Non-numeric input → error.
+
+Extremely low/high BMI → warn user instead of giving absurd results.
+
+Division by zero is not possible with current formula, but TDEE multiplier is validated to prevent unrealistic outputs.
+-->
