@@ -178,29 +178,32 @@ CALCULATORS = [
 
 
     # Health Calculators
-    {"name": "Army Body Fat Calculator", "url_name": "health_army_body_fat_calculator", "plan_type": "corporate", "category": "health"},
+   {"name": "Army Body Fat Calculator", "url_name": "health_army_body_fat_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Adjusted Body Weight Calculator", "url_name": "health_adjusted_body_weight_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "A Body Shape Index (ABSI) Calculator", "url_name": "health_a_body_shape_index_absi_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "A1c Calculator", "url_name": "health_a1c_hemoglobin_a1c_to_average_blood_sugar_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Age Shock Index (Age SI) Calculator", "url_name": "health_age_shock_index_age_si_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Alzheimer’s Life Expectancy Calculator", "url_name": "health_alzheimers_life_expectancy_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Ankle-Brachial Index (ABI) Calculator", "url_name": "health_ankle_brachial_index_abi_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "BMI Calculator", "url_name": "health_bmi_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "BMI Calculator for Kids", "url_name": "health_bmi_for_kids_calculator", "plan_type": "corporate", "category": "health"},
 
-    {"name": "Adjusted Body Weight Calculator", "url_name": "health_adjusted_body_weight_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Basal Metabolic Rate (BMR) Calculator", "url_name": "health_basal_metabolic_rate_bmr_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Body Roundness Index (BRI) Calculator", "url_name": "health_body_roundness_index_bri_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Body Fat Calculator (U.S. Navy Method)", "url_name": "health_body_fat_us_navy_method_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Body Adiposity Index (BAI) Calculator", "url_name": "health_body_adiposity_index_bai_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Body Frame Size Calculator", "url_name": "health_body_frame_size_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Body Surface Area (BSA) Calculator", "url_name": "health_body_surface_area_bsa_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Blood Sugar Converter", "url_name": "health_blood_sugar_converter_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Bedridden Patient Height Estimator", "url_name": "health_bedridden_patient_height_estimator_calculator", "plan_type": "corporate", "category": "health"},
 
-    {"name": "A Body Shape Index (ABSI) Calculator", "url_name": "health_a_body_shape_index_absi_calculator", "plan_type": "corporate", "category": "health"},
-
-    {"name": "A1c Calculator", "url_name": "health_a1c_hemoglobin_a1c_to_average_blood_sugar_calculator", "plan_type": "corporate", "category": "health"},
-
-    {"name": "Age Shock Index (Age SI) Calculator", "url_name": "health_age_shock_index_age_si_calculator", "plan_type": "corporate", "category": "health"},
-    
-    {"name": "Alzheimer’s Life Expectancy Calculator", "url_name": "health_alzheimers_life_expectancy_calculator", "plan_type": "corporate", "category": "health"},
-    {"name": "Ankle-Brachial Index (ABI) Calculator", "url_name": "health_ankle_brachial_index_abi_calculator", "plan_type": "corporate", "category": "health"},
-
-
-    {"name": "BMI Calculator", "url_name": "health_bmi_calculator", "plan_type": "corporate", "category": "health"},
-    {"name": "BMI Calculator for Kids", "url_name": "health_bmi_for_kids_calculator", "plan_type": "corporate", "category": "health"},
-    {"name": "Bedridden Patient Weight Estimator", "url_name": "health_bedridden_patient_weight_estimator_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Bedridden Patient Weight Estimator", "url_name": "health_bedridden_patient_weight_estimator_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Baby Milk Intake Calculator", "url_name": "health_baby_milk_intake_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Cardiac Index Calculator", "url_name": "health_cardiac_index_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Daily Drinking Water Intake Calculator", "url_name": "health_daily_drinking_water_intake_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Dietary Reference Intake (DRI) Calculator", "url_name": "health_dietary_reference_intake_dri_calculator", "plan_type": "corporate", "category": "health"},
 
-{"name": "Diabetes Risk Calculator", "url_name":"health_diabetes_risk_estimate_your_75_year_risk_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Diabetes Risk Calculator", "url_name": "health_diabetes_risk_estimate_your_75_year_risk_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Depression Screening (PHQ-2) Calculator", "url_name": "health_depression_screening_by_phq_2_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Dose-Response Probit Calculator", "url_name": "health_dose_response_probit_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Diet Risk Score Calculator", "url_name": "health_diet_risk_score_calculator", "plan_type": "corporate", "category": "health"},
@@ -210,7 +213,6 @@ CALCULATORS = [
 {"name": "Fiber Intake Calculator", "url_name": "health_fiber_intake_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "GAD-7 Anxiety Assessment Calculator", "url_name": "health_generalized_anxiety_disorder_assessment_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Gupta Perioperative Risk Calculator", "url_name": "health_gupta_perioperative_risk_calculator", "plan_type": "corporate", "category": "health"},
-
 
 
 
