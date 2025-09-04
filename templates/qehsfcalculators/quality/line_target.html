@@ -1,0 +1,662 @@
+{% extends 'base.html' %}
+{% block title %}Line Target Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Line Target Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+            margin-top: 20px;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'qualitycategory_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Line Target Calculator</h1>
+            <p>Calculates production targets based on manpower, working hours, SMV, and efficiency</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator Input Card -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="manpower">Total Manpower (MP)</label>
+                    <input type="number" id="manpower" class="form-input" min="1" placeholder="Enter manpower count">
+                </div>
+
+                <div class="form-group">
+                    <label for="workingHours">Working Hours (WH)</label>
+                    <input type="number" id="workingHours" class="form-input" min="1" placeholder="Enter working hours">
+                </div>
+
+                <div class="form-group">
+                    <label for="smv">Standard Minute Value (SMV)</label>
+                    <input type="number" id="smv" class="form-input" min="1" placeholder="Enter SMV">
+                </div>
+
+                <div class="form-group">
+                    <label for="efficiency">Efficiency (%)</label>
+                    <input type="number" id="efficiency" class="form-input" min="1" max="100" placeholder="Enter efficiency">
+                </div>
+
+                <button class="calculate-btn" onclick="calculateLineTarget()">Calculate Line Target</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Production illustration">
+                    <p>This tool calculates the <strong>production line target</strong> in pieces. Enter your production parameters to see results.</p>
+                </div>
+
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Line Target</h2>
+                    </div>
+                    <div class="rate-value" id="lineTargetValue">0.00</div>
+                    <div class="rate-label"><strong>Pieces</strong></div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">Production Target Interpretation</div>
+                        <div class="feedback-content" id="targetFeedback"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🔎 About This Calculator</h3>
+                <p>
+                    The <strong>Line Target Calculator</strong> helps manufacturers determine how many products can be produced within a given time based on workforce, efficiency, and standard production time. It helps in setting production targets and optimizing workforce management.
+                </p> 
+            </div>
+
+            <div class="note-card">
+                <h3>❓ Explanation of Parameters</h3>
+                <ul class="note-list">
+                    <li><strong>Total Manpower (MP):</strong> The total number of workers (helpers + operators) involved in production.</li>
+                    <li><strong>Working Hours (WH):</strong> The total number of hours the production line operates.</li>
+                    <li><strong>Standard Minute Value (SMV):</strong> The time required to manufacture one unit in minutes.</li>
+                    <li><strong>Efficiency:</strong> The effectiveness of labor and time utilization (expressed in percentage).</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📌 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Manpower:</strong> Required, must be > 0</li>
+                    <li><strong>Working Hours:</strong> Required, must be > 0</li>
+                    <li><strong>SMV:</strong> Required, must be > 0</li>
+                    <li><strong>Efficiency:</strong> Required, must be between 1% and 100%</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📊 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Manufacturing Industry:</strong> Helps in setting production targets and workforce management.</li>
+                    <li><strong>Quality Control:</strong> Ensures that the expected number of units is achieved within given resources.</li>
+                    <li><strong>Labor Productivity:</strong> Optimizes workforce allocation for better performance.</li>
+                    <li><strong>Cost Management:</strong> Helps in budgeting and resource planning for production lines.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Conclusion</h3>
+                <p>A well-calculated line target leads to better efficiency, cost savings, and smooth production flow. This formula is crucial for manufacturers to optimize operations and maintain quality standards while meeting production deadlines.</p>
+            </div>
+            
+        </div>
+    </div>
+
+    <script>function calculateLineTarget() {
+    const manpower = document.getElementById("manpower").value.trim();
+    const workingHours = document.getElementById("workingHours").value.trim();
+    const smv = document.getElementById("smv").value.trim();
+    const efficiency = document.getElementById("efficiency").value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const lineTargetValue = document.getElementById('lineTargetValue');
+    const feedbackBox = document.getElementById('targetFeedback');
+
+    let errors = [];
+
+    // Manpower
+    if (manpower === "" || isNaN(manpower)) {
+        errors.push("👉 Please enter a valid manpower count (whole number).");
+    } else if (!Number.isInteger(parseFloat(manpower))) {
+        errors.push("👉 Manpower must be an integer (no decimals).");
+    } else if (parseInt(manpower) <= 0 || parseInt(manpower) > 500) {
+        errors.push("👉 Manpower must be between 1 and 500 workers.");
+    }
+
+    // Working Hours
+    if (workingHours === "" || isNaN(workingHours)) {
+        errors.push("👉 Please enter valid working hours.");
+    } else if (parseFloat(workingHours) <= 0 || parseFloat(workingHours) > 24) {
+        errors.push("👉 Working hours must be between 1 and 24.");
+    } else if (parseFloat(workingHours) > 12) {
+        errors.push("⚠️ Warning: Working hours exceed 12, may violate safety regulations.");
+    }
+
+    // SMV
+    if (smv === "" || isNaN(smv)) {
+        errors.push("👉 Please enter valid SMV.");
+    } else if (parseFloat(smv) < 0.1 || parseFloat(smv) > 60) {
+        errors.push("👉 SMV must be between 0.1 and 60 minutes per unit.");
+    }
+
+    // Efficiency
+    if (efficiency === "" || isNaN(efficiency)) {
+        errors.push("👉 Please enter valid efficiency percentage.");
+    } else if (parseFloat(efficiency) <= 0 || parseFloat(efficiency) > 100) {
+        errors.push("👉 Efficiency must be between 1% and 100%.");
+    } else if (parseFloat(efficiency) < 30 || parseFloat(efficiency) > 95) {
+        errors.push("⚠️ Warning: Efficiency entered is outside typical industry range (30–95%).");
+    }
+
+    // Show errors
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    const mpNum = parseInt(manpower);
+    const whNum = parseFloat(workingHours);
+    const smvNum = parseFloat(smv);
+    const effNum = parseFloat(efficiency) / 100;
+
+    // Avoid division by zero
+    if (smvNum === 0) {
+        errorMessage.innerHTML = "❌ SMV cannot be zero (division error).";
+        errorBox.classList.remove("hidden");
+        return;
+    }
+
+    // Calculation
+    const target = (mpNum * whNum * 60) / smvNum;
+    const lineTarget = target * effNum;
+    lineTargetValue.textContent = lineTarget.toFixed(2);
+
+    // Feedback messages
+    let feedback = "";
+    if (lineTarget < 500) {
+        feedback = "⚠️ Low Target (<500 pieces) – Possible downtime or underutilization.";
+    } else if (lineTarget > 5000) {
+        feedback = "⚠️ Very High Target (>5000 pieces) – Check inputs for errors.";
+    } else {
+        feedback = "✅ Normal Target (500–5000 pieces) – Operationally reasonable.";
+    }
+
+    feedbackBox.textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+Detailed Input Validation Rules (QEHS & Fire Safety Perspective)
+a. Manpower (MP – Total Workers)
+
+Unit: Persons (operators + helpers).
+
+Allowed decimals: ❌ None (must be an integer).
+
+Range:
+
+Minimum: 1 (can’t have zero or negative workers).
+
+Maximum: 500 per line (practically, garment/assembly lines rarely exceed this per line; beyond this indicates data entry error).
+
+Compliance Note: Ensures labor laws are respected (ILO convention – no over-crowding, worker safety).
+
+b. Working Hours (WH – Line Operation Hours)
+
+Unit: Hours (per shift).
+
+Decimals allowed: ✅ Yes (e.g., 7.5 hrs shift).
+
+Range:
+
+Minimum: 1 (valid shift > 0).
+
+Maximum: 24 (cannot exceed a day).
+
+⚠️ If > 12 → flag warning (most factories are legally limited to ~8 + OT hours).
+
+Compliance Note: OSHA & ISO 45001 restrict continuous working hours to prevent fatigue-related accidents.
+
+c. Standard Minute Value (SMV – Time per Unit)
+
+Unit: Minutes per piece.
+
+Decimals allowed: ✅ Yes (e.g., 2.75 minutes/unit).
+
+Range:
+
+Minimum: 0.1 (below this, task time is unrealistically fast).
+
+Maximum: 60 (if > 1 hour per unit, check if entered correctly).
+
+Compliance Note: Prevents unrealistic targets that could cause unsafe work speeds or ergonomic stress.
+
+d. Efficiency (%)
+
+Unit: Percentage.
+
+Decimals allowed: ✅ Yes (e.g., 87.5%).
+
+Range:
+
+Minimum: 1% (below that = line not functioning).
+
+Maximum: 100% (nobody exceeds 100%).
+
+Practical Range for audits: 30–90%.
+
+⚠️ If entered <30% or >95%, show a warning.
+
+Compliance Note: Helps align with actual productivity studies, prevents “data manipulation” in audit reports.
+
+2. Output Validation Logic & Thresholds
+
+Formula:
+Line Target = (MP × WH × 60 ÷ SMV) × Efficiency%
+
+Interpretation Levels (Audit-Ready)
+
+< 500 pieces → ⚠️ Very low → Underutilization or downtime.
+
+500 – 5,000 pieces → ✅ Reasonable (normal operational range).
+
+> 5,000 pieces → ⚠️ Likely incorrect input (unrealistic for one line/shift).
+
+Compliance Rationale:
+
+These thresholds align with lean manufacturing benchmarks and prevent false expectations that could compromise worker safety (overwork) or management accountability.
+Edge Case Validations
+
+Division by zero: SMV = 0 → block calculation.
+
+Negative inputs: Reject immediately (not physically possible).
+
+Efficiency >100%: Reject → no real-world process exceeds 100%.
+
+Extreme combinations:
+
+(MP=500, WH=24, SMV=0.1, Eff=100) → outputs millions → reject as unrealistic.
+
+Decimal restrictions:
+
+MP → integers only.
+
+WH, SMV, Efficiency → decimals allowed (but validated).
+
+
+            <div class="note-card formula-card">
+                <h3>🧮 Formula</h3>
+                <p>The line target is calculated using the formula:</p>
+                <code>Line Target = (MP × WH × 60) / SMV × Efficiency</code>
+                <p>Where:</p>
+                <ul class="note-list">
+                    <li><strong>MP</strong> = Total Manpower</li>
+                    <li><strong>WH</strong> = Working Hours</li>
+                    <li><strong>SMV</strong> = Standard Minute Value</li>
+                    <li><strong>Efficiency</strong> = Efficiency percentage (converted to decimal)</li>
+                </ul>
+            </div>
+-->
