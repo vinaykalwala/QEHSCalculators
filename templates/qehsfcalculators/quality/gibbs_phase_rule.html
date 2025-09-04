@@ -1,0 +1,653 @@
+{% extends 'base.html' %}
+{% block title %}Gibbs Phase Rule Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gibbs Phase Rule Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'qualitycategory_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Gibbs Phase Rule Calculator</h1>
+            <p>Calculates the degrees of freedom in a thermodynamic system based on the number of components, phases, and constraints</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator Input Card -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="components">Number of Components (C)</label>
+                    <input type="number" id="components" class="form-input" min="1" max="10"  step="1" placeholder="Enter components">
+                </div>
+
+                <div class="form-group">
+                    <label for="phases">Number of Phases (P)</label>
+                    <input type="number" id="phases" class="form-input" min="1" max="10" step="1" placeholder="Enter phases">
+                </div>
+
+                <div class="form-group">
+                    <label for="constraints">Additional Constraints</label>
+                    <input type="number" id="constraints" class="form-input" min="0" max="5"step="1" value="2" placeholder="Enter constraints">
+                </div>
+
+                <button class="calculate-btn" onclick="calculateDegreesOfFreedom()">Calculate Degrees of Freedom</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Thermodynamics illustration">
+                    <p>This tool calculates the <strong>degrees of freedom (F)</strong> using Gibbs Phase Rule. Enter your system parameters to see results.</p>
+                </div>
+
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Degrees of Freedom</h2>
+                    </div>
+                    <div class="rate-value" id="freedomValue">0</div>
+                    <div class="rate-label"><strong>F</strong></div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">System Interpretation</div>
+                        <div class="feedback-content" id="systemFeedback"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🔎 About This Calculator</h3>
+                <p>
+                    The <strong>Gibbs Phase Rule Calculator</strong> determines the number of independent variables (degrees of freedom) in a thermodynamic system. It relates components, phases, and constraints to predict system behavior, which is fundamental for material quality control and process optimization.
+                </p> 
+            </div>
+
+            <div class="note-card">
+                <h3>❓ Explanation of Parameters</h3>
+                <ul class="note-list">
+                    <li><strong>Components (C):</strong> Chemically independent constituents (e.g., H₂O = 1, NaCl+H₂O = 2)</li>
+                    <li><strong>Phases (P):</strong> Physically distinct, homogeneous regions (solid, liquid, gas, different crystals)</li>
+                    <li><strong>Constraints:</strong> Typically 2 (temperature and pressure), may reduce for special conditions</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📌 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Components (C):</strong> Required, must be between 1 and 10</li>
+                    <li><strong>Phases (P):</strong> Required, must be between 1 and 10</li>
+                    <li><strong>Constraints:</strong> Required, must be between 0 and 5</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📊 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Pharmaceuticals:</strong> Ensuring stable crystal forms of drugs</li>
+                    <li><strong>Metallurgy:</strong> Predicting alloy phase diagrams for material properties</li>
+                    <li><strong>Food Science:</strong> Controlling fat crystallization in chocolate</li>
+                    <li><strong>Polymers:</strong> Managing plastic blends and composites</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Conclusion</h3>
+                <p>The Gibbs Phase Rule provides a powerful framework for understanding and controlling material systems. By calculating degrees of freedom, quality professionals can predict phase behavior, avoid unstable conditions, and ensure consistent product performance.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>function calculateDegreesOfFreedom() {
+    // Get input values
+    const C = Number(document.getElementById('components').value.trim());
+    const P = Number(document.getElementById('phases').value.trim());
+    const constraints = Number(document.getElementById('constraints').value.trim());
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const freedomValue = document.getElementById('freedomValue');
+    const feedbackBox = document.getElementById('systemFeedback');
+
+    let errors = [];
+
+    // ===== Validation Rules =====
+    // Components
+    if (isNaN(C) || !Number.isInteger(C) || C < 1 || C > 10) {
+        errors.push("❌ Components (C) must be an integer between 1 and 10.");
+    }
+
+    // Phases
+    if (isNaN(P) || !Number.isInteger(P) || P < 1 || P > 10) {
+        errors.push("❌ Phases (P) must be an integer between 1 and 10.");
+    }
+
+    // Constraints
+    if (isNaN(constraints) || !Number.isInteger(constraints) || constraints < 0 || constraints > 5) {
+        errors.push("❌ Constraints must be an integer between 0 and 5.");
+    }
+
+    // Cross-field rules
+    if (errors.length === 0) {
+        if (P > C + constraints) {
+            errors.push("❌ Invalid: Phases (P) cannot exceed Components (C) + Constraints. This would give negative degrees of freedom (impossible system).");
+        }
+    }
+
+    // ===== Error Handling =====
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // ===== Calculate F =====
+    const F = C - P + constraints;
+
+    // ===== Output Validation =====
+    let systemType, feedback;
+    if (F < 0) {
+        systemType = "Invalid";
+        feedback = "❌ Impossible system - violates Gibbs phase rule.";
+    } else if (F === 0) {
+        systemType = "Invariant";
+        feedback = "⚠️ System locked: No variable can change without phase loss. High instability risk.";
+    } else if (F === 1) {
+        systemType = "Univariant";
+        feedback = "✅ One variable can change independently (e.g., T or P). Tight process safety margins.";
+    } else {
+        systemType = "Multivariant";
+        feedback = "✅ Multiple variables can be changed independently – system is stable and flexible.";
+    }
+
+    // ===== Display Result =====
+    freedomValue.textContent = F;
+    feedbackBox.textContent = `System Type: ${systemType} System. ${feedback}`;
+
+    placeholder.classList.add("hidden");
+    resultValue.classList.remove("hidden");
+}
+
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+Analysis of Inputs, Outputs, and Formula
+
+🔹 Inputs
+
+Components (C): Independent chemical constituents.
+
+Phases (P): Distinct physical states (solid, liquid, gas, crystalline).
+
+Constraints: Variables fixed by external conditions (commonly temperature & pressure = 2).
+
+🔹 Formula Used
+
+𝐹
+=
+𝐶
+−
+𝑃
++
+Constraints
+F=C−P+Constraints
+
+This is the reduced Gibbs Phase Rule (general form is 
+𝐹
+=
+𝐶
+−
+𝑃
++
+2
+F=C−P+2).
+The calculator is correct since you allow constraints to be variable (0–5).
+
+🔹 Output
+
+Degrees of Freedom (F): How many independent intensive variables can be changed without altering phase equilibrium.
+
+System interpretation: Invariant, Univariant, Multivariant → directly maps to real-world process stability.
+
+From a QEHS/Fire Safety lens:
+
+Too many phases with too few components = impossible system → signals calculation or process safety error.
+
+Wrong constraints may suggest unsafe assumptions (e.g., ignoring pressure control in high-temperature reactors).
+
+2. Comprehensive Validation Rules
+
+✅ Components (C)
+
+Range: 1–10 (practical laboratory/industrial systems rarely exceed 10 independent components).
+
+Must be an integer (fractions make no chemical sense).
+
+✅ Phases (P)
+
+Range: 1–10 (more than 10 phases is physically unrealistic in industrial systems).
+
+Integer only.
+
+Cross-field rule: 
+𝑃
+≤
+𝐶
++
+Constraints
+P≤C+Constraints, otherwise 
+𝐹
+<
+0
+F<0 → impossible system.
+
+✅ Constraints
+
+Range: 0–5 (covers typical: none, 1, or 2 (T, P); occasionally higher if composition ratios fixed).
+
+Integer only.
+
+Cross-field logic: If Constraints = 0, system must still obey Gibbs rule (can’t “remove” all measurable variables in real safety audits).
+
+✅ Decimals
+
+Not allowed for any field → only integers are scientifically valid.
+
+✅ Units
+
+Components, Phases, Constraints are unitless counts. (Important for compliance clarity in reports).
+
+3. Edge Case Validations
+
+Division by Zero: Not applicable here (no division).
+
+Negative F: Means 
+𝑃
+>
+𝐶
++
+𝐶
+𝑜
+𝑛
+𝑠
+𝑡
+𝑟
+𝑎
+𝑖
+𝑛
+𝑡
+𝑠
+P>C+Constraints → impossible → must show error, not result.
+
+Zero Components (C=0): Invalid → “No system exists without components.”
+
+Zero Phases (P=0): Invalid → “At least one phase must exist.”
+
+Excessive Constraints (>C+2): Unrealistic → warn user.
+
+Extreme Outliers: (C=10, P=10, Constraints=5 → F=5) still valid but highlight that real-world systems rarely exceed C=6–7.
+
+4. Output Validation Logic
+
+F < 0 → Impossible system → show ❌ and block reporting.
+
+F = 0 → Invariant system (danger in QEHS: “locked” conditions, very unstable, e.g., eutectic point).
+
+F = 1 → Univariant system (only one variable can change → tight safety margins).
+
+F ≥ 2 → Multivariant system (safe flexibility, but must monitor variables).
+
+These outputs map directly to ISO 45001 / OSHA process safety requirements where predictability and control of thermodynamic systems are essential for preventing fire, explosion, or instability.
+-->
