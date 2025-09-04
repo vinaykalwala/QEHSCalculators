@@ -74,6 +74,26 @@ CALCULATORS = [
 
 {"name": "Facade Element Area Calculator", "url_name": "quality_facade_element_weight_calculator", "plan_type": "corporate", "category": "quality"},
 
+{"name": "Gibbs Phase Rule Calculator", "url_name": "quality_gibbs_phase_rule_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Heat Exchanger Heating Area Calculator", "url_name": "quality_heat_exchanger_heating_area_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Largest Particle Size Through a Strainer Screen Calculator", "url_name": "quality_largest_particle_size_through_a_strainer_screen_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Line Target Calculator", "url_name": "quality_line_target_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Mass Flow Rate of Steam Through an Orifice Calculator", "url_name": "quality_mass_flow_rate_of_steam_through_an_orifice_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Overall Equipment Effectiveness (OEE) Calculator", "url_name": "quality_overall_equipment_effectiveness_oee_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Percentage Error when using velocity Calculator", "url_name": "quality_percentage_error_when_using_velocity_calculator", "plan_type": "corporate", "category": "quality"},
+
 
 
 
@@ -174,8 +194,33 @@ CALCULATORS = [
 
 {"name": "Energy Balance between Steam and Secondary Fluid of a Non-Flow Process caluculator", "url_name": "environment_energy_balance_between_steam_and_secondary_fluid_of_a_non_flow_process_calculator", "plan_type": "corporate", "category": "environment"},
 
+{"name": "Energy Balance between Steam and Fluid of a Flow-Type Application Calculator", "url_name": "environment_energy_balance_between_steam_and_fluid_of_a_flow_type_application_calculator", "plan_type": "corporate", "category": "environment"},
 
 
+{"name": "Equal percentage valve lift calculator based on kv", "url_name": "environment_equal_percentage_valve_lift_based_on_kv_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Environmental Damage Frequency (ENDF) Calculator", "url_name": "environment_environmental_damage_frequency_endf_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Environmental Incident rate (EIR) Calculator", "url_name": "environment_environmental_incident_rate_eir_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Electrostatic Precipitator Efficiency Calculator", "url_name": "environment_electrostatic_precipitator_efficiency_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Exponential Population Growth Calculator", "url_name": "environment_exponential_population_growth_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Effective Half-Life Calculator", "url_name": "environment_effective_half_life_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Entering Coil Conditions (Ventilation Airflow) Calculator", "url_name": "environment_entering_coil_conditions_ventilation_airflow_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Elevation Head Loss Calculator", "url_name": "environment_elevation_head_loss_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "environment_energy_consumption_per_person_per_year_calculator", "url_name": "Energy Consumption per Person per Year Calculator", "plan_type": "corporate", "category": "environment"},
 
     # Health Calculators
    {"name": "Army Body Fat Calculator", "url_name": "health_army_body_fat_calculator", "plan_type": "corporate", "category": "health"},
@@ -214,6 +259,14 @@ CALCULATORS = [
 {"name": "GAD-7 Anxiety Assessment Calculator", "url_name": "health_generalized_anxiety_disorder_assessment_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Gupta Perioperative Risk Calculator", "url_name": "health_gupta_perioperative_risk_calculator", "plan_type": "corporate", "category": "health"},
 
+{"name": "Heat Stress Index (HSI) Calculator", "url_name": "health_heat_stress_index_hsi_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Healthy Weight Calculator", "url_name": "health_healthy_weight_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Heaviness of Smoking Index (HSI) Calculator", "url_name": "health_heaviness_of_smoking_index_hsi_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Hand-Arm Vibration Exposure (HAV) Calculator", "url_name": "health_hand_arm_vibration_exposure_hav_a8_value_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Happiness Calculator", "url_name": "health_happiness_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "HEART Score Calculator", "url_name": "health_heart_score_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "HOMA-IR Calculator", "url_name": "health_homa_ir_insulin_resistance_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Ideal Weight Calculator", "url_name": "health_ideal_weight_calculator", "plan_type": "corporate", "category": "health"},
 
 
 
@@ -314,6 +367,28 @@ CALCULATORS = [
 
 {"name": "Compressibility Factor For Compressible Steam And Dry Gas Calculator", "url_name":"safety_compressibility_factor_for_compressible_steam_and_dry_gas_calculator", "plan_type": "corporate", "category": "safety"},
 
+{"name": "Crane Capacity Index (CCI) Calculator", "url_name":"safety_crane_capacity_index_cci_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Crane Wind Speed Allowance Calculator", "url_name":"safety_crane_wind_speed_allowance_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Critical Flow Scaling Parameter Calculator", "url_name":"safety_critical_flow_scaling_parameter_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Collision Rate (CR) Calculator", "url_name":"safety_collision_rate_cr_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Crash Reduction Factor (CRF) Calculator", "url_name":"safety_crash_reduction_factor_crf_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Concrete Element Weight Calculator", "url_name":"safety_concrete_element_weight_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Corrective Action Closure Rate Calculator", "url_name":"safety_corrective_action_closure_rate_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Critical Pressure Calculator (API RP520)", "url_name":"safety_critical_pressure_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Chemical Exposure Burn Severity Rate Calculator", "url_name":"safety_chemical_exposure_burn_severity_rate_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Composite Risk Calculator", "url_name":"safety_compressible_flow_crane_equation_3_20_calculator", "plan_type": "corporate", "category": "safety"},
+
+
+{"name": "Crane Equation 3-20 - Compressible Flow Calculator", "url_name":"safety_composite_risk_calculator", "plan_type": "corporate", "category": "safety"},
     
     # Fire Calculators
     # {"name": "Fire Risk Assessment", "url_name": "fire_risk", "plan_type": "individual", "category": "fire"},
