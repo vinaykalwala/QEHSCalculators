@@ -11,6 +11,7 @@ class CustomUser(AbstractUser):
     address = models.TextField(blank=True, null=True)
     industry = models.CharField(max_length=100, blank=True, null=True)
     purpose = models.CharField(max_length=255, blank=True, null=True)
+    profile_image = models.ImageField(upload_to="profile_images/", blank=True, null=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]

@@ -1,3 +1,4 @@
+# decorators.py
 from django.shortcuts import redirect
 from django.contrib import messages
 from functools import wraps
@@ -8,10 +9,15 @@ def subscription_required(plan_type="individual"):
     Restrict access based on subscription plan.
     Higher plans can access lower plan calculators.
     Also checks device limit.
+    Superusers have access to all calculators regardless of subscription.
     """
     def decorator(view_func):
         @wraps(view_func)
         def _wrapped_view(request, *args, **kwargs):
+            # Allow superusers to bypass all checks
+            if request.user.is_superuser:
+                return view_func(request, *args, **kwargs)
+            
             # Check subscription
             subscription = request.user.subscriptions.filter(status="active").last()
             if not subscription:

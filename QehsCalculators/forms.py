@@ -66,3 +66,33 @@ class VerificationCodeForm(forms.Form):
 class CustomSetPasswordForm(SetPasswordForm):
     # Inherits password1 and password2 fields
     pass
+
+
+
+from .models import CustomUser
+
+class ProfileUpdateForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = [
+            "first_name",
+            "last_name",
+            "phone",
+            "company_name",
+            "designation",
+            "address",
+            "industry",
+            "purpose",
+            "profile_image",
+        ]
+        widgets = {
+            "first_name": forms.TextInput(attrs={"class": "form-control"}),
+            "last_name": forms.TextInput(attrs={"class": "form-control"}),
+            "phone": forms.TextInput(attrs={"class": "form-control"}),
+            "company_name": forms.TextInput(attrs={"class": "form-control"}),
+            "designation": forms.TextInput(attrs={"class": "form-control"}),
+            "address": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "industry": forms.TextInput(attrs={"class": "form-control"}),
+            "purpose": forms.TextInput(attrs={"class": "form-control"}),
+            "profile_image": forms.FileInput(attrs={"class": "form-control"}),
+        }

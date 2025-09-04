@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.urls import include, path
 from QehsCalculators.views import *
+from django.conf.urls.static import static
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home, name='home'),
@@ -19,6 +21,7 @@ urlpatterns = [
     path('privacy/', privacy, name='privacy'),
     path("device-limit/", device_limit_exceeded, name="device_limit_exceeded"),
     path("subscription-expired/", subscription_expired, name="subscription_expired"),
+    path("profile/", profile_view, name="profile"),
 
     path('transactions/', transaction_list, name='transaction_list'),
     path('transactions/delete/<int:pk>/', delete_transaction, name='delete_transaction'),
@@ -458,16 +461,18 @@ urlpatterns = [
     path('safety/compressibility_factor_for_compressible_steam_and_dry_gas_calculator/', safety_compressibility_factor_for_compressible_steam_and_dry_gas_calculator, name='safety_compressibility_factor_for_compressible_steam_and_dry_gas_calculator'),
     path('safety/crane_capacity_index_cci_calculator/', safety_crane_capacity_index_cci_calculator, name='safety_crane_capacity_index_cci_calculator'),
     path('safety/crane_wind_speed_allowance_calculator/', safety_crane_wind_speed_allowance_calculator, name='safety_crane_wind_speed_allowance_calculator'),
-    path('safety/composite_risk_calculator/', safety_composite_risk_calculator, name='safety_composite_risk_calculator'),
-    path('safety/critical_pressure_ratio_for_dry_steam_and_gases_calculator/', safety_critical_pressure_ratio_for_dry_steam_and_gases_calculator, name='safety_critical_pressure_ratio_for_dry_steam_and_gases_calculator'),
+
+    path('safety/critical_flow_scaling_parameter_calculator/', safety_critical_flow_scaling_parameter_calculator, name='safety_critical_flow_scaling_parameter_calculator'),
     path('safety/collision_rate_cr_calculator/', safety_collision_rate_cr_calculator, name='safety_collision_rate_cr_calculator'),
     path('safety/crash_reduction_factor_crf_calculator/', safety_crash_reduction_factor_crf_calculator, name='safety_crash_reduction_factor_crf_calculator'),
     path('safety/concrete_element_weight_calculator/', safety_concrete_element_weight_calculator, name='safety_concrete_element_weight_calculator'),
     path('safety/corrective_action_closure_rate_calculator/', safety_corrective_action_closure_rate_calculator, name='safety_corrective_action_closure_rate_calculator'),
+    path('safety/critical_pressure_calculator/', safety_critical_pressure_calculator, name='safety_critical_pressure_calculator'),
     path('safety/chemical_exposure_burn_severity_rate_calculator/', safety_chemical_exposure_burn_severity_rate_calculator, name='safety_chemical_exposure_burn_severity_rate_calculator'),
     path('safety/compressible_flow_crane_equation_3_20_calculator/', safety_compressible_flow_crane_equation_3_20_calculator, name='safety_compressible_flow_crane_equation_3_20_calculator'),
-    path('safety/clausius_clapeyron_equation_calculator/', safety_clausius_clapeyron_equation_calculator, name='safety_clausius_clapeyron_equation_calculator'),
     path('safety/composite_risk_calculator/', safety_composite_risk_calculator, name='safety_composite_risk_calculator'),
+    path('safety/clausius_clapeyron_equation_calculator/', safety_clausius_clapeyron_equation_calculator, name='safety_clausius_clapeyron_equation_calculator'),
+    
     path('safety/density_of_a_material_calculator/', safety_density_of_a_material_calculator, name='safety_density_of_a_material_calculator'),
     path('safety/daltons_law_of_partial_pressures_calculator/', safety_daltons_law_of_partial_pressures_calculator, name='safety_daltons_law_of_partial_pressures_calculator'),
     path('safety/drilling_torque_and_drag_calculator/', safety_drilling_torque_and_drag_calculator, name='safety_drilling_torque_and_drag_calculator'),
@@ -701,3 +706,5 @@ urlpatterns = [
     path('fire/venting_energy_balance_calculator/', fire_venting_energy_balance_calculator, name='fire_venting_energy_balance_calculator'),
     path('fire/water_control_valve_capacity_calculator/', fire_water_control_valve_capacity_calculator, name='fire_water_control_valve_capacity_calculator'),
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

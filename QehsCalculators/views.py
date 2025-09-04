@@ -874,6 +874,10 @@ def get_user_plan(user):
     """Returns the plan name if user has an active subscription, else None."""
     if not user.is_authenticated:
         return None  # Guests have no plan
+    
+    # Superusers get automatic "corporate" level access
+    if user.is_superuser:
+        return "corporate"
 
     active_subscription = UserSubscription.objects.filter(
         user=user,
@@ -891,6 +895,10 @@ def get_calculators_for_category(category, user_plan):
         # No plan → no calculators
         return []
 
+    # For superusers (who get "corporate" plan), show all calculators
+    if user_plan == "corporate":
+        return [calc for calc in CALCULATORS if calc['category'] == category]
+    
     user_plan_level = PLAN_HIERARCHY.get(user_plan, 0)  # 0 = no access
     filtered = [
         calc for calc in CALCULATORS
@@ -993,6 +1001,47 @@ def delete_user(request, pk):
         return redirect('user_list')
 
     return render(request, 'delete_user_confirm.html', {'user_obj': user_obj})
+
+
+
+
+from .forms import ProfileUpdateForm
+from .models import UserSubscription, UserDevice, Transaction
+
+@login_required
+def profile_view(request):
+    user = request.user
+    edit_mode = request.GET.get("edit", "0") == "1"  # Check if edit mode is on
+
+    if request.method == "POST":
+        form = ProfileUpdateForm(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect("profile")  # Back to display mode
+    else:
+        form = ProfileUpdateForm(instance=user)
+
+    # Get all subscriptions of user
+    subscriptions = user.subscriptions.all()
+    
+    # Get active subscription
+    active_subscription = subscriptions.filter(status="active").first()
+
+    # Get all devices
+    devices = user.devices.all()
+
+    # Get all transactions
+    transactions = Transaction.objects.filter(subscription__user=user).order_by("-created_at")
+
+    return render(request, "profile.html", {
+        "user": user,
+        "form": form,
+        "edit_mode": edit_mode,
+        "subscriptions": subscriptions,
+        "active_subscription": active_subscription,
+        "devices": devices,
+        "transactions": transactions,
+    })
 
 
 from .models import SubscriptionPlan
@@ -3004,13 +3053,8 @@ def safety_crane_wind_speed_allowance_calculator(request):
 
 @login_required
 @subscription_required(plan_type="corporate")
-def safety_composite_risk_calculator(request):
-    return render(request, 'qehsfcalculators/safety/composite_risk.html', {'title': 'Composite Risk Calculator'})
-
-@login_required
-@subscription_required(plan_type="corporate")
-def safety_critical_pressure_ratio_for_dry_steam_and_gases_calculator(request):
-    return render(request, 'qehsfcalculators/safety/critical_pressure_ratio_for_dry_steam_and_gases.html', {'title': 'Critical Pressure Ratio For Dry Steam And Gases Calcualtor'})
+def safety_critical_flow_scaling_parameter_calculator(request):
+    return render(request, 'qehsfcalculators/safety/critical_flow_scaling_parameter.html', {'title': 'Critical Flow Scaling Parameter Calculator'})
 
 @login_required
 @subscription_required(plan_type="corporate")
@@ -3034,6 +3078,11 @@ def safety_corrective_action_closure_rate_calculator(request):
 
 @login_required
 @subscription_required(plan_type="corporate")
+def safety_critical_pressure_calculator(request):
+    return render(request, 'qehsfcalculators/safety/critical_pressure_api_rp520.html', {'title': 'Critical Pressure Calculator (API RP520)'})
+    
+@login_required
+@subscription_required(plan_type="corporate")
 def safety_chemical_exposure_burn_severity_rate_calculator(request):
     return render(request, 'qehsfcalculators/safety/chemical_exposure_burn_severity_rate.html', {'title': 'Chemical Exposure Burn Severity Rate Calculator'})
 
@@ -3044,13 +3093,13 @@ def safety_compressible_flow_crane_equation_3_20_calculator(request):
 
 @login_required
 @subscription_required(plan_type="corporate")
-def safety_clausius_clapeyron_equation_calculator(request):
-    return render(request, 'qehsfcalculators/safety/clausius_clapeyron_equation.html', {'title': 'Clausius-Clapeyron Equation Calculator'})
+def safety_composite_risk_calculator(request):
+    return render(request, 'qehsfcalculators/safety/composite_risk.html', {'title': 'Composite Risk Calculator'})
 
 @login_required
 @subscription_required(plan_type="corporate")
-def safety_composite_risk_calculator(request):
-    return render(request, 'qehsfcalculators/safety/composite_risk.html', {'title': 'Composite Risk Calculator'})
+def safety_clausius_clapeyron_equation_calculator(request):
+    return render(request, 'qehsfcalculators/safety/clausius_clapeyron_equation.html', {'title': 'Clausius-Clapeyron Equation Calculator'})
 
 @login_required
 @subscription_required(plan_type="corporate")
