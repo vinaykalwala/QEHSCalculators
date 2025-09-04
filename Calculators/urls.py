@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.urls import include, path
 from QehsCalculators.views import *
+from django.conf.urls.static import static
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home, name='home'),
@@ -19,6 +21,7 @@ urlpatterns = [
     path('privacy/', privacy, name='privacy'),
     path("device-limit/", device_limit_exceeded, name="device_limit_exceeded"),
     path("subscription-expired/", subscription_expired, name="subscription_expired"),
+    path("profile/", profile_view, name="profile"),
 
     path('transactions/', transaction_list, name='transaction_list'),
     path('transactions/delete/<int:pk>/', delete_transaction, name='delete_transaction'),
@@ -701,3 +704,5 @@ urlpatterns = [
     path('fire/venting_energy_balance_calculator/', fire_venting_energy_balance_calculator, name='fire_venting_energy_balance_calculator'),
     path('fire/water_control_valve_capacity_calculator/', fire_water_control_valve_capacity_calculator, name='fire_water_control_valve_capacity_calculator'),
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

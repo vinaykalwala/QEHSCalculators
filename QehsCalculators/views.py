@@ -1003,6 +1003,47 @@ def delete_user(request, pk):
     return render(request, 'delete_user_confirm.html', {'user_obj': user_obj})
 
 
+
+
+from .forms import ProfileUpdateForm
+from .models import UserSubscription, UserDevice, Transaction
+
+@login_required
+def profile_view(request):
+    user = request.user
+    edit_mode = request.GET.get("edit", "0") == "1"  # Check if edit mode is on
+
+    if request.method == "POST":
+        form = ProfileUpdateForm(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect("profile")  # Back to display mode
+    else:
+        form = ProfileUpdateForm(instance=user)
+
+    # Get all subscriptions of user
+    subscriptions = user.subscriptions.all()
+    
+    # Get active subscription
+    active_subscription = subscriptions.filter(status="active").first()
+
+    # Get all devices
+    devices = user.devices.all()
+
+    # Get all transactions
+    transactions = Transaction.objects.filter(subscription__user=user).order_by("-created_at")
+
+    return render(request, "profile.html", {
+        "user": user,
+        "form": form,
+        "edit_mode": edit_mode,
+        "subscriptions": subscriptions,
+        "active_subscription": active_subscription,
+        "devices": devices,
+        "transactions": transactions,
+    })
+
+
 from .models import SubscriptionPlan
 from .forms import SubscriptionPlanForm
 
