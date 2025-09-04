@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Exposure Level (Concentration) Calculator{% endblock %}
+{% block title %}Effective Half-Life Calculator{% endblock %}
 {% block content %}
 {% load static %}
 
@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exposure Level (Concentration) Calculator</title>
+    <title>Effective Half-Life Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
@@ -419,54 +419,45 @@
 </head>
 <body>
 
-    <div class="btn-container">
+<div class="btn-container">
         <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
-    </div>
+</div>
 
 <div class="calculator-container printable" id="printArea">
     {% include "includes/print_header_footer.html" %}
 
-<!-- ====== HEADER ====== -->
 <div class="calculator-header">
-  <h1>Exposure Level (Concentration) Calculator</h1>
-  <p>Calculate <strong>Concentration</strong> with proper units for air or water.</p>
+  <h1>Effective Half-Life Calculator</h1>
+  <p>
+    Combine physical radioactive decay and biological elimination to estimate
+    the <strong>effective half-life</strong> of a radionuclide in a person or system.
+    Useful for nuclear medicine dosing, decay-in-storage, cleanup planning, and exposure controls.
+  </p>
 </div>
 
 <div class="calc-content">
-  <!-- ====== Calculator ====== -->
+  <!-- Calculator -->
   <div class="calc-card">
     <h2>Enter Data</h2>
 
     <div class="form-group">
-      <label for="amount">Amount of Contaminant (A)</label>
-      <div style="display:flex; gap:8px;">
-        <input type="number" id="amount" class="form-input" min="0" step="any" placeholder="e.g., 25">
-        <select id="amountUnit" class="form-input">
-          <option value="mg">mg</option>
-          <option value="g">g</option>
-        </select>
-      </div>
+      <label for="radioHalf">Radioactive Half-Life (τ<sub>r</sub>) <span>[days]</span></label>
+      <input type="number" id="radioHalf" class="form-input" min="0.000000001" step="0.0001" placeholder="e.g., 8.02">
     </div>
 
     <div class="form-group">
-      <label for="volume">Volume of Medium (V)</label>
-      <div style="display:flex; gap:8px;">
-        <input type="number" id="volume" class="form-input" min="0.001" step="any" placeholder="e.g., 2">
-        <select id="volumeUnit" class="form-input">
-          <option value="L">L</option>
-          <option value="m3">m³</option>
-        </select>
-      </div>
+      <label for="bioHalf">Biological Half-Life (τ<sub>b</sub>) <span>[days]</span></label>
+      <input type="number" id="bioHalf" class="form-input" min="0.000000001" step="0.0001" placeholder="e.g., 1.5">
     </div>
 
-    <button class="calculate-btn" onclick="calculateConcentration()">Calculate Concentration</button>
+    <button class="calculate-btn" onclick="calculateEffectiveHalfLife()">Calculate Effective Half-Life</button>
   </div>
 
-  <!-- ====== Result Section ====== -->
+  <!-- Result Section -->
   <div class="result-card">
     <div class="result-placeholder" id="placeholder">
-      <img src="https://cdn-icons-png.flaticon.com/512/4727/4727260.png" alt="Concentration illustration">
-      <p>This tool calculates <strong>Concentration</strong> using <code>C = A / V</code> with correct unit handling.</p>
+      <img src="https://cdn-icons-png.flaticon.com/512/4727/4727260.png" alt="Effective half-life illustration">
+      <p>This tool calculates <strong>Effective Half-Life (τ<sub>e</sub>)</strong> from τ<sub>r</sub> and τ<sub>b</sub>.</p>
     </div>
 
     <div class="result-error hidden" id="resultError">
@@ -476,12 +467,12 @@
 
     <div class="result-value hidden" id="resultValue">
       <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
-        <h2>Calculated Concentration</h2>
+        <h2>Calculated Effective Half-Life</h2>
       </div>
 
       <div class="rate-display">
-        <div class="rate-value" id="concentrationValue">0.000</div>
-        <div class="rate-label" id="unitLabel" style="color:#2980b9; font-size:20px; font-weight:bold;">mg/L</div>
+        <div class="rate-value" id="rateValue">0.0000</div>
+        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">days (effective half-life)</div>
       </div>
 
       <div class="result-feedback">
@@ -495,54 +486,61 @@
   </div>
 </div>
 
-<!-- ====== Notes Section ====== -->
+<!-- Notes Section -->
 <div class="note-section">
-
   <div class="note-card">
-    <h3>🔵 About This Calculator</h3>
-    <p>
-      The <strong>Energy Consumption Calculator</strong> estimates a device’s daily energy use 
-      for audits, energy management, and safety reviews.
+    <h3>📘 About This Calculator</h3>
+        <p>
+      This tool calculates the <strong>Effective Half-Life (τ<sub>e</sub>)</strong> of a substance by combining its 
+      <strong>radioactive half-life (τ<sub>r</sub>)</strong> and <strong>biological half-life (τ<sub>b</sub>)</strong>. 
+      The formula applied is:
     </p>
   </div>
 
   <div class="note-card">
-    <h3>📊 Interpretation (context-dependent)</h3>
+    <h3>🛡️ QEHS Perspective</h3>
     <ul class="note-list">
-      <li>🟢 <strong>Energy &lt; 1 kWh/day</strong> → Low use (small appliances/IT gear)</li>
-      <li>🟠 <strong>1 ≤ Energy ≤ 5 kWh/day</strong> → Moderate (monitor duty cycle/efficiency)</li>
-      <li>🔴 <strong>Energy &gt; 5 kWh/day</strong> → High (review scheduling & capacity)</li>
+      <li>Plan <em>decay-in-storage</em> durations and waste release timing to meet clearance levels.</li>
+      <li>Estimate <em>patient release</em> or work-area re-entry intervals after administration/spills.</li>
+      <li>Right-size PPE, shielding, and monitoring based on how fast activity effectively declines.</li>
+      <li>Track deviations over time (e.g., hydration or organ function changes affecting τ<sub>b</sub>).</li>
     </ul>
   </div>
 
   <div class="note-card">
-    <h3>⚠️Input Validations</h3>
+    <h3>📊 Interpretation (Guidance)</h3>
     <ul class="note-list">
-      <li>✔️ Device Wattage must be ≥ 0.1 W</li>
-      <li>✔️ Hours per Day must be 0–24</li>
-      <li>✔️ At most 2 decimal places</li>
-      <li>❌ Non-numeric, negative, or empty entries are invalid</li>
-      <li>⚠️ W &gt; 2000 → high load; check circuit</li>
-      <li>⚠️ Hours ≥ 20 → nearly continuous operation</li>
-      <li>⚠️ Energy &gt; 50 kWh/day → very high; verify</li>
-      <li>⚠️ Energy &gt; 100 kWh/day → extreme; check measurement</li>
+      <li><span class="good">τ<sub>e</sub> &lt; min(τ<sub>r</sub>, τ<sub>b</sub>)</span> → expected; combined processes accelerate clearance.</li>
+      <li>When τ<sub>b</sub> ≪ τ<sub>r</sub>: biological elimination dominates; activity falls quickly in vivo.</li>
+      <li>When τ<sub>r</sub> ≪ τ<sub>b</sub>: physical decay dominates; biological processes add little.</li>
+    </ul>
+    <p style="font-size:0.9em;color:#555;">(Model assumes independent first-order processes.)</p>
+  </div>
+
+  <div class="note-card">
+    <h3>⚠️ Input Validations</h3>
+    <ul>
+      <li>✔️ <strong>τ<sub>r</sub>, τ<sub>b</sub> (days)</strong>: required, &gt; 0, allowed <code>1e-9</code> to <code>1e9</code> days
+          (typical clinical: minutes–days; environmental: days–years).</li>
+      <li>✔️ Decimals allowed; step ≤ 0.0001 days (~8.64 s) recommended.</li>
+      <li>✔️ Cross-field: <em>τ<sub>e</sub> &lt; min(τ<sub>r</sub>, τ<sub>b</sub>)</em> by definition (the calculator enforces this).</li>
+      <li>❌ Zeros, negatives, non-numeric values rejected (prevents divide-by-zero and non-physical results).</li>
     </ul>
   </div>
 
   <div class="note-card">
-    <h3>🌍 Key Applications</h3>
+    <h3>🌍 Applications</h3>
     <ul class="note-list">
-      <li><strong>Energy Audits:</strong> Identify high-use equipment</li>
-      <li><strong>QEHS Reviews:</strong> Check thermal load & safety</li>
-      <li><strong>Operations:</strong> Optimize schedules & cycles</li>
-      <li><strong>Reporting:</strong> KPI roll-ups for monthly bills</li>
+      <li>Nuclear medicine: dosing, imaging schedules, patient release calculations.</li>
+      <li>Radiation safety: spill cleanup duration, area re-entry, decay-in-storage for waste.</li>
+      <li>Environmental fate: combined decay and environmental removal processes.</li>
+      <li>Research & pharmacokinetics: modeling tracer clearance and compartment studies.</li>
     </ul>
   </div>
-
 </div>
 
 <script>
-/* ===== Helpers ===== */
+/* Reusable error display */
 function showErrors(errors) {
   const errorBox = document.getElementById("resultError");
   const errorMessage = document.getElementById("errorMessage");
@@ -555,160 +553,119 @@ function showErrors(errors) {
   resultValue.classList.add("hidden");
 }
 
-function countDecimals(numStr) {
-  if (!numStr || !numStr.includes(".")) return 0;
-  return numStr.split(".")[1].length;
-}
+/* Effective Half-Life with robust, domain-aware validations */
+function calculateEffectiveHalfLife() {
+  const rRaw = (document.getElementById("radioHalf").value || "").trim();
+  const bRaw = (document.getElementById("bioHalf").value || "").trim();
 
-function scaleConcentration(value, baseUnit) {
-  // Returns {val, unit} using human-friendly scaling, keeping base traceability
-  // baseUnit is "mg/L" or "mg/m³"
-  if (!Number.isFinite(value)) return { val: value, unit: baseUnit };
-
-  // Up-scale if very large
-  if (value >= 1000000) { // >= 1,000,000 mg/unit
-    const scaled = value / 1000000; // kg per unit
-    const unit = baseUnit.replace("mg", "kg");
-    return { val: scaled, unit };
-  }
-  if (value >= 1000) { // >= 1,000 mg/unit
-    const scaled = value / 1000; // g per unit
-    const unit = baseUnit.replace("mg", "g");
-    return { val: scaled, unit };
-  }
-
-  // Down-scale if very small
-  if (value < 1 && value >= 0) {
-    const scaled = value * 1000; // µg per unit
-    const unit = baseUnit.replace("mg", "µg");
-    return { val: scaled, unit };
-  }
-
-  // Default mg/unit
-  return { val: value, unit: baseUnit };
-}
-
-/* ===== Main Calculation & Validations ===== */
-function calculateConcentration() {
-  const amountRaw = document.getElementById("amount").value.trim();
-  const amountUnit = document.getElementById("amountUnit").value; // mg | g
-  const volumeRaw = document.getElementById("volume").value.trim();
-  const volumeUnit = document.getElementById("volumeUnit").value; // L | m3
-
-  const errorBox   = document.getElementById("resultError");
-  const errorMsgEl = document.getElementById("errorMessage");
-  const placeholder= document.getElementById("placeholder");
-  const resultCard = document.getElementById("resultValue");
-  const concEl     = document.getElementById("concentrationValue");
-  const unitEl     = document.getElementById("unitLabel");
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+  const rateEl = document.getElementById("rateValue");
   const feedbackEl = document.getElementById("feedbackContent");
 
-  // reset state
+  // reset UI
   errorBox.classList.add("hidden");
-  errorMsgEl.innerHTML = "";
+  errorMessage.innerHTML = "";
   feedbackEl.innerHTML = "";
 
   const errors = [];
   const warnings = [];
 
-  // Required fields
-  if (amountRaw === "") errors.push("👉 Please enter Amount of Contaminant (A).");
-  if (volumeRaw === "") errors.push("👉 Please enter Volume of Medium (V).");
+  // presence
+  if (!rRaw) errors.push("👉 Please enter Radioactive Half-Life (τr) in days.");
+  if (!bRaw) errors.push("👉 Please enter Biological Half-Life (τb) in days.");
   if (errors.length) return showErrors(errors);
 
-  // Decimal precision
-  if (countDecimals(amountRaw) > 3) errors.push("👉 Amount: maximum 3 decimal places.");
-  if (countDecimals(volumeRaw) > 3) errors.push("👉 Volume: maximum 3 decimal places.");
+  // parse
+  const tr = Number(rRaw);
+  const tb = Number(bRaw);
 
-  const A_in = parseFloat(amountRaw);
-  const V_in = parseFloat(volumeRaw);
-
-  if (!Number.isFinite(A_in)) errors.push("👉 Amount must be a valid number.");
-  if (!Number.isFinite(V_in)) errors.push("👉 Volume must be a valid number.");
-
-  // Hard limits for amount by unit
-  if (amountUnit === "mg") {
-    if (A_in < 0) errors.push("👉 Amount (mg) must be ≥ 0.");
-    if (A_in > 1000000000) errors.push("👉 Amount (mg) exceeds allowed limit (>1,000,000,000 mg).");
-  } else { // g
-    if (A_in < 0) errors.push("👉 Amount (g) must be ≥ 0.");
-    if (A_in > 1000000) errors.push("👉 Amount (g) exceeds allowed limit (>1,000,000 g).");
-  }
-
-  // Hard limits & zero check for volume
-  if (V_in <= 0) errors.push("👉 Volume must be greater than 0 to avoid division by zero.");
-  if (volumeUnit === "L") {
-    if (V_in < 0.001) errors.push("👉 Volume (L) must be ≥ 0.001 L (1 mL).");
-    if (V_in > 1000000) errors.push("👉 Volume (L) exceeds allowed limit (>1,000,000 L).");
-  } else { // m3
-    if (V_in < 0.001) errors.push("👉 Volume (m³) must be ≥ 0.001 m³ (1 L).");
-    if (V_in > 10000) errors.push("👉 Volume (m³) exceeds allowed limit (>10,000 m³).");
-  }
-
+  // numeric checks
+  if (!Number.isFinite(tr)) errors.push("👉 τr must be a valid number (days).");
+  if (!Number.isFinite(tb)) errors.push("👉 τb must be a valid number (days).");
   if (errors.length) return showErrors(errors);
 
-  // Soft warnings
-  if (volumeUnit === "L") {
-    if (V_in < 0.01) warnings.push("⚠️ Very small sample volume for water (<10 mL) may bias results.");
-    if (V_in > 10000) warnings.push("⚠️ Very large water sample volume (>10,000 L) is unusual; verify entry.");
-  } else {
-    if (V_in < 0.01) warnings.push("⚠️ Very small air volume (<0.01 m³ ≈ 10 L) may bias results.");
-    if (V_in > 100) warnings.push("⚠️ Very large air volume (>100 m³) is unusual for a single measurement.");
+  // hard ranges (avoid non-physical and numeric extremes)
+  const MIN = 1e-9;        // ~0.0864 microseconds
+  const MAX = 1e9;         // ~2.74 million years
+  if (tr <= 0 || tr < MIN || tr > MAX) {
+    errors.push(`👉 τr must be > 0 and within ${MIN} to ${MAX} days.`);
+  }
+  if (tb <= 0 || tb < MIN || tb > MAX) {
+    errors.push(`👉 τb must be > 0 and within ${MIN} to ${MAX} days.`);
+  }
+  if (errors.length) return showErrors(errors);
+
+  // advisories
+  if (tr > 1e7 || tb > 1e7) {
+    warnings.push("⚠️ Very long half-life (&gt;1e7 days) – verify units (years vs days) and context.");
+  }
+  if (tr < 1e-4 || tb < 1e-4) {
+    warnings.push("⚠️ Very short half-life (&lt;1e-4 days ≈ 8.6 s) – ensure timing precision and unit consistency.");
   }
 
-  // Convert A to mg; V unchanged (L or m3)
-  const A_mg = amountUnit === "mg" ? A_in : A_in * 1000;
-
-  // Compute concentration in base units
-  const baseUnit = (volumeUnit === "L") ? "mg/L" : "mg/m³";
-  const C = A_mg / V_in;
-
-  if (!Number.isFinite(C) || C < 0) {
-    return showErrors(["⚠️ Computed concentration is invalid. Check inputs."]);
+  // cross-field disparity & dominance
+  const tMin = Math.min(tr, tb);
+  const tMax = Math.max(tr, tb);
+  const disparity = tMax / tMin;
+  if (disparity > 1e6) {
+    warnings.push("⚠️ Extreme disparity (max/min &gt; 10^6) – τe will be ~ the smaller half-life.");
   }
 
-  // Outcome-based warnings (contextual)
-  if (baseUnit === "mg/L") {
-    if (C > 10000) warnings.push("⚠️ Extremely high water concentration (>10,000 mg/L). Verify units and sampling.");
-    else if (C > 1000) warnings.push("⚠️ Very high water concentration (>1,000 mg/L).");
-    else if (C < 0.001 && A_in > 0) warnings.push("⚠️ Very low water concentration (<0.001 mg/L); may be near/below detection limits.");
-  } else { // mg/m3
-    if (C > 500) warnings.push("⚠️ Extremely high air concentration (>500 mg/m³). Verify units and sampling.");
-    else if (C > 50) warnings.push("⚠️ Very high air concentration (>50 mg/m³).");
-    else if (C < 0.001 && A_in > 0) warnings.push("⚠️ Very low air concentration (<0.001 mg/m³); may be near/below detection limits.");
+  // numerically stable τe = (a*b)/(a+b) = a / (1 + a/b), where a = min, b = max
+  const a = tMin, b = tMax;
+  const tauE = a / (1 + a / b); // stable against overflow/underflow
+
+  if (!Number.isFinite(tauE) || tauE <= 0) {
+    return showErrors(["⚠️ Computed effective half-life is invalid. Check inputs."]);
   }
 
-  // Classification (generic guidance only)
+  // sanity: τe must be < min(tr, tb)
+  if (!(tauE < tMin)) {
+    warnings.push("⚠️ Rounding check: τe should be strictly less than both τr and τb.");
+  }
+
+  // contributions via decay constants (optional insight)
+  const LN2 = Math.log(2);
+  const lambdaR = LN2 / tr;
+  const lambdaB = LN2 / tb;
+  const lambdaE = lambdaR + lambdaB;
+  const fracR = lambdaR / lambdaE; // fraction of total removal rate due to physical decay
+  const fracB = lambdaB / lambdaE;
+
+  // interpretation
   let statusMsg = "";
-  if (baseUnit === "mg/L") {
-    if (C < 1) statusMsg = "✅ Low (typical of many drinking/ambient waters; confirm with standards for the specific substance).";
-    else if (C <= 10) statusMsg = "⚠️ Moderate; monitor and compare with applicable limits.";
-    else statusMsg = "🔴 High; review controls, process conditions, or incident status.";
+  if (tr < tb) {
+    statusMsg = "📉 Physical decay is faster than biological elimination → physical decay dominates.";
+  } else if (tb < tr) {
+    statusMsg = "🧬 Biological elimination is faster than physical decay → biological clearance dominates.";
   } else {
-    if (C < 1) statusMsg = "✅ Low (typical of many workplace/ambient air results; check substance OEL/PEL/REL).";
-    else if (C <= 10) statusMsg = "⚠️ Moderate; ensure ventilation and controls are adequate.";
-    else statusMsg = "🔴 High; prioritize exposure reduction and verification sampling.";
+    statusMsg = "⚖️ Balanced: physical decay and biological elimination contribute equally.";
   }
 
-  // Scaling for display
-  const pretty = scaleConcentration(C, baseUnit);
+  // formatted outputs
+  const fmt = (n, d=4) => Number(n).toLocaleString(undefined,{minimumFractionDigits:d, maximumFractionDigits:d});
+  const fmtPct = (n, d=1) => Number(n*100).toLocaleString(undefined,{minimumFractionDigits:d, maximumFractionDigits:d}) + "%";
 
-  // Present results
-  concEl.textContent = (pretty.val >= 100) ? pretty.val.toFixed(1) : (pretty.val >= 1 ? pretty.val.toFixed(2) : pretty.val.toFixed(3));
-  unitEl.textContent = pretty.unit;
+  let details = `<div>τ<sub>e</sub>: <b>${fmt(tauE, 4)}</b> days</div>`;
+  details += `<div>τ<sub>r</sub>: <b>${fmt(tr, 4)}</b> days</div>`;
+  details += `<div>τ<sub>b</sub>: <b>${fmt(tb, 4)}</b> days</div>`;
+  details += `<div>Removal rate contribution — physical: <b>${fmtPct(fracR,1)}</b> · biological: <b>${fmtPct(fracB,1)}</b></div>`;
 
-  let details = `<div>Normalized concentration: <b>${C.toFixed(6)}</b> ${baseUnit}</div>`;
-  details += `<div>Amount (A): <b>${A_in.toFixed(Math.min(3, countDecimals(amountRaw)))}</b> ${amountUnit}</div>`;
-  details += `<div>Volume (V): <b>${V_in.toFixed(Math.min(3, countDecimals(volumeRaw)))}</b> ${volumeUnit}</div>`;
-  details += `<div style="margin-top:6px; font-size:0.95em; color:#666;">Note: Compare against substance-specific regulatory/occupational limits.</div>`;
   if (warnings.length) {
     details += `<div style="margin-top:6px; color:#b35d00; font-size:0.95em;">${warnings.join(" | ")}</div>`;
   }
 
+  // update UI
+  rateEl.textContent = fmt(tauE, 4);
+  document.querySelector(".rate-label").textContent = "days (effective half-life)";
   feedbackEl.innerHTML = `<div>${statusMsg}</div>${details}`;
+
   document.getElementById("placeholder").classList.add("hidden");
-  document.getElementById("resultValue").classList.remove("hidden");
-  document.getElementById("resultError").classList.add("hidden");
+  resultValue.classList.remove("hidden");
+  errorBox.classList.add("hidden");
 }
 
 function printReport() {
@@ -721,82 +678,70 @@ function printReport() {
 }
 </script>
 
-
     <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
 {% endblock %}
 
 
+<!-- 
+=============================================
+📘 Effective Half-Life (τₑ) Calculator
+=============================================
 
-<!--
-==========================================================
-EXPOSURE LEVEL (CONCENTRATION) CALCULATOR - DOCUMENTATION
-==========================================================
+📌 Formula:
+-----------
+τₑ = (τᵣ × τᵦ) / (τᵣ + τᵦ)
 
-📌 Formula Used:
-  - Convert Amount (A) to mg:
-        If unit = mg → A_mg = A
-        If unit = g  → A_mg = A × 1000
-  - Concentration (C):
-        If volume unit = L  → C = A_mg ÷ V   → mg/L
-        If volume unit = m³ → C = A_mg ÷ V   → mg/m³
+Alternative stable form (to avoid overflow/underflow):
+τₑ = a / (1 + a/b), where:
+  • a = min(τᵣ, τᵦ)
+  • b = max(τᵣ, τᵦ)
 
-  - Display scaling (human-friendly):
-        < 1 mg → converted to µg
-        ≥ 1000 mg → converted to g
-        ≥ 1,000,000 mg → converted to kg
+Decay constant contributions:
+λᵣ = ln(2) / τᵣ
+λᵦ = ln(2) / τᵦ
+λₑ = λᵣ + λᵦ
+Fraction due to radioactive decay = λᵣ / λₑ
+Fraction due to biological clearance = λᵦ / λₑ
 
-📌 Input Validations:
-  - Amount (A):
-      • Required
-      • Numeric, max 3 decimal places
-      • If mg → 0 ≤ A ≤ 1,000,000,000
-      • If g  → 0 ≤ A ≤ 1,000,000
+---
 
-  - Volume (V):
-      • Required
-      • Numeric, max 3 decimal places
-      • Must be > 0 (avoid divide by zero)
-      • If L  → 0.001 ≤ V ≤ 1,000,000
-      • If m³ → 0.001 ≤ V ≤ 10,000
+✅ Input Validations:
+---------------------
+1. Presence:
+   • Both τᵣ (radioactive half-life) and τᵦ (biological half-life) are required.
 
-📌 Output Validations:
-  - C must be finite and ≥ 0
-  - Warnings triggered for unusual values:
-      • Water (mg/L):
-          > 10,000 → extremely high
-          > 1,000  → very high
-          < 0.001 (with A>0) → very low, may be near detection limit
-      • Air (mg/m³):
-          > 500 → extremely high
-          > 50  → very high
-          < 0.001 (with A>0) → very low, may be near detection limit
+2. Data type:
+   • τᵣ and τᵦ must be valid numeric values.
 
-📌 Soft Warnings (plausibility checks):
-  - Water samples:
-        < 0.01 L (10 mL) → very small, may bias results
-        > 10,000 L → very large, unusual for a single sample
-  - Air samples:
-        < 0.01 m³ (~10 L) → very small
-        > 100 m³ → very large, unusual for a single measurement
+3. Ranges:
+   • τᵣ > 0, τᵦ > 0  
+   • Allowed domain: 1e-9 ≤ τ ≤ 1e9 days  
+     (≈ 0.086 microseconds up to ~2.74 million years)
 
-📌 Classification (generic guidance):
-  - Water (mg/L):
-        < 1     → ✅ Low (typical for ambient/drinking water)
-        1–10   → ⚠️ Moderate; monitor & compare to limits
-        > 10   → 🔴 High; review process/incident
-  - Air (mg/m³):
-        < 1     → ✅ Low (typical workplace/ambient levels)
-        1–10   → ⚠️ Moderate; check ventilation & controls
-        > 10   → 🔴 High; reduce exposure & verify sampling
+4. Cross-field checks:
+   • τₑ must be strictly less than both τᵣ and τᵦ.  
+   • Extreme disparity (max/min > 10⁶) → τₑ ≈ smaller half-life.  
 
-📌 Output Breakdown:
-  - Final concentration (scaled to appropriate unit)
-  - Normalized concentration (mg/L or mg/m³, 6 decimals)
-  - Input amount and volume (with original units)
-  - Warnings (if any)
-  - Advisory note: must compare to substance-specific regulatory limits (OEL/PEL/REL for air, drinking water standards, etc.)
+---
 
-==========================================================
+⚠️ Warnings / Advisories:
+--------------------------
+• τ > 1e7 days → very long half-life, verify units (days vs years).  
+• τ < 1e-4 days (~8.6 seconds) → very short half-life, check precision/units.  
+• Extreme disparity between τᵣ and τᵦ → effective half-life dominated by smaller.  
+
+---
+
+📊 Outputs:
+-----------
+• Effective half-life τₑ (days, 4 decimals).  
+• Radioactive half-life τᵣ (days).  
+• Biological half-life τᵦ (days).  
+• Relative contributions to removal (radioactive vs biological).  
+• Status message: dominance of physical decay vs biological clearance.  
+• Warnings/advisories if applicable.  
+
+=============================================
 -->

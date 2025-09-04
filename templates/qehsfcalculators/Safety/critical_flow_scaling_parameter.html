@@ -1,0 +1,752 @@
+{% extends 'base.html' %}
+{% block title %}Critical Flow Scaling Parameter Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Critical Flow Scaling Parameter Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .back-btn:hover {
+            background: linear-gradient(#000040, #1560bd); /* Reverse gradient on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            {% comment %} display: flex; {% endcomment %}
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+            min-height: 420px;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: linear-gradient(#000040, #1560bd);
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+            flex-wrap: wrap;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .input-row {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+        
+        .error {
+            color: #e74c3c;
+            font-size: 14px;
+            display: block;
+            margin-top: 5px;
+        }
+
+        @media print {
+            .btn-container, .calculate-btn, .print-btn {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    <div class="calculator-container printable" id="printArea">
+
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Critical Flow Scaling Parameter Calculator</h1>
+            <p>Calculate the critical flow scaling parameter for two-phase fluid flow analysis</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="x">Quality or Mass Fraction of Vapor (x)</label>
+                        <input type="number" id="x" class="form-input" min="0" max="1" step="0.01" placeholder="e.g., 0.5">
+                        <span class="error" id="error-x"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="v_fg">Difference in Specific Volume (v_fg)</label>
+                        <input type="number" id="v_fg" class="form-input" min="0.0001" step="0.0001" placeholder="e.g., 0.1">
+                        <span class="error" id="error-v_fg"></span>
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="v">Specific Volume (v)</label>
+                        <input type="number" id="v" class="form-input" min="0.0001" step="0.0001" placeholder="e.g., 0.5">
+                        <span class="error" id="error-v"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="C_p">Specific Heat at Constant Pressure (C_p)</label>
+                        <input type="number" id="C_p" class="form-input" min="0.0001" step="0.0001" placeholder="e.g., 4.18">
+                        <span class="error" id="error-C_p"></span>
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="T">Temperature (T in Kelvin)</label>
+                        <input type="number" id="T" class="form-input" min="1" step="0.01" placeholder="e.g., 373.15">
+                        <span class="error" id="error-T"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="P">Pressure (P in Pascals)</label>
+                        <input type="number" id="P" class="form-input" min="1" step="0.01" placeholder="e.g., 101325">
+                        <span class="error" id="error-P"></span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="h_fg">Latent Heat of Vaporization (h_fg)</label>
+                    <input type="number" id="h_fg" class="form-input" min="0.0001" step="0.0001" placeholder="e.g., 2257">
+                    <span class="error" id="error-h_fg"></span>
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateOmega()">Calculate Critical Flow Scaling Parameter</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://img.icons8.com/fluency/96/pipeline.png" alt="Pipeline flow icon" width="100">
+                    <p>This tool will calculate the <strong>Critical Flow Scaling Parameter (ω)</strong>. Enter your data to see results here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Critical Flow Scaling Parameter</h2>
+                    </div>
+                    <div class='rate-display'>
+                        <div class="rate-value" id="omegaValue">0.00000</div>
+                        <div class="rate-label">Dimensionless parameter (ω)</div>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Interpretation</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Critical Flow Scaling Parameter Calculator</strong> helps analyze two-phase fluid flow under critical conditions, where liquid and vapor coexist. It determines how pressure, temperature, and specific properties affect the transition between phases.
+                </p>
+            </div>
+            <div class="note-card">
+                <h3>❓ What is the Critical Flow Scaling Parameter?</h3>
+                <p>The Critical Flow Scaling Parameter (ω) is a dimensionless parameter that characterizes two-phase flow behavior under critical conditions. It's essential for understanding energy transfer and flow dynamics in thermodynamic systems.</p>
+            </div>
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Quality or Mass Fraction of Vapor (x):</strong> Represents the proportion of vapor in a liquid-vapor mixture (ranges from 0 to 1).</li>
+                    <li><strong>Difference in Specific Volume (v_fg):</strong> The difference in specific volumes between the vapor and liquid phases.</li>
+                    <li><strong>Specific Volume (v):</strong> The volume occupied by a unit mass of the substance.</li>
+                    <li><strong>Specific Heat at Constant Pressure (C_p):</strong> The heat required to raise the temperature of a unit mass by one degree while keeping pressure constant.</li>
+                    <li><strong>Temperature (T in Kelvin):</strong> The absolute temperature of the fluid.</li>
+                    <li><strong>Pressure (P in Pascals):</strong> The force exerted by the fluid per unit area.</li>
+                    <li><strong>Latent Heat of Vaporization (h_fg):</strong> The amount of heat required to convert a unit mass of liquid into vapor at constant pressure.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Boiler and Steam Systems:</strong> Determines steam flow efficiency in power plants and industrial boilers.</li>
+                    <li><strong>Nuclear Reactors:</strong> Helps in analyzing coolant flow to prevent overheating and ensure safety.</li>
+                    <li><strong>Cryogenics:</strong> Used in the design of liquid nitrogen and oxygen storage and handling systems.</li>
+                    <li><strong>Aerospace & Jet Propulsion:</strong> Important for fuel flow analysis in jet engines and rocket propulsion.</li>
+                    <li><strong>Refrigeration & HVAC Systems:</strong> Helps in designing efficient cooling and air conditioning systems.</li>
+                </ul>
+            </div>
+            <div class="note-card">
+                <h3>✅ Input Validation Rules</h3>
+                <ul class="note-list">
+                    <li><strong>x (Vapor Quality):</strong> 0 ≤ x ≤ 1 (dimensionless)</li>
+                    <li><strong>v_fg (Δ Specific Volume):</strong> >0, recommended range 0.0001 – 100 m³/kg</li>
+                    <li><strong>v (Specific Volume):</strong> >0, must be > x·v_fg, range 0.0001 – 100 m³/kg</li>
+                    <li><strong>C_p (Specific Heat):</strong> 0.1 – 10,000 J/kg·K</li>
+                    <li><strong>T (Temperature):</strong> 1 – 6000 K</li>
+                    <li><strong>P (Pressure):</strong> 1 – 1e9 Pa</li>
+                    <li><strong>h_fg (Latent Heat):</strong> >0, range 0.1 – 1e7 J/kg</li>
+                    <li><strong>Cross-check:</strong> Ensure units are consistent (e.g., J/kg vs. kJ/kg)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateOmega() {
+            // Clear previous error messages
+            document.querySelectorAll('.error').forEach(el => el.textContent = '');
+            
+            const fields = {
+                x: parseFloat(document.getElementById('x').value.trim()),
+                v_fg: parseFloat(document.getElementById('v_fg').value.trim()),
+                v: parseFloat(document.getElementById('v').value.trim()),
+                C_p: parseFloat(document.getElementById('C_p').value.trim()),
+                T: parseFloat(document.getElementById('T').value.trim()),
+                P: parseFloat(document.getElementById('P').value.trim()),
+                h_fg: parseFloat(document.getElementById('h_fg').value.trim())
+            };
+
+            let errors = [];
+
+            // x validation
+            if (isNaN(fields.x) || fields.x < 0 || fields.x > 1) {
+                document.getElementById('error-x').textContent = 'Quality of vapor (x) must be between 0 and 1.';
+                errors.push("👉 Quality of vapor (x) must be between 0 and 1.");
+            }
+
+            // v_fg validation
+            if (isNaN(fields.v_fg) || fields.v_fg <= 0 || fields.v_fg > 100) {
+                document.getElementById('error-v_fg').textContent = 'v_fg must be >0 and ≤100 m³/kg.';
+                errors.push("👉 v_fg must be >0 and realistically ≤100 m³/kg.");
+            }
+
+            // v validation
+            if (isNaN(fields.v) || fields.v <= 0 || fields.v > 100) {
+                document.getElementById('error-v').textContent = 'Specific volume (v) must be >0 and ≤100 m³/kg.';
+                errors.push("👉 Specific volume (v) must be >0 and ≤100 m³/kg.");
+            } else if (fields.v <= fields.x * fields.v_fg) {
+                document.getElementById('error-v').textContent = 'Specific volume (v) must be greater than x·v_fg.';
+                errors.push("👉 Specific volume (v) must be greater than x·v_fg for physical consistency.");
+            }
+
+            // C_p validation
+            if (isNaN(fields.C_p) || fields.C_p <= 0 || fields.C_p > 10000) {
+                document.getElementById('error-C_p').textContent = 'Specific heat (C_p) must be >0 and ≤10,000 J/kg·K.';
+                errors.push("👉 Specific heat (C_p) must be >0 and ≤10,000 J/kg·K.");
+            }
+
+            // T validation
+            if (isNaN(fields.T) || fields.T < 1 || fields.T > 6000) {
+                document.getElementById('error-T').textContent = 'Temperature (T) must be between 1 K and 6000 K.';
+                errors.push("👉 Temperature (T) must be between 1 K and 6000 K.");
+            }
+
+            // P validation
+            if (isNaN(fields.P) || fields.P < 1 || fields.P > 1e9) {
+                document.getElementById('error-P').textContent = 'Pressure (P) must be between 1 Pa and 1e9 Pa.';
+                errors.push("👉 Pressure (P) must be between 1 Pa and 1e9 Pa.");
+            }
+
+            // h_fg validation
+            if (isNaN(fields.h_fg) || fields.h_fg <= 0 || fields.h_fg > 1e7) {
+                document.getElementById('error-h_fg').textContent = 'Latent heat (h_fg) must be >0 and ≤10⁷ J/kg.';
+                errors.push("👉 Latent heat (h_fg) must be >0 and ≤10⁷ J/kg.");
+            }
+
+            if (errors.length > 0) {
+                document.getElementById('errorMessage').innerHTML = errors.join("<br>");
+                document.getElementById('resultError').classList.remove("hidden");
+                document.getElementById('resultValue').classList.add("hidden");
+                document.getElementById('placeholder').classList.add("hidden");
+                return;
+            }
+
+            // Safe calculation
+            const term1 = (fields.x * fields.v_fg) / fields.v;
+            const term2 = ((fields.C_p * fields.T * fields.P) / fields.v) * Math.pow((fields.v_fg / fields.h_fg), 2);
+            let omega = term1 + term2;
+
+            // Overflow guard
+            if (omega > 1e6 || !isFinite(omega)) {
+                document.getElementById('errorMessage').innerHTML = "⚠️ Result too large or invalid. Check input units.";
+                document.getElementById('resultError').classList.remove("hidden");
+                document.getElementById('resultValue').classList.add("hidden");
+                document.getElementById('placeholder').classList.add("hidden");
+                return;
+            }
+
+            // Show result
+            document.getElementById('omegaValue').textContent = omega.toFixed(5);
+
+            let feedback;
+            if (omega < 0.1) feedback = 'Low critical flow scaling parameter. Minimal two-phase flow effects.';
+            else if (omega < 0.5) feedback = 'Moderate parameter. Early onset of two-phase effects.';
+            else if (omega < 1.0) feedback = 'Significant parameter. Notable two-phase flow effects.';
+            else feedback = 'High parameter. Strong two-phase flow effects — safety monitoring required.';
+
+            document.getElementById('feedbackContent').textContent = feedback;
+            document.getElementById('resultError').classList.add("hidden");
+            document.getElementById('resultValue').classList.remove("hidden");
+            document.getElementById('placeholder').classList.add("hidden");
+        }
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+
+</body>
+</html>
+{% endblock %}
+
+
+{% comment %} 
+
+/*
+ Formula:
+ ω = ( (x * v_fg) / v ) + [ (C_p * T * P) / v ] * (v_fg / h_fg)^2
+
+ Validation rules:
+ - x: 0 ≤ x ≤ 1
+ - v_fg: >0, typical range 0.0001 – 100
+ - v: >0, typical range 0.0001 – 100, must be > (x * v_fg)
+ - C_p: >0, 0.1 – 10000 J/kg·K
+ - T: >0, 1 – 6000 K
+ - P: >0, 1 – 1e9 Pa
+ - h_fg: >0, 0.1 – 1e7 J/kg
+*/
+
+
+1. Formula Used
+
+Based on your script, the formula for the Critical Flow Scaling Parameter (ω) is:
+
+ω = ( (x · v_fg) / v )  +  [ (C_p · T · P) / v ] · (v_fg / h_fg)²
+
+
+Where:
+
+x = vapor quality (0 ≤ x ≤ 1, dimensionless)
+
+v_fg = difference in specific volume between vapor & liquid (m³/kg)
+
+v = specific volume (m³/kg)
+
+C_p = specific heat at constant pressure (kJ/kg·K or J/kg·K, unit consistency needed)
+
+T = temperature (K)
+
+P = pressure (Pa)
+
+h_fg = latent heat of vaporization (kJ/kg or J/kg, unit consistency needed)
+
+2. Validation Rules (Field-Specific)
+🔹 x (Quality or Vapor Mass Fraction)
+
+Range: 0 ≤ x ≤ 1
+
+Precision: 2 decimals (engineering practice)
+
+Validation: Must not be empty, must be numeric.
+
+Compliance: Prevents invalid vapor fraction (>100% vapor or negative).
+
+🔹 v_fg (Difference in Specific Volume)
+
+Range: 0.0001 ≤ v_fg ≤ 100 m³/kg (most real fluids are between 0.001 and 10, but leave buffer for cryogenics).
+
+Validation: Must be >0.
+
+Compliance: Avoids divide-by-zero risk and unrealistic vacuum-like values.
+
+🔹 v (Specific Volume)
+
+Range: 0.0001 ≤ v ≤ 100 m³/kg
+
+Validation: Must be >0 and v > x·v_fg to avoid negative effective liquid volume.
+
+Compliance: Maintains thermodynamic consistency between phases.
+
+🔹 C_p (Specific Heat at Constant Pressure)
+
+Range: 0.1 ≤ C_p ≤ 10,000 J/kg·K (covering gases, water, metals, cryogenic fluids).
+
+Validation: Must be >0.
+
+Compliance: Prevents non-physical negative heat capacity.
+
+🔹 T (Temperature in Kelvin)
+
+Range: 1 ≤ T ≤ 6000 K (absolute scale, upper bound protects against typos).
+
+Validation: Must be >0.
+
+Compliance: Prevents entry of °C mistakenly as negative Kelvin.
+
+🔹 P (Pressure in Pascals)
+
+Range: 1 ≤ P ≤ 1e9 Pa (covers vacuum to ~10,000 bar).
+
+Validation: Must be >0.
+
+Compliance: Prevents division instability, avoids negative pressure.
+
+🔹 h_fg (Latent Heat of Vaporization)
+
+Range: 0.1 ≤ h_fg ≤ 1e7 J/kg
+
+Validation: Must be >0.
+
+Compliance: Zero/negative values would crash (v_fg/h_fg)² term.
+
+3. Output Validation & Thresholds
+ω Interpretation Logic:
+
+ω < 0.1 → Low: negligible two-phase effects.
+
+0.1 ≤ ω < 0.5 → Moderate: early onset of two-phase instabilities.
+
+0.5 ≤ ω < 1.0 → Significant: high caution, may impact safety-critical equipment.
+
+ω ≥ 1.0 → High: strong two-phase interaction → triggers QEHS escalation (risk of flashing, choked flow, or pipe erosion).
+
+📌 Compliance reason:
+These thresholds align with how safety reports interpret dimensionless scaling numbers: values above 1 indicate uncontrolled or severe effects that can damage boilers, reactors, or cryogenic tanks. {% endcomment %}
