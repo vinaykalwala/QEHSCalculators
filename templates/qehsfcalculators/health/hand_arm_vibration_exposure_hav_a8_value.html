@@ -1,0 +1,718 @@
+{% extends 'base.html' %}
+{% block title %}Hand-Arm Vibration (HAV) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hand-Arm Vibration (HAV) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            max-height: 550px;
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+            line-height: 1.4;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .input-row {
+            display: flex;
+            gap: 15px;
+            border-bottom: 1px solid #4a6a9b;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        .input-row:last-child {
+            border-bottom: none;
+        }
+        .input-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        @media (max-width: 600px) {
+            .input-row { flex-direction: column; gap: 10px; }
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .secondary-btn {
+            background: #6c757d;
+            color: white;
+        }
+        .secondary-btn:hover {
+            background: #5a6268;
+        }
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: baseline;
+            justify-content: center;
+        }
+        .result-value {
+            width: 100%;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        .rate-label {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+        /* Toggle helper */
+        .hidden {
+            display: none;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Hand-Arm Vibration Exposure (HAV) Calculator</h1>
+            <p>Calculate the daily vibration exposure A(8) value from one or more tools.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Tool Exposure Data</h2>
+                <div id="vibrationInputs">
+                    <div class="input-row">
+                        <div class="form-group">
+                            <label for="time1">Exposure Time (hours)</label>
+                            <input type="number" class="time-input form-input" placeholder="e.g., 2.5">
+                        </div>
+                        <div class="form-group">
+                            <label for="magnitude1">Vibration Magnitude (m/s²)</label>
+                            <input type="number" class="magnitude-input form-input" placeholder="e.g., 4.0">
+                        </div>
+                    </div>
+                </div>
+                <button class="calculate-btn secondary-btn" onclick="addTool()">➕ Add Another Tool</button>
+                <button class="calculate-btn" onclick="calculateHAV()">Calculate A(8) Exposure</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Enter tool data to calculate the <strong>A(8) vibration exposure</strong> and see the risk level.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div class="result-value hidden" id="resultValue">
+                    <h2>Daily Vibration Exposure</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.0</div>
+                        <div class="rate-label">m/s² A(8)</div>
+                    </div>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Safe</span><span>Action Level</span><span>Limit Value</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Risk Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🔎 Hand-Arm Vibration Exposure A(8)</h3>
+                <p>
+                    This metric assesses the daily exposure of workers to vibrations from handheld tools, machinery, or vibrating surfaces. 
+                    Prolonged exposure to excessive vibrations can cause health issues such as 
+                    <strong>Hand-Arm Vibration Syndrome (HAVS)</strong>, nerve damage, and circulatory disorders.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>📌 Understanding Parameters</h3>
+                <ul class="note-list">
+                    <li><strong>Exposure Time (T):</strong> Duration of tool use within a workday, usually measured in hours.</li>
+                    <li><strong>Vibration Magnitude (A):</strong> Intensity of vibrations from a specific tool, measured in m/s².</li>
+                    <li><strong>Daily Exposure Level (A(8)):</strong> A standardized measure combining vibration magnitude and exposure time to calculate overall daily exposure.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Use of This Calculator</h3>
+                <p>
+                    This calculator helps employers, safety officers, and workers evaluate vibration exposure levels to ensure compliance with 
+                    occupational safety guidelines. By calculating <strong>A(8)</strong>, organizations can:
+                </p>
+                <ul class="note-list">
+                    <li>Limit tool usage duration</li>
+                    <li>Improve workplace ergonomics</li>
+                    <li>Select tools with lower vibration levels</li>
+                    <li>Reduce long-term health risks</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📊 Risk Levels (EU/OSHA Standards)</h3>
+                <ul class="note-list">
+                    <li><strong>&lt; 2.5 m/s²:</strong> Safe – No significant risk.</li>
+                    <li><strong>2.5 – 5.0 m/s²:</strong> Moderate risk – Preventive actions required (monitoring, control measures).</li>
+                    <li><strong>&gt; 5.0 m/s²:</strong> High risk – Immediate action required (reduce exposure, modify processes).</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>ℹ️ Input Validations</h3>
+                <div class="note-list">
+                    <ul>
+                        <li><strong>Exposure Time (hours):</strong> Must be between <em>0.1</em> and <em>24</em>. 
+                            (A worker cannot be exposed for more than 24 hours in a day.)</li>
+                        <li><strong>Vibration Magnitude (m/s²):</strong> Must be between <em>0.1</em> and <em>50</em>. 
+                            (Values above 50 are unrealistic for hand-arm vibration tools.)</li>
+                        <li><strong>No Empty Fields:</strong> Both <em>Time</em> and <em>Magnitude</em> must be entered for every tool.</li>
+                        <li><strong>Positive Numbers Only:</strong> Zero or negative values are not allowed.</li>
+                        <li><strong>Multiple Tools:</strong> You can add several tools. Each tool must follow the same rules.</li>
+                    </ul>
+                    <p style="margin-top:10px; color:#555;">
+                        ✅ These rules prevent calculation errors and ensure realistic exposure values for accurate risk assessment.
+                    </p>
+                </div>
+            </div>
+
+            <div class="note-card">
+                <h3>✅ Conclusion</h3>
+                <p>
+                    Monitoring vibration exposure is crucial for preventing occupational health disorders like HAVS. 
+                    By calculating <strong>A(8)</strong>, organizations can comply with safety standards, 
+                    protect workers, and implement effective preventive measures to improve workplace safety.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            if (document.getElementById('printDate')) {
+                document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
+        });
+
+        function addTool() {
+            const container = document.getElementById("vibrationInputs");
+            const toolCount = container.getElementsByClassName("input-row").length + 1;
+            const newRow = document.createElement("div");
+            newRow.className = "input-row";
+            newRow.innerHTML = `
+                <div class="form-group">
+                    <label>Time for Tool ${toolCount} (hours)</label>
+                    <input type="number" class="time-input form-input" placeholder="e.g., 1.0" min="0.1" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>Magnitude for Tool ${toolCount} (m/s²)</label>
+                    <input type="number" class="magnitude-input form-input" placeholder="e.g., 6.5" min="0.1" step="0.1">
+                </div>
+            `;
+            container.appendChild(newRow);
+        }
+
+        function calculateHAV() {
+            const times = document.querySelectorAll(".time-input");
+            const magnitudes = document.querySelectorAll(".magnitude-input");
+
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+            const resultError = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const rateValue = document.getElementById('rateValue');
+            const feedbackBox = document.getElementById('feedbackContent');
+            const meterFill = document.getElementById('meterFill');
+
+            let totalExposure = 0;
+            let hasError = false;
+            let errorText = "";
+
+            // Reset all states
+            placeholder.classList.add("hidden");
+            resultValue.classList.add("hidden");
+            resultError.classList.add("hidden");
+
+            for (let i = 0; i < times.length; i++) {
+                const timeVal = parseFloat(times[i].value);
+                const magVal = parseFloat(magnitudes[i].value);
+
+                // Validation
+                if (isNaN(timeVal) || isNaN(magVal)) {
+                    errorText = `❌ Tool #${i + 1}: Please enter valid numbers.`;
+                    hasError = true;
+                    break;
+                }
+                if (timeVal <= 0 || timeVal > 24) {
+                    errorText = `❌ Tool #${i + 1}: Exposure time must be between 0.1 and 24 hours.`;
+                    hasError = true;
+                    break;
+                }
+                if (magVal <= 0 || magVal > 50) {
+                    errorText = `❌ Tool #${i + 1}: Vibration magnitude must be between 0.1 and 50 m/s².`;
+                    hasError = true;
+                    break;
+                }
+
+                totalExposure += Math.pow(magVal, 2) * timeVal;
+            }
+
+            if (hasError) {
+                errorMessage.textContent = errorText;
+                resultError.classList.remove("hidden");
+                return;
+            }
+
+            // Calculate A(8)
+            const a8 = Math.sqrt(totalExposure / 8);
+            rateValue.textContent = a8.toFixed(2);
+
+            // Feedback + Meter styling
+            let meterWidth, meterColor, feedback;
+
+            if (a8 < 2.5) {
+                meterWidth = '33%'; meterColor = '#2ecc71';
+                feedback = "<strong>Below Action Level:</strong> Exposure is within safe limits, but monitoring is still recommended.";
+            } else if (a8 <= 5.0) {
+                meterWidth = '66%'; meterColor = '#f1c40f';
+                feedback = "<strong>Above Action Level:</strong> Action required to reduce exposure. Consider health surveillance and worker information.";
+            } else {
+                meterWidth = '95%'; meterColor = '#e74c3c';
+                feedback = "<strong>Above Limit Value:</strong> Exposure is too high. Work must not continue until risk is reduced.";
+            }
+
+            meterFill.style.width = meterWidth;
+            meterFill.style.backgroundColor = meterColor;
+            feedbackBox.innerHTML = feedback;
+
+            // Show result card
+            resultValue.classList.remove("hidden");
+        }
+
+        function printReport() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            if (document.getElementById('printDate')) {
+                document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
+            window.print();
+        }
+    </script>
+
+</body>
+</html>
+{% endblock %}
+
+<!-- 
+1. Analysis of Inputs, Outputs, Formula (Real-world)
+
+Inputs:
+
+Exposure Time (hours) → Duration of tool use.
+
+Vibration Magnitude (m/s²) → Acceleration measured per ISO 5349.
+
+Formula (A(8)):
+
+𝐴
+(
+8
+)
+=
+∑
+(
+𝑎
+ℎ
+𝑣
+2
+×
+𝑇
+𝑖
+)
+𝑇
+0
+A(8)=
+T
+0
+	​
+
+∑(a
+hv
+2
+	​
+
+×T
+i
+	​
+
+)
+	​
+
+	​
+
+
+where
+
+𝑎
+ℎ
+𝑣
+a
+hv
+	​
+
+ = vibration magnitude in m/s²,
+
+𝑇
+𝑖
+T
+i
+	​
+
+ = exposure duration for tool i,
+
+𝑇
+0
+=
+8
+T
+0
+	​
+
+=8 hours (reference duration).
+
+Outputs: Daily vibration exposure (A(8) in m/s²).
+
+Thresholds (EU Directive 2002/44/EC / ISO 5349):
+
+< 2.5 m/s² → Safe (no mandatory action).
+
+2.5 – 5.0 m/s² → Action Value (monitor, reduce exposure).
+
+> 5.0 m/s² → Limit Value (unacceptable, stop or redesign process).
+
+🔹 2. Validation Rules
+Input: Exposure Time (hours)
+
+Range: 0.01 – 24 h (cannot exceed a day, cannot be 0).
+
+Decimal precision: max 2 decimal places.
+
+Must be realistic per tool (e.g., 24h use of one tool is not credible).
+
+Input: Vibration Magnitude (m/s²)
+
+Range: 0.1 – 50 m/s² (per ISO 5349 measurement standards, tools rarely exceed 40 m/s²).
+
+Decimal precision: max 2 decimal places.
+
+Cannot be negative or zero.
+
+Cross-field Validation
+
+Sum of exposure times ≤ 24 h (total workday).
+
+At least one tool must have valid inputs (not all blank).
+
+🔹 3. Edge Case Validations
+
+Division by zero → If no valid time entered, return error.
+
+Extreme outliers → >24h total time, >50 m/s² → flag as unrealistic.
+
+Empty inputs → Error message, skip calculation.
+
+Non-numeric / text → Block and prompt user.
+
+🔹 4. Output Validation
+
+Round A(8) to 2 decimals.
+
+Display compliance interpretation:
+
+Green ✅ Safe (<2.5).
+
+Orange ⚠️ Action Required (2.5–5.0).
+
+Red ❌ High Risk (>5.0).
+
+Ensure risk level wording matches OSHA/ISO for audit credibility.
+-->
