@@ -1,0 +1,512 @@
+{% extends 'base.html' %}
+{% block title %}Heaviness of Smoking Index (HSI) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heaviness of Smoking Index (HSI) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+            line-height: 1.4;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: baseline;
+            justify-content: center;
+        }
+        .result-value {
+            width: 100%;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        .rate-label {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+        /* Toggle helper */
+        .hidden {
+            display: none;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Heaviness of Smoking Index (HSI)</h1>
+            <p>A two-question tool to assess your level of nicotine dependence.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Smoking Habits Questionnaire</h2>
+                <div class="form-group">
+                    <label for="firstCigarette">1. How soon after you wake up do you have your first cigarette?</label>
+                    <select id="firstCigarette" class="form-select">
+                        <option value="3">Within 5 minutes</option>
+                        <option value="2">6-30 minutes</option>
+                        <option value="1">31-60 minutes</option>
+                        <option value="0">After 60 minutes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cigarettesPerDay">2. How many cigarettes do you typically smoke per day?</label>
+                    <select id="cigarettesPerDay" class="form-select">
+                        <option value="0">10 or fewer</option>
+                        <option value="1">11-20</option>
+                        <option value="2">21-30</option>
+                        <option value="3">31 or more</option>
+                    </select>
+                </div>
+                <button class="calculate-btn" onclick="calculateHSI()">Calculate Score</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Answer the two questions to see your <strong>Heaviness of Smoking Index</strong> score.</p>
+                </div>
+                <div class="result-value hidden" id="resultValue">
+                    <h2>Nicotine Dependence Level</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0</div>
+                        <div class="rate-label">HSI Score</div>
+                    </div>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low</span><span>Medium</span><span>High</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Interpretation</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🚬 About the Heaviness of Smoking Index (HSI)</h3>
+                <p>The HSI is a brief, validated test to measure nicotine dependence. By asking about the time to the first cigarette of the day and the number of cigarettes smoked daily, it provides a reliable indication of the intensity of a person's addiction to nicotine.</p>
+            </div>
+            <div class="note-card">
+                <h3>📊 Scoring and Interpretation</h3>
+                <p>The total score ranges from 0 to 6. A higher score indicates a greater level of nicotine dependence, which can be useful for tailoring smoking cessation strategies.</p>
+                <ul class="note-list">
+                    <li><strong>Low (0-2 points):</strong> Mild nicotine dependence.</li>
+                    <li><strong>Medium (3-4 points):</strong> Moderate nicotine dependence.</li>
+                    <li><strong>High (5-6 points):</strong> Severe nicotine dependence.</li>
+                </ul>
+            </div>
+             <div class="note-card">
+                <h3>❗ Disclaimer</h3>
+                <p>This calculator is for informational purposes only and is not a substitute for professional medical advice. If you are struggling with nicotine dependence, please consult a healthcare provider for personalized recommendations and treatment options.</p>
+            </div>
+        </div>
+    </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const now = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        if(document.getElementById('printDate')) {
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        }
+    });
+
+    function calculateHSI() {
+        const firstCigarette = parseInt(document.getElementById('firstCigarette').value);
+        const cigarettesPerDay = parseInt(document.getElementById('cigarettesPerDay').value);
+
+        const placeholder = document.getElementById('placeholder');
+        const resultValue = document.getElementById('resultValue');
+        const rateValue = document.getElementById('rateValue');
+        const meterFill = document.getElementById('meterFill');
+        const feedbackContent = document.getElementById('feedbackContent');
+
+        // --- Input Validations ---
+        if (isNaN(firstCigarette) || firstCigarette < 0 || firstCigarette > 3) {
+            alert("❌ Invalid input for 'Time to First Cigarette'. Please select a valid option.");
+            return;
+        }
+
+        if (isNaN(cigarettesPerDay) || cigarettesPerDay < 0 || cigarettesPerDay > 3) {
+            alert("❌ Invalid input for 'Cigarettes Per Day'. Please select a valid option.");
+            return;
+        }
+
+        // --- Score Calculation ---
+        const score = firstCigarette + cigarettesPerDay;
+        rateValue.textContent = score;
+
+        let meterWidth, meterColor, feedback;
+
+        if (score <= 2) {
+            meterWidth = '33%'; meterColor = '#2ecc71';
+            feedback = "<strong>Low Dependence:</strong> Your smoking pattern suggests a low level of nicotine dependence. Quitting may be easier for you than for heavier smokers.";
+        } else if (score <= 4) {
+            meterWidth = '66%'; meterColor = '#f1c40f';
+            feedback = "<strong>Moderate Dependence:</strong> You have a moderate level of nicotine dependence. You may benefit from smoking cessation aids or support programs.";
+        } else {
+            meterWidth = '95%'; meterColor = '#e74c3c';
+            feedback = "<strong>High Dependence:</strong> Your score indicates a high level of nicotine dependence. Seeking professional help and using nicotine replacement therapy is strongly recommended for a successful quit attempt.";
+        }
+
+        meterFill.style.width = meterWidth;
+        meterFill.style.backgroundColor = meterColor;
+        feedbackContent.innerHTML = feedback;
+
+        placeholder.classList.add('hidden');
+        resultValue.classList.remove('hidden');
+    }
+
+    function printReport() {
+        const now = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        if(document.getElementById('printDate')) {
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        }
+        window.print();
+    }
+</script>
+
+
+</body>
+</html>
+{% endblock %}
+
+<!-- 
+1. Real-world QEHS / Fire Safety Perspective
+
+Why HSI matters in QEHS/Fire Safety:
+High nicotine dependence leads to increased smoking frequency, higher indoor fire risk, elevated absenteeism, reduced productivity, and chronic health hazards. In audits (OSHA, ISO 45001, ILO), nicotine dependence is considered a leading indicator of occupational health risk.
+
+Inputs relevance:
+
+First cigarette after waking: reflects nicotine craving intensity.
+
+Cigarettes per day: reflects exposure level and cumulative fire hazard risk.
+
+Outputs relevance:
+The HSI (0–6) must be interpreted consistently:
+
+0–1: Low dependence → Lower fire risk & occupational impairment.
+
+2–4: Medium dependence → Elevated risk, requires health & fire-prevention interventions.
+
+5–6: High dependence → Critical concern in QEHS audits, flagged in safety reports.
+
+2. Input Validation Rules
+Field	Expected Input	Allowed Range	Validation Rules	Compliance Rationale
+First Cigarette	Dropdown (0–3)	Must be integer 0–3	Required; cannot be blank or outside set	Prevents invalid scoring
+Cigarettes per Day	Dropdown (0–3)	Must be integer 0–3	Required; cannot be blank or outside set	Standard HSI uses categorical scoring
+Logical Consistency	Cross-field	Both must be selected	Both inputs mandatory before result	Prevents partial or misleading HSI results
+3. Edge Case Validations
+
+Missing Input → Show error: “Please answer both questions.”
+
+Tampered Values (non 0–3) → Reset to valid options.
+
+Both Inputs = 0 → Correctly display HSI = 0 (Low Dependence), not error.
+
+Extreme Outlier → Since dropdown is bounded, no unrealistic numbers possible.
+
+4. Output Validation Logic
+
+Score Formula: HSI = firstCigarette + cigarettesPerDay
+
+Interpretation:
+
+0–1 → Low Dependence
+
+2–4 → Medium Dependence
+
+5–6 → High Dependence
+
+Thresholds compliance:
+Based on Heatherton TF et al., 1989 Fagerström Test standard, widely used in occupational health assessments.
+-->

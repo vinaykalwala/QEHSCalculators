@@ -1,0 +1,603 @@
+{% extends 'base.html' %}
+{% block title %}Heat Stress Index (HSI) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heat Stress Index (HSI) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: baseline;
+            justify-content: center;
+        }
+        .result-value {
+            width: 100%;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        .rate-label {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+        /* Toggle helper */
+        .hidden {
+            display: none;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Heat Stress Index (HSI) Calculator</h1>
+            <p>Assess the level of heat stress based on environmental and metabolic factors.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Enter Evaporation Data</h2>
+                <div class="form-group">
+                    <label for="requiredEvaporation">Required Sweat Evaporation (E_req) in W/m²</label>
+                    <input type="number" id="requiredEvaporation" class="form-input" placeholder="e.g., 200">
+                </div>
+                <div class="form-group">
+                    <label for="maxEvaporation">Maximum Sweat Evaporation (E_max) in W/m²</label>
+                    <input type="number" id="maxEvaporation" class="form-input" placeholder="e.g., 400">
+                </div>
+                <button class="calculate-btn" onclick="calculateHSI()">Calculate HSI</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Enter evaporation data to calculate the <strong>Heat Stress Index</strong> and see safety recommendations.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div class="result-value hidden" id="resultValue">
+                    <h2>Heat Stress Index (HSI)</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0%</div>
+                    </div>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Comfortable</span><span>Moderate</span><span>High</span><span>Extreme</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Interpretation & Action</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🌡️ What is the Heat Stress Index?</h3>
+                <p>The Heat Stress Index (HSI) is a measure that relates the amount of sweat the body needs to evaporate to stay cool (E_req) to the maximum amount the environment will allow to be evaporated (E_max). It's calculated as HSI = (E_req / E_max) * 100. The HSI is a critical tool in occupational health for assessing the risk of heat-related illness in workplaces.</p>
+            </div>
+            <div class="note-card">
+                <h3>⚙️ Explanation of Parameters</h3>
+                 <ul class="note-list">
+                    <li><strong>Required Sweat Evaporation (E_req):</strong> The amount of evaporative cooling required to maintain thermal balance, considering metabolic rate and environmental heat exchange. Measured in Watts per square meter (W/m²).</li>
+                    <li><strong>Maximum Sweat Evaporation (E_max):</strong> The maximum possible evaporative cooling given the current ambient temperature, humidity, and air movement. Measured in Watts per square meter (W/m²).</li>
+                </ul>
+            </div>
+            <div class="note-card">
+                <h3>❗ Result Interpretation</h3>
+                <p>The resulting percentage indicates the level of heat stress:</p>
+                 <ul class="note-list">
+                    <li><strong>&lt; 50%:</strong> Comfortable. The body can cool itself effectively.</li>
+                    <li><strong>50% - 75%:</strong> Moderate Heat Stress. Regular water breaks and monitoring are needed.</li>
+                    <li><strong>75% - 100%:</strong> High Heat Stress. Increase rest, reduce strenuous activity, and ensure constant hydration.</li>
+                     <li><strong>&gt; 100%:</strong> Extreme Danger. The environment prevents the body from cooling itself adequately. Immediate cessation of physical activity and moving to a cooler area is required to prevent heat stroke.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>✅ Input Validations</h3>
+                <div class="note-list">
+                    <ul>
+                        <li><strong>Required Evaporation (E<sub>req</sub>):</strong> 
+                            <br>Must be a number between <strong>0 and 1000 W/m²</strong>. 
+                            <br>Values above 1000 are physiologically unrealistic.</li>
+                        <li><strong>Maximum Evaporation (E<sub>max</sub>):</strong> 
+                            <br>Must be a positive number between <strong>50 and 1200 W/m²</strong>. 
+                            <br>Values below 50 are too low to support cooling; above 1200 exceed environmental capacity.</li>
+                        <li><strong>Logical Check:</strong> 
+                            <br><strong>E<sub>req</sub> ≤ E<sub>max</sub></strong>. 
+                            <br>If required evaporation is higher than the maximum possible, it means the environment cannot support adequate cooling.</li>
+                        <li><strong>Decimals:</strong> 
+                            <br>Up to <strong>1 decimal place</strong> is acceptable (e.g., 325.5). Avoid excessive precision.</li>
+                        <li><strong>No Negative Values:</strong> 
+                            <br>Negative inputs for either field are invalid.</li>
+                        <li><strong>Units of Measure:</strong> 
+                            <br>All inputs must be in <strong>Watts per square meter (W/m²)</strong>.</li>
+                    </ul>
+                    <p><em>⚠️ These validation rules are based on occupational safety guidelines (OSHA, ISO 45001, and NFPA standards) to ensure realistic and compliant results.</em></p>
+                </div>
+            </div>
+
+            <div class="note-card">
+                <h3>Conclusion:</h3>
+                <p>
+                    The Shock Index is a valuable early warning tool that helps detect potential cardiovascular compromise before more serious symptoms develop. By using this calculator, healthcare providers can make quicker, more informed decisions to ensure patient safety and improve outcomes in high-risk or emergency situations.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            if (document.getElementById('printDate')) {
+                document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
+        });
+
+        function calculateHSI() {
+            const Er = document.getElementById('requiredEvaporation').value.trim();
+            const Emax = document.getElementById('maxEvaporation').value.trim();
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+
+            let errors = [];
+
+            // Input Validations
+            if (Er === "" || isNaN(parseFloat(Er))) {
+                errors.push("👉 Please enter a valid number for Required Evaporation (E_req).");
+            }
+            if (Emax === "" || isNaN(parseFloat(Emax)) || parseFloat(Emax) <= 0) {
+                errors.push("👉 Please enter a valid, positive number for Maximum Evaporation (E_max).");
+            }
+
+            if (errors.length === 0) {
+                const ErVal = parseFloat(Er);
+                const EmaxVal = parseFloat(Emax);
+
+                if (ErVal < 0) errors.push("👉 Required Evaporation (E_req) cannot be negative.");
+                if (EmaxVal < 50) errors.push("👉 Maximum Evaporation (E_max) is unrealistically low (<50 W/m²).");
+                if (ErVal > 1000) errors.push("👉 Required Evaporation (E_req) exceeds physiological limits (max 1000 W/m²).");
+                if (EmaxVal > 1200) errors.push("👉 Maximum Evaporation (E_max) exceeds environmental capacity (max 1200 W/m²).");
+                if (ErVal > EmaxVal) errors.push("👉 Required Evaporation cannot exceed Maximum Evaporation capacity.");
+            }
+
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            }
+
+            errorBox.classList.add("hidden");
+
+            // Valid inputs → calculate HSI
+            const HSI = (parseFloat(Er) / parseFloat(Emax)) * 100;
+            document.getElementById('rateValue').textContent = `${HSI.toFixed(1)}%`;
+
+            const meterFill = document.getElementById('meterFill');
+            let meterWidth, meterColor, feedback;
+
+            if (HSI <= 0) {
+                meterWidth = '10%'; meterColor = '#3498db';
+                feedback = "<strong>No Heat Stress:</strong> The environment is cool. Ensure warmth if necessary.";
+            } else if (HSI <= 50) {
+                meterWidth = '25%'; meterColor = '#2ecc71';
+                feedback = "<strong>Comfortable:</strong> Body cools efficiently. Maintain normal work pace and stay hydrated.";
+            } else if (HSI <= 75) {
+                meterWidth = '50%'; meterColor = '#f1c40f';
+                feedback = "<strong>Moderate Heat Stress:</strong> Take water breaks, wear breathable clothing, and monitor for fatigue.";
+            } else if (HSI <= 100) {
+                meterWidth = '75%'; meterColor = '#e67e22';
+                feedback = "<strong>High Heat Stress:</strong> Increase hydration, take frequent shade breaks, and reduce strenuous activities.";
+            } else {
+                meterWidth = '95%'; meterColor = '#e74c3c';
+                feedback = "<strong>Extreme Danger:</strong> Stop work immediately, move to a cooler area, hydrate, and seek medical attention if needed.";
+            }
+
+            meterFill.style.width = meterWidth;
+            meterFill.style.backgroundColor = meterColor;
+            document.getElementById('feedbackContent').innerHTML = feedback;
+
+            placeholder.classList.add('hidden');
+            resultValue.classList.remove('hidden');
+        }
+
+        function printReport() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            if (document.getElementById('printDate')) {
+                document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
+            window.print();
+        }
+    </script>
+
+</body>
+</html>
+{% endblock %}
+
+<!-- 
+🔍 1. Real-World Input/Output Analysis
+Inputs:
+
+E_req (Required Sweat Evaporation, W/m²):
+Represents the heat load that must be dissipated via sweat.
+
+E_max (Maximum Sweat Evaporation, W/m²):
+Represents the maximum physiological/physical cooling capacity of the body under the current environment.
+
+Output:
+
+HSI (%) = (E_req / E_max) × 100
+Expressed as a percentage, it indicates if the body can balance the heat load.
+
+HSI ≤ 50% → safe/comfortable
+
+HSI > 75% → workers at risk (per ISO 7243, OSHA heat stress guidelines)
+
+HSI > 100% → unsafe, body cannot cope
+
+🛠️ 2. Comprehensive Validation Rules
+Field: E_req (Required Evaporation, W/m²)
+
+Range: 0 – 1000 W/m² (based on ISO 7933 limits for metabolic heat load).
+
+Decimals: Up to 2 decimals (e.g., 250.75).
+
+Units: W/m² (mandatory).
+
+Validation:
+
+Cannot be negative.
+
+Cannot exceed E_max (because required evaporation cannot exceed the physical maximum by definition).
+
+Must be a realistic nonzero input for calculation.
+
+Field: E_max (Maximum Evaporation, W/m²)
+
+Range: 50 – 1200 W/m² (environmental capacity, considering air temp, RH, clothing, and air movement).
+
+Decimals: Up to 2 decimals.
+
+Validation:
+
+Must be greater than 0 (avoid division by zero).
+
+Must be ≥ E_req.
+
+Extremely low values (<50) indicate unrealistic measurement or extreme error.
+
+Cross-Field Validation
+
+E_req ≤ E_max (logical consistency).
+
+If E_req = 0 → HSI = 0 (no heat stress).
+
+If E_req > E_max → flag “Invalid input” instead of computing a nonsensical HSI.
+
+⚠️ 3. Edge Case Validations
+
+Division by Zero: Prevent if E_max = 0.
+
+Negative Values: Reject if either input < 0.
+
+Unrealistic Outliers:
+
+E_req > 1000 → reject.
+
+E_max > 1200 → reject.
+
+E_req > E_max: Show “Unrealistic condition – required cooling exceeds maximum capacity.”
+
+Empty or NaN Inputs: Must prompt user.
+
+📊 4. Output Validation & Thresholds
+
+HSI < 0%: Invalid → show error.
+
+0–50%: Comfortable, low stress.
+
+51–75%: Moderate, enforce hydration breaks.
+
+76–100%: High risk → reduce workload, mandatory rest cycles.
+
+>100%: Critical → work stoppage, evacuation to cooler environment.
+
+(These align with ISO 7243 (WBGT index) and OSHA Technical Manual Section III: Chapter 4).
+-->

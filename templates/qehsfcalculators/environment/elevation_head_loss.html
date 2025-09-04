@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Exposure Level (Concentration) Calculator{% endblock %}
+{% block title %}Elevation Head Loss Calculator{% endblock %}
 {% block content %}
 {% load static %}
 
@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exposure Level (Concentration) Calculator</title>
+    <title>Elevation Head Loss Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
@@ -419,54 +419,49 @@
 </head>
 <body>
 
-    <div class="btn-container">
+<div class="btn-container">
         <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
-    </div>
+</div>
 
 <div class="calculator-container printable" id="printArea">
     {% include "includes/print_header_footer.html" %}
 
-<!-- ====== HEADER ====== -->
 <div class="calculator-header">
-  <h1>Exposure Level (Concentration) Calculator</h1>
-  <p>Calculate <strong>Concentration</strong> with proper units for air or water.</p>
+  <h1>Elevation Head Loss Calculator</h1>
+  <p>
+    Estimate pressure change caused purely by elevation (static head). Useful for pump sizing,
+    sprinkler zoning, hydro storage, and QEHS/fire-safety reviews.
+  </p>
 </div>
 
 <div class="calc-content">
-  <!-- ====== Calculator ====== -->
+  <!-- Calculator -->
   <div class="calc-card">
     <h2>Enter Data</h2>
 
     <div class="form-group">
-      <label for="amount">Amount of Contaminant (A)</label>
-      <div style="display:flex; gap:8px;">
-        <input type="number" id="amount" class="form-input" min="0" step="any" placeholder="e.g., 25">
-        <select id="amountUnit" class="form-input">
-          <option value="mg">mg</option>
-          <option value="g">g</option>
-        </select>
-      </div>
+      <label for="fluidDensity">Fluid Density (ρ) <span>[kg/m³]</span></label>
+      <input type="number" id="fluidDensity" class="form-input" min="0.01" max="20000" step="0.01" placeholder="e.g., 1000.00 for water">
     </div>
 
     <div class="form-group">
-      <label for="volume">Volume of Medium (V)</label>
-      <div style="display:flex; gap:8px;">
-        <input type="number" id="volume" class="form-input" min="0.001" step="any" placeholder="e.g., 2">
-        <select id="volumeUnit" class="form-input">
-          <option value="L">L</option>
-          <option value="m3">m³</option>
-        </select>
-      </div>
+      <label for="elevationChange">Elevation Change (h) <span>[m]</span></label>
+      <input type="number" id="elevationChange" class="form-input" min="-10000" max="10000" step="0.001" placeholder="Positive for upward lift; negative for drop">
     </div>
 
-    <button class="calculate-btn" onclick="calculateConcentration()">Calculate Concentration</button>
+    <div class="form-group">
+      <label for="gravity">Gravity (g) <span>[m/s²]</span></label>
+      <input type="number" id="gravity" class="form-input" min="0.1" max="30" step="0.001" value="9.81" placeholder="9.81 on Earth">
+    </div>
+
+    <button class="calculate-btn" onclick="calculateElevationHead()">Calculate Pressure Change</button>
   </div>
 
-  <!-- ====== Result Section ====== -->
+  <!-- Result Section -->
   <div class="result-card">
     <div class="result-placeholder" id="placeholder">
-      <img src="https://cdn-icons-png.flaticon.com/512/4727/4727260.png" alt="Concentration illustration">
-      <p>This tool calculates <strong>Concentration</strong> using <code>C = A / V</code> with correct unit handling.</p>
+      <img src="https://cdn-icons-png.flaticon.com/512/4727/4727260.png" alt="Elevation head illustration">
+      <p>This tool calculates <strong>pressure change</strong> due to elevation (static head).</p>
     </div>
 
     <div class="result-error hidden" id="resultError">
@@ -476,12 +471,14 @@
 
     <div class="result-value hidden" id="resultValue">
       <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
-        <h2>Calculated Concentration</h2>
+        <h2>Calculated Pressure Change</h2>
       </div>
 
       <div class="rate-display">
-        <div class="rate-value" id="concentrationValue">0.000</div>
-        <div class="rate-label" id="unitLabel" style="color:#2980b9; font-size:20px; font-weight:bold;">mg/L</div>
+        <div class="rate-value" id="rateValue">0.00</div>
+        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">
+          Pa (ΔP; + = loss for upflow, − = gain for downflow)
+        </div>
       </div>
 
       <div class="result-feedback">
@@ -495,54 +492,62 @@
   </div>
 </div>
 
-<!-- ====== Notes Section ====== -->
+<!-- Notes Section -->
 <div class="note-section">
-
   <div class="note-card">
-    <h3>🔵 About This Calculator</h3>
+    <h3>📘 About This Calculator</h3>
     <p>
-      The <strong>Energy Consumption Calculator</strong> estimates a device’s daily energy use 
-      for audits, energy management, and safety reviews.
+      Computes the static pressure change from a vertical elevation difference for a given fluid.
+      Positive height means lifting the fluid (pressure loss), negative height means descending (pressure gain).
+      Use for pump head checks, gravity supply, and verifying sprinkler zone pressures.
     </p>
   </div>
 
   <div class="note-card">
-    <h3>📊 Interpretation (context-dependent)</h3>
+    <h3>🛡️ QEHS & Fire Safety Perspective</h3>
     <ul class="note-list">
-      <li>🟢 <strong>Energy &lt; 1 kWh/day</strong> → Low use (small appliances/IT gear)</li>
-      <li>🟠 <strong>1 ≤ Energy ≤ 5 kWh/day</strong> → Moderate (monitor duty cycle/efficiency)</li>
-      <li>🔴 <strong>Energy &gt; 5 kWh/day</strong> → High (review scheduling & capacity)</li>
+      <li>Validate available pressure at the highest sprinkler or hose valve in multi-storey buildings.</li>
+      <li>Confirm minimum inlet pressure for safety showers/eyewashes at elevated locations.</li>
+      <li>Check water tower/head tank service range and pressure-reducing/relief valve needs for lower floors.</li>
+      <li>Support pump selection to meet worst-case elevation plus friction and minor losses (not included here).</li>
     </ul>
   </div>
 
   <div class="note-card">
-    <h3>⚠️Input Validations</h3>
+    <h3>📊 Interpretation (Guidance)</h3>
     <ul class="note-list">
-      <li>✔️ Device Wattage must be ≥ 0.1 W</li>
-      <li>✔️ Hours per Day must be 0–24</li>
-      <li>✔️ At most 2 decimal places</li>
-      <li>❌ Non-numeric, negative, or empty entries are invalid</li>
-      <li>⚠️ W &gt; 2000 → high load; check circuit</li>
-      <li>⚠️ Hours ≥ 20 → nearly continuous operation</li>
-      <li>⚠️ Energy &gt; 50 kWh/day → very high; verify</li>
-      <li>⚠️ Energy &gt; 100 kWh/day → extreme; check measurement</li>
+      <li>For water on Earth, ~9.81 kPa pressure change per meter (~0.433 psi per foot).</li>
+      <li>Upflow (h &gt; 0): pressure loss that the pump must add back.</li>
+      <li>Downflow (h &lt; 0): pressure gain; may require PRVs or zoning to avoid over-pressure.</li>
+    </ul>
+    <p style="font-size:0.9em;color:#555;">(Static head only; does not include friction/minor losses or compressibility effects.)</p>
+  </div>
+
+  <div class="note-card">
+    <h3>⚠️ Input Validations</h3>
+    <ul>
+      <li>✔️ <strong>ρ (kg/m³)</strong>: required, &gt; 0, allowed 0.01–20,000 (typical: gases &lt; 5; water ≈ 1,000; brines/oils 800–1,400; slurries &gt; 1,400).</li>
+      <li>✔️ <strong>g (m/s²)</strong>: required, &gt; 0, allowed 0.1–30 (Earth ≈ 9.81).</li>
+      <li>✔️ <strong>h (m)</strong>: required, −10,000 to +10,000. Positive for upward lift; negative for drop.</li>
+      <li>✔️ Reporting precision: ≤ 0.001 for inputs; ΔP displayed in Pa with kPa/bar/psi context.</li>
+      <li>❌ Zeros/negatives for ρ or g not allowed; non-numeric values rejected.</li>
+      <li>⚠️ If |ΔP| &gt; 5 MPa, flag mechanical design/over-pressure risk for review.</li>
     </ul>
   </div>
 
   <div class="note-card">
-    <h3>🌍 Key Applications</h3>
+    <h3>🌍 Applications</h3>
     <ul class="note-list">
-      <li><strong>Energy Audits:</strong> Identify high-use equipment</li>
-      <li><strong>QEHS Reviews:</strong> Check thermal load & safety</li>
-      <li><strong>Operations:</strong> Optimize schedules & cycles</li>
-      <li><strong>Reporting:</strong> KPI roll-ups for monthly bills</li>
+      <li>Pump sizing and NPSH checks (with separate suction calculations).</li>
+      <li>Sprinkler and standpipe pressure zoning and PRV selections.</li>
+      <li>Gravity feed systems (tanks, towers, reservoirs).</li>
+      <li>Hydropower head assessments and energy balance pre-checks.</li>
     </ul>
   </div>
-
 </div>
 
 <script>
-/* ===== Helpers ===== */
+/* Reusable error display */
 function showErrors(errors) {
   const errorBox = document.getElementById("resultError");
   const errorMessage = document.getElementById("errorMessage");
@@ -555,160 +560,121 @@ function showErrors(errors) {
   resultValue.classList.add("hidden");
 }
 
-function countDecimals(numStr) {
-  if (!numStr || !numStr.includes(".")) return 0;
-  return numStr.split(".")[1].length;
-}
+/* Elevation head (static) pressure change with robust, domain-aware validations */
+function calculateElevationHead() {
+  const rhoRaw = (document.getElementById("fluidDensity").value || "").trim();
+  const gRaw   = (document.getElementById("gravity").value || "").trim();
+  const hRaw   = (document.getElementById("elevationChange").value || "").trim();
 
-function scaleConcentration(value, baseUnit) {
-  // Returns {val, unit} using human-friendly scaling, keeping base traceability
-  // baseUnit is "mg/L" or "mg/m³"
-  if (!Number.isFinite(value)) return { val: value, unit: baseUnit };
-
-  // Up-scale if very large
-  if (value >= 1000000) { // >= 1,000,000 mg/unit
-    const scaled = value / 1000000; // kg per unit
-    const unit = baseUnit.replace("mg", "kg");
-    return { val: scaled, unit };
-  }
-  if (value >= 1000) { // >= 1,000 mg/unit
-    const scaled = value / 1000; // g per unit
-    const unit = baseUnit.replace("mg", "g");
-    return { val: scaled, unit };
-  }
-
-  // Down-scale if very small
-  if (value < 1 && value >= 0) {
-    const scaled = value * 1000; // µg per unit
-    const unit = baseUnit.replace("mg", "µg");
-    return { val: scaled, unit };
-  }
-
-  // Default mg/unit
-  return { val: value, unit: baseUnit };
-}
-
-/* ===== Main Calculation & Validations ===== */
-function calculateConcentration() {
-  const amountRaw = document.getElementById("amount").value.trim();
-  const amountUnit = document.getElementById("amountUnit").value; // mg | g
-  const volumeRaw = document.getElementById("volume").value.trim();
-  const volumeUnit = document.getElementById("volumeUnit").value; // L | m3
-
-  const errorBox   = document.getElementById("resultError");
-  const errorMsgEl = document.getElementById("errorMessage");
-  const placeholder= document.getElementById("placeholder");
-  const resultCard = document.getElementById("resultValue");
-  const concEl     = document.getElementById("concentrationValue");
-  const unitEl     = document.getElementById("unitLabel");
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+  const rateEl = document.getElementById("rateValue");
   const feedbackEl = document.getElementById("feedbackContent");
 
-  // reset state
+  // reset UI
   errorBox.classList.add("hidden");
-  errorMsgEl.innerHTML = "";
+  errorMessage.innerHTML = "";
   feedbackEl.innerHTML = "";
 
   const errors = [];
   const warnings = [];
 
-  // Required fields
-  if (amountRaw === "") errors.push("👉 Please enter Amount of Contaminant (A).");
-  if (volumeRaw === "") errors.push("👉 Please enter Volume of Medium (V).");
+  // presence
+  if (!rhoRaw) errors.push("👉 Please enter Fluid Density (ρ) in kg/m³.");
+  if (!gRaw)   errors.push("👉 Please enter Gravity (g) in m/s².");
+  if (!hRaw)   errors.push("👉 Please enter Elevation Change (h) in meters (positive up, negative down).");
   if (errors.length) return showErrors(errors);
 
-  // Decimal precision
-  if (countDecimals(amountRaw) > 3) errors.push("👉 Amount: maximum 3 decimal places.");
-  if (countDecimals(volumeRaw) > 3) errors.push("👉 Volume: maximum 3 decimal places.");
+  // parse
+  const rho = Number(rhoRaw);
+  const g   = Number(gRaw);
+  const h   = Number(hRaw);
 
-  const A_in = parseFloat(amountRaw);
-  const V_in = parseFloat(volumeRaw);
-
-  if (!Number.isFinite(A_in)) errors.push("👉 Amount must be a valid number.");
-  if (!Number.isFinite(V_in)) errors.push("👉 Volume must be a valid number.");
-
-  // Hard limits for amount by unit
-  if (amountUnit === "mg") {
-    if (A_in < 0) errors.push("👉 Amount (mg) must be ≥ 0.");
-    if (A_in > 1000000000) errors.push("👉 Amount (mg) exceeds allowed limit (>1,000,000,000 mg).");
-  } else { // g
-    if (A_in < 0) errors.push("👉 Amount (g) must be ≥ 0.");
-    if (A_in > 1000000) errors.push("👉 Amount (g) exceeds allowed limit (>1,000,000 g).");
-  }
-
-  // Hard limits & zero check for volume
-  if (V_in <= 0) errors.push("👉 Volume must be greater than 0 to avoid division by zero.");
-  if (volumeUnit === "L") {
-    if (V_in < 0.001) errors.push("👉 Volume (L) must be ≥ 0.001 L (1 mL).");
-    if (V_in > 1000000) errors.push("👉 Volume (L) exceeds allowed limit (>1,000,000 L).");
-  } else { // m3
-    if (V_in < 0.001) errors.push("👉 Volume (m³) must be ≥ 0.001 m³ (1 L).");
-    if (V_in > 10000) errors.push("👉 Volume (m³) exceeds allowed limit (>10,000 m³).");
-  }
-
+  // numeric checks
+  if (!Number.isFinite(rho)) errors.push("👉 ρ must be a valid number (kg/m³).");
+  if (!Number.isFinite(g))   errors.push("👉 g must be a valid number (m/s²).");
+  if (!Number.isFinite(h))   errors.push("👉 h must be a valid number (m).");
   if (errors.length) return showErrors(errors);
 
-  // Soft warnings
-  if (volumeUnit === "L") {
-    if (V_in < 0.01) warnings.push("⚠️ Very small sample volume for water (<10 mL) may bias results.");
-    if (V_in > 10000) warnings.push("⚠️ Very large water sample volume (>10,000 L) is unusual; verify entry.");
-  } else {
-    if (V_in < 0.01) warnings.push("⚠️ Very small air volume (<0.01 m³ ≈ 10 L) may bias results.");
-    if (V_in > 100) warnings.push("⚠️ Very large air volume (>100 m³) is unusual for a single measurement.");
+  // hard ranges
+  const RHO_MIN = 0.01, RHO_MAX = 20000;    // kg/m³
+  const G_MIN = 0.1,   G_MAX = 30;          // m/s²
+  const H_MIN = -10000, H_MAX = 10000;      // m
+
+  if (rho <= 0 || rho < RHO_MIN || rho > RHO_MAX) {
+    errors.push(`👉 ρ must be > 0 and within ${RHO_MIN} to ${RHO_MAX} kg/m³.`);
+  }
+  if (g <= 0 || g < G_MIN || g > G_MAX) {
+    errors.push(`👉 g must be > 0 and within ${G_MIN} to ${G_MAX} m/s².`);
+  }
+  if (h < H_MIN || h > H_MAX) {
+    errors.push(`👉 h must be between ${H_MIN} and ${H_MAX} meters.`);
+  }
+  if (errors.length) return showErrors(errors);
+
+  // advisories & sanity checks
+  const decimals = s => (String(s).split(".")[1] || "").length;
+  if (decimals(rhoRaw) > 3) warnings.push("⚠️ ρ has more than 3 decimals – consider rounding for reporting.");
+  if (decimals(gRaw) > 3)   warnings.push("⚠️ g has more than 3 decimals – consider rounding for reporting.");
+  if (decimals(hRaw) > 3)   warnings.push("⚠️ h has more than 3 decimals – consider rounding for reporting.");
+
+  if (Math.abs(h) < 0.001) warnings.push("⚠️ Elevation change is ~0 → negligible static head.");
+  if (rho < 5) warnings.push("⚠️ Very low density suggests gas; incompressible static-head approximation may be less accurate.");
+  if (rho > 3000) warnings.push("⚠️ Very high density (heavy slurry/metal) – verify material and units.");
+  if (Math.abs((g - 9.81) / 9.81) > 0.1) warnings.push("⚠️ g deviates >10% from Earth standard – verify units/context.");
+
+  // compute ΔP = ρ g h (Pa); sign follows h
+  const deltaP = rho * g * h;
+
+  if (!Number.isFinite(deltaP)) {
+    return showErrors(["⚠️ Computation overflow/underflow. Check input magnitudes."]);
   }
 
-  // Convert A to mg; V unchanged (L or m3)
-  const A_mg = amountUnit === "mg" ? A_in : A_in * 1000;
-
-  // Compute concentration in base units
-  const baseUnit = (volumeUnit === "L") ? "mg/L" : "mg/m³";
-  const C = A_mg / V_in;
-
-  if (!Number.isFinite(C) || C < 0) {
-    return showErrors(["⚠️ Computed concentration is invalid. Check inputs."]);
+  // flag extreme pressures for design checks
+  if (Math.abs(deltaP) > 5e6) {
+    warnings.push("⚠️ |ΔP| > 5 MPa – verify mechanical design limits, PRVs, and zoning.");
   }
 
-  // Outcome-based warnings (contextual)
-  if (baseUnit === "mg/L") {
-    if (C > 10000) warnings.push("⚠️ Extremely high water concentration (>10,000 mg/L). Verify units and sampling.");
-    else if (C > 1000) warnings.push("⚠️ Very high water concentration (>1,000 mg/L).");
-    else if (C < 0.001 && A_in > 0) warnings.push("⚠️ Very low water concentration (<0.001 mg/L); may be near/below detection limits.");
-  } else { // mg/m3
-    if (C > 500) warnings.push("⚠️ Extremely high air concentration (>500 mg/m³). Verify units and sampling.");
-    else if (C > 50) warnings.push("⚠️ Very high air concentration (>50 mg/m³).");
-    else if (C < 0.001 && A_in > 0) warnings.push("⚠️ Very low air concentration (<0.001 mg/m³); may be near/below detection limits.");
-  }
-
-  // Classification (generic guidance only)
+  // interpretation
   let statusMsg = "";
-  if (baseUnit === "mg/L") {
-    if (C < 1) statusMsg = "✅ Low (typical of many drinking/ambient waters; confirm with standards for the specific substance).";
-    else if (C <= 10) statusMsg = "⚠️ Moderate; monitor and compare with applicable limits.";
-    else statusMsg = "🔴 High; review controls, process conditions, or incident status.";
+  if (h > 0) {
+    statusMsg = "⬆️ Upflow: static pressure loss (pump must add this head).";
+  } else if (h < 0) {
+    statusMsg = "⬇️ Downflow: static pressure gain (consider PRVs/relief to avoid over-pressure).";
   } else {
-    if (C < 1) statusMsg = "✅ Low (typical of many workplace/ambient air results; check substance OEL/PEL/REL).";
-    else if (C <= 10) statusMsg = "⚠️ Moderate; ensure ventilation and controls are adequate.";
-    else statusMsg = "🔴 High; prioritize exposure reduction and verification sampling.";
+    statusMsg = "ℹ️ No elevation difference: no static head change.";
   }
 
-  // Scaling for display
-  const pretty = scaleConcentration(C, baseUnit);
+  // derived/context values
+  const kPa = deltaP / 1000;
+  const bar = deltaP / 100000;
+  const psi = deltaP * 0.0001450377377;        // Pa → psi
+  const gradPaPerM = rho * g;                  // pressure gradient per meter
 
-  // Present results
-  concEl.textContent = (pretty.val >= 100) ? pretty.val.toFixed(1) : (pretty.val >= 1 ? pretty.val.toFixed(2) : pretty.val.toFixed(3));
-  unitEl.textContent = pretty.unit;
+  const fmt = (n, d=2) => Number(n).toLocaleString(undefined,{minimumFractionDigits:d, maximumFractionDigits:d});
+  const sign = deltaP >= 0 ? "+" : "−";
 
-  let details = `<div>Normalized concentration: <b>${C.toFixed(6)}</b> ${baseUnit}</div>`;
-  details += `<div>Amount (A): <b>${A_in.toFixed(Math.min(3, countDecimals(amountRaw)))}</b> ${amountUnit}</div>`;
-  details += `<div>Volume (V): <b>${V_in.toFixed(Math.min(3, countDecimals(volumeRaw)))}</b> ${volumeUnit}</div>`;
-  details += `<div style="margin-top:6px; font-size:0.95em; color:#666;">Note: Compare against substance-specific regulatory/occupational limits.</div>`;
-  if (warnings.length) {
-    details += `<div style="margin-top:6px; color:#b35d00; font-size:0.95em;">${warnings.join(" | ")}</div>`;
-  }
-
-  feedbackEl.innerHTML = `<div>${statusMsg}</div>${details}`;
+  // update UI
   document.getElementById("placeholder").classList.add("hidden");
   document.getElementById("resultValue").classList.remove("hidden");
   document.getElementById("resultError").classList.add("hidden");
+
+  // main big number (Pa)
+  rateEl.textContent = fmt(deltaP, 2);
+  document.querySelector(".rate-label").textContent = "Pa (ΔP; + = loss for upflow, − = gain for downflow)";
+
+  // details & feedback
+  let details = `
+    <div>ρ: <b>${fmt(rho, 3)}</b> kg/m³ &nbsp; | &nbsp; g: <b>${fmt(g, 3)}</b> m/s² &nbsp; | &nbsp; h: <b>${fmt(h, 3)}</b> m</div>
+    <div>Pressure gradient ρ·g: <b>${fmt(gradPaPerM, 2)}</b> Pa/m</div>
+    <div>ΔP context: <b>${fmt(kPa, 3)}</b> kPa &nbsp; | &nbsp; <b>${fmt(bar, 5)}</b> bar &nbsp; | &nbsp; <b>${fmt(psi, 3)}</b> psi</div>
+  `;
+  if (warnings.length) {
+    details += `<div style="margin-top:6px; color:#b35d00; font-size:0.95em;">${warnings.join(" | ")}</div>`;
+  }
+  feedbackEl.innerHTML = `<div>${statusMsg}</div>${details}`;
 }
 
 function printReport() {
@@ -722,81 +688,76 @@ function printReport() {
 </script>
 
 
+
     <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
 {% endblock %}
 
+<!-- 
+=============================================
+📘 Elevation Head (Static Pressure) Calculator
+=============================================
 
+📌 Formula:
+-----------
+ΔP = ρ × g × h
 
-<!--
-==========================================================
-EXPOSURE LEVEL (CONCENTRATION) CALCULATOR - DOCUMENTATION
-==========================================================
+Where:
+- ΔP = Static pressure difference [Pa]
+- ρ   = Fluid density [kg/m³]
+- g   = Gravitational acceleration [m/s²]
+- h   = Elevation change [m] 
+        (positive upflow → pressure loss; negative downflow → pressure gain)
 
-📌 Formula Used:
-  - Convert Amount (A) to mg:
-        If unit = mg → A_mg = A
-        If unit = g  → A_mg = A × 1000
-  - Concentration (C):
-        If volume unit = L  → C = A_mg ÷ V   → mg/L
-        If volume unit = m³ → C = A_mg ÷ V   → mg/m³
+Conversions & derived values:
+- kPa = ΔP / 1000
+- bar = ΔP / 100000
+- psi = ΔP × 0.0001450377
+- Pressure gradient = ρ·g [Pa/m]
 
-  - Display scaling (human-friendly):
-        < 1 mg → converted to µg
-        ≥ 1000 mg → converted to g
-        ≥ 1,000,000 mg → converted to kg
+---
 
-📌 Input Validations:
-  - Amount (A):
-      • Required
-      • Numeric, max 3 decimal places
-      • If mg → 0 ≤ A ≤ 1,000,000,000
-      • If g  → 0 ≤ A ≤ 1,000,000
+✅ Input Validations:
+---------------------
+1. Presence:
+   • Fluid Density (ρ), Gravity (g), and Elevation Change (h) are required.
 
-  - Volume (V):
-      • Required
-      • Numeric, max 3 decimal places
-      • Must be > 0 (avoid divide by zero)
-      • If L  → 0.001 ≤ V ≤ 1,000,000
-      • If m³ → 0.001 ≤ V ≤ 10,000
+2. Data type:
+   • All inputs must be valid numbers.
 
-📌 Output Validations:
-  - C must be finite and ≥ 0
-  - Warnings triggered for unusual values:
-      • Water (mg/L):
-          > 10,000 → extremely high
-          > 1,000  → very high
-          < 0.001 (with A>0) → very low, may be near detection limit
-      • Air (mg/m³):
-          > 500 → extremely high
-          > 50  → very high
-          < 0.001 (with A>0) → very low, may be near detection limit
+3. Ranges:
+   • ρ: 0.01 ≤ ρ ≤ 20000 kg/m³  
+   • g: 0.1 ≤ g ≤ 30 m/s²  
+   • h: −10000 ≤ h ≤ +10000 m  
 
-📌 Soft Warnings (plausibility checks):
-  - Water samples:
-        < 0.01 L (10 mL) → very small, may bias results
-        > 10,000 L → very large, unusual for a single sample
-  - Air samples:
-        < 0.01 m³ (~10 L) → very small
-        > 100 m³ → very large, unusual for a single measurement
+4. Logic checks:
+   • ρ and g must be > 0.  
+   • If |h| < 0.001 → treated as negligible head difference.  
 
-📌 Classification (generic guidance):
-  - Water (mg/L):
-        < 1     → ✅ Low (typical for ambient/drinking water)
-        1–10   → ⚠️ Moderate; monitor & compare to limits
-        > 10   → 🔴 High; review process/incident
-  - Air (mg/m³):
-        < 1     → ✅ Low (typical workplace/ambient levels)
-        1–10   → ⚠️ Moderate; check ventilation & controls
-        > 10   → 🔴 High; reduce exposure & verify sampling
+---
 
-📌 Output Breakdown:
-  - Final concentration (scaled to appropriate unit)
-  - Normalized concentration (mg/L or mg/m³, 6 decimals)
-  - Input amount and volume (with original units)
-  - Warnings (if any)
-  - Advisory note: must compare to substance-specific regulatory limits (OEL/PEL/REL for air, drinking water standards, etc.)
+⚠️ Warnings / Advisories:
+--------------------------
+• More than 3 decimals → consider rounding for reporting.  
+• ρ < 5 → Gas density; incompressible assumption less accurate.  
+• ρ > 3000 → Very high density; verify units/material.  
+• g deviates >10% from 9.81 → check units/context.  
+• |ΔP| > 5 MPa → Design alert; verify pressure relief and equipment limits.  
 
-==========================================================
+---
+
+📊 Outputs:
+-----------
+• Static pressure change ΔP [Pa] (signed; + = loss/upflow, − = gain/downflow).  
+• Same ΔP in kPa, bar, and psi.  
+• Pressure gradient (ρ·g) [Pa/m].  
+• Input summary: ρ, g, h.  
+• Status message:  
+   - Upflow → pressure loss.  
+   - Downflow → pressure gain.  
+   - Zero h → no head change.  
+• Warnings/advisories shown if applicable.  
+
+=============================================
 -->

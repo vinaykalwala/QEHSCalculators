@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Exposure Level (Concentration) Calculator{% endblock %}
+{% block title %}Equal percentage valve lift calculator based on kv{% endblock %}
 {% block content %}
 {% load static %}
 
@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exposure Level (Concentration) Calculator</title>
+    <title>Equal percentage valve lift calculator based on kv</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
@@ -419,54 +419,48 @@
 </head>
 <body>
 
-    <div class="btn-container">
+<div class="btn-container">
         <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
-    </div>
+</div>
 
 <div class="calculator-container printable" id="printArea">
     {% include "includes/print_header_footer.html" %}
 
-<!-- ====== HEADER ====== -->
 <div class="calculator-header">
-  <h1>Exposure Level (Concentration) Calculator</h1>
-  <p>Calculate <strong>Concentration</strong> with proper units for air or water.</p>
+  <h1>Equal percentage valve lift calculator based on kv</h1>
+  <p>
+     This helps assess valve performance and controllability in industrial systems.
+  </p>
 </div>
 
 <div class="calc-content">
-  <!-- ====== Calculator ====== -->
+  <!-- Calculator -->
   <div class="calc-card">
     <h2>Enter Data</h2>
 
     <div class="form-group">
-      <label for="amount">Amount of Contaminant (A)</label>
-      <div style="display:flex; gap:8px;">
-        <input type="number" id="amount" class="form-input" min="0" step="any" placeholder="e.g., 25">
-        <select id="amountUnit" class="form-input">
-          <option value="mg">mg</option>
-          <option value="g">g</option>
-        </select>
-      </div>
+      <label for="flow">Flow (V) [m³/h]</label>
+      <input type="number" id="flow" class="form-input" min="0.001" step="0.001" placeholder="e.g., 50">
     </div>
 
     <div class="form-group">
-      <label for="volume">Volume of Medium (V)</label>
-      <div style="display:flex; gap:8px;">
-        <input type="number" id="volume" class="form-input" min="0.001" step="any" placeholder="e.g., 2">
-        <select id="volumeUnit" class="form-input">
-          <option value="L">L</option>
-          <option value="m3">m³</option>
-        </select>
-      </div>
+      <label for="maxFlow">Max Flow (Vmax) [m³/h]</label>
+      <input type="number" id="maxFlow" class="form-input" min="0.01" step="0.001" placeholder="e.g., 500">
     </div>
 
-    <button class="calculate-btn" onclick="calculateConcentration()">Calculate Concentration</button>
+    <div class="form-group">
+      <label for="rangeability">Rangeability (τ)</label>
+      <input type="number" id="rangeability" class="form-input" min="1.01" step="0.01" placeholder="e.g., 50">
+    </div>
+
+    <button class="calculate-btn" onclick="calculateValveLift()">Calculate Lift</button>
   </div>
 
-  <!-- ====== Result Section ====== -->
+  <!-- Result Section -->
   <div class="result-card">
     <div class="result-placeholder" id="placeholder">
-      <img src="https://cdn-icons-png.flaticon.com/512/4727/4727260.png" alt="Concentration illustration">
-      <p>This tool calculates <strong>Concentration</strong> using <code>C = A / V</code> with correct unit handling.</p>
+      <img src="https://cdn-icons-png.flaticon.com/512/4727/4727260.png" alt="Valve illustration">
+      <p>This tool will calculate the <strong>Valve Lift Percentage (H%)</strong>.</p>
     </div>
 
     <div class="result-error hidden" id="resultError">
@@ -476,12 +470,12 @@
 
     <div class="result-value hidden" id="resultValue">
       <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
-        <h2>Calculated Concentration</h2>
+        <h2>Calculated Valve Lift</h2>
       </div>
 
       <div class="rate-display">
-        <div class="rate-value" id="concentrationValue">0.000</div>
-        <div class="rate-label" id="unitLabel" style="color:#2980b9; font-size:20px; font-weight:bold;">mg/L</div>
+        <div class="rate-value" id="rateValue">0.00</div>
+        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">%</div>
       </div>
 
       <div class="result-feedback">
@@ -495,54 +489,50 @@
   </div>
 </div>
 
-<!-- ====== Notes Section ====== -->
+<!-- Notes Section -->
 <div class="note-section">
-
   <div class="note-card">
-    <h3>🔵 About This Calculator</h3>
+    <h3>📘 About This Calculator</h3>
     <p>
-      The <strong>Energy Consumption Calculator</strong> estimates a device’s daily energy use 
-      for audits, energy management, and safety reviews.
+      The <strong>Equal Percentage Valve Lift Calculator</strong> determines the percentage lift (H%) required to achieve a given flow in valves with an equal-percentage characteristic. This ensures accurate control of fluids in industrial, HVAC, and water treatment applications.
     </p>
   </div>
 
   <div class="note-card">
-    <h3>📊 Interpretation (context-dependent)</h3>
+    <h3>📊 Interpretation</h3>
     <ul class="note-list">
-      <li>🟢 <strong>Energy &lt; 1 kWh/day</strong> → Low use (small appliances/IT gear)</li>
-      <li>🟠 <strong>1 ≤ Energy ≤ 5 kWh/day</strong> → Moderate (monitor duty cycle/efficiency)</li>
-      <li>🔴 <strong>Energy &gt; 5 kWh/day</strong> → High (review scheduling & capacity)</li>
+      <li><span class="good">0% ≤ H% &lt; 5%</span> → Valve nearly shut (unstable control region).</li>
+      <li><span class="average">5% ≤ H% ≤ 90%</span> → Normal controllable operating range.</li>
+      <li><span class="bad">H% &gt; 90%</span> → Valve near wide-open, reduced controllability.</li>
     </ul>
   </div>
 
   <div class="note-card">
-    <h3>⚠️Input Validations</h3>
-    <ul class="note-list">
-      <li>✔️ Device Wattage must be ≥ 0.1 W</li>
-      <li>✔️ Hours per Day must be 0–24</li>
-      <li>✔️ At most 2 decimal places</li>
-      <li>❌ Non-numeric, negative, or empty entries are invalid</li>
-      <li>⚠️ W &gt; 2000 → high load; check circuit</li>
-      <li>⚠️ Hours ≥ 20 → nearly continuous operation</li>
-      <li>⚠️ Energy &gt; 50 kWh/day → very high; verify</li>
-      <li>⚠️ Energy &gt; 100 kWh/day → extreme; check measurement</li>
+    <h3>⚠️Input  Validations</h3>
+    <ul>
+      <li>✔️ Flow (V) must be 0.001 – 20,000 m³/h.</li>
+      <li>✔️ Max Flow (Vmax) must be 0.01 – 50,000 m³/h.</li>
+      <li>✔️ Rangeability (τ) must be 1.01 – 1000.</li>
+      <li>✔️ Flow must not exceed Max Flow.</li>
+      <li>✔️ Flow must be ≥ Vmax/τ (minimum controllable flow).</li>
+      <li>❌ Zeros, negatives, or τ ≤ 1 are invalid.</li>
+      <li>⚠️ Very low or very high values trigger warnings (may indicate poor valve sizing).</li>
     </ul>
   </div>
 
   <div class="note-card">
     <h3>🌍 Key Applications</h3>
     <ul class="note-list">
-      <li><strong>Energy Audits:</strong> Identify high-use equipment</li>
-      <li><strong>QEHS Reviews:</strong> Check thermal load & safety</li>
-      <li><strong>Operations:</strong> Optimize schedules & cycles</li>
-      <li><strong>Reporting:</strong> KPI roll-ups for monthly bills</li>
+      <li><strong>Process Control:</strong> Chemical, refinery, and manufacturing operations.</li>
+      <li><strong>HVAC Systems:</strong> Air and water flow regulation.</li>
+      <li><strong>Water Treatment:</strong> Flow control of water and chemicals.</li>
+      <li><strong>Energy Systems:</strong> Steam and fuel regulation in power plants.</li>
     </ul>
   </div>
-
 </div>
 
 <script>
-/* ===== Helpers ===== */
+/* Show error messages */
 function showErrors(errors) {
   const errorBox = document.getElementById("resultError");
   const errorMessage = document.getElementById("errorMessage");
@@ -555,160 +545,92 @@ function showErrors(errors) {
   resultValue.classList.add("hidden");
 }
 
-function countDecimals(numStr) {
-  if (!numStr || !numStr.includes(".")) return 0;
-  return numStr.split(".")[1].length;
-}
+function calculateValveLift() {
+  const flowRaw = (document.getElementById("flow").value || "").trim();
+  const maxFlowRaw = (document.getElementById("maxFlow").value || "").trim();
+  const tauRaw = (document.getElementById("rangeability").value || "").trim();
 
-function scaleConcentration(value, baseUnit) {
-  // Returns {val, unit} using human-friendly scaling, keeping base traceability
-  // baseUnit is "mg/L" or "mg/m³"
-  if (!Number.isFinite(value)) return { val: value, unit: baseUnit };
-
-  // Up-scale if very large
-  if (value >= 1000000) { // >= 1,000,000 mg/unit
-    const scaled = value / 1000000; // kg per unit
-    const unit = baseUnit.replace("mg", "kg");
-    return { val: scaled, unit };
-  }
-  if (value >= 1000) { // >= 1,000 mg/unit
-    const scaled = value / 1000; // g per unit
-    const unit = baseUnit.replace("mg", "g");
-    return { val: scaled, unit };
-  }
-
-  // Down-scale if very small
-  if (value < 1 && value >= 0) {
-    const scaled = value * 1000; // µg per unit
-    const unit = baseUnit.replace("mg", "µg");
-    return { val: scaled, unit };
-  }
-
-  // Default mg/unit
-  return { val: value, unit: baseUnit };
-}
-
-/* ===== Main Calculation & Validations ===== */
-function calculateConcentration() {
-  const amountRaw = document.getElementById("amount").value.trim();
-  const amountUnit = document.getElementById("amountUnit").value; // mg | g
-  const volumeRaw = document.getElementById("volume").value.trim();
-  const volumeUnit = document.getElementById("volumeUnit").value; // L | m3
-
-  const errorBox   = document.getElementById("resultError");
-  const errorMsgEl = document.getElementById("errorMessage");
-  const placeholder= document.getElementById("placeholder");
-  const resultCard = document.getElementById("resultValue");
-  const concEl     = document.getElementById("concentrationValue");
-  const unitEl     = document.getElementById("unitLabel");
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+  const rateEl = document.getElementById("rateValue");
   const feedbackEl = document.getElementById("feedbackContent");
 
-  // reset state
   errorBox.classList.add("hidden");
-  errorMsgEl.innerHTML = "";
+  errorMessage.innerHTML = "";
   feedbackEl.innerHTML = "";
 
   const errors = [];
   const warnings = [];
 
-  // Required fields
-  if (amountRaw === "") errors.push("👉 Please enter Amount of Contaminant (A).");
-  if (volumeRaw === "") errors.push("👉 Please enter Volume of Medium (V).");
+  // Required input validation
+  if (!flowRaw) errors.push("👉 Please enter Flow (V).");
+  if (!maxFlowRaw) errors.push("👉 Please enter Max Flow (Vmax).");
+  if (!tauRaw) errors.push("👉 Please enter Rangeability (τ).");
   if (errors.length) return showErrors(errors);
 
-  // Decimal precision
-  if (countDecimals(amountRaw) > 3) errors.push("👉 Amount: maximum 3 decimal places.");
-  if (countDecimals(volumeRaw) > 3) errors.push("👉 Volume: maximum 3 decimal places.");
+  const V = parseFloat(flowRaw);
+  const Vmax = parseFloat(maxFlowRaw);
+  const tau = parseFloat(tauRaw);
 
-  const A_in = parseFloat(amountRaw);
-  const V_in = parseFloat(volumeRaw);
-
-  if (!Number.isFinite(A_in)) errors.push("👉 Amount must be a valid number.");
-  if (!Number.isFinite(V_in)) errors.push("👉 Volume must be a valid number.");
-
-  // Hard limits for amount by unit
-  if (amountUnit === "mg") {
-    if (A_in < 0) errors.push("👉 Amount (mg) must be ≥ 0.");
-    if (A_in > 1000000000) errors.push("👉 Amount (mg) exceeds allowed limit (>1,000,000,000 mg).");
-  } else { // g
-    if (A_in < 0) errors.push("👉 Amount (g) must be ≥ 0.");
-    if (A_in > 1000000) errors.push("👉 Amount (g) exceeds allowed limit (>1,000,000 g).");
-  }
-
-  // Hard limits & zero check for volume
-  if (V_in <= 0) errors.push("👉 Volume must be greater than 0 to avoid division by zero.");
-  if (volumeUnit === "L") {
-    if (V_in < 0.001) errors.push("👉 Volume (L) must be ≥ 0.001 L (1 mL).");
-    if (V_in > 1000000) errors.push("👉 Volume (L) exceeds allowed limit (>1,000,000 L).");
-  } else { // m3
-    if (V_in < 0.001) errors.push("👉 Volume (m³) must be ≥ 0.001 m³ (1 L).");
-    if (V_in > 10000) errors.push("👉 Volume (m³) exceeds allowed limit (>10,000 m³).");
-  }
+  if (!Number.isFinite(V) || V < 0.001 || V > 20000)
+    errors.push("👉 Flow (V) must be between 0.001 and 20,000 m³/h.");
+  if (!Number.isFinite(Vmax) || Vmax < 0.01 || Vmax > 50000)
+    errors.push("👉 Max Flow (Vmax) must be between 0.01 and 50,000 m³/h.");
+  if (!Number.isFinite(tau) || tau <= 1.01 || tau > 1000)
+    errors.push("👉 Rangeability (τ) must be > 1.01 and ≤ 1000.");
 
   if (errors.length) return showErrors(errors);
 
-  // Soft warnings
-  if (volumeUnit === "L") {
-    if (V_in < 0.01) warnings.push("⚠️ Very small sample volume for water (<10 mL) may bias results.");
-    if (V_in > 10000) warnings.push("⚠️ Very large water sample volume (>10,000 L) is unusual; verify entry.");
-  } else {
-    if (V_in < 0.01) warnings.push("⚠️ Very small air volume (<0.01 m³ ≈ 10 L) may bias results.");
-    if (V_in > 100) warnings.push("⚠️ Very large air volume (>100 m³) is unusual for a single measurement.");
+  // Cross-field validations
+  if (V > Vmax) errors.push("👉 Flow (V) cannot exceed Max Flow (Vmax).");
+
+  const Vmin = Vmax / tau;
+  if (V < Vmin) {
+  errors.push(`👉 Flow (V) is too low. For proper valve control, it must be at least ${Vmin.toFixed(3)} m³/h (based on Vmax and rangeability).`);
+}
+
+
+  if (errors.length) return showErrors(errors);
+
+  // Compute Lift %
+  const Hpercent = 100 * (1 + (Math.log(V / Vmax) / Math.log(tau)));
+
+  if (!Number.isFinite(Hpercent) || Hpercent < 0 || Hpercent > 100) {
+    return showErrors(["⚠️ Computed valve lift is invalid. Check inputs."]);
   }
 
-  // Convert A to mg; V unchanged (L or m3)
-  const A_mg = amountUnit === "mg" ? A_in : A_in * 1000;
+  // Warnings
+  if (tau < 10 || tau > 100) warnings.push("⚠️ Rangeability is outside typical range (10–100).");
+  if (V < Vmin * 1.05) warnings.push("⚠️ Flow is very close to minimum controllable limit.");
+  if (V > Vmax * 0.95) warnings.push("⚠️ Flow is very close to maximum capacity.");
 
-  // Compute concentration in base units
-  const baseUnit = (volumeUnit === "L") ? "mg/L" : "mg/m³";
-  const C = A_mg / V_in;
-
-  if (!Number.isFinite(C) || C < 0) {
-    return showErrors(["⚠️ Computed concentration is invalid. Check inputs."]);
-  }
-
-  // Outcome-based warnings (contextual)
-  if (baseUnit === "mg/L") {
-    if (C > 10000) warnings.push("⚠️ Extremely high water concentration (>10,000 mg/L). Verify units and sampling.");
-    else if (C > 1000) warnings.push("⚠️ Very high water concentration (>1,000 mg/L).");
-    else if (C < 0.001 && A_in > 0) warnings.push("⚠️ Very low water concentration (<0.001 mg/L); may be near/below detection limits.");
-  } else { // mg/m3
-    if (C > 500) warnings.push("⚠️ Extremely high air concentration (>500 mg/m³). Verify units and sampling.");
-    else if (C > 50) warnings.push("⚠️ Very high air concentration (>50 mg/m³).");
-    else if (C < 0.001 && A_in > 0) warnings.push("⚠️ Very low air concentration (<0.001 mg/m³); may be near/below detection limits.");
-  }
-
-  // Classification (generic guidance only)
+  // Status interpretation
   let statusMsg = "";
-  if (baseUnit === "mg/L") {
-    if (C < 1) statusMsg = "✅ Low (typical of many drinking/ambient waters; confirm with standards for the specific substance).";
-    else if (C <= 10) statusMsg = "⚠️ Moderate; monitor and compare with applicable limits.";
-    else statusMsg = "🔴 High; review controls, process conditions, or incident status.";
+  if (Hpercent < 5) {
+    statusMsg = "⚠️ Valve nearly shut – control may be unstable.";
+  } else if (Hpercent <= 90) {
+    statusMsg = "✅ Normal controllable operating range.";
   } else {
-    if (C < 1) statusMsg = "✅ Low (typical of many workplace/ambient air results; check substance OEL/PEL/REL).";
-    else if (C <= 10) statusMsg = "⚠️ Moderate; ensure ventilation and controls are adequate.";
-    else statusMsg = "🔴 High; prioritize exposure reduction and verification sampling.";
+    statusMsg = "⚠️ Valve near wide-open – reduced controllability.";
   }
 
-  // Scaling for display
-  const pretty = scaleConcentration(C, baseUnit);
-
-  // Present results
-  concEl.textContent = (pretty.val >= 100) ? pretty.val.toFixed(1) : (pretty.val >= 1 ? pretty.val.toFixed(2) : pretty.val.toFixed(3));
-  unitEl.textContent = pretty.unit;
-
-  let details = `<div>Normalized concentration: <b>${C.toFixed(6)}</b> ${baseUnit}</div>`;
-  details += `<div>Amount (A): <b>${A_in.toFixed(Math.min(3, countDecimals(amountRaw)))}</b> ${amountUnit}</div>`;
-  details += `<div>Volume (V): <b>${V_in.toFixed(Math.min(3, countDecimals(volumeRaw)))}</b> ${volumeUnit}</div>`;
-  details += `<div style="margin-top:6px; font-size:0.95em; color:#666;">Note: Compare against substance-specific regulatory/occupational limits.</div>`;
+  let details = `<div>Valve Lift: <b>${Hpercent.toFixed(2)}%</b></div>`;
+  details += `<div>Flow: <b>${V.toFixed(3)}</b> m³/h</div>`;
+  details += `<div>Max Flow: <b>${Vmax.toFixed(3)}</b> m³/h</div>`;
+  details += `<div>Rangeability: <b>${tau.toFixed(2)}</b></div>`;
+  details += `<div>Minimum Controllable Flow (Vmax/τ): <b>${Vmin.toFixed(3)}</b> m³/h</div>`;
   if (warnings.length) {
     details += `<div style="margin-top:6px; color:#b35d00; font-size:0.95em;">${warnings.join(" | ")}</div>`;
   }
 
+  rateEl.textContent = Hpercent.toFixed(2);
   feedbackEl.innerHTML = `<div>${statusMsg}</div>${details}`;
-  document.getElementById("placeholder").classList.add("hidden");
-  document.getElementById("resultValue").classList.remove("hidden");
-  document.getElementById("resultError").classList.add("hidden");
+
+  placeholder.classList.add("hidden");
+  resultValue.classList.remove("hidden");
+  errorBox.classList.add("hidden");
 }
 
 function printReport() {
@@ -721,82 +643,66 @@ function printReport() {
 }
 </script>
 
-
     <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
 {% endblock %}
 
 
+<!-- /*
+==============================================
+📌 Equal Percentage Valve Lift Calculator
+==============================================
 
-<!--
-==========================================================
-EXPOSURE LEVEL (CONCENTRATION) CALCULATOR - DOCUMENTATION
-==========================================================
+🔹 Formula:
+    Valve Lift % (H%) = 100 * (1 + log(V / Vmax) / log(τ))
 
-📌 Formula Used:
-  - Convert Amount (A) to mg:
-        If unit = mg → A_mg = A
-        If unit = g  → A_mg = A × 1000
-  - Concentration (C):
-        If volume unit = L  → C = A_mg ÷ V   → mg/L
-        If volume unit = m³ → C = A_mg ÷ V   → mg/m³
+    where:
+      V     = Flow [m³/h]
+      Vmax  = Maximum Flow [m³/h]
+      τ     = Rangeability (dimensionless)
+      Vmin  = Vmax / τ (minimum controllable flow)
 
-  - Display scaling (human-friendly):
-        < 1 mg → converted to µg
-        ≥ 1000 mg → converted to g
-        ≥ 1,000,000 mg → converted to kg
+----------------------------------------------
+🔹 Input Validations:
+1. Flow (V):
+   - Required
+   - Must be numeric
+   - Range: 0.001 ≤ V ≤ 20,000 m³/h
 
-📌 Input Validations:
-  - Amount (A):
-      • Required
-      • Numeric, max 3 decimal places
-      • If mg → 0 ≤ A ≤ 1,000,000,000
-      • If g  → 0 ≤ A ≤ 1,000,000
+2. Maximum Flow (Vmax):
+   - Required
+   - Must be numeric
+   - Range: 0.01 ≤ Vmax ≤ 50,000 m³/h
 
-  - Volume (V):
-      • Required
-      • Numeric, max 3 decimal places
-      • Must be > 0 (avoid divide by zero)
-      • If L  → 0.001 ≤ V ≤ 1,000,000
-      • If m³ → 0.001 ≤ V ≤ 10,000
+3. Rangeability (τ):
+   - Required
+   - Must be numeric
+   - Range: 1.01 < τ ≤ 1000
 
-📌 Output Validations:
-  - C must be finite and ≥ 0
-  - Warnings triggered for unusual values:
-      • Water (mg/L):
-          > 10,000 → extremely high
-          > 1,000  → very high
-          < 0.001 (with A>0) → very low, may be near detection limit
-      • Air (mg/m³):
-          > 500 → extremely high
-          > 50  → very high
-          < 0.001 (with A>0) → very low, may be near detection limit
+----------------------------------------------
+🔹 Cross-field Validations:
+1. Flow (V) ≤ Max Flow (Vmax)
+2. Flow (V) ≥ Vmin ( = Vmax / τ )
+   - Otherwise: "Flow is too low for proper control."
 
-📌 Soft Warnings (plausibility checks):
-  - Water samples:
-        < 0.01 L (10 mL) → very small, may bias results
-        > 10,000 L → very large, unusual for a single sample
-  - Air samples:
-        < 0.01 m³ (~10 L) → very small
-        > 100 m³ → very large, unusual for a single measurement
+----------------------------------------------
+🔹 Output Validation:
+- Computed Valve Lift (H%) must be finite.
+- Must fall within 0% ≤ H% ≤ 100%.
+- If invalid → show error.
 
-📌 Classification (generic guidance):
-  - Water (mg/L):
-        < 1     → ✅ Low (typical for ambient/drinking water)
-        1–10   → ⚠️ Moderate; monitor & compare to limits
-        > 10   → 🔴 High; review process/incident
-  - Air (mg/m³):
-        < 1     → ✅ Low (typical workplace/ambient levels)
-        1–10   → ⚠️ Moderate; check ventilation & controls
-        > 10   → 🔴 High; reduce exposure & verify sampling
+----------------------------------------------
+🔹 Warnings:
+- τ outside typical range (10–100).
+- V close to Vmin (≤ 5% above limit).
+- V close to Vmax (≥ 95% of capacity).
 
-📌 Output Breakdown:
-  - Final concentration (scaled to appropriate unit)
-  - Normalized concentration (mg/L or mg/m³, 6 decimals)
-  - Input amount and volume (with original units)
-  - Warnings (if any)
-  - Advisory note: must compare to substance-specific regulatory limits (OEL/PEL/REL for air, drinking water standards, etc.)
+----------------------------------------------
+🔹 Status Interpretation:
+- H% < 5%   → ⚠️ Valve nearly shut (unstable control).
+- 5% ≤ H% ≤ 90% → ✅ Normal controllable operating range.
+- H% > 90%  → ⚠️ Valve near wide open (reduced controllability).
 
-==========================================================
--->
+==============================================
+*/ -->

@@ -1,0 +1,652 @@
+{% extends 'base.html' %}
+{% block title %}Ideal Weight Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ideal Weight Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+            height: 420px;
+            overflow-y: auto;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        /* Result Card */
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder {
+            text-align: center;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            justify-content: center;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+        }
+        .rate-label {
+            color: #2980b9;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0 10px;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        /* Table styles */
+        .result-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .result-table thead {
+            background-color: #1560bd;
+            color: white;
+        }
+        .result-table th, .result-table td {
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .result-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            margin-top: 20px;
+        }
+        .error-message {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        /* Toggle helper */
+        .hidden {
+            display: none;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Ideal Weight Calculator</h1>
+            <p>Calculate your ideal body weight using multiple recognized formulas.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Enter Your Details</h2>
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" class="form-select">
+                        <option value="female">Female</option>
+                        <option value="male">Male</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="height">Height (cm)</label>
+                    <input type="number" id="height" class="form-input" placeholder="Enter height in cm" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="weight">Current Weight (kg)</label>
+                    <input type="number" id="weight" class="form-input" placeholder="Enter weight in kg" step="0.1">
+                </div>
+                <button class="calculate-btn" onclick="calculateAndDisplay()">Calculate Ideal Weight</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Enter your details to calculate your ideal weight and see a detailed breakdown.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div id="resultValue" class="hidden" style="text-align: center;">
+                    <h2>Average Ideal Weight</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.0</div>
+                        <div class="rate-label">kg</div>
+                    </div>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span id="meterMin">Low</span>
+                        <span>Current Weight</span>
+                        <span id="meterMax">High</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Interpretation</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div id="detailedResults"></div>
+                    <div id="chartContainer" style="margin-top: 20px; height: 300px;">
+                        <canvas id="weightChart"></canvas>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 What is Ideal Weight?</h3>
+                <p>
+                    The ideal weight represents a healthy body mass based on various formulas. It is an estimate of the weight range that is considered healthy for a person of a given height and gender. Maintaining an ideal weight is important for overall health and can reduce the risk of chronic diseases such as diabetes, heart disease, and hypertension.
+                </p>
+            </div>
+            <div class="note-card">
+                <h3>📖 Formulas Used:</h3>
+                <ul class="note-list">
+                    <li><strong>Peterson Formula:</strong> A newer formula that takes into account height and gender to estimate ideal weight.</li>
+                    <li><strong>Miller Formula:</strong> Based on height, this formula provides an estimate of ideal weight for both men and women.</li>
+                    <li><strong>Robinson Formula:</strong> A modification of the Devine formula, it is widely used in medical settings.</li>
+                    <li><strong>Devine Formula:</strong> One of the most commonly used formulas, originally developed for medical dosage calculations.</li>
+                    <li><strong>Hamwi Formula:</strong> Similar to the Devine formula, it is often used in clinical practice.</li>
+                    <li><strong>Broca Formula:</strong> A simple formula that subtracts a fixed number from height to estimate ideal weight.</li>
+                    <li><strong>Lorentz Formula:</strong> Adjusts ideal weight based on gender and height, providing a more tailored estimate.</li>
+                </ul>
+            </div>
+            <div class="note-card">
+                <h3>📊 Healthy BMI Range</h3>
+                <p>
+                    The Body Mass Index (BMI) is a measure of body fat based on height and weight. A healthy BMI range is typically between 18.5 and 24.9. This calculator also provides the weight range corresponding to a healthy BMI for your height.
+                </p>
+            </div>
+            <div class="note-card">
+                <h3>ℹ️ Input Validations</h3>
+                <div class="note-list">
+                    <p>
+                        To ensure correct and realistic results, please follow these input rules when entering your details:
+                    </p>
+                    <ul>
+                        <li><strong>Required Fields:</strong> Both <em>Height</em> and <em>Current Weight</em> must be entered.</li>
+                        <li><strong>Height:</strong> Must be a numeric value between <strong>50 cm</strong> and <strong>250
+                                cm</strong>.</li>
+                        <li><strong>Weight:</strong> Must be a numeric value between <strong>20 kg</strong> and <strong>300
+                                kg</strong>.</li>
+                        <li><strong>Numeric Input Only:</strong> Use digits only (e.g., <code>165</code>), no letters, commas, or
+                            symbols.</li>
+                        <li><strong>Gender Selection:</strong> Choose either Male or Female — this affects which formulas are
+                            applied.</li>
+                        <li><strong>Error Messages:</strong> If inputs are missing or invalid, clear warnings will appear and
+                            results will not be calculated.</li>
+                        <li><strong>Correct Example:</strong> Height = <code>170</code>, Weight = <code>65</code>, Gender = Male.
+                        </li>
+                    </ul>
+                    <p>
+                        ✅ These checks make sure your ideal weight range is calculated correctly using multiple formulas, avoiding
+                        misleading results.
+                    </p>
+                </div>
+            </div>
+            <div class="note-card">
+                <h3>⚠️ Disclaimer</h3>
+                <p>
+                    This calculator provides estimates only and should not be used as a substitute for professional medical advice. Individual health conditions, body composition, and other factors may influence your ideal weight. Always consult with a healthcare professional for personalized health assessments and recommendations.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let weightChartInstance = null; // To hold the chart instance
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            if (document.getElementById('printDate')) {
+                document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
+        });
+
+        function calculateAndDisplay() {
+            const gender = document.getElementById('gender').value;
+            
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValueBox = document.getElementById('resultValue');
+            
+            // Reset UI
+            errorBox.classList.add('hidden');
+            resultValueBox.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+
+            let errors = [];
+
+            function getVal(id, label, opts = {}) {
+                const el = document.getElementById(id);
+                const raw = el.value?.toString().trim();
+                if (!raw) {
+                    errors.push(`👉 ${label} is required.`);
+                    return null;
+                }
+                const num = parseFloat(raw);
+                if (isNaN(num) || num <= 0) {
+                    errors.push(`👉 Enter a valid positive number for ${label}.`);
+                    return null;
+                }
+                if (opts.min !== undefined && num < opts.min) {
+                    errors.push(`👉 ${label} must be ≥ ${opts.min}.`);
+                    return null;
+                }
+                if (opts.max !== undefined && num > opts.max) {
+                    errors.push(`👉 ${label} must be ≤ ${opts.max}.`);
+                    return null;
+                }
+                return num;
+            }
+
+            const heightCm = getVal("height", "Height", { min: 50, max: 250 });
+            const currentWeightKg = getVal("weight", "Current Weight", { min: 20, max: 300 });
+
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add('hidden');
+                return;
+            }
+
+            // Calculations
+            const heightInches = heightCm / 2.54;
+            const heightMeters = heightCm / 100;
+            let weights = {};
+
+            if (gender === "male") {
+                const targetBMI = 22;
+                weights.peterson = (2.2 * targetBMI) + (3.5 * targetBMI * (heightMeters - 1.5));
+                weights.miller = 56.2 + 1.41 * (heightInches - 60);
+                weights.robinson = 52 + 1.9 * (heightInches - 60);
+                weights.devine = 50 + 2.3 * (heightInches - 60);
+                weights.hamwi = 48 + 2.7 * (heightInches - 60);
+                weights.broca = heightCm - 100;
+                weights.lorentz = (heightCm - 100) - ((heightCm - 150) / 4);
+            } else {
+                const targetBMI = 22;
+                weights.peterson = (2.2 * targetBMI) + (3.5 * targetBMI * (heightMeters - 1.5));
+                weights.miller = 53.1 + 1.36 * (heightInches - 60);
+                weights.robinson = 49 + 1.7 * (heightInches - 60);
+                weights.devine = 45.5 + 2.3 * (heightInches - 60);
+                weights.hamwi = 45.5 + 2.2 * (heightInches - 60);
+                weights.broca = heightCm - 100;
+                weights.lorentz = (heightCm - 100) - ((heightCm - 150) / 2);
+            }
+            
+            const weightValues = Object.values(weights).filter(w => w > 0);
+            if (weightValues.length === 0) {
+                 errorMessage.innerHTML = "Could not calculate ideal weight with the provided values.";
+                 errorBox.classList.remove("hidden");
+                 placeholder.classList.add('hidden');
+                 return;
+            }
+
+            const averageWeight = weightValues.reduce((a, b) => a + b, 0) / weightValues.length;
+            
+            // Display Results
+            placeholder.classList.add('hidden');
+            resultValueBox.classList.remove('hidden');
+
+            document.getElementById('rateValue').textContent = averageWeight.toFixed(1);
+            document.getElementById('feedbackContent').textContent = `This is the average of 7 common formulas. Your current weight is ${currentWeightKg} kg.`;
+
+            // Update meter
+            const meterFill = document.getElementById('meterFill');
+            const lowerBound = averageWeight * 0.85; // Healthy range -15%
+            const upperBound = averageWeight * 1.15; // Healthy range +15%
+            document.getElementById('meterMin').textContent = `${lowerBound.toFixed(1)} kg`;
+            document.getElementById('meterMax').textContent = `${upperBound.toFixed(1)} kg`;
+            let pct = ((currentWeightKg - lowerBound) / (upperBound - lowerBound)) * 100;
+            pct = Math.min(100, Math.max(0, pct));
+            meterFill.style.width = pct.toFixed(1) + '%';
+            
+            if (currentWeightKg < lowerBound) {
+                meterFill.style.backgroundColor = '#f39c12'; // Orange for low
+            } else if (currentWeightKg > upperBound) {
+                meterFill.style.backgroundColor = '#e74c3c'; // Red for high
+            } else {
+                meterFill.style.backgroundColor = '#2ecc71'; // Green for healthy
+            }
+
+
+            // Display detailed table
+            const detailedResultsDiv = document.getElementById('detailedResults');
+            detailedResultsDiv.innerHTML = `
+                <table class="result-table">
+                    <thead>
+                        <tr><th>Formula</th><th>Ideal Weight (kg)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Peterson</td><td>${weights.peterson.toFixed(1)}</td></tr>
+                        <tr><td>Miller</td><td>${weights.miller.toFixed(1)}</td></tr>
+                        <tr><td>Robinson</td><td>${weights.robinson.toFixed(1)}</td></tr>
+                        <tr><td>Devine</td><td>${weights.devine.toFixed(1)}</td></tr>
+                        <tr><td>Hamwi</td><td>${weights.hamwi.toFixed(1)}</td></tr>
+                        <tr><td>Broca</td><td>${weights.broca.toFixed(1)}</td></tr>
+                        <tr><td>Lorentz</td><td>${weights.lorentz.toFixed(1)}</td></tr>
+                    </tbody>
+                </table>`;
+            
+            // Draw Chart
+            drawBarGraph(weights, currentWeightKg);
+        }
+
+        function drawBarGraph(weights, userWeight) {
+            const ctx = document.getElementById('weightChart').getContext('2d');
+            if (weightChartInstance) {
+                weightChartInstance.destroy(); // Destroy the old chart instance before creating a new one
+            }
+
+            const labels = ['Peterson', 'Miller', 'Robinson', 'Devine', 'Hamwi', 'Broca', 'Lorentz', 'Your Weight'];
+            const data = [
+                weights.peterson, weights.miller, weights.robinson, weights.devine, 
+                weights.hamwi, weights.broca, weights.lorentz, userWeight
+            ];
+
+            weightChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Weight (kg)',
+                        data: data,
+                        backgroundColor: [
+                            'rgba(21, 96, 189, 0.7)',
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(153, 102, 255, 0.7)',
+                            'rgba(255, 159, 64, 0.7)',
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(201, 203, 207, 0.9)'
+                        ],
+                        borderColor: [
+                            'rgba(21, 96, 189, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(201, 203, 207, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, title: { display: true, text: 'Weight (kg)' } } }
+                }
+            });
+        }
+
+        function printReport() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            if (document.getElementById('printDate')) {
+                document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
+            window.print();
+        }
+    </script>
+</body>
+</html>
+{% endblock %}
