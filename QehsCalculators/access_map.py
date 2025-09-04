@@ -272,6 +272,8 @@ CALCULATORS = [
 
 
     # Safety Calculators
+    {"name": "Accident Rate Calculator", "url_name": "safety_accident_rate_calculator", "plan_type": "corporate", "category": "safety"},
+
     {"name": "Average Resolution Time (ART) Calculator", "url_name": "safety_average_resolution_time_art_calculator", "plan_type": "corporate", "category": "safety"},
 
     {"name": "Averaging Thickness for Corroded Areas Calculator", "url_name": "safety_averaging_thickness_for_corroded_areas_calculator", "plan_type": "corporate", "category": "safety"},
@@ -339,7 +341,6 @@ CALCULATORS = [
 
 {"name": "Cost of Accident Calculator", "url_name": "safety_cost_of_an_accident_calculator", "plan_type": "corporate", "category": "safety"},
 
-{"name": "Accident Rate Calculator", "url_name": "safety_accident_rate_calculator", "plan_type": "corporate", "category": "safety"},
 
 {"name": "Casing Burst Pressure Calculator", "url_name": "safety_casing_burst_pressure_calculator", "plan_type": "corporate", "category": "safety"},
 
