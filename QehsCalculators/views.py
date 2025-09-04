@@ -3053,13 +3053,8 @@ def safety_crane_wind_speed_allowance_calculator(request):
 
 @login_required
 @subscription_required(plan_type="corporate")
-def safety_composite_risk_calculator(request):
-    return render(request, 'qehsfcalculators/safety/composite_risk.html', {'title': 'Composite Risk Calculator'})
-
-@login_required
-@subscription_required(plan_type="corporate")
-def safety_critical_pressure_ratio_for_dry_steam_and_gases_calculator(request):
-    return render(request, 'qehsfcalculators/safety/critical_pressure_ratio_for_dry_steam_and_gases.html', {'title': 'Critical Pressure Ratio For Dry Steam And Gases Calcualtor'})
+def safety_critical_flow_scaling_parameter_calculator(request):
+    return render(request, 'qehsfcalculators/safety/critical_flow_scaling_parameter.html', {'title': 'Critical Flow Scaling Parameter Calculator'})
 
 @login_required
 @subscription_required(plan_type="corporate")
@@ -3083,6 +3078,11 @@ def safety_corrective_action_closure_rate_calculator(request):
 
 @login_required
 @subscription_required(plan_type="corporate")
+def safety_critical_pressure_calculator(request):
+    return render(request, 'qehsfcalculators/safety/critical_pressure_api_rp520.html', {'title': 'Critical Pressure Calculator (API RP520)'})
+    
+@login_required
+@subscription_required(plan_type="corporate")
 def safety_chemical_exposure_burn_severity_rate_calculator(request):
     return render(request, 'qehsfcalculators/safety/chemical_exposure_burn_severity_rate.html', {'title': 'Chemical Exposure Burn Severity Rate Calculator'})
 
@@ -3093,13 +3093,13 @@ def safety_compressible_flow_crane_equation_3_20_calculator(request):
 
 @login_required
 @subscription_required(plan_type="corporate")
-def safety_clausius_clapeyron_equation_calculator(request):
-    return render(request, 'qehsfcalculators/safety/clausius_clapeyron_equation.html', {'title': 'Clausius-Clapeyron Equation Calculator'})
+def safety_composite_risk_calculator(request):
+    return render(request, 'qehsfcalculators/safety/composite_risk.html', {'title': 'Composite Risk Calculator'})
 
 @login_required
 @subscription_required(plan_type="corporate")
-def safety_composite_risk_calculator(request):
-    return render(request, 'qehsfcalculators/safety/composite_risk.html', {'title': 'Composite Risk Calculator'})
+def safety_clausius_clapeyron_equation_calculator(request):
+    return render(request, 'qehsfcalculators/safety/clausius_clapeyron_equation.html', {'title': 'Clausius-Clapeyron Equation Calculator'})
 
 @login_required
 @subscription_required(plan_type="corporate")
