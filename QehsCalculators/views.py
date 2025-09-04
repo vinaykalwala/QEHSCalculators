@@ -874,6 +874,10 @@ def get_user_plan(user):
     """Returns the plan name if user has an active subscription, else None."""
     if not user.is_authenticated:
         return None  # Guests have no plan
+    
+    # Superusers get automatic "corporate" level access
+    if user.is_superuser:
+        return "corporate"
 
     active_subscription = UserSubscription.objects.filter(
         user=user,
@@ -891,6 +895,10 @@ def get_calculators_for_category(category, user_plan):
         # No plan → no calculators
         return []
 
+    # For superusers (who get "corporate" plan), show all calculators
+    if user_plan == "corporate":
+        return [calc for calc in CALCULATORS if calc['category'] == category]
+    
     user_plan_level = PLAN_HIERARCHY.get(user_plan, 0)  # 0 = no access
     filtered = [
         calc for calc in CALCULATORS
