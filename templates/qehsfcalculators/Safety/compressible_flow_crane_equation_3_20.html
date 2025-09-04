@@ -1,0 +1,864 @@
+{% extends 'base.html' %}
+{% block title %}Crane Equation 3-20 - Compressible Flow Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crane Equation 3-20 - Compressible Flow Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        /* Input rows for side-by-side fields */
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+       
+       /* 🔹 Gas Table Styling */
+.gas-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 20px 0;
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    font-size: 14px;
+    background: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Header */
+.gas-table th {
+    background: linear-gradient(135deg, #1560bd, #2980b9);
+    color: #fff;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 12px;
+    text-align: center;
+}
+
+/* Data Cells */
+.gas-table td {
+    border: 1px solid #e0e6ed;
+    padding: 10px;
+    text-align: center;
+    color: #333;
+}
+
+/* Alternating Rows */
+.gas-table tr:nth-child(even) {
+    background-color: #f9fbfd;
+}
+.gas-table tr:nth-child(odd) {
+    background-color: #ffffff;
+}
+
+/* Hover Effect */
+.gas-table tr:hover {
+    background-color: #eaf3ff;
+    transition: background-color 0.2s ease-in-out;
+}
+
+/* Rounded Corners */
+.gas-table th:first-child {
+    border-top-left-radius: 10px;
+}
+.gas-table th:last-child {
+    border-top-right-radius: 10px;
+}
+.gas-table tr:last-child td:first-child {
+    border-bottom-left-radius: 10px;
+}
+.gas-table tr:last-child td:last-child {
+    border-bottom-right-radius: 10px;
+}
+
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Crane Equation 3-20 - Compressible Flow Calculator</h1>
+            <p>Calculate flow rate for compressible fluids through valves, fittings and pipes</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="Y">Expansion Factor (Y)</label>
+                        <input type="number" id="Y" class="form-input" min="0" step="0.001" placeholder="e.g., 0.64">
+                    </div>
+                    <div class="form-group">
+                        <label for="d">Internal Diameter (d) (inches)</label>
+                        <input type="number" id="d" class="form-input" min="0" step="0.001" placeholder="e.g., 2.5">
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="deltaP">Pressure Drop (ΔP) (psia)</label>
+                        <input type="number" id="deltaP" class="form-input" min="0" step="0.001" placeholder="e.g., 50">
+                    </div>
+                    <div class="form-group">
+                        <label for="P1">Upstream Pressure (P₁) (psia)</label>
+                        <input type="number" id="P1" class="form-input" min="0" step="0.001" placeholder="e.g., 100">
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="K">Loss Coefficient (K)</label>
+                        <input type="number" id="K" class="form-input" min="0" step="0.001" placeholder="e.g., 4.0">
+                    </div>
+                    <div class="form-group">
+                        <label for="T1">Absolute Temperature (T₁) (Rankine)</label>
+                        <input type="number" id="T1" class="form-input" min="0" step="0.001" placeholder="e.g., 520">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="Sg">Specific Gravity (Sg)</label>
+                    <input type="number" id="Sg" class="form-input" min="0" step="0.001" value="1.0" placeholder="e.g., 1.0">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateFlowRate()">Calculate Flow Rate</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Flow illustration">
+                    <p>This tool will calculate the <strong>Flow Rate</strong> for compressible fluids. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Flow Rate Calculation Result</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">SCFM</div>
+                    </div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low</span><span>Moderate</span><span>Normal</span><span>High</span><span>Very High</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Flow Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    This tool calculates the <strong>Flow Rate for Compressible Fluids</strong> using Crane Equation 3-20, 
+                    which is used for determining flow through valves, fittings, and pipes in various industrial applications.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Expansion Factor (Y):</strong> Adjusts for compressibility effects in high-pressure flows.</li>
+                    <li><strong>Internal Diameter (d):</strong> The inside diameter of the pipe in inches.</li>
+                    <li><strong>Pressure Drop (ΔP):</strong> The difference between upstream and downstream pressure in psia.</li>
+                    <li><strong>Upstream Pressure (P₁):</strong> The absolute pressure at the inlet in psia.</li>
+                    <li><strong>Loss Coefficient (K):</strong> Accounts for resistance from fittings, valves, and pipe roughness.</li>
+                    <li><strong>Absolute Temperature (T₁):</strong> The absolute temperature at the inlet in Rankine.</li>
+                    <li><strong>Specific Gravity (Sg):</strong> The ratio of gas density to air density at standard conditions.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <p>
+                    <b>Flow Rate Guidelines:</b>
+                </p>
+                <ul class="note-list">
+                    <li><span class="good">Below 100 SCFM</span> → Low flow rate</li>
+                    <li><span class="average">100-1,000 SCFM</span> → Moderate flow rate</li>
+                    <li><span class="average">1,000-10,000 SCFM</span> → Normal industrial range</li>
+                    <li><span class="bad">10,000-50,000 SCFM</span> → High flow rate</li>
+                    <li><span class="bad">Above 50,000 SCFM</span> → Very high flow rate</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>🔑 Key Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Oil & Gas Pipelines:</strong> Ensures safe transportation of natural gas.</li>
+                    <li><strong>Power Plants:</strong> Determines steam flow through turbines and boilers.</li>
+                    <li><strong>Fire Safety Systems:</strong> Calculates gas flow rates in suppression systems.</li>
+                    <li><strong>Process Industries:</strong> Sizing of pressure relief valves and vent systems.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>✅ Validation Rules & Input Constraints</h3>
+                <ul class="note-list">
+                    <li><strong>Expansion Factor (Y):</strong> Must be between 0.1 and 1.0.</li>
+                    <li><strong>Internal Diameter (d):</strong> Must be > 0 inches.</li>
+                    <li><strong>Pressure Drop (ΔP):</strong> Must be > 0 psia.</li>
+                    <li><strong>Upstream Pressure (P₁):</strong> Must be > 0 psia.</li>
+                    <li><strong>Loss Coefficient (K):</strong> Must be > 0.</li>
+                    <li><strong>Absolute Temperature (T₁):</strong> Must be > 0 Rankine.</li>
+                    <li><strong>Specific Gravity (Sg):</strong> Must be > 0.</li>
+                    <li><strong>Pressure Check:</strong> ΔP must be less than P₁.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📋 Sonic Flow Determination</h3>
+                <p>Flow becomes sonic (choked) when ΔP/P₁ exceeds critical ratio:</p>
+                <table class="gas-table">
+                    <tr><th>K</th><th>ΔP/P₁</th><th>Y</th></tr>
+                    <tr><td>1.2</td><td>0.552</td><td>0.588</td></tr>
+                    <tr><td>1.5</td><td>0.576</td><td>0.606</td></tr>
+                    <tr><td>2.0</td><td>0.612</td><td>0.622</td></tr>
+                    <tr><td>3</td><td>0.622</td><td>0.639</td></tr>
+                    <tr><td>4</td><td>0.697</td><td>0.649</td></tr>
+                    <tr><td>6</td><td>0.737</td><td>0.671</td></tr>
+                    <tr><td>8</td><td>0.762</td><td>0.685</td></tr>
+                    <tr><td>10</td><td>0.784</td><td>0.695</td></tr>
+                    <tr><td>15</td><td>0.818</td><td>0.702</td></tr>
+                    <tr><td>20</td><td>0.839</td><td>0.710</td></tr>
+                    <tr><td>40</td><td>0.883</td><td>0.710</td></tr>
+                    <tr><td>100</td><td>0.926</td><td>0.710</td></tr>
+                </table>
+            </div>
+            
+            <div class="note-card">
+                <h3>🏭 Industry Standards & Guidelines</h3>
+                <p>Based on ASME & Crane Technical Paper 410 standards for pressure loss calculations in compressible flow systems.</p>
+            </div>
+        </div>
+        <div class="note-card">
+  <h3>✅ Input Validation Rules</h3>
+  <ul class="note-list">
+    <li><strong>Expansion Factor (Y):</strong> Must be between 0.1 and 1.0.</li>
+    <li><strong>Internal Diameter (d):</strong> 0.25 – 48 inches.</li>
+    <li><strong>Pressure Drop (ΔP):</strong> > 0 psia and less than P₁.</li>
+    <li><strong>Upstream Pressure (P₁):</strong> > 0 psia (typical 14.7–3000 psia).</li>
+    <li><strong>Loss Coefficient (K):</strong> > 0 (typical 0.1–100).</li>
+    <li><strong>Temperature (T₁):</strong> > 0 R, ≤ 2000 R.</li>
+    <li><strong>Specific Gravity (Sg):</strong> > 0 (typical 0.1–5).</li>
+    <li><strong>Cross-check:</strong> ΔP must be less than P₁, warn if ΔP/P₁ > 0.5 (possible choked flow).</li>
+  </ul>
+  <p><b>Note:</b> These validations follow <b>ASME</b> and <b>Crane TP-410</b> standards for compressible flow calculations.</p>
+</div>
+
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateFlowRate() {
+    const Y = parseFloat(document.getElementById('Y').value.trim());
+    const d = parseFloat(document.getElementById('d').value.trim());
+    const deltaP = parseFloat(document.getElementById('deltaP').value.trim());
+    const P1 = parseFloat(document.getElementById('P1').value.trim());
+    const K = parseFloat(document.getElementById('K').value.trim());
+    const Sg = parseFloat(document.getElementById('Sg').value.trim());
+    const T1 = parseFloat(document.getElementById('T1').value.trim());
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+    let warnings = [];
+
+    // ============================
+    // VALIDATIONS
+    // ============================
+
+    if (isNaN(Y) || Y < 0.1 || Y > 1.0) {
+        errors.push("👉 Expansion Factor (Y) must be between 0.1 and 1.0.");
+    }
+    if (isNaN(d) || d <= 0 || d > 48) {
+        errors.push("👉 Internal Diameter must be between 0.25 and 48 inches.");
+    }
+    if (isNaN(deltaP) || deltaP <= 0) {
+        errors.push("👉 Pressure Drop (ΔP) must be > 0 psia.");
+    }
+    if (isNaN(P1) || P1 <= 0) {
+        errors.push("👉 Upstream Pressure (P₁) must be > 0 psia.");
+    }
+    if (isNaN(K) || K <= 0 || K > 1000) {
+        errors.push("👉 Loss Coefficient (K) must be > 0 (typically 0.1–100).");
+    }
+    if (isNaN(T1) || T1 <= 0 || T1 > 2000) {
+        errors.push("👉 Temperature (T₁) must be > 0 and ≤ 2000 R.");
+    }
+    if (isNaN(Sg) || Sg <= 0 || Sg > 10) {
+        errors.push("👉 Specific Gravity (Sg) must be > 0 (typical range 0.1–5).");
+    }
+
+    // Cross-field: ΔP < P1
+    if (!isNaN(deltaP) && !isNaN(P1) && deltaP >= P1) {
+        errors.push("👉 ΔP must be less than Upstream Pressure P₁.");
+    }
+
+    // ============================
+    // ERROR HANDLING
+    // ============================
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // ============================
+    // CALCULATION
+    // ============================
+    const flowRate = 678 * Y * Math.pow(d, 2) * Math.sqrt((deltaP * P1) / (K * T1 * Sg));
+
+    if (!isFinite(flowRate) || flowRate <= 0) {
+        errorMessage.innerHTML = "❌ Invalid calculation. Please recheck inputs.";
+        errorBox.classList.remove("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    // Sonic flow warning
+    const pressureRatio = deltaP / P1;
+    if (pressureRatio > 0.5) {
+        warnings.push("⚠️ Flow may be choked (approaching sonic conditions).");
+    }
+
+    document.getElementById('rateValue').textContent = flowRate.toFixed(2);
+
+    // ============================
+    // OUTPUT ASSESSMENT
+    // ============================
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+
+    if (flowRate < 100) {
+        meterWidth = "20%"; meterColor = "#2ecc71";
+        feedback = "Low flow rate. Suitable for small systems.";
+    } else if (flowRate <= 1000) {
+        meterWidth = "40%"; meterColor = "#27ae60";
+        feedback = "Moderate flow rate. Common in small industrial applications.";
+    } else if (flowRate <= 10000) {
+        meterWidth = "60%"; meterColor = "#f39c12";
+        feedback = "Normal industrial flow range.";
+    } else if (flowRate <= 50000) {
+        meterWidth = "80%"; meterColor = "#e67e22";
+        feedback = "High flow rate. Verify system safety.";
+    } else {
+        meterWidth = "95%"; meterColor = "#e74c3c";
+        feedback = "Very high flow. Special design checks required.";
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').textContent = feedback + (warnings.length ? " " + warnings.join(" ") : "");
+
+    placeholder.classList.add("hidden");
+    resultValue.classList.remove("hidden");
+}
+
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+{% comment %} 
+
+1️⃣ Formula (for inclusion as code comments)
+/*
+====================================================
+Crane Equation 3-20: Compressible Flow through fittings/valves
+====================================================
+
+q = 678 × Y × d² × √( (ΔP × P₁) / (K × T₁ × Sg) )
+
+Where:
+- q  = Flow rate (SCFM, standard cubic feet per minute)
+- Y  = Expansion factor (dimensionless, 0.1 ≤ Y ≤ 1.0)
+- d  = Internal diameter (inches)
+- ΔP = Pressure drop across fitting/valve (psia)
+- P₁ = Upstream absolute pressure (psia)
+- K  = Loss coefficient (dimensionless, >0)
+- T₁ = Absolute temperature (Rankine, >0)
+- Sg = Specific gravity of gas relative to air (dimensionless, >0)
+
+⚠️ Valid only for compressible flow with ΔP < P₁.
+Choked flow occurs when ΔP/P₁ exceeds the critical pressure ratio.
+====================================================
+*/
+
+2️⃣ Input Validation Rules (Real-World QEHS / Fire Safety)
+
+Expansion Factor (Y)
+
+Range: 0.1 ≤ Y ≤ 1.0
+
+<0.1 or >1.0 is physically invalid.
+
+Internal Diameter (d, inches)
+
+Must be > 0.
+
+Realistic: 0.25 in – 48 in (industrial pipe sizes).
+
+Pressure Drop (ΔP, psia)
+
+Must be > 0 and less than P₁.
+
+Unrealistic if ΔP/P₁ > 0.95 (likely choked flow).
+
+Upstream Pressure (P₁, psia)
+
+Must be > 0.
+
+Normal range: 14.7 psia (atmospheric) to ~3000 psia for industrial systems.
+
+Loss Coefficient (K)
+
+Must be > 0.
+
+Typical: 0.1 – 100.
+
+Absolute Temperature (T₁, Rankine)
+
+Must be > 0.
+
+Realistic: 300–1500 R (≈ -260°C to 540°C).
+
+Specific Gravity (Sg)
+
+Must be > 0.
+
+Normal gases: 0.1 (hydrogen) to ~5.0 (heavy gases).
+
+Cross-field checks
+
+ΔP < P₁ (otherwise unphysical).
+
+Warn if ΔP/P₁ near sonic critical ratio.
+
+3️⃣ Output Validation and Thresholds
+
+Flow Rate Ranges (SCFM):
+
+< 100 → Low flow, small systems/labs.
+
+100 – 1,000 → Moderate, small industrial.
+
+1,000 – 10,000 → Normal industrial gas systems.
+
+10,000 – 50,000 → High flow, pipeline-scale.
+
+> 50,000 → Very high, requires engineered safety design.
+
+Adds feedback & warnings for QEHS compliance reporting. {% endcomment %}

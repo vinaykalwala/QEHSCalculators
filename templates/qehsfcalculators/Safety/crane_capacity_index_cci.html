@@ -1,0 +1,792 @@
+{% extends 'base.html' %}
+{% block title %}Crane Capacity Index (CCI) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crane Capacity Index (CCI) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            {% comment %} max-width: 700px; {% endcomment %}
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (min-width: 901px) {
+            .calc-content { 
+                flex-direction: row; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+            order: 2;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            min-height: 320px;
+            {% comment %} order: 1; {% endcomment %}
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Input rows for side-by-side fields */
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 350px;
+            text-align: center;
+            {% comment %} margin-top: 20px; {% endcomment %}
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        /* Mobile-specific adjustments */
+        @media (max-width: 320px) {
+            .calculator-container {
+                padding: 10px;
+            }
+            
+            .calculator-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .calculator-header p {
+                font-size: 16px;
+            }
+            
+            .calc-card, .result-card {
+                padding: 20px 15px;
+                border-radius: 12px;
+            }
+            
+            .calc-card h2 {
+                font-size: 1.4rem;
+            }
+            
+            .form-input {
+                padding: 12px 14px;
+                font-size: 14px;
+            }
+            
+            .calculate-btn {
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+            
+            .result-placeholder img {
+                max-width: 180px;
+            }
+            
+            .rate-value {
+                font-size: 36px;
+            }
+            
+            .meter-labels span {
+                font-size: 10px;
+            }
+            
+            .note-card {
+                padding: 15px 18px;
+            }
+            
+            .note-card h3 {
+                font-size: 16px;
+            }
+            
+            .note-card p, .note-card li {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+    <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+</div>
+   <div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Crane Capacity Index (CCI) Calculator</h1>
+            <p>Determine the Crane Capacity Index based on key operational parameters</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                
+                <div class="form-group">
+                    <label for="radius">Radius (m)</label>
+                    <input type="number" id="radius" class="form-input" min="0" step="any" placeholder="e.g., 15.0">
+                </div>
+                
+                <div class="form-group">
+                    <label for="liftingHeight">Lifting Height (m)</label>
+                    <input type="number" id="liftingHeight" class="form-input" min="0" step="any" placeholder="e.g., 25.0">
+                </div>
+                
+                <div class="form-group">
+                    <label for="capacity">Lifting Capacity (Te)</label>
+                    <input type="number" id="capacity" class="form-input" min="0" step="any" placeholder="e.g., 50.0">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateCCI()">Calculate CCI</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://img.icons8.com/fluency/96/crane--v1.png" alt="Crane site icon" width="100">
+
+                    <p>This tool will calculate the <strong>Crane Capacity Index (CCI)</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Crane Capacity Index Results</h2>
+                    </div>
+                    
+                    <div class="rate-display">
+                        <div class="rate-value" id="calculatedCCI">0.00</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">CCI Value</div>
+                    </div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">Performance Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Crane Capacity Index (CCI)</strong> is a measure of crane performance based on key operational parameters. 
+                    It helps evaluate a crane's capability by combining radius, lifting height, and capacity into a single value.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Radius:</strong> The horizontal distance from the crane's center to the load. A larger radius means the crane has to work harder to lift the load efficiently.</li>
+                    <li><strong>Lifting Height:</strong> The vertical height the load is lifted. This affects the crane's stability and performance as greater heights may require adjustments in lifting technique.</li>
+                    <li><strong>Lifting Capacity:</strong> The maximum weight the crane can lift under specific conditions. This depends on the crane model, counterweights, and boom configuration.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <p>
+                    <b>CCI Performance Ranges:</b>
+                </p>
+                <ul class="note-list">
+                    <li>CCI < 50 → <span class="bad">Limited capability</span> - Suitable for light-duty operations only</li>
+                    <li>CCI 50-150 → <span class="average">Standard capability</span> - Appropriate for general construction tasks</li>
+                    <li>CCI 150-300 → <span class="good">Good capability</span> - Suitable for heavy lifting operations</li>
+                    <li>CCI > 300 → <span class="good">Excellent capability</span> - Ideal for specialized heavy lifting projects</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>🔍 Real-Life Applications</h3>
+                <p>
+                    The Crane Capacity Index is essential in:
+                </p>
+                <ul class="note-list">
+                    <li><strong>Construction Planning:</strong> Determining which crane is appropriate for specific lifting tasks.</li>
+                    <li><strong>Safety Assessments:</strong> Ensuring cranes operate within their safe working limits.</li>
+                    <li><strong>Equipment Selection:</strong> Choosing the right crane for projects based on required reach and capacity.</li>
+                    <li><strong>Operational Efficiency:</strong> Optimizing crane utilization on job sites.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+    <h3>✅ Input Validation Rules (Engineering Compliance)</h3>
+    <ul class="note-list">
+        <li><strong>Radius:</strong> > 0 m, ≤ 100 m (standard crane reach)</li>
+        <li><strong>Lifting Height:</strong> > 0 m, ≤ 200 m (typical construction envelope)</li>
+        <li><strong>Lifting Capacity:</strong> > 0 Te, ≤ 1000 Te (realistic crane capacity)</li>
+        <li><strong>No negative values:</strong> All parameters must be positive</li>
+        <li><strong>Cross-field check:</strong> High capacity (>500 Te) with extreme radius/height is unrealistic</li>
+        <li><strong>Output validation:</strong> CCI must be positive; extremely high CCI values flagged as unrealistic</li>
+    </ul>
+    <p><b>Compliance Note:</b> Validations align with <b>OSHA 1926.1400</b> (Cranes & Derricks in Construction) and <b>ASME B30.5</b> (Mobile Cranes).</p>
+</div>
+
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateCCI() {
+    const radius = document.getElementById('radius').value.trim();
+    const liftingHeight = document.getElementById('liftingHeight').value.trim();
+    const capacity = document.getElementById('capacity').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+
+    // --------------------------
+    // Input Validations (QEHS & OSHA/ASME based)
+    // --------------------------
+
+    // Radius Validation
+    if (radius === "") {
+        errors.push("👉 Please enter Radius.");
+    } else {
+        const num = parseFloat(radius);
+        if (isNaN(num)) {
+            errors.push("👉 Radius must be a number.");
+        } else if (num <= 0) {
+            errors.push("👉 Radius must be greater than 0 m.");
+        } else if (num > 100) {
+            errors.push("👉 Radius exceeds typical operational limits (>100 m).");
+        }
+    }
+
+    // Lifting Height Validation
+    if (liftingHeight === "") {
+        errors.push("👉 Please enter Lifting Height.");
+    } else {
+        const num = parseFloat(liftingHeight);
+        if (isNaN(num)) {
+            errors.push("👉 Lifting Height must be a number.");
+        } else if (num <= 0) {
+            errors.push("👉 Lifting Height must be greater than 0 m.");
+        } else if (num > 200) {
+            errors.push("👉 Lifting Height exceeds practical construction limits (>200 m).");
+        }
+    }
+
+    // Capacity Validation
+    if (capacity === "") {
+        errors.push("👉 Please enter Lifting Capacity.");
+    } else {
+        const num = parseFloat(capacity);
+        if (isNaN(num)) {
+            errors.push("👉 Lifting Capacity must be a number.");
+        } else if (num <= 0) {
+            errors.push("👉 Lifting Capacity must be greater than 0 Te.");
+        } else if (num > 1000) {
+            errors.push("👉 Lifting Capacity exceeds realistic crane limits (>1000 Te).");
+        }
+    }
+
+    // Cross-field dependency: check unrealistic combinations
+    if (radius !== "" && liftingHeight !== "" && capacity !== "") {
+        const r = parseFloat(radius);
+        const h = parseFloat(liftingHeight);
+        const c = parseFloat(capacity);
+
+        if ((r > 80 && c > 500) || (h > 150 && c > 500)) {
+            errors.push("👉 The entered Radius/Height with high Capacity is unrealistic for standard cranes.");
+        }
+    }
+
+    // --------------------------
+    // Show errors if any
+    // --------------------------
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // --------------------------
+    // Calculation (validated inputs)
+    // --------------------------
+    const radius_val = parseFloat(radius);
+    const liftingHeight_val = parseFloat(liftingHeight);
+    const capacity_val = parseFloat(capacity);
+
+    // Formula: Crane Capacity Index (CCI)
+    // CCI = (Radius × Lifting Height × Lifting Capacity) / 100
+    const cci = (radius_val * liftingHeight_val * capacity_val) / 100;
+
+    document.getElementById('calculatedCCI').textContent = cci.toFixed(2);
+
+    // --------------------------
+    // Feedback based on ranges
+    // --------------------------
+    let feedback;
+    if (cci < 50) {
+        feedback = "This crane has <strong>limited capability</strong> (light duty operations only).";
+    } else if (cci >= 50 && cci < 150) {
+        feedback = "This crane has <strong>standard capability</strong> (general construction tasks).";
+    } else if (cci >= 150 && cci < 300) {
+        feedback = "This crane has <strong>good capability</strong> (heavy lifting operations).";
+    } else {
+        feedback = "This crane has <strong>excellent capability</strong> (specialized heavy lifting projects).";
+    }
+
+    // Warn if value is extremely high (out of design range)
+    if (cci > 100000) {
+        feedback += "<br>⚠️ Warning: CCI value exceeds typical engineering range. Check inputs.";
+    }
+
+    document.getElementById('feedbackContent').innerHTML = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+{% comment %} 
+
+1. Formula (with reference for comments in code)
+
+The CCI is calculated as:
+
+CCI
+=
+(
+Radius [m]
+×
+Lifting Height [m]
+×
+Lifting Capacity [Te]
+)
+100
+CCI=
+100
+(Radius [m]×Lifting Height [m]×Lifting Capacity [Te])
+	​
+
+
+Radius (m): Distance from crane rotation axis to load centerline.
+
+Lifting Height (m): Vertical lift height.
+
+Lifting Capacity (Te): Safe working load (metric tonnes) under given radius & configuration.
+
+📘 This is a simplified performance indicator, not a substitute for OEM load charts (per ASME B30.5, OSHA 1926.1400).
+
+2. Input Validation Rules (Engineering & QEHS Compliance)
+✅ Radius (m)
+
+Must be > 0 (no crane operates with zero reach).
+
+Max typical operational reach: 100 m (for crawler & tower cranes).
+
+Decimal precision: up to 2–3 decimals (site survey accuracy).
+
+✅ Lifting Height (m)
+
+Must be > 0 (no vertical lift = no operation).
+
+Max practical construction lifting height: ~200 m (typical high-rise/tower crane envelope).
+
+Decimal precision: up to 1–2 decimals.
+
+✅ Lifting Capacity (Te)
+
+Must be > 0.
+
+Max safe limit: 1000 Te (beyond this → specialized offshore/heavy lift cranes).
+
+Decimal precision: up to 1 decimal is usually enough.
+
+✅ Cross-field dependency checks
+
+If Radius is very high (>80 m) and Capacity is also high (>500 Te) → warn user (this is unrealistic for most mobile cranes).
+
+If Lifting Height > 150 m and Capacity > 500 Te → flag unrealistic.
+
+3. Output Validation Logic
+
+CCI Value must always be positive.
+
+Classification bands:
+
+CCI < 50 → Limited capability (light duty only).
+
+50 ≤ CCI < 150 → Standard capability.
+
+150 ≤ CCI < 300 → Good capability.
+
+CCI ≥ 300 → Excellent capability.
+
+If CCI outputs an extreme value (>100,000) → display warning “Values outside practical engineering range.” {% endcomment %}

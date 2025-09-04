@@ -444,6 +444,18 @@
                     <li><span class="bad">Above 3.0</span> → Needs serious safety review</li>
                 </ul>
             </div>
+            <div class="note-card">
+  <h3>✅ Input Validation Rules</h3>
+  <ul class="note-list">
+    <li><strong>Recordable Incidents:</strong> Must be a whole number ≥ 0 (typically ≤ 1000).</li>
+    <li><strong>Total Hours Worked:</strong> Must be > 0, realistic range 1,000 – 100,000,000 hours.</li>
+    <li><strong>No division by zero:</strong> Hours cannot be 0.</li>
+    <li><strong>Cross-check:</strong> If incidents > 0 but hours < 100, flagged as unrealistic.</li>
+    <li><strong>All values must be numeric:</strong> No text or negative entries allowed.</li>
+  </ul>
+  <p><b>Note:</b> These rules follow OSHA, ISO 45001, and safety audit standards for KPI calculations.</p>
+</div>
+
         </div>
 
     </div>
@@ -457,71 +469,114 @@
         });
 
         function calculateAccidentRate() {
-            const numAccidents = document.getElementById('numAccidents').value.trim();
-            const totalHours = document.getElementById('totalHours').value.trim();
+    const numAccidents = document.getElementById('numAccidents').value.trim();
+    const totalHours = document.getElementById('totalHours').value.trim();
 
-            const errorBox = document.getElementById('resultError');
-            const errorMessage = document.getElementById('errorMessage');
-            const placeholder = document.getElementById('placeholder');
-            const resultValue = document.getElementById('resultValue');
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
 
-            let errors = [];
-            if (numAccidents === "") {
-                errors.push("👉 Please enter the number of recordable incidents.");
-            }
-            if (totalHours === "") {
-                errors.push("👉 Please enter the total hours worked.");
-            } else if (parseFloat(totalHours) <= 0) {
-                errors.push("👉 Total hours must be greater than 0.");
-            }
+    let errors = [];
 
-            if (errors.length > 0) {
-                errorMessage.innerHTML = errors.join("<br>");
-                errorBox.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                resultValue.classList.add("hidden");
-                return;
-            } else {
-                errorBox.classList.add("hidden");
-            }
+    // ============================
+    // VALIDATION RULES
+    // ============================
 
-            const numAcc = parseFloat(numAccidents);
-            const hours = parseFloat(totalHours);
-            const accidentRate = (numAcc / hours) * 1000000;
-            document.getElementById('rateValue').textContent = accidentRate.toFixed(4);
-
-            const meterFill = document.getElementById('meterFill');
-            let meterWidth, meterColor, feedback;
-            
-            if (accidentRate === 0) {
-                meterWidth = '5%'; 
-                meterColor = '#27ae60';
-                feedback = '🌟 Outstanding! Zero incidents recorded.';
-            } else if (accidentRate < 1.0) {
-                meterWidth = '25%'; 
-                meterColor = '#2ecc71';
-                feedback = '👍 Good safety performance.';
-            } else if (accidentRate <= 5.0) {
-                meterWidth = '50%'; 
-                meterColor = '#f39c12';
-                feedback = '⚠️ Moderate safety performance.';
-            } else if (accidentRate <= 10.0) {
-                meterWidth = '75%'; 
-                meterColor = '#e67e22';
-                feedback = '🚨 High accident rate.';
-            } else {
-                meterWidth = '95%'; 
-                meterColor = '#e74c3c';
-                feedback = '❌ Critical risk level.';
-            }
-
-            meterFill.style.width = meterWidth;
-            meterFill.style.backgroundColor = meterColor;
-            document.getElementById('feedbackContent').textContent = feedback;
-
-            placeholder.classList.add('hidden');
-            resultValue.classList.remove('hidden');
+    // Recordable Incidents
+    if (numAccidents === "") {
+        errors.push("👉 Please enter the number of recordable incidents.");
+    } else {
+        const num = parseFloat(numAccidents);
+        if (isNaN(num) || num < 0) {
+            errors.push("👉 Recordable incidents must be a whole number ≥ 0.");
+        } else if (!Number.isInteger(num)) {
+            errors.push("👉 Recordable incidents must be an integer value.");
+        } else if (num > 1000) {
+            errors.push("👉 Recordable incidents seem too high (>1000). Please verify.");
         }
+    }
+
+    // Total Hours Worked
+    if (totalHours === "") {
+        errors.push("👉 Please enter the total hours worked.");
+    } else {
+        const hrs = parseFloat(totalHours);
+        if (isNaN(hrs) || hrs <= 0) {
+            errors.push("👉 Total hours must be a number greater than 0.");
+        } else if (hrs < 1000) {
+            errors.push("👉 Total hours less than 1000 is unrealistic for reporting. Please check.");
+        } else if (hrs > 100000000) {
+            errors.push("👉 Total hours exceed realistic reporting (>100 million). Please check.");
+        }
+    }
+
+    // ============================
+    // ERROR HANDLING
+    // ============================
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // ============================
+    // CALCULATION
+    // ============================
+    const A = parseInt(numAccidents);
+    const H = parseFloat(totalHours);
+
+    const accidentRate = (A / H) * 1000000;
+
+    if (!isFinite(accidentRate) || accidentRate < 0) {
+        errorMessage.innerHTML = "❌ Invalid calculation result. Please check inputs.";
+        errorBox.classList.remove("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    document.getElementById('rateValue').textContent = accidentRate.toFixed(4);
+
+    // ============================
+    // SAFETY ASSESSMENT
+    // ============================
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+
+    if (accidentRate === 0) {
+        meterWidth = '5%';
+        meterColor = '#27ae60';
+        feedback = '🌟 Outstanding! Zero incidents recorded.';
+    } else if (accidentRate < 1.0) {
+        meterWidth = '25%';
+        meterColor = '#2ecc71';
+        feedback = '✅ Excellent safety performance.';
+    } else if (accidentRate <= 3.0) {
+        meterWidth = '50%';
+        meterColor = '#f1c40f';
+        feedback = '⚠️ Acceptable but needs improvement.';
+    } else if (accidentRate <= 5.0) {
+        meterWidth = '75%';
+        meterColor = '#e67e22';
+        feedback = '🚨 High accident rate. Review safety measures.';
+    } else {
+        meterWidth = '95%';
+        meterColor = '#e74c3c';
+        feedback = '❌ Critical risk. Immediate action required.';
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').textContent = feedback;
+
+    placeholder.classList.add("hidden");
+    resultValue.classList.remove("hidden");
+}
+
 
         function printReport() {
             // Update date just before printing
@@ -537,3 +592,53 @@
 </body>
 </html>
 {% endblock %}
+{% comment %} 
+1️⃣ Formula (for comment in your code)
+// Accident Rate Formula (per 1,000,000 hours worked):
+// Accident Rate = (Number of Recordable Incidents ÷ Total Hours Worked) × 1,000,000
+//
+// - Number of Recordable Incidents = OSHA/ISO reportable injuries, illnesses, fatalities
+// - Total Hours Worked = Sum of all employee hours in the analysis period
+// - The multiplier (1,000,000) is a standardization factor for comparability
+
+2️⃣ Input Validation Rules (QEHS & Safety Standards)
+
+Number of Recordable Incidents (A):
+
+Must be ≥ 0 (no negative incidents).
+
+Typically ≤ 1000 in large enterprises.
+
+Must be a whole number (integer).
+
+Total Hours Worked (H):
+
+Must be > 0 (to avoid division by zero).
+
+Should be within 1,000 – 100,000,000 hours for realistic reporting.
+
+Must be numeric.
+
+Cross-field Validation:
+
+If A = 0 and H > 0, Accident Rate must = 0.
+
+If A > 0 but H is extremely small (< 100), flag as unrealistic.
+
+Prevent division by zero when H = 0.
+
+3️⃣ Output Validation and Thresholds
+
+Accident Rate (AR) interpretation:
+
+= 0 → Outstanding (no incidents).
+
+< 1.0 → Excellent (world-class safety).
+
+1.0 – 3.0 → Acceptable but requires improvement.
+
+3.0 – 5.0 → High concern, corrective actions required.
+
+> 5.0 → Critical risk, requires urgent management review.
+
+This aligns with real OSHA TRIR and ISO 45001 auditing practices. {% endcomment %}

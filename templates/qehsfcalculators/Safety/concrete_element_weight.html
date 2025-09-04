@@ -1,0 +1,989 @@
+{% extends 'base.html' %}
+{% block title %}Concrete Element Weight Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Concrete Element Weight Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+       /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (min-width: 901px) {
+            .calc-content { 
+                flex-direction: row; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+            order: 2;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Input rows for side-by-side fields */
+        .input-row {
+            {% comment %} display: flex; {% endcomment %}
+            flex-direction: column;
+            gap: 15px;
+            {% comment %} margin-bottom: 15px; {% endcomment %}
+        }
+        
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        /* Mobile-specific adjustments */
+        @media (max-width: 320px) {
+            .calculator-container {
+                padding: 10px;
+            }
+            
+            .calculator-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .calculator-header p {
+                font-size: 16px;
+            }
+            
+            .calc-card, .result-card {
+                padding: 20px 15px;
+                border-radius: 12px;
+            }
+            
+            .calc-card h2 {
+                font-size: 1.4rem;
+            }
+            
+            .form-input {
+                padding: 12px 14px;
+                font-size: 14px;
+            }
+            
+            .calculate-btn {
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+            
+            .result-placeholder img {
+                max-width: 180px;
+            }
+            
+            .rate-value {
+                font-size: 36px;
+            }
+            
+            .meter-labels span {
+                font-size: 10px;
+            }
+            
+            .note-card {
+                padding: 15px 18px;
+            }
+            
+            .note-card h3 {
+                font-size: 16px;
+            }
+            
+            .note-card p, .note-card li {
+                font-size: 14px;
+            }
+        }
+
+        /* Parameters table */
+   .parameters-table {
+    width: 70%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 20px 10px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* Table cells */
+.parameters-table th, 
+.parameters-table td {
+    padding: 9px 20px;
+    text-align: left;
+    white-space: nowrap; /* prevent text breaking on larger screens */
+}
+
+.parameters-table thead th {
+    background: linear-gradient(135deg, #1560bd, #2980b9);
+    color: #fff;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 13px;
+}
+
+.parameters-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.parameters-table tbody tr:hover {
+    background-color: #eaf4ff;
+    transition: background 0.3s ease;
+}
+
+.parameters-table td {
+    border-bottom: 1px solid #eee;
+}
+
+.parameters-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ✅ Responsive mode for small devices */
+@media (max-width: 420px) {
+    .parameters-table {
+        width: 100%;       /* take full width */
+        font-size: 12px;   /* slightly smaller text */
+    }
+
+    .parameters-table thead {
+        display: none; /* hide table header */
+    }
+
+    .parameters-table, 
+    .parameters-table tbody, 
+    .parameters-table tr, 
+    .parameters-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .parameters-table tr {
+        margin-bottom: 12px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        padding: 8px;
+    }
+
+    .parameters-table td {
+        border: none;
+        text-align: right;
+        padding: 6px 10px;
+        position: relative;
+    }
+
+    .parameters-table td::before {
+        content: attr(data-label); /* pull label from attr */
+        position: absolute;
+        left: 10px;
+        font-weight: 600;
+        text-transform: capitalize;
+        color: #1560bd;
+    }
+}
+
+        /* Mobile-specific adjustments */
+        @media (max-width: 320px) {
+            .calculator-container {
+                padding: 10px;
+            }
+            
+            .calculator-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .calculator-header p {
+                font-size: 16px;
+            }
+            
+            .calc-card, .result-card {
+                padding: 20px 15px;
+                border-radius: 12px;
+            }
+            
+            .calc-card h2 {
+                font-size: 1.4rem;
+            }
+            
+            .form-input {
+                padding: 12px 14px;
+                font-size: 14px;
+            }
+            
+            .calculate-btn {
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+            
+            .result-placeholder img {
+                max-width: 180px;
+            }
+            
+            .rate-value {
+                font-size: 36px;
+            }
+            
+            .note-card {
+                padding: 15px 18px;
+            }
+            
+            .note-card h3 {
+                font-size: 16px;
+            }
+            
+            .note-card p, .note-card li {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Concrete Element Weight Calculator</h1>
+            <p>Calculate the weight of concrete elements for construction safety and planning</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                
+                <div class="form-group">
+                    <label for="length">Length (m)</label>
+                    <input type="number" id="length" class="form-input" min="0" step="1" placeholder="e.g., 5.0">
+                    <span class="error" id="lengthError"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="width">Width (m)</label>
+                    <input type="number" id="width" class="form-input" min="0" step="1" placeholder="e.g., 1.0">
+                    <span class="error" id="widthError"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="height">Height (m)</label>
+                    <input type="number" id="height" class="form-input" min="0" step="1" placeholder="e.g., 0.4">
+                    <span class="error" id="heightError"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="density">Density (kN/m³)</label>
+                    <input type="number" id="density" class="form-input" min="0" step="1" value="25" placeholder="e.g., 25">
+                    <span class="error" id="densityError"></span>
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateWeight()">Calculate Weight</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://img.icons8.com/fluency/96/cement-bag.png" alt="Cement bag icon" width="100">
+
+                    <p>This tool will calculate the <strong>Weight of Concrete Elements</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Concrete Element Weight</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.000</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold; ">kN</div>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Weight Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Concrete Element Weight Calculator</strong> calculates the weight of a concrete element based on its dimensions and density. This is crucial for ensuring safe handling and structural integrity during construction and transportation.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Explained</h3>
+                <ul class="note-list">
+                    <li><strong>Length (m):</strong> The length of the concrete element. It must be greater than zero as a zero or negative length is physically meaningless.</li>
+                    <li><strong>Width (m):</strong> The width of the concrete element. It must be greater than zero as a zero or negative width is physically meaningless.</li>
+                    <li><strong>Height (m):</strong> The height of the concrete element. It must be greater than zero as a zero or negative height is physically meaningless.</li>
+                    <li><strong>Density (kN/m³):</strong> The density of the concrete material. It must be greater than zero as a zero or negative density is physically meaningless.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+    <h3>📊 Key Parameters Table</h3>
+    <table class="parameters-table">
+        <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Value</th>
+                <th>Unit</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td data-label="Parameter">Length</td>
+                <td data-label="Value">5.0</td>
+                <td data-label="Unit">m</td>
+            </tr>
+            <tr>
+                <td data-label="Parameter">Width</td>
+                <td data-label="Value">1.0</td>
+                <td data-label="Unit">m</td>
+            </tr>
+            <tr>
+                <td data-label="Parameter">Height</td>
+                <td data-label="Value">0.4</td>
+                <td data-label="Unit">m</td>
+            </tr>
+            <tr>
+                <td data-label="Parameter">Density</td>
+                <td data-label="Value">25</td>
+                <td data-label="Unit">kN/m³</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
+            <div class="note-card">
+                <h3>🔍 Real-Life Applications</h3>
+                <p>
+                    Concrete weight calculations are essential in various construction applications:
+                </p>
+                <ul class="note-list">
+                    <li><strong>Construction:</strong> Calculating the weight of precast concrete elements for lifting and transportation</li>
+                    <li><strong>Material Estimation:</strong> Determining the weight of concrete needed for a project</li>
+                    <li><strong>Structural Analysis:</strong> Calculating the load on structural supports</li>
+                    <li><strong>Safety Planning:</strong> Ensuring lifting equipment can handle the load safely</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+    <h3>✅ Validation Rules for Safe Use</h3>
+    <ul class="note-list">
+        <li><strong>Length, Width, Height:</strong> Must be between 0.01 – 100 m, > 0 only.</li>
+        <li><strong>Density:</strong> Must be > 0. Typical concrete density = 23 – 26 kN/m³. Allowed range = 20 – 30 kN/m³.</li>
+        <li><strong>Volume:</strong> If > 1000 m³, calculator will reject as unrealistic for single element.</li>
+        <li><strong>Outputs:</strong> Weight classified into four safety categories (Light, Moderate, Heavy, Extreme) as per load-handling safety standards.</li>
+        <li><strong>Invalid Inputs:</strong> Blank, zero, negative, or non-numeric values will be rejected with error message.</li>
+    </ul>
+</div>
+
+
+            <div class="note-card">
+                <h3>⚠️ Importance of Accurate Calculations</h3>
+                <p>
+                    Accurate weight calculations are essential for ensuring the safety and structural integrity of construction projects. Incorrect calculations can lead to:
+                </p>
+                <ul class="note-list">
+                    <li>Overloading of lifting equipment</li>
+                    <li>Structural failures</li>
+                    <li>Safety hazards for workers</li>
+                    <li>Project delays and cost overruns</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📋 Conclusion</h3>
+                <p>
+                    This calculator provides a vital tool for accurately determining the weight of concrete elements, helping to prevent accidents and ensure compliance with safety standards in construction projects.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateWeight() {
+    const length = document.getElementById('length').value.trim();
+    const width = document.getElementById('width').value.trim();
+    const height = document.getElementById('height').value.trim();
+    const density = document.getElementById('density').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+
+    // === Validate Length ===
+    if (length === "") {
+        errors.push("👉 Please enter Length.");
+    } else {
+        const lengthVal = parseFloat(length);
+        if (isNaN(lengthVal) || lengthVal <= 0) {
+            errors.push("👉 Length must be a number greater than 0 (m).");
+        } else if (lengthVal < 0.01 || lengthVal > 100) {
+            errors.push("👉 Length must be between 0.01 and 100 m.");
+        }
+    }
+
+    // === Validate Width ===
+    if (width === "") {
+        errors.push("👉 Please enter Width.");
+    } else {
+        const widthVal = parseFloat(width);
+        if (isNaN(widthVal) || widthVal <= 0) {
+            errors.push("👉 Width must be a number greater than 0 (m).");
+        } else if (widthVal < 0.01 || widthVal > 100) {
+            errors.push("👉 Width must be between 0.01 and 100 m.");
+        }
+    }
+
+    // === Validate Height ===
+    if (height === "") {
+        errors.push("👉 Please enter Height.");
+    } else {
+        const heightVal = parseFloat(height);
+        if (isNaN(heightVal) || heightVal <= 0) {
+            errors.push("👉 Height must be a number greater than 0 (m).");
+        } else if (heightVal < 0.01 || heightVal > 100) {
+            errors.push("👉 Height must be between 0.01 and 100 m.");
+        }
+    }
+
+    // === Validate Density ===
+    if (density === "") {
+        errors.push("👉 Please enter Density.");
+    } else {
+        const densityVal = parseFloat(density);
+        if (isNaN(densityVal) || densityVal <= 0) {
+            errors.push("👉 Density must be a number greater than 0 (kN/m³).");
+        } else if (densityVal < 20 || densityVal > 30) {
+            errors.push("👉 Density out of normal range (20–30 kN/m³). Typical concrete is 23–26.");
+        }
+    }
+
+    // === Show Errors ===
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // === Perform Calculation ===
+    const lengthVal = parseFloat(length);
+    const widthVal = parseFloat(width);
+    const heightVal = parseFloat(height);
+    const densityVal = parseFloat(density);
+
+    const volume = lengthVal * widthVal * heightVal;
+    const weight = volume * densityVal;
+
+    // === Edge Case: Unrealistic Volume ===
+    if (volume > 1000) {
+    let oversizeHints = [];
+    if (lengthVal > 100) oversizeHints.push("Length is " + lengthVal + " m (max 100 m).");
+    if (widthVal > 100) oversizeHints.push("Width is " + widthVal + " m (max 100 m).");
+    if (heightVal > 100) oversizeHints.push("Height is " + heightVal + " m (max 100 m).");
+
+    errorMessage.innerHTML =
+    "⚠️ The calculated volume is " + volume.toFixed(2) + " m³, which exceeds the safe handling limit of 1000 m³.<br>" +
+    (oversizeHints.length > 0 
+        ? "👉 Oversized values detected: " + oversizeHints.join(" ") 
+        : "👉 Please reduce one or more of Length, Width, or Height.");
+    
+    errorBox.classList.remove("hidden");
+    placeholder.classList.add("hidden");
+    resultValue.classList.add("hidden");
+    return;
+}
+
+
+    // === Display Result ===
+    document.getElementById('rateValue').textContent = weight.toFixed(2);
+
+    // === Weight Assessment ===
+    let feedback;
+    if (weight > 1000) {
+        feedback = "⚠️ <span class='bad'>Extreme weight.</span> Requires OSHA/NFPA compliant lifting plan.";
+    } else if (weight > 500) {
+        feedback = "ℹ️ <span class='average'>Heavy load.</span> Engineering controls and certified equipment required.";
+    } else if (weight > 100) {
+        feedback = "✅ <span class='good'>Moderate weight.</span> Standard cranes/forklifts suitable with precautions.";
+    } else {
+        feedback = "✅ <span class='good'>Lightweight.</span> Minimal risk. Standard handling applies.";
+    }
+
+    document.getElementById('feedbackContent').innerHTML = feedback;
+
+    placeholder.classList.add("hidden");
+    resultValue.classList.remove("hidden");
+}
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+
+
+{% comment %} 
+
+
+/*
+===================================================
+Concrete Element Weight Calculator - Validation Rules
+---------------------------------------------------
+Formula:
+  Volume (m³) = Length × Width × Height
+  Weight (kN) = Volume × Density
+
+Validation Ranges:
+  Length, Width, Height:
+    - Must be > 0
+    - Range: 0.01 – 100 m
+    - Precision: 2 decimals
+
+  Density:
+    - Must be > 0
+    - Typical: 23 – 26 kN/m³
+    - Allowable: 20 – 30 kN/m³
+    - Precision: 1 decimal
+
+Safety Thresholds:
+  Weight ≤ 100 kN    → Lightweight (safe)
+  101–500 kN         → Moderate (standard handling)
+  501–1000 kN        → Heavy (lifting plan required)
+  > 1000 kN          → Extreme (OSHA/NFPA/ILO compliance required)
+
+Edge Cases:
+  - Reject blank/NaN/negative values
+  - Reject unrealistic dimensions (too large)
+  - Warn if density <20 or >30
+  - Warn if volume > 1000 m³
+===================================================
+*/
+
+
+
+1. Formula Used
+// Formula for concrete element weight
+// Volume = Length (m) × Width (m) × Height (m)    [unit: m³]
+// Weight = Volume × Density                       [unit: kN]
+// Typical concrete density ≈ 23 – 26 kN/m³
+
+2. Input Validation Rules (QEHS/Fire Safety Based)
+
+✅ Length, Width, Height (m):
+
+Must be > 0 (no zero or negative dimensions, meaningless in construction).
+
+Minimum: 0.01 m (1 cm – smallest practical dimension in construction).
+
+Maximum: 100 m (beyond this, concrete elements are unrealistic and unsafe for manual lifting/transport).
+
+Decimal precision: up to 2 decimals (cm accuracy is sufficient for field use).
+
+✅ Density (kN/m³):
+
+Must be > 0.
+
+Typical range: 23 – 26 kN/m³ for standard concrete.
+
+Validation: Allow 20 – 30 kN/m³ (to cover lightweight or heavyweight concrete), but warn if outside 23–26.
+
+Decimal precision: 1 decimal is sufficient.
+
+3. Output Validation Logic
+
+Weight categories (for safety feedback):
+
+≤ 100 kN: ✅ Lightweight object – minimal risk, standard handling.
+
+101 – 500 kN: ✅ Light to moderate weight – standard cranes/forklifts with precautions.
+
+501 – 1000 kN: ℹ️ Moderate–high weight – requires engineered lifting plan, certified rigging.
+
+> 1000 kN: ⚠️ Extreme weight – high risk, must follow OSHA/NFPA/ILO lifting safety protocols. {% endcomment %}
