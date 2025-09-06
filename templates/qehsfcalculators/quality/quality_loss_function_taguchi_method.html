@@ -1,0 +1,673 @@
+{% extends 'base.html' %}
+{% block title %}Quality Loss Function Calculator (Taguchi Method){% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quality Loss Function Calculator (Taguchi Method)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'qualitycategory_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Quality Loss Function Calculator (Taguchi Method)</h1>
+            <p>Calculates the financial loss caused by deviations from the ideal target value using Taguchi's Quality Loss Function</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator Input Card -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="constant">Constant (k)</label>
+                    <input type="number" id="constant" class="form-input" step="0.01" placeholder="Enter constant (k)">
+                </div>
+
+                <div class="form-group">
+                    <label for="measuredValue">Measured Value (x)</label>
+                    <input type="number" id="measuredValue" class="form-input" step="0.01" placeholder="Enter measured value">
+                </div>
+
+                <div class="form-group">
+                    <label for="targetValue">Target Value (T)</label>
+                    <input type="number" id="targetValue" class="form-input" step="0.01" placeholder="Enter target value">
+                </div>
+
+                <button class="calculate-btn" onclick="calculateQualityLoss()">Calculate Quality Loss</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Quality illustration">
+                    <p>This tool calculates the <strong>quality loss</strong> using Taguchi's method. Enter your values to see results.</p>
+                </div>
+
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Quality Loss</h2>
+                    </div>
+                    <div class="rate-value" id="qualityLossValue">0.00</div>
+                    <div class="rate-label"><strong>L(x)</strong></div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">Quality Loss Interpretation</div>
+                        <div class="feedback-content" id="qualityFeedback"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🔎 About This Calculator</h3>
+                <p>
+                    The <strong>Quality Loss Function Calculator</strong> uses Genichi Taguchi's method to quantify the financial loss caused by deviations from the ideal (target) value. It measures the impact of variability on product performance and customer satisfaction.
+                </p> 
+            </div>
+            
+            <div class="note-card">
+                <h3>📌 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Constant (k):</strong> Required, must be > 0</li>
+                    <li><strong>Measured Value (x):</strong> Required, must be a valid number</li>
+                    <li><strong>Target Value (T):</strong> Required, must be a valid number</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ Why is the Quality Loss Function Important?</h3>
+                <ul class="note-list">
+                    <li><strong>Quality Control:</strong> Identifies the cost of deviations from the target value</li>
+                    <li><strong>Process Optimization:</strong> Minimizes variability to reduce financial losses</li>
+                    <li><strong>Customer Satisfaction:</strong> Ensures products meet customer expectations by staying close to the target value</li>
+                    <li><strong>Cost Reduction:</strong> Helps quantify the financial impact of quality improvements</li>
+                </ul>
+            </div>
+      
+            <div class="note-card">
+                <h3>📊 Interpretation Guidelines</h3>
+                <ul class="note-list">
+                    <li><strong>L(x) = 0:</strong> Perfect quality - no deviation from target</li>
+                    <li><strong>0 < L(x) ≤ 50:</strong> Good quality - minimal financial loss</li>
+                    <li><strong>50 < L(x) ≤ 200:</strong> Moderate quality - noticeable deviation</li>
+                    <li><strong>L(x) > 200:</strong> Poor quality - significant financial loss</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Practical Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Manufacturing:</strong> Optimize processes to minimize deviations from specifications</li>
+                    <li><strong>Product Design:</strong> Set appropriate tolerance levels based on cost implications</li>
+                    <li><strong>Quality Management:</strong> Quantify the financial benefits of quality improvements</li>
+                    <li><strong>Supplier Evaluation:</strong> Assess the true cost of supplier quality variations</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>🎯 How to Use This Calculator</h3>
+                <ol class="note-list">
+                    <li><strong>Enter Constant (k):</strong> Input the constant derived from the cost of defect</li>
+                    <li><strong>Enter Measured Value (x):</strong> Input the measured value of the product or process</li>
+                    <li><strong>Enter Target Value (T):</strong> Input the ideal target value</li>
+                    <li><strong>Calculate:</strong> Click "Calculate Quality Loss" to see the financial loss due to deviation</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateQualityLoss() {
+    const constant = document.getElementById("constant").value.trim();
+    const measuredValue = document.getElementById("measuredValue").value.trim();
+    const targetValue = document.getElementById("targetValue").value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const outputValue = document.getElementById('qualityLossValue');
+    const feedbackBox = document.getElementById('qualityFeedback'); 
+
+    let errors = [];
+
+    // ✅ Constant Validation
+    if (constant === "" || isNaN(constant)) {
+        errors.push("👉 Constant (k) is required and must be a number.");
+    } else if (parseFloat(constant) <= 0) {
+        errors.push("👉 Constant (k) must be greater than 0.");
+    } else if (parseFloat(constant) > 1000000) {
+        errors.push("👉 Constant (k) is unrealistically high. Please recheck.");
+    }
+
+    // ✅ Measured Value Validation
+    if (measuredValue === "" || isNaN(measuredValue)) {
+        errors.push("👉 Measured Value (x) is required and must be a number.");
+    } else if (Math.abs(parseFloat(measuredValue)) > 1000000) {
+        errors.push("👉 Measured Value (x) is out of acceptable range.");
+    }
+
+    // ✅ Target Value Validation
+    if (targetValue === "" || isNaN(targetValue)) {
+        errors.push("👉 Target Value (T) is required and must be a number.");
+    } else if (Math.abs(parseFloat(targetValue)) > 1000000) {
+        errors.push("👉 Target Value (T) is out of acceptable range.");
+    }
+
+    // ✅ Cross-check consistency
+    if (!isNaN(measuredValue) && !isNaN(targetValue)) {
+        if (parseFloat(measuredValue) === 0 && parseFloat(targetValue) !== 0) {
+            errors.push("👉 Measured value cannot be 0 when target is non-zero (possible sensor error).");
+        }
+    }
+
+    // Show errors
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    const constantNum = parseFloat(constant);
+    const measuredValueNum = parseFloat(measuredValue);
+    const targetValueNum = parseFloat(targetValue);
+
+    // ✅ Calculate Quality Loss
+    const deviation = measuredValueNum - targetValueNum;
+    let qualityLoss = constantNum * Math.pow(deviation, 2);
+
+    // ✅ Extreme outlier check
+    if (qualityLoss > 1e9) {
+        errorMessage.innerHTML = "⚠️ Unrealistic deviation detected — check instrument calibration.";
+        errorBox.classList.remove("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    outputValue.textContent = qualityLoss.toFixed(2);
+
+    // ✅ Feedback messages
+    let feedback = "";
+    if (qualityLoss === 0) {
+        feedback = "✅ Excellent! Perfect match — zero quality loss.";
+    } else if (qualityLoss > 0 && qualityLoss <= 50) {
+        feedback = "🟢 Good! Within tolerance, minimal risk.";
+    } else if (qualityLoss > 50 && qualityLoss <= 200) {
+        feedback = "🟡 Moderate deviation. Investigate and correct.";
+    } else if (qualityLoss > 200 && qualityLoss <= 1000) {
+        feedback = "🔴 High risk! Escalate to management for corrective action.";
+    } else {
+        feedback = "🚨 Critical failure risk! Immediate shutdown/review required.";
+    }
+
+    feedbackBox.textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--Real-World QEHS & Fire Safety Analysis of Inputs/Outputs
+
+Formula used:
+
+𝐿
+(
+𝑥
+)
+=
+𝑘
+×
+(
+𝑥
+−
+𝑇
+)
+2
+L(x)=k×(x−T)
+2
+
+where:
+
+𝑘
+k = cost constant (financial loss per unit squared deviation)
+
+𝑥
+x = measured value
+
+𝑇
+T = target value
+
+From a QEHS perspective:
+
+This calculator isn’t just about product defects, but about safety-critical parameters too (e.g., fire suppression pressure, toxic gas concentration, emergency lighting lux levels).
+
+Small deviations may not seem critical but can lead to huge safety failures (e.g., 5% lower sprinkler pressure can mean total system failure during a fire).
+
+Therefore, inputs need strict validation to avoid “false safety” results.
+
+2️⃣ Comprehensive Input Validation Rules
+Field	Rule	Why (QEHS/Compliance Context)
+Constant (k)	Required, > 0, ≤ 1,000,000	
+𝑘
+k is monetary/penalty per unit deviation. Must be > 0. Extreme high 
+𝑘
+k beyond 1M unrealistic in safety audits.
+Measured Value (x)	Required, numeric, between -1,000,000 and 1,000,000, up to 3 decimals	Values can be process outputs (e.g., pressure 7.5 bar, temp 350°C). Boundaries prevent meaningless huge/outlier entries.
+Target Value (T)	Required, numeric, same bounds as 
+𝑥
+x, decimals up to 3	Targets should be in comparable scale to measured values. Prevents division by nonsense.
+Logical Consistency	
+𝑥
+x and 
+𝑇
+T must be within same engineering unit family (e.g., both in °C, not °C vs psi)	Cross-field check ensures values are comparable.
+Decimal Precision	Restrict to 3 decimal places	Safety and audit reports require traceability (e.g., 5.325 bar).
+Cross Dependency	If 
+𝑇
+=
+0
+T=0, 
+𝑥
+x must be non-zero only when unit allows (e.g., 0 ppm vs measured ppm). Otherwise flagged.	Avoids meaningless deviations.
+3️⃣ Edge Case Validations
+
+Division by zero → Not in this formula, but must prevent 
+𝑘
+=
+0
+k=0.
+
+Unrealistic Input Combos → Example: Target = 100, Measured = 1,000,000 → Should throw warning (“Outlier deviation detected: check measurement instrument”).
+
+Negative Constants → Reject (not physically meaningful).
+
+Identical inputs (
+𝑥
+=
+𝑇
+x=T) → Should return exactly 0, not -0 or floating point error.
+
+Extreme outliers (
+𝐿
+(
+𝑥
+)
+>
+1
+𝑒
+9
+L(x)>1e9) → Flag as “Unrealistic deviation — check calibration”.
+
+4️⃣ Output Validation & Thresholds
+
+From a real-world compliance angle, thresholds must be interpreted in safety impact terms:
+
+Loss Value (Lx)	Interpretation
+0	Perfect compliance, no deviation risk.
+0 < Lx ≤ 50	Acceptable, within tolerance → No regulatory action, continue monitoring.
+51 ≤ Lx ≤ 200	Moderate → Process drift detected, corrective action required (CAPA).
+> 200	High risk → Must escalate to management, possible OSHA/ISO non-conformance.
+> 1,000	Critical → Potential catastrophic failure, immediate shutdown or recall required.
+
+
+            <div class="note-card formula-card">
+                <h3>📐 Formula for Quality Loss Calculation</h3>
+                <p><strong>L(x) = k × (x - T)²</strong></p>
+                <ul class="note-list">
+                    <li><strong>L(x):</strong> Quality Loss (financial loss due to deviation)</li>
+                    <li><strong>k:</strong> Constant derived from the cost of defect</li>
+                    <li><strong>x:</strong> Measured value of the product or process</li>
+                    <li><strong>T:</strong> Ideal target value</li>
+                </ul>
+            </div>
+-->
