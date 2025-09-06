@@ -1,0 +1,838 @@
+{% extends 'base.html' %}
+{% block title %}Freundlich Isotherm Calculator (Adsorption Capacity Calculator){% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freundlich Isotherm Calculator (Adsorption Capacity Calculator)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+<style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+             /* display: flex;  */
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            /* overflow-y: auto;  */
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Input rows for better organization */
+        .input-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+        
+        @media (max-width: 600px) {
+            .input-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+                .rate-display {
+                display: flex;
+                gap: 20px;
+                justify-content: center;
+                align-items: center;
+                flex-wrap: wrap; /* responsive */
+                text-align: center;
+            }
+
+            .rate-block {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                min-width: 120px; /* keeps blocks same width */
+            }
+
+            .rate-label {
+                font-weight: bold;
+                font-size: 16px;
+                color: #444;
+                margin-bottom: 5px;
+            }
+
+            .rate-value {
+                font-size: 40px;
+                font-weight: 700;
+                color: #2980b9;
+                line-height: 1.2;
+            }
+
+            .rate-unit {
+                font-size: 14px;
+                color: #777;
+                margin-top: 4px;
+            }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+                .rate-value { font-size: 32px; }
+            }
+
+            @media (max-width: 480px) {
+                .rate-value { font-size: 26px; }
+                
+                .rate-unit { font-size: 12px; }
+                
+            }
+
+
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+                .result-feedback {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 18px 20px;
+    border-left: 4px solid #3498db;
+    text-align: left;
+    max-width: 800px; /* keeps it readable on large screens */
+    margin: 0 auto;   /* centers it */
+}
+
+.feedback-title {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #2c3e50;
+    font-size: 18px;
+}
+
+.feedback-content { 
+    color: #34495e; 
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 768px) {
+    .result-feedback {
+        padding: 15px;
+        font-size: 15px;
+    }
+
+    .feedback-title {
+        font-size: 16px;
+    }
+
+    .feedback-content {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .result-feedback {
+        padding: 12px;
+        border-left-width: 3px;
+    }
+
+    .feedback-title {
+        font-size: 15px;
+    }
+
+    .feedback-content {
+        font-size: 13px;
+    }
+}
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+<div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+<div class="calculator-container printable" id="printArea">
+
+
+{% include "includes/print_header_footer.html" %}
+
+<div class="calculator-header">
+  <h1>Freundlich Isotherm Calculator (Adsorption Capacity Calculator)</h1>
+    <p>
+    Predict adsorption capacity using the Freundlich model. Result shown in <strong>mg/g</strong>.
+</p>
+
+</div>
+
+<div class="calc-content">
+  <!-- Calculator -->
+  <div class="calc-card">
+    <h2>Enter Parameters</h2>
+
+    <div class="input-row">
+      <div class="form-group">
+        <label for="equilibriumConcentration">Equilibrium Concentration (C<sub>e</sub>, mg/L) *</label>
+        <input type="number" id="equilibriumConcentration" class="form-input" step="any" min="0" placeholder="e.g., 25" aria-label="Equilibrium concentration">
+      </div>
+
+      <div class="form-group">
+        <label for="constantK">Freundlich Constant (K) *</label>
+        <input type="number" id="constantK" class="form-input" step="any" min="0" placeholder="e.g., 2.5" aria-label="Freundlich constant K">
+      </div>
+    </div>
+
+    <div class="input-row">
+      <div class="form-group">
+        <label for="constantN">Intensity Constant (n) *</label>
+        <input type="number" id="constantN" class="form-input" step="any" min="1" placeholder="e.g., 2.0" aria-label="Freundlich constant n">
+      </div>
+
+      <div class="form-group">
+        <label for="adsorbentMass">Adsorbent Mass (m, g) — optional (for experimental check)</label>
+        <input type="number" id="adsorbentMass" class="form-input" step="any" min="0" placeholder="e.g., 10" aria-label="Mass of adsorbent">
+      </div>
+    </div>
+
+    <div class="input-row">
+      <div class="form-group">
+        <label for="soluteMass">Solute Adsorbed (x, g) — optional (for experimental check)</label>
+        <input type="number" id="soluteMass" class="form-input" step="any" min="0" placeholder="e.g., 0.35" aria-label="Mass of solute adsorbed">
+      </div>
+    </div>
+
+    <button class="calculate-btn" onclick="calculateAdsorption()">Calculate Capacity</button>
+  </div>
+
+  <!-- Result Section -->
+  <div class="result-card">
+    <div class="result-placeholder" id="placeholder">
+      <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Adsorption illustration">
+      <p>This tool predicts adsorption capacity using the Freundlich isotherm and (optionally) compares with experimental <em>x/m</em>.</p>
+    </div>
+
+    <div class="result-error hidden" id="resultError" role="alert" aria-live="polite">
+      <div class="error-icon">❌</div>
+      <div class="error-message" id="errorMessage"></div>
+    </div>
+
+    <div class="result-value hidden" id="resultValue" aria-live="polite">
+      <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+        <h2>Adsorption Capacity</h2>
+      </div>
+
+      <div class="rate-display" style="gap:12px; align-items:center; justify-content:center;">
+        <div class="rate-value" id="headLoss">0.00</div>
+        <div class="rate-label" style="font-size:16px; color: #2980b9;">mg/g</div>
+      </div>
+
+      <div class="result-feedback">
+        <div class="feedback-title">Assessment</div>
+        <div class="feedback-content" id="feedbackContent"></div>
+      </div>
+
+      <div class="btn-wrapper">
+        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Notes Section -->
+<div class="note-section">
+  <div class="note-card">
+    <h3>📘 About</h3>
+    <p>
+      This calculator uses the Freundlich isotherm to estimate adsorption capacity on heterogeneous surfaces:
+         where X is in mg/g if K is expressed accordingly.
+      Useful for air/water treatment (VOC removal, heavy metals), emission control, and HAZMAT response planning in QEHS.
+    </p>
+  </div>
+
+  <div class="note-card">
+    <h3>✅ Input Validations</h3>
+    <ul class="note-list">
+      <li><strong>C<sub>e</sub> (mg/L):</strong> required; &gt; 0; allowed range 0.001–100,000 mg/L.</li>
+      <li><strong>K (capacity constant):</strong> required; &gt; 0; allowed range 1×10<sup>−6</sup>–1×10<sup>6</sup> (units depend on n).</li>
+      <li><strong>n (dimensionless):</strong> required; 1.0–10.0 (n ≥ 1 ensures 0 &lt; 1/n ≤ 1; favorable adsorption).</li>
+      <li><strong>Experimental check (optional):</strong> Provide both m (g) and x (g) or leave both blank. m: 0.01–100,000 g; x: &gt; 0. Constraint: x/m ≤ 2 g/g (2000 mg/g).</li>
+      <li><strong>Output guardrails:</strong> Predicted X must be 0 &lt; X ≤ 2000 mg/g (beyond this is generally non-physical for typical sorbents).</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>🔎 Capacity Classification</h3>
+    <ul class="note-list">
+      <li><strong>Low (&lt; 10 mg/g):</strong> Limited uptake — consider media change or pre-treatment.</li>
+      <li><strong>Moderate (10–50 mg/g):</strong> Typical baseline for many pollutants.</li>
+      <li><strong>Good (50–200 mg/g):</strong> Effective adsorption; suitable for most QEHS controls.</li>
+      <li><strong>Very High (&gt; 200 mg/g):</strong> Excellent sorbent performance — enables smaller vessels/longer life.</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>🏭 Applications</h3>
+    <ul class="note-list">
+      <li><strong>Water/WWTP:</strong> Heavy metals, dyes, organics removal; compliance with discharge limits.</li>
+      <li><strong>Air/VOCs:</strong> Activated carbon beds in fire/explosion risk areas; spill/incident off-gas control.</li>
+      <li><strong>HAZMAT planning:</strong> Sizing portable adsorption units for emergency response.</li>
+      <li><strong>Industrial hygiene:</strong> Capture of toxic vapors/odors in process vents.</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>🛑 Limitations</h3>
+    <ul class="note-list">
+      <li>Empirical; parameter K, n are matrix-specific (pH, temperature, competing species).</li>
+      <li>Not a mass-balance design tool (needs volume and C<sub>0</sub> for full sizing).</li>
+      <li>Applies to heterogeneous surfaces; does not enforce monolayer capacity (use Langmuir for that).</li>
+      <li>Assumes isothermal steady conditions and constant properties.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+function showErrors(errors) {
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+
+  errorMessage.innerHTML = errors.join("<br>");
+  errorBox.classList.remove("hidden");
+  placeholder.classList.add("hidden");
+  resultValue.classList.add("hidden");
+}
+
+function calculateAdsorption() {
+  // raw strings for decimal checks
+  const sCe = document.getElementById("equilibriumConcentration")?.value.trim();
+  const sK  = document.getElementById("constantK")?.value.trim();
+  const sN  = document.getElementById("constantN")?.value.trim();
+  const sM  = document.getElementById("adsorbentMass")?.value.trim();
+  const sX  = document.getElementById("soluteMass")?.value.trim();
+
+  const Ce = parseFloat(sCe);
+  const K  = parseFloat(sK);
+  const n  = parseFloat(sN);
+  const m  = sM === "" ? null : parseFloat(sM);
+  const x  = sX === "" ? null : parseFloat(sX);
+
+  const headLossEl = document.getElementById("headLoss");
+  const feedbackEl = document.getElementById("feedbackContent");
+
+  // reset state
+  document.getElementById("resultError").classList.add("hidden");
+  feedbackEl.innerHTML = "";
+
+  const errors = [];
+  const warnings = [];
+
+  const countDecimals = (s) => {
+    if (!s || !s.includes(".")) return 0;
+    return s.split(".")[1].length;
+  };
+  const isFiniteNum = (v) => Number.isFinite(v) && !Number.isNaN(v);
+
+  // Required field presence & numeric
+  if (!isFiniteNum(Ce) || Ce <= 0) errors.push("👉 Cₑ is required and must be > 0 mg/L.");
+  if (!isFiniteNum(K)  || K <= 0)  errors.push("👉 K is required and must be > 0.");
+  if (!isFiniteNum(n)  || n < 1)   errors.push("👉 n is required and must be ≥ 1 (ensures 0 < 1/n ≤ 1).");
+
+  // Decimal limits (practical QA constraints)
+  if (countDecimals(sCe) > 6) warnings.push("⚠️ Cₑ has >6 decimals; results rounded.");
+  if (countDecimals(sK)  > 6) warnings.push("⚠️ K has >6 decimals; results rounded.");
+  if (countDecimals(sN)  > 4) warnings.push("⚠️ n has >4 decimals; results rounded.");
+
+  // Range checks (industry-plausible)
+  if (isFiniteNum(Ce) && (Ce < 0.001 || Ce > 100000)) errors.push("👉 Cₑ must be between 0.001 and 100000 mg/L.");
+  if (isFiniteNum(K)  && (K  < 1e-6   || K  > 1e6))    errors.push("👉 K must be between 1×10⁻⁶ and 1×10⁶.");
+  if (isFiniteNum(n)  && (n  > 10))                    errors.push("👉 n must be ≤ 10.");
+
+  // Optional experimental check: require both or neither
+  const mProvided = sM !== "" && isFiniteNum(m);
+  const xProvided = sX !== "" && isFiniteNum(x);
+  if ((mProvided && !xProvided) || (!mProvided && xProvided)) {
+    errors.push("👉 Provide both m and x for experimental check, or leave both blank.");
+  }
+  if (mProvided) {
+    if (m <= 0 || m > 100000) errors.push("👉 m must be between 0.01 and 100000 g.");
+    if (countDecimals(sM) > 3) warnings.push("⚠️ m has >3 decimals; results rounded.");
+  }
+  if (xProvided) {
+    if (x <= 0) errors.push("👉 x must be > 0 g.");
+    if (countDecimals(sX) > 6) warnings.push("⚠️ x has >6 decimals; results rounded.");
+  }
+
+  if (errors.length) return showErrors(errors);
+
+  // Compute predicted Freundlich capacity
+  const oneOverN = 1 / n;
+  const Xpred = K * Math.pow(Ce, oneOverN); // mg/g if K provided accordingly
+
+  if (!isFiniteNum(Xpred) || Xpred <= 0) {
+    return showErrors(["⚠️ Computed capacity is invalid. Check K, n, and Cₑ."]);
+  }
+  if (Xpred > 2000) {
+    return showErrors(["⚠️ Predicted capacity > 2000 mg/g is non-physical for most sorbents. Recheck inputs/units."]);
+  }
+
+  // Experimental comparison (optional)
+  let expInfo = "";
+  if (mProvided && xProvided) {
+    const Xexp = (x * 1000) / m; // mg/g (convert x from g → mg)
+    if (!isFiniteNum(Xexp) || Xexp <= 0) {
+      return showErrors(["⚠️ Experimental capacity (x/m) computed invalid."]);
+    }
+    if (Xexp > 2000) {
+      errors.push("👉 Experimental x/m exceeds 2000 mg/g. Recheck laboratory data/units.");
+      return showErrors(errors);
+    }
+    if (Xexp > 1000) warnings.push("⚠️ x/m > 1000 mg/g — unusually high; verify lab method and media.");
+    if (Xexp > 1000 && Xpred < 50) warnings.push("⚠️ Large mismatch: very high experimental capacity but low predicted; K or n may be misfitted.");
+
+    const devPct = ((Xexp - Xpred) / Xpred) * 100;
+    const within20 = Math.abs(devPct) <= 20;
+    expInfo =
+      `<div style="margin-top:8px;"><b>Experimental X</b> (x/m): ${Xexp.toFixed(4)} mg/g</div>` +
+      `<div>Deviation vs model: ${devPct.toFixed(1)}% ${within20 ? "✅ within ±20%" : "❌ outside ±20% (re-check K,n)"}</div>`;
+  }
+
+  // Classification & guidance
+  let classification, suggestion, color = "#2c7a7b";
+  if (Xpred < 10) {
+    classification = "Low Capacity";
+    suggestion = "Consider alternative media, pH adjustment, or pre-treatment.";
+    color = "#b00020";
+  } else if (Xpred < 50) {
+    classification = "Moderate Capacity";
+    suggestion = "Usable; confirm service life with pilot data.";
+    color = "#b35d00";
+  } else if (Xpred < 200) {
+    classification = "Good Capacity";
+    suggestion = "Effective for most compliance controls.";
+    color = "#2c7a7b";
+  } else {
+    classification = "Very High Capacity";
+    suggestion = "Excellent; enables smaller vessels/longer bed life.";
+    color = "#006400";
+  }
+
+  // Additional contextual warnings
+  if (n === 1) warnings.push("ℹ️ n = 1 → linear isotherm; capacity scales directly with concentration.");
+  if (n > 5) warnings.push("⚠️ High n (weak intensity) — adsorption may drop rapidly at low Cₑ.");
+  if (K > 1e3) warnings.push("⚠️ Very large K — verify units; K depends on n.");
+
+  // Render
+  headLossEl.textContent = Xpred.toFixed(4);
+  const details = `
+    <div>Predicted X = <b>${Xpred.toFixed(4)}</b> mg/g</div>
+    <div>Classification: <b style="color:${color}">${classification}</b></div>
+    <div style="margin-top:6px;">${suggestion}</div>
+    <div style="margin-top:8px; font-size:14px;">n = ${n.toFixed(4)} → 1/n = ${oneOverN.toFixed(4)}</div>
+    ${expInfo}
+    ${warnings.length ? `<div style="margin-top:8px; color:#b35d00;">${warnings.join(" | ")}</div>` : ""}
+  `;
+  document.getElementById("feedbackContent").innerHTML = details;
+  document.getElementById("placeholder").classList.add("hidden");
+  document.getElementById("resultValue").classList.remove("hidden");
+  document.getElementById("resultError").classList.add("hidden");
+}
+
+function printReport() {
+  const el = document.getElementById('printDate');
+  if (el) {
+    el.textContent = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  }
+  window.print();
+}
+</script>
+
+
+</body>
+</html>
+{% endblock %}
+
+
+<!--
+Freundlich Adsorption Capacity Calculator
+-----------------------------------------
+
+📌 Formula:
+  X_pred = K × Cₑ^(1/n)
+
+  where:
+    • Cₑ = equilibrium solute concentration (mg/L)
+    • K  = Freundlich constant (capacity-related)
+    • n  = Freundlich intensity constant (≥1)
+    • X_pred = predicted adsorption capacity (mg/g)
+
+  Optional experimental check:
+    X_exp = (x × 1000) / m
+      - x = solute mass adsorbed (g)
+      - m = adsorbent mass (g)
+      - Conversion: g → mg (×1000)
+
+📥 Inputs:
+  • Cₑ (mg/L) — required
+  • K — required
+  • n — required (≥1)
+  • m (g) — optional (only if x also provided)
+  • x (g) — optional (only if m also provided)
+
+📤 Outputs:
+  • Predicted X (mg/g)
+  • Classification & guidance:
+       - <10 → Low Capacity
+       - 10–50 → Moderate Capacity
+       - 50–200 → Good Capacity
+       - ≥200 → Very High Capacity
+  • 1/n value for intensity check
+  • Optional: Experimental X and % deviation vs model
+
+✅ Input Validations:
+  1. Required:
+     - Cₑ > 0
+     - K > 0
+     - n ≥ 1
+  2. Decimal precision checks:
+     - Cₑ, K ≤ 6 decimals
+     - n ≤ 4 decimals
+     - m ≤ 3 decimals
+     - x ≤ 6 decimals
+  3. Practical ranges:
+     - Cₑ: 0.001 – 100,000 mg/L
+     - K: 1×10⁻⁶ – 1×10⁶
+     - n: 1 – 10
+     - m: 0.01 – 100,000 g
+     - x: >0 g
+  4. Optional pair check:
+     - m and x must be provided together, or both left blank.
+  5. Output guard:
+     - X_pred > 0 and ≤ 2000 mg/g
+     - X_exp > 0 and ≤ 2000 mg/g
+
+⚠️ Advisory Checks:
+  • Cₑ, K, n with excessive decimals → results rounded.
+  • n = 1 → linear isotherm.
+  • n > 5 → weak intensity, poor adsorption at low Cₑ.
+  • K > 1000 → unusually high, check units.
+  • X_exp > 1000 mg/g → unusually high lab result, verify method.
+  • X_exp vs X_pred deviation shown, flagged if > ±20%.
+
+📊 Classification Guidance:
+  • Low (<10 mg/g): Alternative media or pretreatment needed.
+  • Moderate (10–50 mg/g): Usable, confirm pilot data.
+  • Good (50–200 mg/g): Effective for most compliance uses.
+  • Very High (≥200 mg/g): Excellent, enables longer bed life and smaller systems.
+-->
