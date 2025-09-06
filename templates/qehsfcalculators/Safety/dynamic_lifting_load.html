@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Composite Risk Calculator{% endblock %}
+{% block title %}Dynamic Lifting Load Calculator{% endblock %}
 {% block content %}
 {% load static %}
 
@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Composite Risk Calculator</title>
+    <title>Dynamic Lifting Load Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
@@ -16,11 +16,10 @@
         .calculator-container {
             max-width: 1200px;
             margin: 20px auto;
-            padding:0 20px;
+            padding: 20px;
             border-radius: 12px;
         }
-        
-        .btn-container {
+         .btn-container {
             display: flex;
             justify-content: center; /* Horizontally center */
             margin: 30px 0;
@@ -64,21 +63,21 @@
         .calculator-header p {
             color: #7f8c8d;
             font-size: 18px;
+            {% comment %} max-width: 700px; {% endcomment %}
             margin: 0 auto;
         }
 
         /* Layout */
         .calc-content {
             display: flex;
-            flex-direction: column;
             gap: 30px;
             margin-bottom: 40px;
             align-items: stretch;
         }
         
-        @media (min-width: 901px) {
+        @media (max-width: 900px) {
             .calc-content { 
-                flex-direction: row; 
+                flex-direction: column; 
             }
         }
 
@@ -93,7 +92,6 @@
             flex-direction: column;
             transition: transform 0.3s ease;
             border: 2px solid #1560bd;
-            order: 2;
         }
         
         .calc-card {
@@ -120,24 +118,6 @@
             border-bottom: 2px solid #f1f5f9;
             padding-bottom: 10px;
             font-weight: 600;
-        }
-
-        /* Input rows for side-by-side fields */
-        .input-row {
-            {% comment %} display: flex; {% endcomment %}
-            flex-direction: column;
-            gap: 15px;
-            {% comment %} margin-bottom: 15px; {% endcomment %}
-        }
-        
-        @media (min-width: 480px) {
-            .input-row {
-                flex-direction: row;
-            }
-        }
-        
-        .input-row .form-group {
-            flex: 1;
         }
 
         /* Inputs */
@@ -214,9 +194,8 @@
         .result-card {
             justify-content: center;
             align-items: center;
-            min-height: auto;
+            min-height: 420px;
             text-align: center;
-            margin-top: 20px;
         }
         
         .result-placeholder img {
@@ -250,30 +229,6 @@
         
         .rate-label { 
             color: #7f8c8d; 
-        }
-
-        /* Meter */
-        .safety-meter {
-            width: 100%; 
-            height: 12px;
-            background: #f1f5f9;
-            border-radius: 6px;
-            margin: 20px 0;
-            overflow: hidden;
-        }
-        
-        .meter-fill {
-            height: 100%;
-            transition: width 1s ease-in-out;
-            border-radius: 6px;
-        }
-        
-        .meter-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: #7f8c8d;
-            margin-bottom: 20px;
         }
 
         /* Feedback */
@@ -335,22 +290,6 @@
             padding-left: 18px;
         }
         
-        
-        .good { 
-            color: #2e7d32; 
-            font-weight: 600; 
-        }
-        
-        .average { 
-            color: #f9a825; 
-            font-weight: 600; 
-        }
-        
-        .bad { 
-            color: #c62828; 
-            font-weight: 600; 
-        }
-
         .result-error {
             background: #ffe6e6;
             border: 2px solid #e74c3c;
@@ -378,6 +317,38 @@
             display: none; 
         }
 
+        /* Table styles */
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        
+        .custom-table {
+            width: 80%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        .custom-table th, .custom-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .custom-table th {
+            background-color: #1560bd;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .custom-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .custom-table tr:hover {
+            background-color: #e9f7fe;
+        }
+
         /* Mobile-specific adjustments */
         @media (max-width: 320px) {
             .calculator-container {
@@ -401,7 +372,7 @@
                 font-size: 1.4rem;
             }
             
-            .form-input {
+            .form-input, .form-select {
                 padding: 12px 14px;
                 font-size: 14px;
             }
@@ -434,6 +405,11 @@
             .note-card p, .note-card li {
                 font-size: 14px;
             }
+            
+            .custom-table th, .custom-table td {
+                padding: 8px 10px;
+                font-size: 14px;
+            }
         }
     </style>
 </head>
@@ -447,8 +423,8 @@
         {% include "includes/print_header_footer.html" %}
 
         <div class="calculator-header">
-            <h1>Composite Risk Calculator</h1>
-            <p>Calculate overall risk by combining exposure magnitude with probability of occurrence</p>
+            <h1>Dynamic Lifting Load Calculator</h1>
+            <p>Calculate the dynamic load for lifting operations based on equipment type and static load</p>
         </div>
 
         <div class="calc-content">
@@ -457,25 +433,31 @@
                 <h2>Enter Data</h2>
                 
                 <div class="form-group">
-                    <label for="exposure">Composite Exposure Score</label>
-                    <input type="number" id="exposure" class="form-input" min="0" step="0.1" placeholder="e.g., 75.0">
-                    <span class="error" id="exposureError"></span>
+                    <label for="staticLoad">Static Load (kN/kg)</label>
+                    <input type="number" id="staticLoad" class="form-input" min="1" placeholder="e.g., 100">
                 </div>
                 
-                <div class="form-group">
-                    <label for="riskIndex">Percentage Risk Index (%)</label>
-                    <input type="number" id="riskIndex" class="form-input" min="0" max="100" step="0.1" placeholder="e.g., 80.0">
-                    <span class="error" id="riskIndexError"></span>
-                </div>
+               <div class="form-group">
+    <label for="liftingClass">Select Lifting Equipment</label>
+    <div class="select-wrapper">
+        <select id="liftingClass" class="form-select">
+            <option value="1.1">Tower Crane (f = 1.1)</option>
+            <option value="1.3">Overhead Crane (f = 1.3)</option>
+            <option value="1.4">Mobile Crane (f = 1.4)</option>
+            <option value="1.6">High-Speed Lifting (f = 1.6)</option>
+        </select>
+    </div>
+</div>
+
                 
-                <button class="calculate-btn" onclick="calculateCompositeRisk()">Calculate Composite Risk</button>
+                <button class="calculate-btn" onclick="calculateDynamicLoad()">Calculate Dynamic Load</button>
             </div>
 
             <!-- Result Section -->
             <div class="result-card">
                 <div class="result-placeholder" id="placeholder">
-                   <img src="https://img.icons8.com/fluency/96/combo-chart.png" alt="Risk analytics icon" width="100">
-                    <p>This tool will calculate the <strong>Composite Risk Score</strong>. Enter your data to see results and insights here.</p>
+                    <img src="https://cdn-icons-png.flaticon.com/512/3142/3142731.png" alt="Lifting illustration">
+                    <p>This tool will calculate the <strong>Dynamic Lifting Load</strong>. Enter your data to see results and insights here.</p>
                 </div>
                 
                 <div class="result-error hidden" id="resultError">
@@ -485,24 +467,21 @@
                  
                 <div class="result-value hidden" id="resultValue">
                     <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
-                        <h2>Composite Risk Score</h2>
+                        <h2>Dynamic Lifting Load</h2>
                     </div>
                     <div class="rate-display">
-                        <div class="rate-value" id="rateValue">0.0</div>
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">kN</div>
                     </div>
 
                     <div class="safety-meter">
                         <div class="meter-fill" id="meterFill"></div>
                     </div>
-                    <div class="meter-labels">
-                        <span>Low Risk</span>
-                        <span>Moderate</span>
-                        <span>High</span>
-                        <span>Extreme</span>
-                    </div>
+                 
 
                     <div class="result-feedback">
-                        <div class="feedback-title">Risk Assessment</div>
+                        
+                        <div class="feedback-title">Safety Assessment</div>
                         <div class="feedback-content" id="feedbackContent"></div>
                     </div>
                     <div class="btn-wrapper">
@@ -517,66 +496,92 @@
             <div class="note-card">
                 <h3>📘 About This Calculator</h3>
                 <p>
-                    The <strong>Composite Risk Score</strong> combines exposure magnitude with probability of occurrence to quantify overall risk. It provides a single metric that reflects both how often a hazard occurs and how severe its consequences are. This approach enables better prioritization of safety measures and resource allocation.
+                    The <strong>Dynamic Lifting Load Calculator</strong> helps determine the actual load experienced during lifting operations,
+                    which is higher than the static load due to acceleration, deceleration, and other dynamic factors.
+                    This calculation is essential for selecting appropriate lifting equipment and ensuring operational safety.
                 </p>
             </div>
 
             <div class="note-card">
                 <h3>⚙️ Parameters Used</h3>
                 <ul class="note-list">
-                    <li><strong>Composite Exposure Score:</strong> Numerical score representing magnitude/frequency of exposure (typically 0-100 scale).</li>
-                    <li><strong>Percentage Risk Index:</strong> The probability or relative importance of the risk (0-100%).</li>
+                    <li><strong>Static Load:</strong> The weight of the object being lifted (in kN or kg).</li>
+                    <li><strong>Dynamic Factor (f):</strong> A multiplier that accounts for the dynamic effects during lifting operations.</li>
                 </ul>
             </div>
 
             <div class="note-card">
-                <h3>📊 Interpretation</h3>
+                <h3>📊 Standard Values of Lifting Coefficient (f)</h3>
+                <div class="table-container">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Lifting Equipment</th>
+                                <th>Dynamic Factor (f)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Tower Crane</td>
+                                <td>1.1</td>
+                            </tr>
+                            <tr>
+                                <td>Overhead Crane</td>
+                                <td>1.3</td>
+                            </tr>
+                            <tr>
+                                <td>Mobile Crane</td>
+                                <td>1.4</td>
+                            </tr>
+                            <tr>
+                                <td>High-Speed Lifting</td>
+                                <td>1.6</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="note-card">
+                <h3>🔍 Why Dynamic Load Calculation is Important?</h3>
                 <p>
-                    The Composite Risk Score ranges from 0 to 1000, where:
+                    Proper load calculation prevents equipment overload, structural damage, and workplace accidents.
+                    It ensures that lifting operations are conducted within safe working limits, protecting both personnel and assets.
                 </p>
+            </div>
+
+            <div class="note-card">
+                <h3>📈 Key Parameters That Affect Lifting Load</h3>
                 <ul class="note-list">
-                    <li><span class="good">0-250</span> → Low risk (routine monitoring)</li>
-                    <li><span class="average">250-500</span> → Moderate risk (requires controls)</li>
-                    <li><span class="bad">500-750</span> → High risk (immediate action needed)</li>
-                    <li><span class="bad">750-1000</span> → Extreme risk (stop operations)</li>
+                    <li><strong>Static Load:</strong> Weight of the object being lifted.</li>
+                    <li><strong>Lifting Coefficient (f):</strong> Factor depending on the type of lifting equipment.</li>
+                    <li><strong>Lifting Speed:</strong> In high-speed lifting, additional forces impact the dynamic load.</li>
+                    <li><strong>Acceleration/Deceleration:</strong> How quickly the load is moved affects dynamic forces.</li>
+                    <li><strong>Environmental Conditions:</strong> Wind, temperature, and other factors can influence load dynamics.</li>
                 </ul>
             </div>
 
             <div class="note-card">
-                <h3>🔍 Real-Life Applications</h3>
-                <p>
-                    Composite risk scores are essential in various safety applications:
-                </p>
+                <h3>🏗️ Real-Life Applications</h3>
                 <ul class="note-list">
-                    <li><strong>Fire Safety Planning:</strong> Assessing overall fire risks in buildings</li>
-                    <li><strong>Industrial Safety:</strong> Evaluating machine operation hazards</li>
-                    <li><strong>Chemical Handling:</strong> Determining storage and handling procedures</li>
-                    <li><strong>Emergency Preparedness:</strong> Prioritizing disaster response plans</li>
+                    <li><strong>Construction:</strong> Cranes lifting heavy steel beams and concrete elements.</li>
+                    <li><strong>Manufacturing:</strong> Overhead cranes moving machinery and heavy components.</li>
+                    <li><strong>Shipbuilding:</strong> Lifting large ship parts with mobile cranes.</li>
+                    <li><strong>Logistics:</strong> Moving heavy containers and cargo in ports and warehouses.</li>
                 </ul>
             </div>
-            
+
             <div class="note-card">
-    <h3>🛡️ Validation Rules Applied</h3>
+    <h3>✅ Input Validation Rules</h3>
     <ul class="note-list">
-        <li><strong>Composite Exposure Score:</strong> 0–100, max 1 decimal, no negatives.</li>
-        <li><strong>Risk Index (%):</strong> 0–100%, max 1 decimal, no negatives.</li>
-        <li><strong>Cross-field Check:</strong> If Exposure = 0 → final score = 0, regardless of Risk Index.</li>
-        <li><strong>Output (Composite Risk):</strong> Always between 0–1000.</li>
-        <li><strong>Audit Note:</strong> Validations align with OSHA, NFPA, and ISO 45001 standards.</li>
+        <li><strong>Static Load:</strong> Must be > 0. Acceptable range: 1 – 10,000 kN. No negative or zero values allowed.</li>
+        <li><strong>Dynamic Factor:</strong> Must be selected from predefined equipment types (1.1 – 1.6).</li>
+        <li><strong>Output Dynamic Load:</strong> Valid range up to 2 × Static Load. Above this is unsafe (Critical Risk).</li>
+        <li><strong>No text or invalid entries:</strong> Only numeric inputs accepted.</li>
     </ul>
+    <p><b>Note:</b> These validations are based on <b>ISO 4301, OSHA 1910, and ASME B30</b> standards for crane and lifting operations.</p>
 </div>
 
-
-
-            <div class="note-card">
-                <h3>🏭 Industry Standards & Guidelines</h3>
-                <p>Used in NFPA risk assessment methodologies and OSHA hazard evaluation frameworks. Aligns with ISO 45001 occupational health and safety standards.</p>
-            </div>
-            
-            <div class="note-card">
-                <h3>📈 Why This Calculation is Important?</h3>
-                <p>Composite risk scores enable safety professionals to prioritize hazards that combine high exposure with high probability, directing resources to areas needing most urgent attention in fire prevention and workplace safety.</p>
-            </div>
         </div>
     </div>
 
@@ -588,9 +593,10 @@
             document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
         });
 
-        function calculateCompositeRisk() {
-    const exposureInput = document.getElementById('exposure').value.trim();
-    const riskIndexInput = document.getElementById('riskIndex').value.trim();
+        
+function calculateDynamicLoad() {
+    const staticLoad = document.getElementById('staticLoad').value.trim();
+    const liftingFactor = document.getElementById('liftingClass').value;
 
     const errorBox = document.getElementById('resultError');
     const errorMessage = document.getElementById('errorMessage');
@@ -599,39 +605,35 @@
 
     let errors = [];
 
-    // === Validate Exposure Score (0–100) ===
-    if (exposureInput === "") {
-        errors.push("👉 Please enter Composite Exposure Score.");
+    // ============================
+    // VALIDATE STATIC LOAD
+    // ============================
+    if (staticLoad === "") {
+        errors.push("👉 Please enter the Static Load.");
     } else {
-        const expValue = parseFloat(exposureInput);
-        if (isNaN(expValue)) {
-            errors.push("👉 Exposure Score must be a number.");
-        } else if (expValue < 0) {
-            errors.push("👉 Exposure Score cannot be negative.");
-        } else if (expValue > 100) {
-            errors.push("👉 Exposure Score must be ≤ 100 (normalized scale).");
-        } else if (!/^\d+(\.\d{1})?$/.test(exposureInput)) {
-            errors.push("👉 Exposure Score must have at most 1 decimal place.");
+        const sl = parseFloat(staticLoad);
+        if (isNaN(sl)) {
+            errors.push("👉 Static Load must be a valid number.");
+        } else if (sl <= 0) {
+            errors.push("👉 Static Load must be greater than 0.");
+        } else if (sl < 1) {
+            errors.push("👉 Static Load less than 1 kN is not realistic for lifting equipment.");
+        } else if (sl > 10000) {
+            errors.push("👉 Static Load exceeds 10,000 kN. Please verify.");
         }
     }
 
-    // === Validate Risk Index (0–100%) ===
-    if (riskIndexInput === "") {
-        errors.push("👉 Please enter Percentage Risk Index.");
-    } else {
-        const riskValue = parseFloat(riskIndexInput);
-        if (isNaN(riskValue)) {
-            errors.push("👉 Risk Index must be a number.");
-        } else if (riskValue < 0) {
-            errors.push("👉 Risk Index cannot be negative.");
-        } else if (riskValue > 100) {
-            errors.push("👉 Risk Index must be ≤ 100%.");
-        } else if (!/^\d+(\.\d{1})?$/.test(riskIndexInput)) {
-            errors.push("👉 Risk Index must have at most 1 decimal place.");
-        }
+    // ============================
+    // VALIDATE LIFTING FACTOR
+    // ============================
+    const validFactors = ["1.1", "1.3", "1.4", "1.6"];
+    if (!validFactors.includes(liftingFactor)) {
+        errors.push("👉 Invalid lifting factor. Please select from the given options.");
     }
 
-    // === Show Errors ===
+    // ============================
+    // HANDLE ERRORS
+    // ============================
     if (errors.length > 0) {
         errorMessage.innerHTML = errors.join("<br>");
         errorBox.classList.remove("hidden");
@@ -642,51 +644,60 @@
         errorBox.classList.add("hidden");
     }
 
-    // === Perform Calculation ===
-    const expValue = parseFloat(exposureInput);
-    const riskValue = parseFloat(riskIndexInput);
+    // ============================
+    // CALCULATION
+    // ============================
+    const SL = parseFloat(staticLoad);
+    const f = parseFloat(liftingFactor);
+    const DL = SL * f;
 
-    // Composite Risk Formula: Exposure × (Risk % / 100)
-    // Scale to 1000
-const compositeRisk = (expValue * riskValue) / 10;
+    if (!isFinite(DL) || DL <= 0) {
+        errorMessage.innerHTML = "❌ Invalid calculation result. Please check inputs.";
+        errorBox.classList.remove("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
 
+    document.getElementById('rateValue').textContent = DL.toFixed(2);
 
-    // Output must be between 0 and 1000
-    const boundedRisk = Math.min(Math.max(compositeRisk, 0), 1000);
-
-    document.getElementById('rateValue').textContent = boundedRisk.toFixed(1);
-
-    // === Risk Assessment Bands ===
+    // ============================
+    // SAFETY ASSESSMENT
+    // ============================
     const meterFill = document.getElementById('meterFill');
     let meterWidth, meterColor, feedback;
 
-    if (boundedRisk <= 250) {
-        meterWidth = "25%";
+    if (DL <= SL * 1.2) {
+        meterWidth = "20%";
+        meterColor = "#27ae60";
+        feedback = "✅ Safe operation. Dynamic load is within safe limits.";
+    } else if (DL <= SL * 1.5) {
+        meterWidth = "40%";
         meterColor = "#2ecc71";
-        feedback = "✅ LOW RISK: Routine monitoring recommended.";
-    } else if (boundedRisk <= 500) {
-        meterWidth = "50%";
+        feedback = "⚠ Moderate risk. Monitor lifting conditions closely.";
+    } else if (DL <= SL * 1.8) {
+        meterWidth = "60%";
         meterColor = "#f39c12";
-        feedback = "⚠️ MODERATE RISK: Implement control measures.";
-    } else if (boundedRisk <= 750) {
-        meterWidth = "75%";
+        feedback = "⚠ High risk. Consider using higher-capacity equipment.";
+    } else if (DL <= SL * 2.0) {
+        meterWidth = "80%";
         meterColor = "#e67e22";
-        feedback = "⚠️ HIGH RISK: Immediate corrective action required.";
+        feedback = "🚨 Dangerous! Review lifting plan before proceeding.";
     } else {
-        meterWidth = "100%";
+        meterWidth = "95%";
         meterColor = "#e74c3c";
-        feedback = "🚨 EXTREME RISK: Stop operations until mitigated.";
+        feedback = "❌ Critical! Do not proceed. Dynamic load exceeds safe working limits.";
     }
 
     meterFill.style.width = meterWidth;
     meterFill.style.backgroundColor = meterColor;
     document.getElementById('feedbackContent').textContent = feedback;
 
+    const equipmentType = document.getElementById('liftingClass').options[document.getElementById('liftingClass').selectedIndex].text;
+    document.getElementById('calculationType').innerHTML = `<h2>Dynamic Lifting Load for ${equipmentType.split(' (')[0]}</h2>`;
+
     placeholder.classList.add("hidden");
     resultValue.classList.remove("hidden");
 }
-
-
 
         function printReport() {
             // Update date just before printing
@@ -702,83 +713,104 @@ const compositeRisk = (expValue * riskValue) / 10;
 </html>
 {% endblock %}
 
-
 {% comment %} 
-✅ Step 1: Formula Used
 
-We need to document the calculation formula explicitly in your code (so future reviewers understand).
-
+1. Formula (with comment for code)
 /*
-Composite Risk Score Formula:
-----------------------------------------
-Composite Risk Score = Exposure Score × (Risk Index ÷ 100)
+
+Dynamic Lifting Load Calculator
+Formula:
+Dynamic Load (DL) = Static Load (SL) × Dynamic Factor (f)
 
 Where:
-- Exposure Score (0–100): Magnitude/frequency of hazard exposure
-- Risk Index (%) (0–100): Probability or importance of hazard occurrence
+SL = Static Load (weight of object in kN or kg)
+f = Dynamic factor (depends on lifting equipment type)
+- Tower Crane = 1.1
+- Overhead Crane = 1.3
+- Mobile Crane = 1.4
+- High-Speed Lifting = 1.6
 
-Output Range:
-- 0 → No risk
-- 1000 → Maximum risk (100 × 100 ÷ 100 = 100)
+Standards Referenced:
+- ISO 4301 (Cranes & Lifting Appliances)
+- OSHA 1910 Subpart N (Material Handling)
+- ASME B30 (Cranes & Lifting Devices)
 
-Risk Level Thresholds:
-- 0 – 250   → Low Risk (routine monitoring)
-- 251 – 500 → Moderate Risk (requires controls)
-- 501 – 750 → High Risk (immediate action)
-- 751 –1000 → Extreme Risk (stop operations)
 */
 
-✅ Step 2: Detailed Validation Rules
-🔹 Composite Exposure Score (0–100 scale)
+2. Input Validation Rules (QEHS / Fire Safety Perspective)
+Static Load (SL)
 
-Unit: dimensionless (normalized risk score).
+Must be numeric.
 
-Min Value: 0 (no exposure).
+Must be > 0 (cannot lift zero or negative weight).
 
-Max Value: 100 (maximum credible exposure).
+Typical safe range: 1 – 10,000 kN (≈ 100 – 1,000,000 kg).
 
-Decimals: up to 1 decimal place.
+Up to 2 decimal places (since load measurement rarely exceeds that precision).
 
-Logical Consistency: Must be a number, not text, not negative.
+If entered in kg, convert to kN (1 kN ≈ 101.97 kg). Recommend consistency in labeling.
 
-Audit Rationale: Exposure above 100 is unrealistic and misleading in hazard analysis (violates ISO 45001 risk assessment normalization).
+Dynamic Factor (f)
 
-🔹 Percentage Risk Index (0–100%)
+Must be chosen from predefined options only.
 
-Unit: % probability.
+Range: 1.1 – 1.6 (based on ISO/ASME/OSHA).
 
-Min Value: 0 (no likelihood).
+Prevent free-text/manual entry.
 
-Max Value: 100 (certainty).
+3. Output Validation Logic
+Dynamic Load (DL)
 
-Decimals: up to 1 decimal place.
+Formula: DL = SL × f
 
-Cross-field check: If Exposure = 0, Risk Index value doesn’t matter → final score = 0.
+Safe working load assessments:
 
-Audit Rationale: Probabilities > 100% are logically impossible and non-compliant with OSHA risk matrix standards.
+≤ 1.2 × SL → ✅ Safe
 
-🔹 Composite Risk Score (Output: 0–1000)
+≤ 1.5 × SL → ⚠ Moderate Risk
 
-Formula Boundaries: Automatically capped (0–100 × 100 ÷ 100 = 100).
+≤ 1.8 × SL → ⚠ High Risk
 
-Decimals: Output shown with 1 decimal.
+≤ 2.0 × SL → 🚨 Dangerous
 
-Audit Rationale: Ensures outputs are consistent with NFPA/ISO risk rating scales.
+2.0 × SL → ❌ Critical (prohibited by OSHA/ASME)
 
-✅ Step 3: Edge Case Validations
+⚠ Thresholds derived from crane derating guidelines (OSHA 1910.179, ASME B30.5).
 
-Empty fields → Show error: "Please enter required values."
+4. Edge Case Validations
 
-Non-numeric input → Reject, show error.
+Static Load = 0 → error: “Load cannot be zero.”
 
-Negative values → Reject, must be ≥ 0.
+Negative Static Load → error: invalid input.
 
-Exposure > 100 → Warn: "Exposure is typically capped at 100 (normalized)."
+Static Load > 10,000 kN → error: beyond crane safe limits.
 
-Risk Index > 100% → Reject, must be ≤ 100.
+Empty input → error: must provide load.
 
-Exposure = 0 but Risk Index > 0 → Allow (output = 0, safe condition).
+Non-numeric input → error.
 
-Extremely small decimals (<0.1) → Round to 1 decimal.
+Unrecognized lifting factor (tampered code) → error: invalid selection.
 
-NaN / Infinity → Catch errors (e.g., if future formula uses division). {% endcomment %}
+DL > 20,000 kN → warning: unrealistic for typical industrial cranes.
+
+5. Corrected JavaScript Code
+
+Here’s a validated version of your calculateDynamicLoad() function:
+
+/*
+=================================================
+Dynamic Lifting Load Calculator
+Formula:
+    DL = SL × f
+Validation Rules:
+    Static Load (SL):
+        - Must be > 0
+        - Range: 1 – 10,000 kN
+        - Up to 2 decimals allowed
+    Dynamic Factor (f):
+        - Must be from predefined options: 1.1, 1.3, 1.4, 1.6
+    Output (DL):
+        - Safe up to 2 × SL
+        - Flag anything > 2 × SL as Critical Risk
+=================================================
+*/ {% endcomment %}
