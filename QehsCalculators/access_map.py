@@ -386,10 +386,10 @@ CALCULATORS = [
 
 {"name": "Chemical Exposure Burn Severity Rate Calculator", "url_name":"safety_chemical_exposure_burn_severity_rate_calculator", "plan_type": "corporate", "category": "safety"},
 
-{"name": "Composite Risk Calculator", "url_name":"safety_compressible_flow_crane_equation_3_20_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Composite Risk Calculator", "url_name":"safety_composite_risk_calculator", "plan_type": "corporate", "category": "safety"},
 
 
-{"name": "Crane Equation 3-20 - Compressible Flow Calculator", "url_name":"safety_composite_risk_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Crane Equation 3-20 - Compressible Flow Calculator", "url_name":"safety_compressible_flow_crane_equation_3_20_calculator", "plan_type": "corporate", "category": "safety"},
     
     # Fire Calculators
     # {"name": "Fire Risk Assessment", "url_name": "fire_risk", "plan_type": "individual", "category": "fire"},
