@@ -161,3 +161,29 @@ class Contact(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.subject}"
+    
+
+
+class BlogPost(models.Model):
+    CATEGORY_CHOICES = [
+        ('quality', 'Quality'),
+        ('environment', 'Environment'),
+        ('health', 'Health'),
+        ('safety', 'Safety'),
+        ('fire', 'Fire'),
+    ]
+
+    title = models.CharField(max_length=200)
+    author = models.CharField(max_length=100) 
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    content = models.TextField()  
+    featured_image = models.ImageField(upload_to='blog_images/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_published = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.title} ({self.get_category_display()})"

@@ -865,6 +865,53 @@ def user_devices_list(request):
     return render(request, "user_devices_list.html", {"user_data": user_data})
 
 
+from django.contrib.auth.decorators import login_required, user_passes_test
+from .models import BlogPost
+from .forms import BlogPostForm
+
+def blog_list(request):
+    posts = BlogPost.objects.filter(is_published=True)
+    return render(request, 'blog/blog_list.html', {'posts': posts})
+
+def blog_detail(request, post_id):
+    post = get_object_or_404(BlogPost, id=post_id, is_published=True)
+    return render(request, 'blog/blog_detail.html', {'post': post})
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def blog_create(request):
+    if request.method == "POST":
+        form = BlogPostForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Blog post created successfully!")
+            return redirect('blog_list')
+    else:
+        form = BlogPostForm()
+    return render(request, 'blog/blog_form.html', {'form': form})
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def blog_edit(request, post_id):
+    post = get_object_or_404(BlogPost, id=post_id)
+    if request.method == "POST":
+        form = BlogPostForm(request.POST, request.FILES, instance=post)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Blog post updated successfully!")
+            return redirect('blog_list')
+    else:
+        form = BlogPostForm(instance=post)
+    return render(request, 'blog/blog_form.html', {'form': form, 'edit': True})
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def blog_delete(request, post_id):
+    post = get_object_or_404(BlogPost, id=post_id)
+    post.delete()
+    messages.success(request, "Blog post deleted successfully!")
+    return redirect('blog_list')
+
 from django.shortcuts import render
 from django.utils import timezone
 from .models import UserSubscription  # import your subscription model
