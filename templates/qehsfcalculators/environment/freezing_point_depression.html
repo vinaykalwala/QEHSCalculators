@@ -1,0 +1,717 @@
+{% extends 'base.html' %}
+{% block title %}Freezing Point Depression Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freezing Point Depression Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 38px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+
+<div class="calculator-header">
+  <h1>Freezing Point Depression Calculator</h1>
+  <p>Calculate the <strong>Freezing Point Depression (°C)</strong> and the resulting new freezing point (°C) for a solution.</p>
+</div>
+
+<div class="calc-content">
+  <!-- Calculator -->
+  <div class="calc-card">
+    <h2>Enter Data</h2>
+
+    <div class="form-group">
+      <label for="molality">Molality (m) — mol/kg</label>
+      <input type="number" id="molality" class="form-input" min="0" step="any" placeholder="e.g., 3.0">
+    </div>
+
+    <div class="form-group">
+      <label for="cryoscopicConstant">Cryoscopic Constant (K<sub>f</sub>) — K·kg/mol</label>
+      <input type="number" id="cryoscopicConstant" class="form-input" min="0.01" step="any" placeholder="e.g., 1.86 (water)">
+    </div>
+
+    <div class="form-group">
+      <label for="pureSolventFP">Pure Solvent Freezing Point, T<sub>pure</sub> — °C</label>
+      <input type="number" id="pureSolventFP" class="form-input" step="any" placeholder="e.g., 0 for water">
+    </div>
+
+    <button class="calculate-btn" onclick="calculateCorrosionRate()">Calculate Freezing Point Depression</button>
+  </div>
+
+  <!-- Result Section -->
+  <div class="result-card">
+    <div class="result-placeholder" id="placeholder">
+      <img src="https://cdn-icons-png.flaticon.com/512/4727/4727260.png" alt="Freezing point illustration">
+      <p>This tool will calculate the <strong>Freezing Point Depression (°C)</strong> and new freezing point.</p>
+    </div>
+
+    <div class="result-error hidden" id="resultError">
+      <div class="error-icon">❌</div>
+      <div class="error-message" id="errorMessage"></div>
+    </div>
+
+    <div class="result-value hidden" id="resultValue">
+      <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+        <h2>Calculated Freezing Point Depression</h2>
+      </div>
+
+      <div class="rate-display">
+        <div class="rate-value" id="rateValue">0.000</div>
+        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">°C</div>
+      </div>
+
+      <div class="result-feedback">
+        <div class="feedback-title">Assessment</div>
+        <div class="feedback-content" id="feedbackContent"></div>
+      </div>
+
+      <div class="btn-wrapper">
+        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Notes Section -->
+<div class="note-section">
+  <div class="note-card">
+    <h3>📘 About This Calculator</h3>
+        <p>
+    Computes the <strong>freezing point depression</strong> and the resulting <strong>new freezing point</strong> of a solution. 
+    This helps optimize winter safety operations such as de-icing and antifreeze dosing, ensuring fire-water networks 
+    and hydrants remain operable in sub-zero conditions while avoiding excess chemical use that could harm the environment.
+    </p>
+
+  </div>
+
+  <div class="note-card">
+    <h3>📊 Interpretation</h3>
+    <ul class="note-list">
+      <li><span class="good">ΔT<sub>f</sub> &lt; 1 °C</span> → ✅ Mild depression (light protection)</li>
+      <li><span class="average">1–5 °C</span> → ⚠️ Moderate depression (typical winter operations)</li>
+      <li><span class="bad">5–10 °C</span> → ❗ Strong depression (heavy de-icing)</li>
+      <li><span class="bad">> 10 °C</span> → 🔴 Extreme depression (verify feasibility and environmental impact)</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>⚠️Input Validations</h3>
+    <ul>
+      <li>✔️ m: required, 0 ≤ m ≤ 25 mol/kg (warning if &gt; 10)</li>
+      <li>✔️ K<sub>f</sub>: required, 0.01 ≤ K<sub>f</sub> ≤ 30 K·kg/mol (warning if &lt; 0.1 or &gt; 10)</li>
+      <li>✔️ T<sub>pure</sub>: required, −200 ≤ T<sub>pure</sub> ≤ +150 °C</li>
+      <li>✔️ ΔT<sub>f</sub> guardrails: 0 ≤ ΔT<sub>f</sub> ≤ 120 °C (warning if &gt; 10)</li>
+      <li>✔️ T<sub>new</sub> ≥ −200 °C (warning if &lt; −100 °C)</li>
+      <li>❌ Negative or non-numeric values are invalid</li>
+      <li>ℹ️ Inputs allow up to 6 decimals; outputs rounded to ΔT<sub>f</sub> 3 decimals, T<sub>new</sub> 2 decimals</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>🌍 Key Applications</h3>
+    <ul class="note-list">
+      <li><strong>Road & facility de-icing</strong> (salt/alternative deicers)</li>
+      <li><strong>Fire-water systems</strong> (hydrants, tanks, sprinkler mains)</li>
+      <li><strong>Process safety</strong> (coolants/heat-transfer fluids)</li>
+      <li><strong>Environmental compliance</strong> (avoid over-dosing to limit chloride loading)</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+/* Show error messages */
+function showErrors(errors) {
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+
+  errorMessage.innerHTML = errors.join("<br>");
+  errorBox.classList.remove("hidden");
+  placeholder.classList.add("hidden");
+  resultValue.classList.add("hidden");
+}
+
+/* Repurposed function name preserved for wiring */
+function calculateCorrosionRate() {
+  const mRaw  = document.getElementById("molality").value.trim();
+  const kfRaw = document.getElementById("cryoscopicConstant").value.trim();
+  const tpRaw = document.getElementById("pureSolventFP").value.trim();
+
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+  const rateEl = document.getElementById("rateValue");           // shows ΔTf
+  const feedbackEl = document.getElementById("feedbackContent"); // details
+
+  errorBox.classList.add("hidden");
+  errorMessage.innerHTML = "";
+  feedbackEl.innerHTML = "";
+
+  const errors = [];
+  const warnings = [];
+
+  // Presence checks
+  if (mRaw === "")  errors.push("👉 Please enter Molality (mol/kg).");
+  if (kfRaw === "") errors.push("👉 Please enter Cryoscopic Constant Kf (K·kg/mol).");
+  if (tpRaw === "") errors.push("👉 Please enter Pure Solvent Freezing Point Tₚᵤᵣₑ (°C).");
+  if (errors.length) return showErrors(errors);
+
+  // Numeric parsing
+  const m  = parseFloat(mRaw);
+  const Kf = parseFloat(kfRaw);
+  const Tp = parseFloat(tpRaw);
+
+  const isFiniteNum = (v) => Number.isFinite(v) && !Number.isNaN(v);
+  if (!isFiniteNum(m))  errors.push("👉 Molality must be numeric.");
+  if (!isFiniteNum(Kf)) errors.push("👉 Kf must be numeric.");
+  if (!isFiniteNum(Tp)) errors.push("👉 Tₚᵤᵣₑ must be numeric.");
+  if (errors.length) return showErrors(errors);
+
+  // Range validations
+  if (m < 0 || m > 25) errors.push("👉 Molality must be between 0 and 25 mol/kg.");
+  if (Kf < 0.01 || Kf > 30) errors.push("👉 Kf must be between 0.01 and 30 K·kg/mol.");
+  if (Tp < -200 || Tp > 150) errors.push("👉 Tₚᵤᵣₑ must be between −200 and +150 °C.");
+
+  // Practical warnings
+  const countDecimals = (s) => (s.includes(".") ? s.split(".")[1].length : 0);
+  if (countDecimals(mRaw)  > 6) warnings.push("⚠️ Molality has >6 decimals; results will be rounded.");
+  if (countDecimals(kfRaw) > 6) warnings.push("⚠️ Kf has >6 decimals; results will be rounded.");
+  if (countDecimals(tpRaw) > 6) warnings.push("⚠️ Tₚᵤᵣₑ has >6 decimals; results will be rounded.");
+
+  if (m > 10) warnings.push("⚠️ Very high molality — check solubility and realism.");
+  if (Kf < 0.1 || Kf > 10) warnings.push("⚠️ Unusual Kf — verify solvent selection.");
+
+  if (errors.length) return showErrors(errors);
+
+  // Calculations (extracted formulas)
+  const deltaTf = Kf * m;
+  if (!isFiniteNum(deltaTf) || deltaTf < 0) {
+    return showErrors(["⚠️ Computed ΔT₍f₎ is invalid. Check inputs."]);
+  }
+  if (deltaTf > 120) {
+    return showErrors(["⚠️ ΔT₍f₎ > 120 °C is not realistic for practical systems. Recheck inputs/units."]);
+  }
+
+  const Tnew = Tp - deltaTf;
+  if (!isFiniteNum(Tnew)) {
+    return showErrors(["⚠️ Computed new freezing point is invalid."]);
+  }
+  if (Tnew < -200) errors.push("👉 New freezing point below −200 °C — non-physical for typical solvents.");
+  if (errors.length) return showErrors(errors);
+
+  if (deltaTf > 10) warnings.push("⚠️ Extreme depression (>10 °C) — verify feasibility and environmental impact.");
+  if (Tnew < -100) warnings.push("⚠️ Very low Tₙₑw (< −100 °C) — uncommon; ensure solvent and inputs are correct.");
+  if (m === 0) warnings.push("ℹ️ m = 0 → behaviour equals pure solvent (ΔT₍f₎ = 0).");
+
+  // Classification
+  let statusMsg = "";
+  if (deltaTf === 0) {
+    statusMsg = "Neutral: No depression (pure solvent behaviour).";
+  } else if (deltaTf < 1) {
+    statusMsg = "✅ Mild depression — light protection.";
+  } else if (deltaTf < 5) {
+    statusMsg = "⚠️ Moderate depression — typical winter operations.";
+  } else if (deltaTf < 10) {
+    statusMsg = "❗ Strong depression — heavy de-icing.";
+  } else {
+    statusMsg = "🔴 Extreme depression — validate practicality & environmental impacts.";
+  }
+
+  // Details
+  let details = `<div>ΔT<sub>f</sub>: <b>${deltaTf.toFixed(3)}</b> °C</div>`;
+  details += `<div>T<sub>new</sub>: <b>${Tnew.toFixed(2)}</b> °C</div>`;
+  details += `<div>Inputs → m: <b>${m.toFixed(6)}</b> mol/kg, K<sub>f</sub>: <b>${Kf.toFixed(6)}</b> K·kg/mol, T<sub>pure</sub>: <b>${Tp.toFixed(2)}</b> °C</div>`;
+  if (warnings.length) {
+    details += `<div style="margin-top:6px; color:#b35d00; font-size:0.95em;">${warnings.join(" | ")}</div>`;
+  }
+
+  // Render
+  document.getElementById("rateValue").textContent = deltaTf.toFixed(3); // show ΔTf in the main numeric box
+  feedbackEl.innerHTML = `<div>${statusMsg}</div>${details}`;
+
+  placeholder.classList.add("hidden");
+  resultValue.classList.remove("hidden");
+  errorBox.classList.add("hidden");
+}
+
+function printReport() {
+  const el = document.getElementById('printDate');
+  if (el) {
+    const now = new Date();
+    el.textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+  window.print();
+}
+</script>
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+<!-- 
+📌 Freezing Point Depression Calculator (ΔTf)
+
+Inputs:
+ - Molality (m) [mol/kg] → from user input field "molality"
+ - Cryoscopic Constant (Kf) [K·kg/mol] → from "cryoscopicConstant"
+ - Pure Solvent Freezing Point (Tp) [°C] → from "pureSolventFP"
+
+Formulas:
+ - ΔTf = Kf × m
+ - Tnew = Tp − ΔTf
+
+Outputs:
+ - ΔTf (freezing point depression, °C) → shown in main result box
+ - Tnew (new freezing point, °C) → shown in feedback details
+ - Classification message based on ΔTf severity
+
+Validations:
+ - Check if all inputs are present (no blanks)
+ - Check if numeric (not NaN)
+ - Acceptable ranges:
+    • m: 0 – 25 mol/kg
+    • Kf: 0.01 – 30 K·kg/mol
+    • Tp: −200 – +150 °C
+ - ΔTf guardrails:
+    • Must be ≥ 0
+    • ΔTf ≤ 120 °C (beyond that → unrealistic)
+ - Tnew guardrails:
+    • Tnew ≥ −200 °C (below is non-physical)
+
+Warnings:
+ - >6 decimals → rounded
+ - High molality (>10) → check solubility
+ - Unusual Kf (<0.1 or >10) → verify solvent
+ - Large ΔTf (>10 °C) → extreme case
+ - Very low Tnew (<−100 °C) → uncommon, recheck inputs
+ - m = 0 → no depression (pure solvent behaviour)
+
+Classification of ΔTf:
+ - =0 → Neutral (pure solvent)
+ - <1 → Mild depression
+ - 1–5 → Moderate (typical winter ops)
+ - 5–10 → Strong (heavy de-icing)
+ - >10 → Extreme (check practicality & impacts)
+-->
