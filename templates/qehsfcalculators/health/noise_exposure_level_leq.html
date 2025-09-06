@@ -1,0 +1,397 @@
+{% extends 'base.html' %}
+{% block title %}Noise Exposure Level Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noise Exposure Level Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            min-height: 420px;
+            justify-content: center;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        /* Result Card */
+        .result-placeholder {
+            text-align: center;
+            margin: auto;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: baseline;
+            justify-content: center;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+        }
+        .rate-label {
+            color: #2980b9;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0 10px;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out, background-color 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list { margin: 0; padding-left: 18px; }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px; padding: 20px;
+            text-align: left; gap: 12px; margin-top: 20px;
+        }
+        .error-icon { font-size: 76px; flex-shrink: 0; text-align: center; }
+        .error-message { font-size: 24px; line-height: 1.6; }
+        .hidden { display: none; }
+        .btn-container { display: flex; justify-content: center; margin: 30px 0; }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040); color: #ffffff; border: 2px solid #1560bd;
+            padding: 10px 20px; font-size: 14px; font-weight: 600; border-radius: 8px;
+            text-decoration: none; transition: all 0.3s ease; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Noise Exposure Level Calculator</h1>
+            <p>Calculate the time-averaged noise exposure (Leq) from multiple sound levels.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Sound Level Measurements</h2>
+                <div class="form-group">
+                    <label for="soundLevel1">Sound Level 1 (dB)</label>
+                    <input type="number" id="soundLevel1" class="form-input" placeholder="Enter first measurement">
+                </div>
+                <div class="form-group">
+                    <label for="soundLevel2">Sound Level 2 (dB)</label>
+                    <input type="number" id="soundLevel2" class="form-input" placeholder="Enter second measurement">
+                </div>
+                <div class="form-group">
+                    <label for="soundLevel3">Sound Level 3 (dB)</label>
+                    <input type="number" id="soundLevel3" class="form-input" placeholder="Enter third measurement">
+                </div>
+                <button class="calculate-btn" onclick="calculateAndDisplay()">Calculate Leq</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Enter three sound level readings to calculate the equivalent continuous sound level.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div id="resultValue" class="hidden" style="text-align: center;">
+                    <h2>Equivalent Sound Level (Leq)</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0</div>
+                        <div class="rate-label">dB</div>
+                    </div>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Safe</span>
+                        <span>Moderate</span>
+                        <span>High Risk</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Interpretation</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <div class="note-card">
+                <h3>About Equivalent Sound Level (Leq)</h3>
+                <p>The <strong>Equivalent Continuous Sound Level (Leq)</strong> is the time-averaged sound level, representing the total sound energy of a fluctuating noise over a period. It is the standard metric used in occupational health to assess noise exposure and prevent noise-induced hearing loss.</p>
+            </div>
+            <div class="note-card">
+                <h3>Why is Leq Important?</h3>
+                <ul class="note-list">
+                    <li><strong>Health & Safety:</strong> It quantifies the risk of hearing damage from cumulative noise exposure.</li>
+                    <li><strong>Regulatory Compliance:</strong> Occupational safety standards, like those from OSHA, set permissible exposure limits based on an 8-hour time-weighted average, which is a form of Leq. The action level is typically 85 dB.</li>
+                    <li><strong>Risk Assessment:</strong> It allows for the comparison of different noise environments and helps prioritize noise control measures.</li>
+                </ul>
+            </div>
+             <div class="note-card">
+                <h3>How to Interpret the Result</h3>
+                <p>The calculated Leq value indicates the overall risk:</p>
+                 <ul class="note-list">
+                    <li><strong>Below 85 dB:</strong> Generally considered safe for an 8-hour workday without hearing protection.</li>
+                    <li><strong>85 dB and above:</strong> This is the "Action Level." Employers are required to implement a hearing conservation program. Hearing protection is strongly recommended.</li>
+                    <li><strong>100 dB and above:</strong> Represents a very high risk. Exposure should be limited, and hearing protection is mandatory.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateAndDisplay() {
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValueBox = document.getElementById('resultValue');
+
+            errorBox.classList.add('hidden');
+            resultValueBox.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+
+            let errors = [];
+            function getVal(id, label) {
+                const el = document.getElementById(id);
+                const raw = el.value?.toString().trim();
+                if (!raw) {
+                    errors.push(`👉 ${label} is required.`);
+                    return null;
+                }
+                const num = parseFloat(raw);
+                if (isNaN(num) || num < 0) {
+                    errors.push(`👉 Enter a valid, non-negative number for ${label}.`);
+                    return null;
+                }
+                if (num > 200) {
+                     errors.push(`👉 ${label} is unrealistically high. Please check the value.`);
+                }
+                return num;
+            }
+
+            const l1 = getVal('soundLevel1', 'Sound Level 1');
+            const l2 = getVal('soundLevel2', 'Sound Level 2');
+            const l3 = getVal('soundLevel3', 'Sound Level 3');
+
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add('hidden');
+                return;
+            }
+            
+            const n = 3;
+            const leq = 10 * Math.log10((Math.pow(10, l1 / 10) + Math.pow(10, l2 / 10) + Math.pow(10, l3 / 10)) / n);
+
+            placeholder.classList.add('hidden');
+            resultValueBox.classList.remove('hidden');
+
+            document.getElementById('rateValue').textContent = leq.toFixed(1);
+            
+            const meterFill = document.getElementById('meterFill');
+            // Scale meter from 50 to 110 dB.
+            const minDb = 50;
+            const maxDb = 110;
+            let pct = ((leq - minDb) / (maxDb - minDb)) * 100;
+            pct = Math.max(0, Math.min(100, pct));
+            meterFill.style.width = pct + '%';
+
+            let interpretation = "";
+            if (leq < 85) {
+                meterFill.style.backgroundColor = '#2ecc71'; // Green
+                interpretation = "✅ <strong>Safe Level:</strong> This noise exposure is below the typical action level. Hearing protection is not usually required.";
+            } else if (leq < 100) {
+                meterFill.style.backgroundColor = '#f39c12'; // Yellow
+                interpretation = "⚠️ <strong>High Level:</strong> This level exceeds the action limit. Hearing protection is strongly recommended and likely required by regulations.";
+            } else {
+                meterFill.style.backgroundColor = '#e74c3c'; // Red
+                interpretation = "🚨 <strong>Dangerously High Level:</strong> Exposure at this level is hazardous. Hearing protection is mandatory, and exposure time should be strictly limited.";
+            }
+            
+            document.getElementById('feedbackContent').innerHTML = interpretation;
+        }
+    </script>
+</body>
+</html>
+{% endblock %}

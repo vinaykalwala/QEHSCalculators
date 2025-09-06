@@ -1,0 +1,502 @@
+{% extends 'base.html' %}
+{% block title %}Kidney Failure Risk Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kidney Failure Risk Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            min-height: 420px;
+            max-height: 700px;
+            overflow-y: auto;
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        /* Result Card */
+        .result-placeholder {
+            text-align: center;
+            margin: auto;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: baseline;
+            justify-content: center;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+        }
+        .rate-label {
+            color: #2980b9;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0 10px;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out, background-color 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section & Table */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list { margin: 0; padding-left: 18px; }
+        .custom-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .custom-table thead {
+            background-color: #1560bd;
+            color: white;
+        }
+        .custom-table th, .custom-table td {
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .custom-table tr:nth-child(even):not(.section-row) {
+            background-color: #f9f9f9;
+        }
+        .section-row td {
+            background: linear-gradient(#1560bd,#000040);
+            font-weight: bold;
+            color: #fff;
+            font-size: 1rem;
+            text-align: left;
+        }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px; padding: 20px;
+            text-align: left; gap: 12px; margin-top: 20px;
+        }
+        .error-icon {
+            font-size: 76px; flex-shrink: 0; text-align: center;
+        }
+        .error-message {
+            font-size: 24px; line-height: 1.6;
+        }
+        .hidden { display: none; }
+        .btn-container { display: flex; justify-content: center; margin: 30px 0; }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040); color: #ffffff; border: 2px solid #1560bd;
+            padding: 10px 20px; font-size: 14px; font-weight: 600; border-radius: 8px;
+            text-decoration: none; transition: all 0.3s ease; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Kidney Failure Risk Calculator</h1>
+            <p>Estimate the 5-year probability of progression to kidney failure for patients with CKD.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Clinical Parameters</h2>
+                <div class="form-group">
+                    <label for="age">Age (years)</label>
+                    <input type="number" id="age" class="form-input" placeholder="Enter age">
+                </div>
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" class="form-select">
+                        <option value="" disabled selected>Select gender...</option>
+                        <option value="0">Female</option>
+                        <option value="-2">Male</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="acr">Urine Albumin-to-Creatinine Ratio (ACR)</label>
+                    <select id="acr" class="form-select">
+                        <option value="" disabled selected>Select ACR...</option>
+                        <option value="0">&lt; 30 mg/g</option>
+                        <option value="-14">30-300 mg/g</option>
+                        <option value="-22">&gt; 300 mg/g</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="egfr">eGFR (mL/min/1.73m²)</label>
+                    <input type="number" id="egfr" class="form-input" placeholder="Enter eGFR">
+                </div>
+                <div class="form-group">
+                    <label for="albumin">Serum Albumin (g/dL)</label>
+                    <input type="number" step="0.1" id="albumin" class="form-input" placeholder="Enter albumin">
+                </div>
+                <div class="form-group">
+                    <label for="bicarbonate">Serum Bicarbonate (mEq/L)</label>
+                    <input type="number" id="bicarbonate" class="form-input" placeholder="Enter bicarbonate">
+                </div>
+                <div class="form-group">
+                    <label for="calcium">Serum Calcium (mg/dL)</label>
+                    <input type="number" step="0.1" id="calcium" class="form-input" placeholder="Enter calcium">
+                </div>
+                <div class="form-group">
+                    <label for="phosphorus">Serum Phosphorus (mg/dL)</label>
+                    <input type="number" step="0.1" id="phosphorus" class="form-input" placeholder="Enter phosphorus">
+                </div>
+                <button class="calculate-btn" onclick="calculateAndDisplay()">Calculate Risk</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Enter all clinical parameters to estimate the 5-year kidney failure risk.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div id="resultValue" class="hidden" style="text-align: center;">
+                    <h2>5-Year Kidney Failure Risk</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0</div>
+                        <div class="rate-label">%</div>
+                    </div>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low Risk</span>
+                        <span>High Risk</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Analysis</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <div class="note-card">
+                <h3>About This Calculator</h3>
+                <p>This tool estimates the 5-year probability of progressing to kidney failure for individuals with chronic kidney disease (CKD). It uses a point-based system derived from eight clinical parameters to generate a risk score, which is then mapped to a probability percentage.</p>
+            </div>
+            <div class="note-card">
+                <h3>Kidney Failure Risk Score Chart</h3>
+                <div style="overflow-x: auto;">
+                    <table class="custom-table">
+                        <thead><tr><th>Category</th><th>Value</th><th>Points</th></tr></thead>
+                        <tbody>
+                            <tr class="section-row"><td colspan="3">Age (years)</td></tr>
+                            <tr><td>Age</td><td>&lt;30</td><td>-4</td></tr><tr><td>Age</td><td>30–39</td><td>-2</td></tr><tr><td>Age</td><td>40–49</td><td>0</td></tr><tr><td>Age</td><td>50–59</td><td>2</td></tr><tr><td>Age</td><td>60–69</td><td>4</td></tr><tr><td>Age</td><td>70–79</td><td>6</td></tr><tr><td>Age</td><td>80–89</td><td>8</td></tr><tr><td>Age</td><td>≥90</td><td>10</td></tr>
+                            <tr class="section-row"><td colspan="3">Gender</td></tr>
+                            <tr><td>Gender</td><td>Female</td><td>0</td></tr><tr><td>Gender</td><td>Male</td><td>-2</td></tr>
+                            <tr class="section-row"><td colspan="3">Urine Albumin-to-Creatinine Ratio (mg/g)</td></tr>
+                            <tr><td>ACR</td><td>&lt;30</td><td>0</td></tr><tr><td>ACR</td><td>30–300</td><td>-14</td></tr><tr><td>ACR</td><td>&gt;300</td><td>-22</td></tr>
+                            <tr class="section-row"><td colspan="3">eGFR (mL/min/1.73m²)</td></tr>
+                            <tr><td>eGFR</td><td>10–14</td><td>-35</td></tr><tr><td>eGFR</td><td>15–19</td><td>-30</td></tr><tr><td>eGFR</td><td>20–24</td><td>-25</td></tr><tr><td>eGFR</td><td>25–29</td><td>-20</td></tr><tr><td>eGFR</td><td>30–34</td><td>-15</td></tr><tr><td>eGFR</td><td>35–39</td><td>-10</td></tr><tr><td>eGFR</td><td>40–44</td><td>-5</td></tr><tr><td>eGFR</td><td>45–49</td><td>0</td></tr><tr><td>eGFR</td><td>50–54</td><td>5</td></tr><tr><td>eGFR</td><td>55–59</td><td>10</td></tr>
+                            <tr class="section-row"><td colspan="3">Serum Albumin (g/dL)</td></tr>
+                            <tr><td>Albumin</td><td>≤2.5</td><td>-5</td></tr><tr><td>Albumin</td><td>2.6–3.0</td><td>0</td></tr><tr><td>Albumin</td><td>3.1–3.5</td><td>2</td></tr><tr><td>Albumin</td><td>≥3.6</td><td>4</td></tr>
+                            <tr class="section-row"><td colspan="3">Serum Bicarbonate (mEq/L)</td></tr>
+                            <tr><td>Bicarbonate</td><td>&lt;18</td><td>-7</td></tr><tr><td>Bicarbonate</td><td>18–22</td><td>-4</td></tr><tr><td>Bicarbonate</td><td>23–25</td><td>-1</td></tr><tr><td>Bicarbonate</td><td>&gt;25</td><td>0</td></tr>
+                            <tr class="section-row"><td colspan="3">Serum Calcium (mg/dL)</td></tr>
+                            <tr><td>Calcium</td><td>≤8.5</td><td>-3</td></tr><tr><td>Calcium</td><td>8.6–9.5</td><td>0</td></tr><tr><td>Calcium</td><td>≥9.6</td><td>2</td></tr>
+                            <tr class="section-row"><td colspan="3">Serum Phosphorus (mg/dL)</td></tr>
+                            <tr><td>Phosphorus</td><td>&lt;3.5</td><td>3</td></tr><tr><td>Phosphorus</td><td>3.5–4.5</td><td>0</td></tr><tr><td>Phosphorus</td><td>4.6–5.5</td><td>-3</td></tr><tr><td>Phosphorus</td><td>&gt;5.5</td><td>-5</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+             <div class="note-card">
+                <h3>⚠️ Disclaimer</h3>
+                <p>This calculator is a clinical support tool for informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. All medical decisions should be made in consultation with a qualified healthcare provider.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateAndDisplay() {
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValueBox = document.getElementById('resultValue');
+
+            errorBox.classList.add('hidden');
+            resultValueBox.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+
+            let errors = [];
+            function getVal(id, label, isSelect = false) {
+                const el = document.getElementById(id);
+                const raw = el.value?.toString().trim();
+                if (!raw) {
+                    errors.push(`👉 ${label} is required.`);
+                    return null;
+                }
+                const num = parseFloat(raw);
+                if (!isSelect && isNaN(num)) {
+                    errors.push(`👉 Enter a valid number for ${label}.`);
+                    return null;
+                }
+                return num;
+            }
+
+            const age = getVal('age', 'Age');
+            const gender = getVal('gender', 'Gender', true);
+            const acr = getVal('acr', 'ACR', true);
+            const egfr = getVal('egfr', 'eGFR');
+            const albumin = getVal('albumin', 'Serum Albumin');
+            const bicarbonate = getVal('bicarbonate', 'Serum Bicarbonate');
+            const calcium = getVal('calcium', 'Serum Calcium');
+            const phosphorus = getVal('phosphorus', 'Serum Phosphorus');
+            
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add('hidden');
+                return;
+            }
+
+            let totalPoints = 0;
+            // Gender and ACR points are direct values from the select options
+            totalPoints += gender + acr;
+            
+            // Age Points
+            if (age < 30) totalPoints += -4; else if (age <= 39) totalPoints += -2; else if (age <= 49) totalPoints += 0;
+            else if (age <= 59) totalPoints += 2; else if (age <= 69) totalPoints += 4; else if (age <= 79) totalPoints += 6;
+            else if (age <= 89) totalPoints += 8; else totalPoints += 10;
+            
+            // eGFR Points
+            if (egfr <= 14) totalPoints += -35; else if (egfr <= 19) totalPoints += -30; else if (egfr <= 24) totalPoints += -25;
+            else if (egfr <= 29) totalPoints += -20; else if (egfr <= 34) totalPoints += -15; else if (egfr <= 39) totalPoints += -10;
+            else if (egfr <= 44) totalPoints += -5; else if (egfr <= 49) totalPoints += 0; else if (egfr <= 54) totalPoints += 5;
+            else if (egfr <= 59) totalPoints += 10;
+            
+            // Albumin Points
+            if (albumin <= 2.5) totalPoints += -5; else if (albumin <= 3.0) totalPoints += 0;
+            else if (albumin <= 3.5) totalPoints += 2; else totalPoints += 4;
+            
+            // Bicarbonate Points
+            if (bicarbonate < 18) totalPoints += -7; else if (bicarbonate <= 22) totalPoints += -4;
+            else if (bicarbonate <= 25) totalPoints += -1; else totalPoints += 0;
+            
+            // Calcium Points
+            if (calcium <= 8.5) totalPoints += -3; else if (calcium <= 9.5) totalPoints += 0; else totalPoints += 2;
+            
+            // Phosphorus Points
+            if (phosphorus < 3.5) totalPoints += 3; else if (phosphorus <= 4.5) totalPoints += 0;
+            else if (phosphorus <= 5.5) totalPoints += -3; else totalPoints += -5;
+
+            const probabilityMap = {
+                "-41": 89.0, "-40": 86.9, "-39": 84.1, "-38": 81.0, "-37": 77.7, "-36": 74.4, "-35": 70.9, "-34": 67.3, "-33": 63.6,
+                "-32": 59.9, "-31": 56.3, "-30": 52.8, "-29": 49.3, "-28": 45.9, "-27": 42.7, "-26": 39.6, "-25": 36.6, "-24": 33.8,
+                "-23": 31.2, "-22": 28.7, "-21": 26.4, "-20": 24.2, "-19": 22.2, "-18": 20.3, "-17": 18.6, "-16": 17.0, "-15": 15.5,
+                "-14": 14.1, "-13": 12.9, "-12": 11.7, "-11": 10.7, "-10": 9.7, "-9": 8.8, "-8": 8.0, "-7": 7.3, "-6": 6.6, "-5": 6.0, "-4": 5.5
+            };
+            
+            let probability;
+            if (totalPoints <= -41) probability = ">90.0";
+            else if (totalPoints >= -3) probability = "<5.0";
+            else probability = probabilityMap[totalPoints.toString()]?.toFixed(1) || "N/A";
+
+            placeholder.classList.add('hidden');
+            resultValueBox.classList.remove('hidden');
+
+            document.getElementById('rateValue').textContent = probability;
+            
+            const meterFill = document.getElementById('meterFill');
+            const numericProb = parseFloat(probability);
+            meterFill.style.width = isNaN(numericProb) ? (probability.includes('>') ? '100%' : '0%') : numericProb + '%';
+
+            let interpretation = "";
+            if (numericProb < 30 || probability.includes('<')) {
+                meterFill.style.backgroundColor = '#2ecc71'; // Green
+                interpretation = "✅ Your risk is considered low. Continue to maintain a healthy lifestyle and follow up with your doctor as recommended.";
+            } else if (numericProb < 70) {
+                meterFill.style.backgroundColor = '#f39c12'; // Yellow
+                interpretation = "⚠️ You have a moderate risk. It is important to monitor your health closely and discuss management strategies with your healthcare provider.";
+            } else {
+                meterFill.style.backgroundColor = '#e74c3c'; // Red
+                interpretation = "❗ Your risk is high. Please consult a nephrologist or your primary doctor for medical advice and preventive measures.";
+            }
+
+            document.getElementById('feedbackContent').innerHTML = `Your total risk score is <strong>${totalPoints} points</strong>. ${interpretation}`;
+        }
+    </script>
+</body>
+</html>
+{% endblock %}

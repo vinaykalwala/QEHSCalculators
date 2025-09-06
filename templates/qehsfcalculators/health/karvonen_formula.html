@@ -1,0 +1,518 @@
+{% extends 'base.html' %}
+{% block title %}Karvonen Formula Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karvonen Formula Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            min-height: 420px;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        /* Result Card */
+        .result-placeholder {
+            text-align: center;
+            margin: auto;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: baseline;
+            justify-content: center;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+        }
+        .rate-label {
+            color: #2980b9;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0 10px;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+            background-color: #3498db;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li, .note-card ol {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+        /* Toggle helper */
+        .hidden {
+            display: none;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Karvonen Formula Calculator</h1>
+            <p>Calculate your Target Heart Rate (THR) for optimal workout intensity.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Enter Your Details</h2>
+                <div class="form-group">
+                    <label for="restingHR">Resting Heart Rate (bpm)</label>
+                    <input type="number" id="restingHR" class="form-input" placeholder="e.g., 65">
+                </div>
+                 <div class="form-group">
+                    <label for="intensity">Desired Intensity (%)</label>
+                    <input type="number" id="intensity" class="form-input" placeholder="e.g., 70">
+                </div>
+                <div class="form-group">
+                    <label for="knowMaxHR">Do you know your Maximum HR?</label>
+                    <select id="knowMaxHR" class="form-select" onchange="renderInputs()">
+                        <option value="no">No (Estimate from my age)</option>
+                        <option value="yes">Yes (I will enter it manually)</option>
+                    </select>
+                </div>
+                <div id="conditionalInputs">
+                    </div>
+                <button class="calculate-btn" onclick="calculateAndDisplay()">Calculate Target Heart Rate</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Enter your details to calculate your personalized target heart rate zones.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div id="resultValue" class="hidden" style="text-align: center;">
+                    <h2>Target Heart Rate (THR)</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0</div>
+                        <div class="rate-label">bpm</div>
+                    </div>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span id="meterMin">Rest</span>
+                        <span id="meterMax">Max</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Calculation Details</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <div class="note-card">
+                <h3>Understanding the Karvonen Formula</h3>
+                <p>The Karvonen formula is a widely used method for calculating your <strong>Target Heart Rate (THR)</strong> during physical activity. It is more precise than basic methods because it considers both your <strong>Resting Heart Rate (RHR)</strong> and <strong>Maximum Heart Rate (MHR)</strong>. This personalized approach helps optimize your workouts by ensuring you train at the right intensity to meet your fitness goals.</p>
+            </div>
+            <div class="note-card">
+                <h3>Key Terms Explained</h3>
+                <p><strong>1. Resting Heart Rate (RHR):</strong> Your heartbeats per minute (bpm) at complete rest. A lower RHR generally indicates better cardiovascular fitness. Best measured in the morning.</p>
+                <p><strong>2. Maximum Heart Rate (MHR):</strong> The highest bpm your heart can achieve during maximum effort. If unknown, it's estimated as <strong>220 - Age</strong>.</p>
+                <p><strong>3. Heart Rate Reserve (HRR):</strong> The difference between your MHR and RHR (MHR - RHR). It represents your heart’s capacity for work during exercise.</p>
+                <p><strong>4. Target Heart Rate (THR):</strong> The ideal range to maintain during exercise. The formula is: <strong>THR = ((MHR - RHR) × % Intensity) + RHR</strong>.</p>
+            </div>
+            <div class="note-card">
+                <h3>How to Use This Calculator</h3>
+                <ol>
+                    <li><strong>Enter your Resting Heart Rate (RHR)</strong>, best measured after waking up.</li>
+                    <li><strong>Choose your desired workout intensity</strong> (e.g., 70% for vigorous exercise).</li>
+                    <li><strong>Select whether you know your Maximum Heart Rate (MHR)</strong>. If not, the calculator will ask for your age to estimate it.</li>
+                    <li>Click "Calculate" to see your personalized Target Heart Rate.</li>
+                </ol>
+            </div>
+            <div class="note-card">
+                <h3>Recommended Intensity Zones</h3>
+                 <ul class="note-list">
+                    <li><strong>Light Exercise (50-60%):</strong> Ideal for warm-ups, cool-downs, and active recovery.</li>
+                    <li><strong>Fat-Burning Zone (60-80%):</strong> Optimal for weight loss and improving general cardiovascular fitness.</li>
+                    <li><strong>High-Intensity Zone (80-90%):</strong> Best for boosting performance and endurance.</li>
+                </ul>
+            </div>
+            <div class="note-card">
+                <h3>⚠️ Disclaimer</h3>
+                <p>This tool is for informational purposes only and should not replace medical advice. Consult a healthcare professional before starting any new fitness program, especially if you have pre-existing health conditions.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', renderInputs);
+
+        function renderInputs() {
+            const knowMaxHR = document.getElementById('knowMaxHR').value;
+            const container = document.getElementById('conditionalInputs');
+            
+            if (knowMaxHR === 'no') {
+                container.innerHTML = `
+                    <div class="form-group">
+                        <label for="age">Age (years)</label>
+                        <input type="number" id="age" class="form-input" placeholder="Enter your age">
+                    </div>`;
+            } else {
+                container.innerHTML = `
+                    <div class="form-group">
+                        <label for="maxHR">Maximum Heart Rate (bpm)</label>
+                        <input type="number" id="maxHR" class="form-input" placeholder="Enter your known max HR">
+                    </div>`;
+            }
+        }
+
+        function calculateAndDisplay() {
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValueBox = document.getElementById('resultValue');
+
+            errorBox.classList.add('hidden');
+            resultValueBox.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+
+            let errors = [];
+            function getVal(id, label, opts = {}) {
+                const el = document.getElementById(id);
+                if (!el) return null; // Element might not exist depending on conditional rendering
+                const raw = el.value?.toString().trim();
+                if (!raw) {
+                    errors.push(`👉 ${label} is required.`);
+                    return null;
+                }
+                const num = parseFloat(raw);
+                if (isNaN(num) || num <= 0) {
+                    errors.push(`👉 Enter a valid positive number for ${label}.`);
+                    return null;
+                }
+                if (opts.min !== undefined && num < opts.min) errors.push(`👉 ${label} must be ≥ ${opts.min}.`);
+                if (opts.max !== undefined && num > opts.max) errors.push(`👉 ${label} must be ≤ ${opts.max}.`);
+                return num;
+            }
+
+            const restingHR = getVal("restingHR", "Resting Heart Rate", { min: 30, max: 130 });
+            const intensity = getVal("intensity", "Intensity", { min: 1, max: 100 });
+            const knowMaxHR = document.getElementById('knowMaxHR').value;
+            
+            let maxHR;
+            let maxHRText = "";
+            if (knowMaxHR === 'no') {
+                const age = getVal("age", "Age", { min: 1, max: 120 });
+                if (age) {
+                    maxHR = 220 - age;
+                    maxHRText = `Estimated Max HR: <strong>${maxHR} bpm</strong> (based on age)`;
+                }
+            } else {
+                maxHR = getVal("maxHR", "Maximum Heart Rate", { min: 100, max: 230 });
+                 if(maxHR) maxHRText = `Your Max HR: <strong>${maxHR} bpm</strong>`;
+            }
+
+            if (maxHR && restingHR && maxHR <= restingHR) {
+                errors.push("👉 Maximum HR must be greater than Resting HR.");
+            }
+
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add('hidden');
+                return;
+            }
+
+            const intensityDecimal = intensity / 100;
+            const hrr = maxHR - restingHR;
+            const thr = (hrr * intensityDecimal) + restingHR;
+
+            placeholder.classList.add('hidden');
+            resultValueBox.classList.remove('hidden');
+
+            document.getElementById('rateValue').textContent = thr.toFixed(0);
+            
+            const meterFill = document.getElementById('meterFill');
+            const meterMin = document.getElementById('meterMin');
+            const meterMax = document.getElementById('meterMax');
+            
+            meterMin.textContent = `Rest: ${restingHR} bpm`;
+            meterMax.textContent = `Max: ${maxHR} bpm`;
+            
+            let pct = ((thr - restingHR) / hrr) * 100;
+            pct = Math.max(0, Math.min(100, pct));
+            meterFill.style.width = pct + '%';
+
+            document.getElementById('feedbackContent').innerHTML = `
+                ${maxHRText}<br>
+                Heart Rate Reserve (HRR): <strong>${hrr.toFixed(0)} bpm</strong><br>
+                Intensity: <strong>${intensity}%</strong>
+            `;
+        }
+        
+        function printReport() {
+            window.print();
+        }
+    </script>
+</body>
+</html>
+{% endblock %}

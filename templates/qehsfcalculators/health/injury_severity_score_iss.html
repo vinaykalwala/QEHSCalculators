@@ -1,0 +1,506 @@
+{% extends 'base.html' %}
+{% block title %}Injury Severity Score (ISS) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Injury Severity Score (ISS) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            min-height: 420px;
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        /* Result Card */
+        .result-placeholder {
+            text-align: center;
+            margin: auto;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: baseline;
+            justify-content: center;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0 10px;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out, background-color 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+        .hidden {
+            display: none;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Injury Severity Score (ISS) Calculator</h1>
+            <p>Assess trauma severity based on injuries across six body regions.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Select Injury Severity</h2>
+                <div class="form-group">
+                    <label for="head">Head and Neck</label>
+                    <select id="head" class="form-select">
+                        <option value="" disabled selected>Select severity...</option>
+                        <option value="0">0 - No injury</option><option value="1">1 - Minor</option><option value="2">2 - Moderate</option>
+                        <option value="3">3 - Serious</option><option value="4">4 - Severe</option><option value="5">5 - Critical</option>
+                        <option value="6">6 - Unsurvivable</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="face">Face</label>
+                    <select id="face" class="form-select">
+                        <option value="" disabled selected>Select severity...</option>
+                        <option value="0">0 - No injury</option><option value="1">1 - Minor</option><option value="2">2 - Moderate</option>
+                        <option value="3">3 - Serious</option><option value="4">4 - Severe</option><option value="5">5 - Critical</option>
+                        <option value="6">6 - Unsurvivable</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="chest">Chest</label>
+                    <select id="chest" class="form-select">
+                         <option value="" disabled selected>Select severity...</option>
+                        <option value="0">0 - No injury</option><option value="1">1 - Minor</option><option value="2">2 - Moderate</option>
+                        <option value="3">3 - Serious</option><option value="4">4 - Severe</option><option value="5">5 - Critical</option>
+                        <option value="6">6 - Unsurvivable</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="abdomen">Abdomen</label>
+                    <select id="abdomen" class="form-select">
+                         <option value="" disabled selected>Select severity...</option>
+                        <option value="0">0 - No injury</option><option value="1">1 - Minor</option><option value="2">2 - Moderate</option>
+                        <option value="3">3 - Serious</option><option value="4">4 - Severe</option><option value="5">5 - Critical</option>
+                        <option value="6">6 - Unsurvivable</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="extremity">Extremity</label>
+                    <select id="extremity" class="form-select">
+                         <option value="" disabled selected>Select severity...</option>
+                        <option value="0">0 - No injury</option><option value="1">1 - Minor</option><option value="2">2 - Moderate</option>
+                        <option value="3">3 - Serious</option><option value="4">4 - Severe</option><option value="5">5 - Critical</option>
+                        <option value="6">6 - Unsurvivable</option>
+                    </select>
+                </div>
+                 <div class="form-group">
+                    <label for="external">External</label>
+                    <select id="external" class="form-select">
+                         <option value="" disabled selected>Select severity...</option>
+                        <option value="0">0 - No injury</option><option value="1">1 - Minor</option><option value="2">2 - Moderate</option>
+                        <option value="3">3 - Serious</option><option value="4">4 - Severe</option><option value="5">5 - Critical</option>
+                        <option value="6">6 - Unsurvivable</option>
+                    </select>
+                </div>
+                <button class="calculate-btn" onclick="calculateAndDisplay()">Calculate ISS</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Select the severity of the worst injury in each of the six body regions to calculate the score.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div id="resultValue" class="hidden" style="text-align: center;">
+                    <h2>Injury Severity Score (ISS)</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0</div>
+                    </div>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Minor</span>
+                        <span>Moderate</span>
+                        <span>Severe</span>
+                        <span>Profound</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Interpretation</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <div class="note-card">
+                <h3>About the Injury Severity Score (ISS)</h3>
+                <p>The <strong>Injury Severity Score (ISS)</strong> is a medical score used to assess trauma severity. It helps determine how critical a patient's condition is by evaluating injuries across six body regions. A higher score indicates more severe trauma.</p>
+            </div>
+            <div class="note-card">
+                <h3>How the ISS is Calculated</h3>
+                <p>The score is calculated by taking the top three highest Abbreviated Injury Scale (AIS) scores from the six body regions, squaring each, and summing the result. <strong>The maximum possible score is 75</strong>. If any single injury is rated a 6 ("Unsurvivable"), the total ISS is automatically assigned as 75.</p>
+            </div>
+            <div class="note-card">
+                <h3>Interpretation of the ISS Score</h3>
+                <ul class="note-list">
+                    <li><strong>1-8:</strong> Minor Injury</li>
+                    <li><strong>9-15:</strong> Moderate Injury</li>
+                    <li><strong>16-24:</strong> Severe Injury</li>
+                    <li><strong>≥ 25:</strong> Profound (Very Severe) Trauma</li>
+                </ul>
+                 <p>An ISS score greater than 15 is generally considered major trauma.</p>
+            </div>
+            <div class="note-card">
+                <h3>⚠️ Disclaimer</h3>
+                <p>This calculator is for educational and informational purposes only. It is not a substitute for professional medical assessment. The diagnosis and management of trauma should always be performed by qualified healthcare professionals.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateAndDisplay() {
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValueBox = document.getElementById('resultValue');
+
+            errorBox.classList.add('hidden');
+            resultValueBox.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+
+            const regions = ['head', 'face', 'chest', 'abdomen', 'extremity', 'external'];
+            let scores = [];
+            let errors = [];
+
+            regions.forEach(id => {
+                const el = document.getElementById(id);
+                if (el.value === "") {
+                    const label = document.querySelector(`label[for=${id}]`).textContent;
+                    errors.push(`👉 Please select a severity for ${label}.`);
+                } else {
+                    scores.push(parseInt(el.value));
+                }
+            });
+
+            if (errors.length > 0) {
+                errorMessage.innerHTML = "Please make a selection for all six body regions.";
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add('hidden');
+                return;
+            }
+
+            let iss = 0;
+            let interpretation = "";
+            let special_case_text = "";
+            
+            if (scores.includes(6)) {
+                iss = 75;
+                interpretation = "The presence of an unsurvivable injury (score of 6) automatically results in the maximum ISS.";
+            } else {
+                const top3 = scores.sort((a, b) => b - a).slice(0, 3);
+                iss = Math.pow(top3[0], 2) + Math.pow(top3[1], 2) + Math.pow(top3[2], 2);
+                
+                if (iss <= 8) {
+                    interpretation = "<strong>Minor Injury:</strong> The patient is likely stable and may recover with basic treatment.";
+                } else if (iss <= 15) {
+                    interpretation = "<strong>Moderate Injury:</strong> Injuries are more than minor but not typically life-threatening. Hospital care may be needed.";
+                } else if (iss <= 24) {
+                    interpretation = "<strong>Severe Injury:</strong> The injuries are serious and require immediate medical attention.";
+                } else {
+                    interpretation = "<strong>Profound Trauma:</strong> These are critical, life-threatening injuries requiring emergency and intensive care.";
+                }
+            }
+
+            placeholder.classList.add('hidden');
+            resultValueBox.classList.remove('hidden');
+
+            document.getElementById('rateValue').textContent = iss;
+            
+            const meterFill = document.getElementById('meterFill');
+            const maxScore = 75;
+            let pct = (iss / maxScore) * 100;
+            meterFill.style.width = pct + '%';
+            
+            if (iss <= 8) meterFill.style.backgroundColor = '#2ecc71'; // Green
+            else if (iss <= 15) meterFill.style.backgroundColor = '#f1c40f'; // Yellow
+            else if (iss <= 24) meterFill.style.backgroundColor = '#e67e22'; // Orange
+            else meterFill.style.backgroundColor = '#e74c3c'; // Red
+
+            document.getElementById('feedbackContent').innerHTML = interpretation;
+        }
+
+        function printReport() {
+            window.print();
+        }
+    </script>
+</body>
+</html>
+{% endblock %}
