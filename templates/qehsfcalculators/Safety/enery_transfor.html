@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Coefficient of Discharge Calculator{% endblock %}
+{% block title %}Energy Transfer Calculator{% endblock %}
 {% block content %}
 {% load static %}
 
@@ -8,18 +8,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coefficient of Discharge Calculator</title>
+    <title>Energy Transfer Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
-      /* Main container */
+        /* Main container */
         .calculator-container {
             max-width: 1200px;
             margin: 20px auto;
-            padding:0 20px;
+            padding: 20px;
             border-radius: 12px;
         }
-        .btn-container {
+           .btn-container {
             display: flex;
             justify-content: center; /* Horizontally center */
             margin: 30px 0;
@@ -105,7 +105,7 @@
             flex-direction: column;
             transition: transform 0.3s ease;
             height: 420px;
-            {% comment %} overflow-y: auto; {% endcomment %}
+            overflow-y: auto;
         }
         
         .calc-card:hover { 
@@ -238,7 +238,6 @@
             padding: 18px;
             border-left: 4px solid #3498db;
             text-align: left;
-            margin-top: 20px;
         }
         
         .feedback-title {
@@ -291,6 +290,22 @@
             padding-left: 18px;
         }
         
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
         .good { 
             color: #2e7d32; 
             font-weight: 600; 
@@ -333,59 +348,55 @@
             display: none; 
         }
 
-        .result-details {
-            text-align: left;
-            margin-top: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 10px;
-        }
-        
-        .result-details p {
-            margin: 8px 0;
-            font-size: 16px;
+        .unit-label {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-top: 5px;
         }
     </style>
 </head>
 <body>
-    <div class="btn-container">
+      <div class="btn-container">
         <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
     </div>
-    
-    <div class="calculator-container printable" id="printArea">
-        <!-- Include header/footer for print -->
-        {% include "includes/print_header_footer.html" %}
+   <div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
 
         <div class="calculator-header">
-            <h1>Coefficient of Discharge (K<sub>d</sub>) Calculator</h1>
-            <p>Calculate the efficiency of fluid flow systems by comparing actual to theoretical capacity</p>
+            <h1>Energy Transfer Calculator</h1>
+            <p>Calculate the amount of heat energy transferred to or from a substance based on mass, specific heat, and temperature change</p>
         </div>
 
         <div class="calc-content">
             <!-- Calculator -->
             <div class="calc-card">
                 <h2>Enter Data</h2>
-                
                 <div class="form-group">
-                    <label for="actualFlow">Actual Flowing Capacity (m³/s)</label>
-                    <input type="number" id="actualFlow" class="form-input" min="0" step="0.01" placeholder="e.g., 0.85">
-                    <span class="error" id="actualFlowError"></span>
+                    <label for="mass">Mass of substance (m) (kg)</label>
+                    <input type="number" id="mass" class="form-input" min="0" step="any" placeholder="e.g., 5">
+                    <div class="unit-label">Must be greater than 0</div>
+                </div>
+                <div class="form-group">
+                    <label for="specificHeat">Specific Heat capacity (Cp) (J/kg°C)</label>
+                    <input type="number" id="specificHeat" class="form-input" min="0" step="any" placeholder="e.g., 4186">
+                    <div class="unit-label">Must be greater than 0</div>
+                </div>
+                <div class="form-group">
+                    <label for="temperatureChange">Temperature change (ΔT) (°C)</label>
+                    <input type="number" id="temperatureChange" class="form-input" step="any" placeholder="e.g., 10">
+                    <div class="unit-label">Can be positive or negative</div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="theoreticalFlow">Theoretical Flowing Capacity (m³/s)</label>
-                    <input type="number" id="theoreticalFlow" class="form-input" min="0" step="0.01" placeholder="e.g., 1.0">
-                    <span class="error" id="theoreticalFlowError"></span>
-                </div>
-                
-                <button class="calculate-btn" onclick="calculateKd()">Calculate Coefficient of Discharge K<sub>d</sub></button>
+                <button class="calculate-btn" onclick="calculateEnergyTransfer()">Calculate Energy Transfer</button>
             </div>
 
             <!-- Result Section -->
             <div class="result-card">
                 <div class="result-placeholder" id="placeholder">
-                    <img src="https://img.icons8.com/fluency/96/water.png" alt="Water flow icon" width="100">
-                    <p>This tool will calculate the <strong>Coefficient of Discharge (K<sub>d</sub>)</strong>. Enter your data to see results and insights here.</p>
+                    <img src="https://cdn-icons-png.flaticon.com/512/3448/3448631.png" alt="Energy illustration">
+                    <p>This tool will calculate the <strong>Energy Transfer</strong>. Enter your data to see results and insights here.</p>
                 </div>
                 
                 <div class="result-error hidden" id="resultError">
@@ -394,21 +405,15 @@
                 </div>
                  
                 <div class="result-value hidden" id="resultValue">
-                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
-                        <h2>Coefficient of Discharge</h2>
+                    <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Energy Transfer</h2>
                     </div>
-                    <div class="rate-display">
-                        <div class="rate-value" id="rateValue">0.000</div>
-                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold; ">K<sub>d</sub> Value</div>
-                    </div>
-
-                    <div class="safety-meter">
-                        <div class="meter-fill" id="meterFill"></div>
-                    </div>
-                  
+                    <div class='rate-display'>
+                    <div class="rate-value" id="energyValue">0.00</div>
+                    <div class="rate-label" id="energyLabel" style="color:#2980b9; font-size:20px; font-weight:bold;">Joules</div></div>
 
                     <div class="result-feedback">
-                        <div class="feedback-title">System Efficiency Assessment</div>
+                        <div class="feedback-title">Energy Assessment</div>
                         <div class="feedback-content" id="feedbackContent"></div>
                     </div>
                     <div class="btn-wrapper">
@@ -423,58 +428,54 @@
             <div class="note-card">
                 <h3>📘 About This Calculator</h3>
                 <p>
-                    The <strong>Coefficient of Discharge (K<sub>d</sub>)</strong> is a crucial parameter in fluid dynamics, representing the efficiency of a system compared to its theoretical capacity. It accounts for energy losses due to friction, turbulence, and flow separation in real-world conditions.
+                    The <strong>Energy Transfer Calculator</strong> helps determine the amount of heat energy (Q) transferred to or from a substance based on its mass, specific heat capacity, and temperature change.
                 </p>
             </div>
-
+            <div class="note-card">
+                <h3>❓ What is Energy Transfer?</h3>
+                <p>Energy transfer refers to the amount of thermal energy gained or lost by a substance when its temperature changes.</p>
+            </div>
             <div class="note-card">
                 <h3>⚙️ Parameters Used</h3>
                 <ul class="note-list">
-                    <li><strong>Actual Flowing Capacity:</strong> The real flow rate measured in the system (m³/s).</li>
-                    <li><strong>Theoretical Flowing Capacity:</strong> The expected or ideal flow rate without losses (m³/s).</li>
+                    <li><strong>Mass (m):</strong> The mass of the substance in kilograms (kg).</li>
+                    <li><strong>Specific Heat (Cp):</strong> The specific heat capacity of the substance in joules per kilogram per degree Celsius (J/kg°C).</li>
+                    <li><strong>Temperature Change (ΔT):</strong> The change in temperature in degrees Celsius (°C).</li>
                 </ul>
             </div>
-
+            
             <div class="note-card">
                 <h3>📊 Interpretation</h3>
-                <p>
-                    The Coefficient of Discharge ranges from 0 to 1, where:
-                </p>
                 <ul class="note-list">
-                    <li><span class="bad">Below 0.6</span> → Low efficiency; significant system losses</li>
-                    <li><span class="average">0.6 - 0.8</span> → Moderate efficiency</li>
-                    <li><span class="good">0.8 - 0.9</span> → Good efficiency</li>
-                    <li><span class="good">Above 0.9</span> → Excellent efficiency; minimal losses</li>
+                    <li><span class="good">Positive value</span> → Energy absorbed by the substance (heating)</li>
+                    <li><span class="bad">Negative value</span> → Energy released by the substance (cooling)</li>
+                    <li><span class="average">Zero value</span> → No energy transfer (no temperature change)</li>
                 </ul>
             </div>
-
-            <div class="note-card">
-                <h3>🔍 Real-Life Applications</h3>
-                <p>
-                    The K<sub>d</sub> value is essential in various engineering applications:
-                </p>
-                <ul class="note-list">
-                    <li><strong>Fire Safety Systems:</strong> Determining fire hose and nozzle discharge efficiency</li>
-                    <li><strong>Pipeline Design:</strong> Assessing fluid flow efficiency in pipelines</li>
-                    <li><strong>Valve and Nozzle Engineering:</strong> Optimizing design to minimize energy losses</li>
-                    <li><strong>Water Supply Systems:</strong> Evaluating pump and distribution network performance</li>
-                </ul>
-            </div>
-            <div class="note-card">
-    <h3>✅ Input Validation Rules (Kd Calculator)</h3>
+           <div class="note-card">
+    <h3>✅ Input Validation Rules (QEHS Standards)</h3>
     <ul class="note-list">
-        <li><strong>Actual Flow (Q_actual):</strong> Must be > 0, typically 0.01 – 1000 m³/s.</li>
-        <li><strong>Theoretical Flow (Q_theoretical):</strong> Must be > 0, typically 0.01 – 1000 m³/s.</li>
-        <li><strong>Q_actual ≤ Q_theoretical:</strong> Ensures Kd ≤ 1 (valid efficiency range).</li>
-        <li><strong>No negative or zero values:</strong> Flow rates must always be positive.</li>
-        <li><strong>Output (Kd):</strong> Must fall strictly between 0 and 1. Values outside this range are invalid.</li>
+        <li><strong>Mass (m):</strong> Must be > 0. Allowed range 0.001–100,000 kg. Precision up to 4 decimals.</li>
+        <li><strong>Specific Heat (Cp):</strong> Must be > 0. Allowed range 100–10,000 J/kg°C. Precision up to 2 decimals.</li>
+        <li><strong>Temperature Change (ΔT):</strong> Can be negative, zero, or positive. Allowed range -1000°C to +1000°C. Precision up to 2 decimals.</li>
+        <li><strong>All values must be numeric:</strong> Non-numeric or blank inputs are not accepted.</li>
+        <li><strong>Output thresholds:</strong> Report in J, kJ, or MJ depending on scale. Values &lt; 1 J flagged as negligible.</li>
     </ul>
-    <p><b>Note:</b> These rules align with <b>ISO 5167</b>, <b>API 520</b>, and <b>NFPA fluid dynamics practices</b>.</p>
+    <p><b>Note:</b> These rules align with OSHA, ISO 45001, NFPA energy efficiency practices, ensuring realistic and safe reporting in industrial audits.</p>
 </div>
 
-
-            
-
+            <div class="note-card">
+                <h3>🔬 Real-Life Application</h3>
+                <p>
+                    This calculator is useful in various real-life scenarios, such as:
+                    <ul class="note-list">
+                        <li>Determining how much energy is needed to heat or cool substances in industrial processes.</li>
+                        <li>Understanding energy consumption in heating systems and appliances.</li>
+                        <li>Estimating energy loss or gain in insulation or temperature control systems.</li>
+                    </ul>
+                    It helps in ensuring energy efficiency, safety, and accurate system design for heating, cooling, and energy conservation.
+                </p>
+            </div>
         </div>
     </div>
 
@@ -486,57 +487,65 @@
             document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
         });
 
-        function calculateKd() {
-    const actualFlow = document.getElementById('actualFlow').value.trim();
-    const theoreticalFlow = document.getElementById('theoreticalFlow').value.trim();
+        function calculateEnergyTransfer() {
+    const mass = document.getElementById('mass').value.trim();
+    const specificHeat = document.getElementById('specificHeat').value.trim();
+    const temperatureChange = document.getElementById('temperatureChange').value.trim();
 
     const errorBox = document.getElementById('resultError');
     const errorMessage = document.getElementById('errorMessage');
     const placeholder = document.getElementById('placeholder');
     const resultValue = document.getElementById('resultValue');
+    const energyValue = document.getElementById('energyValue');
+    const energyLabel = document.getElementById('energyLabel');
+    const feedbackContent = document.getElementById('feedbackContent');
 
-    // Reset
     let errors = [];
 
-    // === Validate Actual Flow ===
-    if (actualFlow === "") {
-        errors.push("👉 Please enter Actual Flowing Capacity (Q_actual).");
+    // ============================
+    // VALIDATION RULES (Compliance)
+    // ============================
+    // Formula: Q = m × Cp × ΔT
+
+    // Mass validation
+    if (mass === "") {
+        errors.push("👉 Please enter the mass of the substance.");
     } else {
-        const actual = parseFloat(actualFlow);
-        if (isNaN(actual) || actual <= 0) {
-            errors.push("👉 Actual Flow must be a number greater than 0 (m³/s).");
-        } else if (actual < 0.01 || actual > 1000) {
-            errors.push("👉 Actual Flow must be between 0.01 and 1000 m³/s.");
+        const m = parseFloat(mass);
+        if (isNaN(m) || m <= 0) {
+            errors.push("👉 Mass must be a number greater than 0.");
+        } else if (m < 0.001 || m > 100000) {
+            errors.push("👉 Mass value is outside realistic safety range (0.001–100000 kg).");
         }
     }
 
-    // === Validate Theoretical Flow ===
-    if (theoreticalFlow === "") {
-        errors.push("👉 Please enter Theoretical Flowing Capacity (Q_theoretical).");
+    // Specific Heat validation
+    if (specificHeat === "") {
+        errors.push("👉 Please enter the specific heat capacity.");
     } else {
-        const theoretical = parseFloat(theoreticalFlow);
-        if (isNaN(theoretical) || theoretical <= 0) {
-            errors.push("👉 Theoretical Flow must be a number greater than 0 (m³/s).");
-        } else if (theoretical < 0.01 || theoretical > 1000) {
-            errors.push("👉 Theoretical Flow must be between 0.01 and 1000 m³/s.");
+        const cp = parseFloat(specificHeat);
+        if (isNaN(cp) || cp <= 0) {
+            errors.push("👉 Specific heat must be a number greater than 0.");
+        } else if (cp < 100 || cp > 10000) {
+            errors.push("👉 Specific heat is outside typical material range (100–10000 J/kg°C).");
         }
     }
 
-    // === Cross-validation ===
-    if (errors.length === 0) {
-        const actual = parseFloat(actualFlow);
-        const theoretical = parseFloat(theoreticalFlow);
-
-        if (theoretical === 0) {
-            errors.push("👉 Division by zero error: Theoretical Flow cannot be 0.");
-        }
-
-        if (actual > theoretical) {
-            errors.push("👉 Actual Flow cannot exceed Theoretical Flow (Kd ≤ 1).");
+    // Temperature Change validation
+    if (temperatureChange === "") {
+        errors.push("👉 Please enter the temperature change.");
+    } else {
+        const dt = parseFloat(temperatureChange);
+        if (isNaN(dt)) {
+            errors.push("👉 Temperature change must be a valid number.");
+        } else if (dt < -1000 || dt > 1000) {
+            errors.push("👉 Temperature change is outside safe practical limits (-1000°C to +1000°C).");
         }
     }
 
-    // === Show Errors ===
+    // ============================
+    // ERROR HANDLING
+    // ============================
     if (errors.length > 0) {
         errorMessage.innerHTML = errors.join("<br>");
         errorBox.classList.remove("hidden");
@@ -547,50 +556,63 @@
         errorBox.classList.add("hidden");
     }
 
-    // === Perform Calculation ===
-    const actual = parseFloat(actualFlow);
-    const theoretical = parseFloat(theoreticalFlow);
-    const Kd = actual / theoretical;
+    // ============================
+    // CALCULATION
+    // ============================
+    const m = parseFloat(mass);
+    const cp = parseFloat(specificHeat);
+    const dt = parseFloat(temperatureChange);
 
-    if (Kd <= 0 || Kd > 1) {
-        errorMessage.innerHTML = "❌ Invalid result: Kd must be between 0 and 1.";
+    const energyTransfer = m * cp * dt;
+
+    if (!isFinite(energyTransfer)) {
+        errorMessage.innerHTML = "❌ Invalid calculation result. Please check inputs.";
         errorBox.classList.remove("hidden");
         resultValue.classList.add("hidden");
         return;
     }
 
-    // === Display Result ===
-    document.getElementById('rateValue').textContent = Kd.toFixed(3);
+    // ============================
+    // OUTPUT FORMATTING
+    // ============================
+    let formattedResult;
+    let unitText = "J";
 
-    // === System Efficiency Assessment ===
-    const meterFill = document.getElementById('meterFill');
-    let meterWidth, meterColor, feedback;
-
-    if (Kd < 0.6) {
-        meterWidth = "20%";
-        meterColor = "#e74c3c";
-        feedback = "❌ Low efficiency. Significant system losses detected. Inspect system for leaks, blockages, or frictional losses.";
-    } else if (Kd < 0.8) {
-        meterWidth = "45%";
-        meterColor = "#f39c12";
-        feedback = "⚠️ Moderate efficiency. System operating below optimal conditions. Consider maintenance or redesign.";
-    } else if (Kd < 0.9) {
-        meterWidth = "70%";
-        meterColor = "#2ecc71";
-        feedback = "✅ Good efficiency. Minor losses, acceptable for most operations.";
+    if (Math.abs(energyTransfer) < 1) {
+        formattedResult = energyTransfer.toExponential(3);
+        unitText = "J (negligible)";
+    } else if (Math.abs(energyTransfer) >= 1000000) {
+        formattedResult = (energyTransfer / 1000000).toFixed(4);
+        unitText = "MJ (MegaJoules)";
+    } else if (Math.abs(energyTransfer) >= 1000) {
+        formattedResult = (energyTransfer / 1000).toFixed(4);
+        unitText = "kJ (KiloJoules)";
     } else {
-        meterWidth = "95%";
-        meterColor = "#27ae60";
-        feedback = "🌟 Excellent efficiency. System operating near theoretical performance.";
+        formattedResult = energyTransfer.toFixed(4);
+        unitText = "J (Joules)";
     }
 
-    meterFill.style.width = meterWidth;
-    meterFill.style.backgroundColor = meterColor;
-    document.getElementById('feedbackContent').textContent = feedback;
+    energyValue.textContent = formattedResult;
+    energyLabel.textContent = unitText;
+
+    // ============================
+    // ENERGY ASSESSMENT
+    // ============================
+    let feedback;
+    if (energyTransfer > 0) {
+        feedback = '🔥 Energy absorbed by the substance (heating process).';
+    } else if (energyTransfer < 0) {
+        feedback = '❄️ Energy released by the substance (cooling process).';
+    } else {
+        feedback = '⚖️ No energy transfer (temperature remained constant).';
+    }
+
+    feedbackContent.textContent = feedback;
 
     placeholder.classList.add("hidden");
     resultValue.classList.remove("hidden");
 }
+
 
         function printReport() {
             // Update date just before printing
@@ -607,84 +629,71 @@
 {% endblock %}
 
 
+
+
 {% comment %} 
-1. Formula (with industry context)
 
-Coefficient of Discharge (K<sub>d</sub>):
+🔢 Formula Used
+// Formula for energy transfer:
+// Q = m × Cp × ΔT
+// Where:
+// Q  = Heat energy transferred (Joules)
+// m  = Mass of substance (kg) → must be > 0
+// Cp = Specific heat capacity (J/kg°C) → must be > 0
+// ΔT = Temperature change (°C) → can be + (heating) or – (cooling)
 
-Kd = Q_actual / Q_theoretical
+✅ Input Validation Rules (QEHS & Fire Safety Perspective)
+1. Mass of Substance (m, in kg)
 
+Allowed range: 0.001 kg → 100,000 kg
+(below 1 g is negligible in industrial audits, above 100 tonnes should be flagged)
 
-Q_actual (Actual Flow Capacity, m³/s): Flow measured under real conditions.
+Decimals: Up to 4 (kg precision to grams is usually sufficient).
 
-Q_theoretical (Theoretical Flow Capacity, m³/s): Flow if there were no energy losses.
+Validation: Must be numeric, positive, and within threshold.
 
-K<sub>d</sub> always ranges 0 < Kd ≤ 1 in valid conditions.
+Reason: Zero or negative mass violates physics and audit credibility. Unrealistically high mass should trigger a warning.
 
-2. Detailed Input Validation Rules (QEHS / Fire Safety)
-✅ Actual Flow Capacity (Q_actual, m³/s)
+2. Specific Heat Capacity (Cp, in J/kg°C)
 
-Must be > 0 (no system can have zero or negative flow).
+Typical range: 100 J/kg°C → 10,000 J/kg°C
+(most materials, e.g., water ~4186 J/kg°C, metals ~400–900 J/kg°C).
 
-Recommended practical range: 0.01 – 1000 m³/s (API, ISO fluid dynamics references).
+Decimals: Up to 2 for practical reporting.
 
-Must not exceed Theoretical Flow (otherwise unphysical).
+Validation: Must be numeric, positive, and within range.
 
-Allowed decimals: up to 3 (precision relevant in fluid testing).
+Reason: Helps prevent user entering values outside real thermodynamic range, ensuring reliability in safety reporting.
 
-✅ Theoretical Flow Capacity (Q_theoretical, m³/s)
+3. Temperature Change (ΔT, in °C)
 
-Must be > 0.
+Allowed range: -1000 °C → +1000 °C
+(beyond this, it’s physically unrealistic for occupational/industrial systems).
 
-Practical range: 0.01 – 1000 m³/s.
+Decimals: Up to 2.
 
-Must always be ≥ Actual Flow.
+Validation: Must be numeric. Can be negative, zero, or positive.
 
-Allowed decimals: up to 3.
+Reason: Negative means cooling, positive heating, zero means no energy transfer.
 
-✅ Cross-field dependencies
+📊 Output Validation Logic
 
-Q_actual ≤ Q_theoretical (by definition, efficiency cannot exceed 1).
+Energy Transfer (Q):
 
-Division by zero (Q_theoretical = 0) → must throw error.
+If |Q| < 1 J → show "Negligible energy transfer".
 
-3. Output Validation & Thresholds
+If 1 J ≤ |Q| < 1000 J → report in J.
 
-K<sub>d</sub> range: 0 – 1 (unitless).
+If 1000 J ≤ |Q| < 1,000,000 J → report in kJ.
 
-Interpretation:
+If ≥ 1,000,000 J → report in MJ.
 
-Kd < 0.6 → Poor efficiency (safety concern, possible leaks/obstructions).
+Meaningful feedback:
 
-0.6 – 0.8 → Moderate efficiency.
+Q > 0 → Heating (energy absorbed).
 
-0.8 – 0.9 → Good efficiency.
+Q < 0 → Cooling (energy released).
 
-> 0.9 → Excellent efficiency (system near-ideal).
+Q = 0 → No transfer.
 
-⚠️ If Kd > 1 → input error (must reject).
-
-4. Corrected JavaScript Code (with Comments)
-
-Here’s your updated calculateKd() with compliance-grade validations:
-
-/*
-=========================================================
-Coefficient of Discharge (Kd) Formula:
-    Kd = Q_actual / Q_theoretical
-
-Where:
-- Q_actual = Actual Flowing Capacity (m³/s)
-- Q_theoretical = Theoretical Flowing Capacity (m³/s)
-
-Validation Rules (Based on ISO 5167, API 520, Fluid Mechanics Standards):
-1. Q_actual must be > 0 m³/s (range 0.01 – 1000).
-2. Q_theoretical must be > 0 m³/s (range 0.01 – 1000).
-3. Q_actual cannot exceed Q_theoretical (Kd ≤ 1).
-4. Division by zero (Q_theoretical = 0) is invalid.
-5. Input precision: allow up to 3 decimal places.
-6. Output Kd must be within 0 < Kd ≤ 1. If > 1, show error.
-=========================================================
-*/
-
-*/ {% endcomment %}
+Safety compliance reasoning: This prevents misleading results in reports and ensures outputs can be compared across different safety audits. {% endcomment %}

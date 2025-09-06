@@ -1,0 +1,746 @@
+{% extends 'base.html' %}
+{% block title %}Ergonomic Risk Score Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ergonomic Risk Score Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+                .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            {% comment %} max-width: 700px; {% endcomment %}
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 520px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+        <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+   <div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Ergonomic Risk Score Calculator</h1>
+            <p>Assess ergonomic risks by calculating the Ergonomic Risk Score (ERS) based on task frequency, duration, and intensity</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="frequency">Frequency (1-10)</label>
+                    <input type="number" id="frequency" class="form-input" min="1" max="10" placeholder="e.g., 5">
+                </div>
+                <div class="form-group">
+                    <label for="duration">Duration (minutes)</label>
+                    <input type="number" id="duration" class="form-input" min="1" placeholder="e.g., 120">
+                </div>
+                <div class="form-group">
+                    <label for="intensity">Intensity (1-5)</label>
+                    <input type="number" id="intensity" class="form-input" min="1" max="5" placeholder="e.g., 3">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateErgonomicRisk()">Calculate Ergonomic Risk Score</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Ergonomics illustration">
+                    <p>This tool will calculate the <strong>Ergonomic Risk Score</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Ergonomic Risk Score</h2>
+                    </div>
+                    <div class="rate-value" id="rateValue">0.00</div>
+                    <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">Risk Score (Higher values indicate greater risk)</div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low Risk</span><span>Moderate Risk</span><span>High Risk</span><span>Very High Risk</span><span>Critical Risk</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Ergonomic Risk Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Ergonomic Risk Score Calculator</strong> helps assess ergonomic risks by calculating the 
+                    <strong>Ergonomic Risk Score (ERS)</strong>, which helps in identifying tasks with potential ergonomic hazards.
+                </p>
+            </div>
+            <div class="note-card">
+                <h3>❓ What is Ergonomic Risk Score?</h3>
+                <p>The Ergonomic Risk Score is a metric that evaluates the potential ergonomic hazards in workplace tasks based on frequency, duration, and intensity of activities.</p>
+            </div>
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Frequency (1-10):</strong> How often a task is performed within a work shift.</li>
+                    <li><strong>Duration (minutes):</strong> Total time spent on the task per workday.</li>
+                    <li><strong>Intensity (1-5):</strong> The effort required to perform the task.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <ul class="note-list">
+                    <li><span class="good">Below 100</span> → Low ergonomic risk</li>
+                    <li><span class="average">100 – 500</span> → Moderate risk, requires evaluation</li>
+                    <li><span class="bad">500 – 1000</span> → High risk, needs intervention</li>
+                    <li><span class="bad">Above 1000</span> → Critical risk, immediate action required</li>
+                </ul>
+            </div>
+            
+           <div class="note-card">
+    <h3>✅ Validation Rules for this Calculator</h3>
+    <ul class="note-list">
+        <li><strong>Frequency:</strong> Whole number only, 1–10 (ILO ergonomic scale).</li>
+        <li><strong>Duration:</strong> Between 1–480 minutes (typical shift). Warnings shown if >480, blocked if >720.</li>
+        <li><strong>Intensity:</strong> Whole number only, 1–5 (ergonomic exertion scale).</li>
+        <li><strong>Cross-field checks:</strong> 
+            <ul>
+                <li>⚠️ Continuous tasks (Frequency = 10) should not exceed 4 hrs.</li>
+                <li>⚠️ High-intensity tasks (Intensity = 5) should not exceed 2 hrs.</li>
+            </ul>
+        </li>
+        <li>No negative values, no text, no blank inputs allowed.</li>
+        <li>All inputs must be numeric, logical, and within acceptable ranges.</li>
+    </ul>
+</div>
+
+            
+            <div class="note-card">
+                <h3>📋 Understanding Ergonomic Risk Factors</h3>
+                <p>Ergonomic risk factors help identify workplace tasks that may contribute to discomfort, fatigue, or long-term musculoskeletal disorders.</p>
+                
+                <h4>Frequency (1-10)</h4>
+                <ul class="note-list">
+                    <li>1 - Rare: Task is performed once or twice a day</li>
+                    <li>5 - Moderate: Task is performed multiple times per hour</li>
+                    <li>10 - Very Frequent: Task is performed continuously throughout the shift</li>
+                </ul>
+                <p>Higher frequency indicates repetitive actions, which increase strain on muscles and joints.</p>
+                
+                <h4>Duration (minutes)</h4>
+                <ul class="note-list">
+                    <li>1-30 minutes: Short task with minimal ergonomic impact</li>
+                    <li>30-120 minutes: Moderate exposure requiring closer evaluation</li>
+                    <li>120+ minutes: High risk due to sustained exposure</li>
+                </ul>
+                <p>Longer durations result in extended exposure to potential risks.</p>
+                
+                <h4>Intensity (1-5)</h4>
+                <ul class="note-list">
+                    <li>1 - Very Low: Minimal effort (e.g., typing)</li>
+                    <li>2 - Low: Slight physical effort (objects under 5 lbs)</li>
+                    <li>3 - Moderate: Noticeable effort (objects 5-25 lbs)</li>
+                    <li>4 - High: Significant effort (objects 25-50 lbs)</li>
+                    <li>5 - Very High: Extreme effort (heavy lifting over 50 lbs)</li>
+                </ul>
+                <p>Higher intensity means greater exertion, which can increase ergonomic risks significantly.</p>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Why These Factors Matter</h3>
+                <ul class="note-list">
+                    <li>Higher frequency, longer duration, and greater intensity increase ergonomic risks</li>
+                    <li>Repetitive movements, sustained postures, and excessive force contribute to injuries</li>
+                    <li>Reducing exposure by modifying tasks, improving posture, or introducing rest breaks can lower risk levels</li>
+                </ul>
+                <p>This evaluation helps organizations design safer work environments by identifying and addressing ergonomic hazards before they cause serious health issues.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateErgonomicRisk() {
+    const frequency = document.getElementById('frequency').value.trim();
+    const duration = document.getElementById('duration').value.trim();
+    const intensity = document.getElementById('intensity').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+
+    // ============================
+    // INPUT VALIDATIONS
+    // ============================
+
+    // Frequency (1–10, integer only)
+    if (frequency === "") {
+        errors.push("👉 Please enter the frequency (1–10).");
+    } else {
+        const freq = parseFloat(frequency);
+        if (isNaN(freq) || freq < 1 || freq > 10) {
+            errors.push("👉 Frequency must be a whole number between 1 and 10.");
+        } else if (!Number.isInteger(freq)) {
+            errors.push("👉 Frequency must be a whole number (no decimals).");
+        }
+    }
+
+    // Duration (1–480 minutes, decimals allowed)
+    if (duration === "") {
+        errors.push("👉 Please enter the task duration in minutes.");
+    } else {
+        const dur = parseFloat(duration);
+        if (isNaN(dur) || dur <= 0) {
+            errors.push("👉 Duration must be greater than 0.");
+        } else if (dur > 480) {
+            errors.push("👉 Duration exceeds 480 minutes (typical workday). Please verify.");
+        } else if (dur > 720) {
+            errors.push("👉 Duration is unrealistic (>12 hrs). Check input.");
+        }
+    }
+
+    // Intensity (1–5, integer only)
+    if (intensity === "") {
+        errors.push("👉 Please enter the intensity (1–5).");
+    } else {
+        const inten = parseFloat(intensity);
+        if (isNaN(inten) || inten < 1 || inten > 5) {
+            errors.push("👉 Intensity must be a whole number between 1 and 5.");
+        } else if (!Number.isInteger(inten)) {
+            errors.push("👉 Intensity must be a whole number (no decimals).");
+        }
+    }
+
+    // ============================
+    // CROSS-FIELD VALIDATIONS
+    // ============================
+    const FQ = parseInt(frequency);
+    const DU = parseFloat(duration);
+    const IN = parseInt(intensity);
+
+    if (!isNaN(FQ) && !isNaN(DU) && !isNaN(IN)) {
+        if (FQ === 10 && DU > 240) {
+            errors.push("⚠️ Continuous tasks >4 hrs are not recommended.");
+        }
+        if (IN === 5 && DU > 120) {
+            errors.push("⚠️ High-intensity tasks should not exceed 2 hrs.");
+        }
+    }
+
+    // ============================
+    // ERROR HANDLING
+    // ============================
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // ============================
+    // CALCULATION (ERS)
+    // ============================
+    const ergonomicRiskScore = FQ * DU * IN;
+
+    if (!isFinite(ergonomicRiskScore) || ergonomicRiskScore < 0) {
+        errorMessage.innerHTML = "❌ Invalid calculation result. Please check inputs.";
+        errorBox.classList.remove("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    document.getElementById('rateValue').textContent = ergonomicRiskScore.toFixed(2);
+
+    // ============================
+    // RISK ASSESSMENT
+    // ============================
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+
+    if (ergonomicRiskScore < 100) {
+        meterWidth = '20%';
+        meterColor = '#27ae60';
+        feedback = '✅ Low ergonomic risk. Task is generally safe but monitor for changes.';
+    } else if (ergonomicRiskScore < 500) {
+        meterWidth = '40%';
+        meterColor = '#f1c40f';
+        feedback = '⚠️ Moderate ergonomic risk. Evaluate task and consider improvements.';
+    } else if (ergonomicRiskScore < 1000) {
+        meterWidth = '60%';
+        meterColor = '#e67e22';
+        feedback = '🚨 High ergonomic risk. Implement ergonomic controls and modifications.';
+    } else if (ergonomicRiskScore < 2000) {
+        meterWidth = '80%';
+        meterColor = '#e74c3c';
+        feedback = '🔴 Very high ergonomic risk. Immediate review and intervention required.';
+    } else {
+        meterWidth = '95%';
+        meterColor = '#c0392b';
+        feedback = '❌ Critical ergonomic risk. Task should be redesigned or eliminated.';
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').textContent = feedback;
+
+    placeholder.classList.add("hidden");
+    resultValue.classList.remove("hidden");
+}
+
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+
+{% comment %} 
+1. Formula for Ergonomic Risk Score (ERS)
+// ============================
+// ERGONOMIC RISK SCORE FORMULA
+// ============================
+//
+// ERS = Frequency × Duration × Intensity
+//
+// Where:
+// Frequency = how often a task is performed (1–10 scale)
+// Duration  = task duration in minutes per work shift (1–480 minutes)
+// Intensity = task exertion/force level (1–5 scale)
+//
+// ERS is a relative indicator of ergonomic risk.
+// Higher values = higher potential ergonomic hazards.
+//
+// Thresholds (aligned with ergonomic safety practices):
+//   <100       → Low Risk (generally safe, monitor task)
+//   100–500    → Moderate Risk (review task design)
+//   500–1000   → High Risk (implement ergonomic controls)
+//   1000–2000  → Very High Risk (urgent intervention)
+//   >2000      → Critical Risk (task redesign or elimination required)
+
+2. Input Validation Rules (real-world standards)
+Frequency (1–10)
+
+Must be integer only (whole numbers).
+
+Range: 1–10 (ILO & ergonomic risk assessment methods like REBA/RULA often use capped scales).
+
+1 = rare, 10 = continuous task.
+
+Duration (minutes)
+
+Must be numeric.
+
+Minimum: 1 minute.
+
+Maximum: 480 minutes (8 hours) (OSHA working shift).
+
+If >480, flag a warning (not auto-block — night shifts may extend).
+
+Accept decimals for fractional minutes (e.g., 15.5).
+
+Intensity (1–5)
+
+Must be integer only.
+
+Range: 1–5 (aligned with ergonomic force exertion scales).
+
+1 = minimal effort, 5 = extreme force.
+
+Cross-field dependency
+
+If Frequency = 10 (continuous) AND Duration > 240 → raise warning “Continuous tasks >4 hrs are not recommended” (ILO guidance).
+
+If Intensity = 5 AND Duration > 120 → warning “High-intensity tasks should not exceed 2 hrs without breaks” (NIOSH lifting guidelines).
+
+3. Edge Case Validations
+
+Empty inputs → Block calculation, show error.
+
+Non-numeric or NaN → Reject.
+
+Negative values → Reject.
+
+Zero values → Reject (except duration decimals, but not 0).
+
+Extremely high values (e.g., duration > 720) → Reject as unrealistic.
+
+Calculation sanity: Prevent negative or Infinity outputs. {% endcomment %}

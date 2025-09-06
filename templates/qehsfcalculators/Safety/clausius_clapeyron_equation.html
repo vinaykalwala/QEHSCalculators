@@ -1,0 +1,837 @@
+{% extends 'base.html' %}
+{% block title %}Clausius-Clapeyron Equation Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clausius-Clapeyron Equation Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        /* Input rows for side-by-side fields */
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+       
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Clausius-Clapeyron Equation Calculator</h1>
+            <p>Calculate vapor pressure at different temperatures for phase change analysis</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="pressure1">Initial Pressure (P₁) (atm)</label>
+                        <input type="number" id="pressure1" class="form-input" min="0.0001" step="any" placeholder="e.g., 1.0">
+                    </div>
+                    <div class="form-group">
+                        <label for="temp1">Initial Temperature (T₁) (K)</label>
+                        <input type="number" id="temp1" class="form-input" min="1" step="any" placeholder="e.g., 373">
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="pressure2">Final Pressure (P₂) (atm)</label>
+                        <input type="number" id="pressure2" class="form-input" min="0.0001" step="any" placeholder="Leave blank to calculate">
+                    </div>
+                    <div class="form-group">
+                        <label for="temp2">Final Temperature (T₂) (K)</label>
+                        <input type="number" id="temp2" class="form-input" min="1" step="any" placeholder="Leave blank to calculate">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="enthalpy">Enthalpy of Vaporization (ΔH<sub>vap</sub>) (kJ/mol)</label>
+                    <input type="number" id="enthalpy" class="form-input" min="0.1" step="any" placeholder="e.g., 40.7">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateClausiusClapeyron()">Calculate</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                   <img src="https://img.icons8.com/fluency/96/cloud.png" alt="Vapor cloud icon" width="100">
+                    <p>This tool will calculate vapor pressure or temperature using the Clausius-Clapeyron Equation. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Calculation Result</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label" id="rateLabel" style="color:#2980b9; font-size:20px; font-weight:bold;"></div>
+                    </div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low Risk</span><span>Moderate</span><span>Elevated</span><span>High Risk</span><span>Extreme</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Safety Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    This tool calculates vapor pressure at different temperatures using the <strong>Clausius-Clapeyron Equation</strong>, 
+                    which relates vapor pressure to temperature for phase changes. It's essential for predicting how pressure changes with temperature during evaporation/condensation.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Initial Pressure (P₁):</strong> Vapor pressure at the initial temperature (atm).</li>
+                    <li><strong>Initial Temperature (T₁):</strong> Absolute temperature in Kelvin (K).</li>
+                    <li><strong>Final Pressure (P₂):</strong> Vapor pressure at the final temperature (atm). Leave blank to calculate.</li>
+                    <li><strong>Final Temperature (T₂):</strong> Absolute temperature in Kelvin (K). Leave blank to calculate.</li>
+                    <li><strong>Enthalpy of Vaporization (ΔH<sub>vap</sub>):</strong> Energy needed for liquid→gas transition (kJ/mol).</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <p>
+                    <b>Pressure Safety Guidelines:</b>
+                </p>
+                <ul class="note-list">
+                    <li><span class="good">Below 0.1 atm</span> → Low pressure - minimal vapor risk</li>
+                    <li><span class="average">0.1-1 atm</span> → Moderate pressure - safe for standard use</li>
+                    <li><span class="average">1-10 atm</span> → High pressure - pressure-rated containers required</li>
+                    <li><span class="bad">Above 10 atm</span> → Extreme pressure - serious explosion risk</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>🔑 Key Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Chemical Storage:</strong> Predicting pressure buildup in sealed containers.</li>
+                    <li><strong>Fire Hazard Assessment:</strong> Estimating flammable vapor concentrations.</li>
+                    <li><strong>Process Safety:</strong> Determining safe operating temperature ranges.</li>
+                    <li><strong>Spill Behavior:</strong> Calculating evaporation rates of hazardous liquids.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+    <h3>✅ Validation Rules (Safety-Critical)</h3>
+    <ul class="note-list">
+        <li><strong>P₁ (Initial Pressure):</strong> 0.0001 – 200 atm</li>
+        <li><strong>T₁ (Initial Temperature):</strong> 50 – 2000 K</li>
+        <li><strong>P₂ (Final Pressure):</strong> 0.0001 – 200 atm (only if T₂ blank)</li>
+        <li><strong>T₂ (Final Temperature):</strong> 50 – 2000 K (only if P₂ blank)</li>
+        <li><strong>ΔHvap:</strong> 5 – 100 kJ/mol (typical liquids, e.g., water = 40.7)</li>
+        <li><strong>Cross-field:</strong> Only one of P₂ or T₂ must be entered</li>
+        <li><strong>Outputs:</strong> Must be positive, finite, and within industrial safety ranges</li>
+    </ul>
+</div>
+
+            
+            <div class="note-card">
+                <h3>⚠️ Why Only One of P₂ or T₂?</h3>
+                <ul class="note-list">
+                    <li>The Clausius-Clapeyron equation is designed to solve for the missing value when you already know three parameters.</li>
+                    <li>If you provide both P₂ and T₂, there's nothing left to calculate.</li>
+                    <li>To calculate effectively, enter either P₂ or T₂, and the equation will find the other.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>🏭 Industry Standards & Guidelines</h3>
+                <p>OSHA Process Safety Management (PSM) and EPA Risk Management Program (RMP) require vapor pressure calculations. NFPA 30 uses this for flammable liquid classification.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Set current date for print header
+    document.addEventListener('DOMContentLoaded', function() {
+        const now = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+    });
+
+    function calculateClausiusClapeyron() {
+        const p1 = parseFloat(document.getElementById('pressure1').value.trim());
+        const t1 = parseFloat(document.getElementById('temp1').value.trim());
+        const p2Input = document.getElementById('pressure2').value.trim();
+        const t2Input = document.getElementById('temp2').value.trim();
+        const dh = parseFloat(document.getElementById('enthalpy').value.trim());
+
+        const errorBox = document.getElementById('resultError');
+        const errorMessage = document.getElementById('errorMessage');
+        const placeholder = document.getElementById('placeholder');
+        const resultValue = document.getElementById('resultValue');
+        const rateValue = document.getElementById('rateValue');
+        const rateLabel = document.getElementById('rateLabel');
+        const calculationType = document.getElementById('calculationType');
+        const feedbackContent = document.getElementById('feedbackContent');
+        const meterFill = document.getElementById('meterFill');
+        
+        let errors = [];
+
+        /* ---------------------------
+           Validation Rules (QEHS-based)
+           --------------------------- */
+
+        // Initial Pressure
+        if (isNaN(p1) || p1 <= 0 || p1 < 0.0001 || p1 > 200) {
+            errors.push("👉 Initial Pressure (P₁) must be between 0.0001 and 200 atm.");
+        }
+
+        // Initial Temperature
+        if (isNaN(t1) || t1 <= 0 || t1 < 50 || t1 > 2000) {
+            errors.push("👉 Initial Temperature (T₁) must be between 50 K and 2000 K.");
+        }
+
+        // Enthalpy
+        if (isNaN(dh) || dh <= 0 || dh < 5 || dh > 100) {
+            errors.push("👉 Enthalpy of Vaporization (ΔHvap) must be between 5 and 100 kJ/mol.");
+        }
+
+        // Final Pressure & Temperature checks
+        const p2Provided = p2Input !== "" && !isNaN(parseFloat(p2Input)) && parseFloat(p2Input) > 0;
+        const t2Provided = t2Input !== "" && !isNaN(parseFloat(t2Input)) && parseFloat(t2Input) > 0;
+
+        if (!p2Provided && !t2Provided) {
+            errors.push("👉 Provide either Final Pressure (P₂) OR Final Temperature (T₂).");
+        }
+        if (p2Provided && t2Provided) {
+            errors.push("👉 Only one of Final Pressure (P₂) or Final Temperature (T₂) must be entered.");
+        }
+
+        if (p2Provided) {
+            const p2_val = parseFloat(p2Input);
+            if (p2_val < 0.0001 || p2_val > 200) {
+                errors.push("👉 Final Pressure (P₂) must be between 0.0001 and 200 atm.");
+            }
+        }
+
+        if (t2Provided) {
+            const t2_val = parseFloat(t2Input);
+            if (t2_val < 50 || t2_val > 2000) {
+                errors.push("👉 Final Temperature (T₂) must be between 50 K and 2000 K.");
+            }
+        }
+
+        // If any validation failed → show error
+        if (errors.length > 0) {
+            errorMessage.innerHTML = errors.join("<br>");
+            errorBox.classList.remove("hidden");
+            placeholder.classList.add("hidden");
+            resultValue.classList.add("hidden");
+            return;
+        } else {
+            errorBox.classList.add("hidden");
+        }
+
+        // Constants
+        const R = 8.314; // J/(mol·K)
+        const dhJmol = dh * 1000; // Convert from kJ/mol to J/mol
+
+        let result, resultType, resultUnit, resultValueNum;
+        
+        // Perform calculation based on what's provided
+        if (p2Provided) {
+            // Calculate T2
+            const p2 = parseFloat(p2Input);
+            const t2 = 1 / ((R * Math.log(p2 / p1)) / dhJmol + (1 / t1));
+            resultValueNum = t2;
+            resultType = "Final Temperature";
+            resultUnit = "K";
+            result = `T₂ = ${t2.toFixed(2)} K`;
+        } else {
+            // Calculate P2
+            const t2 = parseFloat(t2Input);
+            const p2 = p1 * Math.exp((dhJmol / R) * (1/t1 - 1/t2));
+            resultValueNum = p2;
+            resultType = "Final Pressure";
+            resultUnit = "atm";
+            result = `P₂ = ${p2.toFixed(4)} atm`;
+        }
+
+        // Display the result
+        rateValue.textContent = resultValueNum.toFixed(resultType === "Final Pressure" ? 4 : 2);
+        rateLabel.textContent = resultUnit;
+        calculationType.innerHTML = `<h2>${resultType} Calculation Result</h2>`;
+        
+        // Update safety meter and feedback based on result
+        updateSafetyAssessment(resultType, resultValueNum);
+        
+        // Show result section
+        placeholder.classList.add("hidden");
+        resultValue.classList.remove("hidden");
+    }
+
+    function updateSafetyAssessment(resultType, value) {
+        const feedbackContent = document.getElementById('feedbackContent');
+        const meterFill = document.getElementById('meterFill');
+        
+        if (resultType === "Final Pressure") {
+            // Pressure-based safety assessment
+            let riskLevel, feedback, meterWidth;
+            
+            if (value < 0.1) {
+                riskLevel = "Low Risk";
+                feedback = "Pressure is below 0.1 atm. Minimal vapor risk. Standard containers are sufficient.";
+                meterWidth = "20%";
+                meterFill.style.background = "#2ecc71"; // Green
+            } else if (value >= 0.1 && value < 1) {
+                riskLevel = "Moderate Risk";
+                feedback = "Pressure is between 0.1-1 atm. Moderate vapor risk. Standard containers are generally acceptable but monitor conditions.";
+                meterWidth = "40%";
+                meterFill.style.background = "#f1c40f"; // Yellow
+            } else if (value >= 1 && value < 10) {
+                riskLevel = "High Risk";
+                feedback = "Pressure is between 1-10 atm. High pressure risk. Pressure-rated containers required. Implement safety protocols.";
+                meterWidth = "60%";
+                meterFill.style.background = "#e67e22"; // Orange
+            } else if (value >= 10 && value < 50) {
+                riskLevel = "Very High Risk";
+                feedback = "Pressure is between 10-50 atm. Very high pressure risk. Specialized containment needed. Review process safety measures immediately.";
+                meterWidth = "80%";
+                meterFill.style.background = "#e74c3c"; // Red
+            } else {
+                riskLevel = "Extreme Risk";
+                feedback = "Pressure exceeds 50 atm. Extreme explosion hazard. Immediate action required. Do not proceed without expert consultation.";
+                meterWidth = "100%";
+                meterFill.style.background = "#c0392b"; // Dark red
+            }
+            
+            feedbackContent.innerHTML = `<strong>${riskLevel}:</strong> ${feedback}`;
+            meterFill.style.width = meterWidth;
+        } else {
+            // Temperature-based safety assessment
+            let riskLevel, feedback, meterWidth;
+            
+            if (value < 300) {
+                riskLevel = "Low Risk";
+                feedback = "Temperature is below 300 K (~27°C). Moderate temperature, generally safe for most processes.";
+                meterWidth = "20%";
+                meterFill.style.background = "#2ecc71"; // Green
+            } else if (value >= 300 && value < 400) {
+                riskLevel = "Moderate Risk";
+                feedback = "Temperature is between 300-400 K (~27-127°C). Elevated but common process conditions. Standard precautions apply.";
+                meterWidth = "40%";
+                meterFill.style.background = "#f1c40f"; // Yellow
+            } else if (value >= 400 && value < 500) {
+                riskLevel = "High Risk";
+                feedback = "Temperature is between 400-500 K (~127-227°C). High thermal hazard. Risk of autoignition for some solvents. Special precautions needed.";
+                meterWidth = "60%";
+                meterFill.style.background = "#e67e22"; // Orange
+            } else if (value >= 500 && value < 600) {
+                riskLevel = "Very High Risk";
+                feedback = "Temperature is between 500-600 K (~227-327°C). Very high thermal hazard. Special containment and safety protocols required.";
+                meterWidth = "80%";
+                meterFill.style.background = "#e74c3c"; // Red
+            } else {
+                riskLevel = "Extreme Risk";
+                feedback = "Temperature exceeds 600 K (~327°C). Extreme thermal hazard. Immediate expert consultation required before proceeding.";
+                meterWidth = "100%";
+                meterFill.style.background = "#c0392b"; // Dark red
+            }
+            
+            feedbackContent.innerHTML = `<strong>${riskLevel}:</strong> ${feedback}`;
+            meterFill.style.width = meterWidth;
+        }
+    }
+
+    function printReport() {
+        // Update date just before printing
+        const now = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        
+        window.print();
+    }
+</script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+
+{% comment %} 
+
+1. Formula (for comments in code)
+/* 
+Clausius–Clapeyron Equation (Two-point form):
+
+ln(P2 / P1) = (ΔHvap / R) * (1/T1 - 1/T2)
+
+Where:
+- P1 = Initial pressure (atm)
+- P2 = Final pressure (atm)
+- T1 = Initial temperature (K)
+- T2 = Final temperature (K)
+- ΔHvap = Enthalpy of vaporization (J/mol) [convert from kJ/mol by multiplying ×1000]
+- R = Universal gas constant = 8.314 J/(mol·K)
+
+Rearranged for calculation:
+- If P2 is known → T2 = 1 / [ (R * ln(P2/P1) / ΔHvap) + (1/T1) ]
+- If T2 is known → P2 = P1 * exp( (ΔHvap / R) * (1/T1 - 1/T2) )
+*/
+
+2. Input Validation Rules (QEHS/fire safety)
+
+a. Initial Pressure (P₁)
+
+Must be > 0 atm.
+
+Valid range: 0.0001 – 200 atm (below 0.0001 = vacuum, above 200 atm = beyond typical process equipment).
+
+Decimals: up to 4 significant figures.
+
+b. Initial Temperature (T₁)
+
+Must be > 0 K.
+
+Valid range: 50 K – 2000 K (absolute zero is impossible, above 2000 K is unrealistic for normal chemical operations).
+
+Decimals: up to 2.
+
+c. Final Pressure (P₂)
+
+Optional (only if T₂ is blank).
+
+Must be > 0 atm, within 0.0001 – 200 atm.
+
+Cannot be entered if T₂ is provided.
+
+d. Final Temperature (T₂)
+
+Optional (only if P₂ is blank).
+
+Must be > 0 K, within 50 K – 2000 K.
+
+Cannot be entered if P₂ is provided.
+
+e. Enthalpy of Vaporization (ΔHvap)
+
+Must be > 0.
+
+Valid range: 5 – 100 kJ/mol (based on typical volatile chemicals; water is 40.7 kJ/mol).
+
+Outliers (e.g., >100) should trigger warnings.
+
+f. Cross-field validation
+
+Either P₂ or T₂ must be blank (not both filled, not both empty).
+
+If calculation produces negative or infinite results, display error.
+
+3. Output Validation Logic
+
+Pressure thresholds (NFPA 30, OSHA PSM)
+
+< 0.1 atm → Low vapor pressure, minimal hazard.
+
+0.1 – 1 atm → Moderate vapor risk, manageable.
+
+1 – 10 atm → High pressure, rated vessels required.
+
+10 atm → Extreme risk, explosion hazard.
+
+Temperature thresholds (process/fire safety)
+
+< 300 K (~27 °C) → Moderate temperature, safe.
+
+300 – 400 K → Elevated but common process conditions.
+
+400 – 500 K → High thermal hazard (risk of autoignition for some solvents).
+
+500 K → Extreme hazard, special containment needed. {% endcomment %}

@@ -96,3 +96,20 @@ class ProfileUpdateForm(forms.ModelForm):
             "purpose": forms.TextInput(attrs={"class": "form-control"}),
             "profile_image": forms.FileInput(attrs={"class": "form-control"}),
         }
+
+
+
+from .models import BlogPost
+
+class BlogPostForm(forms.ModelForm):
+    class Meta:
+        model = BlogPost
+        fields = ['title', 'author', 'category', 'content', 'featured_image', 'is_published']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'author': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Author Name'}),
+            'category': forms.Select(attrs={'class': 'form-control'}),
+            'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
+            'featured_image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'is_published': forms.CheckboxInput(),
+        }

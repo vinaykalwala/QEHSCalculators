@@ -222,6 +222,36 @@ CALCULATORS = [
 
 {"name": "Energy Consumption per Person per Year Calculator", "url_name": "environment_energy_consumption_per_person_per_year_calculator", "plan_type": "corporate", "category": "environment"},
 
+{"name": "Flash Steam Calculator", "url_name": "environment_flash_steam_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Friction Factor Calculator (SI-Based)", "url_name": "environment_friction_factor_si_based_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Friction Factor Calculator (Imperial-Based)", "url_name": "environment_friction_factor_imperial_based_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Friction Factor Calculator(Reynolds-Number)", "url_name": "environment_friction_factor_reynolds_number_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Fracture Conductivity Calculator", "url_name": "environment_fracture_conductivity_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Freundlich Isotherm Calculator (Adsorption Capacity Calculator)", "url_name": "environment_freundlich_isotherm_adsorption_capacity_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Food to Microorganism (F/M) Ratio Calculator", "url_name": "environment_food_to_microorganism_fm_ratio_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Freezing Point Depression Calculator", "url_name": "environment_freezing_point_depression_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+
+{"name": "Fluid Flow Mass Velocity Calculator", "url_name": "environment_fluid_flow_mass_velocity_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Gas Flux Calculator", "url_name": "environment_gas_flux_calculator", "plan_type": "corporate", "category": "environment"},
+
     # Health Calculators
    {"name": "Army Body Fat Calculator", "url_name": "health_army_body_fat_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Adjusted Body Weight Calculator", "url_name": "health_adjusted_body_weight_calculator", "plan_type": "corporate", "category": "health"},
@@ -390,6 +420,26 @@ CALCULATORS = [
 
 
 {"name": "Crane Equation 3-20 - Compressible Flow Calculator", "url_name":"safety_compressible_flow_crane_equation_3_20_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Clausius-Clapeyron Equation Calculator", "url_name":"safety_clausius_clapeyron_equation_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Density Of A Material Calculator", "url_name":"safety_density_of_a_material_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Dalton's Law of Partial Pressures Calculator", "url_name":"safety_daltons_law_of_partial_pressures_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Drilling Torque & Drag Calculator", "url_name":"safety_drilling_torque_and_drag_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Dynamic Lifting Load Calculator", "url_name":"safety_dynamic_lifting_load_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Double-T Beam Weight Calculator", "url_name":"safety_double_t_beam_weight_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Earthing System Calculator", "url_name":"safety_earthing_system_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Energy Transfer Calculator", "url_name":"safety_enery_transfor_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Ergonomic Risk Score Calculator", "url_name":"safety_erogonomic_risk_score_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Emergency Drill Success Rate Calculator", "url_name":"safety_emergency_drill_success_rate_calculator", "plan_type": "corporate", "category": "safety"},
     
     # Fire Calculators
     {"name": "Burn Rate (chemical Exposure) Calculator", "url_name": "fire_burn_rate_chemical_exposure_calculator", "plan_type": "corporate", "category": "fire"},

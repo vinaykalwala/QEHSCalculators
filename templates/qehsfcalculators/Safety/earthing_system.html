@@ -1,0 +1,919 @@
+{% extends 'base.html' %}
+{% block title %}Earthing System Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earthing System Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        /* Input rows for side-by-side fields */
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+            text-align: left;
+        }
+        
+        /* Make result-item a flex row */
+.result-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    gap: 10px;
+}
+
+/* Title stays left */
+.result-title {
+    font-weight: 600;
+    color: #1560bd;
+    font-size: 18px;
+    flex: 1;
+    text-align: left;
+}
+
+/* Data stays right */
+.result-data {
+    font-size: 16px;
+    color: #2c3e50;
+    line-height: 1.5;
+    flex: 1;
+    text-align: right;
+}
+
+/* Responsive: stack vertically on small screens */
+@media (max-width: 600px) {
+    .result-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .result-data {
+        text-align: left;
+        margin-top: 5px;
+    }
+}
+
+        /* Error display */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Notes section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+        .select-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.form-select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    appearance: none;            /* removes default arrow */
+    -webkit-appearance: none;    /* for Safari */
+    -moz-appearance: none;       /* for Firefox */
+    background: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+/* Custom dropdown arrow */
+.select-wrapper::after {
+    content: "▼";   /* Unicode arrow */
+    font-size: 0.9rem;
+    color: #1560bd;
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none; /* lets clicks pass through */
+}
+
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Earthing System Calculator</h1>
+            <p>Calculate the required earthing system to safely dissipate fault currents</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="faultCurrent">Fault Current (I) (kA)</label>
+                        <input type="number" id="faultCurrent" class="form-input" min="0" step="0.001" placeholder="e.g., 10">
+                    </div>
+                    <div class="form-group">
+                        <label for="soilResistivity">Soil Resistivity (ρ) (ohm-m)</label>
+                        <input type="number" id="soilResistivity" class="form-input" min="0" step="0.001" placeholder="e.g., 100">
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="faultDuration">Fault Duration (t) (seconds)</label>
+                        <input type="number" id="faultDuration" class="form-input" min="0" step="0.001" placeholder="e.g., 3">
+                    </div>
+                    <div class="form-group">
+                        <label for="material">Conductor Material</label>
+                        <div class="select-wrapper">
+                        <select id="material" class="form-select">
+                            <option value="copper">Copper</option>
+                            <option value="aluminum">Aluminum</option>
+                            <option value="steel">Steel (GI)</option>
+                        </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="plateArea">Area of Plate Electrode (m²)</label>
+                        <input type="number" id="plateArea" class="form-input" min="0" step="0.001" placeholder="e.g., 0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="htCurrent">HT Side Fault Current (kA)</label>
+                        <input type="number" id="htCurrent" class="form-input" min="0" step="0.001" placeholder="e.g., 15">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="ltCurrent">LT Side Fault Current (kA)</label>
+                    <input type="number" id="ltCurrent" class="form-input" min="0" step="0.001" placeholder="e.g., 8">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateEarthingSystem()">Calculate Earthing System</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                   <img src="https://img.icons8.com/fluency/96/plug.png" alt="Electrical plug icon" width="100">
+                    <p>This tool will calculate the <strong>Earthing System Requirements</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                     <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Earthing System Calculation Results</h2></div>
+                    
+                    <div class="result-item">
+                        <div class="result-title">Total Area Required</div>
+                        <div class="result-data" id="totalAreaResult"></div>
+                    </div>
+                    
+                    <div class="result-item">
+                        <div class="result-title">Number of Plate Electrodes</div>
+                        <div class="result-data" id="platesResult"></div>
+                    </div>
+                    
+                    <div class="result-item">
+                        <div class="result-title">HT Side Earthing Conductor Size</div>
+                        <div class="result-data" id="htConductorResult"></div>
+                    </div>
+                    
+                    <div class="result-item">
+                        <div class="result-title">LT Side Earthing Conductor Size</div>
+                        <div class="result-data" id="ltConductorResult"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    This tool calculates the <strong>Earthing System Requirements</strong> to safely dissipate fault currents and protect electrical equipment. 
+                    Proper earthing prevents electric shocks, equipment damage, and fire hazards while ensuring compliance with safety standards.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Fault Current (I):</strong> The maximum fault current that flows during a short circuit, typically measured in kiloamperes (kA). A higher fault current requires a more robust earthing system to ensure safety.</li>
+                    <li><strong>Soil Resistivity (ρ):</strong> A measure of how well the soil conducts electricity, expressed in ohm-meters (Ω·m). Lower soil resistivity improves grounding efficiency, while higher resistivity may require additional grounding electrodes or treatment.</li>
+                    <li><strong>Fault Duration (t):</strong> The time taken for the fault to be cleared by protective devices, measured in seconds. A longer fault duration increases thermal and mechanical stress on the grounding system.</li>
+                    <li><strong>Conductor Material:</strong> The type of material used for earthing, such as Copper, Aluminum, or Steel. Copper is preferred for its high conductivity and corrosion resistance, whereas Aluminum and Steel are cost-effective alternatives.</li>
+                    <li><strong>Plate Electrode Area:</strong> The size of the earthing plate buried in the ground, measured in square meters (m²). A larger electrode area improves ground contact and reduces overall resistance.</li>
+                    <li><strong>HT Side Fault Current:</strong> The fault current on the high-voltage (HT) side of the electrical system, measured in kA. Proper grounding on the HT side is critical to preventing insulation breakdown and equipment damage.</li>
+                    <li><strong>LT Side Fault Current:</strong> The fault current on the low-voltage (LT) side, measured in kA. An effective LT grounding system enhances electrical safety by minimizing voltage fluctuations and ensuring proper fault clearance.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <p>
+                    <b>Understanding the Result:</b>
+                </p>
+                <ul class="note-list">
+                    <li><strong>Total Area Required:</strong> The minimum earthing plate area needed to safely dissipate fault current.</li>
+                    <li><strong>Number of Plate Electrodes:</strong> The number of plates required based on the given area.</li>
+                    <li><strong>HT Side Earthing Conductor Size:</strong> The required conductor size to handle high-voltage faults.</li>
+                    <li><strong>LT Side Earthing Conductor Size:</strong> The required conductor size to handle low-voltage faults.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>🔑 Key Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Electrical System Safety:</strong> Ensures proper grounding to prevent electric shocks and equipment damage.</li>
+                    <li><strong>Compliance with Standards:</strong> Helps meet electrical safety regulations and standards.</li>
+                    <li><strong>Industrial Equipment Protection:</strong> Prevents electrical failures in transformers, switchgear, and other equipment.</li>
+                    <li><strong>Lightning Protection Systems:</strong> Provides safe path for lightning currents to dissipate into the ground.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+    <h3>✅ Validation Rules & Input Constraints</h3>
+    <ul class="note-list">
+        <li><strong>Fault Current (I):</strong> 0.1 – 100 kA (positive only, max 3 decimals). Higher than 100 kA is impractical for LV/MV systems, rare in industrial HV setups.</li>
+        <li><strong>Soil Resistivity (ρ):</strong> 10 – 3000 Ω·m (warning if >1000 Ω·m). IEEE 80 recommends soil improvement if resistivity is >1000 Ω·m.</li>
+        <li><strong>Fault Duration (t):</strong> 0.05 – 5 seconds. Typical protection clearing times are &lt; 1 sec, but extreme cases may reach 5 s (above this, warning).</li>
+        <li><strong>Plate Electrode Area:</strong> 0.1 – 2.0 m² (per IS 3043). Warning if outside range.</li>
+        <li><strong>HT Side Fault Current:</strong> 1 – 63 kA (IEEE/NFPA design envelope). Must be ≥ LT side current.</li>
+        <li><strong>LT Side Fault Current:</strong> 0.5 – 50 kA. Must be ≤ HT side current.</li>
+        <li><strong>Conductor Material:</strong> Fixed allowable current densities (for 3 seconds fault duration): Copper = 118 A/mm², Aluminum = 73 A/mm², Steel (GI) = 46 A/mm².</li>
+        <li><strong>Decimals:</strong> Up to 3 decimals accepted for all numeric inputs. Any more are truncated.</li>
+    </ul>
+</div>
+
+            
+         
+
+            
+            <div class="note-card">
+                <h3>🔢 Permissible Current Density Values</h3>
+                <p>
+                    The conductor material is selected based on how much <strong>current per mm²</strong> it can safely carry for <strong>3 seconds</strong> (typical fault duration).
+                </p>
+                <ul class="note-list">
+                    <li><strong>Copper:</strong> 118 A/mm² for 3 seconds.</li>
+                    <li><strong>Aluminum:</strong> 73 A/mm² for 3 seconds.</li>
+                    <li><strong>Steel (GI):</strong> 46 A/mm² for 3 seconds.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateEarthingSystem() {
+    // Get input values
+    const faultCurrent = parseFloat(document.getElementById('faultCurrent').value.trim());
+    const soilResistivity = parseFloat(document.getElementById('soilResistivity').value.trim());
+    const faultDuration = parseFloat(document.getElementById('faultDuration').value.trim());
+    const material = document.getElementById('material').value;
+    const plateArea = parseFloat(document.getElementById('plateArea').value.trim());
+    const htCurrent = parseFloat(document.getElementById('htCurrent').value.trim());
+    const ltCurrent = parseFloat(document.getElementById('ltCurrent').value.trim());
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+    let warnings = [];
+
+    // ----------------------------
+    // INPUT VALIDATION
+    // ----------------------------
+
+    // Fault Current (kA) → IEC/IEEE range 0.1 – 100
+    if (isNaN(faultCurrent) || faultCurrent < 0.1 || faultCurrent > 100) {
+        errors.push("👉 Fault Current must be between 0.1 and 100 kA.");
+    }
+
+    // Soil Resistivity (Ω·m) → 10 – 3000
+    if (isNaN(soilResistivity) || soilResistivity < 10 || soilResistivity > 3000) {
+        errors.push("👉 Soil Resistivity must be between 10 and 3000 Ω·m.");
+    } else if (soilResistivity > 1000) {
+        warnings.push("⚠️ High soil resistivity (>1000 Ω·m). Consider soil improvement or chemical earthing.");
+    }
+
+    // Fault Duration (s) → 0.05 – 5
+    if (isNaN(faultDuration) || faultDuration < 0.05 || faultDuration > 5) {
+        errors.push("👉 Fault Duration must be between 0.05 and 5 seconds.");
+    } else if (faultDuration > 1) {
+        warnings.push("⚠️ Fault duration > 1s may stress conductors. Ensure relay/protection coordination.");
+    }
+
+    // Plate Area (m²) → 0.1 – 2.0
+    if (isNaN(plateArea) || plateArea < 0.1 || plateArea > 2) {
+        errors.push("👉 Plate Area must be between 0.1 and 2.0 m² as per IS 3043.");
+    }
+
+    // HT Current (kA) → 1 – 63
+    if (isNaN(htCurrent) || htCurrent < 1 || htCurrent > 63) {
+        errors.push("👉 HT Fault Current must be between 1 and 63 kA.");
+    }
+
+    // LT Current (kA) → 0.5 – 50
+    if (isNaN(ltCurrent) || ltCurrent < 0.5 || ltCurrent > 50) {
+        errors.push("👉 LT Fault Current must be between 0.5 and 50 kA.");
+    }
+
+    // Logical consistency → HT ≥ LT
+    if (!isNaN(htCurrent) && !isNaN(ltCurrent) && ltCurrent > htCurrent) {
+        errors.push("👉 LT Fault Current cannot exceed HT Fault Current.");
+    }
+
+    // Show errors if any
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // ----------------------------
+    // CALCULATIONS
+    // ----------------------------
+    // Convert fault currents to Amps
+    const I = faultCurrent * 1000;
+    const htCurrentVal = htCurrent * 1000;
+    const ltCurrentVal = ltCurrent * 1000;
+    const t = faultDuration;
+
+    // Permissible current density (A/mm²) based on material (for 3 sec duration)
+    let permissibleCurrentDensityConductor;
+    switch (material) {
+        case 'copper': permissibleCurrentDensityConductor = 118; break;
+        case 'aluminum': permissibleCurrentDensityConductor = 73; break;
+        case 'steel': permissibleCurrentDensityConductor = 46; break;
+    }
+
+    // Electrode permissible current density (A/m²)
+    // Formula: J = 7.57×10³ / √(ρ × t)
+    const permissibleCurrentDensityElectrode = (7.57e3) / Math.sqrt(soilResistivity * t);
+
+    // Step 1: Total Area Required (m²)
+    const totalAreaRequired = I / permissibleCurrentDensityElectrode;
+
+    // Step 2: Number of Plates
+    const numberOfPlates = Math.ceil(totalAreaRequired / plateArea);
+
+    // Step 3: HT & LT Conductor Sizes (mm²)
+    const htConductorSize = htCurrentVal / permissibleCurrentDensityConductor;
+    const ltConductorSize = ltCurrentVal / permissibleCurrentDensityConductor;
+
+    // Minimum conductor sizes per IS 3043
+    const minConductor = { copper: 16, aluminum: 25, steel: 50 };
+    const minSize = minConductor[material];
+
+    const htFinal = Math.max(htConductorSize, minSize);
+    const ltFinal = Math.max(ltConductorSize, minSize);
+
+    // Step 4: Dimensions (assuming 3mm thickness strips)
+    const calculateDimensions = (area) => {
+        const thickness = 3;
+        const width = Math.ceil(area / thickness);
+        return `${width} mm x ${thickness} mm`;
+    };
+
+    const htConductorDimensions = calculateDimensions(htFinal);
+    const ltConductorDimensions = calculateDimensions(ltFinal);
+
+    // ----------------------------
+    // DISPLAY RESULTS
+    // ----------------------------
+    document.getElementById('totalAreaResult').textContent =
+        `${totalAreaRequired.toFixed(4)} m²`;
+    document.getElementById('platesResult').textContent =
+        `${numberOfPlates} plates (each ${plateArea} m²)`;
+    document.getElementById('htConductorResult').textContent =
+        `${htFinal.toFixed(2)} mm² or ${htConductorDimensions} ${material} strip`;
+    document.getElementById('ltConductorResult').textContent =
+        `${ltFinal.toFixed(2)} mm² or ${ltConductorDimensions} ${material} strip`;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+
+    // Show warnings if any
+    if (warnings.length > 0) {
+        errors.push(warnings.join("\n"));
+    }
+}
+
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+{% comment %} 
+
+1. Detailed Input Validation Rules (Industry-based)
+
+✅ Fault Current (I) (kA)
+
+Must be > 0.
+
+Acceptable practical range: 0.1 – 100 kA (higher values are extremely rare outside large substations).
+
+Max 3 decimal places.
+
+Unit: kA, internally converted to A for formula.
+
+✅ Soil Resistivity (ρ) (Ω·m)
+
+Must be > 0.
+
+Acceptable range: 10 – 3000 Ω·m (10 = very conductive clay, 3000 = rocky/dry soil).
+
+Anything >1000 should give a warning: "High resistivity soil – consider soil treatment, multiple electrodes, or chemical earthing."
+
+Max 2 decimals sufficient.
+
+✅ Fault Duration (t) (s)
+
+Must be > 0.
+
+Practical range: 0.05 – 5 s (per IEC/IEEE, fault clearing usually <1s, but worst-case up to 5s).
+
+If >5s → warning: "Unusually high fault duration, check protection relay settings."
+
+✅ Plate Area (m²)
+
+Must be > 0.
+
+Typical range: 0.1 – 2.0 m² per plate (IS 3043 recommends ~0.5 m² plate as standard).
+
+Validation: If <0.1 → warning: "Electrode too small to be practical."
+
+If >2 → warning: "Plate size exceeds standard, consider multiple smaller plates."
+
+✅ HT Side Fault Current (kA)
+
+Must be > 0.
+
+Range: 1 – 63 kA (utility-grade).
+
+If < LT current → warning: "HT fault current cannot be lower than LT."
+
+✅ LT Side Fault Current (kA)
+
+Must be > 0.
+
+Range: 0.5 – 50 kA.
+
+Logical check: LT < HT (usually 40–70% of HT).
+
+✅ Conductor Material
+
+Must be selected (copper/aluminum/steel).
+
+Each has specific current density limits (IEC 60364 / IS 3043):
+
+Copper = 118 A/mm² for 3s
+
+Aluminum = 73 A/mm² for 3s
+
+Steel (GI) = 46 A/mm² for 3s
+
+2. Output Validation & Logic
+
+Total Area Required (m²):
+Formula:
+
+𝐴
+𝑟
+𝑒
+𝑞
+=
+𝐼
+𝐽
+𝑒
+A
+req
+	​
+
+=
+J
+e
+	​
+
+I
+	​
+
+
+where 
+𝐽
+𝑒
+=
+7.57
+×
+10
+3
+𝜌
+⋅
+𝑡
+J
+e
+	​
+
+=
+ρ⋅t
+	​
+
+7.57×10
+3
+	​
+
+ (A/m², from IEEE 80).
+
+If required area < plate area → result = 1 plate (minimum).
+
+If >20 plates → warning: "System impractical, consider alternate electrode system."
+
+Number of Plate Electrodes:
+Always rounded up.
+
+Conductor Size (mm²):
+Formula:
+
+𝐴
+𝑐
+=
+𝐼
+𝐽
+𝑐
+A
+c
+	​
+
+=
+J
+c
+	​
+
+I
+	​
+
+
+where 
+𝐽
+𝑐
+J
+c
+	​
+
+ = permissible conductor current density (A/mm²).
+
+If <16 mm² (copper) → warning: "Below minimum recommended conductor size."
+
+Always show both mm² and equivalent strip size (width × thickness).
+
+3. Corrected JavaScript Validation Function
+/* =============================
+   EARTHING SYSTEM VALIDATIONS
+   Standards: IEEE 80, IS 3043, IEC 60364
+   =============================
+   Formulae:
+   - Electrode Permissible Current Density:
+       J_e = 7.57 × 10³ / √(ρ × t)   [A/m²]
+   - Total Electrode Area:
+       A_req = I / J_e               [m²]
+   - Conductor Size:
+       A_c = I / J_c                 [mm²]
+     where J_c depends on material:
+       Copper = 118 A/mm² (3s)
+       Aluminum = 73 A/mm² (3s)
+       Steel = 46 A/mm² (3s)
+   ============================= */ {% endcomment %}

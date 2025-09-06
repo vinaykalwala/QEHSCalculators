@@ -28,6 +28,12 @@ urlpatterns = [
     path('transactions/clear/', clear_all_transactions, name='clear_all_transactions'),
     path('user-devices/', user_devices_list, name='user_devices_list'),
 
+    path('blog_list/', blog_list, name='blog_list'),
+    path('blog_detail/<int:post_id>/', blog_detail, name='blog_detail'),
+    path('blog_create/', blog_create, name='blog_create'),
+    path('blog_edit/<int:post_id>/', blog_edit, name='blog_edit'),
+    path('blog_delete/<int:post_id>/', blog_delete, name='blog_delete'),
+
     path('approvalsubscriptions/', manage_subscriptions, name='manage_subscriptions'),
     path('approvalsubscriptions/approve/<int:subscription_id>/', approve_subscription, name='approve_subscription'),
     path('approvalsubscriptions/reject/<int:subscription_id>/', reject_subscription, name='reject_subscription'),
