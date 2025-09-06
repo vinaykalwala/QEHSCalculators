@@ -220,7 +220,7 @@ CALCULATORS = [
 
 {"name": "Elevation Head Loss Calculator", "url_name": "environment_elevation_head_loss_calculator", "plan_type": "corporate", "category": "environment"},
 
-{"name": "environment_energy_consumption_per_person_per_year_calculator", "url_name": "Energy Consumption per Person per Year Calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Energy Consumption per Person per Year Calculator", "url_name": "environment_energy_consumption_per_person_per_year_calculator", "plan_type": "corporate", "category": "environment"},
 
     # Health Calculators
    {"name": "Army Body Fat Calculator", "url_name": "health_army_body_fat_calculator", "plan_type": "corporate", "category": "health"},
