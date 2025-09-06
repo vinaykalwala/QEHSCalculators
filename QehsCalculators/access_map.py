@@ -392,7 +392,25 @@ CALCULATORS = [
 {"name": "Crane Equation 3-20 - Compressible Flow Calculator", "url_name":"safety_compressible_flow_crane_equation_3_20_calculator", "plan_type": "corporate", "category": "safety"},
     
     # Fire Calculators
-    # {"name": "Fire Risk Assessment", "url_name": "fire_risk", "plan_type": "individual", "category": "fire"},
+    {"name": "Burn Rate (chemical Exposure) Calculator", "url_name": "fire_burn_rate_chemical_exposure_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Base Design Quantity for CO₂ Calculator", "url_name": "fire_base_design_quantity_for_co_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Bernoulli's Equation for a Liquid Calculator", "url_name": "fire_bernoullis_equation_for_a_liquid_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Bernoulli's Equation With Constant Potential Energy Terms And Frictional Losses Calculator", "url_name": "fire_bernoullis_equation_with_constant_potential_energy_terms_and_frictional_losses_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Combustion Efficiency (CE) Calculator", "url_name": "fire_combustion_efficiency_ce_calculator", "plan_type": "corporate", "category": "fire"},\
+    {"name": "Discharge Rate Calculator for CO₂", "url_name": "fire_discharge_rate_for_co2_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Discharge Rate of co2 Calculator for local applications", "url_name": "fire_discharge_rate_of_co2_for_local_applications_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Equivalent Orifice Area Calculator for co2", "url_name": "fire_equivalent_orifice_area_for_co2_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Equivalent Water Flowrate Through A Check Valve Calculator", "url_name": "fire_equivalent_water_flowrate_through_a_check_valve_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Fire Load Calculator", "url_name": "fire_fire_load_calculator", "plan_type": "corporate", "category": "fire"},
+
+
+
+
+
+
+
+
+
     # {"name": "Evacuation Time Calculator", "url_name": "evacuation_time", "plan_type": "employee", "category": "fire"},
     # {"name": "Fire Safety Compliance", "url_name": "fire_safety", "plan_type": "corporate", "category": "fire"},
     
