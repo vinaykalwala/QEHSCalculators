@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Actual Evaporation Rate Of A Boiler From Its kW Rating And The Energy Required To Be Added To The Feedwater To Make Steam Calculator{% endblock %}
+{% block title %}Steam Density Calculator (Using Dryness Fraction){% endblock %}
 {% block content %}
 {% load static %}
 
@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Actual Evaporation Rate Of A Boiler From Its kW Rating And The Energy Required To Be Added To The Feedwater To Make Steam Calculator</title>
+    <title>Steam Density Calculator (Using Dryness Fraction)</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
@@ -17,7 +17,6 @@
             max-width: 1200px;
             margin: 20px auto;
             padding: 0 20px;
-
             border-radius: 12px;
         }
 
@@ -304,50 +303,45 @@
             display: none; 
         }
 
-          .btn-container {
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
 
-    display: flex;
-    justify-content: center; /* Horizontally center */
-    margin: 30px 0;
-}
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
 
-.back-btn {
-    background:linear-gradient(#1560bd,#000040); /* Dark navy background */
-    color: #ffffff; /* White text */
-    border: 2px solid #1560bd; /* Highlight border */
-    padding: 10px 20px;
-    font-size: 14px;
-    font-weight: 600;
-    border-radius: 8px;
-    text-decoration: none; /* Remove underline for link */
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-.back-btn:hover {
-    background-color: #1560bd; /* Highlight on hover */
-    color: #ffffff;
-    border-color: #000040;
-    transform: scale(1.05); /* Subtle hover effect */
-}
-
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
     </style>
 </head>
 <body>
-     <div class="btn-container">
-    <a href="{% url 'qualitycategory_calculators' %}" class="back-btn">Back To Quality Calculators</a>
-</div>
+    <div class="btn-container">
+        <a href="{% url 'qualitycategory_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+    </div>
 
-   <div class="calculator-container printable" id="printArea">
-
-    <!-- Include header/footer for print -->
-    {% include "includes/print_header_footer.html" %}
-
-       
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
 
         <div class="calculator-header">
-            <h1>Actual Evaporation Rate Of A Boiler From Its kW Rating And The Energy Required To Be Added To The Feedwater To Make Steam Calculator</h1>
-            <p>Calculates the actual steam output of a boiler based on its power rating (kW) and the energy required to convert feedwater into steam (kJ/kg)</p>
+            <h1>Steam Density Calculator (Using Dryness Fraction)</h1>
+            <p>Calculates the density of steam based on specific volume of dry steam and dryness fraction</p>
         </div>
 
         <div class="calc-content">
@@ -355,23 +349,23 @@
             <div class="calc-card">
                 <h2>Enter Data</h2>
                 <div class="form-group">
-                    <label for="Qdot">Boiler Rating (kW)</label>
-                    <input type="number" id="Qdot" class="form-input" min="0" placeholder="Enter boiler rating">
+                    <label for="specificVolume">Specific Volume of Dry Steam (v<sub>g</sub>, m³/kg)</label>
+                    <input type="number" id="specificVolume" class="form-input" min="0" placeholder="Enter specific volume">
                 </div>
 
                 <div class="form-group">
-                    <label for="energy">Energy Required (kJ/kg)</label>
-                    <input type="number" id="energy" class="form-input" min="0" placeholder="Enter energy required">
+                    <label for="drynessFraction">Dryness Fraction (χ)</label>
+                    <input type="number" id="drynessFraction" class="form-input" min="0" max="1" step="0.01" placeholder="Enter dryness fraction (0 to 1)">
                 </div>
 
-                <button class="calculate-btn" onclick="calculateEvaporationRate()">Calculate Steam Output</button>
+                <button class="calculate-btn" onclick="calculateDensity()">Calculate Density</button>
             </div>
 
             <!-- Result Section -->
             <div class="result-card">
                 <div class="result-placeholder" id="placeholder">
-                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Boiler illustration">
-                    <p>This tool calculates the <strong>actual steam output</strong> in kg/h. Enter your boiler rating and energy required to see results.</p>
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Steam illustration">
+                    <p>This tool calculates the <strong>density of steam</strong> in kg/m³. Enter specific volume and dryness fraction to see results.</p>
                 </div>
 
                 <div class="result-error hidden" id="resultError">
@@ -381,14 +375,14 @@
 
                 <div class="result-value hidden" id="resultValue">
                     <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
-                        <h2>Steam Output</h2>
+                        <h2>Steam Density</h2>
                     </div>
-                    <div class="rate-value" id="steamOutputValue">0.00</div>
-                    <div class="rate-label"><strong>kg/h</strong></div>
+                    <div class="rate-value" id="densityValue">0.00</div>
+                    <div class="rate-label"><strong>kg/m³</strong></div>
                     
                     <div class="result-feedback">
-                        <div class="feedback-title">Boiler Evaporation Rate Interpretation</div>
-                        <div class="feedback-content" id="boilerFeedback"></div>
+                        <div class="feedback-title">Steam Quality Interpretation</div>
+                        <div class="feedback-content" id="densityFeedback"></div>
                     </div>
                     
                     <div class="btn-wrapper">
@@ -403,86 +397,93 @@
             <div class="note-card">
                 <h3>🔎 About This Calculator</h3>
                 <p>
-                    The <strong>Boiler Evaporation Rate Calculator</strong> estimates how much steam (kg/h) a boiler produces using its power rating (kW) and the energy needed to convert water into steam (kJ/kg). It helps assess efficiency, optimize energy use, and maintain safe operations.
+                    The <strong>Steam Density Calculator</strong> estimates the density of steam based on its dryness fraction and specific volume of dry steam. It helps assess steam quality, optimize energy use, and maintain efficient operations in thermal systems.
                 </p> 
             </div>
-                        <div class="note-card">
-    <h3>📌 Input Validations</h3>
-    <ul class="note-list">
-        <li><strong>Boiler Rating (kW):</strong> Required, must be > 0 and ≤ 300,000 kW</li>
-        <li><strong>Energy Required (kJ/kg):</strong> Required, must be > 0</li>
-        <li><strong>Energy Required Range:</strong> Typically 2000–3500 kJ/kg for realistic values</li>
-        <li><strong>Energy Required:</strong> Cannot be zero (division by zero)</li>
-    </ul>
-</div>
+            
+            <div class="note-card">
+                <h3>📌 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Specific Volume (v<sub>g</sub>):</strong> Required, must be > 0</li>
+                    <li><strong>Dryness Fraction (χ):</strong> Required, must be between 0 and 1</li>
+                    <li><strong>Realistic Range:</strong> Specific volume typically 0.1–1.7 m³/kg for steam systems</li>
+                    <li><strong>Dryness Fraction:</strong> Values below 0.5 indicate very wet steam with potential efficiency issues</li>
+                </ul>
+            </div>
 
             <div class="note-card">
                 <h3>❓ Explanation of Parameters</h3>
                 <ul class="note-list">
-                    <li><strong>Q̇ (Boiler Rating):</strong> The heating power of the boiler, measured in kilowatts (kW), which represents how much energy the boiler can supply.</li>
-                    <li><strong>Energy to be Added:</strong> The heat energy required to convert 1 kg of water into steam, measured in kilojoules per kilogram (kJ/kg).</li>
-                    <li><strong>ṁ (Steam Output):</strong> The total amount of steam produced by the boiler, measured in kg per hour (kg/h).</li>
-
+                    <li><strong>Specific Volume of Dry Steam (v<sub>g</sub>):</strong> The volume occupied by 1 kg of dry steam at a given pressure, measured in m³/kg.</li>
+                    <li><strong>Dryness Fraction (χ):</strong> The proportion of steam that is in the vapor phase (ranging from 0 to 1, where 1 means fully dry steam).</li>
+                    <li><strong>Density (ρ):</strong> The mass per unit volume of steam, measured in kg/m³.</li>
                 </ul>
             </div>
-      
-
+            
 
             <div class="note-card">
                 <h3>📊 Real-Life Applications</h3>
                 <ul class="note-list">
-                    <li><strong>Industrial Boilers:</strong> Optimize fuel consumption and cost savings.</li>
-                    <li><strong>Power Plants:</strong> Assess steam generation efficiency for electricity production.</li>
-                    <li><strong>Environmental Impact Analysis:</strong> Reduces unnecessary fuel wastage and emissions.</li>
-                    <li><strong>Quality & Safety Control:</strong> Ensure boilers run within safe operating limits.</li>
+                    <li><strong>Steam Quality Assessment:</strong> Determines the proportion of water content in steam, ensuring optimal performance.</li>
+                    <li><strong>Boiler & Turbine Performance:</strong> Helps evaluate steam conditions for efficient energy conversion.</li>
+                    <li><strong>Heat Transfer Optimization:</strong> Essential for industries relying on steam for heating processes.</li>
+                    <li><strong>Industrial Safety & Efficiency:</strong> Prevents excessive moisture in steam, which could cause damage to turbines and pipelines.</li>
                 </ul>
             </div>
             
             <div class="note-card">
                 <h3>💡 Conclusion</h3>
-                <p>This formula is crucial in industrial settings to monitor and optimize boiler performance. By calculating steam output, engineers can ensure energy efficiency, cost savings, and compliance with environmental standards. Regular assessments help improve operations and reduce fuel wastage while maintaining high safety standards.</p>
+                <p>This formula is crucial in thermal engineering to design and optimize steam systems. By calculating steam density with consideration of moisture content, engineers can ensure energy efficiency, prevent equipment damage, and maintain compliance with operational standards. Regular assessments help improve operations and reduce energy wastage.</p>
             </div>
         </div>
     </div>
 
     <script>
-       function calculateEvaporationRate() {
-    const Qdot = document.getElementById("Qdot").value.trim();
-    const energy = document.getElementById("energy").value.trim();
+function calculateDensity() {
+    const specificVolume = document.getElementById("specificVolume").value.trim();
+    const drynessFraction = document.getElementById("drynessFraction").value.trim();
 
     const errorBox = document.getElementById('resultError');
     const errorMessage = document.getElementById('errorMessage');
     const placeholder = document.getElementById('placeholder');
     const resultValue = document.getElementById('resultValue');
-    const outputValue = document.getElementById('steamOutputValue');
-    const feedbackBox = document.getElementById('boilerFeedback'); 
+    const densityValue = document.getElementById('densityValue');
+    const feedbackBox = document.getElementById('densityFeedback');
 
     let errors = [];
     let warnings = [];
 
-    // ✅ Boiler rating validation
-    if (Qdot === "") {
-        errors.push("👉 Please enter the boiler rating (kW).");
-    } else if (isNaN(Qdot)) {
-        errors.push("👉 Boiler rating must be a number.");
-    } else if (parseFloat(Qdot) <= 0) {
-        errors.push("👉 Boiler rating must be greater than 0.");
-    } else if (parseFloat(Qdot) > 300000) {
-        errors.push("👉 Boiler rating exceeds realistic industrial maximum (>300,000 kW). Please recheck input.");
+    // ✅ Specific Volume Validation
+    if (specificVolume === "") {
+        errors.push("👉 Please enter the specific volume of dry steam (m³/kg).");
+    } else if (isNaN(specificVolume)) {
+        errors.push("👉 Specific volume must be a valid number.");
+    } else {
+        const sv = parseFloat(specificVolume);
+        if (sv <= 0) {
+            errors.push("👉 Specific volume must be greater than 0.");
+        } else if (sv < 0.05) {
+            warnings.push("⚠️ Specific volume unusually low (<0.05 m³/kg). Check inputs.");
+        } else if (sv > 5) {
+            warnings.push("⚠️ Specific volume exceeds typical maximum (5 m³/kg). Please verify.");
+        }
     }
 
-    // ✅ Energy required validation
-    if (energy === "") {
-        errors.push("👉 Please enter the energy required (kJ/kg).");
-    } else if (isNaN(energy)) {
-        errors.push("👉 Energy required must be a number.");
-    } else if (parseFloat(energy) <= 0) {
-        errors.push("👉 Energy required must be greater than 0.");
-    } else if (parseFloat(energy) < 2000 || parseFloat(energy) > 3500) {
-        warnings.push("⚠️ Energy value is outside normal range (2000–3500 kJ/kg). Check units and inputs.");
+    // ✅ Dryness Fraction Validation
+    if (drynessFraction === "") {
+        errors.push("👉 Please enter the dryness fraction (0–1).");
+    } else if (isNaN(drynessFraction)) {
+        errors.push("👉 Dryness fraction must be a valid number.");
+    } else {
+        const df = parseFloat(drynessFraction);
+        if (df <= 0 || df > 1) {
+            errors.push("👉 Dryness fraction must be between 0 and 1.");
+        } else if (df < 0.5) {
+            warnings.push("⚠️ Very wet steam (<0.5 dryness fraction) – efficiency and safety risk.");
+        }
     }
 
-    // Show errors
+    // ✅ Show Errors
     if (errors.length > 0) {
         errorMessage.innerHTML = errors.join("<br>");
         errorBox.classList.remove("hidden");
@@ -493,30 +494,28 @@
         errorBox.classList.add("hidden");
     }
 
-    const QdotNum = parseFloat(Qdot);
-    const energyNum = parseFloat(energy);
+    // ✅ Calculation
+    const sv = parseFloat(specificVolume);
+    const df = parseFloat(drynessFraction);
+    const density = 1 / (sv * df);
 
-    // Prevent divide by zero
-    if (energyNum === 0) {
-        errorMessage.innerHTML = "❌ Energy required cannot be zero (division by zero).";
-        errorBox.classList.remove("hidden");
-        return;
+    // ✅ Output range checks
+    if (density < 0.1 || density > 100) {
+        warnings.push("⚠️ Calculated density is outside normal operating range (0.1–100 kg/m³). Check inputs.");
     }
 
-    // ✅ Calculate steam output
-    const steamOutput = (QdotNum * 3600) / energyNum;
-    outputValue.textContent = steamOutput.toFixed(4);
+    densityValue.textContent = density.toFixed(4);
 
     // ✅ Feedback messages
     let feedback = "";
-    if (steamOutput < 1000) {
-        feedback = "⚠️ Low Output (< 1,000 kg/h) – Boiler may be underloaded or inefficient.";
-    } else if (steamOutput < 10000) {
-        feedback = "✅ Moderate Output (1,000 – 10,000 kg/h) – Normal industrial range.";
-    } else if (steamOutput < 100000) {
-        feedback = "🔥 High Output (10,000 – 100,000 kg/h) – Large capacity boiler. Ensure strict monitoring.";
+    if (df === 1) {
+        feedback = "✅ Dry Steam: Completely dry steam.";
+    } else if (df >= 0.8) {
+        feedback = "⚠️ High-Quality Steam: Mostly dry steam with minor moisture.";
+    } else if (df >= 0.5) {
+        feedback = "❌ Wet Steam: Significant moisture content – not efficient.";
     } else {
-        feedback = "🚨 Very High Output (>100,000 kg/h) – Utility-scale boiler. Mandatory compliance with NFPA & ISO standards.";
+        feedback = "🔻 Very Wet Steam: High water content – risk of turbine/piping damage.";
     }
 
     if (warnings.length > 0) {
@@ -534,102 +533,101 @@
 </body>
 </html>
 {% endblock %}
+<!--
+*----------Input Validation Rules -------------------*
+Specific Volume (v<sub>g</sub>, m³/kg)
 
+Required: Must be entered.
 
-<!-- 
-1. Input Validation Rules (QEHS / Fire Safety Context)
-🔹 Boiler Rating (Q̇, kW)
+Range:
 
-Required (cannot be empty).
+Typical range in boilers: 0.1 – 1.7 m³/kg (at 1–100 bar).
 
-Minimum: > 0 kW (negative/zero is physically impossible).
+Upper bound for alerts: Max 5 m³/kg → beyond this indicates input/data error.
 
-Maximum realistic: ≤ 300,000 kW (≈ largest industrial utility boilers).
+Minimum threshold: > 0 (cannot be zero or negative → would imply infinite or undefined density).
 
-Decimals: Accept up to 1 decimal (kW ratings typically whole numbers, but small packaged boilers may use decimals).
+Decimals: Up to 4 decimals (as industrial steam tables are precise).
 
-Units: Must be kW, not MW or HP — clarify in label/tooltips.
+Units: Must be m³/kg only.
 
-🔹 Energy Required (kJ/kg)
+Dryness Fraction (χ)
 
-Required.
+Required: Must be entered.
 
-Minimum realistic range: 2000 kJ/kg (subcooled steam) – 3200 kJ/kg (superheated).
+Range:
 
-Reject unrealistic values: <2000 or >3500 → must warn user (entry error or wrong unit).
+0 < χ ≤ 1 (0 = fully water, 1 = dry steam).
 
-Decimals: Allow up to 1 decimal (thermodynamic tables usually quoted this way).
+Below 0.5 → “very wet steam”, unsafe for turbines.
 
-Logical consistency: Cannot be higher than known latent heat values under normal boiler operation.
-2. Output Validation & Thresholds
+Decimals: Accept 2–3 decimals for precision (e.g., 0.875).
+
+Logical Consistency: If χ = 0, density → ∞ (impossible). Must be rejected.
+
+Cross-check: If χ = 1 and specific volume > 2.5, warn: “Input does not match typical dry steam conditions.”
+
+*----------- 2. Output Validation Logic & Thresholds------------------*
 
 Formula:
 
-
-m = ((Q' * 3600) / (Energy_required))
-
-Where:
-
-𝑚
-˙
-m
-˙
- = steam output (kg/h)
-
-𝑄
-˙
-Q
-˙
+𝜌
+=
+1
+𝑣
+𝑔
+×
+𝜒
+ρ=
+v
+g
 	​
 
- = boiler rating (kW = kJ/s)
+×χ
+1
+	​
 
-𝐸
-𝑛
-𝑒
-𝑟
-𝑔
-𝑦
-_
-𝑟
-𝑒
-𝑞
-𝑢
-𝑖
-𝑟
-𝑒
-𝑑
-Energy_required = kJ/kg
 
-🔎 Validation:
+Output range:
 
-Steam output must be positive.
+Typical steam density in boilers: 0.3 – 10 kg/m³.
 
-Steam output must not exceed safe design capacity → if > 200,000 kg/h, trigger a warning.
+If ρ > 100 → unrealistic → alert: “Check input values; density outside expected range.”
 
-Ensure denominator ≠ 0 (division by zero risk).
+If ρ < 0.1 → too low → likely input error.
 
-🔎 Interpretation Bands:
+Feedback Interpretation:
 
-< 1,000 kg/h → Small boiler, lab/pilot unit, or underloaded → ⚠️ monitor for inefficiency.
+χ = 1 → “✅ Dry Steam”
 
-1,000 – 10,000 kg/h → Medium industrial boiler (normal safe range).
+0.8 ≤ χ < 1 → “⚠️ High-quality steam (minor moisture)”
 
-10,000 – 100,000 kg/h → Large industrial/utility → 🔥 high capacity, ensure safety controls.
+0.5 ≤ χ < 0.8 → “❌ Wet steam (not ideal for efficiency)”
 
-> 100,000 kg/h → Very large utility boilers → 🚨 additional risk controls, compliance audits mandatory.
+<0.5 → “🔻 Very wet steam (unsafe, risk to turbines).”
+*----Edge Case Validations-----------*
 
-3. Edge Case Validations
+Division by Zero: If χ = 0 or v<sub>g</sub> = 0, block calculation (density → ∞).
 
-Empty input → block calculation.
+Negative Inputs: Reject immediately (not possible physically).
 
-Non-numeric input → reject.
+Extreme Values:
 
-Qdot = 0 but energy > 0 → invalid (no steam generated).
+χ > 1 → impossible, reject.
 
-Energy = 0 → invalid (division by zero).
+v<sub>g</sub> > 5 → warning (likely wrong pressure input).
 
-Energy outside 2000–3500 kJ/kg → soft warning (possible input error or unit confusion).
-
-Steam output exceeding industry benchmarks → display a ⚠️ “review” message.
+Rounding: Keep 4 decimals for density (audits require high precision).
+*-----------------------------------------------------------------------------------------*
+            <div class="note-card formula-card">
+                <h3>📐 Formula</h3>
+                <p>The density of steam is calculated using:</p>
+                <code>ρ = 1 / (v<sub>g</sub> × χ)</code>
+                <p>Where:</p>
+                <ul class="note-list">
+                    <li><strong>ρ</strong> = Density of steam (kg/m³)</li>
+                    <li><strong>v<sub>g</sub></strong> = Specific volume of dry steam (m³/kg)</li>
+                    <li><strong>χ</strong> = Dryness fraction (0 to 1)</li>
+                </ul>
+            </div>
 -->
