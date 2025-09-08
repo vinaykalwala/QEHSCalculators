@@ -1,0 +1,670 @@
+{% extends 'base.html' %}
+{% block title %}Secondary Fluid Outlet Temperature At Any Load Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secondary Fluid Outlet Temperature At Any Load Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'qualitycategory_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Secondary Fluid Outlet Temperature At Any Load Calculator</h1>
+            <p>Calculates the secondary fluid outlet temperature (T2) based on steam temperature, inlet temperature, and temperature design constant</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator Input Card -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="Ts">Steam Temperature (T<sub>s</sub>, °C)</label>
+                    <input type="number" id="Ts" class="form-input" placeholder="Enter steam temperature">
+                </div>
+
+                <div class="form-group">
+                    <label for="T1">Secondary Fluid Inlet Temperature (T<sub>1</sub>, °C)</label>
+                    <input type="number" id="T1" class="form-input" placeholder="Enter inlet temperature">
+                </div>
+
+                <div class="form-group">
+                    <label for="TDC">Temperature Design Constant (TDC)</label>
+                    <input type="number" id="TDC" class="form-input" placeholder="Enter temperature constant">
+                </div>
+
+                <button class="calculate-btn" onclick="calculateTemperature()">Calculate T<sub>2</sub></button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Heat exchanger illustration">
+                    <p>This tool calculates the <strong>secondary fluid outlet temperature (T<sub>2</sub>)</strong> in a heat exchanger. Enter your parameters to see results.</p>
+                </div>
+
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Outlet Temperature</h2>
+                    </div>
+                    <div class="rate-value" id="T2Value">0.00</div>
+                    <div class="rate-label"><strong>°C</strong></div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">Heat Exchanger Performance</div>
+                        <div class="feedback-content" id="temperatureFeedback"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🔎 About This Calculator</h3>
+                <p>
+                    The <strong>Secondary Fluid Outlet Temperature Calculator</strong> determines the outlet temperature of a secondary fluid in a heat exchanger. This is crucial for optimizing heat transfer efficiency, ensuring proper system operation, and maintaining safety standards in industrial processes.
+                </p> 
+            </div>
+            
+            <div class="note-card">
+                <h3>📌 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Steam Temperature (T<sub>s</sub>):</strong> Required, must be > 0°C and > T<sub>1</sub></li>
+                    <li><strong>Inlet Temperature (T<sub>1</sub>):</strong> Required, must be > 0°C</li>
+                    <li><strong>Temperature Design Constant (TDC):</strong> Required, must be > 0</li>
+                    <li><strong>Realistic Values:</strong> TDC typically ranges from 1.2 to 2.5 for most heat exchangers</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ Explanation of Parameters</h3>
+                <ul class="note-list">
+                    <li><strong>Steam Temperature (T<sub>s</sub>):</strong> The temperature of the steam used as the heat source in °C.</li>
+                    <li><strong>Secondary Fluid Inlet Temperature (T<sub>1</sub>):</strong> The initial temperature of the secondary fluid before heat exchange in °C.</li>
+                    <li><strong>Temperature Design Constant (TDC):</strong> A constant that defines how efficiently heat is transferred in the heat exchanger.</li>
+                    <li><strong>Secondary Fluid Outlet Temperature (T<sub>2</sub>):</strong> The resulting temperature of the secondary fluid after heat transfer in °C.</li>
+                </ul>
+            </div>
+            
+
+            <div class="note-card">
+                <h3>📊 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Industrial Heat Exchangers:</strong> Optimize heat transfer efficiency in processing plants.</li>
+                    <li><strong>HVAC Systems:</strong> Ensure effective heating/cooling in air conditioning systems.</li>
+                    <li><strong>Chemical Processing:</strong> Control temperature for safe and efficient chemical reactions.</li>
+                    <li><strong>Power Plants:</strong> Monitor and optimize heat exchange in boiler systems.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Conclusion</h3>
+                <p>This calculator enables accurate assessment of heat exchanger performance by evaluating the outlet temperature of secondary fluids. It ensures optimal heat transfer efficiency, reduces energy waste, and maintains system reliability in industrial applications. Regular monitoring helps prevent overheating issues and ensures compliance with safety standards.</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+    function calculateTemperature() {
+    const Ts = document.getElementById("Ts").value.trim();
+    const T1 = document.getElementById("T1").value.trim();
+    const TDC = document.getElementById("TDC").value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const T2Value = document.getElementById('T2Value');
+    const feedbackBox = document.getElementById('temperatureFeedback'); 
+
+    // Reset UI
+    errorBox.classList.add("hidden");
+    errorMessage.innerHTML = "";
+    feedbackBox.innerHTML = "";
+
+    let errors = [];
+    let warnings = [];
+
+    // --- Validate Steam Temperature (Ts) ---
+    if (Ts === "" || isNaN(Ts)) {
+        errors.push("Steam Temperature (Tₛ) is required and must be numeric.");
+    } else {
+        const TsNum = parseFloat(Ts);
+        if (TsNum <= 0) {
+            errors.push("Steam Temperature (Tₛ) must be greater than 0 °C.");
+        } else if (TsNum < 100) {
+            warnings.push("⚠️ Steam < 100 °C: This is hot water, not steam.");
+        } else if (TsNum > 400) {
+            warnings.push("⚠️ Steam > 400 °C: Verify input, only for superheated boilers.");
+        }
+    }
+
+    // --- Validate Inlet Temperature (T1) ---
+    if (T1 === "" || isNaN(T1)) {
+        errors.push("Inlet Temperature (T₁) is required and must be numeric.");
+    } else {
+        const T1Num = parseFloat(T1);
+        if (T1Num <= 0) {
+            errors.push("Inlet Temperature (T₁) must be greater than 0 °C.");
+        } else if (T1Num > 200) {
+            warnings.push("⚠️ Inlet > 200 °C: Special fluid detected, check conditions.");
+        }
+    }
+
+    // --- Validate TDC ---
+    if (TDC === "" || isNaN(TDC)) {
+        errors.push("Temperature Design Constant (TDC) is required and must be numeric.");
+    } else {
+        const TDCNum = parseFloat(TDC);
+        if (TDCNum <= 0) {
+            errors.push("TDC must be greater than 0 (avoid division by zero).");
+        } else if (TDCNum < 1.2) {
+            warnings.push("⚠️ TDC < 1.2: Possible efficiency issues.");
+        } else if (TDCNum > 2.5 && TDCNum <= 5) {
+            warnings.push("⚠️ TDC > 2.5: High-efficiency design, verify equipment specs.");
+        } else if (TDCNum > 5) {
+            errors.push("Unrealistic TDC (>5). Check input.");
+        }
+    }
+
+    // --- Cross-field checks ---
+    if (Ts && T1) {
+        const TsNum = parseFloat(Ts);
+        const T1Num = parseFloat(T1);
+        if (TsNum <= T1Num) {
+            errors.push("Steam Temp (Tₛ) must be higher than Inlet Temp (T₁) for heat transfer.");
+        }
+    }
+
+    // ❌ Show errors if any
+    if (errors.length > 0) {
+        errorMessage.innerHTML = "<strong>Validation Errors:</strong><br>" + errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    // ✅ Parse numbers
+    const TsNum = parseFloat(Ts);
+    const T1Num = parseFloat(T1);
+    const TDCNum = parseFloat(TDC);
+
+    // ✅ Calculate T2
+    const T2 = TsNum - ((TsNum - T1Num) / TDCNum);
+
+    // --- Output sanity check ---
+    if (T2 < T1Num || T2 > TsNum) {
+        errorMessage.innerHTML = "❌ Calculated outlet temperature (T₂) is outside physical limits. Recheck inputs.";
+        errorBox.classList.remove("hidden");
+        return;
+    }
+
+    // ✅ Show result
+    T2Value.textContent = T2.toFixed(2);
+
+    // ✅ Efficiency Analysis
+    const tempDifference = T2 - T1Num;
+    const efficiency = (tempDifference / (TsNum - T1Num)) * 100;
+    let feedbackMessage = "";
+    let complianceLevel = "";
+
+    if (efficiency >= 85) {
+        feedbackMessage = "✅ Excellent: Efficiency > 85%.";
+        complianceLevel = "optimal";
+    } else if (efficiency >= 70) {
+        feedbackMessage = "⚠️ Acceptable: Efficiency 70–85%.";
+        complianceLevel = "acceptable";
+    } else if (efficiency >= 50) {
+        feedbackMessage = "🔶 Moderate: Efficiency 50–70%. Consider maintenance.";
+        complianceLevel = "moderate";
+    } else {
+        feedbackMessage = "❌ Poor: Efficiency < 50%. Immediate inspection required.";
+        complianceLevel = "non-compliant";
+    }
+
+    feedbackMessage += `<br><br>Heat Transfer Efficiency: <strong>${efficiency.toFixed(1)}%</strong>`;
+    feedbackMessage += `<br>Temperature Rise: <strong>${tempDifference.toFixed(1)} °C</strong>`;
+
+    if (warnings.length > 0) {
+        feedbackMessage += "<br><br><strong>Notes:</strong><br>" + warnings.join("<br>");
+    }
+
+    feedbackBox.innerHTML = feedbackMessage;
+    placeholder.classList.add("hidden");
+    resultValue.classList.remove("hidden");
+}
+
+    </script>
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+*-------------Input Analysis & Real-World QEHS Perspective-----------*
+Steam Temperature (Tₛ)
+
+Represents the heat source temperature in heat exchangers
+
+Typical range: 100°C to 400°C for most industrial applications
+
+Extremely high temperatures (>400°C) require special safety considerations
+
+Units: °C (consistent throughout calculation)
+
+Secondary Fluid Inlet Temperature (T₁)
+
+Initial temperature of fluid being heated
+
+Must be lower than steam temperature for heat transfer to occur
+
+Typical range: 5°C to 200°C depending on application
+
+Units: °C
+
+Temperature Design Constant (TDC)
+
+Represents heat exchanger efficiency
+
+Normal range: 1.2 to 2.5 for properly functioning heat exchangers
+
+Values <1.2 indicate efficiency problems; >2.5 suggests exceptional performance
+
+Dimensionless value
+
+*----------- Comprehensive Validation Rules (Industry Standards)---------------*
+Input	Range	Allowed Decimals	Notes
+Tₛ	5°C < Tₛ ≤ 450°C	1	Minimum 5°C to prevent freezing issues; maximum based on high-pressure steam systems
+T₁	5°C < T₁ ≤ 250°C	1	Must be >0°C; upper limit for most industrial applications
+TDC	0.5 ≤ TDC ≤ 5.0	2	Values outside 1.2-2.5 range require investigation
+Cross-field dependencies:
+
+Tₛ must be greater than T₁ (minimum 10°C difference)
+
+T₂ cannot exceed Tₛ (physically impossible)
+
+T₂ must be greater than T₁ (heat must be transferred)
+
+*-------- Edge Case Validations------------*
+TDC = 0 → Division by zero → ❌ Invalid
+
+Tₛ = T₁ → No temperature difference → No heat transfer → ❌ Invalid
+
+Extreme TDC values (<0.5 or >5.0) → Likely input error → ⚠️ Warning
+
+Negative temperatures → Only valid for special applications → ⚠️ Warning
+
+T₂ approaching fluid boiling point → ⚠️ Safety warning required
+
+*---------------. Output Validation & Thresholds----------------*
+The formula calculates:
+
+T₂ = Tₛ - ((Tₛ - T₁) / TDC)
+
+Heat transfer efficiency = ((T₂ - T₁) / (Tₛ - T₁)) × 100%
+
+Interpretation thresholds (for safety audits):
+
+Efficiency	Interpretation	QEHS Action
+≥85%	Excellent	System optimal; document performance
+70-85%	Acceptable	Monitor for changes; routine maintenance
+50-70%	Moderate	Schedule inspection; possible fouling
+30-50%	Poor	Immediate inspection required
+<30%	Critical	Shutdown required; safety risk
+
+*-----------------------------------------------------------------------------*
+            <div class="note-card formula-card">
+                <h3>📐 Formula</h3>
+                <p>The outlet temperature is calculated using:</p>
+                <code>T<sub>2</sub> = T<sub>s</sub> - ((T<sub>s</sub> - T<sub>1</sub>) / TDC)</code>
+                <p>Where:</p>
+                <ul class="note-list">
+                    <li><strong>T<sub>2</sub></strong> = Secondary fluid outlet temperature (°C)</li>
+                    <li><strong>T<sub>s</sub></strong> = Steam temperature (°C)</li>
+                    <li><strong>T<sub>1</sub></strong> = Secondary fluid inlet temperature (°C)</li>
+                    <li><strong>TDC</strong> = Temperature Design Constant</li>
+                </ul>
+            </div>
+-->

@@ -1,0 +1,720 @@
+{% extends 'base.html' %}
+{% block title %}Rolled Throughput Yield (RTY) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rolled Throughput Yield (RTY) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+        
+        /* Additional styles for RTY calculator */
+        .add-step-btn {
+            background: #28a745;
+            margin-bottom: 15px;
+        }
+        
+        .add-step-btn:hover {
+            background: #218838;
+        }
+        
+        .small-remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        
+        .small-remove-btn:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'qualitycategory_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Rolled Throughput Yield (RTY) Calculator</h1>
+            <p>Calculates the overall probability that a product will pass through all process steps without defects</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator Input Card -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div id="yieldInputs">
+                    <div class="form-group">
+                        <label for="yield1">Yield of Step 1 (%):</label>
+                        <input type="number" id="yield1" class="form-input yield-input" placeholder="Enter yield for Step 1" step="0.01" min="0" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="yield2">Yield of Step 2 (%):</label>
+                        <input type="number" id="yield2" class="form-input yield-input" placeholder="Enter yield for Step 2" step="0.01" min="0" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="yield3">Yield of Step 3 (%):</label>
+                        <input type="number" id="yield3" class="form-input yield-input" placeholder="Enter yield for Step 3" step="0.01" min="0" max="100">
+                    </div>
+                </div>
+
+                <button class="calculate-btn add-step-btn" onclick="addStep()">➕ Add Step</button>
+                <button class="calculate-btn" onclick="calculateRTY()">Calculate RTY</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Quality illustration">
+                    <p>This tool calculates the <strong>Rolled Throughput Yield (RTY)</strong>. Enter yields for each process step to see results.</p>
+                </div>
+
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Rolled Throughput Yield</h2>
+                    </div>
+                    <div class="rate-value" id="rtyValue">0.00</div>
+                    <div class="rate-label"><strong>%</strong></div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">RTY Interpretation</div>
+                        <div class="feedback-content" id="rtyFeedback"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🔎 About This Calculator</h3>
+                <p>
+                    The <strong>Rolled Throughput Yield (RTY) Calculator</strong> measures the probability that a product will pass through all process steps without defects. It is calculated by multiplying the yield of each individual step. This helps identify process inefficiencies and quality issues.
+                </p> 
+            </div>
+            
+            <div class="note-card">
+                <h3>📌 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Yield Values:</strong> Required, must be numbers between 0 and 100</li>
+                    <li><strong>Minimum Value:</strong> 0% (no units pass)</li>
+                    <li><strong>Maximum Value:</strong> 100% (all units pass)</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ Explanation of Parameters</h3>
+                <ul class="note-list">
+                    <li><strong>Yield of Each Step:</strong> Represents the percentage of units that pass through a specific process step without defects.</li>
+                    <li><strong>Rolled Throughput Yield (RTY):</strong> The overall probability that a unit will pass through all process steps without a single defect.</li>
+                </ul>
+            </div>
+      
+            <div class="note-card">
+                <h3>📊 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Manufacturing Processes:</strong> Identify which steps contribute most to defects.</li>
+                    <li><strong>Quality Improvement:</strong> Focus improvement efforts on steps with the lowest yield.</li>
+                    <li><strong>Process Monitoring:</strong> Track quality performance over time.</li>
+                    <li><strong>Decision Making:</strong> Data-driven insights for process optimization.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Conclusion</h3>
+                <p>RTY is a crucial metric in quality management that provides insight into the overall efficiency of a multi-step process. By calculating RTY, organizations can identify problem areas, prioritize improvement efforts, and ultimately enhance product quality and customer satisfaction.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Expose functions globally so inline onclick attributes still work
+            window.addStep = function () {
+                const yieldInputs = document.getElementById("yieldInputs");
+                const errorBox = document.getElementById('resultError');
+                const errorMessage = document.getElementById('errorMessage');
+                const resultValue = document.getElementById('resultValue');
+
+                if (!yieldInputs) {
+                    console.error("Element #yieldInputs not found in DOM.");
+                    if (errorBox) {
+                        errorMessage.innerText = "Internal error: inputs container not found.";
+                        errorBox.classList.remove('hidden');
+                    }
+                    return;
+                }
+
+                const currentCount = yieldInputs.querySelectorAll('.yield-input').length;
+                const MAX_STEPS = 20;
+                if (currentCount >= MAX_STEPS) {
+                    if (errorBox) {
+                        errorMessage.innerHTML = `👉 Too many steps (max ${MAX_STEPS}). Remove some steps to add new ones.`;
+                        errorBox.classList.remove('hidden');
+                    } else {
+                        alert(`Too many steps (max ${MAX_STEPS}).`);
+                    }
+                    return;
+                }
+
+                const stepNumber = currentCount + 1;
+
+                // Build elements
+                const wrapper = document.createElement('div');
+                wrapper.className = 'form-group';
+
+                const label = document.createElement('label');
+                label.setAttribute('for', `yield${stepNumber}`);
+                label.textContent = `Yield of Step ${stepNumber} (%):`;
+
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.id = `yield${stepNumber}`;
+                input.className = 'form-input yield-input';
+                input.placeholder = `Enter yield for Step ${stepNumber}`;
+                input.setAttribute('step', '0.01');
+                input.setAttribute('min', '0');
+                input.setAttribute('max', '100');
+                input.setAttribute('aria-label', `Yield of Step ${stepNumber}`);
+
+                // Optional: add a remove button for convenience
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'small-remove-btn';
+                removeBtn.textContent = 'Remove';
+                removeBtn.style.marginLeft = '8px';
+                removeBtn.onclick = function () {
+                    wrapper.remove();
+                    // hide result because inputs changed
+                    if (resultValue) resultValue.classList.add('hidden');
+                    if (errorBox) errorBox.classList.add('hidden');
+                    // renumber labels/ids (light touch)
+                    renumberYieldFields();
+                };
+
+                wrapper.appendChild(label);
+                wrapper.appendChild(input);
+                wrapper.appendChild(removeBtn);
+
+                yieldInputs.appendChild(wrapper);
+
+                // Focus and scroll to the new input
+                input.focus();
+                input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                // Hide previous results/errors when new input added
+                if (errorBox) errorBox.classList.add('hidden');
+                if (resultValue) resultValue.classList.add('hidden');
+            };
+
+            // Helper: renumber labels and ids after remove so numbering stays logical
+            function renumberYieldFields() {
+                const yieldInputs = document.getElementById("yieldInputs");
+                if (!yieldInputs) return;
+                const groups = Array.from(yieldInputs.querySelectorAll('.form-group'));
+                groups.forEach((g, idx) => {
+                    const label = g.querySelector('label');
+                    const input = g.querySelector('input.yield-input');
+                    const stepNo = idx + 1;
+                    if (label) label.setAttribute('for', `yield${stepNo}`);
+                    if (label) label.textContent = `Yield of Step ${stepNo} (%):`;
+                    if (input) {
+                        input.id = `yield${stepNo}`;
+                        input.setAttribute('aria-label', `Yield of Step ${stepNo}`);
+                        input.placeholder = `Enter yield for Step ${stepNo}`;
+                    }
+                });
+            }
+
+            window.calculateRTY = function () {
+                const yields = document.querySelectorAll(".yield-input");
+                const errorBox = document.getElementById('resultError');
+                const errorMessage = document.getElementById('errorMessage');
+                const placeholder = document.getElementById('placeholder');
+                const resultValue = document.getElementById('resultValue');
+                const rtyValueElement = document.getElementById('rtyValue');
+                const feedbackBox = document.getElementById('rtyFeedback');
+
+                let errors = [];
+                let rty = 1;
+
+                if (!yields || yields.length === 0) {
+                    errors.push("👉 At least one process step is required.");
+                }
+                if (yields.length > 20) {
+                    errors.push("👉 Too many steps entered. Limit to 20 steps for practical use.");
+                }
+
+                for (let i = 0; i < yields.length; i++) {
+                    const raw = yields[i].value.trim();
+
+                    if (raw === "") {
+                        errors.push(`👉 Please enter yield for Step ${i + 1}.`);
+                        continue;
+                    }
+
+                    const numValue = parseFloat(raw);
+                    if (isNaN(numValue) || !isFinite(numValue)) {
+                        errors.push(`👉 Yield for Step ${i + 1} must be a valid number.`);
+                        continue;
+                    }
+
+                    // Decimal places check (max 2)
+                    const fractional = (raw.indexOf('.') >= 0) ? raw.split('.')[1] : '';
+                    if (fractional && fractional.length > 2) {
+                        errors.push(`👉 Yield for Step ${i + 1} may have a maximum of 2 decimal places.`);
+                        continue;
+                    }
+
+                    if (numValue < 0 || numValue > 100) {
+                        errors.push(`👉 Yield for Step ${i + 1} must be between 0 and 100.`);
+                        continue;
+                    }
+
+                    // realistic input check (flagging extreme low yields optionally)
+                    if (numValue > 0 && numValue < 0.01) {
+                        errors.push(`👉 Yield for Step ${i + 1} seems unrealistically low (<0.01%). Please confirm.`);
+                        continue;
+                    }
+
+                    // Multiply into RTY (use decimals)
+                    rty *= (numValue / 100);
+                }
+
+                // Show errors if any
+                if (errors.length > 0) {
+                    if (errorMessage) errorMessage.innerHTML = errors.join("<br>");
+                    if (errorBox) errorBox.classList.remove("hidden");
+                    if (placeholder) placeholder.classList.add("hidden");
+                    if (resultValue) resultValue.classList.add("hidden");
+                    return;
+                } else {
+                    if (errorBox) errorBox.classList.add("hidden");
+                }
+
+                // Calculate and display result
+                let rtyPercent = (rty * 100);
+                if (!isFinite(rtyPercent) || isNaN(rtyPercent)) {
+                    if (errorMessage) errorMessage.innerHTML = "👉 Invalid calculation. Please check inputs.";
+                    if (errorBox) errorBox.classList.remove('hidden');
+                    if (resultValue) resultValue.classList.add('hidden');
+                    return;
+                }
+
+                // Display with 2 decimal places (audit-friendly)
+                const displayRTY = parseFloat(rtyPercent.toFixed(2));
+                rtyValueElement.textContent = displayRTY.toFixed(2);
+
+                // Feedback thresholds
+                let feedback = "";
+                if (displayRTY < 70) {
+                    feedback = "❌ <strong>Poor:</strong> Major quality issues. Immediate corrective action required.";
+                } else if (displayRTY >= 70 && displayRTY < 85) {
+                    feedback = "⚠️ <strong>Average:</strong> Needs process improvement.";
+                } else if (displayRTY >= 85 && displayRTY < 95) {
+                    feedback = "🔷 <strong>Good:</strong> High quality, minor improvements possible.";
+                } else if (displayRTY >= 95) {
+                    feedback = "✅ <strong>Excellent:</strong> World-class quality standard.";
+                }
+
+                if (feedbackBox) feedbackBox.innerHTML = feedback;
+                if (placeholder) placeholder.classList.add('hidden');
+                if (resultValue) resultValue.classList.remove('hidden');
+            };
+
+            window.printReport = function () {
+                window.print();
+            };
+        });
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+*----------------General Rules--------------------*
+
+Mandatory Fields: Every yield must be entered. Empty inputs are not allowed.
+
+Data Type: Numbers only. No letters, special characters, or blank spaces.
+
+Units: Percent (%) only, since yield is always reported in percentages.
+
+Range Rules
+
+Min: 0% → means no unit passes.
+
+Max: 100% → perfect yield, all units pass.
+
+Practical Thresholds: In real-world safety/quality audits, values below 50% are red flags. These need warning feedback.
+
+Decimal Rules
+
+Allow up to 2 decimal places (step = 0.01), because excessive precision (e.g., 92.123456789%) is misleading and not used in compliance reporting.
+
+Round RTY to 2–6 decimals in calculations, but only display up to 2 decimals in reports for clarity.
+
+Cross-Field / Logical Rules
+
+Must have at least 1 step.
+
+More than 20 steps → warn user (too many yields make RTY nearly zero, unrealistic in audits).
+
+If all steps are 100%, RTY must be 100%.
+
+If any step is 0%, RTY must be 0%.
+
+*------------- 2. Output Validation & Thresholds (Real-World Interpretation)---------------*
+
+From ISO 9001 / Six Sigma quality benchmarks:
+
+< 70% RTY → ❌ Poor (Unacceptable, urgent action required)
+
+70–85% RTY → ⚠️ Average (Needs improvement, process is unstable)
+
+85–95% RTY → 🔷 Good (Acceptable, but continuous improvement required)
+
+≥ 95% RTY → ✅ Excellent (World-class standard, sustainable quality)
+
+👉 These thresholds align with how KPI dashboards and audit reports are graded in QEHS and fire safety systems.
+
+-->
