@@ -1,0 +1,671 @@
+{% extends 'base.html' %}
+{% block title %}Fire Flow calcualtor{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accident Rate Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input{
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+        @media (max-width: 768px) {
+    .rate-value {
+        font-size: 28px; /* smaller font for tablets/mobiles */
+    }
+}
+
+@media (max-width: 480px) {
+    .rate-value {
+        font-size: 24px; /* even smaller for phones */
+    }
+}
+select {
+    width: 100%;
+    padding: 15px;
+    margin-top: 5px;
+    border: 1px solid #d3e0f0;
+    border-radius: 5px;
+    font-size: 1rem;
+
+}
+    </style>
+</head>
+<body>
+   <div class="btn-container">
+    <a href="{% url 'firecategory_calculators' %}" class="back-btn">Back To Fire Calculators</a>
+</div>
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+    <div class="calculator-header">
+        <h1>Fire Flow Calculator</h1>
+        <p>Estimate the amount of water required to control a fire in a building based on construction, occupancy, exposure, and sprinkler protection.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Input Card -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+
+            <div class="form-group">
+                <label for="floorArea">Total Floor Area (ft²)</label>
+                <input type="number" id="floorArea" class="form-input" placeholder="Enter total floor area">
+            </div>
+
+            <div class="form-group">
+                <label for="buildingType">Building Type</label>
+                <select id="buildingType" onchange="toggleCustomInput('buildingType', 'customBuildingType')">
+                    <option value="0.6">Noncombustible (Fire-Resistive) (0.6)</option>
+                    <option value="0.8">Ordinary Construction (0.8)</option>
+                    <option value="1.0">Wood Frame (1.0)</option>
+                    <option value="custom">Enter Custom Value</option>
+                </select>
+                <input type="number" id="customBuildingType" class="form-input" placeholder="Enter custom value" style="display:none;">
+            </div>
+
+            <div class="form-group">
+                <label for="sprinkler">Fire Sprinkler System</label>
+                <select id="sprinkler" onchange="toggleCustomInput('sprinkler', 'customSprinkler')">
+                    <option value="0.5">Fully Sprinklered (0.5)</option>
+                    <option value="1">Not Sprinklered (1.0)</option>
+                    <option value="custom">Enter Custom Value</option>
+                </select>
+                <input type="number" id="customSprinkler" class="form-input" placeholder="Enter custom value" style="display:none;">
+            </div>
+
+            <div class="form-group">
+                <label for="occupancyReduction">Occupancy Reduction (OR)</label>
+                <select id="occupancyReduction" onchange="toggleCustomInput('occupancyReduction', 'customOccupancyReduction')">
+                    <option value="0.9">Office Building (0.9)</option>
+                    <option value="0.85">Industrial/Warehouse (0.85)</option>
+                    <option value="1.0">High-Hazard Facility (1.0)</option>
+                    <option value="custom">Enter Custom Value</option>
+                </select>
+                <input type="number" id="customOccupancyReduction" class="form-input" placeholder="Enter custom value" style="display:none;">
+            </div>
+
+            <div class="form-group">
+                <label for="exposureDistance">Exposure Distance (ED)</label>
+                <select id="exposureDistance" onchange="toggleCustomInput('exposureDistance', 'customExposureDistance')">
+                    <option value="1.0">No Nearby Buildings (1.0)</option>
+                    <option value="1.15">One Building Nearby (1.15)</option>
+                    <option value="1.3">Two Buildings Nearby (1.3)</option>
+                    <option value="custom">Enter Custom Value</option>
+                </select>
+                <input type="number" id="customExposureDistance" class="form-input" placeholder="Enter custom value" style="display:none;">
+            </div>
+
+            <button class="calculate-btn" onclick="calculateFireFlow()">Calculate Fire Flow</button>
+        </div>
+
+        <!-- Result Card -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="{% static 'images/fireflow.jpeg' %}" alt="Fire Flow Illustration">
+                <p>This tool will calculate the <strong>Required Fire Flow</strong>. Enter your building data to see results here.</p>
+            </div>
+
+            <div class="result-error hidden" id="resultError" style="font-size: 28px;"></div>
+
+            <div class="result-value hidden" id="resultValue">
+                <div class="rate-value">Fire Flow Rate</div>
+
+                <div class="rate-value" id="fireFlowValue">0.00</div>
+                <div class="rate-label" style="font-size:16px; font-weight:bold;">GPM</div>
+                <div class="result-feedback" id="feedbackContent"></div>
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="note-section">
+
+        <div class="note-card">
+            <h3>📘 About This Calculator</h3>
+            <p>
+                The <strong>Fire Flow Calculator</strong> estimates the water required to control a fire in a building using the 
+                <strong>Fairfax County Method (Modified ISO Method)</strong>. It considers construction type, floor area, occupancy, exposure distance, and sprinkler protection.
+            </p>
+        </div>
+
+       <div class="note-card">
+    <h3>⚙️ Fire Flow Parameters Explained</h3>
+    <ul class="note-list">
+        <li>
+            <strong>Total Floor Area (A):</strong> Total built-up area of the building (ft²), excluding basements.
+            <ul>
+                <li>Larger area → more combustible materials → higher fire flow required.</li>
+                <li>Fire flow increases with the square root of the area.</li>
+                <li>Example: Small office (2,000 ft²) vs. Industrial warehouse (50,000 ft²).</li>
+            </ul>
+        </li>
+        <li>
+            <strong>Building Type (C):</strong> Fire resistance factor of construction materials.
+            <ul>
+                <li>0.6 Noncombustible – steel, reinforced concrete; lower fire flow.</li>
+                <li>0.8 Ordinary Construction – brick/wood mix; moderate fire flow.</li>
+                <li>1.0 Wood Frame – mostly wood; maximum fire flow.</li>
+                <li>Custom values can be entered for unique structures.</li>
+            </ul>
+        </li>
+        <li>
+            <strong>Fire Sprinkler System (S):</strong> Reduces required fire flow depending on system effectiveness.
+            <ul>
+                <li>0.5 Fully Sprinklered – early suppression reduces water needs by 50%.</li>
+                <li>1.0 No Sprinklers – full fire flow required.</li>
+                <li>Custom values allowed for partial or special systems.</li>
+            </ul>
+        </li>
+        <li>
+            <strong>Occupancy Reduction (OR):</strong> Reflects occupancy type and fire risk.
+            <ul>
+                <li>0.9 Office Building – lower fire risk, reduces flow.</li>
+                <li>0.85 Industrial/Warehouse – moderate risk.</li>
+                <li>1.0 High-Hazard Facility – no reduction.</li>
+                <li>Custom values allowed for unique occupancy.</li>
+            </ul>
+        </li>
+        <li>
+            <strong>Exposure Distance (ED):</strong> Accounts for nearby structures increasing fire spread.
+            <ul>
+                <li>1.0 No Nearby Buildings – standard risk.</li>
+                <li>1.15 One Nearby Building – 15% increase in fire flow.</li>
+                <li>1.3 Two Nearby Buildings – 30% increase.</li>
+                <li>Custom values allowed based on actual proximity.</li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+
+        
+
+       <div class="note-card">
+    <h3>🛡️ Input Validations (QEHS Compliant)</h3>
+    <ul class="note-list">
+        <li><strong>Mandatory Fields:</strong> All inputs must be filled; missing data may lead to inaccurate fire flow calculations.</li>
+        <li><strong>Numeric Values Only:</strong> Letters, symbols, or empty fields are invalid; ensures proper mathematical computations.</li>
+        <li><strong>Positive Numbers:</strong> Zero or negative values are rejected; fire flow cannot be negative or zero.</li>
+        <li><strong>Total Floor Area (A):</strong> 500 – 100,000 ft²; prevents unrealistic building sizes in calculations.</li>
+        <li><strong>Building Type Factor (C):</strong> 0.5 – 1.2; reflects fire-resistance rating of construction materials (Noncombustible → Wood Frame).</li>
+        <li><strong>Fire Sprinkler System Factor (S):</strong> 0.3 – 1.0; lower values reflect effective suppression systems.</li>
+        <li><strong>Occupancy Reduction Factor (OR):</strong> 0.7 – 1.0; considers fire risk based on building occupancy type.</li>
+        <li><strong>Exposure Distance Factor (ED):</strong> 1.0 – 1.5; accounts for risk from nearby structures affecting fire spread.</li>
+        <li><strong>Custom Values:</strong> Must adhere to the above ranges and be positive; ensures consistency and regulatory compliance.</li>
+        <li><strong>Decimal Precision:</strong> Maximum 2 decimal places; maintains clarity and audit-ready calculations.</li>
+        <li><strong>Edge Case Handling:</strong> Extremely high, zero, or negative inputs trigger warnings and prevent calculation; avoids nonsensical results.</li>
+        <li><strong>Logical Consistency:</strong> Cross-field checks ensure combinations make sense (e.g., a small floor area with a high hazard factor prompts a review).</li>
+    </ul>
+</div>
+
+
+        <div class="note-card">
+            <h3>Why Fire Flow is Important?</h3>
+            <ul>
+                <li>Ensures sufficient water to control fire.</li>
+                <li>Protects structure and contents.</li>
+                <li>Compliance with safety codes.</li>
+                <li>Aids emergency planning for fire departments.</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <p>Enter your building details and click <strong>"Calculate Fire Flow"</strong> to estimate the water supply needed for fire control.</p>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function calculateFireFlow() {
+    const floorAreaInput = document.getElementById('floorArea').value.trim();
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const fireFlowValue = document.getElementById('fireFlowValue');
+    const resultError = document.getElementById('resultError');
+    const feedbackContent = document.getElementById('feedbackContent');
+
+    // Reset
+    resultError.classList.add('hidden');
+    resultValue.classList.add('hidden');
+    placeholder.classList.add('hidden');
+    resultError.innerHTML = "";
+    feedbackContent.innerHTML = "";
+
+    // Validate floor area
+    const floorArea = parseFloat(floorAreaInput);
+    if (isNaN(floorArea) || floorArea < 500 || floorArea > 100000) {
+        resultError.innerHTML = "❌ Floor area must be between 500 and 100,000 ft².";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    // Collect values (custom or selection)
+    const buildingType = getValidatedInput('buildingType', 'customBuildingType', 0.5, 1.2, 'Building Type');
+    const sprinkler = getValidatedInput('sprinkler', 'customSprinkler', 0.3, 1.0, 'Sprinkler System');
+    const occupancyReduction = getValidatedInput('occupancyReduction', 'customOccupancyReduction', 0.7, 1.0, 'Occupancy Reduction');
+    const exposureDistance = getValidatedInput('exposureDistance', 'customExposureDistance', 1.0, 1.5, 'Exposure Distance');
+
+    if ([buildingType, sprinkler, occupancyReduction, exposureDistance].includes(null)) return; // Validation failed
+
+    // Raw fire flow
+    let fireFlow = 18 * buildingType * Math.sqrt(floorArea) * exposureDistance;
+
+    // Apply max/min limits
+    fireFlow = Math.min(Math.max(fireFlow * occupancyReduction * sprinkler, 500), 6000);
+
+    // Display
+    fireFlowValue.innerText = fireFlow.toFixed(2);
+    resultValue.classList.remove('hidden');
+
+    // Feedback
+    if (fireFlow < 1000) {
+        feedbackContent.innerHTML = "✅ Low Fire Flow: Adequate for smaller structures.";
+        feedbackContent.style.color = "green";
+    } else if (fireFlow <= 3000) {
+        feedbackContent.innerHTML = "⚠️ Moderate Fire Flow: Standard commercial/industrial structures.";
+        feedbackContent.style.color = "orange";
+    } else {
+        feedbackContent.innerHTML = "🚨 High Fire Flow: Large or high-hazard building; ensure hydrant capacity.";
+        feedbackContent.style.color = "red";
+    }
+}
+
+// Helper function for validation
+function getValidatedInput(selectId, customId, min, max, name) {
+    const selectVal = document.getElementById(selectId).value;
+    const value = (selectVal === "custom") ? parseFloat(document.getElementById(customId).value) : parseFloat(selectVal);
+
+    if (isNaN(value) || value < min || value > max) {
+        const resultError = document.getElementById('resultError');
+        resultError.innerHTML = `❌ ${name} must be between ${min} and ${max}.`;
+        resultError.classList.remove('hidden');
+        return null;
+    }
+    return value;
+}
+
+
+function printReport() {
+    window.print();
+}
+</script>
+
+<script>
+function toggleCustomInput(selectId, customId) {
+    const selectElem = document.getElementById(selectId);
+    const customInput = document.getElementById(customId);
+
+    if (selectElem.value === "custom") {
+        customInput.style.display = "block";
+        customInput.focus();
+    } else {
+        customInput.style.display = "none";
+        customInput.value = ""; // Clear any previous custom input
+    }
+}
+</script>
+
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+<!-- 1️⃣ Detailed Input Validation Rules (Industry-Oriented)
+Input Field	Units	Acceptable Range	Decimals	Cross-Field / Logical Checks	Compliance Rationale
+Total Floor Area (A)	ft²	500 – 100,000	0–2 decimal places	Must be > 0; realistic for building type	Ensures fire flow is calculated for realistic structures; too small or huge areas could produce misleading flow rates.
+Building Type (C)	Factor	0.5 – 1.2	0–2 decimal places	Must be consistent with occupancy	Represents fire resistance; avoids underestimating required fire flow.
+Fire Sprinkler System (S)	Factor	0.3 – 1.0	0–2 decimal places	Cannot be > 1 (no enhancement >100%)	Represents reduction of fire flow; ensures suppression system logic aligns with NFPA codes.
+Occupancy Reduction (OR)	Factor	0.7 – 1.0	0–2 decimal places	High-risk occupancy (OR=1.0) cannot have sprinkler reduction <0.5	Ensures high-hazard buildings are not underestimated.
+Exposure Distance (ED)	Factor	1.0 – 1.5	0–2 decimal places	Cannot decrease below 1.0; must increase if nearby building exists	Prevents underestimation due to neighboring structures; aligns with ISO / Fairfax County method.
+
+Notes:
+
+Decimal precision should be limited to 2 decimals; more precision is meaningless in fire flow calculations.
+
+Custom values must be validated to fall within safe ranges.
+
+Logical consistency is crucial: e.g., a “High-Hazard” building cannot have OR < 1.0 if sprinkler factor is > 1.0.
+
+2️⃣ Output Validation Logic
+
+Raw Fire Flow (before reductions):
+fireFlowRaw = 18 × C × √A × ED
+Must be ≥ 500 GPM (minimum operational threshold) and ≤ 6000 GPM (max hydrant capacity per NFPA 13 guidelines).
+
+After applying reductions (OR × S):
+
+Fire Flow cannot fall below 500 GPM for safety.
+
+Fire Flow cannot exceed 6000 GPM; if calculated > 6000, it should be capped.
+
+Feedback thresholds:
+
+<1000 GPM: Low fire flow → suitable for small offices or low-risk areas.
+
+1000–3000 GPM: Moderate → typical commercial/industrial structures.
+
+>3000 GPM: High → large or high-risk structures; hydrant capacity must be checked. -->

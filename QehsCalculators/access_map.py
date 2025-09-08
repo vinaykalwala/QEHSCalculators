@@ -93,6 +93,29 @@ CALCULATORS = [
 
 
 {"name": "Percentage Error when using velocity Calculator", "url_name": "quality_percentage_error_when_using_velocity_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Relation Between Indicated and Actual Flowrate Calculator", "url_name": "quality_relation_between_indicate_and_actual_flowrate_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Rolled Throughput Yield (RTY) Calculator", "url_name": "quality_rolled_throughput_yield_rty_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Steam Consumption of Drying Cylinders Calculator", "url_name": "quality_steam_consumption_of_drying_cylinders_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Steam Velocity through an Orifice Calculator", "url_name": "quality_steam_velocity_through_an_orifice_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Steam Density Calculator (Using Dryness Fraction)", "url_name": "quality_steam_density_usin_b44_b38_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Statistical Process Control (SPC) Chart Calculator", "url_name": "quality_statistical_process_control_spc_chart_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Secondary Fluid Outlet Temperature At Any Load Calculator", "url_name": "quality_secondary_fluid_outlet_temperature_at_any_load_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+
+{"name": "Standard Minute Value (SMV) Calculator", "url_name": "quality_standard_minute_value_smv_calculator", "plan_type": "corporate", "category": "quality"},
 
 
 
@@ -251,6 +274,35 @@ CALCULATORS = [
 
 
 {"name": "Gas Flux Calculator", "url_name": "environment_gas_flux_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Gas Phase Analyte Concentration Calculator", "url_name": "environment_gas_phase_analyte_concentration_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Gas Buoyancy Calculator", "url_name": "environment_gas_buoyancy_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Heat Transfer Thermo Flow Calculator", "url_name": "environment_heat_transfer_thermo_flow_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Heat Transfer Rate Calculator (Condensing Steam)", "url_name": "environment_heat_transfer_rate_condensing_steam_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Heat Transfer Thermo resistance Calculator", "url_name": "environment_heat_transfer_thermo_resistance_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Heat Exchanger Temperature Design Constant Calculator", "url_name": "environment_heat_exchanger_temperature_design_constant_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Half-Life Decay Calculator", "url_name": "environment_half_life_decay_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Hazen-Williams Hydraulic Flow Velocity Calculator", "url_name": "environment_hazen_williams_hydraulic_flow_velocity_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Hardy Cross Flow Correction Calculator (Δd)", "url_name": "environment_hardy_cross_flow_correction_δd_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Hardy Cross Head Loss Calculator", "url_name": "environment_hardy_cross_head_loss_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Heat transferred by condensing steam", "url_name": "environment_heat_transfer_rate_condensing_steam_calculator", "plan_type": "corporate", "category": "environment"},
 
     # Health Calculators
    {"name": "Army Body Fat Calculator", "url_name": "health_army_body_fat_calculator", "plan_type": "corporate", "category": "health"},
@@ -297,6 +349,17 @@ CALCULATORS = [
 {"name": "HEART Score Calculator", "url_name": "health_heart_score_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "HOMA-IR Calculator", "url_name": "health_homa_ir_insulin_resistance_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Ideal Weight Calculator", "url_name": "health_ideal_weight_calculator", "plan_type": "corporate", "category": "health"},
+
+{"name": "Plasma Volume Calculator", "url_name": "health_plasma_volume_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Relative Fat Mass (RFM) Calculator", "url_name": "health_relative_fat_mass_rfm_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "REBA Calculator", "url_name": "health_rapid_entire_body_assessment_reba_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Sleep Cycle Calculator", "url_name": "health_sleep_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Shock Index (SI) Calculator", "url_name": "health_shock_index_si_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Stroke Volume (SV) Calculator", "url_name": "health_stroke_volume_sv_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Stroke Volume Index (SVI) Calculator", "url_name": "health_stroke_volume_index_svi_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Threshold Limit Value (TLV) Calculator", "url_name": "health_threshold_limit_value_tlv_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "TRCF-ILL Calculator", "url_name": "health_total_recordable_occupational_illness_frequency_trcf_ill_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Time of Death Calculator", "url_name": "health_time_of_death_calculator", "plan_type": "corporate", "category": "health"},
 
 
 
@@ -440,6 +503,26 @@ CALCULATORS = [
 {"name": "Ergonomic Risk Score Calculator", "url_name":"safety_erogonomic_risk_score_calculator", "plan_type": "corporate", "category": "safety"},
 
 {"name": "Emergency Drill Success Rate Calculator", "url_name":"safety_emergency_drill_success_rate_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Excavation Slope Calculator", "url_name":"safety_excavation_slope_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Equivalent Circulating Density (ECD) Calculator", "url_name":"safety_equivalent_circulating_density_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Energy Requirement for a Flow-Type Application Calculator", "url_name":"safety_energy_requirement_for_a_flow_type_application_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Equivalent Skin Factor Calculator", "url_name":"safety_equivalent_skin_factor_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Employee Training Cost Calculator", "url_name":"safety_employee_training_cost_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Exothermic Reaction Burn Severity Calculator", "url_name":"safety_exothermic_reaction_burn_severity_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Expected Accident Rate (EAR) Calculator", "url_name":"safety_expected_accident_rate_ear_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Fluid Loss for Drilling Calculator", "url_name":"safety_fluid_loss_for_drilling_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Fracture Gradient Calculator", "url_name":"safety_fracture_gradient_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Fracture Width Calculator (PKN Model)", "url_name":"safety_fracture_width_pkn_model_calculator", "plan_type": "corporate", "category": "safety"},
     
     # Fire Calculators
     {"name": "Burn Rate (chemical Exposure) Calculator", "url_name": "fire_burn_rate_chemical_exposure_calculator", "plan_type": "corporate", "category": "fire"},
@@ -452,6 +535,18 @@ CALCULATORS = [
     {"name": "Equivalent Orifice Area Calculator for co2", "url_name": "fire_equivalent_orifice_area_for_co2_calculator", "plan_type": "corporate", "category": "fire"},
     {"name": "Equivalent Water Flowrate Through A Check Valve Calculator", "url_name": "fire_equivalent_water_flowrate_through_a_check_valve_calculator", "plan_type": "corporate", "category": "fire"},
     {"name": "Fire Load Calculator", "url_name": "fire_fire_load_calculator", "plan_type": "corporate", "category": "fire"},
+    
+     {"name": "Fire Extinguisher Placement Calculator", "url_name": "fire_fire_extinguisher_placement_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Fire extinguisher weight inspection", "url_name": "fire_fire_extinguisher_weight_inspection_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "fire load density calculator", "url_name": "fire_fire_load_density_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Fire Flow calcualtor", "url_name": "fire_fire_flow_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "FM-200 / NOVEC 1230 - Net Hazard Volume Calculator", "url_name": "fire_fm_200_novec_1230_net_hazard_volume_calculator", "plan_type": "corporate", "category": "fire"},\
+    {"name": "FM-200 / NOVEC 1230 - agent quantity calculator", "url_name": "fire_fm_200_novec_1230_agent_quantity_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "FM-200 / NOVEC 1230 - Nozzle Quantity Calculator", "url_name": "fire_fm_200_novec_1230_nozzle_quantity_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "FM-200 / NOVEC 1230 - Pipe Sizing Calculator", "url_name": "fire_fm_200_novec_1230_pipe_sizing_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Final design Quantity for co2 calcualtor", "url_name": "fire_final_design_quantity_for_co2_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Flow rate calculator for Local application System", "url_name": "fire_flow_rate_for_local_application_system_calculator", "plan_type": "corporate", "category": "fire"},
+
 
 
 

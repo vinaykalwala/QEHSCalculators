@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Base Design Quantity for CO₂ Calculator{% endblock %}
+{% block title %}FM-200 / NOVEC 1230 - Net Hazard Volume Calculator{% endblock %}
 {% block content %}
 {% load static %}
 
@@ -325,16 +325,17 @@
         .hidden { 
             display: none; 
         }
-        /* Remove list dots & align horizontally */
-.note-section ul {
-    list-style: none;       /* removes bullets */
-    
-   
+           @media (max-width: 768px) {
+    .rate-value {
+        font-size: 28px; /* smaller font for tablets/mobiles */
+    }
 }
 
-/* Space between items if more links later */
-
-
+@media (max-width: 480px) {
+    .rate-value {
+        font-size: 24px; /* even smaller for phones */
+    }
+}
     </style>
 </head>
 <body>
@@ -345,39 +346,36 @@
 <div class="calculator-container printable" id="printArea">
     {% include "includes/print_header_footer.html" %}
 
-    <!-- Calculator Header -->
     <div class="calculator-header">
-        <h1>Base Design Quantity for CO₂ Calculator</h1>
-        <p>
-            Determine the <strong>Base Design Quantity (m<sub>BD</sub>)</strong> of CO₂ required for fire suppression in a given hazard space.
-            This is a critical parameter in ensuring compliance, fire suppression effectiveness, and system optimization.
-        </p>
+        <h1>FM-200 / NOVEC 1230 - Net Hazard Volume Calculator</h1>
+        <p>Calculate the internal air volume of a protected space to determine the required quantity of fire suppression agents.</p>
     </div>
 
     <div class="calc-content">
         <!-- Input Card -->
         <div class="calc-card">
-            <h2>Enter Data</h2>
+            <h2>Enter Room Dimensions</h2>
             <div class="form-group">
-                <label for="Vnet">Net Hazard Volume (V<sub>net</sub>)</label>
-                <input type="number" id="Vnet" class="form-input" placeholder="Enter Net Hazard Volume (m³)">
+                <label for="length">Room Length (m)</label>
+                <input type="number" id="length" class="form-input" placeholder="Enter room length">
             </div>
             <div class="form-group">
-                <label for="FF">Flooding Factor (FF)</label>
-                <input type="number" id="FF" class="form-input" placeholder="Enter Flooding Factor">
+                <label for="width">Room Width (m)</label>
+                <input type="number" id="width" class="form-input" placeholder="Enter room width">
             </div>
-            <button class="calculate-btn" onclick="calculateBaseDesignQuantity()">Calculate Base Design Quantity</button>
+            <div class="form-group">
+                <label for="height">Room Height (m)</label>
+                <input type="number" id="height" class="form-input" placeholder="Enter room height">
+            </div>
+            <button class="calculate-btn" onclick="calculateNetHazardVolume()">Calculate Net Hazard Volume</button>
         </div>
 
         <!-- Result Card -->
         <div class="result-card">
             <!-- Placeholder -->
             <div class="result-placeholder" id="placeholder">
-                <img src="{% static 'images/co2.jpg' %}" alt="CO₂ Illustration">
-                <p>
-                    This tool calculates the <strong>Base Design Quantity</strong> of CO₂ required for fire suppression.
-                    Enter your values to see results and insights here.
-                </p>
+                <img src="{% static 'images/fm200.png' %}" alt="Net Hazard Volume Illustration">
+                <p>This tool will calculate the <strong>Net Hazard Volume</strong>. Enter room dimensions to see results and insights here.</p>
             </div>
 
             <!-- Error -->
@@ -385,8 +383,9 @@
 
             <!-- Result -->
             <div class="result-value hidden" id="resultValue">
-                <div class="rate-value" id="mBDValue">0.00</div>
-                <div class="rate-label" style="font-size:16px; font-weight:bold;">kg of CO₂ Required</div>
+                <div class="rate-value">Net Hazard Volume</div>
+                <div class="rate-value" id="nhvValue">0.00</div>
+                <div class="rate-label" style="font-size:16px; font-weight:bold;">m³</div>
                 <div class="result-feedback" id="feedbackContent"></div>
                 <div class="btn-wrapper">
                     <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
@@ -397,170 +396,184 @@
 
     <!-- Notes Section -->
     <div class="note-section">
-
-        <!-- About -->
         <div class="note-card">
             <h3>📘 About This Calculator</h3>
             <p>
-                This calculator determines the <strong>Base Design Quantity (m<sub>BD</sub>)</strong> of CO₂ required for fire suppression in a given space.
-                The base design quantity is a critical parameter in designing fire suppression systems, ensuring that the correct amount of CO₂ is used to effectively suppress fires.
-            </p>
-            <p>
-                Fire suppression systems rely on achieving the correct quantity of CO₂ to effectively suppress fires.
-                Too little CO₂ may be ineffective, while excessive CO₂ could pose risks to personnel and equipment.
+                This calculator helps determine the <strong>Net Hazard Volume (NHV)</strong>,
+                representing the total internal air volume of a protected space. This is crucial for sizing FM-200 or NOVEC 1230 fire suppression systems.
             </p>
         </div>
 
-       <div class="note-card">
-    <h3>⚙️ Parameters</h3>
-    <ul class="note-list">
-        <li><strong>Net Hazard Volume (V<sub>net</sub>):</strong> The total volume of the hazard area (m³) that must be protected.</li>
-        <li><strong>Flooding Factor (FF):</strong> A coefficient provided in standards (e.g., NFPA 12), dependent on hazard type and space.</li>
-    </ul>
-</div>
-
-
-        <!-- Interpretation -->
         <div class="note-card">
-            <h3>💡 Why This Matters</h3>
-            <p>Properly calculating the base design quantity ensures:</p>
+            <h3>⚙️ Parameters</h3>
             <ul class="note-list">
-                <li>✅ Compliance with fire safety standards and regulations.</li>
-                <li>💰 Optimal use of CO₂, reducing waste and costs.</li>
-                <li>🔥 Effective fire suppression without unnecessary risks to life or equipment.</li>
+                <li><strong>Room Length (L):</strong> Distance from one end of the room to the other (meters).</li>
+                <li><strong>Room Width (W):</strong> Distance across the room from side to side (meters).</li>
+                <li><strong>Room Height (H):</strong> Vertical distance from floor to ceiling (meters).</li>
             </ul>
         </div>
 
-        <!-- Validations -->
-       <div class="note-card">
+        <div class="note-card">
+    <h3>💡 What is Net Hazard Volume?</h3>
+    <p>
+        Net Hazard Volume (NHV) refers to the total air space inside a room or protected area that needs to be safeguarded by a fire suppression system. 
+        It represents the entire internal volume of the room, taking into account its length, width, and height, and is measured in cubic meters (m³). 
+        Knowing the NHV is crucial because it determines how much fire suppression agent is required to effectively protect the space from fire hazards.
+    </p>
+</div>
+
+
+        <div class="note-card">
+            <h3>🔥 Why is NHV Important?</h3>
+            <ul class="note-list">
+                <li><strong>Accurate Agent Calculation:</strong> Ensures correct fire suppression agent quantity.</li>
+                <li><strong>System Efficiency:</strong> Optimizes nozzle and pipe sizing.</li>
+                <li><strong>Regulatory Compliance:</strong> Supports NFPA 2001 fire safety standards.</li>
+                <li><strong>Cost Optimization:</strong> Prevents overuse or underuse of agents.</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
     <h3>🛡️ Input Validations</h3>
     <ul class="note-list">
-        <li>✅ All fields are <strong>mandatory</strong> and must be completed before calculation.</li>
-        <li>✅ <strong>Numeric values only:</strong> Non-numeric entries are invalid.</li>
-        <li>✅ <strong>Positive values required:</strong> Zero or negative numbers are not allowed.</li>
-        <li>✅ <strong>Net Hazard Volume (V<sub>net</sub>):</strong> 
-            Must be between <strong>1 m³ and 100,000 m³</strong>. 
-            Values outside this range will trigger warnings or errors.
+        <li><strong>All fields are mandatory:</strong> Room Length, Width, and Height must be entered. Empty fields will trigger a warning.</li>
+        <li><strong>Numeric values only:</strong> Enter positive numbers; non-numeric entries are not allowed.</li>
+        <li><strong>Positive and realistic ranges:</strong>
+            <ul>
+                <li>Length: 0.5 m – 100 m</li>
+                <li>Width: 0.5 m – 100 m</li>
+                <li>Height: 2 m – 20 m</li>
+            </ul>
         </li>
-        <li>✅ <strong>Flooding Factor (FF):</strong> 
-            Must be between <strong>0.3 and 1.2</strong>, in line with NFPA/ISO design standards. 
-            Typical values are 0.5–1.0 for gaseous agents.
+        <li><strong>Logical consistency:</strong> Avoid unrealistic proportions, such as extremely tall rooms with tiny floor area. Length/Width ratio should not exceed 10, Height to Length/Width ratio should not exceed 3.</li>
+        <li><strong>Suspicious or extreme values:</strong> Values resulting in NHV above 200,000 m³ will trigger a warning to review inputs.</li>
+        <li><strong>Edge cases:</strong> Zero or negative numbers are invalid; very small or excessively large dimensions generate caution messages.</li>
+        <li><strong>Feedback on NHV:</strong> The calculator provides guidance based on calculated volume: 
+            <ul>
+                <li>Very small (<50 m³): low agent requirement</li>
+                <li>Normal (50–500 m³): typical agent design</li>
+                <li>Medium (500–5000 m³): check system sizing</li>
+                <li>Large (5000–200,000 m³): verify design, may require multiple nozzles</li>
+                <li>Unrealistic (>200,000 m³): review inputs</li>
+            </ul>
         </li>
-        <li>✅ <strong>Result validation:</strong> 
-            Very low CO₂ (<100 kg) or very high (>20,000 kg) outputs will trigger warnings for review.
-        </li>
-        <li>⚠️ Any error or warning will be displayed in the result box (default image will disappear).</li>
+        <li><strong>Compliance rationale:</strong> These validations ensure data integrity, regulatory compliance (NFPA 2001), and accurate system design for fire safety audits.</li>
     </ul>
 </div>
 
-        <!-- Usage -->
+
         <div class="note-card">
             <p>
-                Enter the required values and click <strong>"Calculate Base Design Quantity"</strong> to see the result.
-                This calculation aids fire safety engineers and facility managers in designing effective suppression systems.
+                Click <strong>"Calculate Net Hazard Volume"</strong> to determine the space volume for fire suppression system design. Understanding NHV ensures proper protection, regulatory compliance, and cost efficiency.
             </p>
-            <p>
-                If you need help calculating the Net Hazard Volume, please use the following tool:
-            </p>
-           <ul style="display:flex; flex-wrap:wrap; justify-content:center; padding:0; margin:0; list-style:none;">
-    <li style="margin:10px; flex:1 1 100%; text-align:center;">
-        <a href="{% url 'fire_fm_200_novec_1230_net_hazard_volume_calculator' %}" style="background-color:#1560bd; padding:12px 24px; color:white; border-radius:10px; text-decoration:none; font-weight:500; display:inline-block; width:90%; max-width:300px;">
-            Net Hazard Volume Calculator
-        </a>
-    </li>
-</ul>
-
         </div>
     </div>
 </div>
 
 <script>
-function calculateBaseDesignQuantity() {
-    const VnetInput = document.getElementById("Vnet").value.trim();
-    const FFInput = document.getElementById("FF").value.trim();
-    const resultValue = document.getElementById("resultValue");
-    const placeholder = document.getElementById("placeholder");
-    const feedbackContent = document.getElementById("feedbackContent");
-    const resultError = document.getElementById("resultError");
+function calculateNetHazardVolume() {
+    const lengthInput = document.getElementById('length').value.trim();
+    const widthInput = document.getElementById('width').value.trim();
+    const heightInput = document.getElementById('height').value.trim();
 
-    // Reset display
-    resultError.classList.add("hidden");
-    resultValue.classList.add("hidden");
-    placeholder.classList.add("hidden");
+    const resultValue = document.getElementById('resultValue');
+    const placeholder = document.getElementById('placeholder');
+    const feedbackContent = document.getElementById('feedbackContent');
+    const resultError = document.getElementById('resultError');
+
+    // Reset displays
+    resultError.classList.add('hidden');
+    resultValue.classList.add('hidden');
+    placeholder.classList.add('hidden');
     resultError.innerHTML = "";
     feedbackContent.innerHTML = "";
 
     // Empty check
-    if (VnetInput === "" || FFInput === "") {
+    if (!lengthInput || !widthInput || !heightInput) {
         resultError.innerHTML = "⚠️ Please fill in all required fields.";
         resultError.style.color = "orange";
-        resultError.classList.remove("hidden");
+        resultError.classList.remove('hidden');
         return;
     }
 
-    const Vnet = parseFloat(VnetInput);
-    const FF = parseFloat(FFInput);
+    const length = parseFloat(lengthInput);
+    const width = parseFloat(widthInput);
+    const height = parseFloat(heightInput);
 
     // Numeric check
-    if (isNaN(Vnet) || isNaN(FF)) {
+    if (isNaN(length) || isNaN(width) || isNaN(height)) {
         resultError.innerHTML = "❌ Invalid entry. Please enter numeric values only.";
         resultError.style.color = "red";
-        resultError.classList.remove("hidden");
+        resultError.classList.remove('hidden');
         return;
     }
 
-    // Range checks for Vnet
-    if (Vnet <= 0) {
-        resultError.innerHTML = "❌ Net Hazard Volume must be greater than zero.";
-        resultError.style.color = "red";
-        resultError.classList.remove("hidden");
-        return;
-    }
-    if (Vnet < 1) {
-        resultError.innerHTML = "⚠️ Net Hazard Volume is unrealistically small for CO₂ flooding (<1 m³).";
+    // Positive and realistic limits
+    if (length < 0.5 || length > 100) {
+        resultError.innerHTML = "⚠️ Length should be between 0.5 m and 100 m.";
         resultError.style.color = "orange";
-        resultError.classList.remove("hidden");
-        return;
-    }
-    if (Vnet > 100000) {
-        resultError.innerHTML = "⚠️ Net Hazard Volume exceeds typical NFPA design limits (>100,000 m³).";
-        resultError.style.color = "orange";
-        resultError.classList.remove("hidden");
+        resultError.classList.remove('hidden');
         return;
     }
 
-    // Range checks for FF
-    if (FF <= 0) {
-        resultError.innerHTML = "❌ Flooding Factor must be greater than zero.";
-        resultError.style.color = "red";
-        resultError.classList.remove("hidden");
+    if (width < 0.5 || width > 100) {
+        resultError.innerHTML = "⚠️ Width should be between 0.5 m and 100 m.";
+        resultError.style.color = "orange";
+        resultError.classList.remove('hidden');
         return;
     }
-    if (FF < 0.3 || FF > 1.2) {
-        resultError.innerHTML = "❌ Flooding Factor must be between 0.3 and 1.2 as per NFPA/ISO guidelines.";
-        resultError.style.color = "red";
-        resultError.classList.remove("hidden");
+
+    if (height < 2 || height > 20) {
+        resultError.innerHTML = "⚠️ Height should be between 2 m and 20 m.";
+        resultError.style.color = "orange";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    // Suspicious ratios
+    if (length / width > 10 || width / length > 10) {
+        resultError.innerHTML = "⚠️ Length and width ratio seems unrealistic.";
+        resultError.style.color = "orange";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    if (height / length > 3 || height / width > 3) {
+        resultError.innerHTML = "⚠️ Height seems disproportionately large compared to floor dimensions.";
+        resultError.style.color = "orange";
+        resultError.classList.remove('hidden');
         return;
     }
 
     // Calculation
-    const mBD = Vnet * FF;
-    document.getElementById("mBDValue").innerText = mBD.toFixed(2);
-    resultValue.classList.remove("hidden");
+    const nhv = length * width * height;
 
-    // Feedback interpretation
+    // Output threshold feedback
     let feedback = "";
-    if (mBD < 100) {
-        feedback = "⚠️ Very low CO₂ quantity (<100 kg). Confirm if total flooding is applicable.";
-        feedbackContent.style.color = "orange";
-    } else if (mBD > 20000) {
-        feedback = "⚠️ Very high CO₂ requirement (>20,000 kg). Check practicality and confirm inputs.";
-        feedbackContent.style.color = "orange";
+    let color = "green";
+    if (nhv < 50) {
+        feedback = "✅ Very small room, low agent requirement.";
+    } else if (nhv <= 500) {
+        feedback = "✅ Normal room, typical agent design.";
+    } else if (nhv <= 5000) {
+        feedback = "⚠️ Medium volume; check system sizing.";
+        color = "orange";
+    } else if (nhv <= 200000) {
+        feedback = "🚨 Large space; verify design, may require multiple nozzles.";
+        color = "red";
     } else {
-        feedback = "✅ Successfully calculated Base Design Quantity. Within typical suppression range.";
-        feedbackContent.style.color = "green";
+        feedback = "🔴 Unrealistic volume entered; review inputs.";
+        color = "darkred";
     }
+
+    document.getElementById('nhvValue').innerText = nhv.toFixed(2);
+    resultValue.classList.remove('hidden');
     feedbackContent.innerHTML = feedback;
+    feedbackContent.style.color = color;
+}
+
+function printReport() {
+    window.print();
 }
 
 </script>
@@ -572,118 +585,63 @@ function calculateBaseDesignQuantity() {
 {% endblock %}
 
 
-<!-- 1. Real-world inputs & formula
+<!-- 1. Analysis of Inputs, Outputs, and Formula
 
-Your calculator uses:
+Inputs:
 
-Net Hazard Volume (Vnet, m³): total volume of the enclosure that must be protected.
+Room Length (m): Linear dimension along one axis.
 
-Flooding Factor (FF): standard coefficient from NFPA 12/ISO guidelines.
+Room Width (m): Linear dimension perpendicular to length.
 
-Formula:
+Room Height (m): Vertical distance.
 
-𝑚
-𝐵
-𝐷
-=
-𝑉
-𝑛
-𝑒
-𝑡
-×
-𝐹
-𝐹
-m
-BD
-	​
+Output:
 
-=V
-net
-	​
+Net Hazard Volume (m³): Represents the total air volume to be protected by the fire suppression system. This is critical for calculating agent quantity per NFPA 2001 standards.
 
-×FF
+Formula Used:
 
-where 
-𝑚
-𝐵
-𝐷
-m
-BD
-	​
+NHV = Length × Width × Height
 
- = CO₂ mass required (kg).
+From a QEHS perspective, this is correct for enclosed spaces, but inputs must reflect realistic dimensions and constraints used in fire system design.
 
-This is correct for gaseous suppression design in principle.
+2. Recommended Input Validation Rules
+Parameter	Unit	Minimum	Maximum	Decimals	Notes / Logical Checks
+Length	meters (m)	0.5	100	2	Avoids extremely small or unrealistically large rooms. Length must be positive and reasonable.
+Width	meters (m)	0.5	100	2	Same rationale as length.
+Height	meters (m)	2	20	2	Minimum height ensures human occupancy; maximum based on typical industrial/commercial ceilings.
+NHV (calculated)	m³	>1	200,000	2	Ensures calculation is within physically possible and design-relevant volumes.
 
-2. Validation rules (industry-based)
-General rules
+Additional Logical Checks:
 
-All fields mandatory.
-
-Numeric only.
+All inputs must be numeric.
 
 No negative or zero values.
 
-Net Hazard Volume (Vnet)
+Inputs should be consistent: for example, a height of 15 m with a length of 1 m may indicate an error.
 
-Unit: cubic meters (m³).
+Extremely large NHV (>200,000 m³) triggers a warning for potential unrealistic entry.
 
-Minimum realistic threshold: ≥ 10 m³ (anything smaller is not normally protected with total flooding, but allow ≥1 for flexibility in testing).
+3. Edge Case Validations
 
-Maximum reasonable threshold: ≤ 100,000 m³ (above that, CO₂ flooding impractical).
+Empty fields: Must trigger warning.
 
-Decimals: up to 2 decimal places allowed (e.g., 452.75 m³).
+Zero or negative numbers: Invalid.
 
-Flooding Factor (FF)
+Non-numeric input: Invalid.
 
-Unit: dimensionless coefficient.
+Extremely high values: Warn user (e.g., Length >100 m, Width >100 m, Height >20 m).
 
-NFPA 12 typical range: 0.5 – 1.0 for gaseous agents.
+Division by zero: Not applicable here directly (multiplication), but zero inputs would yield zero volume — should be invalid.
 
-Acceptable extended range: 0.3 – 1.2 (for edge cases or manufacturer variations).
+Suspicious ratios: For example, L/W > 10 or H/L > 3 could indicate a data entry error.
 
-Decimals: up to 3 decimal places allowed.
+4. Output Validation / Feedback Logic
+NHV (m³)	Feedback / Interpretation	Color
+<50	Very small room, low agent requirement.	green
+50–500	Normal room, typical agent design.	green
+500–5000	Medium volume; check system sizing.	orange
+5000–200,000	Large space; verify design, may require multiple nozzles.	red
+>200,000	Unrealistic; review input.	dark red
 
-Output (mBD)
-
-Must be positive.
-
-Round to 2 decimals.
-
-Provide context thresholds:
-
-< 100 kg: very small hazard, confirm coverage.
-
-100 – 20,000 kg: typical for enclosures.
-
-> 20,000 kg: warning, check feasibility.
-
-3. Edge case validations
-
-Empty fields: already covered.
-
-Non-numeric: reject with error.
-
-Extremely small Vnet (e.g., 0.1 m³): warn "unlikely practical for CO₂ flooding."
-
-Extremely large Vnet (>100,000 m³): warn "outside practical NFPA range."
-
-FF out of standard range (e.g., 2.5): error, not allowed.
-
-Division by zero: not applicable here, but zero inputs must be rejected.
-
-4. Output validation logic
-
-After computing mBD = Vnet × FF:
-
-Always show kg of CO₂ with two decimals.
-
-Provide feedback interpretation:
-
-✅ "Within standard suppression range."
-
-⚠️ "Value unusually high; confirm inputs or design feasibility."
-
-⚠️ "Value unusually low; check if local flooding method applies instead."
-
-This ensures output is audit-ready and compliant. -->
+Why: Real audits and NFPA design calculations consider NHV to size agent cylinders, nozzle placement, and system efficiency. -->
