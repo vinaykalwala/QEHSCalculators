@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Ponderal Index (PI) Calculator{% endblock %}
+{% block title %}Relative Fat Mass (RFM) Calculator{% endblock %}
 {% block content %}
 {% load static %}
 
@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ponderal Index (PI) Calculator</title>
+    <title>Relative Fat Mass (RFM) Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
@@ -71,7 +71,7 @@
             display: flex;
             flex-direction: column;
             transition: transform 0.3s ease;
-            height: 420px; /* Fixed height to match reference */
+            height: 420px;
             overflow-y: auto;
         }
         .calc-card:hover {
@@ -159,6 +159,11 @@
             font-weight: 700;
             color: #2980b9;
         }
+        .rate-label {
+            color: #2980b9;
+            font-weight: bold;
+            font-size: 20px;
+        }
         /* Meter */
         .safety-meter {
             width: 100%;
@@ -224,6 +229,25 @@
             text-align: justify;
         }
         .note-list { margin: 0; padding-left: 18px; }
+        /* Table styles */
+        .custom-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .custom-table thead {
+            background-color: #1560bd;
+            color: white;
+        }
+        .custom-table th, .custom-table td {
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .custom-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
         /* Error Message */
         .result-error {
             background: #ffe6e6;
@@ -252,58 +276,59 @@
         {% include "includes/print_header_footer.html" %}
 
         <div class="calculator-header">
-            <h1>Ponderal Index (PI) Calculator</h1>
-            <p>Calculate your body composition using a three-dimensional measure of weight and height.</p>
+            <h1>Relative Fat Mass (RFM) Calculator</h1>
+            <p>Estimate your body fat percentage using the height-to-waist ratio method.</p>
         </div>
 
         <div class="calc-content">
             <div class="calc-card">
-                <h2>Your Details</h2>
+                <h2>Your Measurements</h2>
                 <div class="form-group">
-                    <label for="age-group">Age Group</label>
-                    <select id="age-group" class="form-select">
-                        <option value="adult">Adult</option>
-                        <option value="child">Child / Infant</option>
+                    <label for="gender">Gender</label>
+                    <select id="gender" class="form-select">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="height">Height (cm)</label>
-                    <input type="number" id="height" class="form-input" placeholder="Enter height in cm">
+                    <input type="number" id="height" class="form-input" placeholder="e.g., 175 cm">
                 </div>
                 <div class="form-group">
-                    <label for="weight">Weight (kg)</label>
-                    <input type="number" id="weight" class="form-input" placeholder="Enter weight in kg">
+                    <label for="waist">Waist Circumference (cm)</label>
+                    <input type="number" id="waist" class="form-input" placeholder="e.g., 85 cm">
                 </div>
-                <button class="calculate-btn" onclick="calculateAndDisplay()">Calculate Ponderal Index</button>
+                <button class="calculate-btn" onclick="calculateAndDisplay()">Calculate Body Fat %</button>
             </div>
 
             <div class="result-card">
                 <div class="result-placeholder" id="placeholder">
                     <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
-                    <p>Select an age group and enter your measurements to calculate the Ponderal Index.</p>
+                    <p>Enter your gender and measurements to calculate your Relative Fat Mass.</p>
                 </div>
                 <div class="result-error hidden" id="resultError">
                     <div class="error-icon">❌</div>
                     <div class="error-message" id="errorMessage"></div>
                 </div>
                 <div id="resultValue" class="hidden" style="text-align: center;">
-                    <h2>Ponderal Index (PI)</h2>
+                    <h2>Relative Fat Mass (RFM)</h2>
                     <div class="rate-display">
                         <div class="rate-value" id="rateValue">0.0</div>
+                        <div class="rate-label">%</div>
                     </div>
                     <div class="safety-meter">
                         <div class="meter-fill" id="meterFill"></div>
                     </div>
                     <div class="meter-labels">
-                        <span id="label-low">Underweight</span>
-                        <span id="label-normal">Normal</span>
-                        <span id="label-high">Overweight</span>
+                        <span>Lean</span>
+                        <span>Healthy</span>
+                        <span>Overfat</span>
                     </div>
                     <div class="result-feedback">
                         <div class="feedback-title">Interpretation</div>
                         <div class="feedback-content" id="feedbackContent"></div>
                     </div>
-                    <div class="btn-wrapper">
+                     <div class="btn-wrapper">
                         <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
                     </div>
                 </div>
@@ -312,90 +337,39 @@
 
         <div class="note-section">
             <div class="note-card">
-                <h3>📌 What is the Ponderal Index (PI)?</h3>
-                <p>
-                    The Ponderal Index (PI) is an improved version of the Body Mass Index (BMI). While BMI uses height squared
-                    (height²),
-                    PI uses height cubed (height³), making it more accurate for assessing body composition in three-dimensional
-                    terms.
-                    PI is particularly useful for very tall or short individuals, as BMI tends to misclassify them.
-                </p>
+                <h3>About Relative Fat Mass (RFM)</h3>
+                <p>RFM is a scientifically validated method to estimate body fat percentage using only your <strong>height</strong> and <strong>waist circumference</strong>. Unlike BMI, RFM is often considered more accurate for assessing body fatness because it directly accounts for central (abdominal) fat, a key indicator of metabolic health risks.</p>
             </div>
-        
             <div class="note-card">
-                <h3>📐 Ponderal Index Formula</h3>
-                <p>The formula depends on the age group:</p>
+                <h3>RFM Interpretation Guide</h3>
+                <div style="overflow-x:auto;">
+                    <table class="custom-table">
+                        <thead>
+                            <tr><th>Category</th><th>Men (Body Fat %)</th><th>Women (Body Fat %)</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>Essential Fat</strong></td><td>2–5%</td><td>10–13%</td></tr>
+                            <tr><td><strong>Athletes</strong></td><td>6–13%</td><td>14–20%</td></tr>
+                            <tr><td><strong>Fitness</strong></td><td>14–17%</td><td>21–24%</td></tr>
+                            <tr><td><strong>Average</strong></td><td>18–24%</td><td>25–31%</td></tr>
+                            <tr><td><strong>Obese</strong></td><td>≥ 25%</td><td>≥ 32%</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+             <div class="note-card">
+                <h3>Measurement Instructions</h3>
                 <ul class="note-list">
-                    <li><strong>For Adults:</strong> PI = weight (kg) / height (m)³</li>
-                    <li><strong>For Children/Infants:</strong> PI = weight (g) / height (cm)³</li>
+                    <li><strong>Height:</strong> Stand straight against a wall without shoes and measure from the floor to the top of your head.</li>
+                    <li><strong>Waist:</strong> Keep the tape measure horizontal. For men, measure at the level of the navel. For women, measure at the narrowest part of the torso, usually just above the navel.</li>
+                    <li>Take measurements with a relaxed abdomen, without sucking in your stomach.</li>
                 </ul>
             </div>
-        
-            <div class="note-card">
-                <h3>📊 Normal Ponderal Index Ranges</h3>
-                <ul class="note-list">
-                    <li><strong>Adults:</strong> 11–15 (normal range)</li>
-                    <li><strong>Newborn Babies:</strong> 2.2–3.0 (normal range)</li>
-                </ul>
-            </div>
-        
-            <div class="note-card">
-                <h3>🧾 Interpreting Your Results</h3>
-                <ul class="note-list">
-                    <li><strong>For Adults:</strong>
-                        <ul>
-                            <li><strong>PI &lt; 11:</strong> Underweight – May suggest malnutrition or health issues.</li>
-                            <li><strong>11 ≤ PI ≤ 15:</strong> Normal – Healthy weight proportional to height.</li>
-                            <li><strong>PI &gt; 15:</strong> Overweight – Indicates excess body mass.</li>
-                        </ul>
-                    </li>
-                    <li><strong>For Children/Infants:</strong>
-                        <ul>
-                            <li><strong>PI &lt; 2.2:</strong> Underweight – Possible developmental or nutrition issues.</li>
-                            <li><strong>2.2 ≤ PI ≤ 3.0:</strong> Normal – Healthy, proportionate growth.</li>
-                            <li><strong>PI &gt; 3.0:</strong> Overweight – May indicate early obesity risk.</li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        
-            <div class="note-card">
-                <h3>💡 What Can You Do?</h3>
-                <ul class="note-list">
-                    <li><strong>Consult a Doctor:</strong> Seek professional evaluation.</li>
-                    <li><strong>Adopt a Healthy Lifestyle:</strong> Focus on diet, exercise, and stress management.</li>
-                    <li><strong>Monitor Progress:</strong> Track weight, height, and health regularly.</li>
-                </ul>
-            </div>
-        
-            <!-- Note Section for Input Validations -->
-            <div class="note-card">
-                <h3>✅ Input Validations</h3>
-                <ul class="note-list">
-                    <li><strong>Height:</strong> Must be a positive number in centimeters (valid range: <em>30 cm – 250 cm</em>).
-                    </li>
-                    <li><strong>Weight:</strong> Must be a positive number in kilograms (valid range: <em>1 kg – 250 kg</em>).</li>
-                    <li><strong>Age Group:</strong> Choose either <em>Adult</em> or <em>Child</em> before calculating.</li>
-                    <li>⚠️ Inputs that are <em>blank, zero, negative, or unrealistically high</em> will be flagged with an error
-                        message.</li>
-                    <li>✅ Only valid inputs will allow the Ponderal Index (PI) to be calculated.</li>
-                </ul>
-                <p style="margin-top: 12px; color: #555; font-size: 0.95em;">
-                    These rules ensure the calculator provides <strong>accurate and reliable PI results</strong> for both adults and
-                    children.
-                </p>
-            </div>
-
             <div class="note-card">
                 <h3>⚠️ Disclaimer</h3>
-                <p>
-                    This calculator provides estimates based on the Ponderal Index formula and is not a substitute for medical
-                    advice.
-                    Always consult a healthcare provider for personalized recommendations.
-                </p>
+                <p>This calculator provides an estimate and is not a substitute for a professional medical assessment. For a precise measurement of body composition, methods like DEXA scans are the gold standard. Consult a healthcare provider for personalized health advice.</p>
             </div>
         </div>
-
     </div>
 
     <script>
@@ -405,42 +379,36 @@
             const placeholder = document.getElementById('placeholder');
             const resultValueBox = document.getElementById('resultValue');
 
-            // Reset UI
             errorBox.classList.add('hidden');
             resultValueBox.classList.add('hidden');
             placeholder.classList.remove('hidden');
 
             let errors = [];
-
-            // Helper: get and validate numeric inputs
-            function getVal(id, label, maxLimit = 300) {
+            function getVal(id, label, opts = {}) {
                 const el = document.getElementById(id);
                 const raw = el.value?.toString().trim();
-
                 if (!raw) {
                     errors.push(`👉 ${label} is required.`);
                     return null;
                 }
-
                 const num = parseFloat(raw);
                 if (isNaN(num) || num <= 0) {
                     errors.push(`👉 Enter a valid positive number for ${label}.`);
                     return null;
                 }
-
-                if (num > maxLimit) {
-                    errors.push(`👉 ${label} seems unrealistically high. Please check the input.`);
-                }
-
+                if (opts.min !== undefined && num < opts.min) errors.push(`👉 ${label} must be ≥ ${opts.min}.`);
+                if (opts.max !== undefined && num > opts.max) errors.push(`👉 ${label} must be ≤ ${opts.max}.`);
                 return num;
             }
 
-            // Collect inputs
-            const ageGroup = document.getElementById('age-group').value;
-            const heightCm = getVal('height', 'Height (cm)', 250);
-            const weightKg = getVal('weight', 'Weight (kg)', 250);
+            const gender = document.getElementById('gender').value;
+            const height = getVal('height', 'Height', { min: 100, max: 250 });
+            const waist = getVal('waist', 'Waist Circumference', { min: 50, max: 200 });
+            
+            if(height && waist && waist >= height) {
+                errors.push('👉 Waist circumference cannot be greater than or equal to height.');
+            }
 
-            // If validation failed, show errors
             if (errors.length > 0) {
                 errorMessage.innerHTML = errors.join("<br>");
                 errorBox.classList.remove("hidden");
@@ -448,155 +416,53 @@
                 return;
             }
 
-            // Calculation variables
-            let pi, interpretation, meterMin, meterMax, lowRange, highRange;
-
-            if (ageGroup === 'adult') {
-                // Adult PI Formula: kg / m³
-                const heightM = heightCm / 100;
-                pi = weightKg / Math.pow(heightM, 3);
-
-                // Adult PI reference range
-                lowRange = 11;
-                highRange = 15;
-                meterMin = 8;
-                meterMax = 18;
-
-                if (pi < lowRange) {
-                    interpretation = "⚠️ Underweight: Your PI is below the healthy adult range.";
-                } else if (pi <= highRange) {
-                    interpretation = "✅ Normal: Your PI is within the healthy adult range.";
-                } else {
-                    interpretation = "⚠️ Overweight: Your PI is above the healthy adult range.";
-                }
-            } else {
-                // Child PI Formula: (100 × g) / cm³
-                const weightG = weightKg * 1000;
-                pi = (100 * weightG) / Math.pow(heightCm, 3);
-
-                // Child PI reference range
-                lowRange = 2.2;
-                highRange = 3.0;
-                meterMin = 1.5;
-                meterMax = 3.5;
-
-                if (pi < lowRange) {
-                    interpretation = "⚠️ Underweight: The PI is below the typical range for children.";
-                } else if (pi <= highRange) {
-                    interpretation = "✅ Normal: The PI is within the typical range for children.";
-                } else {
-                    interpretation = "⚠️ Overweight: The PI is above the typical range for children.";
-                }
+            let rfm;
+            if (gender === 'male') {
+                rfm = 64 - (20 * (height / waist));
+            } else { // female
+                rfm = 76 - (20 * (height / waist));
             }
 
-            // Show result
+            if (!isFinite(rfm) || rfm < 0 || rfm > 80) {
+                errorMessage.innerHTML = "❌ Calculation resulted in an unrealistic value. Please check your inputs.";
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add('hidden');
+                return;
+            }
+
             placeholder.classList.add('hidden');
             resultValueBox.classList.remove('hidden');
-
-            document.getElementById('rateValue').textContent = pi.toFixed(2);
-            document.getElementById('feedbackContent').textContent = interpretation;
-
-            // Update meter dynamically
+            document.getElementById('rateValue').textContent = rfm.toFixed(1);
+            
             const meterFill = document.getElementById('meterFill');
-            let pct = ((pi - meterMin) / (meterMax - meterMin)) * 100;
-            pct = Math.max(0, Math.min(100, pct));
-            meterFill.style.width = pct + '%';
-
-            if (pi < lowRange) {
-                meterFill.style.backgroundColor = '#f39c12'; // Yellow - Underweight
-            } else if (pi <= highRange) {
-                meterFill.style.backgroundColor = '#2ecc71'; // Green - Normal
-            } else {
-                meterFill.style.backgroundColor = '#e74c3c'; // Red - Overweight
+            const maxPercent = 50; // Visual scale up to 50% body fat
+            meterFill.style.width = Math.min(100, (rfm / maxPercent) * 100) + '%';
+            
+            let interpretation = "";
+            if (gender === 'male') {
+                if (rfm < 6) interpretation = "This is below the typical essential fat range. Consult a professional.";
+                else if (rfm <= 17) interpretation = "This is within the healthy 'Athlete' to 'Fitness' range.";
+                else if (rfm <= 24) interpretation = "This is in the 'Average' or acceptable range.";
+                else interpretation = "This is in the 'Obese' range, indicating a high health risk.";
+            } else { // female
+                if (rfm < 14) interpretation = "This is below the typical essential fat range. Consult a professional.";
+                else if (rfm <= 24) interpretation = "This is within the healthy 'Athlete' to 'Fitness' range.";
+                else if (rfm <= 31) interpretation = "This is in the 'Average' or acceptable range.";
+                else interpretation = "This is in the 'Obese' range, indicating a high health risk.";
             }
 
-            // Update meter labels for clarity
-            document.getElementById('label-low').textContent = `Underweight (<${lowRange})`;
-            document.getElementById('label-normal').textContent = `Normal (${lowRange}-${highRange})`;
-            document.getElementById('label-high').textContent = `Overweight (>${highRange})`;
+            if(rfm >= 25 && gender === 'male') meterFill.style.backgroundColor = '#e74c3c';
+            else if (rfm >= 32 && gender === 'female') meterFill.style.backgroundColor = '#e74c3c';
+            else if (rfm > 17 && gender === 'male' || rfm > 24 && gender === 'female') meterFill.style.backgroundColor = '#f39c12';
+            else meterFill.style.backgroundColor = '#2ecc71';
+            
+            document.getElementById('feedbackContent').textContent = interpretation;
         }
 
         function printReport() {
             window.print();
         }
     </script>
-
 </body>
 </html>
 {% endblock %}
-
-<!-- 
-1. Input Validation Rules (Real-World Perspective)
-
-From a QEHS/Fire Safety + Occupational Health angle, data integrity is critical. Unsafe, unrealistic, or inconsistent inputs could lead to misleading health risk assessments.
-
-Age Group Selection
-
-Must be explicitly selected: Adult or Child/Infant.
-
-Prevent default/blank selection.
-
-Adults → thresholds based on kg & meters.
-
-Children/Infants → thresholds based on grams & cm.
-
-Height
-
-Must be numeric.
-
-Units: cm (always).
-
-Range:
-
-Adults: 50–272 cm (realistic human extremes).
-
-Children/infants: 20–120 cm (newborn to toddler).
-
-Decimals allowed: 1 decimal place for accuracy.
-
-Weight
-
-Must be numeric.
-
-Units: kg for adults, kg for children (converted internally).
-
-Range:
-
-Adults: 2–500 kg (covers clinical edge cases).
-
-Children/infants: 0.5–30 kg.
-
-Decimals allowed: up to 1 decimal place.
-
-Cross-Field Logic
-
-Height cannot be too low or too high for age group.
-
-Weight must be reasonable for height (e.g., 50 cm tall adult weighing 200 kg → flag).
-
-2. Output Validation Logic & Thresholds
-
-Ponderal Index Formula
-
-Adults: PI = weight(kg) / height(m)^3
-
-Children: PI = weight(g) / height(cm)^3
-
-Adult PI Ranges (clinical norms, adapted for occupational health screenings):
-
-< 11 → Underweight (possible malnutrition/health risk).
-
-11–15 → Normal.
-
-15 → Overweight (possible obesity-related risks).
-
-Child PI Ranges:
-
-< 2.2 → Underweight.
-
-2.2–3.0 → Normal.
-
-3.0 → Overweight.
-
-Error Guard: If PI returns NaN, Infinity, or negative, display error → "Invalid input combination".
--->
