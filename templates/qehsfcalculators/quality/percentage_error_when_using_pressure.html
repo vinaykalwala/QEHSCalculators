@@ -1,0 +1,574 @@
+{% extends 'base.html' %}
+{% block title %}Percentage Error When Using Pressure Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Percentage Error When Using Pressure Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'qualitycategory_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Percentage Error When Using Pressure Calculator</h1>
+            <p>Calculates the percentage error in flowrate when using a pressure differential meter that is not pressure compensated</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator Input Card -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="specifiedDensity">Specified Density (ρ_specified, kg/m³)</label>
+                    <input type="number" id="specifiedDensity" class="form-input" min="0" placeholder="Enter specified density">
+                </div>
+
+                <div class="form-group">
+                    <label for="actualDensity">Actual Density (ρ_actual, kg/m³)</label>
+                    <input type="number" id="actualDensity" class="form-input" min="0" placeholder="Enter actual density">
+                </div>
+
+                <button class="calculate-btn" onclick="calculateError()">Calculate Error</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Pressure meter illustration">
+                    <p>This tool calculates the <strong>percentage error</strong> in flowrate. Enter your density values to see results.</p>
+                </div>
+
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Percentage Error</h2>
+                    </div>
+                    <div class="rate-value" id="errorValue">0.00</div>
+                    <div class="rate-label"><strong>%</strong></div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">Error Interpretation</div>
+                        <div class="feedback-content" id="errorFeedback"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🔎 About This Calculator</h3>
+                <p>
+                    The <strong>Percentage Error Calculator</strong> determines the error in flowrate when using a pressure differential meter that is not pressure compensated. The error arises due to variations in steam density at different pressures.
+                </p> 
+            </div>
+            
+            <div class="note-card">
+                <h3>📌 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Specified Density (ρ_specified):</strong> Required, must be > 0 kg/m³</li>
+                    <li><strong>Actual Density (ρ_actual):</strong> Required, must be > 0 kg/m³</li>
+                    <li><strong>Density Ratio Consistency:</strong> Extreme variations could indicate incorrect input data</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ Explanation of Parameters</h3>
+                <ul class="note-list">
+                    <li><strong>Specified Density (ρ<sub>specified</sub>):</strong> The expected density of steam at a given pressure, measured in kg/m³.</li>
+                    <li><strong>Actual Density (ρ<sub>actual</sub>):</strong> The real-time density of steam at the operating pressure, measured in kg/m³.</li>
+                    <li><strong>Percentage Error (ε):</strong> The calculated error in flowrate measurement, expressed as a percentage.</li>
+                </ul>
+            </div>
+      
+            <div class="note-card">
+                <h3>📊 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Steam Flow Measurement:</strong> Identifies inaccuracies in flowrate calculations due to pressure variations.</li>
+                    <li><strong>Boiler & Turbine Performance:</strong> Ensures reliable steam flow monitoring in power plants and industrial applications.</li>
+                    <li><strong>Industrial Fluid Dynamics:</strong> Optimizes process efficiency by minimizing measurement errors.</li>
+                    <li><strong>Process Safety & Control:</strong> Helps prevent miscalculations that could impact system stability.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Conclusion</h3>
+                <p>This tool enables accurate flowrate assessment in steam-based systems by evaluating the effect of density variations. It helps maintain measurement precision, ensuring efficiency and reliability in industrial steam applications.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateError() {
+    const specifiedDensity = document.getElementById("specifiedDensity").value.trim();
+    const actualDensity = document.getElementById("actualDensity").value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const outputValue = document.getElementById('errorValue');
+    const feedbackBox = document.getElementById('errorFeedback'); 
+
+    let errors = [];
+
+    // ✅ Convert inputs to numbers
+    const specifiedNum = parseFloat(specifiedDensity);
+    const actualNum = parseFloat(actualDensity);
+
+    // 🔹 Input Presence
+    if (!specifiedDensity) errors.push("👉 Please enter the specified density (kg/m³).");
+    if (!actualDensity) errors.push("👉 Please enter the actual density (kg/m³).");
+
+    // 🔹 Numeric Validation
+    if (isNaN(specifiedNum) || specifiedNum <= 0) {
+        errors.push("👉 Specified density must be a positive number (>0).");
+    }
+    if (isNaN(actualNum) || actualNum <= 0) {
+        errors.push("👉 Actual density must be a positive number (>0).");
+    }
+
+    // 🔹 Physical Range Validation (0.1 – 1200 kg/m³)
+    if (specifiedNum < 0.1 || specifiedNum > 1200) {
+        errors.push("👉 Specified density must be between 0.1 and 1200 kg/m³.");
+    }
+    if (actualNum < 0.1 || actualNum > 1200) {
+        errors.push("👉 Actual density must be between 0.1 and 1200 kg/m³.");
+    }
+
+    // 🔹 Cross-field validation
+    if (specifiedNum > 0 && actualNum > 0) {
+        const ratio = specifiedNum / actualNum;
+        if (ratio < 0.1 || ratio > 10) {
+            errors.push("👉 Specified and actual density values differ too much. Check input data.");
+        }
+    }
+
+    // 🚨 Show Errors
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // ✅ Calculate Percentage Error
+    const error = (Math.sqrt(specifiedNum / actualNum) - 1) * 100;
+    outputValue.textContent = error.toFixed(2);
+
+    // ✅ Feedback Interpretation
+    let feedback = "";
+    let feedbackColor = "black";
+
+    if (error === 0) {
+        feedback = "✅ Perfect Measurement: No error in flow calculation.";
+        feedbackColor = "green";
+    } else if (error > 0 && error <= 5) {
+        feedback = "⚠️ Minor Overestimation: Within acceptable audit tolerance.";
+        feedbackColor = "orange";
+    } else if (error > 5 && error <= 15) {
+        feedback = "❌ Significant Overestimation: Investigate calibration.";
+        feedbackColor = "red";
+    } else if (error > 15) {
+        feedback = "🚨 Critical Error: Non-compliant, requires immediate correction.";
+        feedbackColor = "darkred";
+    } else {
+        feedback = "🔻 Underestimation: Flow is being underreported. Check pressure compensation.";
+        feedbackColor = "purple";
+    }
+
+    feedbackBox.innerHTML = `<span style="color: ${feedbackColor};">${feedback}</span>`;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+Input Validation Rules
+Input	Unit	Validation Rule	Rationale (Compliance/Safety)
+Specified Density (ρ_specified)	kg/m³	- Required	
+
+Numeric only
+
+0
+
+Min threshold: 0.1 kg/m³ (below = gas/vacuum, unrealistic for steam/liquid)
+
+Max threshold: 1200 kg/m³ (water at 4°C, upper physical limit)
+
+Decimal precision ≤ 2 | Ensures physical realism. Prevents zero/negative values which cause division by zero or unsafe misreporting. |
+| Actual Density (ρ_actual) | kg/m³ | Same as above + cannot be exactly zero + must be within ±90% of specified density | Prevents operator input mistakes (e.g., typing 1000 instead of 10). Real-world steam density variations are <±50%. |
+| Cross-field Dependency | — | Ratio ρ_specified / ρ_actual must be between 0.1 and 10 | Outside range = measurement or data entry error. |
+| Decimals & Units | — | - Allow max 2 decimal places
+
+Units must be explicitly shown (kg/m³) in UI | Consistent with energy audits and ISO reports. |
+
+3. Edge Case Validations
+
+Division by Zero: If ρ_actual = 0 → block calculation, return error.
+
+Extreme Ratios: If error > ±100% → warn “Inputs unrealistic; check data”.
+
+Identical Inputs: If ρ_specified = ρ_actual → Error = 0 (perfect match).
+
+Very Small Densities (<1 kg/m³): Warn that inputs look like gas/vacuum, not steam.
+
+Negative Values: Hard reject (physically impossible).
+
+4. Output Validation & Thresholds
+
+From safety/audit practice:
+
+Error Range (%)	Interpretation	Compliance Action
+0 %	✅ Perfect measurement	Record as calibrated
+0–5 %	⚠️ Minor deviation	Acceptable (ISO/ASHRAE energy audits allow ±5%)
+5–15 %	❌ Significant deviation	Investigate meter calibration & density assumptions
+>15 %	🚨 Critical deviation	Non-compliant with ISO/OSHA reporting, immediate corrective action needed
+
+-->

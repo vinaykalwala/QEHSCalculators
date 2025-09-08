@@ -1,0 +1,781 @@
+{% extends 'base.html' %}
+{% block title %}Friction Factor Calculator (Reynolds Number){% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friction Factor Calculator (Reynolds Number)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px极25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+        
+        /* 🔹 Common container for results */
+        .re-f-results {
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        /* 🔹 Individual result cards */
+        .re-result,
+        .f-result {
+            flex: 1;
+            background: #f9f9f9;
+            border: 2px solid #1560bd;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* 🔹 Headings */
+        .re-result h3,
+        .f-result h3 {
+            font-size: 18px;
+            color: #1560bd;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* 🔹 Values */
+        .re-result p,
+        .f-result p {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'qualitycategory_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Friction Factor Calculator (Reynolds Number)</h1>
+            <p>Calculates the friction factor for turbulent fluid flow in pipes using Reynolds number</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator Input Card -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="density">Density (ρ) [kg/m³]</label>
+                    <input type="number" id="density" class="form-input" min="0.001" step="any" placeholder="Enter fluid density">
+                </div>
+
+                <div class="form-group">
+                    <label for="velocity">Velocity (u) [m/s]</label>
+                    <input type="number" id="velocity" class="form-input" min="0.001" step="any" placeholder="Enter fluid velocity">
+                </div>
+
+                <div class="form-group">
+                    <label for="diameter">Pipe Diameter (D) [m]</label>
+                    <input type="number" id="diameter" class="form-input" min="0.001" step="any" placeholder="Enter pipe diameter">
+                </div>
+
+                <div class="form-group">
+                    <label for="viscosity">Dynamic Viscosity (μ) [kg/m·s]</label>
+                    <input type="number" id="viscosity" class="form-input" min="0.000001" step="any" placeholder="Enter viscosity">
+                </div>
+
+                <button class="calculate-btn" onclick="calculateFrictionFactor()">Calculate Friction Factor</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Fluid flow illustration">
+                    <p>This tool calculates the <strong>friction factor</strong> and <strong>Reynolds number</strong> for turbulent fluid flow. Enter your parameters to see results.</p>
+                </div>
+
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Calculation Results</h2>
+                    </div>
+                    
+                    <div class="re-f-results">
+                        <div class="re-result">
+                            <h3>Reynolds Number (Re)</h3>
+                            <p id="reynoldsValue">0.00</p>
+                        </div>
+                        <div class="f-result">
+                            <h3>Friction Factor (f)</h3>
+                            <p id="frictionValue">0.000000</p>
+                        </div>
+                    </div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">Flow Interpretation</div>
+                        <div class="feedback-content" id="flowFeedback"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🔎 About This Calculator</h3>
+                <p>
+                    The <strong>Friction Factor Calculator</strong> determines the friction factor for turbulent fluid flow in pipes using Reynolds number. It helps engineers assess flow characteristics, pressure loss, and optimize piping system design.
+                </p> 
+            </div>
+            
+            <div class="note-card">
+                <h3>📌 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Density (ρ):</strong> Required, must be > 0 kg/m³ (0.1–2000 kg/m³ typical)</li>
+                    <li><strong>Velocity (u):</strong> Required, must be > 0 m/s (0.01–15 m/s typical)</li>
+                    <li><strong>Pipe Diameter (D):</strong> Required, must be > 0 m (0.005–5 m typical)</li>
+                    <li><strong>Dynamic Viscosity (μ):</strong> Required, must be > 0 kg/m·s (1e-6–100 typical)</li>
+                    <li><strong>Flow Type:</strong> Formula only valid for turbulent flow (Re ≥ 4000)</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ Explanation of Parameters</h3>
+                <ul class="note-list">
+                    <li><strong>Density (ρ):</strong> The mass per unit volume of the fluid, measured in kg/m³.</li>
+                    <li><strong>Velocity (u):</strong> The speed of the fluid flowing through the pipe, measured in m/s.</li>
+                    <li><strong>Pipe Diameter (D):</strong> The internal diameter of the pipe, measured in meters.</li>
+                    <li><strong>Dynamic Viscosity (μ):</strong> The fluid's internal resistance to flow, measured in kg/(m·s).</li>
+                    <li><strong>Reynolds Number (Re):</strong> A dimensionless quantity representing the ratio of inertial forces to viscous forces.</li>
+                    <li><strong>Friction Factor (f):</strong> A dimensionless number that quantifies resistance due to pipe friction.</li>
+                </ul>
+            </div>
+      
+            <div class="note-card formula-card">
+                <h3>🧮 Formula</h3>
+                <p>The calculator uses these formulas:</p>
+                <code>Re = (ρ × u × D) / μ</code><br><br>
+                <code>f = 0.079 / Re^(0.25)  [for turbulent flow, Re ≥ 4000]</code>
+                <p>Where:</p>
+                <ul class="note-list">
+                    <li>Re = Reynolds Number (dimensionless)</li>
+                    <li>f = Friction Factor (dimensionless)</li>
+                    <li>ρ = Fluid Density (kg/m³)</li>
+                    <li>u = Fluid Velocity (m/s)</li>
+                    <li>D = Pipe Diameter (m)</li>
+                    <li>μ = Dynamic Viscosity (kg/m·s)</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Pipelines & Water Distribution:</strong> Calculate pressure loss in municipal water supply systems.</li>
+                    <li><strong>HVAC Systems:</strong> Determine airflow resistance in ventilation and ducting systems.</li>
+                    <li><strong>Oil & Gas Pipelines:</strong> Estimate energy loss in crude oil, natural gas, and chemical pipelines.</li>
+                    <li><strong>Fire Hydrants & Sprinklers:</strong> Ensure proper water flow for firefighting systems.</li>
+                    <li><strong>Industrial Fluid Transport:</strong> Design piping systems for chemical, slurry, and process fluid transport.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Conclusion</h3>
+                <p>This formula provides a quick and reliable estimate of frictional losses in fluid transport. It helps engineers design efficient, cost-effective, and safe piping systems, minimizing energy losses while ensuring optimal flow conditions.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateFrictionFactor() {
+            const density = document.getElementById("density").value.trim();
+            const velocity = document.getElementById("velocity").value.trim();
+            const diameter = document.getElementById("diameter").value.trim();
+            const viscosity = document.getElementById("viscosity").value.trim();
+            
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+            const reynoldsValue = document.getElementById('reynoldsValue');
+            const frictionValue = document.getElementById('frictionValue');
+            const feedbackBox = document.getElementById('flowFeedback'); 
+            
+            let errors = [];
+            let warnings = [];
+            
+            // ✅ Density validation
+            if (density === "") {
+                errors.push("👉 Please enter the fluid density (kg/m³).");
+            } else if (isNaN(density)) {
+                errors.push("👉 Density must be a number.");
+            } else if (parseFloat(density) <= 0) {
+                errors.push("👉 Density must be greater than 0.");
+            } else if (parseFloat(density) < 0.1 || parseFloat(density) > 2000) {
+                warnings.push("⚠️ Density outside typical range (0.1–2000 kg/m³).");
+            }
+            
+            // ✅ Velocity validation
+            if (velocity === "") {
+                errors.push("👉 Please enter the fluid velocity (m/s).");
+            } else if (isNaN(velocity)) {
+                errors.push("👉 Velocity must be a number.");
+            } else if (parseFloat(velocity) <= 0) {
+                errors.push("👉 Velocity must be greater than 0.");
+            } else if (parseFloat(velocity) > 15) {
+                warnings.push("⚠️ Velocity exceeds safe design limit (>15 m/s). Risk of erosion/cavitation.");
+            }
+            
+            // ✅ Pipe diameter validation
+            if (diameter === "") {
+                errors.push("👉 Please enter the pipe diameter (m).");
+            } else if (isNaN(diameter)) {
+                errors.push("👉 Pipe diameter must be a number.");
+            } else if (parseFloat(diameter) <= 0) {
+                errors.push("👉 Pipe diameter must be greater than 0.");
+            } else if (parseFloat(diameter) < 0.005 || parseFloat(diameter) > 5) {
+                warnings.push("⚠️ Pipe diameter outside normal range (0.005–5 m).");
+            }
+            
+            // ✅ Viscosity validation
+            if (viscosity === "") {
+                errors.push("👉 Please enter the dynamic viscosity (kg/m·s).");
+            } else if (isNaN(viscosity)) {
+                errors.push("👉 Dynamic viscosity must be a number.");
+            } else if (parseFloat(viscosity) <= 0) {
+                errors.push("👉 Dynamic viscosity must be greater than 0.");
+            } else if (parseFloat(viscosity) < 1e-6 || parseFloat(viscosity) > 100) {
+                warnings.push("⚠️ Viscosity outside typical fluid range (1e-6 – 100).");
+            }
+            
+            // Show errors
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden");
+            }
+            
+            const rho = parseFloat(density);
+            const u = parseFloat(velocity);
+            const D = parseFloat(diameter);
+            const mu = parseFloat(viscosity);
+            
+            // ✅ Calculate Reynolds Number (Re)
+            const Re = (rho * u * D) / mu;
+            reynoldsValue.textContent = Re.toFixed(2);
+            
+            // ✅ Check Flow Type and Calculate Friction Factor
+            let feedback = "";
+            let f = 0;
+            
+            if (Re < 2000) {
+                feedback = "ℹ️ <strong>Laminar Flow:</strong> Reynolds number is below 2000. Friction factor calculation not applicable.";
+                frictionValue.textContent = "N/A";
+            } else if (Re >= 2000 && Re < 4000) {
+                feedback = "⚠️ <strong>Transitional Flow:</strong> Flow is in transition between laminar and turbulent. Friction factor calculation not reliable.";
+                frictionValue.textContent = "N/A";
+            } else {
+                // ✅ Calculate Friction Factor (f) for turbulent flow
+                f = 0.079 / Math.pow(Re, 0.25);
+                frictionValue.textContent = f.toFixed(6);
+                
+                // ✅ Feedback based on friction factor value
+                if (f < 0.005) {
+                    feedback = "⚠️ <strong>Very Low Friction Factor:</strong> Smooth pipe, minimal resistance.";
+                } else if (f >= 0.005 && f <= 0.02) {
+                    feedback = "✅ <strong>Optimal Friction Factor:</strong> Suitable for most engineering applications.";
+                } else {
+                    feedback = "❌ <strong>High Friction Factor:</strong> Significant energy loss, consider pipe material and size.";
+                }
+                
+                feedback += "<br>Formula valid for turbulent flow (Re ≥ 4000).";
+            }
+            
+            // Show warnings if any
+            if (warnings.length > 0) {
+                feedback += " | " + warnings.join(" ");
+            }
+            
+            feedbackBox.innerHTML = feedback;
+            
+            placeholder.classList.add('hidden');
+            resultValue.classList.remove('hidden');
+        }
+        
+        function printReport() {
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+Input Validation Rules 
+
+Each input must reflect real-world engineering limits. If inputs are outside, operators may misjudge flow → risks like pipe burst, pump cavitation, or fire suppression system failure.
+
+Density (ρ) [kg/m³]
+
+Must be > 0.
+
+Typical range for fluids: 0.2 (gas) → 2000 (heavy slurries).
+
+Valid input range: 0.1 – 2000 kg/m³.
+
+❌ Reject outside this (unrealistic for gases/liquids).
+
+Velocity (u) [m/s]
+
+Must be > 0.
+
+Typical engineering range: 0.01 – 15 m/s.
+
+15 m/s → warning (risk of erosion/cavitation in pipes).
+
+Pipe Diameter (D) [m]
+
+Must be > 0.
+
+Typical range: 0.005 – 5 m.
+
+<0.005 → unrealistic (needle-size).
+
+5 → reject (very rare in industry).
+
+Viscosity (μ) [kg/m·s]
+
+Must be > 0.
+
+Typical fluids:
+
+Air ≈ 1.8 × 10⁻⁵
+
+Water ≈ 1 × 10⁻³
+
+Oils ≈ 0.01 – 10
+
+Valid range: 1e-6 – 100.
+
+❌ Reject outside this.
+
+Decimals
+
+Allow up to 4 decimal places for precision, but round internally to avoid meaningless noise.
+
+2️⃣ Output Validation Logic
+Reynolds Number (Re)
+
+Formula:
+
+𝑅
+𝑒
+=
+𝜌
+⋅
+𝑢
+⋅
+𝐷
+𝜇
+Re=
+μ
+ρ⋅u⋅D
+	​
+
+
+Flow Classification (for safety reports):
+
+Laminar (Re < 2000) → smooth flow, no turbulence.
+
+Transitional (2000 ≤ Re < 4000) → unstable, unpredictable.
+
+Turbulent (Re ≥ 4000) → swirling, energy loss, risk of vibration.
+
+Friction Factor (f) (valid only for turbulent)
+
+Formula (Blasius approx. for smooth pipes):
+
+𝑓
+=
+0.079
+𝑅
+𝑒
+0.25
+f=
+Re
+0.25
+0.079
+	​
+
+
+Interpretation thresholds:
+
+f < 0.005 → ⚠️ Very low resistance (smooth pipe).
+
+0.005 ≤ f ≤ 0.02 → ✅ Normal safe range.
+
+f > 0.02 → ❌ High energy loss (risk of overheating pumps, wasted energy).
+
+3️⃣ Edge Cases Handling
+
+Zero inputs → division by zero error.
+
+Negative inputs → reject.
+
+Extremely high Re (>1e8) → warn (numerical instability).
+
+Viscosity near 0 → huge Re → reject as unrealistic.
+
+Tiny diameter with high velocity → check Re, but warn operator (jet-like unsafe flow).
+
+
+            <div class="note-card formula-card">
+                <h3>🧮 Formula</h3>
+                <p>The calculator uses these formulas:</p>
+                <code>Re = (ρ × u × D) / μ</code><br><br>
+                <code>f = 0.079 / Re^(0.25)  [for turbulent flow, Re ≥ 4000]</code>
+                <p>Where:</p>
+                <ul class="note-list">
+                    <li>Re = Reynolds Number (dimensionless)</li>
+                    <li>f = Friction Factor (dimensionless)</li>
+                    <li>ρ = Fluid Density (kg/m³)</li>
+                    <li>u = Fluid Velocity (m/s)</li>
+                    <li>D = Pipe Diameter (m)</li>
+                    <li>μ = Dynamic Viscosity (kg/m·s)</li>
+                </ul>
+            </div>
+-->

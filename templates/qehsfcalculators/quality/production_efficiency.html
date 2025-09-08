@@ -1,0 +1,636 @@
+{% extends 'base.html' %}
+{% block title %}Production Efficiency Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Efficiency Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Additional styles for efficiency calculator */
+        .input-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+        
+        .error {
+            color: #ff6b6b;
+            font-size: 14px;
+            margin-top: 5px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'qualitycategory_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Production Efficiency Calculator</h1>
+            <p>Calculates production efficiency based on output, standard time, manpower, and working time</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator Input Card -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="pcs">Production (PCs)</label>
+                    <input type="number" id="pcs" class="form-input" min="0" step="0.01" placeholder="Enter production count">
+                    <span class="error" id="pcs-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="smv">Standard Minute Value (SMV)</label>
+                    <input type="number" id="smv" class="form-input" min="0" step="0.01" placeholder="Enter SMV">
+                    <span class="error" id="smv-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="manpower">Manpower (HEL + OPR)</label>
+                    <input type="number" id="manpower" class="form-input" min="0" step="0.01" placeholder="Enter manpower count">
+                    <span class="error" id="manpower-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="workingTime">Working Time (Minutes)</label>
+                    <input type="number" id="workingTime" class="form-input" min="0" step="0.01" placeholder="Enter working minutes">
+                    <span class="error" id="workingTime-error"></span>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateEfficiency()">Calculate Efficiency</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Efficiency illustration">
+                    <p>This tool calculates <strong>production efficiency</strong> in percentage. Enter your production data to see results.</p>
+                </div>
+
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Production Efficiency</h2>
+                    </div>
+                    <div class="rate-value" id="efficiencyValue">0.00</div>
+                    <div class="rate-label"><strong>%</strong></div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">Efficiency Interpretation</div>
+                        <div class="feedback-content" id="efficiencyFeedback"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🔎 About This Calculator</h3>
+                <p>
+                    The <strong>Production Efficiency Calculator</strong> measures how effectively labor and time are utilized in manufacturing and production. A higher efficiency percentage indicates better productivity and optimized resource usage.
+                </p> 
+            </div>
+            
+            <div class="note-card">
+                <h3>📌 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Production (PCs):</strong> Required, must be > 0</li>
+                    <li><strong>Standard Minute Value (SMV):</strong> Required, must be > 0</li>
+                    <li><strong>Manpower (HEL + OPR):</strong> Required, must be > 0</li>
+                    <li><strong>Working Time (Minutes):</strong> Required, must be > 0</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ Why Must Input Values Be Greater Than 0?</h3>
+                <ul class="note-list">
+                    <li><strong>Production (PCs) > 0:</strong> No production means no efficiency can be calculated.</li>
+                    <li><strong>SMV > 0:</strong> Every product takes some time to manufacture.</li>
+                    <li><strong>Manpower > 0:</strong> If no workers are available, no time can be utilized.</li>
+                    <li><strong>Working Time > 0:</strong> Without time allocation, efficiency becomes undefined.</li>
+                </ul>
+            </div>
+      
+            <div class="note-card">
+                <h3>📊 Efficiency Interpretation Guidelines</h3>
+                <ul class="note-list">
+                    <li><strong>Below 50%:</strong> Low efficiency - process optimization needed</li>
+                    <li><strong>50-90%:</strong> Moderate efficiency - room for improvement</li>
+                    <li><strong>Above 90%:</strong> Excellent efficiency - optimal performance</li>
+                    <li><strong>Above 100%:</strong> Exceptional performance - exceeding standards</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Practical Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Manufacturing:</strong> To assess production performance and identify bottlenecks</li>
+                    <li><strong>Quality Control:</strong> To identify inefficiencies and improve processes</li>
+                    <li><strong>Resource Planning:</strong> To optimize manpower and time allocation</li>
+                    <li><strong>Performance Monitoring:</strong> To track productivity improvements over time</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>🎯 Conclusion</h3>
+                <p>A higher efficiency value means better productivity and cost savings. By tracking efficiency, companies can improve workflow, reduce waste, maximize output, and maintain competitive advantage in manufacturing operations.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateEfficiency() {
+    const pcs = document.getElementById("pcs").value.trim();
+    const smv = document.getElementById("smv").value.trim();
+    const manpower = document.getElementById("manpower").value.trim();
+    const workingTime = document.getElementById("workingTime").value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const outputValue = document.getElementById('efficiencyValue');
+    const feedbackBox = document.getElementById('efficiencyFeedback'); 
+
+    // Reset
+    errorMessage.innerHTML = "";
+    document.querySelectorAll(".error").forEach(e => e.textContent = "");
+
+    let errors = [];
+
+    // --- Validation rules ---
+    const pcsNum = parseFloat(pcs);
+    const smvNum = parseFloat(smv);
+    const manpowerNum = parseFloat(manpower);
+    const workingTimeNum = parseFloat(workingTime);
+
+    if (!pcs || isNaN(pcsNum) || pcsNum <= 0 || pcsNum > 1000000) {
+        errors.push("👉 Production must be >0 and ≤1,000,000 pcs/day.");
+        document.getElementById('pcs-error').textContent = "Invalid production count.";
+    }
+    if (!smv || isNaN(smvNum) || smvNum <= 0 || smvNum > 200) {
+        errors.push("👉 SMV must be >0 and ≤200 minutes per piece.");
+        document.getElementById('smv-error').textContent = "Invalid SMV.";
+    }
+    if (!manpower || isNaN(manpowerNum) || manpowerNum <= 0 || manpowerNum > 5000 || !Number.isInteger(manpowerNum)) {
+        errors.push("👉 Manpower must be an integer >0 and ≤5000.");
+        document.getElementById('manpower-error').textContent = "Invalid manpower count.";
+    }
+    if (!workingTime || isNaN(workingTimeNum) || workingTimeNum <= 0 || workingTimeNum > 1440 || !Number.isInteger(workingTimeNum)) {
+        errors.push("👉 Working time must be between 30 and 1440 minutes/day.");
+        document.getElementById('workingTime-error').textContent = "Invalid working time.";
+    }
+
+    // Show errors
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // --- Calculation ---
+    const earnedMinute = pcsNum * smvNum;
+    const availableMinute = manpowerNum * workingTimeNum;
+
+    if (availableMinute === 0) {
+        errorMessage.innerHTML = "❌ Cannot divide by zero (invalid manpower or working time).";
+        errorBox.classList.remove("hidden");
+        return;
+    }
+
+    let efficiency = (earnedMinute / availableMinute) * 100;
+
+    // --- Outlier handling ---
+    if (efficiency > 200) {
+        errorMessage.innerHTML = "⚠️ Efficiency exceeds 200%. Please check input values.";
+        errorBox.classList.remove("hidden");
+    }
+
+    outputValue.textContent = efficiency.toFixed(2);
+
+    // --- Feedback ---
+    let feedback = "";
+    let color = "black";
+
+    if (efficiency < 50) {
+        feedback = "❌ Low efficiency. Review workflow, training, or equipment utilization.";
+        color = "red";
+    } else if (efficiency < 90) {
+        feedback = "🔵 Moderate efficiency. Improvement opportunities exist.";
+        color = "blue";
+    } else if (efficiency <= 100) {
+        feedback = "✅ Excellent efficiency. Aligned with ISO/OSHA best practices.";
+        color = "green";
+    } else {
+        feedback = "🎯 Exceptional performance. Verify sustainability and audit compliance.";
+        color = "purple";
+    }
+
+    feedbackBox.innerHTML = `<span style="color:${color};">${feedback}</span>`;
+
+    placeholder.classList.add("hidden");
+    resultValue.classList.remove("hidden");
+}
+
+function printReport() {
+    window.print();
+}
+
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+Detailed Input Validation Rules
+Input	Validation Rule	Acceptable Range	Units	Compliance Justification
+Production (pcs)	Required, integer or decimal, >0	1 → 1,000,000 pcs/day	Units (pcs)	0 means no output; extreme >1M pcs flagged as unrealistic for daily audit.
+SMV (Standard Minute Value)	Required, >0, 2 decimal max	0.1 → 200 mins/pc	Minutes	Must be >0 (no product is made instantly); >200 flagged as outlier.
+Manpower (HEL + OPR)	Required, integer, >0	1 → 5,000 workers	Count	Zero manpower invalid (ILO/OSHA principle: no work without workers). Extreme >5k flagged as unrealistic for a single line.
+Working Time	Required, >0	30 → 1440 mins/day	Minutes	<30 mins flagged (too short for shift); >1440 invalid (exceeds 24h).
+
+Decimals → Allow max 2 decimals for SMV & production, 0 for manpower and time (usually whole numbers in audits).
+
+Cross-field dependency checks:
+
+Earned minutes must not exceed 10× available minutes (else data entry error).
+
+Efficiency >200% should trigger a warning (possible input mistake).
+
+⚠️ 3. Edge Case Validations
+
+Division by zero → Manpower or working time = 0 → Efficiency undefined.
+
+All inputs empty → Show single error box instead of multiple.
+
+Negative inputs → Not allowed, flagged immediately.
+
+Extreme outliers → Efficiency >200% flagged as “check data validity”.
+
+Floating manpower → Round down to nearest whole number (compliance: manpower is always discrete).
+
+📊 4. Output Validation & Interpretation
+Efficiency %	Interpretation	Compliance Meaning
+<50%	❌ Low efficiency	High idle time → resource wastage (ILO non-compliance risk).
+50–90%	🔵 Moderate	Acceptable, but needs process improvement for ISO certification.
+90–100%	✅ Excellent	Balanced manpower & workload → meets OSHA/ISO audit standards.
+>100%	🎯 Exceptional (possible data error if >200%)	May indicate overtime, rework, or misreporting → must be validated in audits.
+            <div class="note-card formula-card">
+                <h3>📐 Formula for Efficiency Calculation</h3>
+                <ul class="note-list">
+                    <li><strong>Earned Minutes</strong> = Production (PCs) × Standard Minute Value (SMV)</li>
+                    <li><strong>Available Minutes</strong> = Manpower × Working Time (Minutes)</li>
+                    <li><strong>Efficiency</strong> = (Earned Minutes ÷ Available Minutes) × 100%</li>
+                </ul>
+            </div>
+
+-->

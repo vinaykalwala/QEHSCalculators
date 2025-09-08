@@ -1,0 +1,638 @@
+{% extends 'base.html' %}
+{% block title %}Process Capability (Cp, Cpk) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Process Capability (Cp, Cpk) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Additional styles for Cp/Cpk layout */
+        .input-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+        
+        .cp-cpk-results {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .cp-result, .cpk-result {
+            flex: 1;
+            background: #1560bd;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .cp-result h3, .cpk-result h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+        }
+        
+        .cp-result p, .cpk-result p {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'qualitycategory_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Process Capability (Cp, Cpk) Calculator</h1>
+            <p>Calculates process capability indices to determine how well a process can produce outputs within specification limits</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator Input Card -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                    <div class="form-group">
+                        <label for="usl">Upper Specification Limit (USL)</label>
+                        <input type="number" id="usl" class="form-input" step="0.01" placeholder="Enter USL">
+                    </div>
+                    <div class="form-group">
+                        <label for="lsl">Lower Specification Limit (LSL)</label>
+                        <input type="number" id="lsl" class="form-input" step="0.01" placeholder="Enter LSL">
+                    </div>
+                    <div class="form-group">
+                        <label for="mean">Process Mean (μ)</label>
+                        <input type="number" id="mean" class="form-input" step="0.01" placeholder="Enter μ">
+                    </div>
+                    <div class="form-group">
+                        <label for="sigma">Standard Deviation (σ)</label>
+                        <input type="number" id="sigma" class="form-input" step="0.01" placeholder="Enter σ">
+                    </div>
+        
+
+                <button class="calculate-btn" onclick="calculateCpCpk()">Calculate Cp and Cpk</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Quality control illustration">
+                    <p>This tool calculates <strong>process capability indices</strong> (Cp and Cpk). Enter your specification limits and process parameters to see results.</p>
+                </div>
+
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Process Capability Results</h2>
+                    </div>
+                    
+                    <div class="cp-cpk-results">
+                        <div class="cp-result">
+                            <h3>Cp</h3>
+                            <p id="cpValue">0.00</p>
+                        </div>
+                        <div class="cpk-result">
+                            <h3>Cpk</h3>
+                            <p id="cpkValue">0.00</p>
+                        </div>
+                    </div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">Process Capability Interpretation</div>
+                        <div class="feedback-content" id="capabilityFeedback"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🔎 About This Calculator</h3>
+                <p>
+                    The <strong>Process Capability Calculator</strong> helps determine how well a process can produce outputs within specified limits. It calculates the Cp (potential capability) and Cpk (actual capability) indices, which are critical for quality control and process improvement.
+                </p> 
+            </div>
+            
+            <div class="note-card">
+                <h3>📌 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Upper Specification Limit (USL):</strong> Required, must be a valid number</li>
+                    <li><strong>Lower Specification Limit (LSL):</strong> Required, must be a valid number</li>
+                    <li><strong>Process Mean (μ):</strong> Required, must be a valid number</li>
+                    <li><strong>Standard Deviation (σ):</strong> Required, must be > 0</li>
+                    <li><strong>Specification Range:</strong> USL must be greater than LSL</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ Explanation of Parameters</h3>
+                <ul class="note-list">
+                    <li><strong>Upper Specification Limit (USL):</strong> The maximum acceptable value for the process output.</li>
+                    <li><strong>Lower Specification Limit (LSL):</strong> The minimum acceptable value for the process output.</li>
+                    <li><strong>Process Mean (μ):</strong> The average value of the process output.</li>
+                    <li><strong>Standard Deviation (σ):</strong> A measure of the variability in the process output.</li>
+                    <li><strong>Cp (Process Capability):</strong> Measures the potential capability by comparing process spread to specification limits.</li>
+                    <li><strong>Cpk (Process Capability Index):</strong> Considers both process variability and how centered the process is between limits.</li>
+                </ul>
+            </div>
+      
+            <div class="note-card">
+                <h3>📊 Interpretation Guidelines</h3>
+                <ul class="note-list">
+                    <li><strong>Cp/Cpk < 1:</strong> Process is not capable - outputs exceed specification limits</li>
+                    <li><strong>Cp/Cpk = 1:</strong> Process is marginally capable</li>
+                    <li><strong>Cp/Cpk ≥ 1.33:</strong> Process is capable and meets quality standards</li>
+                    <li><strong>Cp/Cpk ≥ 1.67:</strong> Process is highly capable (Six Sigma target: 2.0)</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Conclusion</h3>
+                <p>Maintaining high Cp and Cpk values indicates a consistent and reliable process, ensuring better product quality and reduced defects. Regular monitoring of these indices helps identify process improvements and maintain quality standards in manufacturing and service industries.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateCpCpk() {
+    const usl = document.getElementById("usl").value.trim();
+    const lsl = document.getElementById("lsl").value.trim();
+    const mean = document.getElementById("mean").value.trim();
+    const sigma = document.getElementById("sigma").value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const cpValue = document.getElementById('cpValue');
+    const cpkValue = document.getElementById('cpkValue');
+    const feedbackBox = document.getElementById('capabilityFeedback'); 
+
+    let errors = [];
+
+    // ✅ Input presence
+    if (!usl) errors.push("👉 Enter the Upper Specification Limit (USL).");
+    if (!lsl) errors.push("👉 Enter the Lower Specification Limit (LSL).");
+    if (!mean) errors.push("👉 Enter the Process Mean (μ).");
+    if (!sigma) errors.push("👉 Enter the Standard Deviation (σ).");
+
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    const uslNum = parseFloat(usl);
+    const lslNum = parseFloat(lsl);
+    const meanNum = parseFloat(mean);
+    const sigmaNum = parseFloat(sigma);
+
+    // ✅ Numeric validations
+    if (isNaN(uslNum) || isNaN(lslNum) || isNaN(meanNum) || isNaN(sigmaNum)) {
+        errorMessage.innerHTML = "❌ All inputs must be valid numbers.";
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    if (uslNum <= lslNum) {
+        errorMessage.innerHTML = "❌ USL must be greater than LSL.";
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    if (sigmaNum <= 0) {
+        errorMessage.innerHTML = "❌ Standard Deviation must be greater than zero.";
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    // ✅ Warning for mean outside limits
+    if (meanNum < lslNum || meanNum > uslNum) {
+        errorMessage.innerHTML = "⚠️ Process Mean is outside specification limits. This will result in a very low Cpk.";
+        errorBox.classList.remove("hidden");
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // ✅ Calculations
+    const Cp = (uslNum - lslNum) / (6 * sigmaNum);
+    const Cpk = Math.min(
+        (uslNum - meanNum) / (3 * sigmaNum),
+        (meanNum - lslNum) / (3 * sigmaNum)
+    );
+
+    cpValue.textContent = Cp.toFixed(2);
+    cpkValue.textContent = Cpk.toFixed(2);
+
+    // ✅ Interpretation
+    let feedback = "";
+    if (Cp < 1) feedback += "❌ Process not capable (Cp < 1). ";
+    if (Cpk < 1) feedback += "❌ Process not centered or too variable (Cpk < 1). ";
+    if (Cp >= 1.33 && Cpk >= 1.33) feedback += "✅ Process is capable and meets industry standards. ";
+    if (Cp >= 1.67 && Cpk >= 1.67) feedback += "🎯 Process is highly capable (world-class quality). ";
+
+    feedbackBox.innerHTML = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+function printReport() {
+    window.print();
+}
+
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+Input Validation Rules
+Input	Validation	Acceptable Range	Justification
+USL (Upper Spec Limit)	Required, numeric, > LSL	Engineering realistic values	USL must exceed LSL.
+LSL (Lower Spec Limit)	Required, numeric, < USL	Non-negative (≥ 0 unless negative specs are justified)	Ensures proper spec range.
+Process Mean (μ)	Required, numeric	Should lie between USL & LSL (flag warning if not)	If outside, process is unstable.
+Standard Deviation (σ)	Required, numeric, > 0	0.01 ≤ σ ≤ 1000	Zero σ = division by zero, negative is invalid.
+Decimals	Max 2–3 decimals	Matches industrial reporting precision	Avoids misleading false precision.
+3. Edge Case Validations
+
+Division by zero → If σ = 0, Cp and Cpk are undefined. Must reject.
+
+USL = LSL → Cp = 0 (process tolerance = 0). Invalid spec design.
+
+Mean outside USL/LSL → Warn user; Cpk will be very low.
+
+Unrealistic ratios → Cp > 10 or Cpk > 10 → likely data entry error.
+
+Extreme σ (e.g., > tolerance range) → Show warning of unstable process.
+
+4. Output Validation Logic & Thresholds
+
+Industry standard (AIAG, Six Sigma, ISO):
+
+Cp < 1.0 → Not capable (process spread > spec range).
+
+Cp ≥ 1.33 → Capable (common industry minimum).
+
+Cp ≥ 1.67 → Highly capable (critical safety equipment).
+
+Cp ≥ 2.0 → Six Sigma level.
+
+Cpk considers centering:
+
+Cpk < 1.0 → Process off-center or too variable.
+
+Cp good but Cpk poor → Misalignment between process mean and target.
+
+
+-->

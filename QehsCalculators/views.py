@@ -3200,6 +3200,16 @@ def safety_excavation_slope_calculator(request):
 
 @login_required
 @subscription_required(plan_type="corporate")
+def safety_equivalent_circulating_density_calculator(request):
+    return render(
+        request,
+        'qehsfcalculators/safety/equivalent_circulating_density.html',
+        {'title': 'Equivalent Circulating Density (ECD) Calculator'}
+    )
+
+
+@login_required
+@subscription_required(plan_type="corporate")
 def safety_energy_requirement_for_a_flow_type_application_calculator(request):
     return render(request, 'qehsfcalculators/safety/energy_requirement_for_a_flow_type_application.html', {'title': 'Energy Requirement for a Flow-Type Application Calculator'})
 
