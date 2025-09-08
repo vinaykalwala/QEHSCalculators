@@ -1,0 +1,781 @@
+{% extends 'base.html' %}
+{% block title %}Half-Life Decay Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Half-Life Decay Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 38px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+    <!-- HALF-LIFE DECAY CALCULATOR (replaces previous heat-exchanger block) -->
+<div class="calculator-header">
+  <h1>Half-Life Decay Calculator</h1>
+  <p>Compute remaining quantity after decay. Result shows <strong>Remaining Quantity</strong>, <strong>% remaining</strong>, and <strong>half-lives elapsed</strong>. Keep consistent time units (e.g., seconds, minutes, hours, days).</p>
+</div>
+
+<div class="calc-content">
+  <div class="calc-card">
+    <h2>Enter Data</h2>
+
+    <div class="form-group">
+      <label for="initialQuantity"><strong>Initial Quantity (N₀)</strong> — (Bq, mg, kg, mol, copies, etc.) *</label>
+      <input type="number" id="initialQuantity" class="form-input" step="any" placeholder="e.g., 1.2e6">
+    </div>
+
+    <div class="form-group">
+      <label for="halfLife"><strong>Half-Life (τ)</strong> — same time units as Time Elapsed *</label>
+      <input type="number" id="halfLife" class="form-input" step="any" placeholder="e.g., 30" >
+    </div>
+
+    <div class="form-group">
+      <label for="timeElapsed"><strong>Time Elapsed (t)</strong> — same units as τ *</label>
+      <input type="number" id="timeElapsed" class="form-input" step="any" placeholder="e.g., 90">
+    </div>
+
+    <button class="calculate-btn" onclick="calculateCorrosionRate()">Calculate Remaining Quantity</button>
+  </div>
+
+  <!-- Result Section -->
+  <div class="result-card">
+    <div class="result-placeholder" id="placeholder">
+      <img src="https://cdn-icons-png.flaticon.com/512/2921/2921222.png" alt="Decay illustration">
+      <p>This tool computes the remaining quantity after exponential decay. Results are audit-friendly and include checks/warnings.</p>
+    </div>
+
+    <div class="result-error hidden" id="resultError" role="alert" aria-live="polite">
+      <div class="error-icon">❌</div>
+      <div class="error-message" id="errorMessage"></div>
+    </div>
+
+    <div class="result-value hidden" id="resultValue" aria-live="polite">
+      <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+        <h2>Decay Results</h2>
+      </div>
+
+      <div class="rate-display" style="display:flex; gap:24px; align-items:center;">
+        <div>
+          <div class="rate-label" style="font-size:14px; color:#2980b9;">Remaining Quantity (N)</div>
+          <div class="rate-value" id="rateValue">0.00</div>
+          <div class="rate-label" id="unitLabel" style="font-size:12px; color:#666;">same units as N₀</div>
+        </div>
+
+        <div>
+          <div class="rate-label" style="font-size:14px; color:#2980b9;">% Remaining</div>
+          <div class="rate-value" id="percentValue">0.00</div>
+          <div class="rate-label" style="font-size:12px; color:#666;">%</div>
+        </div>
+
+        <div>
+          <div class="rate-label" style="font-size:14px; color:#2980b9;">Half-Lives Elapsed</div>
+          <div class="rate-value" id="halfLivesValue">0.00</div>
+          <div class="rate-label" style="font-size:12px; color:#666;">n = t/τ</div>
+        </div>
+      </div>
+
+      <div class="result-feedback">
+        <div class="feedback-title">Assessment</div>
+        <div class="feedback-content" id="feedbackContent"></div>
+      </div>
+
+      <div class="btn-wrapper">
+        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Notes section tuned for half-life -->
+<div class="note-section">
+  <div class="note-card">
+    <h3>About</h3>
+    <p>
+      Uses the half-life exponential decay model. Provide an initial quantity and the half-life in the same time units as the elapsed time.
+      The calculator reports remaining quantity, fraction remaining, and number of half-lives elapsed. Record units and timestamp for audits.
+    </p>
+  </div>
+
+  <div class="note-card">
+    <h3>Input Validations</h3>
+    <ul class="note-list">
+      <li><b>N₀:</b> required; numeric; > 0; typ. range 1e-12 – 1e30 (reject clearly unrealistic magnitudes as likely unit errors).</li>
+      <li><b>τ (half-life):</b> required; numeric; > 0; typical range accepted: 1e-9 – 1e9 (units flexible; must match t).</li>
+      <li><b>t (elapsed time):</b> required; numeric; ≥ 0; same units as τ; very large t/τ will produce effectively zero remaining.</li>
+      <li><b>Precision:</b> up to 6 decimals accepted; outputs show fixed or exponential notation depending on magnitude.</li>
+      <li><b>Cross-checks:</b> If t = 0 → N = N₀. Warn if t/τ is extremely large (>1e6) or extremely small (<1e-6).</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>Applications</h3>
+    <ul class="note-list">
+      <li>Radioactive material storage planning and clearance scheduling.</li>
+      <li>Estimating environmental pollutant persistence for remediation planning.</li>
+      <li>Pharmacokinetics: drug clearance and dosing interval planning.</li>
+      <li>Industrial safety audits and record keeping for hazardous materials.</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>QEHS considerations</h3>
+    <ul>
+      <li>Always log N₀, τ, t, units, computed N, %, timestamp and any warnings for compliance and investigations.</li>
+      <li>Watch for unit mismatches (e.g., τ in seconds while t in hours) — this is the most frequent source of error.</li>
+      <li>When computed N is extremely small (< detection limit), record as “Below detection / effectively zero” and log detection limit.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+/* error UI helper (kept pattern) */
+function showErrors(errors) {
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+
+  errorMessage.innerHTML = errors.join("<br>");
+  errorBox.classList.remove("hidden");
+  placeholder.classList.add("hidden");
+  resultValue.classList.add("hidden");
+}
+
+/* Main calculator function (name preserved so your button still works) */
+function calculateCorrosionRate() {
+  // raw strings
+  const sN0 = document.getElementById("initialQuantity").value.trim();
+  const sTau = document.getElementById("halfLife").value.trim();
+  const sT = document.getElementById("timeElapsed").value.trim();
+
+  const placeholder = document.getElementById("placeholder");
+  const errorBox = document.getElementById("resultError");
+  const resultValue = document.getElementById("resultValue");
+  const rateEl = document.getElementById("rateValue");
+  const percentEl = document.getElementById("percentValue");
+  const halfEl = document.getElementById("halfLivesValue");
+  const feedbackEl = document.getElementById("feedbackContent");
+  const unitLabel = document.getElementById("unitLabel");
+
+  errorBox.classList.add("hidden");
+  feedbackEl.innerHTML = "";
+
+  const errors = [];
+  const warnings = [];
+
+  const isFiniteNum = v => Number.isFinite(v) && !Number.isNaN(v);
+  const decLen = s => (s && s.includes('.')) ? s.split('.')[1].length : 0;
+
+  // presence
+  if (sN0 === "") errors.push("👉 Enter initial quantity (N₀).");
+  if (sTau === "") errors.push("👉 Enter half-life (τ).");
+  if (sT === "") errors.push("👉 Enter elapsed time (t).");
+  if (errors.length) return showErrors(errors);
+
+  // parse
+  const N0 = parseFloat(sN0);
+  const tau = parseFloat(sTau);
+  const t = parseFloat(sT);
+
+  if (!isFiniteNum(N0)) errors.push("👉 N₀ must be numeric.");
+  if (!isFiniteNum(tau)) errors.push("👉 τ (half-life) must be numeric.");
+  if (!isFiniteNum(t)) errors.push("👉 t (elapsed time) must be numeric.");
+  if (errors.length) return showErrors(errors);
+
+  // basic value checks
+  if (!(N0 > 0)) errors.push("👉 N₀ must be > 0.");
+  if (!(tau > 0)) errors.push("👉 τ (half-life) must be > 0 (same time units as t).");
+  if (!(t >= 0)) errors.push("👉 t (elapsed time) must be ≥ 0.");
+
+  // practical magnitude checks (catch unit errors)
+  if (N0 < 1e-18 || N0 > 1e30) warnings.push("⚠️ N₀ is outside typical magnitudes — check units (Bq, mg, kg, mol, etc.).");
+  if (tau < 1e-12 || tau > 1e12) warnings.push("⚠️ τ is unusually small or large — verify time units and correctness.");
+  if (t > 1e12) warnings.push("⚠️ t is extremely large — ensure time units are correct.");
+
+  if (errors.length) return showErrors(errors);
+
+  // precision warnings
+  if (decLen(sN0) > 6) warnings.push("⚠️ N₀ has >6 decimals; results may be rounded.");
+  if (decLen(sTau) > 6) warnings.push("⚠️ τ has >6 decimals; results may be rounded.");
+  if (decLen(sT) > 6) warnings.push("⚠️ t has >6 decimals; results may be rounded.");
+
+  // compute
+  const halfLives = t / tau; // n = t/τ
+  const ln2 = Math.LN2;      // ~0.693147...
+  let remaining;
+  // handle underflow: if halfLives is huge, Math.exp will underflow to 0
+  if (halfLives > 1e6) {
+    remaining = 0; // effectively zero, too many half-lives
+    warnings.push("⚠️ t/τ is extremely large — remaining amount is effectively zero (underflow).");
+  } else {
+    const exponent = -ln2 * halfLives;
+    remaining = N0 * Math.exp(exponent);
+    // if remaining rounds to zero due to floating point, call it zero
+    if (!isFiniteNum(remaining)) remaining = 0;
+    if (Math.abs(remaining) !== 0 && Math.abs(remaining) < Number.MIN_VALUE) {
+      remaining = 0;
+      warnings.push("⚠️ Remaining amount below numeric precision — reported as zero.");
+    }
+  }
+
+  // percentages
+  const pctRemaining = (N0 === 0) ? 0 : (remaining / N0) * 100;
+
+  // plausibility warnings
+  if (t === 0) warnings.push("ℹ️ t = 0 → no decay occurred (N = N₀).");
+  if (halfLives < 1e-6) warnings.push("ℹ️ t ≪ τ — decay negligible over given time.");
+  if (halfLives > 1000) warnings.push("⚠️ t/τ > 1000 — remaining amount is essentially zero.");
+
+  // interpretation / classification (QEHS)
+  let classification = "";
+  if (pctRemaining === 0) classification = "Effectively zero remaining (below numeric/detection limits).";
+  else if (pctRemaining < 0.01) classification = "Negligible — <0.01% remains.";
+  else if (pctRemaining < 1) classification = "Very low remaining — <1% remains.";
+  else if (pctRemaining < 10) classification = "Low remaining — 1–10% remains.";
+  else if (pctRemaining < 50) classification = "Moderate remaining — 10–50% remains.";
+  else classification = "High remaining — >50% remains; consider exposure/controls.";
+
+  // formatting helper
+  const fmt = (v) => {
+    if (!isFiniteNum(v)) return "NaN";
+    const abs = Math.abs(v);
+    if (v === 0) return "0";
+    if ((abs >= 1e-3) && (abs < 1e6)) {
+      // choose decimals: larger numbers fewer decimals
+      if (abs >= 100) return v.toFixed(2);
+      if (abs >= 1) return v.toFixed(4);
+      return v.toFixed(6);
+    }
+    return v.toExponential(4);
+  };
+
+  // render outputs
+  rateEl.textContent = fmt(remaining);
+  percentEl.textContent = (pctRemaining === 0) ? "0.00" : pctRemaining.toFixed(6);
+  halfEl.textContent = halfLives.toFixed(6);
+  unitLabel.textContent = "same units as N₀";
+
+  // build details
+  let details = `<div><b>Remaining (N):</b> ${fmt(remaining)} (same units as N₀)</div>`;
+  details += `<div style="margin-top:6px;"><b>% remaining:</b> ${pctRemaining.toFixed(6)}%</div>`;
+  details += `<div style="margin-top:6px;"><b>Half-lives elapsed (t/τ):</b> ${halfLives.toFixed(6)}</div>`;
+  details += `<div style="margin-top:6px;"><b>Interpretation:</b> ${classification}</div>`;
+  details += `<div style="margin-top:6px; font-size:0.95em;">Inputs → N₀: <b>${fmt(N0)}</b>, τ: <b>${tau}</b>, t: <b>${t}</b> (units must match)</div>`;
+  if (warnings.length) details += `<div style="margin-top:8px; color:#b35d00;">${warnings.join(" | ")}</div>`;
+
+  feedbackEl.innerHTML = details;
+
+  // show result UI
+  placeholder.classList.add("hidden");
+  resultValue.classList.remove("hidden");
+  errorBox.classList.add("hidden");
+}
+
+/* Print helper (kept) */
+function printReport() {
+  const el = document.getElementById('printDate');
+  if (el) {
+    el.textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+  window.print();
+}
+</script>
+
+
+
+
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+<!--
+=======================================
+ Radioactive Decay / Half-Life Calculator
+=======================================
+
+ Formula:
+   Remaining quantity, N(t) = N₀ × e^(−ln(2) × t / τ)
+
+ Where:
+   N₀   = Initial quantity (Bq, mol, g, kg… any consistent unit)
+   τ    = Half-life (same time units as t)
+   t    = Elapsed time
+   n    = t / τ (number of half-lives passed)
+
+ Outputs:
+   • N(t)          → Remaining quantity (same units as N₀)
+   • % remaining   → (N / N₀) × 100
+   • Half-lives    → t / τ (dimensionless)
+
+---------------------------------------
+ Input Validations
+---------------------------------------
+ • N₀ (initial quantity)
+   - Must be numeric
+   - Must be > 0
+   - Warning if < 1e-18 or > 1e30 → unusual magnitude (check units)
+
+ • τ (half-life)
+   - Must be numeric
+   - Must be > 0
+   - Same time units as t
+   - Warning if < 1e−12 or > 1e12 → may indicate wrong units
+
+ • t (elapsed time)
+   - Must be numeric
+   - Must be ≥ 0
+   - Warning if > 1e12 → unrealistic size, check units
+
+ • Precision
+   - More than 6 decimal places → results rounded
+
+---------------------------------------
+ Output Validations
+---------------------------------------
+ • N(t) must be finite and ≥ 0
+ • If t/τ > 1e6 → treat as effectively zero (underflow)
+ • If result < machine precision → report as 0
+ • % remaining must be between 0 and 100
+ • Half-lives (t/τ) must be finite
+
+---------------------------------------
+ Output Interpretation (QEHS context)
+---------------------------------------
+ • N = N₀ (t = 0) → no decay
+ • % remaining > 50% → High remaining, possible exposure concern
+ • 10–50% → Moderate remaining
+ • 1–10% → Low remaining
+ • <1% → Very low, essentially decayed
+ • <0.01% → Negligible
+ • = 0 → Effectively zero (below numeric or detection limits)
+
+---------------------------------------
+ Warnings
+---------------------------------------
+ • t ≪ τ → negligible decay
+ • t/τ > 1000 → essentially zero remaining
+ • Extremely large t or small τ may cause exponential underflow
+-->
+
+

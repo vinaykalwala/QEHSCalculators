@@ -1,0 +1,667 @@
+{% extends 'base.html' %}
+{% block title %}Energy Requirement for a Flow-Type Application Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy Requirement for a Flow-Type Application Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+              .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            {% comment %} max-width: 700px; {% endcomment %}
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 480px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .heating { color: #e74c3c; font-weight: 600; }
+        .cooling { color: #3498db; font-weight: 600; }
+        .neutral { color: #7f8c8d; font-weight: 600; }
+    </style>
+</head>
+<body>
+      <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+   <div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Energy Requirement for a Flow-Type Application Calculator</h1>
+            <p>Calculate heat transfer rate for industrial systems like heat exchangers, cooling systems, and power plants</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="m_dot">Mean Secondary Fluid Flowrate (ṁ) (kg/s)</label>
+                    <input type="number" id="m_dot" class="form-input" step="any" placeholder="e.g., 2.5">
+                </div>
+                <div class="form-group">
+                    <label for="cp">Specific Heat Capacity (cₚ) (kJ/kg°C)</label>
+                    <input type="number" id="cp" class="form-input" step="any" placeholder="e.g., 4.18">
+                </div>
+                <div class="form-group">
+                    <label for="dT">Temperature Change (ΔT) (°C)</label>
+                    <input type="number" id="dT" class="form-input" step="any" placeholder="e.g., 15">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateEnergyRequirement()">Calculate Heat Transfer Rate</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                   <img src="https://img.icons8.com/fluency/96/process.png" alt="Flow process icon" width="100">
+                    <p>This tool will calculate the <strong>Heat Transfer Rate</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Heat Transfer Rate</h2></div>
+                    <div class="rate-value" id="rateValue">0.00</div>
+                    <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">Kilowatts (kW)</div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Process Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Energy Requirement for a Flow-Type Application Calculator</strong> helps determine heat transfer in industrial systems such as heat exchangers, cooling systems, and power plants.
+                </p>
+            </div>
+            
+            <div class="note-card">
+                <h3>🔧 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Heat Exchangers:</strong> Optimizing heat transfer efficiency between two fluids.</li>
+                    <li><strong>Cooling Systems:</strong> Calculating energy required for heating or cooling in HVAC and refrigeration.</li>
+                    <li><strong>Power Plants:</strong> Understanding heat energy transfer in turbines and condensers.</li>
+                    <li><strong>Manufacturing:</strong> Managing process temperatures in chemical, food, and pharmaceutical industries.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>❓ What Does a Negative Result Mean?</h3>
+                <p>If the heat transfer rate (Q̇) is <strong class="cooling">negative</strong>, it indicates a cooling process, meaning heat is being removed from the fluid.</p>
+                <ul class="note-list">
+                    <li><span class="heating">Q̇ &gt; 0 → Heating Process:</span> Energy is added, increasing temperature.</li>
+                    <li><span class="cooling">Q̇ &lt; 0 → Cooling Process:</span> Energy is removed, decreasing temperature.</li>
+                    <li><span class="neutral">Q̇ = 0 → No Heat Transfer:</span> The fluid remains at the same temperature.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+    <h3>⚖️ Validation Rules Applied</h3>
+    <ul class="note-list">
+        <li><strong>Flowrate (ṁ):</strong> > 0, typical range 0.01–10,000 kg/s. Warnings if outside.</li>
+        <li><strong>Specific Heat Capacity (cₚ):</strong> > 0, realistic range 0.5–10 kJ/kg°C.</li>
+        <li><strong>Temperature Change (ΔT):</strong> -200 to 500 °C. Positive = heating, negative = cooling.</li>
+        <li><strong>Outputs:</strong> Q̇ reported in kW. Warnings shown if absolute Q̇ > 100,000 kW.</li>
+        <li><strong>All inputs must be numeric:</strong> No blank or text entries allowed.</li>
+    </ul>
+</div>
+
+            
+            <div class="note-card">
+                <h3>📋 How to Use This Calculator</h3>
+                <ul class="note-list">
+                    <li>Enter the fluid flowrate (ṁ), specific heat capacity (cₚ), and temperature change (ΔT).</li>
+                    <li>Click "Calculate Heat Transfer Rate" to compute the result.</li>
+                    <li>The result displays the heat transfer rate in kW along with feedback based on the value.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateEnergyRequirement() {
+    const m_dot = document.getElementById('m_dot').value.trim();
+    const cp = document.getElementById('cp').value.trim();
+    const dT = document.getElementById('dT').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+
+    /*
+    ===============================
+    Validation Rules (QEHS aligned)
+    ===============================
+    ṁ (Flowrate): >0, range 0.01–10,000 kg/s
+    cₚ (Specific Heat Capacity): >0, realistic 0.5–10 kJ/kg°C
+    ΔT (Temperature Change): numeric, range -200 to 500 °C
+    */
+
+    // Flowrate Validation
+    if (m_dot === "") {
+        errors.push("👉 Please enter the mean secondary fluid flowrate (ṁ).");
+    } else {
+        const num = parseFloat(m_dot);
+        if (isNaN(num) || num <= 0) {
+            errors.push("👉 Flowrate (ṁ) must be a number greater than 0.");
+        } else if (num < 0.01 || num > 10000) {
+            errors.push("⚠️ Flowrate is outside typical industrial range (0.01–10,000 kg/s). Please verify.");
+        }
+    }
+
+    // Specific Heat Capacity Validation
+    if (cp === "") {
+        errors.push("👉 Please enter the specific heat capacity (cₚ).");
+    } else {
+        const num = parseFloat(cp);
+        if (isNaN(num) || num <= 0) {
+            errors.push("👉 Specific heat capacity must be a number greater than 0.");
+        } else if (num < 0.5 || num > 10) {
+            errors.push("⚠️ Specific heat capacity is outside realistic physical range (0.5–10 kJ/kg°C). Please verify.");
+        }
+    }
+
+    // Temperature Change Validation
+    if (dT === "") {
+        errors.push("👉 Please enter the temperature change (ΔT).");
+    } else {
+        const num = parseFloat(dT);
+        if (isNaN(num)) {
+            errors.push("👉 Temperature change must be a valid number.");
+        } else if (num < -200 || num > 500) {
+            errors.push("⚠️ Temperature change is outside safe range (-200 to 500 °C). Please verify.");
+        }
+    }
+
+    // Handle Errors
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // Calculation
+    const m = parseFloat(m_dot);
+    const c = parseFloat(cp);
+    const dt = parseFloat(dT);
+
+    const Qdot = m * c * dt; // Units: kW
+
+    if (!isFinite(Qdot)) {
+        errorMessage.innerHTML = "❌ Invalid calculation result. Please check inputs.";
+        errorBox.classList.remove("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    document.getElementById('rateValue').textContent = Qdot.toFixed(4);
+
+    // Process Assessment
+    let feedback = "";
+    if (Qdot > 0) {
+        feedback = `<span class="heating">Heating process:</span> Energy is being added to the fluid.`;
+        if (Qdot > 100000) {
+            feedback += ` ⚠️ Extremely high heat transfer detected. Review process safety controls.`;
+        }
+    } else if (Qdot < 0) {
+        feedback = `<span class="cooling">Cooling process:</span> Energy is being removed from the fluid.`;
+        if (Math.abs(Qdot) > 100000) {
+            feedback += ` ⚠️ Extremely high cooling load detected. Verify design limits.`;
+        }
+    } else {
+        feedback = `<span class="neutral">No heat transfer:</span> The fluid temperature remains unchanged.`;
+    }
+
+    document.getElementById('feedbackContent').innerHTML = feedback;
+
+    placeholder.classList.add("hidden");
+    resultValue.classList.remove("hidden");
+}
+
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+
+
+
+
+{% comment %} 
+
+1. Formula (to keep as a code comment)
+/*
+Formula:
+Q̇ = ṁ × cₚ × ΔT
+
+Where:
+Q̇  = Heat Transfer Rate (kW)
+ṁ   = Mean Secondary Fluid Flowrate (kg/s)
+cₚ  = Specific Heat Capacity (kJ/kg°C)
+ΔT  = Temperature Change (°C)
+
+Notes:
+- 1 kJ/s = 1 kW, so no further unit conversion is required.
+*/
+
+2. Detailed Input Validation Rules (QEHS/Fire Safety Perspective)
+
+a. Flowrate (ṁ, kg/s)
+
+Must be > 0 (no negative or zero flow).
+
+Typical range for industrial cooling/heating: 0.01 – 10,000 kg/s.
+
+Allowed decimals: up to 3 places.
+
+Cross-check: If flowrate > 1000, warn user (“Value is very high, verify process scale”).
+
+Compliance: Unrealistic flowrate can cause design errors in heat exchanger sizing and emergency cooling systems.
+
+b. Specific Heat Capacity (cₚ, kJ/kg°C)
+
+Must be > 0.
+
+Physical limits: 0.5 – 10 kJ/kg°C.
+
+Typical:
+
+Water = 4.18
+
+Oils = 1.5–3.0
+
+Air = ~1.0
+
+More than 10 → flag as unrealistic.
+
+Compliance: Wrong cₚ leads to under/overestimation of cooling loads, impacting fire suppression and process safety.
+
+c. Temperature Change (ΔT, °C)
+
+Can be negative (cooling) or positive (heating).
+
+Logical range: -200 ≤ ΔT ≤ 500 °C.
+
+ΔT = 0 → should return Q̇ = 0 with a neutral process message.
+
+Compliance: ΔT beyond realistic thresholds may indicate sensor error, hazardous overheating, or cryogenic risk.
+
+3. Output Validation & Thresholds
+
+Q̇ > 0 → Heating process, must display warning if Q̇ exceeds 100,000 kW (large power plant scale).
+
+Q̇ < 0 → Cooling process, must flag if absolute value > 100,000 kW.
+
+Q̇ = 0 → Neutral (no transfer).
+
+Compliance: Very high heat transfer may require fire safety reviews (risk of runaway reactions or overheating). {% endcomment %}

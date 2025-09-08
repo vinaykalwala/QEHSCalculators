@@ -1,0 +1,750 @@
+{% extends 'base.html' %}
+{% block title %}Hazen-Williams Hydraulic Flow Velocity Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hazen-Williams Hydraulic Flow Velocity Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 30px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+
+
+<div class="calculator-header">
+  <h1>Hazen-Williams Hydraulic Flow Velocity Calculator</h1>
+  <p>Estimate flow velocity <strong>U</strong> (m/s) using an empirical Hazen-Williams form. Enter consistent units: <strong>r_H (m)</strong>, <strong>S (m/m)</strong>, <strong>C (dimensionless)</strong>.</p>
+</div>
+
+<div class="calc-content">
+  <div class="calc-card">
+    <h2>Enter Data</h2>
+
+    <div class="form-group">
+      <label for="C"><strong>Hazen-Williams Coefficient (C) — dimensionless *</strong></label>
+      <input type="number" id="C" class="form-input" step="any" placeholder="e.g., 100">
+    </div>
+
+    <div class="form-group">
+      <label for="r_H"><strong>Hydraulic Radius (r_H) — m *</strong></label>
+      <input type="number" id="r_H" class="form-input" step="any" placeholder="e.g., 0.05">
+    </div>
+
+    <div class="form-group">
+      <label for="S"><strong>Slope (S) — m/m (energy grade line) *</strong></label>
+      <input type="number" id="S" class="form-input" step="any" placeholder="e.g., 0.001">
+    </div>
+
+    <button class="calculate-btn" onclick="calculateCorrosionRate()">Calculate Flow Velocity</button>
+  </div>
+
+  <!-- Result Section (keeps your pattern for compatibility) -->
+  <div class="result-card">
+    <div class="result-placeholder" id="placeholder">
+      <img src="https://cdn-icons-png.flaticon.com/512/2921/2921222.png" alt="flow illustration">
+      <p>This tool computes velocity using an empirical Hazen-Williams velocity form and provides QEHS-oriented guidance.</p>
+    </div>
+
+    <div class="result-error hidden" id="resultError" role="alert" aria-live="polite">
+      <div class="error-icon">❌</div>
+      <div class="error-message" id="errorMessage"></div>
+    </div>
+
+    <div class="result-value hidden" id="resultValue" aria-live="polite">
+      <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+        <h2>Flow Velocity Result</h2>
+      </div>
+
+      <div class="rate-display" style="display:flex; gap:24px; align-items:center;">
+        <div>
+          <div class="rate-label" style="font-size:14px; color:#2980b9;">Velocity (U)</div>
+          <div class="rate-value" id="rateValue">0.0000</div>
+          <div class="rate-label" style="font-size:12px; color:#666;">m/s</div>
+        </div>
+
+        <div>
+          <div class="rate-label" style="font-size:14px; color:#2980b9;">Classification</div>
+          <div class="rate-value" id="classValue">—</div>
+          <div class="rate-label" style="font-size:12px; color:#666;">(qualitative)</div>
+        </div>
+      </div>
+
+      <div class="result-feedback">
+        <div class="feedback-title">Assessment & Details</div>
+        <div class="feedback-content" id="feedbackContent"></div>
+      </div>
+
+      <div class="btn-wrapper">
+        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="note-section">
+  <div class="note-card">
+    <h3>About</h3>
+        <p>
+        This calculator estimates the flow velocity of water-like fluids in pipes using the Hazen-Williams method. 
+        Inputs must use consistent SI units: <strong>hydraulic radius (r<sub>H</sub>) in meters (m)</strong>, 
+        <strong>slope (S) as m/m</strong>, and <strong>C as a dimensionless roughness coefficient</strong>. 
+        The result is reported as velocity <strong>U</strong> in <strong>m/s</strong>, suitable for hydraulic design, safety reviews, and QEHS documentation.
+        </p>
+
+  </div>
+
+  <div class="note-card">
+    <h3>Input validations (summary)</h3>
+    <ul class="note-list">
+      <li><b>C:</b> required; numeric; > 0. Typical: <b>60–150</b>. Acceptable: <b>20–300</b>. Warn if &gt;300 or &lt;20.</li>
+      <li><b>r_H (m):</b> required; numeric; > 0. Typical full-pipe: <b>0.001–2.0 m</b>. Acceptable: <b>1×10⁻⁴ – 50 m</b>.</li>
+      <li><b>S (m/m):</b> required; numeric; > 0. Typical range: <b>1×10⁻⁸ – 0.1</b>. Acceptable: <b>1×10⁻¹² – 1</b>. Warn if user likely provided % instead of m/m.</li>
+      <li><b>Precision:</b> up to 6 decimals for C and r_H; S may use more precision. Results shown to 4 significant digits.</li>
+      <li><b>Cross-checks:</b> large U (&gt;3 m/s) and/or very small r_H commonly indicate unit errors (mm → m) or slope in % → check inputs.</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>QEHS & Fire-Safety considerations</h3>
+    <ul class="note-list">
+      <li>Low velocity may cause sedimentation and reduce firefighting effectiveness.</li>
+      <li>High velocity increases erosion/corrosion risk—inspect pipe integrity and support systems.</li>
+      <li>Log all inputs, units, computed U and warnings for audits and incident investigations.</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>Applications</h3>
+    <ul class="note-list">
+      <li>Design and assessment of water distribution and fire protection piping.</li>
+      <li>Hydraulic checks for irrigation, water utilities, and building systems.</li>
+      <li>Preliminary screening for pipe erosion risk and sedimentation potential.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+/* Reuse showErrors pattern */
+function showErrors(errors) {
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+  errorMessage.innerHTML = errors.join("<br>");
+  errorBox.classList.remove("hidden");
+  placeholder.classList.add("hidden");
+  resultValue.classList.add("hidden");
+}
+
+/* Main calculator — kept name to preserve existing button wiring */
+function calculateCorrosionRate() {
+  const sC = document.getElementById("C").value.trim();
+  const srH = document.getElementById("r_H").value.trim();
+  const sS = document.getElementById("S").value.trim();
+
+  const placeholder = document.getElementById("placeholder");
+  const errorBox = document.getElementById("resultError");
+  const resultValue = document.getElementById("resultValue");
+  const rateEl = document.getElementById("rateValue");
+  const classEl = document.getElementById("classValue");
+  const feedbackEl = document.getElementById("feedbackContent");
+
+  errorBox.classList.add("hidden");
+  feedbackEl.innerHTML = "";
+
+  const errors = [];
+  const warnings = [];
+
+  const isFiniteNum = v => Number.isFinite(v) && !Number.isNaN(v);
+  const decLen = s => (s && s.includes('.')) ? s.split('.')[1].length : 0;
+
+  // presence
+  if (sC === "") errors.push("👉 Enter Hazen-Williams coefficient (C).");
+  if (srH === "") errors.push("👉 Enter hydraulic radius (r_H) in meters.");
+  if (sS === "") errors.push("👉 Enter slope (S) in m/m (energy grade line).");
+  if (errors.length) return showErrors(errors);
+
+  // parse
+  const C = parseFloat(sC);
+  const rH = parseFloat(srH);
+  const S = parseFloat(sS);
+
+  if (!isFiniteNum(C)) errors.push("👉 C must be numeric (dimensionless).");
+  if (!isFiniteNum(rH)) errors.push("👉 r_H must be numeric (m).");
+  if (!isFiniteNum(S)) errors.push("👉 S must be numeric (m/m).");
+  if (errors.length) return showErrors(errors);
+
+  // basic >0 checks
+  if (C <= 0) errors.push("👉 C must be > 0.");
+  if (rH <= 0) errors.push("👉 r_H must be > 0 m.");
+  if (S <= 0) errors.push("👉 S must be > 0 (m/m).");
+
+  // plausible ranges (reject likely unit errors)
+  if (C < 20 || C > 300) warnings.push("⚠️ C is outside typical 20–300 range — check material/age or unit error.");
+  if (rH < 1e-4 || rH > 50) warnings.push("⚠️ r_H is outside typical practical range (1e-4 – 50 m) — verify units (mm→m?).");
+  if (S < 1e-12 || S > 1) warnings.push("⚠️ S is outside typical range (1e-12 – 1). Ensure you entered slope in m/m.");
+
+  // decimal precision warnings
+  if (decLen(sC) > 6) warnings.push("⚠️ C has >6 decimals; results will be rounded.");
+  if (decLen(srH) > 6) warnings.push("⚠️ r_H has >6 decimals; results will be rounded.");
+  if (decLen(sS) > 12) warnings.push("⚠️ S has >12 decimals; results will be rounded.");
+
+  if (errors.length) return showErrors(errors);
+
+  // Heuristic unit-mismatch checks
+  if (rH > 5 && rH < 1000) {
+    // Possibly user entered pipe diameter in mm (100 mm) — suggest check
+    warnings.push("⚠️ r_H seems large for a hydraulic radius (did you enter diameter in mm instead of meters?).");
+  }
+  if (S > 1e-2 && S < 100) {
+    // slope values larger than typical for buried pipes; maybe percent used (e.g., 1% = 0.01)
+    warnings.push("⚠️ S is large for an energy slope — did you enter percent (%) instead of m/m?");
+  }
+
+  // compute velocity using Hazen-Williams empirical velocity form:
+  // U = 0.85 * C * r_H^0.63 * S^0.54
+  const U = 0.85 * C * Math.pow(rH, 0.63) * Math.pow(S, 0.54);
+
+  // numeric sanity checks
+  if (!isFiniteNum(U) || Number.isNaN(U)) return showErrors(["⚠️ Computed velocity is invalid. Check inputs for extremes or non-finite values."]);
+  if (U <= 0) return showErrors(["⚠️ Computed velocity ≤ 0. Check inputs."]);
+  if (U > 1e6) return showErrors(["⚠️ Computed velocity extremely large (>1×10⁶ m/s). Likely unit or scale error."]);
+
+  // classification (QEHS)
+  let classification = "";
+  let color = "#2c7a7b";
+  if (U < 0.01) {
+    classification = "Practically stagnant (<0.01 m/s) — severe sedimentation risk.";
+    color = "#b35d00";
+  } else if (U < 0.3) {
+    classification = "Low velocity (<0.3 m/s) — sedimentation and quality risk.";
+    color = "#b35d00";
+  } else if (U <= 1.5) {
+    classification = "Normal velocity (0.3–1.5 m/s) — typical for safe distribution.";
+    color = "#006400";
+  } else if (U <= 3.0) {
+    classification = "High velocity (1.5–3.0 m/s) — watch for erosion and noise.";
+    color = "#b35d00";
+  } else {
+    classification = "Very high velocity (>3.0 m/s) — likely erosion, pipe wear, or unit error.";
+    color = "#b00020";
+  }
+
+  // build feedback details
+  const fmt = v => {
+    if (v === 0) return "0.0000";
+    if (v >= 0.01 && v < 1000) return v.toFixed(4);
+    return v.toExponential(4);
+  };
+
+  rateEl.textContent = fmt(U);
+  classEl.textContent = classification;
+
+  let details = `<div><b>Computed velocity (U):</b> ${fmt(U)} m/s</div>`;
+  details += `<div style="margin-top:6px;"><b>Classification:</b> <span style="color:${color}; font-weight:600">${classification}</span></div>`;
+  details += `<div style="margin-top:6px; font-size:0.95em;">Inputs → C: <b>${C.toFixed(4)}</b>, r_H: <b>${rH.toFixed(6)} m</b>, S: <b>${S}</b> (m/m)</div>`;
+  if (warnings.length) details += `<div style="margin-top:8px; color:#b35d00;">${warnings.join(" | ")}</div>`;
+
+  feedbackEl.innerHTML = details;
+
+  // show results
+  placeholder.classList.add("hidden");
+  resultValue.classList.remove("hidden");
+  errorBox.classList.add("hidden");
+}
+
+/* Print helper */
+function printReport() {
+  const el = document.getElementById('printDate');
+  if (el) el.textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  window.print();
+}
+</script>
+
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+<!--
+=======================================
+ Hazen–Williams Velocity Calculator
+=======================================
+
+ Formula:
+   U = 0.85 × C × r_H^0.63 × S^0.54
+
+ Where:
+   U   = Flow velocity (m/s)
+   C   = Hazen–Williams roughness coefficient (dimensionless)
+   r_H = Hydraulic radius (m)
+   S   = Slope of energy grade line (m/m)
+
+---------------------------------------
+ Input Validations
+---------------------------------------
+ • C (Hazen–Williams coefficient)
+   - Must be numeric
+   - Must be > 0
+   - Warning if outside 20–300 → unusual for common materials
+
+ • r_H (hydraulic radius, m)
+   - Must be numeric
+   - Must be > 0
+   - Warning if < 1e−4 m or > 50 m → likely unit error (mm entered as m)
+
+ • S (slope of energy grade line, m/m)
+   - Must be numeric
+   - Must be > 0
+   - Warning if < 1e−12 or > 1 → slope unrealistic
+   - Warning if value looks like % (e.g. 1% entered as 1 instead of 0.01)
+
+ • Decimal precision
+   - >6 decimals for C or r_H, >12 for S → results rounded
+
+---------------------------------------
+ Output Validations
+---------------------------------------
+ • Computed U must be:
+   - Finite
+   - > 0
+   - Not excessively large (>1×10⁶ m/s → unit error)
+
+---------------------------------------
+ Output Classification
+---------------------------------------
+ • U < 0.01 m/s → Practically stagnant (sedimentation risk)
+ • 0.01 ≤ U < 0.3 m/s → Low velocity (sedimentation / quality issues)
+ • 0.3 ≤ U ≤ 1.5 m/s → Normal range (safe distribution)
+ • 1.5 < U ≤ 3.0 m/s → High velocity (erosion / noise risk)
+ • U > 3.0 m/s → Very high velocity (erosion / wear / unit error)
+
+---------------------------------------
+ Heuristic Warnings
+---------------------------------------
+ • r_H > 5 and <1000 → Possibly entered diameter in mm
+ • S > 0.01 → Possibly entered slope in percent (%) instead of m/m
+-->
+
+
+
