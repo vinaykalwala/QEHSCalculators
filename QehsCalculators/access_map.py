@@ -94,7 +94,27 @@ CALCULATORS = [
 
 {"name": "Percentage Error when using velocity Calculator", "url_name": "quality_percentage_error_when_using_velocity_calculator", "plan_type": "corporate", "category": "quality"},
 
+{"name": "Percentage Error When Using Pressure Calculator", "url_name": "quality_percentage_error_when_using_pressure_calculator", "plan_type": "corporate", "category": "quality"},
 
+
+{"name": "Pressure Drop & Friction Loss Calculator", "url_name": "quality_pressure_drop_and_friction_loss_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Process Capability (Cp, Cpk) Calculator", "url_name": "quality_process_capability_cp_cpk_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Production Efficiency Calculator", "url_name": "quality_production_efficiency_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Quality Loss Function Calculator (Taguchi Method)", "url_name": "quality_quality_loss_function_taguchi_method_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+
+{"name": "Relating Boiler Pressure To Heat Transfer Rate Calculator", "url_name": "quality_relating_boiler_pressure_to_heat_transfer_rate_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+
+{"name": "Reynolds Number Calculator", "url_name": "quality_reynolds_number_calculator", "plan_type": "corporate", "category": "quality"},
 
 
     # Environment Calculators
@@ -298,6 +318,18 @@ CALCULATORS = [
 {"name": "HOMA-IR Calculator", "url_name": "health_homa_ir_insulin_resistance_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Ideal Weight Calculator", "url_name": "health_ideal_weight_calculator", "plan_type": "corporate", "category": "health"},
 
+{"name": "Injury Severity Score (ISS) Calculator", "url_name": "health_injury_severity_score_iss_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Karvonen Formula Calculator", "url_name": "health_karvonen_formula_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Kidney Failure Risk Calculator", "url_name": "health_kidney_failure_risk_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Kidney STONE Score Calculator", "url_name": "health_kidney_stone_for_percutaneous_nephrolithotomy_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Lean Body Mass (LBM) Calculator", "url_name": "health_lean_body_mass_lbm_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Lille Score Calculator", "url_name": "health_lille_score_for_alcoholic_hepatitis_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Metabolic Syndrome Calculator", "url_name": "health_metabolic_syndrome_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Modified Shock Index (MSI) Calculator", "url_name": "health_modified_shock_index_msi_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "MAP & Pulse Pressure Calculator", "url_name": "health_mean_arterial_pressure_map_and_pulse_pressure_pp_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Noise Exposure Level Calculator", "url_name": "health_noise_exposure_level_leq_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Ponderal Index (PI) Calculator", "url_name": "health_ponderal_index_pi_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Daily Protein Intake Calculator", "url_name": "health_protein_intake_calculator", "plan_type": "corporate", "category": "health"},
 
 
 
