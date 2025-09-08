@@ -488,7 +488,14 @@ urlpatterns = [
     path('safety/enery_transfor_calculator/', safety_enery_transfor_calculator, name='safety_enery_transfor_calculator'),
     path('safety/erogonomic_risk_score_calculator/', safety_erogonomic_risk_score_calculator, name='safety_erogonomic_risk_score_calculator'),
     path('safety/emergency_drill_success_rate_calculator/', safety_emergency_drill_success_rate_calculator, name='safety_emergency_drill_success_rate_calculator'),
+  
     path('safety/excavation_slope_calculator/', safety_excavation_slope_calculator, name='safety_excavation_slope_calculator'),
+    path(
+    'safety/equivalent_circulating_density_calculator/',
+    safety_equivalent_circulating_density_calculator,
+    name='safety_equivalent_circulating_density_calculator'
+),
+
     path('safety/energy_requirement_for_a_flow_type_application_calculator/', safety_energy_requirement_for_a_flow_type_application_calculator, name='safety_energy_requirement_for_a_flow_type_application_calculator'),
     path('safety/equivalent_skin_factor_calculator/', safety_equivalent_skin_factor_calculator, name='safety_equivalent_skin_factor_calculator'),
     path('safety/employee_training_cost_calculator/', safety_employee_training_cost_calculator, name='safety_employee_training_cost_calculator'),
