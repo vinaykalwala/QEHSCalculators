@@ -1,0 +1,804 @@
+{% extends 'base.html' %}
+{% block title %}Fracture Volume Calculator (PKN Model){% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fracture Volume Calculator (PKN Model)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        /* Input rows for side-by-side fields */
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            {% comment %} margin-top: 20px; {% endcomment %}
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+        
+        .error {
+            color: #e74c3c;
+            font-size: 14px;
+            {% comment %} margin-top: 5px; {% endcomment %}
+            display: block;
+        }
+        
+        .success {
+            color: #27ae60;
+            font-size: 16px;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Fracture Volume Calculator (PKN Model)</h1>
+            <p>Calculate the volume of a hydraulic fracture using the PKN model for oil, gas, and geothermal applications</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="xf"><strong>( x<sub>f</sub> ) Fracture Half-Length (ft)</strong></label>
+                    <input type="number" id="xf" class="form-input" min="0.1" step="0.01" placeholder="e.g., 500">
+                    <span class="error" id="feedbackXf"></span>
+                </div>
+
+                <div class="form-group">    
+                    <label for="hf"><strong>( h<sub>f</sub> ) Fracture Height (ft)</strong></label>
+                    <input type="number" id="hf" class="form-input" min="0.1" step="0.01" placeholder="e.g., 100">
+                    <span class="error" id="feedbackHf"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="wm"><strong>( w̄<sub>m</sub> ) Average Fracture Width (ft)</strong></label>
+                    <input type="number" id="wm" class="form-input" min="0.1" step="0.01" placeholder="e.g., 0.02">
+                    <span class="error" id="feedbackWm"></span>   
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateVolume()">Calculate Fracture Volume</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/851/851221.png" alt="Fracture volume diagram illustration">
+                    <p>This tool will calculate the <strong>Fracture Volume</strong> using the PKN model. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Fracture Volume</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">Volume (ft³)</div>
+                    </div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Small</span><span>Moderate</span><span>Medium</span><span>Large</span><span>Very Large</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Volume Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    
+                    <p class="success" id="feedbackResult"></p>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    This tool calculates the <strong>volume of a hydraulic fracture</strong> using the PKN model. 
+                    It helps in designing and monitoring hydraulic fracturing operations for oil, gas, and geothermal applications.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Fracture Half-Length (x<sub>f</sub>):</strong> The distance from the center of the fracture to the tip (ft).</li>
+                    <li><strong>Fracture Height (h<sub>f</sub>):</strong> The vertical height of the fracture (ft).</li>
+                    <li><strong>Average Fracture Width (w̄<sub>m</sub>):</strong> The average width of the fracture (ft).</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <p>
+                    <b>Fracture Volume Size Guidelines:</b>
+                </p>
+                <ul class="note-list">
+                    <li><span class="good">Below 100 ft³</span> → Small fracture volume</li>
+                    <li><span class="average">100-1,000 ft³</span> → Moderate fracture volume</li>
+                    <li><span class="average">1,000-10,000 ft³</span> → Medium fracture volume</li>
+                    <li><span class="bad">10,000-50,000 ft³</span> → Large fracture volume</li>
+                    <li><span class="bad">Above 50,000 ft³</span> → Very large fracture volume</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>🔑 Key Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Oil & Gas Industry:</strong> Determines fracture volume for efficient hydrocarbon extraction.</li>
+                    <li><strong>Geothermal Energy:</strong> Helps in designing heat extraction fractures.</li>
+                    <li><strong>Mining & Rock Mechanics:</strong> Optimizes underground rock fracturing.</li>
+                    <li><strong>Environmental Engineering:</strong> Assesses potential impacts of fracturing operations.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+    <h3>📈 Validation Rules (QEHS-Compliant)</h3>
+    <ul class="note-list">
+        <li><b>Fracture Half-Length (xf):</b> 10–2000 ft, >0 required, 2 decimals allowed.</li>
+        <li><b>Fracture Height (hf):</b> 10–500 ft, >0 required, 2 decimals allowed.</li>
+        <li><b>Average Fracture Width (wm):</b> 0.01–0.5 ft, >0 required, 3 decimals allowed.</li>
+        <li><b>Output Volume (Vf):</b> 1–100,000 ft³ typical. Outside this range → warning.</li>
+        <li><b>Error Prevention:</b> Negative, zero, empty, and unrealistic values blocked.</li>
+    </ul>
+</div>
+
+            
+            <div class="note-card">
+                <h3>✅ Conclusion</h3>
+                <p>
+                    Using this calculation, engineers can <strong>design effective fractures</strong> to maximize resource extraction 
+                    while ensuring environmental and structural safety.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateVolume() {
+    const xf = parseFloat(document.getElementById('xf').value.trim());
+    const hf = parseFloat(document.getElementById('hf').value.trim());
+    const wm = parseFloat(document.getElementById('wm').value.trim());
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    const feedbackXf = document.getElementById('feedbackXf');
+    const feedbackHf = document.getElementById('feedbackHf');
+    const feedbackWm = document.getElementById('feedbackWm');
+    const feedbackResult = document.getElementById('feedbackResult');
+
+    // Reset
+    feedbackXf.innerHTML = feedbackHf.innerHTML = feedbackWm.innerHTML = '';
+    errorBox.classList.add('hidden');
+
+    let errors = [];
+
+    // Validation - Fracture Half-Length
+    if (isNaN(xf)) {
+        errors.push("👉 Fracture half-length is required.");
+        feedbackXf.innerHTML = "Enter a valid number (ft).";
+    } else if (xf <= 0) {
+        errors.push("👉 Fracture half-length must be greater than 0 ft.");
+    } else if (xf < 10 || xf > 2000) {
+        errors.push("⚠️ Typical range for xf is 10–2000 ft.");
+    }
+
+    // Validation - Fracture Height
+    if (isNaN(hf)) {
+        errors.push("👉 Fracture height is required.");
+        feedbackHf.innerHTML = "Enter a valid number (ft).";
+    } else if (hf <= 0) {
+        errors.push("👉 Fracture height must be greater than 0 ft.");
+    } else if (hf < 10 || hf > 500) {
+        errors.push("⚠️ Typical range for hf is 10–500 ft.");
+    }
+
+    // Validation - Average Fracture Width
+    if (isNaN(wm)) {
+        errors.push("👉 Average fracture width is required.");
+        feedbackWm.innerHTML = "Enter a valid number (ft).";
+    } else if (wm <= 0) {
+        errors.push("👉 Average fracture width must be greater than 0 ft.");
+    } else if (wm < 0.01 || wm > 0.5) {
+        errors.push("⚠️ Typical range for wm is 0.01–0.5 ft.");
+    }
+
+    // Show errors if any
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    // Perform calculation
+    const Vf = 2 * xf * hf * wm;
+
+    if (!isFinite(Vf) || isNaN(Vf)) {
+        errorMessage.innerHTML = "👉 Calculation error: check inputs.";
+        errorBox.classList.remove("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    // Output range validation
+    let warnings = [];
+    if (Vf < 1 || Vf > 100000) {
+        warnings.push("⚠️ Calculated volume outside typical range (1–100,000 ft³). Verify inputs.");
+    }
+
+    document.getElementById('rateValue').textContent = Vf.toFixed(2);
+
+    // Feedback meter
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+
+    if (Vf < 100) {
+        meterWidth = '20%'; meterColor = '#2ecc71';
+        feedback = 'Small fracture volume.';
+    } else if (Vf <= 1000) {
+        meterWidth = '40%'; meterColor = '#27ae60';
+        feedback = 'Moderate fracture volume.';
+    } else if (Vf <= 10000) {
+        meterWidth = '60%'; meterColor = '#f39c12';
+        feedback = 'Medium fracture volume.';
+    } else if (Vf <= 50000) {
+        meterWidth = '80%'; meterColor = '#e67e22';
+        feedback = 'Large fracture volume.';
+    } else {
+        meterWidth = '95%'; meterColor = '#e74c3c';
+        feedback = 'Very large fracture volume. Check regulatory compliance.';
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').textContent = feedback + (warnings.length ? " " + warnings.join(" ") : "");
+
+    feedbackResult.innerHTML = "✅ Fracture volume calculated successfully.";
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+
+{% comment %} 
+🔹 1. Formula (PKN Model)
+
+The fracture volume in the PKN model is calculated as:
+
+𝑉
+𝑓
+=
+2
+×
+𝑥
+𝑓
+×
+ℎ
+𝑓
+×
+𝑤
+ˉ
+𝑚
+V
+f
+	​
+
+=2×x
+f
+	​
+
+×h
+f
+	​
+
+×
+w
+ˉ
+m
+	​
+
+
+Where:
+
+𝑥
+𝑓
+x
+f
+	​
+
+ = fracture half-length (ft)
+
+ℎ
+𝑓
+h
+f
+	​
+
+ = fracture height (ft)
+
+𝑤
+ˉ
+𝑚
+w
+ˉ
+m
+	​
+
+ = average fracture width (ft)
+
+Factor 2 accounts for both wings of the fracture.
+
+🔹 2. Input Validation Rules (Based on Real-World QEHS & Fire Safety Practices)
+Fracture Half-Length (xf)
+
+Unit: ft
+
+Min threshold: > 0 ft
+
+Practical range: 10–2000 ft (API & industry practice)
+
+Decimals allowed: Up to 2 decimals
+
+Compliance rationale: Very small values (<10 ft) indicate poor fracture growth. Very large values (>2000 ft) may suggest runaway fracture risk or unrealistic input.
+
+Fracture Height (hf)
+
+Unit: ft
+
+Min threshold: > 0 ft
+
+Practical range: 10–500 ft
+
+Decimals allowed: Up to 2 decimals
+
+Compliance rationale: Ensures the fracture remains within reservoir zones and doesn’t risk aquifer or overburden breach.
+
+Average Fracture Width (wm)
+
+Unit: ft
+
+Min threshold: > 0.001 ft (~0.3 mm)
+
+Practical range: 0.01–0.5 ft (3–150 mm)
+
+Decimals allowed: Up to 3 decimals for accuracy
+
+Compliance rationale: Width smaller than 0.001 ft is not practical; >0.5 ft is mechanically unrealistic.
+
+🔹 3. Output Validation Logic (Industry Interpretation)
+Fracture Volume (ft³)	Interpretation	QEHS/Compliance Note
+< 100	Small	Minimal environmental risk, low stimulation efficiency.
+100 – 1,000	Moderate	Safe for standard operations.
+1,000 – 10,000	Medium	Typical commercial range.
+10,000 – 50,000	Large	Requires monitoring of environmental & seismic impact.
+> 50,000	Very Large	High risk → verify with field data, risk of induced seismicity, regulatory review.
+
+/*
+=================================================
+📘 FRACTURE VOLUME CALCULATOR (PKN MODEL)
+Formula: Vf = 2 * xf * hf * wm
+Where:
+    xf = Fracture Half-Length (ft) [10–2000 ft]
+    hf = Fracture Height (ft) [10–500 ft]
+    wm = Average Fracture Width (ft) [0.01–0.5 ft]
+    Vf = Fracture Volume (ft³)
+
+Validation Rules:
+- All inputs > 0
+- xf: 10–2000 ft
+- hf: 10–500 ft
+- wm: 0.01–0.5 ft
+- Allow 2–3 decimals
+- Vf valid range: 1–100,000 ft³
+- Outliers outside range → warning
+=================================================
+*/ {% endcomment %}
