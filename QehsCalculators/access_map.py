@@ -138,6 +138,27 @@ CALCULATORS = [
 
 
 {"name": "Reynolds Number Calculator", "url_name": "quality_reynolds_number_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Sample Size Calculator", "url_name": "quality_sample_size_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Sensible Heat Gain from Infiltration Calculator", "url_name": "quality_sensible_heat_gain_from_infiltration_calculator", "plan_type": "corporate", "category": "quality"},
+
+{"name": "The Turndown Ratio Of A Steam Flowmeter Calculator", "url_name": "quality_turndown_ratio_of_a_steam_flowmeter_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Training Efficiency Calculator", "url_name": "quality_training_efficiency_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Two-Pack Mix Density Calculator", "url_name": "quality_two_pack_mix_density_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Vortex Shedding Frequency Calculator", "url_name": "quality_vortex_shedding_frequency_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Volume Solids (VS) Calculator", "url_name": "quality_volume_solids_vs_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Volume of Paint Required Calculator", "url_name": "quality_volume_of_paint_required_calculator", "plan_type": "corporate", "category": "quality"},
 
 
     # Environment Calculators
@@ -323,6 +344,36 @@ CALCULATORS = [
 
 
 {"name": "Heat transferred by condensing steam", "url_name": "environment_heat_transfer_rate_condensing_steam_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Hardy Cross Flow Update Calculator", "url_name": "environment_hardy_cross_flow_update_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Heat Gain from Lighting Calculator", "url_name": "environment_heat_gain_from_lighting_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Heat Gain from Ventilation Calculator", "url_name": "environment_heat_gain_from_ventilation_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Height Calculation for Drain Pipe Sloper", "url_name": "environment_height_calculation_for_drain_pipe_slope_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Height of Soak Pit Based on Volume Calculator", "url_name": "environment_height_of_soak_pit_based_on_volume_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Horizontal Settling Velocity (vh) Calculator", "url_name": "environment_horizontal_settling_velocity_vh_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Head Loss through Clean Flat Bar Screens Calculator", "url_name": "environment_head_loss_through_clean_flat_bar_screens_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Head Loss through Fine Screens Calculator", "url_name": "environment_head_loss_through_fine_screens_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Incineration DRE Calculator", "url_name": "environment_incineration_dre_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Kinematic Viscosity Calculator", "url_name": "environment_kinematic_viscosity_calculator", "plan_type": "corporate", "category": "environment"},
 
     # Health Calculators
    {"name": "Army Body Fat Calculator", "url_name": "health_army_body_fat_calculator", "plan_type": "corporate", "category": "health"},
@@ -555,6 +606,26 @@ CALCULATORS = [
 {"name": "Fracture Gradient Calculator", "url_name":"safety_fracture_gradient_calculator", "plan_type": "corporate", "category": "safety"},
 
 {"name": "Fracture Width Calculator (PKN Model)", "url_name":"safety_fracture_width_pkn_model_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Fracture Volume Calculator (PKN Model)", "url_name":"safety_fracture_volume_pkn_model_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Fall Clearance Calculator", "url_name":"safety_fall_clearance_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Fluid Velocity Calculator (Pitot Tube)", "url_name":"safety_fluid_velocity_pitot_tube_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Flow Area of Safety Valve Calculator", "url_name":"safety_flow_area_of_safety_valve_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Friction Factor For Fluids (Colebrook-White) Calculator", "url_name":"safety_friction_factor_for_fluids_colebrook_white_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Formwork Adhesion Calculator", "url_name":"safety_formwork_adhesion_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Fatal Accident Rate (FAR) Calculator", "url_name":"safety_fatal_accident_rate_far_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Gas Flow Rate Calculator", "url_name":"safety_gas_flow_rate_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Hydraulic Vertical Pressure Calculator", "url_name":"safety_hydraulic_vertical_pressure_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Horizontal Stress Calculator (Breckels and van Eekelen Model)", "url_name":"safety_horizontal_stress_breckels_and_van_eekelen_model_calculator", "plan_type": "corporate", "category": "safety"},
     
     # Fire Calculators
     {"name": "Burn Rate (chemical Exposure) Calculator", "url_name": "fire_burn_rate_chemical_exposure_calculator", "plan_type": "corporate", "category": "fire"},
