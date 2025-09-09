@@ -579,6 +579,27 @@ CALCULATORS = [
     {"name": "Final design Quantity for co2 calcualtor", "url_name": "fire_final_design_quantity_for_co2_calculator", "plan_type": "corporate", "category": "fire"},
     {"name": "Flow rate calculator for Local application System", "url_name": "fire_flow_rate_for_local_application_system_calculator", "plan_type": "corporate", "category": "fire"},
 
+    {"name": "Fire Alarm System Secondary Battery -Set Calculation", "url_name": "fire_fire_alarm_system_secondary_battery_set_calculation_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Fire Safety Occupancy Calculator For Assembly and Recreation Limit", "url_name": "fire_fire_safety_occupancy_for_assembly_and_recreation_limit_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Flammable Range Calculator", "url_name": "fire_flammable_range_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Flammability Calculator for Gas Mixtures", "url_name": "fire_flammability_for_gas_mixtures_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Fauske's Vent Area Calculator", "url_name": "fire_fauskes_vent_area_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Fire Fighting Demand Calculator", "url_name": "fire_fire_fighting_demand_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Fire Hazard Risk Calculation (Fire Load Density)", "url_name": "fire_fire_hazard_risk_calculation_fire_load_density_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Heat Transfer By Conduction Calculator (Fourier's Law)", "url_name": "fire_heat_transfer_conduction_fouriers_law_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Heat Transfer Calculator convection(newtons Law)", "url_name": "fire_heat_transfer_convection_newtons_law_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Heat detector responsive time calculator", "url_name": "fire_heat_detector_responsive_time_calculator", "plan_type": "corporate", "category": "fire"},
+
+
+
+
+
+
+
+
+
+
+
 
 
 
