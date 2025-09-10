@@ -1,0 +1,723 @@
+{% extends 'base.html' %}
+{% block title %}Liquid Flow rate vs pressure drop calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liquid Flow rate vs pressure drop calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 38px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+
+<div class="calculator-header">
+    <h1>Liquid Flow Rate Calculator (V₂ from V₁ & pressures)</h1>
+    <p>
+        Calculate <strong>V₂ (m³/h)</strong> from a known flow V₁ and the measured pressures P₁ and P₂. 
+        Assumes incompressible fluid and consistent units for both pressure inputs.
+    </p>
+
+</div>
+
+<div class="calc-content">
+    <div class="calc-card">
+        <h2>Enter Data</h2>
+
+        <div class="form-group">
+            <label for="flowV1">Flowrate V₁ (m³/h)</label>
+            <input type="number" id="flowV1" class="form-input" min="0.001" step="any" placeholder="e.g., 100.0">
+        </div>
+
+        <div class="form-group">
+            <label for="pressureP1">Pressure Loss P₁ (bar)</label>
+            <input type="number" id="pressureP1" class="form-input" min="0.0001" step="any" placeholder="e.g., 1.38">
+        </div>
+
+        <div class="form-group">
+            <label for="pressureP2">Pressure Loss P₂ (bar)</label>
+            <input type="number" id="pressureP2" class="form-input" min="0" step="any" placeholder="e.g., 2.50">
+        </div>
+
+        <button class="calculate-btn" onclick="calculateFlowRate()">Calculate V₂</button>
+    </div>
+
+    <!-- Result Section (kept structure) -->
+    <div class="result-card">
+        <div class="result-placeholder" id="placeholder">
+            <img src="https://cdn-icons-png.flaticon.com/512/4727/4727260.png" alt="Flow illustration">
+        </div>
+
+        <div class="result-error hidden" id="resultError">
+            <div class="error-icon">❌</div>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <div class="result-value hidden" id="resultValue">
+            <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                <h2>Calculated Flowrate V₂</h2>
+            </div>
+
+            <div class="rate-display">
+                <div class="rate-value" id="rateValue">0.0000</div>
+                <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">m³/h</div>
+            </div>
+
+            <div class="result-feedback">
+                <div class="feedback-title">Assessment</div>
+                <div class="feedback-content" id="feedbackContent"></div>
+            </div>
+            <div class="btn-wrapper">
+                <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notes --> 
+<div class="note-section">
+  <div class="note-card">
+    <h3>📘 About This Calculator</h3>
+    <p>
+      Uses the square-root relationship between flow and pressure drop valid for orifice/venturi/acceleration-based elements.
+      Make sure P₁ and P₂ are measured in the same unit (bar here) and represent comparable pressure-loss measurements.
+    </p>
+  </div>
+
+  <div class="note-card">
+    <h3>⚠️ Input Validations</h3>
+    <p>
+    The calculator enforces strict input rules to ensure accurate and physically meaningful results:
+    </p>
+    <ul>
+    <li>✔️ <strong>Flowrate V₁ (m³/h):</strong> Must be numeric and &gt; 0. Typical operational range: 0.001 – 50,000 m³/h.</li>
+    <li>✔️ <strong>Pressure P₁ (bar):</strong> Must be numeric and &gt; 0. Prevents division by zero errors and unrealistic readings. Recommended range: 0.01 – 50 bar.</li>
+    <li>✔️ <strong>Pressure P₂ (bar):</strong> Must be numeric and ≥ 0. Can be greater or smaller than P₁, but extreme ratios are flagged as warnings.</li>
+    <li>⚠️ Very small or very large values trigger warnings to confirm measurement accuracy or unit correctness.</li>
+    <li>⚠️ Extreme pressure ratios (P₂/P₁ &lt; 0.01 or &gt; 100) trigger additional warnings for potential sensor errors.</li>
+    <li>⚠️ Very large V₂/V₁ changes (&gt;10× increase or &lt;0.1× decrease) trigger plausibility warnings.</li>
+    </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>🌍 Key Applications</h3>
+        <ul>
+        <li><strong>Fire Safety Systems:</strong> Quick screening of flow changes in sprinkler, hydrant, and standpipe systems.</li>
+        <li><strong>Pipeline Monitoring:</strong> Checking flow consistency across pressure drops in industrial fluid transport.</li>
+        <li><strong>Hydraulic Troubleshooting:</strong> Identifying abnormal flow behavior or measurement errors in process piping.</li>
+        <li><strong>QEHS Audits:</strong> Supports verification of system performance against safety and operational benchmarks.</li>
+        <li><strong>Industrial Design Checks:</strong> Preliminary design validation for pumps, orifices, and valves using measured or design pressures.</li>
+        </ul>
+
+    </div>
+</div>
+
+<script>
+/* Show error messages (keeps existing flow) */
+function showErrors(errors) {
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+
+  errorMessage.innerHTML = errors.join("<br>");
+  errorBox.classList.remove("hidden");
+  placeholder.classList.add("hidden");
+  resultValue.classList.add("hidden");
+}
+
+/* Main calculation & validation */
+function calculateFlowRate() {
+  // Inputs (trim strings first)
+  const v1Raw = (document.getElementById("flowV1").value || "").toString().trim();
+  const p1Raw = (document.getElementById("pressureP1").value || "").toString().trim();
+  const p2Raw = (document.getElementById("pressureP2").value || "").toString().trim();
+
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+  const rateEl = document.getElementById("rateValue");
+  const feedbackEl = document.getElementById("feedbackContent");
+
+  // Reset displays
+  errorBox.classList.add("hidden");
+  errorMessage.innerHTML = "";
+  feedbackEl.innerHTML = "";
+
+  const errors = [];
+  const warnings = [];
+
+  // Required checks
+  if (v1Raw === "") errors.push("👉 Please enter Flow V₁ (m³/h).");
+  if (p1Raw === "") errors.push("👉 Please enter Pressure Loss P₁ (bar).");
+  if (p2Raw === "") errors.push("👉 Please enter Pressure Loss P₂ (bar).");
+
+  if (errors.length) return showErrors(errors);
+
+  // Parse numeric
+  const v1 = parseFloat(v1Raw);
+  const p1 = parseFloat(p1Raw);
+  const p2 = parseFloat(p2Raw);
+
+  // Numeric & basic range validation
+  if (!Number.isFinite(v1) || v1 <= 0) errors.push("👉 Flow V₁ must be a number greater than 0 (m³/h).");
+  if (!Number.isFinite(p1) || p1 <= 0) errors.push("👉 Pressure P₁ must be a number > 0 bar (P₁ cannot be zero).");
+  if (!Number.isFinite(p2) || p2 < 0) errors.push("👉 Pressure P₂ must be a number ≥ 0 bar.");
+
+  // Early exit on errors
+  if (errors.length) return showErrors(errors);
+
+  // Recommended bounds and warnings (QEHS-minded)
+  if (v1 < 0.001) warnings.push("⚠️ Very small V₁ (< 0.001 m³/h). Check units and measurement precision.");
+  if (v1 > 50000) warnings.push("⚠️ Very large V₁ (> 50,000 m³/h). Verify units and that this is not an aggregated system value.");
+
+  if (p1 < 0.01) warnings.push("⚠️ Very low P₁ (< 0.01 bar). Small sensor errors can cause large V₂ errors.");
+  if (p1 > 50) warnings.push("⚠️ P₁ unusually high (>50 bar). Confirm this is a pressure-loss, not absolute pressure.");
+
+  if (p2 > 50) warnings.push("⚠️ P₂ unusually high (>50 bar). Confirm units and measurement.");
+
+  // Ratio checks
+  const ratio = p2 / p1;
+  if (!Number.isFinite(ratio)) return showErrors(["⚠️ Computed pressure ratio invalid. Check P₁ and P₂."]);
+  if (ratio <= 0) {
+    // ratio == 0 is allowed (p2==0) but flagged
+    if (p2 === 0) warnings.push("⚠️ P₂ = 0 bar → computed V₂ will be 0. Verify that P₂ measurement is correct.");
+  }
+
+  if (ratio < 0.01 || ratio > 100) warnings.push("⚠️ Extreme pressure ratio (P₂/P₁). Verify sensors/units/assignment.");
+
+  // Now compute
+  let v2;
+  try {
+    v2 = v1 * Math.sqrt(ratio);
+  } catch (e) {
+    return showErrors(["⚠️ Error computing V₂. Check input values."]);
+  }
+
+  if (!Number.isFinite(v2) || v2 < 0) {
+    return showErrors(["⚠️ Computed V₂ is invalid. Check inputs."]);
+  }
+
+  // Reasonableness check on sudden change
+  const changeFactor = v2 / v1;
+  if (changeFactor > 10) warnings.push(`⚠️ V₂ is ${changeFactor.toFixed(2)}× V₁ — large increase; verify P₂ and P₁.`);
+  if (changeFactor < 0.1) warnings.push(`⚠️ V₂ is ${changeFactor.toFixed(2)}× V₁ — large decrease; verify P₂ and P₁.`);
+
+  // Display results
+  rateEl.textContent = v2.toFixed(6);
+
+  // Conversions
+  const v2_L_per_min = v2 * 1000.0 / 60.0;               // m³/h -> L/min
+  const v2_gpm = v2 * 4.4028675;                         // m³/h -> US gpm (approx)
+
+  // Status message (generic)
+  let statusMsg = "✅ Calculation complete.";
+  // Add domain-aware hint (user must confirm design flow against code)
+  const designHint = `Compare: V₂ ≈ ${v2_gpm.toFixed(2)} US gpm. If this is for fire-system design, compare against code-required fire flow (e.g., NFPA baseline ≈ 1000 gpm for many buildings).`;
+
+  // Build details block
+  let details = `<div>V₂: <b>${v2.toFixed(6)}</b> m³/h</div>`;
+  details += `<div>→ ${v2_L_per_min.toFixed(2)} L/min</div>`;
+  details += `<div>→ ${v2_gpm.toFixed(2)} US gpm</div>`;
+  details += `<div style="margin-top:6px;">Inputs: V₁=${v1.toFixed(6)} m³/h, P₁=${p1.toFixed(4)} bar, P₂=${p2.toFixed(4)} bar</div>`;
+  details += `<div>Pressure ratio (P₂/P₁): <b>${ratio.toFixed(6)}</b></div>`;
+  if (warnings.length) {
+    details += `<div style="margin-top:8px; color:#b35d00; font-size:0.95em;">${warnings.join(" | ")}</div>`;
+  }
+  details += `<div style="margin-top:8px; color:#2c3e50; font-size:0.95em;">${designHint}</div>`;
+
+  feedbackEl.innerHTML = `<div>${statusMsg}</div>${details}`;
+
+  placeholder.classList.add("hidden");
+  resultValue.classList.remove("hidden");
+  errorBox.classList.add("hidden");
+}
+
+/* Print helper */
+function printReport() {
+  const el = document.getElementById('printDate');
+  if (el) {
+    const now = new Date();
+    el.textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+  window.print();
+}
+</script>
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+<!-- /*
+===========================================
+Flow Rate Calculation Based on Pressure Loss
+===========================================
+
+📌 Formula:
+    V₂ = V₁ * sqrt(P₂ / P₁)
+
+    where:
+      V₁ = Flow at point 1 (m³/h)
+      P₁ = Pressure at point 1 (bar)
+      P₂ = Pressure at point 2 (bar)
+      V₂ = Computed flow at point 2 (m³/h)
+
+    Optional conversions:
+      V₂_L/min = V₂ * 1000 / 60       (m³/h → L/min)
+      V₂_gpm   = V₂ * 4.4028675       (m³/h → US gpm approx.)
+
+-------------------------------------------
+✅ Input Validations:
+
+1. Required:
+   - V₁, P₁, P₂ must be provided and numeric
+
+2. Numeric & basic ranges:
+   - V₁ > 0 (m³/h)
+   - P₁ > 0 (bar)
+   - P₂ ≥ 0 (bar)
+
+3. Recommended bounds & warnings:
+   - V₁ < 0.001 → check units/precision
+   - V₁ > 50,000 → verify large system or aggregated flow
+   - P₁ < 0.01 → small sensor errors may impact V₂
+   - P₁ > 50 → unusually high, check measurement
+   - P₂ > 50 → unusually high, check measurement
+   - Pressure ratio extremes (P₂/P₁ <0.01 or >100) → verify sensors/units
+
+-------------------------------------------
+⚠️ Output Validations:
+
+1. Computed V₂ must be:
+   - Finite
+   - ≥ 0
+
+2. Reasonableness check:
+   - Sudden changes: V₂/V₁ <0.1 or >10 → warning, verify pressures
+
+3. Classification/feedback:
+   - Generic status: "✅ Calculation complete"
+   - Domain-specific hint: Compare V₂ against design flows (e.g., fire system requirements)
+
+===========================================
+*/ -->

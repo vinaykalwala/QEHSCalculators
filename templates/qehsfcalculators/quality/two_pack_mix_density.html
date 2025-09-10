@@ -1,0 +1,632 @@
+{% extends 'base.html' %}
+{% block title %}Two-Pack Mix Density Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two-Pack Mix Density Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+    </style>
+</head>
+<body>
+     <div class="btn-container">
+    <a href="{% url 'qualitycategory_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+</div>
+
+   <div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Two-Pack Mix Density Calculator</h1>
+            <p>Calculates the combined density of a two-component system using their mix ratios and individual densities</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator Input Card -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="partA">Parts of Base (A)</label>
+                    <input type="number" id="partA" class="form-input" min="0" step="1" placeholder="Enter parts of base">
+                </div>
+
+                <div class="form-group">
+                    <label for="partB">Parts of Activator (B)</label>
+                    <input type="number" id="partB" class="form-input" min="0" step="1" placeholder="Enter parts of activator">
+                </div>
+
+                <div class="form-group">
+                    <label for="densityBase">Density of Base (gm/cc)</label>
+                    <input type="number" id="densityBase" class="form-input" min="0" step="0.01" placeholder="Enter base density">
+                </div>
+
+                <div class="form-group">
+                    <label for="densityActivator">Density of Activator (gm/cc)</label>
+                    <input type="number" id="densityActivator" class="form-input" min="0" step="0.01" placeholder="Enter activator density">
+                </div>
+
+                <button class="calculate-btn" onclick="calculateMixDensity()">Calculate Mix Density</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Mix density illustration">
+                    <p>This tool calculates the <strong>mix density</strong> of a two-component system. Enter your component ratios and densities to see results.</p>
+                </div>
+
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Mix Density</h2>
+                    </div>
+                    <div class="rate-value" id="mixDensityValue">0.000</div>
+                    <div class="rate-label"><strong>gm/cc</strong></div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">Mix Density Interpretation</div>
+                        <div class="feedback-content" id="mixDensityFeedback"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🔎 About This Calculator</h3>
+                <p>
+                    The <strong>Two-Pack Mix Density Calculator</strong> calculates the combined density of a two-component system such as epoxy or paint, using their respective mix ratios and individual densities. This is essential for quality control, proper formulation, and ensuring consistent performance in industrial applications.
+                </p> 
+            </div>
+            
+            <div class="note-card">
+                <h3>📌 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Parts of Base (A):</strong> Required, must be > 0</li>
+                    <li><strong>Parts of Activator (B):</strong> Required, must be > 0</li>
+                    <li><strong>Density of Base:</strong> Required, must be > 0</li>
+                    <li><strong>Density of Activator:</strong> Required, must be > 0</li>
+                    <li><strong>Realistic Values:</strong> Densities typically range from 0.8-2.0 gm/cc for most coating materials</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ Explanation of Parameters</h3>
+                <ul class="note-list">
+                    <li><strong>Parts of Base (A):</strong> The number of parts of the base component in the mix ratio.</li>
+                    <li><strong>Parts of Activator (B):</strong> The number of parts of the activator component in the mix ratio.</li>
+                    <li><strong>Density of Base:</strong> The density of the base component, measured in grams per cubic centimeter (gm/cc).</li>
+                    <li><strong>Density of Activator:</strong> The density of the activator component, measured in grams per cubic centimeter (gm/cc).</li>
+                </ul>
+            </div>
+            
+
+            <div class="note-card">
+                <h3>📊 QEHS Importance</h3>
+                <ul class="note-list">
+                    <li><strong>Performance Assurance:</strong> Two-pack coatings cure chemically, offering superior mechanical and chemical resistance.</li>
+                    <li><strong>Durability & Safety:</strong> Accurate mixing ensures the coating reaches full strength, reducing the risk of premature failure.</li>
+                    <li><strong>Quality Control:</strong> Properly mixed systems ensure batch-to-batch consistency and minimize defects.</li>
+                    <li><strong>Environmental Compliance:</strong> Correct mix ratios ensure minimal waste and reduced emissions.</li>
+                    <li><strong>Health and Safety:</strong> Prevents unreacted chemicals that pose health hazards to applicators or end users.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Conclusion</h3>
+                <p>The ability to calculate and verify mix density is not only a technical requirement but also a vital QEHS control measure. It ensures that products perform as intended, comply with environmental standards, and are safe for use across industrial applications. Integrating mix density checks into standard operating procedures helps maintain quality assurance and supports sustainability goals through proper usage and reduced rework.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateMixDensity() {
+    const partA = document.getElementById("partA").value.trim();
+    const partB = document.getElementById("partB").value.trim();
+    const densityBase = document.getElementById("densityBase").value.trim();
+    const densityActivator = document.getElementById("densityActivator").value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const outputValue = document.getElementById('mixDensityValue');
+    const feedbackBox = document.getElementById('mixDensityFeedback'); 
+
+    let errors = [];
+
+    // Check for missing values
+    if (!partA || !partB || !densityBase || !densityActivator) {
+        errors.push("👉 Please enter values for all fields.");
+    }
+
+    // Parse inputs
+    const partANum = parseFloat(partA);
+    const partBNum = parseFloat(partB);
+    const densityBaseNum = parseFloat(densityBase);
+    const densityActivatorNum = parseFloat(densityActivator);
+
+    // Check if numeric
+    if ([partANum, partBNum, densityBaseNum, densityActivatorNum].some(isNaN)) {
+        errors.push("👉 All values must be valid numbers.");
+    }
+
+    // Validation ranges
+    if (partANum <= 0 || partBNum <= 0) {
+        errors.push("👉 Parts A and B must be greater than zero.");
+    }
+    if (!Number.isInteger(partANum) || !Number.isInteger(partBNum)) {
+        errors.push("👉 Parts A and B must be whole numbers (integers).");
+    }
+    if (partANum > 1000 || partBNum > 1000) {
+        errors.push("👉 Parts cannot exceed 1000 (unrealistic batch mix).");
+    }
+    if (densityBaseNum <= 0 || densityActivatorNum <= 0) {
+        errors.push("👉 Densities must be greater than zero.");
+    }
+    if (densityBaseNum < 0.8 || densityBaseNum > 2.0) {
+        errors.push("👉 Base density must be between 0.8 and 2.0 gm/cc.");
+    }
+    if (densityActivatorNum < 0.8 || densityActivatorNum > 2.0) {
+        errors.push("👉 Activator density must be between 0.8 and 2.0 gm/cc.");
+    }
+    if (!Number.isInteger(densityBaseNum * 100) || !Number.isInteger(densityActivatorNum * 100)) {
+        errors.push("👉 Densities can only have up to 2 decimal places.");
+    }
+
+    // Prevent divide by zero
+    if ((partANum + partBNum) === 0) {
+        errors.push("👉 Invalid mix ratio: Parts A + B cannot be zero.");
+    }
+
+    // Ratio sanity check
+    if (partANum / partBNum > 100 || partBNum / partANum > 100) {
+        errors.push("👉 A:B ratio exceeds 100:1 – unrealistic mix ratio.");
+    }
+
+    // Handle errors
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // Calculate mix density
+    const mixDensity = ((partANum * densityBaseNum) + (partBNum * densityActivatorNum)) / (partANum + partBNum);
+    outputValue.textContent = mixDensity.toFixed(3);
+
+    // Feedback logic
+    let feedback = "";
+    if (mixDensity < 1.0) {
+        feedback = "⚠️ Low density mix – likely solvent-based or lightweight coating system.";
+    } else if (mixDensity < 1.5) {
+        feedback = "✅ Medium density mix – common for industrial coatings and adhesives.";
+    } else if (mixDensity <= 2.0) {
+        feedback = "🔥 High density mix – heavy-duty protective or filled coating system.";
+    } else {
+        feedback = "❌ Unrealistic mix density – please review your input values.";
+    }
+
+    feedbackBox.textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+*-------------Input Validation Rules (Industry-Compliant)------------------*
+Inputs:
+--------------***--------------------
+Parts of Base (A)
+
+Required, numeric
+
+Must be > 0
+
+Range: 1–1000 (beyond this is unrealistic in industrial batch mixes)
+
+Integer only (parts are usually discrete whole-number ratios)
+
+----------------------------*****--------------------------
+Parts of Activator (B)
+
+Required, numeric
+
+Must be > 0
+
+Range: 1–1000
+
+Integer only
+
+----------------------------*****-----------------------
+
+Density of Base (gm/cc)
+
+Required, numeric
+
+Must be > 0
+
+Range: 0.8–2.0 gm/cc (most polymer resins, epoxies, polyurethanes, paints)
+
+Max precision: 2 decimals (e.g., 1.25 gm/cc)
+----------------------------*****---------------------------------
+Density of Activator (gm/cc)
+
+Required, numeric
+
+Must be > 0
+
+Range: 0.8–2.0 gm/cc
+
+Max precision: 2 decimals
+
+*---------------Output Validation Logic-------------------------*
+
+Formula:
+-------------------------------------------------------------------
+Mix Density = [(A × Density_A) + (B × Density_B)] / (A + B)
+-------------------------------------------------------------------
+Meaningful Ranges
+
+< 1.0 gm/cc → Low-density → solvent-based, lightweight, porous system.
+
+1.0 – 1.5 gm/cc → Normal industrial coatings & adhesives.
+
+1.5 – 2.0 gm/cc → Heavy-duty protective, filled or fire-retardant systems.
+
+> 2.2 gm/cc → ⚠️ Unrealistic for coatings → likely wrong data entry.
+
+*---------------------Edge Case Validations----------------------------------------------*
+
+Division by zero: If A + B = 0 → invalid.
+
+Zero or negative values: Must reject.
+
+Extremely high mix ratios: If ratio A:B > 100:1 or < 1:100 → warn as unrealistic.
+
+Outliers in density: < 0.8 or > 2.0 gm/cc → reject as out of practical range.
+
+Decimals check: Densities limited to 2 decimals; parts restricted to integers.
+-->

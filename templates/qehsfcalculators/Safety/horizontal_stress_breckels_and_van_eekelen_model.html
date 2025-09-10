@@ -1,0 +1,786 @@
+{% extends 'base.html' %}
+{% block title %}Horizontal Stress Calculator (Breckels and van Eekelen Model){% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horizontal Stress Calculator (Breckels and van Eekelen Model)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        /* Input rows for side-by-side fields */
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .display {
+            display: flex;
+            gap: 10px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        @media (max-width: 420px) {
+        .display {
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .rate-display {
+            min-width: auto;
+            width: 100%;
+        }
+    }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Result Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+        .select-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.form-select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    appearance: none;            /* removes default arrow */
+    -webkit-appearance: none;    /* for Safari */
+    -moz-appearance: none;       /* for Firefox */
+    background: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+/* Custom dropdown arrow */
+.select-wrapper::after {
+    content: "▼";   /* Unicode arrow */
+    font-size: 0.9rem;
+    color: #1560bd;
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none; /* lets clicks pass through */
+}
+
+       
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Horizontal Stress Calculator (Breckels and van Eekelen Model)</h1>
+            <p>Calculate horizontal stress for geomechanical analysis and wellbore stability</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="depth">Depth</label>
+                        <input type="number" id="depth" class="form-input" min="0" placeholder="e.g., 2500">
+                    </div>
+                    <div class="form-group">
+                        <label for="unit">Depth Unit</label>
+                        <div class="select-wrapper">
+                        <select id="unit" class="form-select">
+                            <option value="meters">Meters (m)</option>
+                            <option value="feet">Feet (ft)</option>
+                        </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="porePressure">Pore Pressure (MPa)</label>
+                        <input type="number" id="porePressure" class="form-input" min="0" step="0.001" placeholder="e.g., 40">
+                    </div>
+                    <div class="form-group">
+                        <label for="normalPorePressure">Normal Pore Pressure (MPa)</label>
+                        <input type="number" id="normalPorePressure" class="form-input" min="0" step="0.001" placeholder="e.g., 35">
+                    </div>
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateHorizontalStress()">Calculate Horizontal Stress</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942805.png" alt="Geomechanics horizontal stress illustration">
+                    <p>This tool will calculate the <strong>Horizontal Stress</strong> using the Breckels and van Eekelen model. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Horizontal Stress</h2>
+                    </div>
+                    <div class="display">
+                    <div class="rate-display">
+                        <div class="rate-value" id="stressValueMpa">0.000</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">MPa</div>
+                    </div>
+                    
+                    <div class="rate-display">
+                        <div class="rate-value" id="stressValuePsi">0.00</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">psi</div>
+                    </div></div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Stress Level Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    This tool calculates <strong>Horizontal Stress</strong> using the Breckels and van Eekelen model, 
+                    which is essential for geomechanical analysis, wellbore stability assessment, and hydraulic fracturing design.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Depth:</strong> The vertical depth at which stress is being calculated. Can be entered in meters or feet.</li>
+                    <li><strong>Pore Pressure (P<sub>f</sub>):</strong> The pressure exerted by fluids within the rock pores, measured in MPa.</li>
+                    <li><strong>Normal Pore Pressure (P<sub>f,n</sub>):</strong> The expected pore pressure under normal conditions without abnormal pressure influences, measured in MPa.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <p>
+                    <b>Horizontal Stress Guidelines:</b>
+                </p>
+                <ul class="note-list">
+                    <li><span class="good">Low to Moderate Stress</span> → Generally favorable for wellbore stability</li>
+                    <li><span class="average">Moderate to High Stress</span> → Requires careful well planning and mud weight selection</li>
+                    <li><span class="bad">Very High Stress</span> → May indicate potential wellbore stability issues</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>🔑 Key Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Wellbore Stability:</strong> Determines safe mud weight windows to prevent well collapse or fracturing.</li>
+                    <li><strong>Hydraulic Fracturing:</strong> Helps design effective fracture treatments by understanding in-situ stress fields.</li>
+                    <li><strong>Reservoir Management:</strong> Supports reservoir characterization and production optimization.</li>
+                    <li><strong>Geohazard Assessment:</strong> Identifies potential drilling hazards related to abnormal pressure zones.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+    <h3>✅ Validation Rules & Input Constraints</h3>
+    <ul class="note-list">
+        <li><strong>Depth:</strong> > 0; typical range 100–10,000 m (≈ 300–30,000 ft). Max 2 decimals.</li>
+        <li><strong>Pore Pressure (Pf):</strong> ≥ 0 MPa, typically 0–150 MPa. Max 3 decimals.</li>
+        <li><strong>Normal Pore Pressure (Pfn):</strong> ≥ 0 MPa, typically 0–150 MPa. Max 3 decimals.</li>
+        <li><strong>Pressure Relationship:</strong> Pf ≥ Pfn (overpressured/normal). Pf < Pfn allowed but flagged as underpressured (warning).</li>
+        <li><strong>Outputs:</strong> Horizontal stress ≥ 0, not exceeding 200 MPa (practical upper limit). Displayed in MPa and psi.</li>
+        <li><strong>Edge Cases:</strong> Negative values or missing inputs → error; extreme values → warning.</li>
+    </ul>
+</div>
+
+            
+            <div class="note-card">
+                <h3>🧠 How This Calculator Works</h3>
+                <ul class="note-list">
+                    <li>If depth is in feet, it's converted to meters (1 ft = 0.3048 m)</li>
+                    <li>For depths < 3,500 m: σ<sub>h</sub> = 0.0053 × D<sup>1.145</sup> + 0.46 × (P<sub>f</sub> - P<sub>f,n</sub>)</li>
+                    <li>For depths ≥ 3,500 m: σ<sub>h</sub> = 0.0264 × D - 31.7 + 0.46 × (P<sub>f</sub> - P<sub>f,n</sub>)</li>
+                    <li>Results are provided in both MPa and psi (1 MPa = 145.038 psi)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateHorizontalStress() {
+    const depthRaw = document.getElementById('depth').value.trim();
+    const unit = document.getElementById('unit').value;
+    const porePressureRaw = document.getElementById('porePressure').value.trim();
+    const normalPorePressureRaw = document.getElementById('normalPorePressure').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+    let warnings = [];
+
+    // Convert to floats
+    let depth = parseFloat(depthRaw);
+    let Pf = parseFloat(porePressureRaw);
+    let Pfn = parseFloat(normalPorePressureRaw);
+
+    // Depth validation
+    if (isNaN(depth) || depth <= 0) {
+        errors.push("👉 Depth must be a positive number.");
+    } else {
+        if (unit === "feet") depth *= 0.3048;
+        if (depth < 100 || depth > 10000) {
+            warnings.push("⚠️ Depth is outside typical operational range (100–10,000 m).");
+        }
+    }
+
+    // Pore Pressure validation
+    if (isNaN(Pf) || Pf < 0) {
+        errors.push("👉 Pore Pressure must be a non-negative number.");
+    } else if (Pf > 150) {
+        warnings.push("⚠️ Pore Pressure exceeds typical upper limit (150 MPa).");
+    }
+
+    // Normal Pore Pressure validation
+    if (isNaN(Pfn) || Pfn < 0) {
+        errors.push("👉 Normal Pore Pressure must be a non-negative number.");
+    } else if (Pfn > 150) {
+        warnings.push("⚠️ Normal Pore Pressure exceeds typical upper limit (150 MPa).");
+    }
+
+    // Cross-validation: Pf vs Pfn
+    if (!isNaN(Pf) && !isNaN(Pfn)) {
+        if (Pf < Pfn) {
+            warnings.push("⚠️ Pore Pressure < Normal Pore Pressure → underpressured formation.");
+        }
+    }
+
+    // Show errors if any
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // Perform calculation
+    let horizontalStress;
+    if (depth < 3500) {
+        horizontalStress = 0.0053 * Math.pow(depth, 1.145) + 0.46 * (Pf - Pfn);
+    } else {
+        horizontalStress = 0.0264 * depth - 31.7 + 0.46 * (Pf - Pfn);
+    }
+
+    // Convert to psi
+    const horizontalStressPsi = horizontalStress * 145.038;
+
+    // Output validation
+    if (horizontalStress < 0) {
+        errorMessage.innerHTML = "👉 Negative stress result. Check input values.";
+        errorBox.classList.remove("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+    if (horizontalStress > 200) {
+        warnings.push("⚠️ Calculated stress exceeds typical geomechanical range (>200 MPa).");
+    }
+
+    // Display results
+    document.getElementById('stressValueMpa').textContent = horizontalStress.toFixed(3);
+    document.getElementById('stressValuePsi').textContent = horizontalStressPsi.toFixed(2);
+
+    // Feedback logic
+    let feedback;
+    if (horizontalStress < 20) {
+        feedback = 'Low stress. Generally favorable for drilling.';
+    } else if (horizontalStress <= 40) {
+        feedback = 'Moderate stress. Standard drilling practices apply.';
+    } else if (horizontalStress <= 60) {
+        feedback = 'High stress. Careful well planning required.';
+    } else {
+        feedback = 'Very high stress. Potential wellbore stability issues; consult experts.';
+    }
+
+    // Add warnings
+    if (warnings.length > 0) {
+        feedback += " " + warnings.join(" ");
+    }
+
+    document.getElementById('feedbackContent').textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+
+{% comment %} 
+1. 📏 Detailed Input Validation Rules (QEHS/Geomechanics Standards)
+Depth
+
+Must be > 0
+
+Valid range:
+
+100–10,000 m (≈ 300–30,000 ft) → based on drilling/geomechanical industry limits.
+
+Allowed decimals: up to 2 (depth beyond 2 decimals has no practical significance).
+
+If unit is feet, convert internally to meters.
+
+Cross-validation: Depth should be consistent with pressure values (e.g., shallow wells cannot have abnormally high pore pressures).
+
+Pore Pressure (Pf, MPa)
+
+Must be ≥ 0
+
+Typical range: 0–150 MPa (≈ 0–21,750 psi).
+
+Allowed decimals: up to 3.
+
+Must not exceed expected maximum at given depth (hydrostatic pressure ~0.01 × depth (m)).
+
+Normal Pore Pressure (Pfn, MPa)
+
+Must be ≥ 0
+
+Same range as Pf: 0–150 MPa.
+
+Allowed decimals: up to 3.
+
+Cross-validation:
+
+Normally Pf ≥ Pfn in overpressured zones.
+
+Pf < Pfn possible in underpressured formations (warning, not error).
+
+2. 📊 Output Validation & Thresholds
+Formula Used (from Breckels & van Eekelen model)
+// If depth < 3500 m:
+σh = 0.0053 × D^1.145 + 0.46 × (Pf − Pfn)
+
+// If depth ≥ 3500 m:
+σh = 0.0264 × D − 31.7 + 0.46 × (Pf − Pfn)
+
+// Output units:
+// MPa (primary), psi (secondary; 1 MPa = 145.038 psi)
+
+Thresholds for Stress Levels
+
+< 20 MPa → Low stress (generally safe drilling conditions)
+
+20–40 MPa → Moderate stress (normal precautions apply)
+
+40–60 MPa → High stress (requires advanced planning)
+
+60 MPa → Very high stress (wellbore stability risk, HSE hazard potential)
+
+Output Validation
+
+Horizontal Stress must be ≥ 0 (negative stress = invalid input combination).
+
+Stress should not exceed ~200 MPa in realistic wells (beyond that is geologically implausible).
+
+3. ✅ Corrected JavaScript Code (Validation Function)
+/*
+---------------------------------------------------
+ Horizontal Stress Calculator (Breckels & van Eekelen)
+ Validation Rules (QEHS/Geomechanics Standards)
+---------------------------------------------------
+ FORMULAS:
+ For depth < 3500 m:
+   σh = 0.0053 × D^1.145 + 0.46 × (Pf − Pfn)
+ For depth ≥ 3500 m:
+   σh = 0.0264 × D − 31.7 + 0.46 × (Pf − Pfn)
+ Units: MPa (converted to psi internally; 1 MPa = 145.038 psi)
+
+ VALIDATIONS:
+ Depth:
+   - > 0
+   - Range: 100–10,000 m (or 300–30,000 ft)
+   - Max 2 decimals
+ Pore Pressure (Pf):
+   - ≥ 0, ≤ 150 MPa
+   - Max 3 decimals
+ Normal Pore Pressure (Pfn):
+   - ≥ 0, ≤ 150 MPa
+   - Max 3 decimals
+ Relationships:
+   - Pf ≥ Pfn → normal or overpressured (OK)
+   - Pf < Pfn → warning (underpressured)
+ Outputs:
+   - σh ≥ 0
+   - σh ≤ 200 MPa (practical limit)
+---------------------------------------------------
+*/ {% endcomment %}

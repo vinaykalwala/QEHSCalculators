@@ -1,0 +1,568 @@
+{% extends 'base.html' %}
+{% block title %}Pressure Factor Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accident Rate Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+         @media (max-width: 768px) {
+    .rate-value {
+        font-size: 28px; /* smaller font for tablets/mobiles */
+    }
+}
+
+@media (max-width: 480px) {
+    .rate-value {
+        font-size: 24px; /* even smaller for phones */
+    }
+}
+    </style>
+</head>
+<body>
+   <div class="btn-container">
+    <a href="{% url 'firecategory_calculators' %}" class="back-btn">Back To Fire Calculators</a>
+</div>
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+    <div class="calculator-header">
+        <h1>Pressure Factor Calculator</h1>
+        <p>Determine the pressure drop per unit length in a pipeline to assess flow efficiency and system performance.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Input Card -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+            <div class="form-group">
+                <label for="p1">Inlet Pressure (P₁) [Pa]</label>
+                <input type="number" id="p1" class="form-input" placeholder="Enter inlet pressure" step="any">
+            </div>
+            <div class="form-group">
+                <label for="p2">Pressure at Distance (P₂) [Pa]</label>
+                <input type="number" id="p2" class="form-input" placeholder="Enter pressure at distance" step="any">
+            </div>
+            <div class="form-group">
+                <label for="length">Pipe Length (L) [m]</label>
+                <input type="number" id="length" class="form-input" placeholder="Enter pipe length" min="0.001" step="any">
+            </div>
+            <button class="calculate-btn" onclick="calculatePressureFactor()">Calculate Pressure Factor</button>
+        </div>
+
+        <!-- Result Card -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="{% static 'images/pressure.jpg' %}" alt="Pressure Factor Illustration">
+                <p>This tool will calculate the <strong>Pressure Factor</strong>. Enter your data to see results and insights here.</p>
+            </div>
+
+            <div class="result-error hidden" id="resultError" style="font-size: 28px;"></div>
+
+            <div class="result-value hidden" id="resultValue">
+                <div class="rate-value">Pressure Factor</div>
+                <div class="rate-value" id="pressureFactorValue">0.0000</div>
+                <div class="rate-label" style="font-size:16px; font-weight:bold;">Pa/m</div>
+                <div class="result-feedback" id="feedbackContent"></div>
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="note-section">
+       <div class="note-card">
+    <h3>📘 About This Calculator</h3>
+    <p>
+        The <strong>Pressure Factor Calculator</strong> is designed to determine the <strong>Pressure Factor (F)</strong>, which represents the rate of pressure drop per unit length of a pipeline. 
+        This is a fundamental parameter in fluid mechanics and pipeline engineering, as it helps engineers understand how pressure changes along the length of a pipe due to friction, elevation, or other factors.
+    </p>
+    <p>
+        Understanding the Pressure Factor is crucial because excessive pressure drops can lead to inefficient system performance, energy losses, and potential damage to equipment. Conversely, abnormal pressure gains may indicate pump assistance or system anomalies that need attention. By calculating F, engineers can make informed decisions about pipe sizing, pump selection, and overall system optimization.
+    </p>
+    <p>
+        <strong>Key points:</strong>
+        <ul>
+            <li>Helps assess pressure distribution along pipelines carrying liquids or gases.</li>
+            <li>Supports the design of efficient water, oil, gas, and chemical transport systems.</li>
+            <li>Identifies potential issues like excessive energy loss, insufficient flow, or abnormal pressure behavior.</li>
+            <li>Provides quick, on-the-spot calculations for engineering analysis, maintenance checks, or emergency assessment.</li>
+        </ul>
+    </p>
+    <p>
+        This calculator is intended for basic engineering analysis. For detailed system design, factors such as pipe friction, viscosity, flow velocity, temperature, and elevation changes should also be considered. Nonetheless, it provides a fast and reliable estimate of the pressure drop per unit length, which is often sufficient for preliminary assessments, troubleshooting, and educational purposes.
+    </p>
+</div>
+
+
+        <div class="note-card">
+            <h3>⚙️ Parameters</h3>
+            <ul class="note-list">
+                <li><strong>Inlet Pressure (P₁):</strong> The pressure at the start of the pipe, in Pascals (Pa).</li>
+                <li><strong>Pressure at Distance (P₂):</strong> The pressure at a distance L along the pipe, in Pascals (Pa).</li>
+                <li><strong>Pipe Length (L):</strong> Distance along the pipeline over which the pressure drop is measured, in meters (m).</li>
+                <li><strong>Pressure Factor (F):</strong> Rate of pressure drop per unit length, in Pa/m.</li>
+            </ul>
+        </div>
+
+      <div class="note-card">
+    <h3>🛡️ Input Validations</h3>
+    <ul class="note-list">
+        <li>All fields (<strong>P₁</strong>, <strong>P₂</strong>, <strong>L</strong>) are <strong>mandatory</strong>. Leaving a field empty triggers a warning.</li>
+        <li><strong>Numeric values only:</strong> Non-numeric entries (letters, symbols) are invalid.</li>
+        <li><strong>Pipe Length (L):</strong> Must be greater than 0 m. Zero or negative values are not allowed (prevents division by zero).</li>
+        <li><strong>Pressure Limits:</strong> P₁ and P₂ must be ≥ 0 Pa. Negative pressures are physically impossible in standard pipelines.</li>
+        <li><strong>Logical Consistency:</strong> Normally, P₂ ≤ P₁. If P₂ > P₁, a warning indicates possible pump influence or system anomaly.</li>
+        <li><strong>Realistic Industrial Ranges:</strong> Typical pressures should not exceed 10 MPa (10,000,000 Pa). Extremely high values trigger a caution.</li>
+        <li><strong>Decimal Precision:</strong> Inputs allow up to 4 decimal places to maintain accuracy in Pa/m calculations.</li>
+        <li>All error or warning messages are displayed in the result box; the placeholder image disappears once the calculation is performed.</li>
+    </ul>
+</div>
+
+<div class="note-card">
+    <h3>💡 Interpretation of Pressure Factor (F)</h3>
+    <ul class="note-list">
+        <li>✅ <strong>F > 0 and ≤ 1000 Pa/m:</strong> Normal Pressure Drop – safe, within design limits.</li>
+        <li>⚠️ <strong>F > 1000 and ≤ 5000 Pa/m:</strong> Moderate Pressure Drop – monitor system; may indicate friction, scaling, or pipe restrictions.</li>
+        <li>🚨 <strong>F > 5000 Pa/m:</strong> High Pressure Drop – potential equipment strain; immediate inspection recommended.</li>
+        <li>⚠️ <strong>F < 0:</strong> Pressure Gain – may indicate pump assistance or abnormal system behavior; investigate source.</li>
+        <li>❌ <strong>F = 0:</strong> No Pressure Change – check input values; could indicate blocked or malfunctioning system.</li>
+        <li>These thresholds help QEHS professionals identify safe operating conditions and flag potential risks in pipelines, fire safety systems, and industrial fluid transport.</li>
+    </ul>
+</div>
+
+        <div class="note-card">
+            <h3>📌 Real-life Applications</h3>
+            <ul class="note-list">
+                <li>Water distribution systems for efficient network design.</li>
+                <li>Oil & Gas pipelines to evaluate pressure losses.</li>
+                <li>Fire safety systems ensuring adequate sprinkler and hydrant pressure.</li>
+                <li>Industrial process piping for chemical transport optimization.</li>
+                <li>HVAC and airflow systems for efficient air and gas transport.</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <p>The Pressure Factor is crucial in pipeline design and analysis to optimize pipe diameter, minimize energy losses, and improve flow efficiency.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+function calculatePressureFactor() {
+    const P1Input = document.getElementById('p1').value.trim();
+    const P2Input = document.getElementById('p2').value.trim();
+    const lengthInput = document.getElementById('length').value.trim();
+
+    const resultValue = document.getElementById('resultValue');
+    const placeholder = document.getElementById('placeholder');
+    const feedbackContent = document.getElementById('feedbackContent');
+    const resultError = document.getElementById('resultError');
+
+    // Reset display
+    resultError.classList.add('hidden');
+    resultValue.classList.add('hidden');
+    placeholder.classList.add('hidden');
+    resultError.innerHTML = "";
+    feedbackContent.innerHTML = "";
+
+    // ---- Mandatory Field Check ----
+    if (P1Input === "" || P2Input === "" || lengthInput === "") {
+        resultError.innerHTML = "⚠️ Please fill in all required fields.";
+        resultError.style.color = "orange";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    // ---- Numeric Check ----
+    const P1 = parseFloat(P1Input);
+    const P2 = parseFloat(P2Input);
+    const L = parseFloat(lengthInput);
+
+    if (isNaN(P1) || isNaN(P2) || isNaN(L)) {
+        resultError.innerHTML = "❌ Invalid entry. Only numeric values are allowed.";
+        resultError.style.color = "red";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    // ---- Positive Length Check ----
+    if (L <= 0) {
+        resultError.innerHTML = "❌ Pipe Length (L) must be greater than zero.";
+        resultError.style.color = "red";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    // ---- Pressure Range Checks ----
+    if (P1 < 0 || P2 < 0) {
+        resultError.innerHTML = "❌ Pressures cannot be negative.";
+        resultError.style.color = "red";
+        resultError.classList.remove('hidden');
+        return;
+    }
+    if (P1 > 1e7 || P2 > 1e7) {
+        resultError.innerHTML = "⚠️ Pressure exceeds typical industrial range (>10 MPa). Verify input.";
+        resultError.style.color = "orange";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    // ---- Calculate Pressure Factor ----
+    const F = (P1 - P2) / L;
+    document.getElementById('pressureFactorValue').innerText = F.toFixed(4);
+    resultValue.classList.remove('hidden');
+
+    // ---- Feedback Logic ----
+    let feedback = "";
+    if (F > 0 && F <= 1000) {
+        feedback = "✅ Normal Pressure Drop: Within safe operating limits.";
+        feedbackContent.style.color = "green";
+    } else if (F > 1000 && F <= 5000) {
+        feedback = "⚠️ Moderate Pressure Drop: Monitor system, may indicate friction or scaling.";
+        feedbackContent.style.color = "orange";
+    } else if (F > 5000) {
+        feedback = "🚨 High Pressure Drop: Risk of equipment strain; check pipeline design.";
+        feedbackContent.style.color = "red";
+    } else if (F < 0) {
+        feedback = "⚠️ Pressure Gain: Possible pump influence or system anomaly.";
+        feedbackContent.style.color = "orange";
+    } else {
+        feedback = "❌ No Pressure Change: Verify input values or check for blocked/closed system.";
+        feedbackContent.style.color = "red";
+    }
+    feedbackContent.innerHTML = feedback;
+}
+
+</script>
+
+
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+

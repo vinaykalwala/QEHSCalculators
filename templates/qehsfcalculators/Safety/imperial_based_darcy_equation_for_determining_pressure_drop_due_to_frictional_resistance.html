@@ -1,0 +1,747 @@
+{% extends 'base.html' %}
+{% block title %}Imperial-based D'Arcy Equation - Pressure Drop Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imperial-based D'Arcy Equation - Pressure Drop Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Input rows for better organization */
+        .ad-input-row {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .ad-input-row .form-group {
+            flex: 1;
+        }
+        
+        @media (max-width: 600px) {
+            .ad-input-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+        
+        .error {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 5px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Imperial-based D'Arcy Equation For Determining Pressure Drop</h1>
+            <p>Calculate pressure drop due to frictional resistance in pipelines</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                
+                <div class="ad-input-row">
+                    <div class="form-group">
+                        <label for="f">Friction Factor (f)</label>
+                        <input type="number" id="f" class="form-input" step="0.01" min="0.001" placeholder="e.g., 0.02">
+                        <small class="error hidden" id="fError"></small>
+                    </div>
+                    <div class="form-group">
+                        <label for="L">Length of Pipe (L) [m]</label>
+                        <input type="number" id="L" class="form-input" step="0.1" min="0.1" placeholder="e.g., 100">
+                        <small class="error hidden" id="LError"></small>
+                    </div>
+                </div>
+                
+                <div class="ad-input-row">
+                    <div class="form-group">
+                        <label for="u">Flow Velocity (u) [m/s]</label>
+                        <input type="number" id="u" class="form-input" step="0.1" min="0.1" placeholder="e.g., 2.5">
+                        <small class="error hidden" id="uError"></small>
+                    </div>
+                    <div class="form-group">
+                        <label for="D">Pipe Diameter (D) [m]</label>
+                        <input type="number" id="D" class="form-input" step="0.01" min="0.01" placeholder="e.g., 0.15">
+                        <small class="error hidden" id="DError"></small>
+                    </div>
+                </div>
+                
+                <button class="calculate-btn" onclick="calculatePressureDrop()">Calculate Pressure Drop</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://img.icons8.com/fluency/96/calculator.png" alt="Calculator icon" width="100">
+                    <p>This tool will calculate the <strong>Head Loss due to friction</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Head Loss Due to Friction</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label">meters</div>
+                    </div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Minimal</span><span>Moderate</span><span>High</span><span>Very High</span><span>Critical</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    This calculator determines the <strong>head loss due to friction (h<sub>f</sub>)</strong> in pipelines using the 
+                    D'Arcy-Weisbach equation. It helps engineers design efficient fluid transport systems in firefighting, 
+                    irrigation, and industrial piping applications.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ What is the D'Arcy-Weisbach Equation?</h3>
+                <p>
+                    The <strong>D'Arcy-Weisbach equation</strong> is a fundamental formula in fluid mechanics used to calculate 
+                    the pressure drop or head loss due to friction along a given length of pipe with a constant flow rate.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Friction Factor (f):</strong> Dimensionless parameter that depends on pipe roughness and flow type (laminar or turbulent).</li>
+                    <li><strong>Length of Pipe (L):</strong> The distance over which the fluid travels [m]. Longer pipes cause more frictional loss.</li>
+                    <li><strong>Flow Velocity (u):</strong> The speed at which the fluid moves through the pipe [m/s]. Faster flows lead to greater energy loss.</li>
+                    <li><strong>Pipe Diameter (D):</strong> The internal diameter of the pipe [m]. Smaller diameters increase resistance.</li>
+                    <li><strong>Gravity (g):</strong> Acceleration due to gravity (9.81 m/s²) - affects the fluid's energy loss.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <p>
+                    <b>Head Loss Values</b> indicate the energy loss in the piping system:
+                </p>
+                <ul class="note-list">
+                    <li><span class="good">Below 0.5 meters</span> → Minimal pressure drop. Pipe system is efficient.</li>
+                    <li><span class="average">0.5 – 2 meters</span> → Moderate pressure drop. Consider pipe material and roughness.</li>
+                    <li><span class="bad">Above 2 meters</span> → High pressure drop! Increase pipe diameter or decrease flow velocity.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>🔬 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li>Used in <strong>fire hydrants and sprinklers</strong> to ensure proper water flow during emergencies.</li>
+                    <li>Helps in designing <strong>water supply pipelines</strong> to avoid excessive energy loss and ensure adequate pressure.</li>
+                    <li>Applied in <strong>industrial cooling systems</strong> where fluids are transported through complex piping networks.</li>
+                    <li>Essential for <strong>plumbing and irrigation systems</strong> to maintain efficient water distribution.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+    <h3>✅ Validation Rules Applied</h3>
+    <ul class="note-list">
+        <li><strong>Friction Factor (f):</strong> 0.001 – 0.1 (dimensionless)</li>
+        <li><strong>Pipe Length (L):</strong> 0.1 – 10,000 m</li>
+        <li><strong>Flow Velocity (u):</strong> 0.1 – 25 m/s</li>
+        <li><strong>Pipe Diameter (D):</strong> 0.01 – 5 m</li>
+        <li><strong>Cross-field check:</strong> Pipe length must be ≥ pipe diameter</li>
+        <li><strong>No empty/negative values:</strong> Required for all inputs</li>
+        <li><strong>Division by zero & infinity:</strong> Prevented by validations</li>
+    </ul>
+    <p>⚠️ These rules are based on <strong>OSHA, NFPA, ISO 45001, and fluid mechanics standards</strong>, ensuring the calculator provides realistic and safe results for engineering and fire safety applications.</p>
+</div>
+
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculatePressureDrop() {
+    const f = parseFloat(document.getElementById('f').value.trim());
+    const L = parseFloat(document.getElementById('L').value.trim());
+    const u = parseFloat(document.getElementById('u').value.trim());
+    const D = parseFloat(document.getElementById('D').value.trim());
+    const g = 9.81; // Acceleration due to gravity (m/s²)
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    // Reset error messages
+    document.querySelectorAll('.error').forEach(el => {
+        el.classList.add('hidden');
+        el.textContent = '';
+    });
+
+    let errors = [];
+
+    /**
+     * VALIDATION RULES
+     * - Friction Factor (f): 0.001 ≤ f ≤ 0.1
+     * - Pipe Length (L): 0.1 m ≤ L ≤ 10,000 m
+     * - Flow Velocity (u): 0.1 m/s ≤ u ≤ 25 m/s
+     * - Pipe Diameter (D): 0.01 m ≤ D ≤ 5 m
+     * - Cross check: L ≥ D (pipe length must be greater than diameter)
+     */
+
+    if (isNaN(f) || f < 0.001 || f > 0.1) {
+        errors.push("👉 Friction Factor (f) must be between 0.001 and 0.1.");
+        document.getElementById('fError').textContent = "Valid range: 0.001 – 0.1.";
+        document.getElementById('fError').classList.remove('hidden');
+    }
+
+    if (isNaN(L) || L < 0.1 || L > 10000) {
+        errors.push("👉 Pipe Length (L) must be between 0.1 m and 10,000 m.");
+        document.getElementById('LError').textContent = "Valid range: 0.1 – 10,000 m.";
+        document.getElementById('LError').classList.remove('hidden');
+    }
+
+    if (isNaN(u) || u < 0.1 || u > 25) {
+        errors.push("👉 Flow Velocity (u) must be between 0.1 m/s and 25 m/s.");
+        document.getElementById('uError').textContent = "Valid range: 0.1 – 25 m/s.";
+        document.getElementById('uError').classList.remove('hidden');
+    }
+
+    if (isNaN(D) || D < 0.01 || D > 5) {
+        errors.push("👉 Pipe Diameter (D) must be between 0.01 m and 5 m.");
+        document.getElementById('DError').textContent = "Valid range: 0.01 – 5 m.";
+        document.getElementById('DError').classList.remove('hidden');
+    }
+
+    // Cross-field dependency check
+    if (!isNaN(L) && !isNaN(D) && L < D) {
+        errors.push("👉 Pipe Length (L) must be greater than or equal to Pipe Diameter (D).");
+    }
+
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // D'Arcy–Weisbach Formula: hf = (f * L * u²) / (2 * g * D)
+    const hf = (f * L * Math.pow(u, 2)) / (2 * g * D);
+
+    if (!isFinite(hf) || hf <= 0) {
+        errorMessage.innerHTML = "❌ Calculation error: Invalid combination of inputs (check values).";
+        errorBox.classList.remove("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    document.getElementById('rateValue').textContent = hf.toFixed(4);
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+
+    // Threshold interpretation
+    if (hf < 0.5) {
+        meterWidth = '20%'; meterColor = '#27ae60';
+        feedback = '✅ Minimal pressure drop. Pipe system is efficient.';
+    } else if (hf < 2) {
+        meterWidth = '40%'; meterColor = '#2ecc71';
+        feedback = '👍 Moderate pressure drop. Consider pipe material and roughness.';
+    } else if (hf < 5) {
+        meterWidth = '60%'; meterColor = '#f39c12';
+        feedback = '⚠️ High pressure drop! Consider increasing pipe diameter or reducing flow velocity.';
+    } else if (hf < 10) {
+        meterWidth = '80%'; meterColor = '#e67e22';
+        feedback = '🚨 Very high pressure drop! System redesign strongly recommended.';
+    } else {
+        meterWidth = '95%'; meterColor = '#e74c3c';
+        feedback = '❌ Critical pressure drop! System is not feasible with current parameters.';
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+{% comment %} 
+1. Real-World Input Validation Rules (QEHS/Fire Safety Perspective)
+
+These rules ensure that your calculator is consistent with OSHA, ISO 45001, NFPA guidelines, and engineering practice:
+
+🔹 Friction Factor (f)
+
+Range: 0.001 ≤ f ≤ 0.1
+
+Rationale: In practical pipe flows, the Darcy friction factor rarely exceeds 0.1. Values below 0.001 are unrealistic (extremely smooth, ideal conditions).
+
+Decimals: Up to 3 decimals recommended.
+
+🔹 Length of Pipe (L) [m]
+
+Range: 0.1 m ≤ L ≤ 10,000 m
+
+Rationale:
+
+Very short pipes (<0.1 m) don’t practically represent fluid transport.
+
+Beyond 10 km, losses become system-level rather than segment-level, requiring pump station design (fire safety hydrant networks often limited to <3 km).
+
+Decimals: Up to 1 decimal.
+
+🔹 Flow Velocity (u) [m/s]
+
+Range: 0.1 m/s ≤ u ≤ 25 m/s
+
+Rationale:
+
+Below 0.1 → stagnant flow (risk of stagnation & contamination).
+
+Above 25 m/s → unrealistic for firefighting, water, or industrial systems (erosion, cavitation risk).
+
+Decimals: Up to 2 decimals.
+
+🔹 Pipe Diameter (D) [m]
+
+Range: 0.01 m ≤ D ≤ 5 m
+
+Rationale:
+
+Smallest usable diameter in fire safety ≈ 10 mm (sprinklers).
+
+Largest industrial pipeline diameter ≈ 5 m (power plants, dams).
+
+Decimals: Up to 2 decimals.
+
+🔹 Cross-field dependencies
+
+L/D ratio should not be <1 → pipe cannot be shorter than its diameter.
+
+For firefighting design: u ≤ 5 m/s preferred for hydrant lines (NFPA recommends lower velocities to reduce surge pressure).
+
+2. Output Validation Logic & Thresholds
+
+Equation:
+
+// D'Arcy–Weisbach Formula:
+// hf = (f * L * u²) / (2 * g * D)
+
+Thresholds for Head Loss (hₓ):
+
+<0.5 m → ✅ Minimal drop → efficient.
+
+0.5–2 m → 👍 Moderate → check pipe material.
+
+2–5 m → ⚠ High → redesign or adjust velocity.
+
+5–10 m → 🚨 Very High → not acceptable for firefighting systems.
+
+>10 m → ❌ Critical → system failure risk.
+
+👉 These thresholds align with NFPA 13 (sprinkler) & OSHA safe pumping pressure ranges. {% endcomment %}

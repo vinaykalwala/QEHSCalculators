@@ -457,157 +457,105 @@
 
     <script>
   function calculateDispersion() {
-    const zScoreRaw = document.getElementById("zScore").value.trim();
-    const cvaRaw = document.getElementById("cva").value.trim();
-    const cviRaw = document.getElementById("cvi").value.trim();
-    const nARaw = document.getElementById("nA").value.trim();
-    const nSRaw = document.getElementById("nS").value.trim();
+  const zScoreRaw = document.getElementById("zScore").value.trim();
+  const cvaRaw = document.getElementById("cva").value.trim();
+  const cviRaw = document.getElementById("cvi").value.trim();
+  const nARaw = document.getElementById("nA").value.trim();
+  const nSRaw = document.getElementById("nS").value.trim();
 
-    const errorBox = document.getElementById('resultError');
-    const errorMessage = document.getElementById('errorMessage');
-    const placeholder = document.getElementById('placeholder');
-    const resultValue = document.getElementById('resultValue');
-    const outputValue = document.getElementById('dispersionValue');
-    const feedbackBox = document.getElementById('dispersionFeedback');
+  const errorBox = document.getElementById('resultError');
+  const errorMessage = document.getElementById('errorMessage');
+  const resultValue = document.getElementById('resultValue');
+  const placeholder = document.getElementById('placeholder');
+  const feedbackBox = document.getElementById('dispersionFeedback');
 
-    // Reset UI
-    errorBox.classList.add('hidden');
-    resultValue.classList.add('hidden');
-    feedbackBox.textContent = "";
-    errorMessage.innerHTML = "";
+  // Reset
+  errorBox.classList.add('hidden');
+  resultValue.classList.add('hidden');
+  errorMessage.innerHTML = "";
+  feedbackBox.textContent = "";
 
-    const errors = [];
-    const warnings = [];
+  const errors = [];
+  const warnings = [];
 
-    // --- Parse / Basic presence ---
-    const z = parseFloat(zScoreRaw);
-    const cva = parseFloat(cvaRaw);
-    const cvi = parseFloat(cviRaw);
-    const nA = parseFloat(nARaw);
-    const nS = parseFloat(nSRaw);
+  const z = parseFloat(zScoreRaw);
+  const cva = parseFloat(cvaRaw);
+  const cvi = parseFloat(cviRaw);
+  const nA = parseFloat(nARaw);
+  const nS = parseFloat(nSRaw);
 
-    // --- Field-level validation ---
-    if (!isProvided(zScoreRaw)) errors.push("👉 Enter Z-Score (e.g., 1.96).");
-    else if (!isFinite(z)) errors.push("👉 Z-Score must be a finite number.");
-    else {
-      if (z <= 0) errors.push("👉 Z-Score must be > 0.");
-      if (z > 5) errors.push("👉 Z-Score must be ≤ 5.0 (values above 5 are not practical in QC).");
-      if (!hasMaxDecimals(zScoreRaw, 2)) errors.push("👉 Z-Score: max 2 decimals.");
-    }
+  // ---- Validation ----
+  if (!isProvided(zScoreRaw)) errors.push("Enter Z-Score (e.g., 1.96).");
+  else if (!isFinite(z) || z <= 0 || z > 5) errors.push("Z-Score must be between 0–5.");
+  else if (!hasMaxDecimals(zScoreRaw, 2)) errors.push("Z-Score: max 2 decimals.");
 
-    if (!isProvided(cvaRaw)) errors.push("👉 Enter Analytical CV (CVA %).");
-    else if (!isFinite(cva)) errors.push("👉 CVA must be a finite number.");
-    else {
-      if (cva < 0) errors.push("👉 CVA cannot be negative.");
-      if (cva > 100) errors.push("👉 CVA must be ≤ 100%.");
-      if (!hasMaxDecimals(cvaRaw, 2)) errors.push("👉 CVA: max 2 decimals.");
-    }
+  if (!isProvided(cvaRaw)) errors.push("Enter Analytical CV (CVA%).");
+  else if (!isFinite(cva) || cva < 0 || cva > 100) errors.push("CVA must be 0–100%.");
+  else if (!hasMaxDecimals(cvaRaw, 2)) errors.push("CVA: max 2 decimals.");
 
-    if (!isProvided(cviRaw)) errors.push("👉 Enter Biological Variation (CVI %).");
-    else if (!isFinite(cvi)) errors.push("👉 CVI must be a finite number.");
-    else {
-      if (cvi < 0) errors.push("👉 CVI cannot be negative.");
-      if (cvi > 100) errors.push("👉 CVI must be ≤ 100%.");
-      if (!hasMaxDecimals(cviRaw, 2)) errors.push("👉 CVI: max 2 decimals.");
-    }
+  if (!isProvided(cviRaw)) errors.push("Enter Biological CV (CVI%).");
+  else if (!isFinite(cvi) || cvi < 0 || cvi > 100) errors.push("CVI must be 0–100%.");
+  else if (!hasMaxDecimals(cviRaw, 2)) errors.push("CVI: max 2 decimals.");
 
-    if (!isProvided(nARaw)) errors.push("👉 Enter number of replicate measurements (nA).");
-    else if (!isFinite(nA)) errors.push("👉 nA must be a finite number.");
-    else {
-      if (!Number.isInteger(Number(nARaw))) errors.push("👉 nA must be an integer.");
-      if (nA < 1) errors.push("👉 nA must be ≥ 1.");
-      if (nA > 100) errors.push("👉 nA must be ≤ 100.");
-    }
-
-    if (!isProvided(nSRaw)) errors.push("👉 Enter number of patient samples (nS).");
-    else if (!isFinite(nS)) errors.push("👉 nS must be a finite number.");
-    else {
-      if (!Number.isInteger(Number(nSRaw))) errors.push("👉 nS must be an integer.");
-      if (nS < 1) errors.push("👉 nS must be ≥ 1.");
-      if (nS > 100) errors.push("👉 nS must be ≤ 100.");
-    }
-
-    // Cross-field logic
-    if (isFinite(cva) && isFinite(cvi) && cva === 0 && cvi === 0) {
-      errors.push("👉 CVA and CVI cannot both be zero (dispersion would be undefined in practice).");
-    }
-    if (isFinite(cva) && cva > 20 && isFinite(nA) && nA === 1) {
-      warnings.push("High analytical imprecision (CVA > 20%) with nA=1 increases dispersion risk.");
-    }
-    if (isFinite(cvi) && cvi > 30 && isFinite(nS) && nS === 1) {
-      warnings.push("High biological variation (CVI > 30%) with nS=1 reduces result reliability.");
-    }
-    if (isFinite(cva) && cva === 0 && isFinite(nA) && nA > 1) {
-      warnings.push("CVA=0%: increasing nA will not further reduce analytical noise.");
-    }
-    if (isFinite(cvi) && cvi === 0 && isFinite(nS) && nS > 1) {
-      warnings.push("CVI=0%: increasing nS will not further reduce biological noise.");
-    }
-
-    // Show errors if any
-    if (errors.length > 0) {
-      errorMessage.innerHTML = errors.join("<br>");
-      errorBox.classList.remove("hidden");
-      return;
-    }
-
-    // --- Calculation ---
-    const termA = (cva * cva) / nA;
-    const termS = (cvi * cvi) / nS;
-    const inner = termA + termS;
-
-    if (!isFinite(inner) || inner < 0) {
-      errorMessage.innerHTML = "❌ Invalid calculation (check inputs).";
-      errorBox.classList.remove("hidden");
-      return;
-    }
-
-    const dispersion = z * Math.sqrt(inner);
-
-    if (!isFinite(dispersion)) {
-      errorMessage.innerHTML = "❌ Result is not finite. Please review inputs.";
-      errorBox.classList.remove("hidden");
-      return;
-    }
-
-    // --- Output & feedback ---
-    const resultText = dispersion.toFixed(2);
-    document.getElementById('dispersionValue').textContent = resultText;
-
-    let feedback = "";
-    if (dispersion < 0.1) {
-      feedback = "ℹ️ Very low dispersion (<0.1%). Verify units and method assumptions.";
-    } else if (dispersion < 5) {
-      feedback = "✅ Excellent dispersion (<5%) – very low variability.";
-    } else if (dispersion < 10) {
-      feedback = "📊 Good dispersion (5–10%) – acceptable for most applications.";
-    } else if (dispersion < 15) {
-      feedback = "⚠️ Moderate dispersion (10–15%) – consider increasing nA/nS or improving precision (lower CVA).";
-    } else if (dispersion < 20) {
-      feedback = "🔶 High dispersion (15–20%) – review method and sampling plan.";
-    } else if (dispersion <= 100) {
-      feedback = "❌ Very high dispersion (>20%) – results may be unreliable for compliance decisions.";
-    } else {
-      feedback = "❌ Extreme dispersion (>100%). Inputs likely unrealistic or the study design is unsuitable.";
-    }
-
-    // Combine warnings with feedback
-    const warningBlock = warnings.length ? ("Note: " + warnings.join(" ")) : "";
-    document.getElementById('dispersionFeedback').textContent = [warningBlock, feedback].filter(Boolean).join(" ");
-
-    // Show result
-    document.getElementById('placeholder').classList.add('hidden');
-    resultValue.classList.remove('hidden');
+  if (!isProvided(nARaw)) errors.push("Enter number of replicates (nA).");
+  else if (!isFinite(nA) || !Number.isInteger(Number(nARaw)) || nA < 1 || nA > 100) {
+    errors.push("nA must be an integer 1–100.");
   }
 
-  // --- Helpers ---
-  function isProvided(v) { return v !== null && v !== undefined && v !== ""; }
-  function hasMaxDecimals(raw, maxDec) {
-    // Accept scientific notation for Z if user enters like 1.96e0; otherwise enforce decimal digits
-    if (/e|E/.test(raw)) return true;
-    const parts = String(raw).split(".");
-    return parts.length < 2 || parts[1].length <= maxDec;
+  if (!isProvided(nSRaw)) errors.push("Enter number of patient samples (nS).");
+  else if (!isFinite(nS) || !Number.isInteger(Number(nSRaw)) || nS < 1 || nS > 100) {
+    errors.push("nS must be an integer 1–100.");
   }
+
+  // Cross-field checks
+  if (cva === 0 && cvi === 0) errors.push("CVA and CVI cannot both be zero.");
+  if (cva > 20 && nA === 1) warnings.push("High CVA (>20%) with nA=1 increases risk.");
+  if (cvi > 30 && nS === 1) warnings.push("High CVI (>30%) with nS=1 lowers reliability.");
+
+  if (errors.length > 0) {
+    errorMessage.innerHTML = errors.join("<br>");
+    errorBox.classList.remove('hidden');
+    return;
+  }
+
+  // ---- Calculation ----
+  const inner = (cva * cva) / nA + (cvi * cvi) / nS;
+  const dispersion = z * Math.sqrt(inner);
+
+  if (!isFinite(dispersion)) {
+    errorMessage.innerHTML = "Invalid calculation. Check inputs.";
+    errorBox.classList.remove('hidden');
+    return;
+  }
+
+  // ---- Output ----
+  const resultText = dispersion.toFixed(2);
+  document.getElementById('dispersionValue').textContent = resultText;
+
+  let feedback = "";
+  if (dispersion < 0.1) feedback = "Very low dispersion (<0.1%) – check units.";
+  else if (dispersion < 5) feedback = "Excellent dispersion (<5%) – high confidence.";
+  else if (dispersion < 10) feedback = "Good dispersion (5–10%) – acceptable.";
+  else if (dispersion < 15) feedback = "Moderate (10–15%) – consider improving precision.";
+  else if (dispersion < 20) feedback = "High (15–20%) – review method.";
+  else if (dispersion <= 100) feedback = "Very high (>20%) – unreliable for compliance.";
+  else feedback = "Extreme (>100%) – inputs unrealistic.";
+
+  const warningBlock = warnings.length ? ("⚠ " + warnings.join(" ")) : "";
+  feedbackBox.textContent = [warningBlock, feedback].filter(Boolean).join(" ");
+
+  placeholder.classList.add('hidden');
+  resultValue.classList.remove('hidden');
+}
+
+// Helpers
+function isProvided(v) { return v !== null && v !== undefined && v !== ""; }
+function hasMaxDecimals(raw, maxDec) {
+  if (/e|E/.test(raw)) return true;
+  const parts = String(raw).split(".");
+  return parts.length < 2 || parts[1].length <= maxDec;
+}
+
 </script>
 
     <script src="{% static 'js/print.js' %}"></script>
