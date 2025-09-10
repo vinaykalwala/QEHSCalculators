@@ -312,21 +312,89 @@
         <div class="note-section">
             <div class="note-card">
                 <h3>About Stroke Volume (SV)</h3>
-                <p><strong>Stroke Volume (SV)</strong> is a key measure of cardiac performance, representing the volume of blood pumped from the left ventricle per heartbeat. It is a crucial indicator of cardiovascular health and efficiency. It is calculated by dividing Cardiac Output by Heart Rate.</p>
+                <p>
+                    <strong>Stroke Volume (SV)</strong> is a key measure of heart performance.
+                    It tells us how much blood the heart pumps with each beat.
+                    This information helps in assessing overall cardiovascular health and efficiency.
+                    Stroke Volume is calculated by dividing <strong>Cardiac Output (CO)</strong> by <strong>Heart Rate
+                        (HR)</strong>.
+                </p>
             </div>
+        
+            <div class="note-card">
+                <h3>Understanding the Parameters</h3>
+                <ul class="note-list">
+                    <li>
+                        <strong>Cardiac Output (CO):</strong> The total volume of blood pumped in one minute,
+                        usually measured in <em>liters per minute (L/min)</em>.
+                        It reflects how efficiently the heart delivers oxygen-rich blood to the body.
+                    </li>
+                    <li>
+                        <strong>Heart Rate (HR):</strong> The number of heartbeats per minute, expressed in
+                        <em>beats per minute (bpm)</em>. A higher HR often means the heart is working harder,
+                        such as during exercise or stress.
+                    </li>
+                </ul>
+            </div>
+        
+            <div class="note-card">
+                <h3>Use of the Calculator</h3>
+                <p>
+                    This calculator estimates how much blood is ejected from the heart with each beat by combining CO and HR.
+                    It is widely used by healthcare professionals, fitness trainers, and researchers to evaluate
+                    how effectively the heart is functioning.
+                </p>
+            </div>
+        
             <div class="note-card">
                 <h3>Interpretation of Results</h3>
                 <ul class="note-list">
-                    <li><strong>Below 60 mL/beat:</strong> A low stroke volume may suggest impaired heart function or conditions like dehydration or heart failure. Medical evaluation is recommended.</li>
-                    <li><strong>60–120 mL/beat:</strong> This is the typical range for healthy adults at rest, reflecting efficient and stable cardiovascular performance.</li>
-                    <li><strong>Above 120 mL/beat:</strong> A high stroke volume is often seen in well-trained athletes, indicating a strong, efficient heart. It can also occur during physical exertion.</li>
+                    <li><strong>Below 60 mL/beat:</strong> May indicate the heart isn’t pumping enough blood per beat. Could
+                        suggest heart dysfunction — medical review advised.</li>
+                    <li><strong>60–120 mL/beat:</strong> Typical range for healthy individuals at rest, showing efficient and
+                        stable cardiovascular performance.</li>
+                    <li><strong>Above 120 mL/beat:</strong> Often seen in trained athletes or during physical exertion,
+                        reflecting a strong and healthy heart.</li>
                 </ul>
             </div>
-             <div class="note-card">
-                <h3>Clinical Significance</h3>
-                <p>Stroke Volume is a powerful indicator of cardiac health. It helps in the early detection of heart issues, monitoring fitness progress in athletes, and guiding medical decisions in clinical and critical care settings.</p>
+        
+            <div class="note-card">
+                <div class="note-title">ℹ️ Input Validations</div>
+                <div class="note-content">
+                    <ul>
+                        <li><strong>Cardiac Output (CO):</strong> 
+                            <br>• Range: <em>1 – 20 L/min</em> 
+                            <br>• Allowed up to <em>2 decimal places</em>
+                        </li>
+                        <li><strong>Heart Rate (HR):</strong> 
+                            <br>• Range: <em>30 – 250 beats/min</em> 
+                            <br>• Must be a <em>whole number (no decimals)</em>
+                        </li>
+                        <li><strong>Cross-field Consistency:</strong> 
+                            <br>• Extremely high HR (&gt;220 bpm) with very low CO (&lt;2 L/min) will be flagged as unrealistic.
+                        </li>
+                        <li><strong>Logical Rules:</strong> 
+                            <br>• Zero or negative values are not accepted.  
+                            <br>• Excessive decimals will be rejected.
+                        </li>
+                        <li><strong>Units Reminder:</strong> 
+                            <br>• CO is in <em>Liters per minute (L/min)</em>  
+                            <br>• HR is in <em>Beats per minute (bpm)</em>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="note-card">
+                <h3>Clinical Importance</h3>
+                <p>
+                    Stroke Volume is a powerful indicator of cardiac health and endurance.
+                    It helps detect heart issues early, monitor athletic training progress,
+                    and guide clinical decisions in healthcare settings.
+                </p>
             </div>
         </div>
+
     </div>
 
     <script>
@@ -336,71 +404,179 @@
             const placeholder = document.getElementById('placeholder');
             const resultValueBox = document.getElementById('resultValue');
 
+            // Reset states
             errorBox.classList.add('hidden');
             resultValueBox.classList.add('hidden');
             placeholder.classList.remove('hidden');
 
             let errors = [];
+
+            // Helper for validation
             function getVal(id, label, opts = {}) {
                 const el = document.getElementById(id);
                 const raw = el.value?.toString().trim();
+
                 if (!raw) {
                     errors.push(`👉 ${label} is required.`);
                     return null;
                 }
+
                 const num = parseFloat(raw);
+
                 if (isNaN(num) || num <= 0) {
                     errors.push(`👉 Enter a valid positive number for ${label}.`);
                     return null;
                 }
-                if (opts.min !== undefined && num < opts.min) errors.push(`👉 ${label} must be ≥ ${opts.min}.`);
-                if (opts.max !== undefined && num > opts.max) errors.push(`👉 ${label} must be ≤ ${opts.max}.`);
+
+                if (opts.decimals !== undefined) {
+                    const decimals = raw.split(".")[1]?.length || 0;
+                    if (decimals > opts.decimals) {
+                        errors.push(`👉 ${label} must have ≤ ${opts.decimals} decimal places.`);
+                    }
+                }
+
+                if (opts.min !== undefined && num < opts.min) {
+                    errors.push(`👉 ${label} must be ≥ ${opts.min} ${opts.unit || ""}.`);
+                }
+
+                if (opts.max !== undefined && num > opts.max) {
+                    errors.push(`👉 ${label} must be ≤ ${opts.max} ${opts.unit || ""}.`);
+                }
+
                 return num;
             }
 
-            const co = getVal('cardiacOutput', 'Cardiac Output', { min: 1, max: 20 });
-            const hr = getVal('heartRate', 'Heart Rate', { min: 30, max: 250 });
-            
+            // Input validation ranges based on clinical standards
+            const co = getVal("cardiacOutput", "Cardiac Output", { min: 1, max: 20, decimals: 2, unit: "L/min" });
+            const hr = getVal("heartRate", "Heart Rate", { min: 30, max: 250, decimals: 0, unit: "beats/min" });
+
+            // Cross-field validation
+            if (co && hr && hr > 220 && co < 2) {
+                errors.push("👉 Unlikely combination: Very high HR with very low CO may indicate input error.");
+            }
+
             if (errors.length > 0) {
                 errorMessage.innerHTML = errors.join("<br>");
                 errorBox.classList.remove("hidden");
-                placeholder.classList.add('hidden');
+                placeholder.classList.add("hidden");
                 return;
             }
-            
-            const sv = (co * 1000) / hr;
 
-            placeholder.classList.add('hidden');
-            resultValueBox.classList.remove('hidden');
+            // Stroke Volume calculation
+            const sv = (co * 1000) / hr; // CO converted to mL/min, divided by HR → mL/beat
 
-            document.getElementById('rateValue').textContent = sv.toFixed(1);
-            
-            const meterFill = document.getElementById('meterFill');
+            // Edge case: Division by zero safeguard
+            if (!isFinite(sv) || sv <= 0) {
+                errorMessage.innerHTML = "👉 Invalid calculation: Please recheck inputs.";
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                return;
+            }
+
+            // Display result
+            placeholder.classList.add("hidden");
+            resultValueBox.classList.remove("hidden");
+
+            document.getElementById("rateValue").textContent = sv.toFixed(1);
+
+            // Safety meter visualization
+            const meterFill = document.getElementById("meterFill");
             const minSV = 40;
             const maxSV = 140;
             let pct = ((sv - minSV) / (maxSV - minSV)) * 100;
             pct = Math.max(0, Math.min(100, pct));
-            meterFill.style.width = pct + '%';
+            meterFill.style.width = pct + "%";
 
+            // Interpretation logic
             let interpretation;
             if (sv < 60) {
-                meterFill.style.backgroundColor = '#e67e22'; // Orange
+                meterFill.style.backgroundColor = "#e67e22"; // Orange
                 interpretation = "⚠️ <strong>Low Stroke Volume:</strong> May indicate reduced cardiac output. Consider medical evaluation.";
             } else if (sv <= 120) {
-                meterFill.style.backgroundColor = '#2ecc71'; // Green
+                meterFill.style.backgroundColor = "#2ecc71"; // Green
                 interpretation = "✅ <strong>Normal Range:</strong> Indicates healthy and efficient heart performance.";
             } else {
-                meterFill.style.backgroundColor = '#3498db'; // Blue for high/athletic
-                interpretation = "💪 <strong>High Stroke Volume:</strong> Common in athletes or during high activity levels, reflecting a strong heart.";
+                meterFill.style.backgroundColor = "#3498db"; // Blue
+                interpretation = "💪 <strong>High Stroke Volume:</strong> Often seen in athletes or high activity, reflects strong cardiac efficiency.";
             }
-            
-            document.getElementById('feedbackContent').innerHTML = interpretation;
+
+            document.getElementById("feedbackContent").innerHTML = interpretation;
         }
-        
+
         function printReport() {
             window.print();
         }
     </script>
+
 </body>
 </html>
 {% endblock %}
+
+<!-- 
+1. Real-world Analysis (QEHS & Fire Safety Perspective)
+
+Stroke Volume (SV) = (Cardiac Output (CO) × 1000) ÷ Heart Rate (HR)
+
+CO (Cardiac Output): Volume of blood pumped per minute, measured in L/min.
+
+HR (Heart Rate): Beats per minute (bpm).
+
+SV (Stroke Volume): Volume of blood pumped per beat, measured in mL/beat.
+
+📌 In occupational health & safety audits (OSHA, ILO, ISO 45001), this metric is important for monitoring worker health during high-risk environments (heat stress, fire brigades, confined space entry). Abnormal SV values may indicate cardiovascular strain, which directly impacts fitness-for-duty compliance.
+
+🛡 2. Input Validation Rules
+✅ Cardiac Output (CO)
+
+Unit: L/min
+
+Valid range: 2.5 – 8.0 L/min (normal resting range)
+
+Audit-safe range: 1.5 – 15 L/min (covering extreme conditions like athletes or critical illness).
+
+Decimals: Allow up to 1 decimal place (e.g., 5.6).
+
+Validation rule: Must be > 0, ≤ 15.
+
+✅ Heart Rate (HR)
+
+Unit: beats per minute (bpm).
+
+Valid range: 40 – 180 bpm (normal safe working range).
+
+Audit-safe range: 30 – 250 bpm (to catch extremes, but flag outside normal).
+
+Decimals: Not needed (integer is enough).
+
+Validation rule: Must be ≥ 30, ≤ 250.
+
+✅ Logical Consistency (Cross-field checks)
+
+Division by zero: HR must never = 0.
+
+Unrealistic combos:
+
+If CO < 2.0 L/min & HR > 150 → Possible shock state → warning.
+
+If CO > 10 L/min & HR < 50 → Check if athlete or measurement error.
+
+📊 3. Output Validation & Thresholds
+
+Stroke Volume Ranges (based on clinical + safety standards):
+
+< 60 mL/beat → ⚠️ Low SV → Possible reduced cardiac output (shock, dehydration, fatigue).
+
+60 – 120 mL/beat → ✅ Normal → Healthy functional range.
+
+> 120 mL/beat → 💪 High SV → Common in athletes or stress responses.
+
+⚠️ 4. Edge Case Handling
+
+Empty fields → Show error.
+
+Negative or zero inputs → Reject with message.
+
+Out-of-range values → Warning with context (not just error).
+
+Extreme ratios (e.g., CO = 0.5 L/min, HR = 200 → SV = 2.5 mL/beat) → Warn user of potential measurement error.
+-->
