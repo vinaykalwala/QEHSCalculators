@@ -160,7 +160,8 @@ CALCULATORS = [
 
 {"name": "Volume of Paint Required Calculator", "url_name": "quality_volume_of_paint_required_calculator", "plan_type": "corporate", "category": "quality"},
 
-
+{"name": "Wet Film Thickness (WFT) Calculator", "url_name": "quality_wet_film_thickness_wft_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Water Ion Product Calculator", "url_name": "quality_water_ion_product_calculator", "plan_type": "corporate", "category": "quality"},
     # Environment Calculators
     {"name": "Ambient Noise Level Calculator", "url_name": "environment_ambient_noise_level_calculator", "plan_type": "corporate", "category": "environment"},
 
@@ -473,6 +474,12 @@ CALCULATORS = [
 {"name": "Threshold Limit Value (TLV) Calculator", "url_name": "health_threshold_limit_value_tlv_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "TRCF-ILL Calculator", "url_name": "health_total_recordable_occupational_illness_frequency_trcf_ill_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Time of Death Calculator", "url_name": "health_time_of_death_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Workplace Exposure Limit (WEL) Calculator", "url_name": "health_workplace_exposure_limit_wel_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Weight Loss Calculator", "url_name": "health_weight_loss_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Weight Gain Calculator", "url_name": "health_weight_gain_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Waist-to-Hip Ratio (WHR) Calculator", "url_name": "health_waist_to_hip_ratio_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Waist-to-Height Ratio (WHtR) Calculator", "url_name": "health_waist_to_height_ratio_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Winters' Formula Calculator", "url_name": "health_winters_formula_calculator", "plan_type": "corporate", "category": "health"},
 
 
 
@@ -655,7 +662,26 @@ CALCULATORS = [
 {"name": "Hydraulic Vertical Pressure Calculator", "url_name":"safety_hydraulic_vertical_pressure_calculator", "plan_type": "corporate", "category": "safety"},
 
 {"name": "Horizontal Stress Calculator (Breckels and van Eekelen Model)", "url_name":"safety_horizontal_stress_breckels_and_van_eekelen_model_calculator", "plan_type": "corporate", "category": "safety"},
-    
+{"name": "Hazard Reporting Rate Calculator", "url_name":"safety_hazard_reporting_rate_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Hazard Quotient (HQ) Calculator – Chemical Exposure Risk", "url_name":"safety_hazard_quotient_hq_chemical_exposure_risk_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Hazard Score Calculator", "url_name":"safety_hazard_score_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Incidence Rate Calculator", "url_name":"safety_incidence_rate_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Incident Frequency Rate Calculator", "url_name":"safety_incident_frequency_rate_fr_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Incidents & Near Misses Calculator", "url_name":"safety_incidents_and_near_misses_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "IP Rating Checker", "url_name":"safety_ip_rating_checker_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Imperial-based D'Arcy Equation For Determining Pressure Drop", "url_name":"safety_imperial_based_darcy_equation_for_determining_pressure_drop_due_to_frictional_resistance_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Inflow Equation Calculator", "url_name":"safety_inflow_equation_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Inverse Square Law Calculator", "url_name":"safety_inverse_square_law_calculator", "plan_type": "corporate", "category": "safety"},
+
     # Fire Calculators
     {"name": "Burn Rate (chemical Exposure) Calculator", "url_name": "fire_burn_rate_chemical_exposure_calculator", "plan_type": "corporate", "category": "fire"},
     {"name": "Base Design Quantity for CO₂ Calculator", "url_name": "fire_base_design_quantity_for_co_calculator", "plan_type": "corporate", "category": "fire"},
