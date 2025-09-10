@@ -1,0 +1,639 @@
+{% extends 'base.html' %}
+{% block title %}Incidents & Near Misses Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incidents & Near Misses Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .rate-display {
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+      
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Incidents & Near Misses Calculator</h1>
+            <p>Calculate the ratio of incidents to near misses to assess safety performance</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="totalIncidents">Total Count of Incidents</label>
+                    <input type="number" id="totalIncidents" class="form-input" min="0" placeholder="e.g., 15">
+                </div>
+                <div class="form-group">
+                    <label for="nearMisses">Near Misses Reported in Specific Period</label>
+                    <input type="number" id="nearMisses" class="form-input" min="0" placeholder="e.g., 45">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateIncidentRate()">Calculate Rate</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/6194/6194029.png" 
+     alt="Incident reporting and safety alert illustration">
+
+                    <p>This tool will calculate the <strong>Incident to Near Miss Ratio</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Incident to Near Miss Ratio</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">Incidents per Near Miss</div>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Safety Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Incidents & Near Misses Calculator</strong> measures the ratio of actual incidents to near misses, 
+                    providing insights into safety performance and the effectiveness of preventive measures.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ What is the Incident to Near Miss Ratio?</h3>
+                <p>
+                    This ratio compares the number of actual incidents (injuries, property damage) to the number of near misses 
+                    (events that could have resulted in incidents but didn't). A lower ratio indicates better safety performance.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Total Count of Incidents:</strong> Recorded incidents including injuries or property damage</li>
+                    <li><strong>Near Misses:</strong> Reported events that could have led to an incident but did not</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <p>
+                    <b>Lower Ratio Values</b> = better safety performance. Generally:
+                </p>
+                <ul class="note-list">
+                    <li><span class="good">Below 0.3</span> → Low incident rate - safe environment with effective safety practices</li>
+                    <li><span class="average">0.3 - 1.0</span> → Moderate incident rate - suggests ongoing monitoring and incremental improvements</li>
+                    <li><span class="average">1.0 - 1.5</span> → High incident rate - indicates a need for significant safety improvements</li>
+                    <li><span class="bad">Above 1.5</span> → Critical risk - indicates a very high risk environment requiring immediate action</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>🌍 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Workplace Safety</strong> - Identifying areas needing safety improvements</li>
+                    <li><strong>Risk Management</strong> - Assessing the effectiveness of safety programs</li>
+                    <li><strong>Safety Culture</strong> - Evaluating reporting culture and proactive safety measures</li>
+                    <li><strong>Performance Benchmarking</strong> - Comparing safety performance across departments or time periods</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📋 Industry Standards</h3>
+                <p>
+                    This metric aligns with OSHA's recommended practices for safety and health programs, 
+                    ISO 45001 (Occupational Health and Safety Management Systems), and industry best practices 
+                    for proactive safety management.
+                </p>
+            </div>
+            
+            <div class="note-card">
+    <h3>✅ Validation Rules</h3>
+    <ul class="note-list">
+        <li><b>Incidents:</b> Must be a whole number, 0–1,000,000 (no negatives, no decimals).</li>
+        <li><b>Near Misses:</b> Must be a whole number, 0–1,000,000 (no negatives, no decimals).</li>
+        <li><b>Special Case:</b> If incidents > 0, near misses must be greater than 0 (to avoid invalid ratio).</li>
+        <li><b>Units:</b> Both inputs represent event counts (not rates, no units).</li>
+        <li><b>Cross-check:</b> (0,0) = perfect safety record; (0,X) = acceptable; (X,0) = invalid.</li>
+    </ul>
+</div>
+
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateIncidentRate() {
+    const incidents = document.getElementById('totalIncidents').value.trim();
+    const nearMisses = document.getElementById('nearMisses').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+
+    // -------------------------
+    // VALIDATION RULES
+    // -------------------------
+    // Total Incidents
+    if (incidents === "" || isNaN(incidents)) {
+        errors.push("👉 Please enter the total count of incidents.");
+    } else if (!Number.isInteger(Number(incidents))) {
+        errors.push("👉 Incidents must be a whole number (no decimals).");
+    } else if (parseInt(incidents) < 0) {
+        errors.push("👉 Incidents cannot be negative.");
+    } else if (parseInt(incidents) > 1000000) {
+        errors.push("👉 Incidents cannot exceed 1,000,000.");
+    }
+
+    // Near Misses
+    if (nearMisses === "" || isNaN(nearMisses)) {
+        errors.push("👉 Please enter the number of near misses.");
+    } else if (!Number.isInteger(Number(nearMisses))) {
+        errors.push("👉 Near misses must be a whole number (no decimals).");
+    } else if (parseInt(nearMisses) < 0) {
+        errors.push("👉 Near misses cannot be negative.");
+    } else if (parseInt(nearMisses) > 1000000) {
+        errors.push("👉 Near misses cannot exceed 1,000,000.");
+    }
+
+    // Cross-field validation
+    if (incidents !== "" && nearMisses !== "" && parseInt(incidents) > 0 && parseInt(nearMisses) === 0) {
+        errors.push("👉 Near misses cannot be zero when incidents are greater than zero (prevents division by zero).");
+    }
+
+    // -------------------------
+    // ERROR HANDLING
+    // -------------------------
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // -------------------------
+    // SAFE CALCULATION
+    // -------------------------
+    const numIncidents = parseInt(incidents);
+    const numNearMisses = parseInt(nearMisses);
+
+    let ratio;
+    let feedback = "";
+
+    if (numIncidents === 0 && numNearMisses === 0) {
+        ratio = 0;
+        feedback = "<span style='color: green;'><strong>Perfect Safety Record:</strong> No incidents or near misses reported - excellent safety performance.</span>";
+    } else if (numNearMisses === 0) {
+        // This should already be caught by validation, but fallback
+        ratio = Infinity;
+        feedback = "<span style='color: red;'><strong>Undefined Ratio:</strong> Cannot calculate ratio with zero near misses when incidents exist.</span>";
+    } else {
+        ratio = numIncidents / numNearMisses;
+
+        if (ratio > 1.5) {
+            feedback = "<span style='color: red;'><strong>Critical Risk:</strong> Very high risk environment requiring immediate corrective action.</span>";
+        } else if (ratio > 1.0) {
+            feedback = "<span style='color: orange;'><strong>High Incident Rate:</strong> Indicates unsafe conditions and poor reporting culture.</span>";
+        } else if (ratio > 0.3) {
+            feedback = "<span style='color: #f9a825;'><strong>Moderate Incident Rate:</strong> Needs monitoring and preventive measures.</span>";
+        } else {
+            feedback = "<span style='color: green;'><strong>Low Incident Rate:</strong> Indicates a safe environment with effective safety practices.</span>";
+        }
+    }
+
+    document.getElementById('rateValue').textContent = ratio.toFixed(2);
+    document.getElementById('feedbackContent').innerHTML = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+{% comment %} 
+
+1. Formula (to include as comment in your code)
+/*
+Formula:
+Incident to Near Miss Ratio = Total Incidents ÷ Near Misses
+
+- If Incidents = 0 and Near Misses = 0 → Ratio = 0 (Perfect safety record)
+- If Near Misses = 0 and Incidents > 0 → Invalid (cannot divide by zero)
+- Ratio interpretation:
+   < 0.3   → Low incident rate (good safety performance)
+   0.3–1.0 → Moderate incident rate (needs monitoring)
+   1.0–1.5 → High incident rate (needs corrective action)
+   > 1.5   → Critical risk (immediate intervention)
+*/
+
+2. Input Validation Rules (QEHS/Fire Safety Best Practices)
+Total Incidents
+
+Must be an integer only (incidents are countable events).
+
+Range: 0 – 1,000,000 (aligns with OSHA/ISO max dataset handling).
+
+No decimals, no negative numbers.
+
+If incidents > 0, nearMisses cannot be zero.
+
+Near Misses
+
+Must be an integer only.
+
+Range: 0 – 1,000,000.
+
+No decimals, no negative numbers.
+
+If nearMisses = 0 but incidents = 0, allowed (interpreted as “perfect record”).
+
+If nearMisses = 0 but incidents > 0, invalid (division by zero).
+
+3. Output Validation Logic & Thresholds
+
+0 → Perfect record.
+
+< 0.3 → Good safety culture (more near misses reported than incidents).
+
+0.3 – 1.0 → Needs monitoring (incidents moderately high compared to near misses).
+
+1.0 – 1.5 → Unsafe (incident numbers close to near misses).
+
+> 1.5 → Critical risk (indicates underreporting of near misses or poor safety performance).
+
+🔹 These thresholds are based on Heinrich’s Safety Triangle / Bird’s Safety Pyramid, which OSHA and ISO 45001 recognize as best practice: more near misses should always be reported than actual incidents. {% endcomment %}
