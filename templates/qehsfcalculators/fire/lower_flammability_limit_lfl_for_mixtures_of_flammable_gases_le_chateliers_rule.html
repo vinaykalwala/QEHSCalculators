@@ -1,0 +1,591 @@
+{% extends 'base.html' %}
+{% block title %}Lower Flammability Limit (LFL) for Mixtures of Flammable Gases (Le Chatelier’s Rule) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accident Rate Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+         @media (max-width: 768px) {
+    .rate-value {
+        font-size: 28px; /* smaller font for tablets/mobiles */
+    }
+}
+
+@media (max-width: 480px) {
+    .rate-value {
+        font-size: 24px; /* even smaller for phones */
+    }
+}
+    </style>
+</head>
+<body>
+   <div class="btn-container">
+    <a href="{% url 'firecategory_calculators' %}" class="back-btn">Back To Fire Calculators</a>
+</div>
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+    <div class="calculator-header">
+        <h1>Lower Flammability Limit (LFL) for Mixtures of Flammable Gases (Le Chatelier’s Rule) Calculator</h1>
+        <p>Calculate the overall LFL of a gas mixture using <strong>Le Chatelier’s Rule</strong> to assess fire and explosion risks.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Input Card -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+            <div class="form-group">
+                <label for="gases">Number of Flammable Gases (n)</label>
+                <input type="number" id="gases" class="form-input" min="1" placeholder="Enter number of gases" oninput="generateInputs()">
+            </div>
+            <div id="gasInputs"></div>
+            <button class="calculate-btn" onclick="calculateLFL()">Calculate LFL</button>
+        </div>
+
+        <!-- Result Card -->
+        <div class="result-card">
+            <!-- Placeholder -->
+            <div class="result-placeholder" id="placeholder">
+                <img src="{% static 'images/flame.png' %}" alt="LFL Illustration">
+                <p>This tool will calculate the <strong>Lower Flammability Limit (LFL)</strong>. Enter your data to see results and insights here.</p>
+            </div>
+
+            <!-- Error -->
+            <div class="result-error hidden" id="resultError" style="font-size: 20px;"></div>
+
+            <!-- Result -->
+            <div class="result-value hidden" id="resultValue">
+                <div class="rate-value">LFL<sub>M</sub></div>
+                <div class="rate-value" id="lflValue">0.00</div>
+                <div class="rate-label" style="font-size:16px; font-weight:bold;">mol%</div>
+                <div class="result-feedback" id="feedbackContent"></div>
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   <!-- Notes Section -->
+<div class="note-section">
+
+    <!-- About This Calculator -->
+    <div class="note-card">
+        <h3>📘 About This Calculator</h3>
+        <p>
+            This calculator estimates the <strong>Lower Flammability Limit (LFL)</strong> of a mixture of flammable gases using Le Chatelier’s Rule. 
+            LFL indicates the minimum concentration at which a gas mixture can ignite. It is essential for fire prevention, explosion control, and chemical plant safety.
+        </p>
+    </div>
+
+    <!-- Parameters -->
+    <div class="note-card">
+        <h3>⚙️ Parameters</h3>
+        <ul class="note-list">
+            <li><strong>Molar Fraction (A<sub>i</sub>):</strong> Percentage contribution of each gas in the mixture.
+                <ul>
+                    <li>Expressed in % (sum of all fractions should be ~100%).</li>
+                    <li>Higher fraction gases dominate the mixture’s flammability behavior.</li>
+                </ul>
+            </li>
+            <li><strong>LFL of Each Gas (LFL<sub>i</sub>):</strong> Known lower flammability limit of each gas in mol%.
+                <ul>
+                    <li>Gases with lower LFL values are more hazardous.</li>
+                </ul>
+            </li>
+            <li><strong>Overall Mixture LFL (LFL<sub>M</sub>):</strong> Effective flammability limit of the gas mixture, influenced by all A<sub>i</sub> and LFL<sub>i</sub> values.</li>
+        </ul>
+    </div>
+
+    <!-- Validations -->
+    <div class="note-card">
+        <h3>🛡️ Input Validations</h3>
+        <ul class="note-list">
+            <li>All fields are <strong>mandatory</strong>; empty inputs trigger an error.</li>
+            <li><strong>Number of gases (n):</strong> Must be an integer ≥1 and ≤20 (practical industrial limit).</li>
+            <li><strong>Molar fractions (A<sub>i</sub>):</strong> Positive, ≤100%, sum ~100% (tolerance ±1%).</li>
+            <li><strong>LFL of each gas (LFL<sub>i</sub>):</strong> Positive, realistic (0.1–100 mol%).</li>
+            <li>Logical consistency: Prevents zero or negative values, sum exceeding 100%, and extreme outliers.</li>
+            <li>Any invalid entry shows a warning or error in the result card.</li>
+        </ul>
+    </div>
+
+    <!-- Interpretation -->
+    <div class="note-card">
+        <h3>💡 Interpretation</h3>
+        <ul class="note-list">
+            <li>✅ <strong>Low LFL<sub>M</sub> (&lt; 5 mol%):</strong> Highly flammable; ignites easily at low concentrations.</li>
+            <li>⚠️ <strong>Moderate LFL<sub>M</sub> (5–15 mol%):</strong> Flammable at moderate concentrations; monitor environment and ensure PPE.</li>
+            <li>🚨 <strong>High LFL<sub>M</sub> (&gt; 15 mol%):</strong> Lower fire risk, but confined spaces can still be hazardous.</li>
+            <li>Colored feedback in the result card gives quick risk assessment for operational decisions.</li>
+        </ul>
+    </div>
+
+    <!-- Usage -->
+    <div class="note-card">
+        <p>
+            Click <strong>"Calculate LFL"</strong> after entering gas fractions and LFL values. 
+            The calculated <strong>LFL<sub>M</sub></strong> helps engineers and safety officers evaluate explosion risks and plan preventive measures in gas handling environments.
+        </p>
+    </div>
+
+</div>
+
+
+</div>
+
+
+<script>
+   function generateInputs() {
+    let numGases = parseInt(document.getElementById("gases").value);
+    let gasInputs = document.getElementById("gasInputs");
+    gasInputs.innerHTML = "";
+
+    if (isNaN(numGases) || numGases < 1) return;
+
+    for (let i = 1; i <= numGases; i++) {
+        let div = document.createElement("div");
+        div.classList.add("form-group-container");
+        div.innerHTML = `
+            <div class="form-group">
+                <label for="Ai${i}">Molar Fraction (A${i}) [%]</label>
+                <input type="number" id="Ai${i}" class="form-input" min="0.01" max="100" step="0.01" placeholder="Enter A${i}">
+            </div>
+            <div class="form-group">
+                <label for="LFLi${i}">LFL Value (LFL${i}) [%]</label>
+                <input type="number" id="LFLi${i}" class="form-input" min="0.01" max="100" step="0.01" placeholder="Enter LFL${i}">
+            </div>
+        `;
+        gasInputs.appendChild(div);
+    }
+}
+
+function calculateLFL() {
+    const resultValue = document.getElementById('resultValue');
+    const placeholder = document.getElementById('placeholder');
+    const feedbackContent = document.getElementById('feedbackContent');
+    const resultError = document.getElementById('resultError');
+
+    // Reset display
+    resultError.classList.add('hidden');
+    resultValue.classList.add('hidden');
+    placeholder.classList.add('hidden');
+    resultError.innerHTML = "";
+    feedbackContent.innerHTML = "";
+
+    let numGases = parseInt(document.getElementById("gases").value);
+    if (isNaN(numGases) || numGases < 1 || numGases > 20) {
+        resultError.innerHTML = "⚠️ Enter a valid number of gases (1–20).";
+        resultError.style.color = "orange";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    let sum = 0, totalMolarFraction = 0, errorMsg = [];
+
+    for (let i = 1; i <= numGases; i++) {
+        let Ai = parseFloat(document.getElementById(`Ai${i}`).value);
+        let LFLi = parseFloat(document.getElementById(`LFLi${i}`).value);
+
+        // Input validation
+        if (isNaN(Ai) || Ai <= 0 || Ai > 100) errorMsg.push(`A${i} must be >0 and ≤100`);
+        if (isNaN(LFLi) || LFLi <= 0 || LFLi > 100) errorMsg.push(`LFL${i} must be >0 and ≤100`);
+
+        // Sum only valid inputs
+        if (!isNaN(Ai) && !isNaN(LFLi) && Ai > 0 && LFLi > 0) {
+            sum += (Ai / LFLi);
+            totalMolarFraction += Ai;
+        }
+    }
+
+    if (errorMsg.length > 0) {
+        resultError.innerHTML = errorMsg.join("<br>");
+        resultError.style.color = "red";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    // Total molar fraction check
+    if (Math.abs(totalMolarFraction - 100) > 1) {
+        resultError.innerHTML = `⚠️ Total molar fraction must be ~100%. Currently: ${totalMolarFraction.toFixed(2)}%.`;
+        resultError.style.color = "orange";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    // Calculation
+    let LFLM = 100 / sum;
+    document.getElementById('lflValue').innerText = LFLM.toFixed(2);
+    resultValue.classList.remove('hidden');
+
+    // Feedback
+    let feedback = "";
+    if (LFLM < 5) {
+        feedback = "✅ Low LFLM: Highly flammable mixture. Extreme caution required.";
+        feedbackContent.style.color = "green";
+    } else if (LFLM <= 15) {
+        feedback = "⚠️ Moderate LFLM: Flammable at moderate concentrations.";
+        feedbackContent.style.color = "orange";
+    } else {
+        feedback = "🚨 High LFLM: Lower fire risk, but still hazardous in confined spaces.";
+        feedbackContent.style.color = "red";
+    }
+    feedbackContent.innerHTML = feedback;
+}
+
+</script>
+
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+<!-- 1️⃣ Input Validation Rules (QEHS Perspective)
+Input	Required Validation	Realistic Thresholds	Notes
+Number of Gases (n)	Mandatory, numeric, integer ≥1	1 ≤ n ≤ 20 (practical for industrial mixtures)	Ensures the user enters a valid number of flammable gases
+Molar Fraction (A<sub>i</sub>)	Mandatory, numeric, >0, ≤100	0.01 ≤ A<sub>i</sub> ≤ 100	Sum of all A<sub>i</sub> ≈ 100% (tolerance ±1%)
+LFL of Each Gas (LFL<sub>i</sub>)	Mandatory, numeric, >0, ≤100	0.1 ≤ LFL<sub>i</sub> ≤ 100	Avoid unrealistic values; extremely low (<0.1%) is physically improbable
+Cross-Field Checks	Sum(A<sub>i</sub>) ~100%	Tolerance: ±1%	Ensures mixture fractions are physically meaningful
+Units	Ensure mol% for LFL and % for molar fraction	N/A	Critical for correct calculation and compliance with standards
+2️⃣ Output Validation Logic and Threshold Explanations
+
+LFL<sub>M</sub> (overall mixture LFL) indicates the flammability of the mixture:
+
+LFL<sub>M</sub> Value	Interpretation	Safety Implication
+< 5 mol%	Highly flammable	Extreme fire/explosion risk; requires strict controls, PPE, ventilation, explosion-proof equipment
+5 – 15 mol%	Moderately flammable	Medium risk; monitor, ensure ventilation, enforce safety SOPs
+> 15 mol%	Low flammability	Lower risk but still needs standard industrial precautions
+
+Feedback should clearly indicate risk level to operators.
+
+3️⃣ Edge Case Validations
+Edge Case	Handling
+Total molar fraction ≠ 100%	Show warning with actual total; prevent calculation if deviation >1%
+Division by zero (LFL<sub>i</sub>=0)	Block input, show error
+Negative / zero values	Block calculation and show error
+Extremely high LFL or molar fraction (>100%)	Show warning: “Check units or values”
+Missing values	Prompt user to fill all fields
+Large number of gases (>20)	Show warning: unusual mixture; allow only if necessary -->

@@ -374,6 +374,35 @@ CALCULATORS = [
 
 
 {"name": "Kinematic Viscosity Calculator", "url_name": "environment_kinematic_viscosity_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Kiln Residence Time Calculator", "url_name": "environment_kiln_residence_time_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Kirschmer’s Head Loss (h) Calculator", "url_name": "environment_kirschmers_head_loss_h_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Log Mean Temperature Difference (LMTD) Calculator", "url_name": "environment_log_mean_temperature_difference_lmtd_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Liquid Flow rate vs pressure drop calculator", "url_name": "environment_liquid_flow_rate_vs_pressure_drop_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Latent Heat Gain from People Calculator", "url_name": "environment_latent_heat_gain_from_people_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Latent Heat Gain from Infiltration Calculator", "url_name": "environment_latent_heat_gain_from_infiltration_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Loading Rate Hydraulic Retention Time (HRT) Calculator", "url_name": "environment_loading_rate_hydraulic_retention_time_hrt_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Loading Rate Specific Substrate Utilization Rate Calculator", "url_name": "environment_loading_rate_specific_substrate_utilization_rate_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Lapse Rate Calculator", "url_name": "environment_lapse_rate_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Liquid Film Coefficient (KL) Calculator", "url_name": "environment_liquid_film_coefficient_kl_calculator", "plan_type": "corporate", "category": "environment"},
+
 
     # Health Calculators
    {"name": "Army Body Fat Calculator", "url_name": "health_army_body_fat_calculator", "plan_type": "corporate", "category": "health"},
@@ -660,6 +689,26 @@ CALCULATORS = [
     {"name": "Heat Transfer By Conduction Calculator (Fourier's Law)", "url_name": "fire_heat_transfer_conduction_fouriers_law_calculator", "plan_type": "corporate", "category": "fire"},
     {"name": "Heat Transfer Calculator convection(newtons Law)", "url_name": "fire_heat_transfer_convection_newtons_law_calculator", "plan_type": "corporate", "category": "fire"},
     {"name": "Heat detector responsive time calculator", "url_name": "fire_heat_detector_responsive_time_calculator", "plan_type": "corporate", "category": "fire"},
+
+    {"name": "Huff's Relief Vent Rate Calculator", "url_name": "fire_huffs_relief_vent_rate_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Homogeneous-Vessel Venting Temperature Calculator", "url_name": "fire_homogeneous_vessel_venting_temperature_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Lower Flammability Limit (LFL) for Mixtures of Flammable Gases (Le Chatelier’s Rule) Calculator", "url_name": "fire_lower_flammability_limit_lfl_for_mixtures_of_flammable_gases_le_chateliers_rule_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Modified CO₂ Quantity Calculator", "url_name": "fire_modified_co_quantity_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Nitrogen Equivalency (Kik) Calculator", "url_name": "fire_nitrogen_equivalency_kik_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Normalized Mass Flux Formula (High-Quality Region) Calculator", "url_name": "fire_normalized_mass_flux_formula_high_quality_region_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Pressure Factor Calculator", "url_name": "fire_pressure_factor_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Reached Concentration Calculator", "url_name": "fire_reached_concentration_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Relief Vent Rate (Homogeneous-Vessel Venting) Calculator", "url_name": "fire_relief_vent_rate_homogeneous_vessel_venting_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Relief Vent Rate Formula (External Heating) Calculator", "url_name": "fire_relief_vent_rate_formula_external_heating_calculator", "plan_type": "corporate", "category": "fire"},
+
+
+
+
+
+
+
+
+
 
 
 

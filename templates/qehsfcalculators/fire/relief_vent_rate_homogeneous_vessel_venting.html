@@ -1,0 +1,678 @@
+{% extends 'base.html' %}
+{% block title %}Relief Vent Rate (Homogeneous-Vessel Venting) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accident Rate Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+         @media (max-width: 768px) {
+    .rate-value {
+        font-size: 28px; /* smaller font for tablets/mobiles */
+    }
+}
+
+@media (max-width: 480px) {
+    .rate-value {
+        font-size: 24px; /* even smaller for phones */
+    }
+}
+    </style>
+</head>
+<body>
+   <div class="btn-container">
+    <a href="{% url 'firecategory_calculators' %}" class="back-btn">Back To Fire Calculators</a>
+</div>
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+    <!-- Header -->
+    <div class="calculator-header">
+        <h1>Relief Vent Rate (Homogeneous-Vessel Venting) Calculator</h1>
+        <p>Calculate the required vent rate for safe pressure relief in vessels, preventing explosions or structural failure.</p>
+    </div>
+
+    <!-- Input Card -->
+    <div class="calc-content">
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+            <div class="form-group">
+                <label for="V">Volume of Vessel (V, m³)</label>
+                <input type="number" id="V" class="form-input" placeholder="Enter Volume" min="0.01">
+            </div>
+            <div class="form-group">
+                <label for="mo">Initial Mass (mo, kg)</label>
+                <input type="number" id="mo" class="form-input" placeholder="Enter Initial Mass" min="0.01">
+            </div>
+            <div class="form-group">
+                <label for="vfa">Specific Volume (vfa, m³/kg)</label>
+                <input type="number" id="vfa" class="form-input" placeholder="Enter Specific Volume" min="0.01">
+            </div>
+            <div class="form-group">
+                <label for="Cv">Specific Heat at Constant Volume (Cv, J/kg.K)</label>
+                <input type="number" id="Cv" class="form-input" placeholder="Enter Cv" min="0.01">
+            </div>
+            <div class="form-group">
+                <label for="dT">Temperature Rise (ΔT, K)</label>
+                <input type="number" id="dT" class="form-input" placeholder="Enter Temperature Rise" min="0.01">
+            </div>
+            <button class="calculate-btn" onclick="calculateVentRate()">Calculate Vent Rate</button>
+        </div>
+
+        <!-- Result Card -->
+        <div class="result-card">
+            <!-- Placeholder -->
+            <div class="result-placeholder" id="placeholder">
+                <img src="{% static 'images/resultimage.png' %}" alt="Relief Vent Illustration">
+                <p>This tool will calculate the <strong>Relief Vent Rate</strong>. Enter your data to see results and insights here.</p>
+            </div>
+
+            <!-- Error -->
+            <div class="result-error hidden" id="resultError" style="font-size: 28px;"></div>
+
+            <!-- Result -->
+            <div class="result-value hidden" id="resultValue">
+                <div class="rate-value">Relief Vent Rate</div>
+                <div class="rate-value" id="ventRateValue">0.000</div>
+                <div class="rate-label" style="font-size:16px; font-weight:bold;">kg/s</div>
+                <div class="result-feedback" id="feedbackContent"></div>
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="note-section">
+        <div class="note-card">
+    <h3>📘 About This Calculator</h3>
+    <p>
+        This calculator determines the <strong>Relief Vent Rate</strong> for vessels exposed to fire or other heat sources. 
+        The Relief Vent Rate represents the amount of material (gas or vapor) that must be safely released per second to prevent 
+        dangerous pressure buildup inside the vessel.
+    </p>
+    <p>
+        In fire scenarios, vessels containing flammable liquids or gases can heat up rapidly. As temperature rises, the pressure 
+        inside the vessel increases. Without proper venting, this can lead to:
+        <ul>
+            <li>Structural failure or rupture of the vessel</li>
+            <li>Explosion hazards</li>
+            <li>Release of toxic or flammable materials into the environment</li>
+        </ul>
+    </p>
+    <p>
+        This calculator helps engineers and safety professionals:
+        <ul>
+            <li>Determine the safe venting capacity required during fire exposure</li>
+            <li>Design pressure relief devices such as safety valves or rupture disks</li>
+            <li>Prevent catastrophic failures and ensure personnel safety</li>
+            <li>Comply with industrial safety regulations and standards</li>
+        </ul>
+    </p>
+    <p>
+        <strong>Applications in Fire Safety:</strong>
+        <ul>
+            <li>Chemical plants: Safe venting of storage tanks during fire incidents</li>
+            <li>Refineries: Prevent overpressure in flammable liquid vessels</li>
+            <li>Industrial storage facilities: Controlled release of gases and vapors to reduce fire/explosion risk</li>
+        </ul>
+    </p>
+    <p>
+        In short, this tool is essential for **fire safety and explosion prevention**, ensuring that vessels can safely relieve 
+        pressure during emergency heating events, protecting both people and equipment.
+    </p>
+</div>
+
+        <div class="note-card">
+            <h3>⚙️ Parameters</h3>
+            <ul class="note-list">
+                <li><strong>V (Volume, m³):</strong> Total vessel volume affecting pressure distribution.</li>
+                <li><strong>mo (Initial Mass, kg):</strong> Mass of liquid inside the vessel initially.</li>
+                <li><strong>vfa (Specific Volume, m³/kg):</strong> Space per unit mass, affecting expansion.</li>
+                <li><strong>Cv (Specific Heat, J/kg.K):</strong> Energy required to raise unit mass by 1K.</li>
+                <li><strong>ΔT (Temperature Rise, K):</strong> Temperature increase affecting pressure buildup.</li>
+            </ul>
+        </div>
+
+       <!-- Validation & Interpretation Note Card -->
+<div class="note-card">
+    <h3>🛡️ Input Validation & ⚖️ Result Interpretation</h3>
+
+    <!-- Input Validations -->
+    <p><strong>Input Validations:</strong></p>
+    <ul class="note-list">
+        <li>✅ <strong>Mandatory Fields:</strong> All inputs (V, mo, vfa, Cv, ΔT) are required; empty fields trigger errors.</li>
+        <li>✅ <strong>Positive Numeric Values:</strong> Inputs must be numeric and greater than zero; negative or zero values are invalid.</li>
+        <li>✅ <strong>Realistic Ranges:</strong>
+            <ul>
+                <li>V (Volume): 0.01 – 100,000 m³</li>
+                <li>mo (Initial Mass): 0.01 – 50,000 kg</li>
+                <li>vfa (Specific Volume): 0.001 – 10 m³/kg</li>
+                <li>Cv (Specific Heat): 1 – 10,000 J/kg·K</li>
+                <li>ΔT (Temperature Rise): 0.1 – 2,000 K</li>
+            </ul>
+        </li>
+        <li>✅ <strong>Cross-field Checks:</strong> Term <code>V / (mo * vfa)</code> must be positive to avoid invalid calculations.</li>
+        <li>✅ <strong>Extreme Value Warnings:</strong> Vent rates &gt;100 kg/s trigger critical alert; vent rates &lt;0.01 kg/s indicate very low hazard.</li>
+        <li>✅ <strong>Non-numeric or illogical combinations:</strong> Trigger an error and prevent calculation.</li>
+    </ul>
+</div>
+<div class="note-card">
+        <h3><strong>Result Interpretation:</strong></h3>
+    <ul class="note-list">
+        <li>✅ <strong>Low Vent Rate (&lt;1 kg/s):</strong> Safe, low-pressure release; minimal hazard.</li>
+        <li>⚠️ <strong>Moderate Vent Rate (1–10 kg/s):</strong> Requires monitoring and regular maintenance; ensure relief devices function properly.</li>
+        <li>🚨 <strong>High Vent Rate (10–100 kg/s):</strong> Critical! Immediate safety actions required; verify vessel integrity and safety systems.</li>
+        <li>⚠️ <strong>Extreme Vent Rate (&gt;100 kg/s):</strong> Emergency scenario; follow evacuation procedures and ensure system compliance with fire safety standards.</li>
+    </ul>
+</div>
+<div class="note-card">    <p><strong>Compliance Rationale:</strong> These validations and interpretations ensure that the calculator output aligns with OSHA, NFPA, ISO 45001, and fire safety standards, supporting safe operation, risk mitigation, and audit compliance in industrial environments.</p>
+</div>
+
+        <div class="note-card">
+            <p>Click <strong>"Calculate Vent Rate"</strong> to determine the relief vent capacity. Proper venting is essential for safe operation of pressurized vessels.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+function calculateVentRate() {
+    const V = parseFloat(document.getElementById('V').value);
+    const mo = parseFloat(document.getElementById('mo').value);
+    const vfa = parseFloat(document.getElementById('vfa').value);
+    const Cv = parseFloat(document.getElementById('Cv').value);
+    const dT = parseFloat(document.getElementById('dT').value);
+
+    const resultValue = document.getElementById('resultValue');
+    const placeholder = document.getElementById('placeholder');
+    const feedbackContent = document.getElementById('feedbackContent');
+    const resultError = document.getElementById('resultError');
+
+    // Reset display
+    resultError.classList.add('hidden');
+    resultValue.classList.add('hidden');
+    placeholder.classList.add('hidden');
+    feedbackContent.innerHTML = "";
+    resultError.innerHTML = "";
+
+    let errors = [];
+
+    // Basic Validations
+    if (isNaN(V) || V <= 0) errors.push("Volume (V) must be > 0 and numeric.");
+    if (isNaN(mo) || mo <= 0) errors.push("Initial Mass (mo) must be > 0 and numeric.");
+    if (isNaN(vfa) || vfa <= 0) errors.push("Specific Volume (vfa) must be > 0 and numeric.");
+    if (isNaN(Cv) || Cv <= 0) errors.push("Specific Heat (Cv) must be > 0 and numeric.");
+    if (isNaN(dT) || dT <= 0) errors.push("Temperature Rise (ΔT) must be > 0 and numeric.");
+
+    // Threshold validations
+    if (V > 100000) errors.push("Volume unusually large (>100,000 m³); verify input.");
+    if (mo > 50000) errors.push("Initial Mass unusually large (>50,000 kg); verify input.");
+    if (vfa < 0.001 || vfa > 10) errors.push("Specific Volume out of realistic range (0.001–10 m³/kg).");
+    if (Cv < 1 || Cv > 10000) errors.push("Cv out of realistic range (1–10,000 J/kg·K).");
+    if (dT < 0.1 || dT > 2000) errors.push("ΔT out of realistic fire exposure range (0.1–2000 K).");
+
+    // Cross-field check
+    if (V / (mo * vfa) <= 0) errors.push("Check Volume, Mass, and Specific Volume combination; term under sqrt must be positive.");
+
+    if (errors.length > 0) {
+        resultError.innerHTML = "❌ " + errors.join("<br>");
+        resultError.style.color = "red";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    // Calculation
+    const term1 = Math.sqrt(V / (mo * vfa));
+    const term2 = Math.sqrt(Cv * dT);
+    const ventRate = Math.pow(term1 + term2, 2);
+
+    document.getElementById('ventRateValue').innerText = ventRate.toFixed(3);
+    resultValue.classList.remove('hidden');
+
+    // Feedback based on thresholds
+    let feedback = "";
+    if (ventRate < 1) {
+        feedback = "✅ Low Vent Rate: Safe, low-pressure release.";
+        feedbackContent.style.color = "green";
+    } else if (ventRate <= 10) {
+        feedback = "⚠️ Moderate Vent Rate: Monitor and maintain the system.";
+        feedbackContent.style.color = "orange";
+    } else if (ventRate <= 100) {
+        feedback = "🚨 High Vent Rate: Critical! Ensure vessel safety and emergency procedures.";
+        feedbackContent.style.color = "red";
+    } else {
+        feedback = "⚠️ Extreme Vent Rate (>100 kg/s): Immediate safety intervention required!";
+        feedbackContent.style.color = "darkred";
+    }
+
+    feedbackContent.innerHTML = feedback;
+}
+
+</script>
+
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+<!-- 1️⃣ Analysis of Calculator Inputs, Outputs, and Formula
+Inputs:
+Input	Units	Purpose	Fire Safety Significance
+V (Volume)	m³	Total vessel volume	Larger volume reduces pressure buildup; must be realistic for vessel size.
+mo (Initial Mass)	kg	Mass of liquid or gas	Higher mass → higher energy → more venting required.
+vfa (Specific Volume)	m³/kg	Volume per unit mass	Ensures correct expansion calculation under heating.
+Cv (Specific Heat)	J/kg·K	Heat capacity at constant volume	Determines energy absorbed during temperature rise.
+ΔT (dT, Temperature Rise)	K	Temperature increase	Fire exposure or process deviation can increase ΔT; higher ΔT → higher pressure.
+Output:
+Output	Units	Interpretation
+Relief Vent Rate	kg/s	Required venting rate to prevent vessel overpressure during fire/exposure. Feedback categorized as Low, Moderate, or High risk.
+Formula:
+Vent Rate
+=
+(
+𝑉
+𝑚
+𝑜
+⋅
+𝑣
+𝑓
+𝑎
++
+𝐶
+𝑣
+⋅
+Δ
+𝑇
+)
+2
+Vent Rate=(
+m
+o
+	​
+
+⋅v
+fa
+	​
+
+V
+	​
+
+	​
+
++
+C
+v
+	​
+
+⋅ΔT
+	​
+
+)
+2
+
+Real-World Significance:
+
+Term1 models mass/volume expansion contribution.
+
+Term2 models thermal energy contribution.
+
+Combined, squared → venting capacity needed for safe release.
+
+2️⃣ Recommended Input Validation Rules
+
+Based on QEHS, NFPA, ISO 45001, and OSHA fire safety guidelines:
+
+Input	Minimum	Maximum	Decimals	Unit Check	Logical Cross-Checks	Notes
+V	0.01 m³	100,000 m³	2	m³	V / mo > 0	Avoid division by zero; extremely small or huge vessels flagged.
+mo	0.01 kg	50,000 kg	2	kg	mo / V > 0	Prevents zero-mass or unreasonably high mass.
+vfa	0.001 m³/kg	10 m³/kg	3	m³/kg	Ensure term1 realistic	Outliers in expansion ratio flagged.
+Cv	1 J/kg·K	10,000 J/kg·K	2	J/kg·K	Consistent with substance	Avoid unrealistically high heat capacity values.
+ΔT	0.1 K	2,000 K	1	K	ΔT consistent with fire scenarios	Extreme ΔT values flagged; negative or zero ΔT invalid.
+
+Additional Cross-Field Validations:
+
+V / (mo * vfa) must be > 0 (avoids sqrt of zero/negative).
+
+Cv * ΔT must be > 0.
+
+Warn if calculated vent rate > 100 kg/s (extreme hazard).
+
+Warn if calculated vent rate < 0.01 kg/s (unlikely scenario, very low hazard).
+
+3️⃣ Edge Case Handling
+Edge Case	Handling
+Division by zero	Prevent by validating V, mo, vfa > 0
+Negative inputs	Reject all negative or zero values
+Extremely high/low vent rate	Provide warning feedback to the user
+Non-numeric input	Reject with error message
+Unrealistic combinations (e.g., tiny V with massive mo)	Flag as warning for verification
+Missing inputs	Reject and prompt for mandatory fields
+4️⃣ Output Validation Logic / Thresholds
+Vent Rate (kg/s)	Interpretation	QEHS Implication
+<1	Low	Safe; no immediate action required
+1–10	Moderate	Monitor system; ensure relief valves are functional
+>10	High	Critical; emergency preparation needed; confirm vessel capacity
+>100	Extreme	Immediate safety intervention; non-compliance hazard -->
