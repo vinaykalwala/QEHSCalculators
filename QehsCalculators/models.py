@@ -2,6 +2,8 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
 from datetime import timedelta
+from .utils.email_utils import send_subscription_email
+
 
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
@@ -94,15 +96,38 @@ class UserSubscription(models.Model):
         remaining_days = max(0, time_remaining.days)
         return remaining_days
 
+    # def check_and_update_expiration(self):
+    #     """Check and update expiration status if needed"""
+    #     if (self.status == "active" and 
+    #         self.end_date and 
+    #         self.end_date < timezone.now()):
+    #         self.status = "expired"
+    #         self.save(update_fields=['status'])
+    #         return True
+    #     return False
+    
     def check_and_update_expiration(self):
-        """Check and update expiration status if needed"""
-        if (self.status == "active" and 
-            self.end_date and 
-            self.end_date < timezone.now()):
+        """Expire subscription if needed and send email once after expiry."""
+        now = timezone.now()
+
+        if self.status == "active" and self.end_date and self.end_date < now:
             self.status = "expired"
             self.save(update_fields=['status'])
+
+            # Send email AFTER expiry
+            send_subscription_email(
+                self.user,
+                "Your Subscription has Expired",
+                f"Hello {self.user.username},\n\n"
+                f"We wanted to let you know that your subscription plan '{self.plan}' has expired on {self.end_date.strftime('%Y-%m-%d %H:%M')}.\n\n"
+                "To continue enjoying access to our calculators and features, please subscribe again to your previous plan.\n\n"
+                "Thank you for being with us!\n\n"
+                "Best Regards,\n"
+                "The QehsCalculators Team"
+            )
             return True
         return False
+
 
     @property
     def is_active(self):

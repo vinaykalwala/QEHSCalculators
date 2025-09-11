@@ -1,6 +1,5 @@
 from django.contrib.auth import logout
 from django.shortcuts import redirect
-from django.utils import timezone
 from django.utils.deprecation import MiddlewareMixin
 from .models import UserDevice
 
@@ -9,22 +8,22 @@ class DeviceLimitMiddleware(MiddlewareMixin):
         if not request.user.is_authenticated:
             return None
 
-        # Check ALL subscriptions for expiration (not just the latest)
+        # --- Subscription Expiry Check ---
         active_subscriptions = request.user.subscriptions.filter(status="active")
         expired_found = False
-        
+
         for sub in active_subscriptions:
-            if sub.check_and_update_expiration():  # This will save if expired
+            if sub.check_and_update_expiration():  # Marks expired + sends email
                 expired_found = True
-                # If this was the user's only active subscription, log them out
+                # If this was the last active subscription → logout
                 if sub == active_subscriptions.last():
                     logout(request)
                     return redirect("subscription_expired")
 
-        # Get latest active subscription after expiration checks
+        # Get latest active subscription after running checks
         latest_sub = request.user.subscriptions.filter(status="active").last()
 
-        # If user had active subscriptions but all expired now
+        # If user had active subs but all expired now → logout
         if expired_found and not latest_sub:
             logout(request)
             return redirect("subscription_expired")
@@ -49,6 +48,7 @@ class DeviceLimitMiddleware(MiddlewareMixin):
                 if active_devices >= limit and not device_exists:
                     return redirect("device_limit_exceeded")
 
+            # Track / update device usage
             UserDevice.objects.get_or_create(user=request.user, device_id=device_id)
 
         return None
