@@ -404,7 +404,34 @@ CALCULATORS = [
 
 {"name": "Liquid Film Coefficient (KL) Calculator", "url_name": "environment_liquid_film_coefficient_kl_calculator", "plan_type": "corporate", "category": "environment"},
 
+{"name": "Mass Flow Rate From Velocity Calculator", "url_name": "environment_mass_flow_rate_from_velocity_calculator", "plan_type": "corporate", "category": "environment"},
 
+
+{"name": "Mean steam consumption rate for  a flow type application(1)", "url_name": "environment_mean_steam_consumption_rate_for_a_flow_type_application1_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Mean Steam Consumption  Of a Flow-Type Application caluculator (2)", "url_name": "environment_mean_steam_consumption_of_a_flow_type_application2_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "mean steam flowrate to a storage calorifier calculator", "url_name": "environment_mean_steam_flowrate_to_a_storage_calorifier_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Maximum allowable concentartion (MAC) calculator", "url_name": "environment_maximum_allowable_concentartion_mac_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Mass Flow Rate from volumetric flowrate Calculator", "url_name": "environment_mass_flow_rate_from_volumetric_flowrate_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Metal Loss Calculator", "url_name": "environment_metal_loss_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Municipal Water Quantity Estimator Calculator", "url_name": "environment_municipal_water_quantity_estimator_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Maximum Pollutant Concentration Calculator", "url_name": "environment_maximum_pollutant_concentration_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Monod Kinetics - Substrate Limited Growth Calculator", "url_name": "environment_monod_kinetics_substrate_limited_growth_calculator", "plan_type": "corporate", "category": "environment"},
     # Health Calculators
    {"name": "Army Body Fat Calculator", "url_name": "health_army_body_fat_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Adjusted Body Weight Calculator", "url_name": "health_adjusted_body_weight_calculator", "plan_type": "corporate", "category": "health"},
