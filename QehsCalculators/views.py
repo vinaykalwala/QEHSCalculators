@@ -1313,6 +1313,20 @@ def quality_percentage_error_when_using_pressure_calculator(request):
 def quality_pressure_drop_and_friction_loss_calculator(request):
     return render(request, 'qehsfcalculators/quality/pressure_drop_and_friction_loss.html', {'title': 'Pressure Drop & Friction Loss Calculator'})
 
+
+
+@login_required
+@subscription_required(plan_type="corporate")
+def quality_venturi_meter_flow_calculator(request):
+    return render(request, 'qehsfcalculators/quality/venturi_meter_flow_calculator.html', {'title': 'Venturi Meter Flow Calculator'})
+
+
+@login_required
+@subscription_required(plan_type="corporate")
+def quality_control_score_calculator(request):
+    return render(request, 'qehsfcalculators/quality/control_score_calculator.html', {'title': 'Control Score Calculator'})
+
+
 @login_required
 @subscription_required(plan_type="corporate")
 def quality_process_capability_cp_cpk_calculator(request):
