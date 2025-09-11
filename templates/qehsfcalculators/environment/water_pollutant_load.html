@@ -1,0 +1,673 @@
+{% extends 'base.html' %}
+{% block title %}Water Pollutant Load Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Pollutant Load Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 38px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+        
+        select.form-input {
+            appearance: menulist;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+
+
+<div class="calculator-container printable" id="printArea">
+
+    {% include "includes/print_header_footer.html" %}
+    
+    <div class="calculator-header">
+        <h1>Water Pollutant Load Calculator</h1>
+        <p>Calculate the <strong>Pollutant Load (M)</strong> using the formula</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Calculator -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+
+            <div class="form-group">
+                <label for="concentration">Pollutant Concentration (C) [mg/L]</label>
+                <input type="number" id="concentration" class="form-input" min="0" step="any" placeholder="e.g., 15.5">
+            </div>
+
+            <div class="form-group">
+                <label for="flow">Flow Rate (Q) [MGD]</label>
+                <input type="number" id="flow" class="form-input" min="0.001" step="any" placeholder="e.g., 2.5">
+            </div>
+            
+            <button class="calculate-btn" onclick="calculatePollutantLoad()">Calculate Pollutant Load</button>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Water pollution illustration">
+                <p>This tool will calculate the <strong>Pollutant Load (M)</strong> using the formula .</p>
+            </div>
+            
+            <div class="result-error hidden" id="resultError">
+                <div class="error-icon">❌</div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+             
+            <div class="result-value hidden" id="resultValue">
+                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Calculated Pollutant Load</h2>
+                </div>
+
+                <div class="rate-display">
+                    <div class="rate-value" id="rateValue">0.00</div>
+                    <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">lb/day</div>
+                </div>
+
+                <div class="result-feedback">
+                    <div class="feedback-title">Assessment</div>
+                    <div class="feedback-content" id="feedbackContent"></div>
+                </div>
+                <div class="btn-wrapper">
+                   <button type="button" class="calculate-btn print-btn" onclick="handlePrintReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="note-section">
+        <div class="note-card">
+            <h3>📘 About This Calculator</h3>
+            <p>
+                The <strong>Water Pollutant Load Calculator</strong> determines the pollutant load using the formula:
+                M = C × Q × 8.34. This is essential in environmental engineering for measuring pollutant discharge
+                in wastewater treatment plants, industrial effluents, and surface water bodies.
+            </p>
+        </div>
+        
+        <div class="note-card">
+            <h3>📊 Interpretation</h3>
+            <ul class="note-list">
+                <li><span class="bad">Pollutant Load > 10000 lb/day</span> → ⚠️ High Pollutant Load: Potential environmental risk, consider treatment options</li>
+                <li><span class="average">1000 ≤ Pollutant Load ≤ 10000 lb/day</span> → ✅ Acceptable Pollutant Load: Within normal environmental discharge limits</li>
+                <li><span class="good">Pollutant Load < 1000 lb/day</span> → ❌ Low Pollutant Load: Check for underestimation or inaccurate inputs</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h3>⚠️ Input Validations</h3>
+            <ul class="note-list">
+                <li>✔️ <strong>Pollutant Concentration (C)</strong> must be a non-negative number</li>
+                <li>✔️ <strong>Flow Rate (Q)</strong> must be a positive number (water must be flowing)</li>
+                <li>⚠️ High Pollutant Load: May indicate severe contamination requiring immediate treatment</li>
+                <li>⚠️ Low Pollutant Load: Could indicate underestimated measurements or highly efficient treatment</li>
+                <li>❌ Zero, negative, or non-numeric inputs are invalid</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h3>📏 Units & Typical Ranges</h3>
+            <ul class="note-list">
+                <li><strong>Pollutant Concentration (C):</strong> Milligrams per liter (mg/L) (typical range: 0-1000 mg/L)</li>
+                <li><strong>Flow Rate (Q):</strong> Million Gallons per Day (MGD) (typical range: 0.1-100 MGD)</li>
+                <li><strong>Conversion Factor:</strong> 8.34 (converts mg/L and MGD to lb/day)</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h3>🌍 Key Applications</h3>
+            <ul class="note-list">
+                <li><strong>Wastewater Treatment:</strong> Ensuring compliance with discharge permits</li>
+                <li><strong>Industrial Effluent Monitoring:</strong> Tracking pollutant discharge from factories and power plants</li>
+                <li><strong>Environmental Impact Assessments:</strong> Evaluating pollution levels in rivers and lakes</li>
+                <li><strong>Drinking Water Safety:</strong> Identifying contamination sources in water supplies</li>
+                <li><strong>Agricultural Runoff Studies:</strong> Measuring nutrient loads in farming areas</li>
+            </ul>
+        </div>
+        
+        <div class="note-card">
+            <h3>📝 Explanation of Parameters</h3>
+            <ul class="note-list">
+                <li><strong>Pollutant Concentration (C):</strong> The concentration of a specific contaminant in water, measured in mg/L (milligrams per liter)</li>
+                <li><strong>Flow Rate (Q):</strong> The volume of water flowing per day, measured in MGD (Million Gallons per Day)</li>
+                <li><strong>Conversion Factor (8.34):</strong> Converts the concentration and flow rate to a standardized mass unit (lb/day)</li>
+            </ul>
+        </div>
+        
+        <div class="note-card">
+            <h3>💡 Why Pollutant Load is Important?</h3>
+            <p>Understanding pollutant load is crucial for water quality management, regulatory compliance, and environmental protection. It helps determine:</p>
+            <ul class="note-list">
+                <li>Whether wastewater treatment facilities are meeting discharge limits</li>
+                <li>The impact of industrial and municipal effluents on rivers, lakes, and groundwater</li>
+                <li>The effectiveness of pollution control measures</li>
+            </ul>
+        </div>
+        
+        <div class="note-card">
+            <h3>⚠️ Limitations</h3>
+            <p>This formula assumes a steady-state flow and does not account for seasonal variations, dilution effects, or intermittent pollution sources.</p>
+        </div>
+        
+        <div class="note-card">
+            <h3>🔚 Conclusion</h3>
+            <p>The Pollutant Load formula is a key tool in environmental management. Understanding pollutant discharge levels helps industries and municipalities protect water resources, comply with regulations, and implement effective pollution control strategies.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function calculatePollutantLoad() {
+        const concentration = parseFloat(document.getElementById("concentration").value);
+        const flow = parseFloat(document.getElementById("flow").value);
+        const placeholder = document.getElementById("placeholder");
+        const resultValue = document.getElementById("resultValue");
+        const resultError = document.getElementById("resultError");
+        const rateValue = document.getElementById("rateValue");
+        const feedbackContent = document.getElementById("feedbackContent");
+        const errorMessage = document.getElementById("errorMessage");
+
+        // Reset display
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        resultError.classList.add("hidden");
+
+        // Validations
+        if (isNaN(concentration) || concentration < 0) {
+            errorMessage.textContent = "Pollutant concentration (C) must be a non-negative number.";
+            resultError.classList.remove("hidden");
+            return;
+        }
+
+        if (isNaN(flow) || flow <= 0) {
+            errorMessage.textContent = "Flow rate (Q) must be a positive number.";
+            resultError.classList.remove("hidden");
+            return;
+        }
+
+        // Pollutant Load Calculation
+        const pollutantLoad = concentration * flow * 8.34;
+
+        // Feedback Message
+        let feedbackMessage = "";
+        let feedbackClass = "";
+
+        if (pollutantLoad > 10000) {
+            feedbackMessage = "⚠️ High Pollutant Load: Potential environmental risk, consider treatment options.";
+            feedbackClass = "bad";
+        } else if (pollutantLoad >= 1000 && pollutantLoad <= 10000) {
+            feedbackMessage = "✅ Acceptable Pollutant Load: Within normal environmental discharge limits.";
+            feedbackClass = "average";
+        } else {
+            feedbackMessage = "❌ Low Pollutant Load: Check for underestimation or inaccurate inputs.";
+            feedbackClass = "good";
+        }
+
+        // Display Results
+        rateValue.textContent = pollutantLoad.toFixed(4);
+        feedbackContent.innerHTML = `<span class="${feedbackClass}">${feedbackMessage}</span>`;
+        resultValue.classList.remove("hidden");
+    }
+    
+    function handlePrintReport() {
+        window.print();
+    }
+</script>
+  <script src="{% static 'js/print.js' %}"></script>
+
+</body>
+</html>
+{% endblock %}
+<!--
+Formula
+𝑀=𝐶×𝑄×8.34
+
+M=C×Q×8.34
+
+M = Pollutant Load (lb/day)
+
+C = Concentration (mg/L)
+
+Q = Flow (MGD)
+
+8.34 = unit conversion factor
+
+===Validation Rules==
+
+Concentration (C, mg/L):
+
+Must be ≥ 0
+
+Typical: 0–1000 mg/L
+
+Hard cap: 1,000,000 mg/L (warn about wrong units if >1000)
+
+Flow (Q, MGD):
+
+Must be > 0
+
+Typical: 0.1–100 MGD
+
+Hard cap: 1000 MGD
+
+Cross checks:
+
+If C = 0 → Load = 0, show info message
+
+If load > 1e6 lb/day → likely unit error
+
+Must be finite numbers (no NaN/Infinity)
+=======Edge Cases=============
+
+Empty input → error
+
+Negative C or Q → error
+
+Zero Q → error
+
+Extremely small Q (<0.001 MGD) → warning
+
+Extremely high C or Q → unit mismatch warning
+
+========Output Rules===========
+
+Show M in lb/day, plus kg/day and g/day for audits
+
+Classify:
+
+High: >10,000 lb/day (critical)
+
+Moderate: 1,000–10,000 lb/day
+
+Low: <1,000 lb/day
+-->

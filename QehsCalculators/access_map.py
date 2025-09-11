@@ -433,6 +433,22 @@ CALCULATORS = [
 
 {"name": "Monod Kinetics - Substrate Limited Growth Calculator", "url_name": "environment_monod_kinetics_substrate_limited_growth_calculator", "plan_type": "corporate", "category": "environment"},
 
+
+
+
+
+#environment calculators from  bottom to top
+
+
+{"name": "Water Pollutant Load Calculator", "url_name": "environment_water_pollutant_load_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Water Flux Through Membrane Calculator", "url_name": "environment_water_flux_through_the_membrane_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Waterflux Ultrafiltration Calculator", "url_name": "environment_waterflux_ultrafiltration_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Wind Profile Calculator", "url_name": "environment_wind_profile_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Weir Flow Rate Calculator", "url_name": "environment_weir_flow_rate_q_calculator", "plan_type": "corporate", "category": "environment"},
+
     # Health Calculators
    {"name": "Army Body Fat Calculator", "url_name": "health_army_body_fat_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Adjusted Body Weight Calculator", "url_name": "health_adjusted_body_weight_calculator", "plan_type": "corporate", "category": "health"},
