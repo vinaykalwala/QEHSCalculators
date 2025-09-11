@@ -432,6 +432,7 @@ CALCULATORS = [
 
 
 {"name": "Monod Kinetics - Substrate Limited Growth Calculator", "url_name": "environment_monod_kinetics_substrate_limited_growth_calculator", "plan_type": "corporate", "category": "environment"},
+
     # Health Calculators
    {"name": "Army Body Fat Calculator", "url_name": "health_army_body_fat_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Adjusted Body Weight Calculator", "url_name": "health_adjusted_body_weight_calculator", "plan_type": "corporate", "category": "health"},
