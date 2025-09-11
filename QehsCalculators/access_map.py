@@ -710,6 +710,33 @@ CALCULATORS = [
 
 {"name": "Inverse Square Law Calculator", "url_name":"safety_inverse_square_law_calculator", "plan_type": "corporate", "category": "safety"},
 
+
+{"name": "Initial Accident Rate (IAR) Calculator", "url_name":"safety_initial_accident_rate_iar_calculator", "plan_type": "corporate", "category": "safety"}, 
+
+{"name": "Job Safety Analysis Frequency (JSAF) Calculator", "url_name":"safety_job_safety_analysis_frequency_jsaf_calculator", "plan_type": "corporate", "category": "safety"}, 
+
+{"name": "Job Safety Analysis Coverage Calculator", "url_name":"safety_job_safety_analysis_coverage_calculator", "plan_type": "corporate", "category": "safety"}, 
+
+{"name": "Kick Tolerance Calculator", "url_name":"safety_kick_tolerance_calculator", "plan_type": "corporate", "category": "safety"}, 
+
+{"name": "Kinetic Energy in Steam Calculator", "url_name":"safety_kinetic_energy_in_steam_calculator", "plan_type": "corporate", "category": "safety"}, 
+
+{"name": "Kinetic Energy Calculator", "url_name":"safety_kinetic_energy_calculator", "plan_type": "corporate", "category": "safety"}, 
+
+{"name": "Kv Flow Coefficient Calculator", "url_name":"afety_kv_flow_coeffient_calculator", "plan_type": "corporate", "category": "safety"}, 
+
+{"name": "Ladder Length Calculator", "url_name":"safety_ladder_length_calculator", "plan_type": "corporate", "category": "safety"}, 
+
+{"name": "Lost Time Injury Frequency Rate Calculator", "url_name":"safety_lost_time_injury_incident_rate_calculator", "plan_type": "corporate", "category": "safety"}, 
+
+{"name": "Live Load Calculator", "url_name":"safety_live_load_calculation_ll_calculator", "plan_type": "corporate", "category": "safety"}, 
+
+{"name": "Load Distribution Per Leg Calculator", "url_name":"safety_load_distribution_per_leg_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Total Intended Load (TIL) Calculator", "url_name":"safety_total_intend_load_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Total Dead Load Calculator", "url_name":"safety_total_dead_load_dl_calculator", "plan_type": "corporate", "category": "safety"},
+
     # Fire Calculators
     {"name": "Burn Rate (chemical Exposure) Calculator", "url_name": "fire_burn_rate_chemical_exposure_calculator", "plan_type": "corporate", "category": "fire"},
     {"name": "Base Design Quantity for CO₂ Calculator", "url_name": "fire_base_design_quantity_for_co_calculator", "plan_type": "corporate", "category": "fire"},
