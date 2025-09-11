@@ -1,0 +1,709 @@
+{% extends 'base.html' %}
+{% block title %}Heat Transfer Rate Calculator (Condensing Steam){% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heat Transfer Rate Calculator (Condensing Steam)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 38px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+
+<div class="calculator-header">
+    <h1>Heat Transfer Rate Calculator (Condensing Steam)</h1>
+    <p>Estimate instantaneous heat transfer delivered by condensing steam. Result shown in <strong>kW</strong> (and MW).</p>
+</div>
+
+<div class="calc-content">
+    <div class="calc-card">
+        <h2>Enter Data</h2>
+
+        <div class="form-group">
+            <label for="m_s"><strong>Mean Steam Consumption (ṁₛ) — kg/s *</strong></label>
+            <input type="number" id="m_s" class="form-input" step="any" min="0" placeholder="e.g., 1.25">
+        </div>
+
+        <div class="form-group">
+            <label for="h_fg"><strong>Specific Enthalpy of Evaporation (h_fg) — kJ/kg *</strong></label>
+            <input type="number" id="h_fg" class="form-input" step="any" min="0" placeholder="e.g., 2257">
+        </div>
+
+        <button class="calculate-btn" onclick="calculateCorrosionRate()">Calculate Heat Transfer Rate</button>
+    </div>
+
+    <!-- Result Section (kept ids to preserve styling) -->
+    <div class="result-card">
+        <div class="result-placeholder" id="placeholder">
+            <img src="/static/images/mlc_environment_result.png" alt="Steam heat illustration">
+            <p>This tool estimates the instantaneous heat transfer rate produced by condensing steam (used for system sizing, energy audits and safety checks).</p>
+        </div>
+
+        <div class="result-error hidden" id="resultError">
+            <div class="error-icon">❌</div>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <div class="result-value hidden" id="resultValue">
+            <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                <h2>Heat Transfer Rate</h2>
+            </div>
+
+            <div class="rate-display">
+                <div>
+                  <div class="rate-label" style="font-size:14px; color:#2980b9;">Heat transfer (Q)</div>
+                  <div class="rate-value" id="rateValue">0.00</div>
+                  <div class="rate-label" style="font-size:12px; color:#666;">kW</div>
+                </div>
+                <div style="margin-left:20px;">
+                  <div class="rate-label" style="font-size:14px; color:#2980b9;">Equivalent (MW)</div>
+                  <div class="rate-value" id="mwValue">0.000</div>
+                  <div class="rate-label" style="font-size:12px; color:#666;">MW</div>
+                </div>
+            </div>
+
+            <div class="result-feedback">
+                <div class="feedback-title">Assessment</div>
+                <div class="feedback-content" id="feedbackContent"></div>
+            </div>
+
+            <div class="btn-wrapper">
+                <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Updated Notes & Validations -->
+<div class="note-section">
+  <div class="note-card">
+    <h3>📘 About</h3>
+    <p>
+      This calculator estimates the instantaneous heat transfer produced when steam condenses.
+      It uses the mass flow of steam and the steam's latent enthalpy to compute the thermal power delivered.
+      Use consistent SI units: <em>ṁₛ in kg/s</em> and <em>h₍fg₎ in kJ/kg</em>. The result is presented in <strong>kW</strong> (kJ/s).
+    </p>
+  </div>
+
+  <div class="note-card">
+    <h3>✅ Input guidance & validations (summary)</h3>
+    <ul class="note-list">
+      <li><b>ṁₛ (kg/s):</b> required; numeric; allowed range (error if outside): <b>0.001 – 1000 kg/s</b>. Typical industrial range: 0.1–50 kg/s. Warning if &gt;50 kg/s.</li>
+      <li><b>h₍fg₎ (kJ/kg):</b> required; numeric; allowed range (error if outside): <b>100 – 5000 kJ/kg</b>. Typical for water: ~1500–2800 kJ/kg (depends on pressure/temperature).</li>
+      <li><b>Precision:</b> up to 6 decimals accepted; UI step = any. Outputs rounded: kW to 2 decimals, MW to 3 decimals.</li>
+      <li><b>Units check:</b> If computed Q is extraordinarily large, the calculator will flag likely unit mismatches (e.g., entering h_fg in J/kg instead of kJ/kg, or ṁ in kg/hr instead of kg/s).</li>
+      <li><b>Cross-field checks:</b> extremely small ṁ with large h_fg or vice-versa will generate warnings about measurement accuracy.</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>🔎 Safety & QEHS considerations</h3>
+    <ul class="note-list">
+      <li><b>Heat release & cooling:</b> High Q implies high energy needing removal — check condenser and cooling duty capacity to prevent overheating.</li>
+      <li><b>Fire & explosion:</b> Large steam/hot surfaces can increase ignition risk for nearby combustibles; ensure adequate ventilation and separation.</li>
+      <li><b>Process integrity:</b> Rapid condensation can cause thermal shock or water hammer — ensure piping and controls are rated.</li>
+      <li><b>Audit record:</b> Keep inputs (flow, enthalpy), computed Q, units, and timestamp for compliance and incident investigations.</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>🏭 Typical applications</h3>
+    <ul class="note-list">
+      <li>Condenser heat duty calculation in power plants and Rankine cycles</li>
+      <li>Sizing heat exchangers and steam injection systems</li>
+      <li>Process heating (food, chemical, pharmaceutical)</li>
+      <li>Boiler and steam distribution efficiency assessments</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+/* Error display helper (retained pattern) */
+function showErrors(errors) {
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+
+  errorMessage.innerHTML = errors.join("<br>");
+  errorBox.classList.remove("hidden");
+  placeholder.classList.add("hidden");
+  resultValue.classList.add("hidden");
+}
+
+/* Main calculator (keeps original function name for your button) */
+function calculateCorrosionRate() {
+  // read raw inputs
+  const sMs = document.getElementById("m_s").value.trim();
+  const sHfg = document.getElementById("h_fg").value.trim();
+
+  const placeholder = document.getElementById("placeholder");
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const resultValue = document.getElementById("resultValue");
+  const rateEl = document.getElementById("rateValue"); // kW
+  const mwEl = document.getElementById("mwValue");     // MW
+  const feedbackEl = document.getElementById("feedbackContent");
+
+  errorBox.classList.add("hidden");
+  errorMessage.innerHTML = "";
+  feedbackEl.innerHTML = "";
+
+  const errors = [];
+  const warnings = [];
+
+  const isFiniteNum = v => Number.isFinite(v) && !Number.isNaN(v);
+  const decLen = s => (s && s.includes(".")) ? s.split(".")[1].length : 0;
+
+  // presence checks
+  if (sMs === "") errors.push("👉 Please enter mean steam consumption (ṁₛ) in kg/s.");
+  if (sHfg === "") errors.push("👉 Please enter specific enthalpy of evaporation (h_fg) in kJ/kg.");
+  if (errors.length) return showErrors(errors);
+
+  // parse
+  const m_s = parseFloat(sMs);
+  const h_fg = parseFloat(sHfg);
+
+  if (!isFiniteNum(m_s)) errors.push("👉 ṁₛ must be numeric (kg/s).");
+  if (!isFiniteNum(h_fg)) errors.push("👉 h_fg must be numeric (kJ/kg).");
+  if (errors.length) return showErrors(errors);
+
+  // value checks (errors)
+  if (m_s <= 0) errors.push("👉 ṁₛ must be greater than 0 kg/s.");
+  if (h_fg <= 0) errors.push("👉 h_fg must be greater than 0 kJ/kg.");
+
+  // Acceptable ranges (tuned to practical industry values)
+  if (m_s < 0.001 || m_s > 1000) errors.push("👉 ṁₛ should be between 0.001 and 1,000 kg/s — check units (kg/s).");
+  if (h_fg < 100 || h_fg > 5000) errors.push("👉 h_fg should be between 100 and 5,000 kJ/kg — check units (kJ/kg).");
+
+  if (errors.length) return showErrors(errors);
+
+  // precision warnings
+  if (decLen(sMs) > 6) warnings.push("⚠️ ṁₛ has >6 decimals; results will be rounded.");
+  if (decLen(sHfg) > 6) warnings.push("⚠️ h_fg has >6 decimals; results will be rounded.");
+
+  // detect likely unit mistakes
+  if (h_fg > 100000) {
+    // h_fg extremely large — probably J/kg entered instead of kJ/kg
+    return showErrors(["⚠️ h_fg is unusually large — did you enter J/kg instead of kJ/kg? Enter h_fg in kJ/kg (e.g., ~2257)."]);
+  }
+  if (m_s > 3600 && m_s <= 1e6) {
+    // m_s > 3600 kg/s suspicious — maybe user input kg/hr
+    warnings.push("⚠️ ṁₛ is very large — did you enter kg/hr instead of kg/s? If so, divide by 3600 to convert to kg/s.");
+  }
+
+  // compute Q using extracted formula: Q (kW) = m_s (kg/s) * h_fg (kJ/kg) => kJ/s == kW
+  const Q_kW = m_s * h_fg; // kW
+  const Q_MW = Q_kW / 1000;
+
+  // guardrails on computed output
+  if (!isFiniteNum(Q_kW)) return showErrors(["⚠️ Computed heat transfer invalid. Check inputs."]);
+  if (Math.abs(Q_kW) > 1e6) {
+    // >1e6 kW = 1e9 W unrealistic for single process point; likely units error
+    return showErrors(["⚠️ Computed Q exceeds 1×10⁶ kW — likely unit or scale error. Re-check inputs and units."]);
+  }
+
+  // reasonableness warnings (QEHS-oriented)
+  if (Q_kW > 2000) warnings.push("⚠️ High heat duty (>2000 kW). Verify condenser/cooling capacity and safety controls.");
+  if (m_s < 0.01) warnings.push("⚠️ Very small steam flow (<0.01 kg/s). Confirm measurement sensitivity and instrumentation.");
+  if (h_fg < 1000 || h_fg > 3000) warnings.push("⚠️ h_fg outside common range for saturated water vapor — confirm pressure/temperature and source (steam tables).");
+
+  // classification
+  let classification = "";
+  if (Q_kW < 500) classification = "Low heat transfer (keep monitoring)";
+  else if (Q_kW <= 2000) classification = "Moderate heat transfer (typical duty)";
+  else classification = "High heat transfer (check cooling & safety)";
+
+  // prepare display
+  rateEl.textContent = Q_kW.toFixed(2);
+  mwEl.textContent = Q_MW.toFixed(3);
+
+  let details = `<div><b>Heat transfer (Q):</b> ${Q_kW.toFixed(2)} kW (~${Q_MW.toFixed(3)} MW)</div>`;
+  details += `<div style="margin-top:6px;"><b>Classification:</b> ${classification}</div>`;
+  details += `<div style="margin-top:6px; font-size:0.95em;">Inputs → ṁₛ: <b>${m_s.toFixed(6)}</b> kg/s, h_fg: <b>${h_fg.toFixed(3)}</b> kJ/kg</div>`;
+  if (warnings.length) details += `<div style="margin-top:8px; color:#b35d00;">${warnings.join(" | ")}</div>`;
+
+  feedbackEl.innerHTML = details;
+
+  // show results
+  placeholder.classList.add("hidden");
+  resultValue.classList.remove("hidden");
+  errorBox.classList.add("hidden");
+}
+
+/* Print helper retained */
+function printReport() {
+  const el = document.getElementById('printDate');
+  if (el) {
+    const now = new Date();
+    el.textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+  window.print();
+}
+</script>
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+<!-- 
+📌 Steam Heat Duty Calculator
+
+Formula:
+ Q (kW) = ṁₛ × h_fg
+ where:
+   - ṁₛ → steam mass flow rate [kg/s]
+   - h_fg → specific enthalpy of evaporation [kJ/kg]
+ Derived:
+   - Q_MW = Q / 1000  [MW]
+
+Inputs:
+ - ṁₛ (m_s): Mean steam consumption [kg/s]
+ - h_fg: Specific enthalpy of evaporation [kJ/kg]
+
+Input Validations:
+ - Required: Both values must be provided
+ - Numeric check: Must be valid numbers
+ - Range checks:  
+     • ṁₛ > 0 (expected 0.001 – 1000 kg/s)  
+     • h_fg > 0 (expected 100 – 5000 kJ/kg)  
+ - Decimal precision: warn if >6 decimals  
+ - Unit mistake checks:  
+     • h_fg > 100,000 → probably J/kg instead of kJ/kg  
+     • ṁₛ > 3600 → probably kg/hr instead of kg/s  
+
+Outputs:
+ - Q_kW → Heat transfer [kW]
+ - Q_MW → Heat transfer [MW]
+ - Classification → Low / Moderate / High duty
+ - Context warnings (e.g., very small steam flow, unusual h_fg, excessive heat duty)
+
+Output Validations:
+ - Must be finite (no NaN or Infinity)  
+ - Guardrails:  
+     • |Q_kW| > 1e6 → reject as unrealistic (unit/scale error)  
+ - Context warnings:  
+     • Q_kW > 2000 → very high duty (check cooling capacity)  
+     • m_s < 0.01 → very small steam flow (instrument sensitivity issue)  
+     • h_fg < 1000 or > 3000 → outside typical range for saturated steam  
+-->

@@ -1,0 +1,702 @@
+{% extends 'base.html' %}
+{% block title %}Lapse Rate Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lapse Rate Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 38px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+
+<div class="calculator-header">
+    <h1>Lapse Rate Calculator</h1>
+    <p>Estimate the atmospheric lapse rate expressed in <strong>°C per 100 m</strong> from a measured temperature difference and the corresponding height change.</p>
+</div>
+
+<div class="calc-content">
+    <!-- Calculator -->
+    <div class="calc-card">
+        <h2>Enter Data</h2>
+
+        <div class="form-group">
+            <label for="tempDiff">Temperature Differential (ΔT) (°C)</label>
+            <input type="number" id="tempDiff" class="form-input" step="any" placeholder="e.g., 6.5">
+        </div>
+
+        <div class="form-group">
+            <label for="heightDiff">Height Variation (ΔZ) (m)</label>
+            <input type="number" id="heightDiff" class="form-input" step="any" placeholder="e.g., 1000">
+        </div>
+
+        <button class="calculate-btn" onclick="calculateLapseRate()">Calculate Lapse Rate</button>
+    </div>
+
+    <!-- Result Section -->
+    <div class="result-card">
+        <div class="result-placeholder" id="placeholder">
+            <img src="/static/images/mlc_environment_result.png" alt="Lapse rate illustration">
+            <p>This tool calculates the atmospheric lapse rate in <strong>°C per 100 m</strong> and provides an interpretation for environmental / QEHS use.</p>
+        </div>
+
+        <div class="result-error hidden" id="resultError">
+            <div class="error-icon">❌</div>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <div class="result-value hidden" id="resultValue">
+            <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                <h2>Calculated Lapse Rate</h2>
+            </div>
+
+            <div class="rate-display">
+                <div class="rate-value" id="rateValue">0.00</div>
+                <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">°C per 100 m</div>
+            </div>
+
+            <div class="result-feedback">
+                <div class="feedback-title">Interpretation</div>
+                <div class="feedback-content" id="feedbackContent"></div>
+            </div>
+
+            <div class="btn-wrapper">
+                <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notes Section -->
+<div class="note-section">
+    <div class="note-card">
+        <h3>📘 About This Calculator</h3>
+        <p>
+            This calculator converts a measured temperature change over a known vertical distance into an atmospheric lapse rate
+            (reported as °C per 100 meters). The lapse rate is used to assess atmospheric stability, pollutant dispersion, and
+            meteorological conditions relevant to environmental and safety evaluations.
+        </p>
+    </div>
+
+    <div class="note-card">
+        <h3>⚠️ Input Validations (summary)</h3>
+        <ul class="note-list">
+            <li><strong>ΔT (°C)</strong>: Required, numeric. Typical range: 0.01 – 100 °C. Hard limits: &gt; 0.005 and ≤ 500 °C.</li>
+            <li><strong>ΔZ (m)</strong>: Required, numeric. Typical range: 0.1 – 20,000 m. Hard limits: &gt; 0.01 and ≤ 50,000 m.</li>
+            <li>ΔT and ΔZ must be positive — small ΔZ &lt; 0.1 m or very small ΔT may cause numerical instability.</li>
+            <li>Precision guidance: round to ≤ 3 decimals for reporting consistency.</li>
+            <li>Results beyond ±50 °C per 100 m are flagged as implausible and must be checked for unit/sampling errors.</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>🌍 Key Applications</h3>
+        <ul class="note-list">
+            <li><strong>Air quality and pollution dispersion</strong> — identify trapping/inversion conditions that hold pollutants near ground level.</li>
+            <li><strong>Fire & smoke modelling</strong> — inversion and stable layers are critical when modelling smoke transport and firefighter safety.</li>
+            <li><strong>Aviation & UAV operations</strong> — impacts aircraft performance and atmospheric stability.</li>
+            <li><strong>Environmental assessments</strong> — meteorological stability classification for impact studies and regulatory reporting.</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+/* Show error messages (keeps your existing flow/DOM) */
+function showErrors(errors) {
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+
+  errorMessage.innerHTML = errors.join("<br>");
+  errorBox.classList.remove("hidden");
+  placeholder.classList.add("hidden");
+  resultValue.classList.add("hidden");
+}
+
+/* Helper: count decimals */
+function countDecimals(value) {
+  const s = String(value);
+  if (s.indexOf('.') >= 0) return s.split('.')[1].length;
+  return 0;
+}
+
+/* Core validation + calculation for Lapse Rate */
+function calculateLapseRate() {
+  const dTRaw = (document.getElementById("tempDiff").value || "").toString().trim();
+  const dZRaw = (document.getElementById("heightDiff").value || "").toString().trim();
+
+  const rateEl = document.getElementById("rateValue");
+  const feedbackEl = document.getElementById("feedbackContent");
+  const placeholder = document.getElementById("placeholder");
+
+  // reset UI
+  document.getElementById("resultError").classList.add("hidden");
+  feedbackEl.innerHTML = "";
+
+  const errors = [];
+  const warnings = [];
+
+  if (!dTRaw) errors.push("👉 Please enter Temperature Differential (ΔT) in °C.");
+  if (!dZRaw) errors.push("👉 Please enter Height Variation (ΔZ) in meters.");
+  if (errors.length) return showErrors(errors);
+
+  const dT = parseFloat(dTRaw);
+  const dZ = parseFloat(dZRaw);
+
+  // Numeric & basic sign checks
+  if (!Number.isFinite(dT)) errors.push("👉 ΔT must be a numeric value (°C).");
+  if (!Number.isFinite(dZ)) errors.push("👉 ΔZ must be a numeric value (m).");
+  if (errors.length) return showErrors(errors);
+
+  // Hard limits and plausibility (industry-informed)
+  if (dT <= 0 || dT < 0.005 || dT > 500) {
+    errors.push("👉 ΔT must be > 0 (typical range 0.01–100 °C). Check units and measurement.");
+  }
+  if (dZ <= 0 || dZ < 0.01 || dZ > 50000) {
+    errors.push("👉 ΔZ must be > 0 (typical range 0.1–20,000 m). Check units and measurement.");
+  }
+  if (errors.length) return showErrors(errors);
+
+  // Precision guidance
+  if (countDecimals(dT) > 3 || countDecimals(dZ) > 3) {
+    warnings.push("⚠️ High decimal precision detected — round inputs to ≤ 3 decimals for reporting.");
+  }
+
+  // Soft plausibility warnings
+  if (dZ < 1) warnings.push("⚠️ Very small height interval — measurement noise may dominate the result.");
+  if (dZ > 20000) warnings.push("⚠️ Very large height interval — ensure ΔT corresponds to the same vertical span.");
+  if (dT > 100) warnings.push("⚠️ Very large temperature differential — confirm measurement and units.");
+
+  // Calculation (matches extracted formula)
+  const lapseRate = - (dT / dZ) * 100; // °C per 100 m
+
+  if (!Number.isFinite(lapseRate)) {
+    return showErrors(["⚠️ Computed lapse rate is invalid. Check inputs and units."]);
+  }
+
+  // Plausibility check on result magnitude
+  if (Math.abs(lapseRate) > 50) {
+    warnings.push("⚠️ |lapse rate| > 50 °C/100m — implausible for atmosphere. Check units (e.g., accidentally used °C per km or wrong ΔT units).");
+  }
+
+  // Interpretation (QEHS-focused)
+  let interpretation = "";
+  if (lapseRate < 0) {
+    interpretation = "🌫️ Temperature inversion — very stable atmosphere; pollutants and smoke may become trapped near the ground.";
+  } else if (lapseRate < 1) {
+    interpretation = "🌀 Stable atmosphere — limited vertical motion; reduced dispersion.";
+  } else if (lapseRate < 9.3) {
+    interpretation = "⚠️ Conditionally unstable — some potential for convection and vertical mixing.";
+  } else if (Math.abs(lapseRate - 9.8) <= 0.5) {
+    interpretation = "✅ Dry adiabatic (~9.8°C/100m) — neutral stability for dry parcels.";
+  } else if (lapseRate >= 9.3 && lapseRate < 15) {
+    interpretation = "🔥 Unstable — strong vertical motion, good dispersion potential.";
+  } else {
+    interpretation = "🔥 Very unstable / atypical — verify inputs and instrumentation.";
+  }
+
+  // Build details for audit/report
+  let details = `<div>Lapse Rate: <b>${lapseRate.toFixed(2)}</b> °C per 100 m</div>`;
+  details += `<div>ΔT (°C): <b>${dT.toFixed(3)}</b>, ΔZ (m): <b>${dZ.toFixed(3)}</b></div>`;
+  if (warnings.length) details += `<div style="margin-top:6px; color:#b35d00; font-size:0.95em;">${warnings.join(" | ")}</div>`;
+
+  // Update UI
+  rateEl.textContent = lapseRate.toFixed(2);
+  feedbackEl.innerHTML = `<div>${interpretation}</div>${details}`;
+
+  // Show/hide
+  placeholder.classList.add("hidden");
+  document.getElementById("resultValue").classList.remove("hidden");
+  document.getElementById("resultError").classList.add("hidden");
+}
+
+/* print helper (keeps your existing flow) */
+function printReport() {
+  const el = document.getElementById('printDate');
+  if (el) {
+    el.textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+  window.print();
+}
+</script>
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+<!-- /*
+===========================================
+Atmospheric Lapse Rate Calculator
+===========================================
+
+📌 Formula:
+    Lapse Rate (Γ) = - (ΔT / ΔZ) × 100
+
+    where:
+      ΔT = Temperature Difference (°C)
+      ΔZ = Height Difference (m)
+      Γ  = Lapse Rate (°C per 100 m)
+
+-------------------------------------------
+✅ Input Requirements & Validations:
+
+1. Required inputs:
+   - Temperature Differential (ΔT, °C)
+   - Height Variation (ΔZ, m)
+
+2. Numeric & valid ranges:
+   - ΔT > 0 (typical range 0.01 – 100 °C, max 500)
+   - ΔZ > 0 (typical range 0.1 – 20,000 m, max 50,000)
+
+3. Precision guidance:
+   - Inputs should be ≤ 3 decimals (warn if more).
+
+-------------------------------------------
+⚠️ Warnings / Plausibility Checks:
+
+1. Input plausibility:
+   - ΔZ < 1 → ⚠️ Small height, results may be noisy
+   - ΔZ > 20,000 → ⚠️ Very large height, ensure ΔT matches span
+   - ΔT > 100 → ⚠️ Very large ΔT, check units
+
+2. Result plausibility:
+   - |Γ| > 50 °C/100 m → ⚠️ Implausible, check units (°C/km mix-up?)
+
+-------------------------------------------
+📊 Output:
+
+- Lapse Rate (°C per 100 m)
+- Inputs summary (ΔT, ΔZ)
+- Warning messages (if applicable)
+- Interpretation (stability classification):
+
+    • Γ < 0 → 🌫️ Inversion (stable, pollutants trapped)
+    • 0 ≤ Γ < 1 → 🌀 Stable atmosphere
+    • 1 ≤ Γ < 9.3 → ⚠️ Conditionally unstable
+    • Γ ≈ 9.8 → ✅ Dry adiabatic (neutral)
+    • 9.3 ≤ Γ < 15 → 🔥 Unstable, good dispersion
+    • Γ ≥ 15 or extreme → 🔥 Very unstable / atypical
+
+-------------------------------------------
+*/ -->

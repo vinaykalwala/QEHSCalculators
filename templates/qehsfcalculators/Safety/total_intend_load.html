@@ -1,0 +1,689 @@
+{% extends 'base.html' %}
+{% block title %}Total Intended Load (TIL) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Total Intended Load (TIL) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .rate-display {
+            display:flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        .calculation-nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .calculation-item {
+            list-style: none;
+        }
+        
+        .calculation-link {
+            display: inline-block;
+            background-color: #1560bd;
+            padding: 12px 20px;
+            color: white;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .calculation-link:hover {
+            background-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Total Intended Load (TIL) Calculator</h1>
+            <p>Calculate the total intended load on a scaffold structure</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="deadLoad">Dead Load (DL) (kg)</label>
+                    <input type="number" id="deadLoad" class="form-input" min="0" placeholder="e.g., 1500">
+                </div>
+                <div class="form-group">
+                    <label for="liveLoad">Live Load (LL) (kg)</label>
+                    <input type="number" id="liveLoad" class="form-input" min="0" placeholder="e.g., 1000">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateTIL()">Calculate Total Intended Load</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Safety illustration">
+                    <p>This tool will calculate the <strong>Total Intended Load (TIL)</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Total Intended Load (TIL)</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">kg</div>
+                    </div>
+                    
+                    <div class="rate-display" style="margin-top: 20px;">
+                        <div class="rate-value" id="rateValueLbs">0.00</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">pounds</div>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Load Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Total Intended Load (TIL) Calculator</strong> determines the complete load that a scaffold structure
+                    will need to support, combining both the weight of the structure itself and the weight of workers and equipment.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ What is Total Intended Load (TIL)?</h3>
+                <p>
+                    Total Intended Load is the sum of Dead Load (the weight of the scaffold structure itself) and Live Load 
+                    (the weight of workers, tools, materials, and equipment that will be on the scaffold during use).
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Dead Load (DL):</strong> The weight of the scaffold itself (in kilograms)</li>
+                    <li><strong>Live Load (LL):</strong> The weight of workers, tools, and equipment (in kilograms)</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <p>
+                    <b>Higher Load Values</b> = more structural support required.  
+                    Generally:
+                </p>
+                <ul class="note-list">
+                    <li><span class="good">Below 2000 kg</span> → Light to moderate load (standard scaffolds)</li>
+                    <li><span class="average">2000 - 5000 kg</span> → Heavy load (heavy-duty scaffolds)</li>
+                    <li><span class="bad">Above 5000 kg</span> → Very heavy load (requires specialized equipment and engineering verification)</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>🌍 Importance in Construction Safety</h3>
+                <p>
+                    In construction and maintenance work at heights, scaffolds are essential. It's critical to ensure that 
+                    the scaffold is built to withstand the total load it will carry to avoid accidents or collapses. 
+                    By calculating the total intended load, which includes both the dead load and live load, 
+                    we can verify that the scaffold is safe for use and meets necessary load-bearing standards.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>📋 Industry Standards</h3>
+                <p>
+                    OSHA 1926.451 (Scaffolding Standards), ANSI/ASSE A10.8 (Scaffolding Safety Requirements), 
+                    and local building codes for maximum allowable loads on scaffolding structures.
+                </p>
+            </div>
+            
+            <div class="note-card">
+    <h3>✅ Validation Rules</h3>
+    <ul class="note-list">
+        <li><b>Dead Load (DL):</b> 0 – 100,000 kg, max 2 decimals, must be ≥ realistic scaffold self-weight (~50 kg).</li>
+        <li><b>Live Load (LL):</b> 0 – 100,000 kg, max 2 decimals, should reflect workers & tools (≥70 kg if applicable).</li>
+        <li><b>Total Intended Load (TIL):</b> DL + LL, must not exceed 150,000 kg.</li>
+        <li><b>Cross-check:</b> DL and LL cannot both be zero.</li>
+        <li><b>Units:</b> Inputs in kilograms, results shown in kg and pounds.</li>
+        <li><b>Output Validation:</b>
+            <ul>
+                <li>&lt;2000 kg → ✅ Safe (standard scaffolds)</li>
+                <li>2000–5000 kg → ⚠️ Heavy (heavy-duty scaffolds)</li>
+                <li>&gt;5000 kg → ❌ Very Heavy (requires engineering approval)</li>
+            </ul>
+        </li>
+        <li><b>Standards Reference:</b> OSHA 1926.451, ANSI/ASSE A10.8, ISO 45001, NFPA guidelines.</li>
+    </ul>
+</div>
+
+            
+            <div class="note-card">
+                <h3>🔗 Related Calculators</h3>
+                <p>If you need more information on how to calculate the dead and live loads for scaffolds, you can use the following calculators:</p>
+                <ul class="calculation-nav">
+                    <li class="calculation-item">
+                        <a href="{% url 'safety_total_dead_load_dl_calculator' %}" class="calculation-link">Total Dead Load Calculator</a>
+                    </li>
+                    <li class="calculation-item">
+                        <a href="{% url 'safety_live_load_calculation_ll_calculator' %}" class="calculation-link">Live Load Calculator</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+<script>
+    // Set current date for print header
+    document.addEventListener('DOMContentLoaded', function() {
+        const now = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+    });
+
+    function calculateTIL() {
+    const deadLoadInput = document.getElementById('deadLoad').value.trim();
+    const liveLoadInput = document.getElementById('liveLoad').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const rateValue = document.getElementById('rateValue');
+    const rateValueLbs = document.getElementById('rateValueLbs');
+    const feedbackContent = document.getElementById('feedbackContent');
+
+    let errors = [];
+
+    // --- Validation Rules ---
+    // Dead Load
+    if (deadLoadInput === "" || isNaN(deadLoadInput)) {
+        errors.push("👉 Please enter the Dead Load (kg).");
+    } else {
+        const DL = parseFloat(deadLoadInput);
+        if (DL < 0) errors.push("👉 Dead Load cannot be negative.");
+        if (DL > 100000) errors.push("👉 Dead Load cannot exceed 100,000 kg.");
+        if (DL.toString().includes(".") && DL.toString().split(".")[1].length > 2) {
+            errors.push("👉 Dead Load can have at most 2 decimal places.");
+        }
+    }
+
+    // Live Load
+    if (liveLoadInput === "" || isNaN(liveLoadInput)) {
+        errors.push("👉 Please enter the Live Load (kg).");
+    } else {
+        const LL = parseFloat(liveLoadInput);
+        if (LL < 0) errors.push("👉 Live Load cannot be negative.");
+        if (LL > 100000) errors.push("👉 Live Load cannot exceed 100,000 kg.");
+        if (LL.toString().includes(".") && LL.toString().split(".")[1].length > 2) {
+            errors.push("👉 Live Load can have at most 2 decimal places.");
+        }
+    }
+
+    // Cross-field validation
+    if (errors.length === 0) {
+        const DL = parseFloat(deadLoadInput);
+        const LL = parseFloat(liveLoadInput);
+        const TIL = DL + LL;
+
+        if (DL === 0 && LL === 0) {
+            errors.push("👉 Dead Load and Live Load cannot both be zero.");
+        }
+        if (TIL > 150000) {
+            errors.push("👉 Total Intended Load cannot exceed 150,000 kg (out of safety range).");
+        }
+    }
+
+    // Show errors if any
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    // --- Calculation ---
+    const DL = parseFloat(deadLoadInput);
+    const LL = parseFloat(liveLoadInput);
+    const TIL_KG = DL + LL;
+    const TIL_LB = TIL_KG * 2.20462;
+
+    // Display result
+    rateValue.textContent = TIL_KG.toFixed(2);
+    rateValueLbs.textContent = TIL_LB.toFixed(2);
+
+    // --- Feedback ---
+    let feedback = "";
+    if (TIL_KG < 2000) {
+        feedback = `✅ Safe: ${TIL_KG.toFixed(2)} kg (light to moderate load, standard scaffold).`;
+    } else if (TIL_KG >= 2000 && TIL_KG <= 5000) {
+        feedback = `⚠️ Caution: ${TIL_KG.toFixed(2)} kg (heavy load, use heavy-duty scaffolds).`;
+    } else {
+        feedback = `❌ Unsafe: ${TIL_KG.toFixed(2)} kg (very heavy, requires engineering verification).`;
+    }
+
+    feedbackContent.innerHTML = feedback;
+
+    // Show result, hide errors and placeholder
+    errorBox.classList.add("hidden");
+    placeholder.classList.add("hidden");
+    resultValue.classList.remove("hidden");
+}
+
+
+    function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+</script>
+{% endblock %}
+
+{% comment %} 
+1. Formula Used (for comment in code)
+// Formula:
+// TIL (kg) = Dead Load (DL) + Live Load (LL)
+//
+// Where:
+// DL = Dead Load (weight of scaffold structure itself, kg)
+// LL = Live Load (workers, tools, materials, equipment, kg)
+// TIL = Total Intended Load (kg)
+//
+// Conversion to pounds (lb):
+// TIL_lb = TIL_kg × 2.20462
+
+2. Input Validation Rules (Real-world QEHS & Fire Safety)
+Dead Load (DL)
+
+Unit: kilograms (kg).
+
+Range: 0 – 100,000 kg.
+
+Decimals: Allowed up to 2 decimals (precision in design weights).
+
+Compliance Rationale: Dead load is scaffold self-weight; values beyond ~100,000 kg are unrealistic for conventional scaffolds.
+
+Live Load (LL)
+
+Unit: kilograms (kg).
+
+Range: 0 – 100,000 kg.
+
+Decimals: Allowed up to 2 decimals.
+
+Compliance Rationale: Covers workers, tools, equipment; OSHA typically requires considering the maximum reasonably expected live loads.
+
+Cross-Field Validation
+
+Total Intended Load (TIL) = DL + LL ≤ 150,000 kg (upper safety cap to catch outliers).
+
+Both DL and LL cannot be 0 simultaneously (scaffold must carry some load).
+
+DL should not be unrealistically low (e.g., <50 kg for a scaffold).
+
+LL should reflect at least 1 person load if used (>70 kg recommended when workers are included).
+
+3. Output Validation Logic & Thresholds
+
+Following OSHA/ANSI capacity guidance:
+
+<2000 kg (≈ 4,400 lbs): ✅ Light to moderate load → standard scaffold use.
+
+2000–5000 kg (≈ 4,400–11,000 lbs): ⚠️ Heavy load → requires heavy-duty scaffolds, inspection.
+
+>5000 kg (≈ 11,000 lbs): ❌ Very heavy load → requires engineering verification, specialized scaffolds.
+
+These thresholds are consistent with OSHA’s minimum 4× intended load-bearing capacity requirement. {% endcomment %}

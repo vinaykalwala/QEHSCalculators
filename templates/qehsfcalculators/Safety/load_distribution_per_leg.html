@@ -1,0 +1,672 @@
+{% extends 'base.html' %}
+{% block title %}Load Distribution Per Leg Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Load Distribution Per Leg Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .rate-display {
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        .til-link {
+            display: inline-block;
+            background-color: #1560bd;
+            padding: 12px 20px;
+            color: white;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 10px 0;
+        }
+        
+        .til-link:hover {
+            background-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Load Distribution Per Leg Calculator</h1>
+            <p>Calculate the load distribution per leg for a scaffold structure</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="totalLoad">Total Intended Load (TIL) (kg)</label>
+                    <input type="number" id="totalLoad" class="form-input" min="0" placeholder="e.g., 5000">
+                </div>
+                <div class="form-group">
+                    <label for="numberOfLegs">Number of Legs (N)</label>
+                    <input type="number" id="numberOfLegs" class="form-input" min="1" placeholder="e.g., 4">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateLoadPerLeg()">Calculate Load Per Leg</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Safety illustration">
+                    <p>This tool will calculate the <strong>Load Distribution Per Leg</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Load Distribution Per Leg</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">kg per leg</div>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Load Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Load Distribution Per Leg Calculator</strong> determines how much weight each leg of a scaffold structure
+                    will bear, ensuring safe and balanced load distribution across the entire structure.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ What is Load Distribution Per Leg?</h3>
+                <p>
+                    Load Distribution Per Leg is a calculation that determines the amount of weight supported by each individual leg
+                    of a scaffold structure, based on the total load and the number of supporting legs.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Total Intended Load (TIL):</strong> The total load on the scaffold (in kilograms)</li>
+                    <li><strong>Number of Legs (N):</strong> The number of scaffold legs supporting the load</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <p>
+                    <b>Lower Load Values</b> = less stress on each leg.  
+                    Generally:
+                </p>
+                <ul class="note-list">
+                    <li><span class="good">Below 200 kg</span> → Light load (standard scaffolds)</li>
+                    <li><span class="average">200 - 500 kg</span> → Moderate load (heavy-duty scaffolds)</li>
+                    <li><span class="bad">Above 500 kg</span> → Heavy load (requires specialized equipment and verification)</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>🌍 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Construction Safety</strong> - Ensuring scaffold stability</li>
+                    <li><strong>Event Planning</strong> - Setting up temporary structures</li>
+                    <li><strong>Industrial Maintenance</strong> - Planning work platforms</li>
+                    <li><strong>Engineering</strong> - Structural load calculations</li>
+                    <li><strong>Safety Compliance</strong> - Meeting OSHA and other regulatory requirements</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📋 Industry Standards</h3>
+                <p>
+                    OSHA 1926.451 (Scaffolding Standards), ANSI/ASSE A10.8 (Scaffolding Safety Requirements), 
+                    and local building codes for maximum allowable loads on scaffolding structures.
+                </p>
+            </div>
+            
+            <div class="note-card">
+    <h3>✅ Validation Rules</h3>
+    <ul class="note-list">
+        <li><b>Total Intended Load (TIL):</b> Must be >0 kg and ≤1,000,000 kg. Max 2 decimals.</li>
+        <li><b>Number of Legs (N):</b> Must be a whole number, between 2 and 100.</li>
+        <li><b>Cross-Check:</b> TIL must be ≥ N (minimum ~1 kg per leg).</li>
+        <li><b>Division by Zero:</b> Number of legs cannot be zero.</li>
+        <li><b>Output Validation:</b>
+            <ul>
+                <li>&lt;200 kg/leg → ✅ Safe</li>
+                <li>200–500 kg/leg → ⚠️ Caution (heavy-duty scaffold)</li>
+                <li>&gt;500 kg/leg → ❌ Unsafe (requires engineering approval)</li>
+            </ul>
+        </li>
+        <li><b>Standards Reference:</b> OSHA 1926.451, ANSI/ASSE A10.8, manufacturer specs.</li>
+    </ul>
+</div>
+
+            
+            <div class="note-card">
+                <h3>🔗 Related Calculators</h3>
+                <p>If you need assistance calculating the total intended load, please use the following calculator:</p>
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="{% url 'safety_total_intend_load_calculator' %}" class="til-link">Total Intended Load (TIL) Calculator</a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateLoadPerLeg() {
+    const totalLoadInput = document.getElementById('totalLoad').value.trim();
+    const numberOfLegsInput = document.getElementById('numberOfLegs').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+
+    // --- Validation Rules ---
+    // Total Intended Load (TIL)
+    if (totalLoadInput === "" || isNaN(totalLoadInput)) {
+        errors.push("👉 Please enter the total intended load (kg).");
+    } else {
+        const totalLoad = parseFloat(totalLoadInput);
+        if (totalLoad <= 0) {
+            errors.push("👉 Total load must be greater than 0 kg.");
+        } else if (totalLoad > 1000000) {
+            errors.push("👉 Total load cannot exceed 1,000,000 kg.");
+        } else if (totalLoad.toString().split(".")[1]?.length > 2) {
+            errors.push("👉 Total load can have a maximum of 2 decimal places.");
+        }
+    }
+
+    // Number of Legs (N)
+    if (numberOfLegsInput === "" || isNaN(numberOfLegsInput)) {
+        errors.push("👉 Please enter the number of legs.");
+    } else {
+        const numberOfLegs = parseInt(numberOfLegsInput, 10);
+        if (numberOfLegs < 2) {
+            errors.push("👉 Scaffold must have at least 2 legs.");
+        } else if (numberOfLegs > 100) {
+            errors.push("👉 Number of legs cannot exceed 100.");
+        } else if (!Number.isInteger(Number(numberOfLegsInput))) {
+            errors.push("👉 Number of legs must be a whole number.");
+        }
+    }
+
+    // Cross-field validations
+    if (errors.length === 0) {
+        const TIL = parseFloat(totalLoadInput);
+        const N = parseInt(numberOfLegsInput, 10);
+
+        if (N === 0) {
+            errors.push("👉 Number of legs cannot be zero (division by zero error).");
+        } else if (TIL < N) {
+            errors.push("👉 Total load must be greater than the number of legs (minimum realistic load per leg is ~1 kg).");
+        }
+    }
+
+    // Show errors if any
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    // If no errors, proceed with calculation
+    const TIL = parseFloat(totalLoadInput);
+    const N = parseInt(numberOfLegsInput, 10);
+    const loadPerLeg = TIL / N;
+
+    // Display result
+    document.getElementById('rateValue').textContent = loadPerLeg.toFixed(2);
+
+    // Provide feedback based on result thresholds
+    let feedback = "";
+    if (loadPerLeg < 200) {
+        feedback = "✅ Safe: Within standard scaffold load capacity.";
+    } else if (loadPerLeg >= 200 && loadPerLeg <= 500) {
+        feedback = "⚠️ Caution: Heavy-duty load. Ensure scaffold is designed for this capacity and inspected.";
+    } else {
+        feedback = "❌ Unsafe: Exceeds typical scaffold safety limits. Consult manufacturer/engineer.";
+    }
+
+    document.getElementById('feedbackContent').textContent = feedback;
+
+    // Show result, hide errors and placeholder
+    errorBox.classList.add("hidden");
+    placeholder.classList.add("hidden");
+    resultValue.classList.remove("hidden");
+}
+
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+</body>
+</html>
+{% endblock %}
+
+{% comment %} 
+1. Formula Used (for code comment)
+// Formula:
+// Load Per Leg (LPL) = Total Intended Load (TIL) / Number of Legs (N)
+//
+// Where:
+// TIL = Total Intended Load applied on the scaffold (kg)
+// N   = Number of scaffold legs supporting the load (count)
+// LPL = Load Distribution Per Leg (kg per leg)
+
+
+This is a direct division, but in safety-critical calculations we must ensure TIL and N are valid.
+
+2. Detailed Input Validation Rules (Real-world QEHS/Fire Safety)
+Total Intended Load (TIL)
+
+Unit: kilograms (kg).
+
+Min value: > 0 (zero load is unrealistic for scaffold use).
+
+Max value: ≤ 1,000,000 kg (upper bound to prevent unrealistic/outlier entries).
+
+Decimals: Allowed up to 2 decimals for precision (scaffolding load is usually whole kg, but partial weights can exist).
+
+Logical dependency: Must be greater than Number of Legs × Minimum expected load per leg (50 kg).
+(i.e., unrealistic if TIL is 10 kg and legs = 10 → 1 kg/leg).
+
+Number of Legs (N)
+
+Unit: count (no decimals).
+
+Min value: ≥ 2 (scaffold structures require at least 2 support points – single-leg input is unsafe and should be rejected).
+
+Max value: ≤ 100 (beyond that, not practical for scaffolding and may imply wrong data entry).
+
+Must be integer (no decimals or fractions).
+
+Cross-Field Validations
+
+Division by zero must be prevented (N ≠ 0).
+
+TIL must be greater than N (otherwise load per leg < 1 kg, impractical for scaffolds).
+
+Resulting Load per Leg (LPL) must be checked against industry thresholds:
+
+<200 kg → Safe / standard scaffold
+
+200–500 kg → Heavy-duty scaffold, requires confirmation of design
+
+>500 kg → Unsafe unless certified by manufacturer/engineer
+
+3. Output Validation & Threshold Explanations
+
+Safe zone (<200 kg/leg):
+Within standard scaffold capacity (OSHA 1926.451 requires at least 4× intended load-bearing capacity).
+
+Caution zone (200–500 kg/leg):
+Heavy-duty scaffolds, require inspection and documentation (ANSI/ASSE A10.8).
+
+Unsafe zone (>500 kg/leg):
+Exceeds typical leg capacity; must involve structural engineer and manufacturer specs. {% endcomment %}

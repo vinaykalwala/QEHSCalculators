@@ -1,0 +1,594 @@
+{% extends 'base.html' %}
+{% block title %}REBA Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REBA Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        /* Result Card */
+        .result-placeholder {
+            text-align: center;
+            margin: auto;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: baseline;
+            justify-content: center;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0 10px;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out, background-color 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list { margin: 0; padding-left: 18px; }
+        .custom-table {
+            border-collapse: collapse; width: 100%;
+            margin: 20px 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .custom-table thead { background-color: #1560bd; color: white; }
+        .custom-table th, .custom-table td {
+            padding: 12px 16px; border: 1px solid #ddd; text-align: center;
+        }
+        .custom-table tr:nth-child(even) { background-color: #f9f9f9; }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px; padding: 20px;
+            text-align: left; gap: 12px; margin-top: 20px;
+        }
+        .error-icon { font-size: 76px; flex-shrink: 0; text-align: center; }
+        .error-message { font-size: 24px; line-height: 1.6; }
+        .hidden { display: none; }
+        .btn-container { display: flex; justify-content: center; margin: 30px 0; }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040); color: #ffffff; border: 2px solid #1560bd;
+            padding: 10px 20px; font-size: 14px; font-weight: 600; border-radius: 8px;
+            text-decoration: none; transition: all 0.3s ease; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>REBA Score Calculator</h1>
+            <p>Assess ergonomic risks associated with whole-body postures.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Ergonomic Assessment</h2>
+                <div class="form-group">
+                    <label for="postureScore">Posture Score (1-12)</label>
+                    <input type="number" id="postureScore" class="form-input" placeholder="Enter posture score">
+                </div>
+                <div class="form-group">
+                    <label for="loadScore">Load/Force Score (0-3)</label>
+                    <input type="number" id="loadScore" class="form-input" placeholder="Enter load score">
+                </div>
+                <div class="form-group">
+                    <label for="couplingScore">Coupling Score (0-3)</label>
+                    <input type="number" id="couplingScore" class="form-input" placeholder="Enter coupling score">
+                </div>
+                <button class="calculate-btn" onclick="calculateAndDisplay()">Calculate REBA Score</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Enter the assessment scores to calculate the final REBA score and risk level.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div id="resultValue" class="hidden" style="text-align: center;">
+                    <h2>REBA Score</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0</div>
+                    </div>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low</span>
+                        <span>Medium</span>
+                        <span>High</span>
+                        <span>Very High</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Risk Level & Action</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                     <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <!-- About REBA -->
+            <div class="note-card">
+                <h3>📌 About the REBA Method</h3>
+                <p>
+                    The <strong>Rapid Entire Body Assessment (REBA)</strong> is an ergonomic tool used to evaluate
+                    whole-body postural risks in occupational settings. It helps assess the physical strain
+                    associated with different tasks, particularly in workplaces where manual labor, repetitive
+                    movements, or awkward postures are involved.
+                </p>
+                <p>
+                    REBA considers factors such as <strong>body posture, force exertion, and movement frequency</strong>
+                    to determine a risk score, which can guide workplace modifications and injury prevention strategies.
+                    By identifying high-risk postures, employers and safety professionals can implement ergonomic
+                    interventions to enhance worker health, efficiency, and overall well-being.
+                </p>
+            </div>
+        
+            <!-- Parameters Explained -->
+            <div class="note-card">
+                <h3>📏 Parameters Explained</h3>
+                <ul class="note-list">
+                    <li><strong>Posture Score:</strong> Evaluation of body positioning (typically 1–12)</li>
+                    <li><strong>Load/Force Score:</strong> Assessment of weight/force being handled (typically 0–3)</li>
+                    <li><strong>Coupling Score:</strong> Evaluation of grip/hand-object interaction (typically 0–3)</li>
+                </ul>
+            </div>
+        
+            <!-- Risk Level Interpretation -->
+            <div class="note-card">
+                <h3>📋 Risk Level Interpretation</h3>
+                <div style="overflow-x:auto;">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Score Range</th>
+                                <th>Risk Level</th>
+                                <th>Action Required</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1–2</td>
+                                <td>Low Risk</td>
+                                <td>No Action</td>
+                            </tr>
+                            <tr>
+                                <td>3–4</td>
+                                <td>Medium Risk</td>
+                                <td>Change Needed</td>
+                            </tr>
+                            <tr>
+                                <td>5–7</td>
+                                <td>High Risk</td>
+                                <td>Intervention Required</td>
+                            </tr>
+                            <tr>
+                                <td>8+</td>
+                                <td>Very High Risk</td>
+                                <td>Immediate Action</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        
+            <!-- Importance of REBA -->
+            <div class="note-card">
+                <h3>✅ Importance of REBA Assessment</h3>
+                <ul class="note-list">
+                    <li>Identifies ergonomic risks in workplace postures</li>
+                    <li>Helps prevent musculoskeletal disorders</li>
+                    <li>Guides ergonomic interventions</li>
+                    <li>Improves worker safety and comfort</li>
+                </ul>
+            </div>
+        
+            <div class="note-card">
+                <h3>✅ Input Validations</h3>
+                <p>Please ensure your inputs follow these rules before calculating the REBA Score:</p>
+                <ul class="note-list">
+                    <li><strong>Posture Score (1–12):</strong> Must be a whole number. Represents trunk, neck, and leg postures. Cannot be less than 1.</li>
+                    <li><strong>Load/Force Score (0–9):</strong> Whole number only. Reflects weight or force applied. <em>0 = minimal load</em>, up to <em>9 = very high load</em>.</li>
+                    <li><strong>Coupling Score (0–3):</strong> Whole number only. Indicates grip quality. <em>0 = good grip</em>, <em>3 = poor/no grip</em>.</li>
+                    <li><strong>No decimals allowed:</strong> All inputs must be integers (whole numbers).</li>
+                    <li><strong>Logical consistency:</strong> 
+                        <ul>
+                            <li>High load (≥7) cannot be combined with a very low posture score (≤2).</li>
+                            <li>Poor grip (score = 3) should not be paired with very high load (≥7).</li>
+                        </ul>
+                    </li>
+                    <li><strong>Unrealistic inputs:</strong> Any combination outside real ergonomic practice will be flagged with an error.</li>
+                </ul>
+                <p style="margin-top:12px;color:#555;"><em>Following these rules ensures reliable results aligned with international QEHS and ergonomic safety standards.</em></p>
+            </div>
+
+            <!-- How to Use Calculator -->
+            <div class="note-card">
+                <h3>🛠️ How to Use This Calculator</h3>
+                <p>
+                    This tool calculates the final REBA score from three preliminary scores.
+                    A full REBA assessment involves analyzing the worker's posture for the
+                    <strong>neck, trunk, legs, upper arms, lower arms, and wrists</strong>,
+                    which are combined into a single <em>Posture Score</em>.
+                    This is then adjusted based on the <strong>load/force</strong> handled
+                    and how good the <strong>coupling (grip)</strong> on the object is.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function calculateAndDisplay() {
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValueBox = document.getElementById('resultValue');
+
+            // Reset UI
+            errorBox.classList.add('hidden');
+            resultValueBox.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+
+            let errors = [];
+
+            // Generic validation helper
+            function getVal(id, label, opts = {}) {
+                const el = document.getElementById(id);
+                const raw = el.value?.toString().trim();
+
+                if (!raw) {
+                    errors.push(`👉 ${label} is required.`);
+                    return null;
+                }
+
+                const num = parseInt(raw, 10); // REBA uses integer scores only
+                if (isNaN(num)) {
+                    errors.push(`👉 ${label} must be a valid whole number.`);
+                    return null;
+                }
+                if (!Number.isInteger(num)) {
+                    errors.push(`👉 ${label} must be a whole number (no decimals).`);
+                    return null;
+                }
+                if (opts.min !== undefined && num < opts.min)
+                    errors.push(`👉 ${label} must be ≥ ${opts.min}.`);
+                if (opts.max !== undefined && num > opts.max)
+                    errors.push(`👉 ${label} must be ≤ ${opts.max}.`);
+
+                return num;
+            }
+
+            // Input validations (ranges from QEHS standards)
+            const postureScore = getVal('postureScore', 'Posture Score', { min: 1, max: 12 });
+            const loadScore = getVal('loadScore', 'Load/Force Score', { min: 0, max: 9 });
+            const couplingScore = getVal('couplingScore', 'Coupling Score', { min: 0, max: 3 });
+
+            // Cross-field logical consistency checks
+            if (loadScore !== null && postureScore !== null) {
+                if (loadScore >= 7 && postureScore <= 2) {
+                    errors.push("👉 Unrealistic: very high load with nearly perfect posture. Please recheck.");
+                }
+            }
+
+            if (couplingScore !== null && loadScore !== null) {
+                if (couplingScore === 3 && loadScore >= 7) {
+                    errors.push("👉 Unrealistic: cannot handle very high loads with 'no grip'.");
+                }
+            }
+
+            // If any validation errors, show them
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add('hidden');
+                return;
+            }
+
+            // Calculate REBA score
+            const rebaScore = postureScore + loadScore + couplingScore;
+
+            placeholder.classList.add('hidden');
+            resultValueBox.classList.remove('hidden');
+            document.getElementById('rateValue').textContent = rebaScore;
+
+            // Meter fill logic
+            const meterFill = document.getElementById('meterFill');
+            const maxScore = 24; // max possible with posture(12)+load(9)+coupling(3)
+            meterFill.style.width = Math.min(100, (rebaScore / maxScore) * 100) + '%';
+
+            // Risk classification
+            let riskLevel, actionRequired;
+            if (rebaScore <= 2) {
+                riskLevel = "Low Risk";
+                actionRequired = "No action necessary.";
+                meterFill.style.backgroundColor = '#2ecc71'; // Green
+            } else if (rebaScore <= 4) {
+                riskLevel = "Medium Risk";
+                actionRequired = "Further investigation needed, changes may be required.";
+                meterFill.style.backgroundColor = '#f39c12'; // Yellow
+            } else if (rebaScore <= 7) {
+                riskLevel = "High Risk";
+                actionRequired = "Investigate and implement changes soon.";
+                meterFill.style.backgroundColor = '#e67e22'; // Orange
+            } else {
+                riskLevel = "Very High Risk";
+                actionRequired = "Investigate and implement changes immediately.";
+                meterFill.style.backgroundColor = '#e74c3c'; // Red
+            }
+
+            // Feedback content
+            document.getElementById('feedbackContent').innerHTML =
+                `<strong>${riskLevel}:</strong> ${actionRequired}`;
+        }
+
+        function printReport() {
+            window.print();
+        }
+    </script>
+
+</body>
+</html>
+{% endblock %}
+
+<!-- 
+1. Input Validation Rules (QEHS-Compliant)
+Inputs:
+
+Posture Score (1–12)
+
+Standard REBA tables assign posture scores between 1 and 12 depending on trunk, neck, leg, and arm positioning.
+
+Rule: Must be an integer between 1 and 12.
+
+Decimals not allowed because REBA posture tables use discrete scores.
+
+Load/Force Score (0–9)
+
+REBA methodology allows additional scores based on the weight/force being handled.
+
+Typical range: 0 = no load/force → up to 9 = very high force load.
+
+Rule: Must be an integer between 0 and 9.
+
+Coupling Score (0–3)
+
+Coupling describes how well the worker can grip the load (good, fair, poor, or none).
+
+Range: 0–3.
+
+Rule: Must be an integer between 0 and 3.
+
+Cross-field Logical Rules
+
+PostureScore ≥ 1 always. (There’s no “0 posture.”)
+
+If loadScore ≥ 7, postureScore should not be ≤ 2 (unrealistic to have very high load with “perfect” posture).
+
+If couplingScore = 3 (no grip possible), loadScore must not be ≥ 7 (physically impossible to hold heavy loads without grip).
+
+🔍 2. Output Validation & Thresholds
+
+The REBA score = posture + load + coupling, but in reality, REBA tables are more nuanced (Tables A, B, C). Still, for your calculator:
+
+0–2 → Low Risk → Acceptable → “No action needed.”
+
+3–4 → Medium Risk → “Action may be needed.”
+
+5–7 → High Risk → “Action required soon.”
+
+≥ 8 → Very High Risk → “Immediate action required.”
+
+✅ These categories align with Ergonomic Risk Assessment guidelines (HSE, ISO 11226, OSHA).
+-->

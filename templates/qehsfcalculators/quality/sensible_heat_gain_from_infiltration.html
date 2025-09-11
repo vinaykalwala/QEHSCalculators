@@ -1,0 +1,744 @@
+{% extends 'base.html' %}
+{% block title %}Sensible Heat Gain from Infiltration Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensible Heat Gain from Infiltration Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+      .btn-wrapper {
+    text-align: center; /* centers inline-block buttons */
+    margin-top: 20px;
+  }
+
+   .btn-wrapper {
+    text-align: center; /* centers the button */
+    margin-top: 20px;
+  }
+
+  .print-btn {
+    display: inline-block;
+    background:linear-gradient(#1560bd,#000040);
+    color: white;
+    padding: 8px 18px;   /* control button size */
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    width: auto !important; /* prevent full width */
+  }
+
+  .print-btn:hover {
+    background: #1560bd;
+  }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .btn-container {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    margin: 30px 0;
+}
+
+.back-btn {
+    background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+    color: #ffffff; /* White text */
+    border: 2px solid #1560bd; /* Highlight border */
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none; /* Remove underline for link */
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    background-color: #1560bd; /* Highlight on hover */
+    color: #ffffff;
+    border-color: #000040;
+    transform: scale(1.05); /* Subtle hover effect */
+}
+        
+        /* New styles for dual result display */
+        .dual-result-container {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .result-unit {
+            text-align: center;
+            padding: 15px;
+            border-radius: 12px;
+            background: #f8f9fa;
+            width: 45%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+        
+        .result-unit-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1560bd;
+            margin: 10px 0;
+        }
+        
+        .result-unit-label {
+            color: #7f8c8d;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        
+        .result-unit-system {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        @media (max-width: 992px) {
+    .result-unit {
+        width: 48%; /* keeps two columns but more spacing */
+    }
+    .result-unit-value {
+        font-size: 28px;
+    }
+    .result-unit-label {
+        font-size: 15px;
+    }
+}
+
+/* Mobiles (≤600px) */
+@media (max-width: 600px) {
+    .dual-result-container {
+        flex-direction: column;  /* ✅ stack vertically */
+        align-items: center;
+    }
+    .result-unit {
+        width: 90%; /* full but with side margin */
+    }
+    .result-unit-value {
+        font-size: 24px;
+    }
+    .result-unit-label {
+        font-size: 14px;
+    }
+    .result-unit-system {
+        font-size: 13px;
+    }
+}
+
+/* Extra small devices (≤400px) */
+@media (max-width: 400px) {
+    .result-unit {
+        width: 100%; /* ✅ edge-to-edge */
+        padding: 12px;
+    }
+    .result-unit-value {
+        font-size: 20px;
+    }
+    .result-unit-label {
+        font-size: 13px;
+    }
+    .result-unit-system {
+        font-size: 12px;
+    }
+}
+
+    </style>
+</head>
+<body>
+     <div class="btn-container">
+    <a href="{% url 'qualitycategory_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+</div>
+
+   <div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Sensible Heat Gain from Infiltration Calculator</h1>
+            <p>Calculates the amount of heat added to a space due to the uncontrolled entry of outdoor air</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator Input Card -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="airflow">Airflow (CFM or m³/s)</label>
+                    <input type="number" id="airflow" class="form-input" min="0" placeholder="Enter airflow rate">
+                </div>
+
+                <div class="form-group">
+                    <label for="deltaT">Temperature Difference (ΔT)</label>
+                    <input type="number" id="deltaT" class="form-input" min="0" placeholder="Enter temperature difference">
+                </div>
+
+                <button class="calculate-btn" onclick="calculateHeatGain()">Calculate Heat Gain</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Heat gain illustration">
+                    <p>This tool calculates the <strong>sensible heat gain</strong> from infiltration. Enter your airflow and temperature difference to see results.</p>
+                </div>
+
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" style="font-weight:bold; font-size:20px; margin-bottom:15px; color:#1560bd;">
+                        <h2>Heat Gain Results</h2>
+                    </div>
+                    
+                    <div class="dual-result-container">
+                        <div class="result-unit">
+                            <div class="result-unit-label">Imperial Units</div>
+                            <div class="result-unit-value" id="heatGainImperialValue">0.00</div>
+                            <div class="result-unit-system">BTU/h</div>
+                        </div>
+                        
+                        <div class="result-unit">
+                            <div class="result-unit-label">SI Units</div>
+                            <div class="result-unit-value" id="heatGainSIValue">0.00</div>
+                            <div class="result-unit-system">Watts</div>
+                        </div>
+                    </div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">Interpretation</div>
+                        <div class="feedback-content" id="heatGainFeedback"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🔎 About This Calculator</h3>
+                <p>
+                    The <strong>Sensible Heat Gain from Infiltration Calculator</strong> estimates the amount of heat added to a space due to the uncontrolled entry of outdoor air. This is crucial in HVAC systems to determine the cooling or heating load required for maintaining indoor thermal comfort.
+                </p> 
+            </div>
+            
+            <div class="note-card">
+                <h3>📌 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Airflow (CFM or m³/s):</strong> Required, must be > 0</li>
+                    <li><strong>Temperature Difference (ΔT):</strong> Required, must be > 0</li>
+                    <li><strong>Realistic Values:</strong> Airflow typically ranges from 10-10,000 CFM (0.005-5 m³/s)</li>
+                    <li><strong>Temperature Difference:</strong> Typically ranges from 1-50°F (0.5-28°C)</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ Explanation of Parameters</h3>
+                <ul class="note-list">
+                    <li><strong>Airflow:</strong> The volumetric flow rate of air entering the space (CFM for Imperial, m³/s for SI).</li>
+                    <li><strong>Temperature Difference (ΔT):</strong> The difference between outdoor and indoor air temperatures.</li>
+                    <li><strong>Constants:</strong>
+                        <ul>
+                            <li><strong>1.085:</strong> Imperial unit constant used for airflow in CFM</li>
+                            <li><strong>1210:</strong> SI unit constant used for airflow in m³/s</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+      
+
+            <div class="note-card">
+                <h3>📊 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>HVAC System Design:</strong> Ensures proper sizing of heating or cooling equipment by accounting for heat gain through air infiltration.</li>
+                    <li><strong>Building Energy Management:</strong> Helps in optimizing insulation and sealing to reduce unwanted heat gain or loss.</li>
+                    <li><strong>Industrial Environments:</strong> Maintains controlled temperatures in sensitive manufacturing processes.</li>
+                    <li><strong>Data Centers:</strong> Prevents overheating by managing the impact of infiltrated air on temperature control systems.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Conclusion</h3>
+                <p>Sensible heat gain from infiltration is a critical factor in maintaining indoor air quality and thermal comfort. By calculating and addressing this parameter, buildings can improve energy efficiency, reduce costs, and ensure a consistent indoor environment.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateHeatGain() {
+            const airflow = document.getElementById("airflow").value.trim();
+            const deltaT = document.getElementById("deltaT").value.trim();
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+            const imperialValue = document.getElementById('heatGainImperialValue');
+            const siValue = document.getElementById('heatGainSIValue');
+            const feedbackBox = document.getElementById('heatGainFeedback'); 
+
+            let errors = [];
+
+            // Input Validation
+            if (airflow === "") {
+                errors.push("👉 Please enter the airflow rate.");
+            } else if (isNaN(airflow)) {
+                errors.push("👉 Airflow must be a number.");
+            } else if (parseFloat(airflow) <= 0) {
+                errors.push("👉 Airflow must be greater than 0.");
+            } else if (parseFloat(airflow) > 10000) {
+                errors.push("👉 Airflow exceeds realistic maximum (>10,000 CFM). Please recheck input.");
+            }
+
+            if (deltaT === "") {
+                errors.push("👉 Please enter the temperature difference (ΔT).");
+            } else if (isNaN(deltaT)) {
+                errors.push("👉 Temperature difference must be a number.");
+            } else if (parseFloat(deltaT) <= 0) {
+                errors.push("👉 Temperature difference must be greater than 0.");
+            } else if (parseFloat(deltaT) > 100) {
+                errors.push("👉 Temperature difference exceeds realistic maximum (>100°F/38°C). Please recheck input.");
+            }
+
+            // Show errors
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden");
+            }
+
+            const airflowNum = parseFloat(airflow);
+            const deltaTNum = parseFloat(deltaT);
+
+            // Calculate heat gain
+            const heatGainImperial = 1.085 * airflowNum * deltaTNum;
+            const heatGainSI = 1210 * airflowNum * deltaTNum;
+            
+            imperialValue.textContent = heatGainImperial.toFixed(2);
+            siValue.textContent = heatGainSI.toFixed(2);
+
+            // Feedback messages
+            let feedback = "This formula calculates the heat gain due to infiltration by considering airflow and temperature difference.";
+            
+            if (heatGainImperial < 1000) {
+                feedback += " Low heat gain (< 1,000 BTU/h) – Minimal impact on HVAC load.";
+            } else if (heatGainImperial < 10000) {
+                feedback += " Moderate heat gain (1,000 – 10,000 BTU/h) – Standard residential/small commercial impact.";
+            } else if (heatGainImperial < 50000) {
+                feedback += " Significant heat gain (10,000 – 50,000 BTU/h) – Substantial impact on HVAC systems.";
+            } else {
+                feedback += " High heat gain (>50,000 BTU/h) – Major impact requiring specialized HVAC solutions.";
+            }
+
+            feedbackBox.textContent = feedback;
+
+            placeholder.classList.add('hidden');
+            resultValue.classList.remove('hidden');
+        }
+
+        function printReport() {
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+*-----------Comprehensive Input Validation Rules----------------*
+Airflow (CFM or m³/s)
+
+Unit: CFM (Imperial) or m³/s (SI).
+
+Allowed range:
+
+Min: > 0 (no infiltration = invalid for calculation).
+
+Typical:
+
+Residential: 10–500 CFM (0.005–0.25 m³/s).
+
+Commercial: 500–10,000 CFM (0.25–5 m³/s).
+
+Max cutoff: 10,000 CFM (5 m³/s) → above this requires industrial-grade system validation.
+
+Decimals: Up to 2–3 decimals (to capture small test data).
+----------------------------***------------------------------
+Temperature Difference (ΔT)
+
+Unit: °F or °C.
+
+Allowed range:
+
+Min: > 0 (no driving force = invalid).
+
+Typical:
+
+Comfort applications: 1–30°F (0.5–16°C).
+
+Extremes: 50°F (28°C).
+
+Max cutoff: 100°F (38°C) → beyond this unsafe for comfort environments.
+
+Decimals: 1–2 decimals sufficient.
+---------------------------------***-----------------------
+Cross-field dependencies
+
+If airflow is near maximum (>8,000 CFM) and ΔT > 50°F, flag as extreme → review design data (likely mechanical pressurization case, not uncontrolled infiltration).
+
+If airflow < 10 CFM and ΔT small (< 2°F), result is negligible → flag as "below measurable threshold".
+
+*------------Edge Case Validations-----------------
+
+Zero or negative input → reject.
+
+Airflow extremely high (>20,000 CFM) → warning: “Input outside standard infiltration range, check mechanical pressurization instead.”
+
+ΔT > 100°F → unrealistic in habitable spaces, warn.
+
+Small airflow + small ΔT → output < 100 BTU/h → warn: "Negligible impact on HVAC load."
+
+Very large result (>500,000 BTU/h) → flag: "Major load, review HVAC/fire strategy design."
+
+*-------------- Output Validation Logic & Thresholds---------------------------*
+
+Outputs must be auditable in reports. Suggested feedback bands:
+
+< 1,000 BTU/h → Minimal load, negligible HVAC impact.
+
+1,000 – 10,000 BTU/h → Typical residential/small commercial.
+
+10,000 – 50,000 BTU/h → Significant HVAC consideration, medium facilities.
+
+50,000 – 500,000 BTU/h → Industrial/facility scale infiltration load.
+
+> 500,000 BTU/h → Extreme/unrealistic → advise engineering recheck.
+
+SI outputs (Watts) should match BTU/h × 0.293 for consistency.
+-->

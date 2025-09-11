@@ -1,0 +1,757 @@
+{% extends 'base.html' %}
+{% block title %}Hazard Score Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hazard Score Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+         /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        /* Input rows for side-by-side fields */
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            {% comment %} margin-top: 20px; {% endcomment %}
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .display {
+            display: flex;
+            gap: 10px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        @media (max-width: 420px) {
+        .display {
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .rate-display {
+            min-width: auto;
+            width: 100%;
+        }
+    }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Result Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Hazard Score Calculator</h1>
+            <p>Calculate the risk level of hazards based on their factors and severity weightage</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                
+                <div class="form-group">
+                    <label for="sumValue">Sum of Hazard Factors</label>
+                    <input type="number" id="sumValue" class="form-input" min="0" step="0.1" placeholder="e.g., 8.5">
+                </div>
+                
+                <div class="form-group">
+                    <label for="weightage">Hazard Weightage Factor</label>
+                    <input type="number" id="weightage" class="form-input" min="0" step="0.1" placeholder="e.g., 3.0">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateHazardScore()">Calculate Hazard Score</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                   <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Safety illustration">
+                    <p>This tool will calculate the <strong>Hazard Score</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Hazard Score</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.0</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">Hazard Score</div>
+                    </div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                   
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Risk Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Hazard Score</strong> is a metric used to quantify the risk level of identified hazards. 
+                    It combines the total of hazard indicators with a severity multiplier to produce a comprehensive risk rating. 
+                    This simple yet powerful calculation helps prioritize safety interventions in various environments.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Sum of Hazard Factors:</strong> Total of all identified hazard components (frequency, exposure, etc.)</li>
+                    <li><strong>Hazard Weightage Factor:</strong> Multiplier reflecting severity/consequence (typically 1-5 scale)</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📊 Interpretation Guidelines</h3>
+                <ul class="note-list">
+                    <li><span class="good">0-10</span> → Low risk (routine monitoring)</li>
+                    <li><span class="average">10-25</span> → Moderate risk (requires controls)</li>
+                    <li><span class="bad">25-50</span> → High risk (immediate action needed)</li>
+                    <li><span class="bad">50+</span> → Extreme risk (stop activities)</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>🔍 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Workplace Safety:</strong> Prioritizing hazard controls in industrial settings</li>
+                    <li><strong>Fire Risk Assessment:</strong> Evaluating building fire hazards</li>
+                    <li><strong>Chemical Storage:</strong> Ranking hazardous material risks</li>
+                    <li><strong>Construction Safety:</strong> Assessing site-specific dangers</li>
+                    <li><strong>Emergency Planning:</strong> Identifying high-risk scenarios</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+    <h3>✅ Validation Rules (QEHS & Fire Safety)</h3>
+    <ul class="note-list">
+        <li><strong>Sum of Hazard Factors:</strong> 0 – 100 (max 1 decimal place)</li>
+        <li><strong>Hazard Weightage Factor:</strong> 1 – 10 (max 1 decimal place)</li>
+        <li><strong>No negatives:</strong> Negative inputs are invalid</li>
+        <li><strong>Consistency Check:</strong> If hazard factors > 0, weightage cannot be 0</li>
+        <li><strong>Output Thresholds:</strong>
+            <ul>
+                <li>0 → Excellent</li>
+                <li>1–10 → Low Risk</li>
+                <li>11–25 → Moderate Risk</li>
+                <li>26–50 → High Risk</li>
+                <li>>50 → Extreme Risk</li>
+            </ul>
+        </li>
+    </ul>
+    <p><b>Standards Reference:</b> Validations derived from <b>ISO 45001, OSHA 29 CFR 1910, NFPA 551</b> risk assessment practices.</p>
+</div>
+
+
+            <div class="note-card">
+                <h3>📈 Common Weightage Factors</h3>
+                <ul class="note-list">
+                    <li><strong>1.0</strong> - Minor injury potential</li>
+                    <li><strong>2.0</strong> - Medical treatment injuries</li>
+                    <li><strong>3.0</strong> - Major injuries</li>
+                    <li><strong>4.0</strong> - Single fatality</li>
+                    <li><strong>5.0</strong> - Multiple fatalities</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>🔍 Why This Calculation is Important?</h3>
+                <p>
+                    It transforms qualitative hazard assessments into quantitative scores, enabling objective comparison of risks and data-driven safety decisions in workplaces and fire prevention planning.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>🏭 Industry Standards & Guidelines</h3>
+                <p>
+                    Aligned with ISO 45001 safety standards, NFPA fire codes, and OSHA hazard ranking systems. Basis for many risk matrix implementations.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateHazardScore() {
+    const sumValue = document.getElementById('sumValue').value.trim();
+    const weightage = document.getElementById('weightage').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+
+    // Validate Sum of Hazard Factors
+    if (sumValue === "") {
+        errors.push("👉 Please enter Sum of Hazard Factors.");
+    } else {
+        const sumNum = parseFloat(sumValue);
+        if (isNaN(sumNum)) {
+            errors.push("👉 Sum of Hazard Factors must be a number.");
+        } else if (sumNum < 0) {
+            errors.push("👉 Sum of Hazard Factors cannot be negative.");
+        } else if (sumNum > 100) {
+            errors.push("👉 Sum of Hazard Factors exceeds maximum allowed value (100).");
+        } else if (!/^\d+(\.\d{1})?$/.test(sumValue)) {
+            errors.push("👉 Sum of Hazard Factors must have at most 1 decimal place.");
+        }
+    }
+
+    // Validate Hazard Weightage Factor
+    if (weightage === "") {
+        errors.push("👉 Please enter Hazard Weightage Factor.");
+    } else {
+        const weightNum = parseFloat(weightage);
+        if (isNaN(weightNum)) {
+            errors.push("👉 Hazard Weightage Factor must be a number.");
+        } else if (weightNum < 1) {
+            errors.push("👉 Hazard Weightage Factor must be at least 1.");
+        } else if (weightNum > 10) {
+            errors.push("👉 Hazard Weightage Factor exceeds maximum allowed value (10).");
+        } else if (!/^\d+(\.\d{1})?$/.test(weightage)) {
+            errors.push("👉 Hazard Weightage Factor must have at most 1 decimal place.");
+        }
+    }
+
+    // Logical Consistency Check
+    if (parseFloat(sumValue) > 0 && parseFloat(weightage) === 0) {
+        errors.push("👉 Hazard cannot exist with zero severity (Weightage cannot be 0 if hazards are present).");
+    }
+
+    // Show errors if any
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // Calculation
+    const sum = parseFloat(sumValue);
+    const weight = parseFloat(weightage);
+    const hazardScore = sum * weight;
+
+    // Guard against NaN or Infinity
+    if (!isFinite(hazardScore)) {
+        errorMessage.innerHTML = "⚠️ Calculation error: Please check input values.";
+        errorBox.classList.remove("hidden");
+        return;
+    }
+
+    document.getElementById('rateValue').textContent = hazardScore.toFixed(1);
+
+    // Risk Threshold Assessment
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+
+    if (hazardScore === 0) {
+        meterWidth = '5%';
+        meterColor = '#27ae60';
+        feedback = '🌟 Excellent! No hazards detected. Maintain safety protocols.';
+    } else if (hazardScore <= 10) {
+        meterWidth = '20%';
+        meterColor = '#2ecc71';
+        feedback = '✅ LOW RISK: Continue routine monitoring.';
+    } else if (hazardScore <= 25) {
+        meterWidth = '50%';
+        meterColor = '#f39c12';
+        feedback = '⚠️ MODERATE RISK: Implement control measures.';
+    } else if (hazardScore <= 50) {
+        meterWidth = '75%';
+        meterColor = '#e67e22';
+        feedback = '🚨 HIGH RISK: Immediate corrective action required.';
+    } else {
+        meterWidth = '95%';
+        meterColor = '#e74c3c';
+        feedback = '⛔ EXTREME RISK: Cease activity until mitigated.';
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+
+{% comment %} 
+✅ 1. Real-world QEHS / Fire Safety Input Validation Rules
+Inputs
+
+Sum of Hazard Factors (Σ Hazard Factors)
+
+Definition: The aggregated score of identified hazard parameters (frequency, probability, detectability, exposure, etc.).
+
+Units: Dimensionless score (index).
+
+Valid Range: 0 – 100
+
+Reasoning: In real-world risk assessments, most standardized scoring systems (OSHA, NFPA 551, ISO 45001 risk matrices) normalize risk parameters within a capped range (e.g., 1–5 scale per parameter, max ~100 when aggregated).
+
+Decimal Precision: Up to 1 decimal (e.g., 25.3). More precision is not meaningful in qualitative hazard scoring.
+
+Hazard Weightage Factor (Severity Multiplier)
+
+Definition: Reflects severity or consequence of the hazard (injury, fatality, financial loss, environmental damage).
+
+Units: Dimensionless multiplier.
+
+Valid Range: 1 – 5 (realistic for consequence-based weightage, but allow up to 10 to support custom matrices).
+
+Decimal Precision: Up to 1 decimal.
+
+✅ 2. Output Validation (Hazard Score)
+
+Formula (to keep in code as comment):
+
+// Hazard Score Formula (ISO 45001 / OSHA aligned)
+// Hazard Score = Sum of Hazard Factors × Hazard Weightage Factor
+
+
+Thresholds (aligned with risk matrix best practices):
+
+0 → Excellent (no hazards detected)
+
+1 – 10 → Low risk (routine monitoring, ALARP principle applies)
+
+11 – 25 → Moderate risk (requires additional controls, ALARP principle)
+
+26 – 50 → High risk (must implement immediate corrective action)
+
+> 50 → Extreme risk (stop activity, escalate per NFPA/OSHA guidance)
+
+⚠️ Why essential: Provides auditable, objective categorization in line with ISO 45001 clause 6.1.2.2 (hazard identification & risk assessment).
+
+✅ 3. Edge Case Validations
+
+All inputs = 0 → Hazard Score = 0 (valid: excellent safety).
+
+Weightage = 0 while Sum > 0 → Invalid (hazard cannot exist without severity). Should flag an error.
+
+Sum > 0 but Hazard Score still 0 → Must not happen (guard against floating-point errors).
+
+Extremely high values (> thresholds) → Flag as potential data error (e.g., ΣHazard > 100, Weight > 10).
+
+Negative values → Not allowed, must throw validation error.
+
+Non-numeric / empty input → Must prompt user with descriptive error.
+
+✅ 4. Corrected JavaScript Validation Logic
+
+Here’s an improved version of your validation function with industry-grade checks:
+
+/*
+====================================================
+Hazard Score Calculator - Validation & Formula
+----------------------------------------------------
+Formula:
+Hazard Score = Sum of Hazard Factors × Hazard Weightage Factor
+
+Validation Rules:
+1. Sum of Hazard Factors:
+   - Must be ≥ 0 and ≤ 100
+   - Decimals allowed: 1
+   - Unit: Dimensionless index
+
+2. Hazard Weightage Factor:
+   - Must be ≥ 1 and ≤ 10
+   - Decimals allowed: 1
+   - Unit: Dimensionless multiplier
+   - Cannot be 0 if hazards exist
+
+3. Hazard Score Thresholds:
+   - 0      → Excellent (no hazard)
+   - 1–10   → Low risk (monitor)
+   - 11–25  → Moderate risk (control required)
+   - 26–50  → High risk (immediate action)
+   - >50    → Extreme risk (stop activity)
+
+Edge Cases:
+- All inputs = 0 → Valid, Hazard Score = 0
+- Weightage = 0 with Sum > 0 → Invalid
+- Negative or non-numeric inputs → Invalid
+- Sum > 100 or Weight > 10 → Invalid (flagged as unrealistic)
+====================================================
+*/ {% endcomment %}

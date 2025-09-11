@@ -1,0 +1,752 @@
+{% extends 'base.html' %}
+{% block title %}Heat Gain from Lighting Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heat Gain from Lighting Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 38px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+
+<div class="calculator-header">
+    <h1>Heat Gain from Lighting Calculator</h1>
+    <p>Estimate instantaneous heat added to the space from lighting fixtures. Results show Btu/hr (primary), plus kW and MJ/hr equivalents.</p>
+</div>
+
+<div class="calc-content">
+    <!-- Calculator -->
+    <div class="calc-card">
+        <h2>Enter Data</h2>
+
+        <div class="form-group">
+            <label for="watts"><strong>Total Lighting Power (W)</strong></label>
+            <input type="number" id="watts" class="form-input" step="any" placeholder="e.g., 1500">
+        </div>
+
+        <div class="form-group">
+            <label for="ballastFactor"><strong>Ballast Factor (BF)</strong></label>
+            <input type="number" id="ballastFactor" class="form-input" step="any" placeholder="e.g., 1.00">
+        </div>
+
+        <div class="form-group">
+            <label for="clf"><strong>Cooling Load Factor (CLF)</strong></label>
+            <input type="number" id="clf" class="form-input" step="any" placeholder="0.0 - 1.0">
+        </div>
+
+        <button class="calculate-btn" onclick="calculateCorrosionRate()">Calculate Heat Gain</button>
+    </div>
+
+    <!-- Result Section -->
+    <div class="result-card">
+        <div class="result-placeholder" id="placeholder">
+            <img src="/static/images/mlc_environment_result.png" alt="lighting">
+            <p>This tool estimates instantaneous lighting heat gain for HVAC/energy assessments.</p>
+        </div>
+
+        <div class="result-error hidden" id="resultError">
+            <div class="error-icon">❌</div>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+         
+        <div class="result-value hidden" id="resultValue">
+            <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                <h2>Lighting Heat Gain</h2>
+            </div>
+
+            <div class="rate-display">
+                <div>
+                    <div class="rate-label" style="font-size:14px; color:#2980b9;">Heat (Btu/hr)</div>
+                    <div class="rate-value" id="rateValue">0.00</div>
+                </div>
+
+                <div style="margin-left:20px;">
+                    <div class="rate-label" style="font-size:14px; color:#2980b9;">Equivalent (kW)</div>
+                    <div class="rate-value" id="kwValue">0.000</div>
+                </div>
+
+                <div style="margin-left:20px;">
+                    <div class="rate-label" style="font-size:14px; color:#2980b9;">Equivalent (MJ/hr)</div>
+                    <div class="rate-value" id="mjValue">0.00</div>
+                </div>
+            </div>
+
+            <div class="result-feedback">
+                <div class="feedback-title">Assessment</div>
+                <div class="feedback-content" id="feedbackContent"></div>
+            </div>
+            <div class="btn-wrapper">
+                <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notes & validations updated for lighting -->
+<div class="note-section">
+    <div class="note-card">
+        <h3>About</h3>
+        <p>
+            This calculator estimates the **instantaneous sensible heat** added to a conditioned space by lighting.
+            Provide total electrical lighting power in <strong>watts (W)</strong>, the ballast factor (dimensionless), and
+            the cooling load factor (<strong>CLF</strong>, 0–1). Outputs are shown primarily in <strong>Btu/hr</strong> with conversions.
+        </p>
+    </div>
+
+    <div class="note-card">
+        <h3>Input validations</h3>
+        <ul>
+            <li><strong>Watts (W):</strong> required; numeric; must be &gt; 0. Typical: <em>10 – 100,000 W</em> depending on project size.
+                <ul><li>Error if ≤ 0 or non-finite; warn if &lt; 1 W or &gt; 100,000 W (possible unit error).</li></ul>
+            </li>
+            <li><strong>Ballast Factor (BF):</strong> required; numeric; must be &gt; 0. Typical: <em>0.6 – 1.2</em>. Reject if ≤ 0 or &gt; 10 (likely input mistake).</li>
+            <li><strong>Cooling Load Factor (CLF):</strong> required; numeric; 0 ≤ CLF ≤ 1. (0 → no instantaneous heat; 1 → all power instantaneously counts toward cooling load.)</li>
+            <li><strong>Precision:</strong> up to 6 decimals accepted. Outputs: Btu/hr to 2 decimals, kW to 3 decimals, MJ/hr to 2 decimals.</li>
+            <li><strong>Cross-checks:</strong> if CLF is 0 or BF extremely large, calculator will warn; very large outputs will flag unit mismatches (e.g., W was actually kW or W/hr).</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>QEHS & Fire-safety considerations</h3>
+        <ul>
+            <li>High instantaneous heat gain (large Btu/hr or kW) affects HVAC capacity — verify ventilation, temperature control and emergency egress conditions.</li>
+            <li>High local heat flux (from concentrated lighting) can raise surface or wiring temperatures — check luminaire ratings and clearances from combustibles.</li>
+            <li>Auditability: always record input values, units, and timestamp when saving results for compliance or incident investigation.</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>Applications</h3>
+        <ul>
+            <li>HVAC cooling load sizing and estimation</li>
+            <li>Energy efficiency analysis and lighting retrofits</li>
+            <li>Fire/safety checks where elevated interior temperatures or hot surfaces matter</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+/* Reused error UI helper (keeps original patterns) */
+function showErrors(errors) {
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+
+  errorMessage.innerHTML = errors.join("<br>");
+  errorBox.classList.remove("hidden");
+  placeholder.classList.add("hidden");
+  resultValue.classList.add("hidden");
+}
+
+/* Main calculator (keeps function name for your button) */
+function calculateCorrosionRate() {
+  // raw strings (for decimal checks)
+  const sWatts = document.getElementById("watts").value.trim();
+  const sBF = document.getElementById("ballastFactor").value.trim();
+  const sCLF = document.getElementById("clf").value.trim();
+
+  const placeholder = document.getElementById("placeholder");
+  const errorBox = document.getElementById("resultError");
+  const resultValue = document.getElementById("resultValue");
+  const rateEl = document.getElementById("rateValue"); // Btu/hr
+  const kwEl = document.getElementById("kwValue");     // kW
+  const mjEl = document.getElementById("mjValue");     // MJ/hr
+  const feedbackEl = document.getElementById("feedbackContent");
+
+  errorBox.classList.add("hidden");
+  feedbackEl.innerHTML = "";
+
+  const errors = [];
+  const warnings = [];
+
+  const isFiniteNum = v => Number.isFinite(v) && !Number.isNaN(v);
+  const decLen = s => (s && s.includes('.')) ? s.split('.')[1].length : 0;
+
+  // presence
+  if (sWatts === "") errors.push("👉 Enter total lighting power (Watts).");
+  if (sBF === "") errors.push("👉 Enter ballast factor (dimensionless).");
+  if (sCLF === "") errors.push("👉 Enter cooling load factor (CLF) between 0 and 1.");
+  if (errors.length) return showErrors(errors);
+
+  // parse
+  const watts = parseFloat(sWatts);
+  const bf = parseFloat(sBF);
+  const clf = parseFloat(sCLF);
+
+  if (!isFiniteNum(watts)) errors.push("👉 Watts must be numeric (W).");
+  if (!isFiniteNum(bf)) errors.push("👉 Ballast factor must be numeric (dimensionless).");
+  if (!isFiniteNum(clf)) errors.push("👉 CLF must be numeric (0–1).");
+  if (errors.length) return showErrors(errors);
+
+  // basic value checks (errors)
+  if (!(watts > 0)) errors.push("👉 Watts must be > 0 (total lighting electric power).");
+  if (!(bf > 0)) errors.push("👉 Ballast factor (BF) must be > 0.");
+  if (!(clf >= 0 && clf <= 1)) errors.push("👉 CLF must be between 0 and 1 (inclusive).");
+
+  // practical hard ranges (reject likely unit/mis-entry)
+  if (watts < 0.01) warnings.push("⚠️ Very small Watts (<0.01 W) — check units or sensor resolution.");
+  if (watts > 1e7) errors.push("👉 Watts seems unrealistically large (>10 MW) — check units (W vs kW) or input.");
+  if (bf > 10) errors.push("👉 Ballast factor > 10 is unrealistic — check input (dimensionless multiplier).");
+  if (bf < 0.2 || bf > 2.0) warnings.push("⚠️ BF outside common range (0.2 – 2.0) — verify luminaire type and data sheet.");
+  if (clf === 0) warnings.push("⚠️ CLF = 0 → no instantaneous cooling load from lights (may be valid for some storage effects).");
+  
+  if (errors.length) return showErrors(errors);
+
+  // precision warnings
+  if (decLen(sWatts) > 6) warnings.push("⚠️ Watts has >6 decimals; results will be rounded.");
+  if (decLen(sBF) > 6) warnings.push("⚠️ BF has >6 decimals; results will be rounded.");
+  if (decLen(sCLF) > 6) warnings.push("⚠️ CLF has >6 decimals; results will be rounded.");
+
+  // Compute using lighting heat expression:
+  // Internal steps:
+  // Q_Watts (instantaneous heat power) = watts * BF * CLF  (W)
+  // Q_Btu_per_hr = Q_Watts * 3.41                         (Btu/hr)   (using provided conversion)
+  const Q_W = watts * bf * clf;              // W
+  const Q_Btu_hr = Q_W * 3.41;               // Btu/hr
+  const Q_kW = Q_W / 1000;                   // kW
+  const Q_MJ_hr = Q_kW * 3.6;                // MJ/hr (1 kW = 3.6 MJ/hr)
+
+  // sanity checks on computed results
+  if (!isFiniteNum(Q_Btu_hr) || !isFiniteNum(Q_W)) return showErrors(["⚠️ Computed result invalid — check inputs."]);
+  if (Q_Btu_hr > 1e12) return showErrors(["⚠️ Computed heat gain exceeds 1×10¹² Btu/hr — likely unit or scale error."]);
+
+  // QEHS-oriented warnings
+  if (Q_Btu_hr > 10000) warnings.push("⚠️ High instantaneous lighting heat (>10,000 Btu/hr) — verify HVAC and ventilation capacity.");
+  if (Q_kW > 50) warnings.push("⚠️ Large lighting heat (>50 kW) — check equipment ratings, ventilation and fire safety implications.");
+  if (Q_MJ_hr > 180) warnings.push("⚠️ Large energy flow in MJ/hr — ensure system can remove this heat.");
+
+  // Classification (simple heuristic)
+  let classification = "";
+  if (Q_Btu_hr < 1000) classification = "Low heat gain (lighting unlikely to drive cooling capacity).";
+  else if (Q_Btu_hr < 10000) classification = "Moderate heat gain (noticeable on HVAC load).";
+  else classification = "High heat gain (may drive cooling equipment size).";
+
+  // formatting helpers
+  const fmt2 = v => (Math.abs(v) >= 1e3 ? v.toFixed(2) : v.toFixed(2));
+  const fmtKW = v => v.toFixed(3);
+
+  // render outputs
+  rateEl.textContent = Q_Btu_hr.toFixed(2);
+  kwEl.textContent = Q_kW.toFixed(3);
+  mjEl.textContent = Q_MJ_hr.toFixed(2);
+
+  let details = `<div><b>Instantaneous heat (Q):</b> ${Q_Btu_hr.toFixed(2)} Btu/hr (~${Q_kW.toFixed(3)} kW / ${Q_MJ_hr.toFixed(2)} MJ/hr)</div>`;
+  details += `<div style="margin-top:6px;"><b>Classification:</b> ${classification}</div>`;
+  details += `<div style="margin-top:6px; font-size:0.95em;">Inputs → Watts: <b>${watts}</b> W, BF: <b>${bf}</b>, CLF: <b>${clf}</b></div>`;
+  if (warnings.length) details += `<div style="margin-top:8px; color:#b35d00;">${warnings.join(" | ")}</div>`;
+
+  feedbackEl.innerHTML = details;
+
+  // show results UI
+  placeholder.classList.add("hidden");
+  resultValue.classList.remove("hidden");
+  errorBox.classList.add("hidden");
+}
+
+/* Print helper (kept) */
+function printReport() {
+  const el = document.getElementById('printDate');
+  if (el) {
+    el.textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+  window.print();
+}
+</script>
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+<!-- /**
+=======================================================
+ Lighting Heat Gain Calculator
+=======================================================
+
+ Formula:
+   Q_W     = Watts × BallastFactor × CLF
+   Q_Btu/h = Q_W × 3.41
+   Q_kW    = Q_W ÷ 1000
+   Q_MJ/h  = Q_kW × 3.6
+
+ where:
+   • Watts        = total lighting electrical power input (W)
+   • BallastFactor (BF) = unitless multiplier accounting for ballast effect
+   • CLF          = Cooling Load Factor (0–1), fraction of heat converted
+   • Q_W          = lighting heat release in watts
+   • Q_Btu/h      = lighting heat release in Btu per hour
+   • Q_kW         = lighting heat in kilowatts
+   • Q_MJ/h       = lighting heat in megajoules per hour
+
+-------------------------------------------------------
+ Input Validations
+-------------------------------------------------------
+ • Watts:
+   - Required (cannot be blank)
+   - Must be numeric and > 0
+   - Error if > 1e7 W (10 MW) → unrealistic for lighting
+   - Warning if < 0.01 W → likely unit error or wrong sensor resolution
+   - Warning if > 6 decimals
+
+ • Ballast Factor (BF):
+   - Required
+   - Must be numeric and > 0
+   - Error if > 10 → unrealistic
+   - Warning if outside 0.2 – 2.0 → uncommon in practice
+   - Warning if > 6 decimals
+
+ • Cooling Load Factor (CLF):
+   - Required
+   - Must be numeric
+   - Must lie between 0 and 1 (inclusive)
+   - Warning if exactly 0 → no instantaneous heat (may be valid)
+   - Warning if > 6 decimals
+
+-------------------------------------------------------
+ Output Validations
+-------------------------------------------------------
+ • Q_W (Watts):
+   - Must be finite and > 0
+ • Q_Btu/h:
+   - Must be finite and > 0
+   - Error if > 1e12 Btu/hr (clearly wrong scale)
+ • Q_kW and Q_MJ/h:
+   - Derived directly, must be finite and > 0
+
+-------------------------------------------------------
+ Warnings (QEHS / HVAC relevance)
+-------------------------------------------------------
+ • Q_Btu/h > 10,000 → High lighting heat load
+ • Q_kW > 50 → Large heat load, verify ventilation/fire-safety
+ • Q_MJ/h > 180 → Significant energy flow
+
+-------------------------------------------------------
+ Classification (based on Q_Btu/h):
+-------------------------------------------------------
+ • < 1,000 → Low heat gain (unlikely to affect cooling system sizing)
+ • 1,000 – 10,000 → Moderate heat gain (noticeable on HVAC load)
+ • > 10,000 → High heat gain (drives HVAC capacity / system design)
+
+=======================================================
+**/ -->

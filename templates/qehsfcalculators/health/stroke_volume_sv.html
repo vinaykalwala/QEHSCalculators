@@ -1,0 +1,582 @@
+{% extends 'base.html' %}
+{% block title %}Stroke Volume (SV) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stroke Volume (SV) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        /* Result Card */
+        .result-placeholder {
+            text-align: center;
+            margin: auto;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: baseline;
+            justify-content: center;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+        }
+        .rate-label {
+            color: #2980b9;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0 10px;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out, background-color 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list { margin: 0; padding-left: 18px; }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px; padding: 20px;
+            text-align: left; gap: 12px; margin-top: 20px;
+        }
+        .error-icon { font-size: 76px; flex-shrink: 0; text-align: center; }
+        .error-message { font-size: 24px; line-height: 1.6; }
+        .hidden { display: none; }
+        .btn-container { display: flex; justify-content: center; margin: 30px 0; }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040); color: #ffffff; border: 2px solid #1560bd;
+            padding: 10px 20px; font-size: 14px; font-weight: 600; border-radius: 8px;
+            text-decoration: none; transition: all 0.3s ease; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Stroke Volume (SV) Calculator</h1>
+            <p>Calculate the volume of blood pumped from the heart with each beat.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Patient Vitals</h2>
+                <div class="form-group">
+                    <label for="cardiacOutput">Cardiac Output (CO) (L/min)</label>
+                    <input type="number" id="cardiacOutput" class="form-input" placeholder="Enter Cardiac Output">
+                </div>
+                <div class="form-group">
+                    <label for="heartRate">Heart Rate (HR) (beats/min)</label>
+                    <input type="number" id="heartRate" class="form-input" placeholder="Enter Heart Rate">
+                </div>
+                <button class="calculate-btn" onclick="calculateAndDisplay()">Calculate Stroke Volume</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Enter Cardiac Output and Heart Rate to calculate the Stroke Volume.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div id="resultValue" class="hidden" style="text-align: center;">
+                    <h2>Stroke Volume (SV)</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0</div>
+                        <div class="rate-label">mL/beat</div>
+                    </div>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low</span>
+                        <span>Normal (60-120)</span>
+                        <span>High</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Interpretation</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                     <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <div class="note-card">
+                <h3>About Stroke Volume (SV)</h3>
+                <p>
+                    <strong>Stroke Volume (SV)</strong> is a key measure of heart performance.
+                    It tells us how much blood the heart pumps with each beat.
+                    This information helps in assessing overall cardiovascular health and efficiency.
+                    Stroke Volume is calculated by dividing <strong>Cardiac Output (CO)</strong> by <strong>Heart Rate
+                        (HR)</strong>.
+                </p>
+            </div>
+        
+            <div class="note-card">
+                <h3>Understanding the Parameters</h3>
+                <ul class="note-list">
+                    <li>
+                        <strong>Cardiac Output (CO):</strong> The total volume of blood pumped in one minute,
+                        usually measured in <em>liters per minute (L/min)</em>.
+                        It reflects how efficiently the heart delivers oxygen-rich blood to the body.
+                    </li>
+                    <li>
+                        <strong>Heart Rate (HR):</strong> The number of heartbeats per minute, expressed in
+                        <em>beats per minute (bpm)</em>. A higher HR often means the heart is working harder,
+                        such as during exercise or stress.
+                    </li>
+                </ul>
+            </div>
+        
+            <div class="note-card">
+                <h3>Use of the Calculator</h3>
+                <p>
+                    This calculator estimates how much blood is ejected from the heart with each beat by combining CO and HR.
+                    It is widely used by healthcare professionals, fitness trainers, and researchers to evaluate
+                    how effectively the heart is functioning.
+                </p>
+            </div>
+        
+            <div class="note-card">
+                <h3>Interpretation of Results</h3>
+                <ul class="note-list">
+                    <li><strong>Below 60 mL/beat:</strong> May indicate the heart isn’t pumping enough blood per beat. Could
+                        suggest heart dysfunction — medical review advised.</li>
+                    <li><strong>60–120 mL/beat:</strong> Typical range for healthy individuals at rest, showing efficient and
+                        stable cardiovascular performance.</li>
+                    <li><strong>Above 120 mL/beat:</strong> Often seen in trained athletes or during physical exertion,
+                        reflecting a strong and healthy heart.</li>
+                </ul>
+            </div>
+        
+            <div class="note-card">
+                <div class="note-title">ℹ️ Input Validations</div>
+                <div class="note-content">
+                    <ul>
+                        <li><strong>Cardiac Output (CO):</strong> 
+                            <br>• Range: <em>1 – 20 L/min</em> 
+                            <br>• Allowed up to <em>2 decimal places</em>
+                        </li>
+                        <li><strong>Heart Rate (HR):</strong> 
+                            <br>• Range: <em>30 – 250 beats/min</em> 
+                            <br>• Must be a <em>whole number (no decimals)</em>
+                        </li>
+                        <li><strong>Cross-field Consistency:</strong> 
+                            <br>• Extremely high HR (&gt;220 bpm) with very low CO (&lt;2 L/min) will be flagged as unrealistic.
+                        </li>
+                        <li><strong>Logical Rules:</strong> 
+                            <br>• Zero or negative values are not accepted.  
+                            <br>• Excessive decimals will be rejected.
+                        </li>
+                        <li><strong>Units Reminder:</strong> 
+                            <br>• CO is in <em>Liters per minute (L/min)</em>  
+                            <br>• HR is in <em>Beats per minute (bpm)</em>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="note-card">
+                <h3>Clinical Importance</h3>
+                <p>
+                    Stroke Volume is a powerful indicator of cardiac health and endurance.
+                    It helps detect heart issues early, monitor athletic training progress,
+                    and guide clinical decisions in healthcare settings.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function calculateAndDisplay() {
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValueBox = document.getElementById('resultValue');
+
+            // Reset states
+            errorBox.classList.add('hidden');
+            resultValueBox.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+
+            let errors = [];
+
+            // Helper for validation
+            function getVal(id, label, opts = {}) {
+                const el = document.getElementById(id);
+                const raw = el.value?.toString().trim();
+
+                if (!raw) {
+                    errors.push(`👉 ${label} is required.`);
+                    return null;
+                }
+
+                const num = parseFloat(raw);
+
+                if (isNaN(num) || num <= 0) {
+                    errors.push(`👉 Enter a valid positive number for ${label}.`);
+                    return null;
+                }
+
+                if (opts.decimals !== undefined) {
+                    const decimals = raw.split(".")[1]?.length || 0;
+                    if (decimals > opts.decimals) {
+                        errors.push(`👉 ${label} must have ≤ ${opts.decimals} decimal places.`);
+                    }
+                }
+
+                if (opts.min !== undefined && num < opts.min) {
+                    errors.push(`👉 ${label} must be ≥ ${opts.min} ${opts.unit || ""}.`);
+                }
+
+                if (opts.max !== undefined && num > opts.max) {
+                    errors.push(`👉 ${label} must be ≤ ${opts.max} ${opts.unit || ""}.`);
+                }
+
+                return num;
+            }
+
+            // Input validation ranges based on clinical standards
+            const co = getVal("cardiacOutput", "Cardiac Output", { min: 1, max: 20, decimals: 2, unit: "L/min" });
+            const hr = getVal("heartRate", "Heart Rate", { min: 30, max: 250, decimals: 0, unit: "beats/min" });
+
+            // Cross-field validation
+            if (co && hr && hr > 220 && co < 2) {
+                errors.push("👉 Unlikely combination: Very high HR with very low CO may indicate input error.");
+            }
+
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                return;
+            }
+
+            // Stroke Volume calculation
+            const sv = (co * 1000) / hr; // CO converted to mL/min, divided by HR → mL/beat
+
+            // Edge case: Division by zero safeguard
+            if (!isFinite(sv) || sv <= 0) {
+                errorMessage.innerHTML = "👉 Invalid calculation: Please recheck inputs.";
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                return;
+            }
+
+            // Display result
+            placeholder.classList.add("hidden");
+            resultValueBox.classList.remove("hidden");
+
+            document.getElementById("rateValue").textContent = sv.toFixed(1);
+
+            // Safety meter visualization
+            const meterFill = document.getElementById("meterFill");
+            const minSV = 40;
+            const maxSV = 140;
+            let pct = ((sv - minSV) / (maxSV - minSV)) * 100;
+            pct = Math.max(0, Math.min(100, pct));
+            meterFill.style.width = pct + "%";
+
+            // Interpretation logic
+            let interpretation;
+            if (sv < 60) {
+                meterFill.style.backgroundColor = "#e67e22"; // Orange
+                interpretation = "⚠️ <strong>Low Stroke Volume:</strong> May indicate reduced cardiac output. Consider medical evaluation.";
+            } else if (sv <= 120) {
+                meterFill.style.backgroundColor = "#2ecc71"; // Green
+                interpretation = "✅ <strong>Normal Range:</strong> Indicates healthy and efficient heart performance.";
+            } else {
+                meterFill.style.backgroundColor = "#3498db"; // Blue
+                interpretation = "💪 <strong>High Stroke Volume:</strong> Often seen in athletes or high activity, reflects strong cardiac efficiency.";
+            }
+
+            document.getElementById("feedbackContent").innerHTML = interpretation;
+        }
+
+        function printReport() {
+            window.print();
+        }
+    </script>
+
+</body>
+</html>
+{% endblock %}
+
+<!-- 
+1. Real-world Analysis (QEHS & Fire Safety Perspective)
+
+Stroke Volume (SV) = (Cardiac Output (CO) × 1000) ÷ Heart Rate (HR)
+
+CO (Cardiac Output): Volume of blood pumped per minute, measured in L/min.
+
+HR (Heart Rate): Beats per minute (bpm).
+
+SV (Stroke Volume): Volume of blood pumped per beat, measured in mL/beat.
+
+📌 In occupational health & safety audits (OSHA, ILO, ISO 45001), this metric is important for monitoring worker health during high-risk environments (heat stress, fire brigades, confined space entry). Abnormal SV values may indicate cardiovascular strain, which directly impacts fitness-for-duty compliance.
+
+🛡 2. Input Validation Rules
+✅ Cardiac Output (CO)
+
+Unit: L/min
+
+Valid range: 2.5 – 8.0 L/min (normal resting range)
+
+Audit-safe range: 1.5 – 15 L/min (covering extreme conditions like athletes or critical illness).
+
+Decimals: Allow up to 1 decimal place (e.g., 5.6).
+
+Validation rule: Must be > 0, ≤ 15.
+
+✅ Heart Rate (HR)
+
+Unit: beats per minute (bpm).
+
+Valid range: 40 – 180 bpm (normal safe working range).
+
+Audit-safe range: 30 – 250 bpm (to catch extremes, but flag outside normal).
+
+Decimals: Not needed (integer is enough).
+
+Validation rule: Must be ≥ 30, ≤ 250.
+
+✅ Logical Consistency (Cross-field checks)
+
+Division by zero: HR must never = 0.
+
+Unrealistic combos:
+
+If CO < 2.0 L/min & HR > 150 → Possible shock state → warning.
+
+If CO > 10 L/min & HR < 50 → Check if athlete or measurement error.
+
+📊 3. Output Validation & Thresholds
+
+Stroke Volume Ranges (based on clinical + safety standards):
+
+< 60 mL/beat → ⚠️ Low SV → Possible reduced cardiac output (shock, dehydration, fatigue).
+
+60 – 120 mL/beat → ✅ Normal → Healthy functional range.
+
+> 120 mL/beat → 💪 High SV → Common in athletes or stress responses.
+
+⚠️ 4. Edge Case Handling
+
+Empty fields → Show error.
+
+Negative or zero inputs → Reject with message.
+
+Out-of-range values → Warning with context (not just error).
+
+Extreme ratios (e.g., CO = 0.5 L/min, HR = 200 → SV = 2.5 mL/beat) → Warn user of potential measurement error.
+-->

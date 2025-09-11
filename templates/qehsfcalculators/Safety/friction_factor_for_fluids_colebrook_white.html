@@ -1,0 +1,767 @@
+{% extends 'base.html' %}
+{% block title %}Friction Factor For Fluids (Colebrook-White) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friction Factor For Fluids (Colebrook-White) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        /* Input rows for side-by-side fields */
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            height: 420px;
+            overflow-y: auto;
+            text-align: center;
+            {% comment %} margin-top: 20px; {% endcomment %}
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+        
+        .error {
+            color: #e74c3c;
+            font-size: 14px;
+            {% comment %} margin-top: 5px; {% endcomment %}
+            display: block;
+        }
+        
+        .success {
+            color: #27ae60;
+            font-size: 16px;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Friction Factor For Fluids (Colebrook-White) Calculator</h1>
+            <p>Calculate the friction factor for turbulent fluid flow in pipes using the Colebrook-White equation</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                
+                <div class="form-group">
+                    <label for="roughness">Absolute Pipe Roughness (kₛ) (m):</label>
+                    <input type="number" id="roughness" class="form-input" min="0" step="0.01" placeholder="e.g., 0.000045">
+                </div>
+                
+                <div class="form-group">
+                    <label for="diameter">Pipe Bore (D) (m):</label>
+                    <input type="number" id="diameter" class="form-input" min="0" step="any" placeholder="e.g., 0.1">
+                </div>
+                
+                <div class="form-group">
+                    <label for="reynolds">Reynolds Number (Rₑ):</label>
+                    <input type="number" id="reynolds" class="form-input" min="4000" step="any" placeholder="e.g., 10000">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateFrictionFactor()">Calculate Friction Factor</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Safety illustration">
+
+                    <p>This tool will calculate the <strong>Friction Factor (f)</strong> using the Colebrook-White equation. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Friction Factor</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.0000</div>
+                    </div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low</span><span>Moderate</span><span>High</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Flow Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Colebrook-White equation</strong> calculates the <strong>friction factor (f)</strong> for 
+                    <strong>turbulent fluid flow</strong> in pipes. It's essential in <strong>hydraulic and fluid mechanics</strong> 
+                    to determine pressure loss due to pipe friction.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Absolute Pipe Roughness (kₛ):</strong> The roughness height of the pipe's inner surface (m).</li>
+                    <li><strong>Pipe Bore (D):</strong> The internal diameter of the pipe (m).</li>
+                    <li><strong>Reynolds Number (Re):</strong> A dimensionless quantity representing the ratio of inertial forces to viscous forces in the flow.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📊 Explanation of Parameters</h3>
+                <p>
+                    Parameter details and their significance:
+                </p>
+                <ul class="note-list">
+                    <li><strong>Absolute Pipe Roughness (kₛ):</strong> Varies by material (e.g., 0.0015mm for plastic, 0.045mm for commercial steel)</li>
+                    <li><strong>Pipe Bore (D):</strong> Larger diameters generally result in lower friction factors</li>
+                    <li><strong>Reynolds Number (Re):</strong> Values > 4000 indicate turbulent flow where this equation applies</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📈 Interpretation</h3>
+                <p>
+                    <b>Friction factor values</b> indicate flow resistance. Generally:
+                </p>
+                <ul class="note-list">
+                    <li><span class="good">Below 0.015</span> → Low friction, smooth pipe</li>
+                    <li><span class="average">0.015 – 0.03</span> → Moderate friction, typical for engineering applications</li>
+                    <li><span class="bad">Above 0.03</span> → High friction, significant resistance requiring attention</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>🔍 Real-life Applications</h3>
+                <p>
+                    The Colebrook-White equation is crucial for:
+                </p>
+                <ul class="note-list">
+                    <li><strong>Pipelines & Water Supply Systems:</strong> Designing efficient water distribution networks</li>
+                    <li><strong>HVAC Systems:</strong> Determining pressure losses in air ducts and ventilation systems</li>
+                    <li><strong>Oil & Gas Industry:</strong> Calculating frictional losses in pipelines</li>
+                    <li><strong>Fire Protection Systems:</strong> Ensuring proper flow rate and pressure for firefighting systems</li>
+                    <li><strong>Hydraulic Engineering:</strong> Designing canals, tunnels, and closed conduits</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+  <h3>✅ Input Validation Rules</h3>
+  <ul class="note-list">
+    <li><strong>Absolute Pipe Roughness (kₛ):</strong> Must be between 0 and 0.01 m.</li>
+    <li><strong>Pipe Bore (D):</strong> Must be between 0.001 m and 10 m.</li>
+    <li><strong>Reynolds Number (Rₑ):</strong> Must be between 4000 and 1×10⁸ (turbulent flow only).</li>
+    <li><strong>Relative Roughness (kₛ/D):</strong> Must be ≤ 0.05.</li>
+    <li><strong>Cross-field check:</strong> kₛ must always be smaller than D.</li>
+    <li><strong>Output Validity:</strong> Friction factor (f) must converge and lie between 0.007 and 0.08.</li>
+  </ul>
+  <p><b>Note:</b> These rules follow <b>ASME, ISO 5167, NFPA, and hydraulic engineering standards</b>.</p>
+</div>
+
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateFrictionFactor() {
+    const ks = parseFloat(document.getElementById('roughness').value.trim());
+    const D = parseFloat(document.getElementById('diameter').value.trim());
+    const Re = parseFloat(document.getElementById('reynolds').value.trim());
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    let errors = [];
+
+    // --- Input validations ---
+    if (isNaN(ks) || ks < 0 || ks > 0.01) {
+        errors.push("👉 Absolute roughness (kₛ) must be between 0 and 0.01 m.");
+    }
+    if (isNaN(D) || D <= 0.001 || D > 10) {
+        errors.push("👉 Pipe bore (D) must be between 0.001 m and 10 m.");
+    }
+    if (isNaN(Re) || Re < 4000 || Re > 1e8) {
+        errors.push("👉 Reynolds number (Rₑ) must be between 4000 and 100,000,000(1e8) for turbulent flow.");
+    }
+    if (!isNaN(ks) && !isNaN(D) && ks >= D) {
+        errors.push("👉 Pipe roughness (kₛ) cannot be greater than or equal to pipe diameter (D).");
+    }
+    if (!isNaN(ks) && !isNaN(D)) {
+        const relRoughness = ks / D;
+        if (relRoughness > 0.05) {
+            errors.push("👉 Relative roughness (kₛ/D) must be ≤ 0.05 for valid Colebrook calculations.");
+        }
+    }
+
+    // Show errors if any
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // --- Colebrook Iteration ---
+    let f = 0.02; // initial guess
+    const maxIterations = 100;
+    const tolerance = 1e-6;
+    let converged = false;
+
+    for (let i = 0; i < maxIterations; i++) {
+        const term1 = ks / (3.7 * D);
+        const term2 = 2.51 / (Re * Math.sqrt(f));
+        const newF = 1 / Math.pow(-2 * Math.log10(term1 + term2), 2);
+
+        if (Math.abs(newF - f) < tolerance) {
+            f = newF;
+            converged = true;
+            break;
+        }
+        f = newF;
+    }
+
+    if (!converged) {
+        errorMessage.innerHTML = "👉 Colebrook-White equation did not converge. Please check your inputs.";
+        errorBox.classList.remove("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    // --- Output validation ---
+    if (f < 0.007 || f > 0.08) {
+        errorMessage.innerHTML = "👉 Friction factor (f) outside practical range (0.007–0.08). Please verify inputs.";
+        errorBox.classList.remove("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    // Display result
+    document.getElementById('rateValue').textContent = f.toFixed(6);
+
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+
+    if (f < 0.015) {
+        meterWidth = '25%';
+        meterColor = '#27ae60';
+        feedback = '✅ Low friction factor. Smooth pipe with minimal flow resistance.';
+    } else if (f <= 0.03) {
+        meterWidth = '50%';
+        meterColor = '#f39c12';
+        feedback = '⚠️ Moderate friction factor. Typical for most engineering applications.';
+    } else {
+        meterWidth = '85%';
+        meterColor = '#e74c3c';
+        feedback = '❌ High friction factor. Significant flow resistance - consider pipe material or diameter changes.';
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+{% comment %} 
+
+✅ Step 1: Real-World Analysis of Inputs & Outputs
+Inputs
+
+Absolute Pipe Roughness (kₛ, m)
+
+Pipe material dependent.
+
+Typical ranges:
+
+Plastic/PVC: 0.000001 – 0.000005 m
+
+Commercial steel: 0.000045 m
+
+Concrete: 0.0003 – 0.003 m
+
+Compliance requirement: Avoid unrealistic values outside engineering norms.
+
+Pipe Bore (D, m)
+
+Common pipe bores: 0.01 m (small tubes) to 5 m (large tunnels).
+
+Compliance requirement: Must be >0; too small (<0.001 m) or too large (>10 m) impractical for safety systems.
+
+Reynolds Number (Re)
+
+Equation valid for turbulent flow only (Re ≥ 4000).
+
+Re < 2000 → laminar (use Hagen-Poiseuille).
+
+Transitional 2000–4000 → not suitable for Colebrook.
+
+Compliance requirement: Disallow invalid Re values.
+
+Output
+
+Friction Factor (f, dimensionless)
+
+Physically valid range: 0.007 – 0.08 for most pipe systems.
+
+Interpretation:
+
+<0.015 → Low resistance (smooth pipe).
+
+0.015–0.03 → Moderate (normal operation).
+
+0.03 → High resistance (safety risk in fire suppression or high flow demand systems).
+
+Compliance requirement: Flag unrealistic or non-converging results.
+
+✅ Step 2: Detailed Input Validation Rules (with rationale)
+Input	Validation Rule	Reason / Standard
+kₛ (m)	Must be ≥ 0 and ≤ 0.01	Typical roughness from ASME/ISO 5167; prevents nonsense values
+D (m)	Must be > 0.001 and ≤ 10	Covers real-world pipe diameters (from micro to tunnels)
+Re	Must be ≥ 4000 and ≤ 1e8	Colebrook valid only for turbulent flow; upper bound prevents overflow
+Relative Roughness (kₛ/D)	Must be between 0 and 0.05	Beyond 0.05 invalidates Colebrook assumptions
+Decimals	Allow up to 6 decimal places	Required for precision in hydraulics
+Units	Explicit (m for length, dimensionless Re)	Prevents misinterpretation
+Cross-field checks	ks < D always	A pipe cannot be smoother than its own bore
+✅ Step 3: Edge Case Validations
+
+Division by zero – Prevent if D=0 or Re=0.
+
+Relative roughness > 0.05 – Warn and stop calculation.
+
+Extreme Re (≥ 1e8) – Warn: “Unrealistically high Reynolds number.”
+
+Non-convergence – If iterations exceed tolerance, show error instead of false result.
+
+Negative or blank inputs – Block calculation with user-friendly messages.
+
+✅ Step 4: Output Validation Logic
+
+If f < 0.007 or f > 0.08, show warning:
+"Calculated friction factor is outside practical engineering range. Please verify inputs."
+
+Map f into traffic-light safety zones:
+
+✅ Green: <0.015 → smooth pipe
+
+⚠️ Amber: 0.015–0.03 → typical range
+
+❌ Red: >0.03 → high resistance, safety concern in firefighting systems
+
+✅ Step 5: Corrected JavaScript Code (with comments)
+/*
+Colebrook-White Equation (Iterative Form):
+1/√f = -2 log10( (ks/(3.7D)) + (2.51 / (Re√f)) )
+
+Validation Rules (per ASME, ISO 5167, NFPA hydraulic guidelines):
+- ks ≥ 0 and ≤ 0.01 m
+- D > 0.001 m and ≤ 10 m
+- Re ≥ 4000 and ≤ 1e8 (turbulent flow requirement)
+- ks < D
+- Relative roughness (ks/D) ≤ 0.05
+- Friction factor f must converge between 0.007 – 0.08
+*/ {% endcomment %}

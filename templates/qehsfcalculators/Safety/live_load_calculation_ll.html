@@ -1,0 +1,686 @@
+{% extends 'base.html' %}
+{% block title %}Live Load Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Load Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            height: 420px;
+            overflow-y:auto;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .load-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .load-label { 
+            color: #7f8c8d; 
+            margin-bottom: 20px;
+        }
+
+        /* Result feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+        .select-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.form-select {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: #f9fbfd;
+    font-size: 16px;
+    transition: all 0.3s;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+}
+
+.select-wrapper::after {
+    content: "▼";
+    font-size: 0.9rem;
+    color: #1560bd;
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+/* 🔹 Responsive adjustments for small screens */
+@media screen and (max-width: 425px) {
+    .form-select {
+        padding: 10px 12px;
+        font-size: 14px;
+        border-radius: 8px;
+    }
+
+    .select-wrapper::after {
+        font-size: 0.75rem;
+        right: 10px;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Live Load Calculator</h1>
+            <p>Calculate the total live load for scaffold platforms based on duty classification</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="loadType">Select Load Type</label>
+                    <div class="select-wrapper">
+                    <select id="loadType" class="form-select">
+                        <option value="light">Light Duty (1.2 kN/m²)</option>
+                        <option value="medium">Medium Duty (2.4 kN/m²)</option>
+                        <option value="heavy">Heavy Duty (3.6 kN/m²)</option>
+                    </select>
+                </div>
+                </div>
+                <div class="form-group">
+                    <label for="platformArea">Platform Area (m²)</label>
+                    <input type="number" id="platformArea" class="form-input" min="0.1" step="0.1" placeholder="e.g., 10.5">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateLiveLoad()">Calculate Live Load</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Safety illustration">
+                    <p>This tool will calculate the <strong>Live Load</strong> for scaffold platforms. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd; margin-top:30px;">
+                        <h2>Live Load Calculation Result</h2>
+                    </div>
+                    
+                    <div class="load-value" id="loadValue">0.00 kN</div>
+                    <div class="load-label" id="loadLabel" style="color:#2980b9; font-size:20px; font-weight:bold;">(0.00 kg)</div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Load Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Live Load Calculator</strong> determines the total live load for scaffold platforms based on 
+                    duty classification and platform area, ensuring structural safety and compliance with industry standards.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ What is Live Load?</h3>
+                <p>
+                    Live load represents the weight of workers, tools, equipment, and any other movable items placed on the scaffold. 
+                    It is used to ensure the platform is designed to support the intended weight, maintaining safety and stability.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Load Type:</strong> Classification based on the type of work being performed</li>
+                    <li><strong>Platform Area:</strong> Total area of the scaffold platform in square meters</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Duty Classifications</h3>
+                <ul class="note-list">
+                    <li><strong>Light Duty:</strong> 1.2 kN/m² (for workers only, no material storage)</li>
+                    <li><strong>Medium Duty:</strong> 2.4 kN/m² (for workers and some material storage)</li>
+                    <li><strong>Heavy Duty:</strong> 3.6 kN/m² (for workers and substantial material storage)</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>🌍 Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Construction Safety</strong> - Ensuring scaffold platforms can support intended loads</li>
+                    <li><strong>Structural Engineering</strong> - Calculating load requirements for temporary structures</li>
+                    <li><strong>Workplace Safety</strong> - Compliance with OSHA and other safety regulations</li>
+                    <li><strong>Project Planning</strong> - Determining equipment requirements for construction projects</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📋 Industry Standards</h3>
+                <p>
+                    OSHA 1926.451, ANSI/ASSE A10.8, and other international scaffolding safety standards that specify 
+                    minimum live load requirements for different types of work.
+                </p>
+            </div>
+            
+            <div class="note-card">
+    <h3>✅ Validation Rules</h3>
+    <ul class="note-list">
+        <li><b>Platform Area:</b> Must be between 0.1 m² and 1000 m².</li>
+        <li><b>Decimals:</b> Up to 2 decimal places allowed.</li>
+        <li><b>Duty Class:</b> Light = 1.2 kN/m², Medium = 2.4 kN/m², Heavy = 3.6 kN/m².</li>
+        <li><b>Compliance Check:</b> Loads exceeding duty × 1000 m² require engineering approval.</li>
+        <li><b>Formula:</b> Live Load (kN) = Load Intensity × Platform Area.</li>
+        <li><b>Conversion:</b> 1 kN ≈ 101.97 kg.</li>
+    </ul>
+</div>
+
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateLiveLoad() {
+    const loadType = document.getElementById('loadType').value;
+    let platformArea = document.getElementById('platformArea').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+
+    // Validation: Empty or non-numeric
+    if (platformArea === "" || isNaN(platformArea)) {
+        errors.push("👉 Please enter a valid numeric value for platform area.");
+    } else {
+        platformArea = parseFloat(platformArea);
+
+        // Validation: Range checks
+        if (platformArea <= 0) {
+            errors.push("👉 Platform area must be greater than 0.1 m².");
+        } else if (platformArea < 0.1) {
+            errors.push("👉 Minimum platform area is 0.1 m².");
+        } else if (platformArea > 1000) {
+            errors.push("👉 Platform area cannot exceed 1000 m² (engineering assessment required).");
+        }
+
+        // Validation: Decimal precision
+        if ((platformArea * 100) % 1 !== 0) {
+            errors.push("👉 Platform area should be entered with a maximum of 2 decimal places.");
+        }
+    }
+
+    // Handle errors
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // Duty class load values
+    let liveLoadPerM2, dutyDescription;
+    switch (loadType) {
+        case 'light':
+            liveLoadPerM2 = 1.2;
+            dutyDescription = "Light Duty (workers only, no material storage)";
+            break;
+        case 'medium':
+            liveLoadPerM2 = 2.4;
+            dutyDescription = "Medium Duty (workers and some material storage)";
+            break;
+        case 'heavy':
+            liveLoadPerM2 = 3.6;
+            dutyDescription = "Heavy Duty (workers and substantial material storage)";
+            break;
+        default:
+            liveLoadPerM2 = 0;
+            dutyDescription = "Invalid selection";
+            break;
+    }
+
+    // Calculate loads
+    const totalLiveLoadKn = liveLoadPerM2 * platformArea;
+    const totalLiveLoadKg = totalLiveLoadKn * 101.97;
+
+    // Output display
+    document.getElementById('loadValue').textContent = `${totalLiveLoadKn.toFixed(2)} kN`;
+    document.getElementById('loadLabel').textContent = `(${totalLiveLoadKg.toFixed(2)} kg)`;
+
+    // Feedback message
+    let feedback = `Selected Duty: ${dutyDescription}<br>`;
+    feedback += `Platform Area: ${platformArea.toFixed(2)} m²<br>`;
+    feedback += `Load Intensity: ${liveLoadPerM2} kN/m²<br><br>`;
+    feedback += `Total Live Load: ${totalLiveLoadKn.toFixed(2)} kN (${totalLiveLoadKg.toFixed(2)} kg)<br>`;
+
+    // Threshold warnings
+    if (totalLiveLoadKn > (liveLoadPerM2 * 1000)) {
+        feedback += `<br><span style="color:red; font-weight:bold;">⚠️ Load exceeds standard threshold. Engineering approval required.</span>`;
+    }
+
+    document.getElementById('feedbackContent').innerHTML = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+{% comment %} 
+1. Detailed Input Validation Rules
+Platform Area (m²)
+
+Min Value: 0.1 m² (smaller areas are not practical for scaffolds).
+
+Max Value: 1000 m² (beyond this, scaffold design should be engineering-controlled).
+
+Step: 0.1 m² for precision.
+
+Allowed Decimals: up to 2 decimal places.
+
+Logical Check: Must be numeric, positive, and within range.
+
+Load Type (Duty Classification)
+
+Allowed values:
+
+Light Duty → 1.2 kN/m²
+
+Medium Duty → 2.4 kN/m²
+
+Heavy Duty → 3.6 kN/m²
+
+Cross-validation: Must be one of the defined duty classes (prevents tampering).
+
+Output Validation Rules
+
+Formula:
+
+Total Live Load (kN) = Duty Load Intensity (kN/m²) × Platform Area (m²)
+
+
+Conversion to kilograms:
+
+1 kN ≈ 101.97 kg
+Total Live Load (kg) = Total Live Load (kN) × 101.97
+
+
+Threshold checks:
+
+Light duty max: 1.2 × 1000 = 1200 kN (~122,364 kg)
+
+Medium duty max: 2400 kN (~244,728 kg)
+
+Heavy duty max: 3600 kN (~367,092 kg)
+
+If values exceed these, flag "Requires Structural Engineer Approval".
+
+2. Edge Case Validations
+
+Empty Input → show error.
+
+Non-numeric / special chars → reject.
+
+Zero or negative → reject.
+
+Decimal precision > 2 places → round to 2 decimals.
+
+Unrealistic combination → e.g., heavy duty with tiny platform area (<1 m²) → warn: “Check if classification is correct for such a small platform.”
+
+Extreme outliers → e.g., >1000 m² → block and require engineering approval.
+
+3. Corrected JavaScript Code
+
+Here’s the revised calculateLiveLoad() with all validations and inline comments (so you can keep them for audits/future reference):
+
+/*
+Formula Reference:
+------------------
+Total Live Load (kN) = Duty Load Intensity (kN/m²) × Platform Area (m²)
+Conversion: 1 kN ≈ 101.97 kg
+Standards: OSHA 1926.451, ANSI/ASSE A10.8, NFPA, ISO 45001
+Validation Rules:
+- Platform Area: 0.1 ≤ area ≤ 1000 m², max 2 decimals
+- Load Type: {light=1.2, medium=2.4, heavy=3.6}
+- Output thresholds: Flag if > duty_class × 1000 m²
+*/ {% endcomment %}

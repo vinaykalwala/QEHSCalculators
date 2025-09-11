@@ -1,0 +1,603 @@
+{% extends 'base.html' %}
+{% block title %}Plasma Volume Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plasma Volume Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        /* Result Card */
+        .result-placeholder {
+            text-align: center;
+            margin: auto;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .result-item h3 {
+            font-size: 1.2rem;
+            color: #34495e;
+            margin-bottom: 8px;
+        }
+        .rate-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2980b9;
+        }
+        .rate-label {
+            font-size: 1rem;
+            color: #7f8c8d;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list { margin: 0; padding-left: 18px; }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px; padding: 20px;
+            text-align: left; gap: 12px; margin-top: 20px;
+        }
+        .error-icon { font-size: 76px; flex-shrink: 0; text-align: center; }
+        .error-message { font-size: 24px; line-height: 1.6; }
+        .hidden { display: none; }
+        .btn-container { display: flex; justify-content: center; margin: 30px 0; }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040); color: #ffffff; border: 2px solid #1560bd;
+            padding: 10px 20px; font-size: 14px; font-weight: 600; border-radius: 8px;
+            text-decoration: none; transition: all 0.3s ease; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Plasma Volume Calculator</h1>
+            <p>Estimate plasma volume using Simple, Nadler's, or Lemmens-Bernstein-Brodsky methods.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Patient Data</h2>
+                <div class="form-group">
+                    <label for="method">Calculation Method</label>
+                    <select id="method" class="form-select" onchange="renderInputs()">
+                        <option value="simple">Simple Method</option>
+                        <option value="nadler">Nadler's Equation</option>
+                        <option value="lembro">Lemmens-Bernstein-Brodsky</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="weight">Weight (kg)</label>
+                    <input type="number" id="weight" class="form-input" placeholder="Enter weight in kg">
+                </div>
+                <div class="form-group hidden" id="heightGroup">
+                    <label for="height">Height (cm)</label>
+                    <input type="number" id="height" class="form-input" placeholder="Enter height in cm">
+                </div>
+                <div class="form-group">
+                    <label for="hematocrit">Hematocrit (%)</label>
+                    <input type="number" id="hematocrit" class="form-input" placeholder="Enter percentage (e.g., 45)">
+                </div>
+                <button class="calculate-btn" onclick="calculateAndDisplay()">Calculate Plasma Volume</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Select a method and enter patient data to calculate estimated plasma volume.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div id="resultValue" class="hidden">
+                    <h2>Estimated Plasma Volume</h2>
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <h3>For Males</h3>
+                            <span class="rate-value" id="pvMale">0</span>
+                            <span class="rate-label">mL</span>
+                        </div>
+                        <div class="result-item">
+                            <h3>For Females</h3>
+                            <span class="rate-value" id="pvFemale">0</span>
+                            <span class="rate-label">mL</span>
+                        </div>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Analysis</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <!-- Plasma Basics -->
+            <div class="note-card">
+                <h3>What is Plasma?</h3>
+                <p>
+                    Plasma is the <strong>fluid part of blood</strong> that transports cells, nutrients, hormones, and waste
+                    products.
+                    It makes up about <strong>55% of the total blood volume</strong> and is primarily composed of water,
+                    proteins, and electrolytes.
+                </p>
+            </div>
+        
+            <!-- Why Calculate -->
+            <div class="note-card">
+                <h3>Why Calculate Plasma Volume?</h3>
+                <ul class="note-list">
+                    <li>Evaluate <strong>hydration levels</strong> and detect dehydration or fluid overload.</li>
+                    <li>Assist in diagnosing conditions like <strong>anemia</strong> or <strong>polycythemia</strong>.</li>
+                    <li>Support treatment planning in <strong>critical care, dialysis, or surgery</strong>.</li>
+                    <li>Monitor changes during <strong>athletic training or medical treatments</strong>.</li>
+                </ul>
+            </div>
+        
+            <!-- How It’s Calculated -->
+            <div class="note-card">
+                <h3>How Plasma Volume is Calculated</h3>
+                <p>
+                    Plasma volume is estimated by calculating the <strong>Total Blood Volume (TBV)</strong> and then determining
+                    the fraction
+                    that is plasma. This requires body weight, hematocrit percentage, and in some cases, height.
+                </p>
+            </div>
+        
+            <!-- TBV Methods -->
+            <div class="note-card">
+                <h3>Total Blood Volume (TBV) Estimation Methods</h3>
+                <ul class="note-list">
+                    <li><strong>Simple Method:</strong> Uses body weight only, convenient when height is unknown.</li>
+                    <li><strong>Nadler’s Equation:</strong> Considers both height and weight, more accurate for medical use.
+                    </li>
+                    <li><strong>Lemmens-Bernstein-Brodsky:</strong> Adjusts values for BMI differences, useful for varied body
+                        types.</li>
+                </ul>
+            </div>
+        
+            <!-- Inputs -->
+            <div class="note-card">
+                <h3>Inputs Required</h3>
+                <ul class="note-list">
+                    <li><strong>Weight (kg):</strong> Required for all methods.</li>
+                    <li><strong>Height (cm):</strong> Needed for Nadler & Lemmens methods.</li>
+                    <li><strong>Hematocrit (%):</strong> Determines plasma fraction of TBV.</li>
+                </ul>
+            </div>
+        
+            <!-- Understanding Results -->
+            <div class="note-card">
+                <h3>Understanding the Results</h3>
+                <ul class="note-list">
+                    <li><strong>Low plasma volume:</strong> Possible dehydration or blood loss.</li>
+                    <li><strong>High plasma volume:</strong> Could indicate fluid overload, heart, or kidney disease.</li>
+                    <li>Interpret results alongside clinical findings with a healthcare provider.</li>
+                </ul>
+            </div>
+        
+            <!-- Limitations -->
+            <div class="note-card">
+                <h3>Limitations of the Calculator</h3>
+                <p>This tool provides estimates and may not be reliable for:</p>
+                <ul class="note-list">
+                    <li>Very low or high body weight individuals</li>
+                    <li>Children or elderly patients</li>
+                    <li>People with unusual hematocrit values or fluid balance disorders</li>
+                </ul>
+            </div>
+        
+            <div class="note-card">
+                <h3>✅ Input Validations</h3>
+                    <ul class="note-list">
+                        <li><strong>Weight (kg):</strong> Must be between <strong>30 and 300 kg</strong>. Decimals allowed (e.g.,
+                            72.5).</li>
+                        <li><strong>Height (cm):</strong> Required for <em>Nadler’s</em> and <em>Lemmens-Bernstein-Brodsky</em>
+                            methods only. Acceptable range: <strong>100–250 cm</strong>.</li>
+                        <li><strong>Hematocrit (%):</strong> Must be between <strong>20% and 65%</strong>. Enter as a whole number
+                            (e.g., 45 for 45%).</li>
+                        <li><strong>Units:</strong> Ensure values are entered in <strong>kg</strong>, <strong>cm</strong>, and
+                            <strong>%</strong> only.</li>
+                        <li><strong>Logical Consistency:</strong> Height must match weight realistically (e.g., 40 kg with 200 cm
+                            height is invalid).</li>
+                        <li><strong>Edge Cases:</strong>
+                            <ul>
+                                <li>No zero or negative inputs.</li>
+                                <li>Extremely low or high values will trigger warnings.</li>
+                                <li>BMI-based method checks for invalid BMI (division by zero).</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <p class="note-highlight">
+                        ⚠️ Plasma volume outside <strong>1500–6000 mL</strong> will be flagged as physiologically abnormal. Please
+                        recheck inputs if you see a warning.
+                    </p>
+            </div>
+
+            <!-- Disclaimer -->
+            <div class="note-card">
+                <h3>⚠️ Disclaimer</h3>
+                <p>
+                    This calculator is for educational and informational use only.
+                    It does not replace professional medical advice, diagnosis, or treatment.
+                    Always consult a healthcare provider for personalized assessment.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', renderInputs);
+
+        function renderInputs() {
+            const method = document.getElementById("method").value;
+            const heightGroup = document.getElementById("heightGroup");
+            heightGroup.classList.toggle("hidden", method === "simple");
+        }
+
+        function calculateAndDisplay() {
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValueBox = document.getElementById('resultValue');
+
+            // Reset UI
+            errorBox.classList.add('hidden');
+            resultValueBox.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+
+            let errors = [];
+
+            // Reusable validation function
+            function getVal(id, label, opts = {}) {
+                const el = document.getElementById(id);
+                if (el.parentElement.classList.contains('hidden') && !opts.required) return null;
+
+                const raw = el.value?.toString().trim();
+                if (!raw) {
+                    errors.push(`👉 ${label} is required.`);
+                    return null;
+                }
+
+                const num = parseFloat(raw);
+                if (isNaN(num) || num <= 0) {
+                    errors.push(`👉 Enter a valid positive number for ${label}.`);
+                    return null;
+                }
+                if (opts.min !== undefined && num < opts.min) {
+                    errors.push(`👉 ${label} must be ≥ ${opts.min}.`);
+                }
+                if (opts.max !== undefined && num > opts.max) {
+                    errors.push(`👉 ${label} must be ≤ ${opts.max}.`);
+                }
+                return num;
+            }
+
+            const method = document.getElementById("method").value;
+            const weight = getVal('weight', 'Weight', { min: 30, max: 300 });
+            const hematocritVal = getVal('hematocrit', 'Hematocrit', { min: 20, max: 65 });
+            const height = getVal('height', 'Height', { min: 100, max: 250, required: method !== 'simple' });
+
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add('hidden');
+                return;
+            }
+
+            const hematocrit = hematocritVal / 100;
+            let tbvMale = 0, tbvFemale = 0;
+
+            // Calculation logic
+            if (method === "simple") {
+                tbvMale = 70 * weight;
+                tbvFemale = 65 * weight;
+            } else if (method === "nadler") {
+                const h_m = height / 100;
+                tbvMale = (0.3669 * Math.pow(h_m, 3) + 0.03219 * weight + 0.6041) * 1000;
+                tbvFemale = (0.3561 * Math.pow(h_m, 3) + 0.03308 * weight + 0.1833) * 1000;
+            } else if (method === "lembro") {
+                const bmi = weight / Math.pow(height / 100, 2);
+                if (bmi <= 0) {
+                    errorMessage.textContent = "👉 Invalid BMI calculation (check weight/height inputs).";
+                    errorBox.classList.remove("hidden");
+                    return;
+                }
+                tbvMale = weight * 70 / Math.sqrt(bmi / 22);
+                tbvFemale = weight * 65 / Math.sqrt(bmi / 22);
+            }
+
+            // Plasma volume
+            const pvMale = tbvMale * (1 - hematocrit);
+            const pvFemale = tbvFemale * (1 - hematocrit);
+
+            // Feedback with physiological checks
+            let feedback = `Result calculated using the ${document.querySelector("#method option:checked").textContent}. `;
+            if (pvMale < 1500 || pvMale > 6000 || pvFemale < 1500 || pvFemale > 6000) {
+                feedback += "⚠️ Calculated plasma volume is outside normal physiological ranges. Please recheck inputs.";
+            } else {
+                feedback += "✅ Plasma volume is within normal physiological limits. Lower-than-normal values may indicate dehydration; higher values may suggest fluid overload.";
+            }
+
+            // Update UI with results
+            placeholder.classList.add('hidden');
+            resultValueBox.classList.remove('hidden');
+            document.getElementById('pvMale').textContent = pvMale.toFixed(0);
+            document.getElementById('pvFemale').textContent = pvFemale.toFixed(0);
+            document.getElementById('feedbackContent').textContent = feedback;
+        }
+
+        function printReport() {
+            window.print();
+        }
+    </script>
+
+</body>
+</html>
+{% endblock %}
+
+<!-- 
+🔹 1. Input Validation Rules (QEHS / Safety-Oriented)
+Weight (kg)
+
+Allowed range: 30 – 300 kg
+
+Decimals: Up to 1 decimal place (precision required in clinical calculations).
+
+Validation: Must be positive, numeric, not blank.
+
+Reason: Underweight (<30 kg) or extreme obesity (>300 kg) creates inaccurate and unsafe estimates in safety-critical planning (e.g., transfusion, fluid replacement).
+
+Height (cm) (required for Nadler & Lemmens-Bernstein-Brodsky)
+
+Allowed range: 100 – 250 cm
+
+Decimals: Up to 1 decimal place.
+
+Validation: Required only if selected method needs it; otherwise hidden.
+
+Reason: Values outside range imply erroneous input, affecting TBV (total blood volume) and downstream plasma volume accuracy.
+
+Hematocrit (%)
+
+Allowed range: 20 – 65 %
+
+Decimals: Up to 1 decimal place.
+
+Validation: Must be between lower survival threshold and upper physiologic maximum.
+
+Reason:
+
+<20% → Severe anemia, not physiologically sustainable.
+
+65% → Polycythemia, unsafe for transfusion-related calculations.
+
+Values outside this range indicate incorrect input, warranting error.
+
+Calculation Method
+
+Allowed options: Simple, Nadler, Lemmens-Bernstein-Brodsky.
+
+Validation: Must be one of the predefined choices.
+
+Reason: Prevents invalid function calls or arbitrary formulas.
+
+🔹 2. Output Validation & Threshold Logic
+
+Plasma Volume (PV):
+
+Normal range (adult males): ~3000–4000 mL
+
+Normal range (adult females): ~2600–3500 mL
+
+Validation: If calculated PV is <1500 mL or >6000 mL, warn user: “Values may be clinically unrealistic – check inputs.”
+
+Compliance Note: In QEHS audits (e.g., blood bank safety reports, NFPA medical readiness guidelines), results must always flag outliers for traceability.
+
+🔹 3. Edge Case Validations
+
+Division by Zero: Height must not be 0 in Lemmens-Bernstein-Brodsky method.
+
+Negative Inputs: Any negative number → reject with error.
+
+Blank Inputs: Show “Field is required.”
+
+Extreme Outliers: Warn if weight <30 kg or >300 kg, height <100 cm or >250 cm, hematocrit <20% or >65%.
+
+Non-numeric Input: Prevent form submission (regex: /^\d+(\.\d{1})?$/).
+-->

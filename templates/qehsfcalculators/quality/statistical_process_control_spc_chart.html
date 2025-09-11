@@ -1,0 +1,794 @@
+{% extends 'base.html' %}
+{% block title %}Statistical Process Control (SPC) Chart Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistical Process Control (SPC) Chart Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <!-- Add Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+
+
+
+
+
+
+
+
+
+
+.result-card::-webkit-scrollbar {
+    width: 8px;
+}
+
+.result-card::-webkit-scrollbar-thumb {
+    background: #1560bd;
+    border-radius: 6px;
+}
+
+.result-card::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+
+
+
+
+
+
+.result-card {
+    justify-content: flex-start; /* align from top */
+    align-items: stretch;
+    min-height: 420px;
+    text-align: center;
+    overflow-y: auto;       /* Enable vertical scrolling */
+    max-height: 450px;      /* Set max height to control output size */
+    padding: 20px;          /* keep spacing */
+}
+
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Graph container */
+        .graph-container {
+            margin-top: 30px;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border: 1px solid #eaeaea;
+        }
+        
+        /* Result cards */
+        .spc-result-card {
+            background: linear-gradient(135deg, #1560bd, #000040);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 10px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            color: white;
+        }
+        
+        .feedback-container {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'qualitycategory_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Statistical Process Control (SPC) Chart Calculator</h1>
+            <p>Calculates Upper and Lower Control Limits for process monitoring based on sample means, range, and control chart constants</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator Input Card -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="xbar">Average of Sample Means (X̄)</label>
+                    <input type="number" id="xbar" class="form-input" step="0.01" placeholder="Enter X̄">
+                </div>
+
+                <div class="form-group">
+                    <label for="rbar">Average Range (R)</label>
+                    <input type="number" id="rbar" class="form-input" step="0.01" placeholder="Enter R">
+                </div>
+
+                <div class="form-group">
+                    <label for="a2">Control Chart Constant (A₂)</label>
+                    <input type="number" id="a2" class="form-input" step="0.01" placeholder="Enter A₂">
+                </div>
+
+                <button class="calculate-btn" onclick="calculateSPC()">Calculate SPC Limits</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="SPC illustration">
+                    <p>This tool calculates the <strong>Upper and Lower Control Limits</strong> for statistical process control. Enter your values to see results.</p>
+                </div>
+
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Control Limits</h2>
+                    </div>
+                    
+                    <div id="spcResultsContainer"></div>
+                    
+                    <div class="graph-container hidden" id="graphContainer">
+                        <canvas id="spcChart" width="400" height="200"></canvas>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🔎 About This Calculator</h3>
+                <p>
+                    The <strong>Statistical Process Control (SPC) Chart Calculator</strong> helps determine the Upper and Lower Control Limits for process monitoring. These limits are used to monitor process stability and identify variations that may indicate issues requiring investigation.
+                </p> 
+            </div>
+            
+            <div class="note-card">
+                <h3>📌 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Average of Sample Means (X̄):</strong> Required, must be a valid number</li>
+                    <li><strong>Average Range (R):</strong> Required, must be > 0</li>
+                    <li><strong>Control Chart Constant (A₂):</strong> Required, must be > 0 (typically between 0.18-2.66 depending on sample size)</li>
+                    <li><strong>Realistic Values:</strong> Inputs should represent actual process data for meaningful results</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ Explanation of Parameters</h3>
+                <ul class="note-list">
+                    <li><strong>Average of Sample Means (X̄):</strong> The mean of the sample means, representing the central tendency of the process.</li>
+                    <li><strong>Average Range (R):</strong> The average of the ranges of the samples, measuring the variability within the samples.</li>
+                    <li><strong>Control Chart Constant (A₂):</strong> A constant used in the calculation of control limits, depending on sample size (from statistical tables).</li>
+                    <li><strong>UCL (Upper Control Limit):</strong> The maximum acceptable value for the process.</li>
+                    <li><strong>LCL (Lower Control Limit):</strong> The minimum acceptable value for the process.</li>
+                </ul>
+            </div>
+        
+
+            <div class="note-card">
+                <h3>📊 Interpretation Guidelines</h3>
+                <ul class="note-list">
+                    <li><strong>Process In Control:</strong> All data points fall between UCL and LCL</li>
+                    <li><strong>Process Out of Control:</strong> Data points outside control limits indicate special cause variation</li>
+                    <li><strong>Narrow Control Limits:</strong> May indicate a tightly controlled process or insufficient variability</li>
+                    <li><strong>Wide Control Limits:</strong> May indicate high process variability or incorrect inputs</li>
+                    <li><strong>Invalid Limits:</strong> UCL less than LCL indicates erroneous input values</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📈 Understanding the Graph</h3>
+                <p>The graph provides a visual representation of:</p>
+                <ul class="note-list">
+                    <li><strong>Process Data (Blue Line):</strong> Simulated process data points around the average</li>
+                    <li><strong>UCL (Red Dashed Line):</strong> Upper Control Limit - points above indicate issues</li>
+                    <li><strong>LCL (Red Dashed Line):</strong> Lower Control Limit - points below indicate issues</li>
+                    <li><strong>X̄ (Green Line):</strong> Process average - represents central tendency</li>
+                </ul>
+                <p>The graph helps visualize process variation, identify trends, patterns, or outliers, and monitor process stability over time.</p>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Conclusion</h3>
+                <p>SPC charts are powerful tools for quality control and process improvement. By calculating and monitoring control limits, organizations can maintain process stability, reduce variability, and quickly identify when processes require adjustment or investigation. Regular use of SPC helps ensure consistent quality and operational excellence.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let spcChart; // Variable to store the chart instance
+
+        function calculateSPC() {
+            const xbar = document.getElementById("xbar").value.trim();
+            const rbar = document.getElementById("rbar").value.trim();
+            const a2 = document.getElementById("a2").value.trim();
+            
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+            const spcResultsContainer = document.getElementById('spcResultsContainer');
+            const graphContainer = document.getElementById('graphContainer');
+            
+            let errors = [];
+            let warnings = [];
+            
+            // ✅ Input validation
+            if (xbar === "") {
+                errors.push("👉 Please enter the Average of Sample Means (X̄).");
+            } else if (isNaN(xbar)) {
+                errors.push("👉 Average of Sample Means must be a number.");
+            }
+            
+            if (rbar === "") {
+                errors.push("👉 Please enter the Average Range (R).");
+            } else if (isNaN(rbar)) {
+                errors.push("👉 Average Range must be a number.");
+            } else if (parseFloat(rbar) <= 0) {
+                errors.push("👉 Average Range must be greater than 0.");
+            }
+            
+            if (a2 === "") {
+                errors.push("👉 Please enter the Control Chart Constant (A₂).");
+            } else if (isNaN(a2)) {
+                errors.push("👉 Control Chart Constant must be a number.");
+            } else if (parseFloat(a2) <= 0) {
+                errors.push("👉 Control Chart Constant must be greater than 0.");
+            } else if (parseFloat(a2) > 3) {
+                warnings.push("⚠️ Control Chart Constant value exceeds typical maximum (3.0). Please recheck input.");
+            }
+            
+            // Show errors
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden");
+            }
+            
+            const xbarNum = parseFloat(xbar);
+            const rbarNum = parseFloat(rbar);
+            const a2Num = parseFloat(a2);
+            
+            // ✅ Calculate control limits
+            const UCL = xbarNum + a2Num * rbarNum;
+            const LCL = xbarNum - a2Num * rbarNum;
+            
+            // Display Results
+            spcResultsContainer.innerHTML = `
+                <div class="spc-result-card">
+                    <h3 style="color:white; font-size:16px;">UCL (Upper Control Limit)</h3>
+                    <p style="color:white; font-size:20px; font-weight:bold;">${UCL.toFixed(4)}</p>
+                </div>
+                <div class="spc-result-card">
+                    <h3 style="color:white; font-size:16px;">LCL (Lower Control Limit)</h3>
+                    <p style="color:white; font-size:20px; font-weight:bold;">${LCL.toFixed(4)}</p>
+                </div>
+            `;
+            
+            // Provide Feedback based on UCL, LCL
+            let feedbackMessage = "";
+            const controlLimitRange = UCL - LCL;
+            
+            if (UCL < LCL) {
+                feedbackMessage = `<p style='color:red; font-weight:bold;'>Invalid Control Limits: UCL (${UCL.toFixed(4)}) is less than LCL (${LCL.toFixed(4)}). Please check your inputs.</p>`;
+            } else if (controlLimitRange < 1) {
+                feedbackMessage = `<p style='color:orange;'>Narrow Control Limits: The range between UCL and LCL is very small (${controlLimitRange.toFixed(4)}). This may indicate a tightly controlled process or insufficient variability.</p>`;
+            } else if (controlLimitRange > 10) {
+                feedbackMessage = `<p style='color:orange;'>Wide Control Limits: The range between UCL and LCL is large (${controlLimitRange.toFixed(4)}). This may indicate high variability in the process.</p>`;
+            } else {
+                feedbackMessage = `<p style='color:blue;'>Reasonable Control Limits: The range between UCL and LCL is ${controlLimitRange.toFixed(4)}, which suggests a stable process. Monitor for any deviations.</p>`;
+            }
+            
+            if (warnings.length > 0) {
+                feedbackMessage += "<p style='color:orange;'>" + warnings.join(" ") + "</p>";
+            }
+            
+            spcResultsContainer.innerHTML += `
+                <div class="feedback-container">
+                    <h3 style="font-size:18px;color:#1560bd">Result Analysis</h3>
+                    ${feedbackMessage}
+                </div>
+            `;
+            
+            // Show Graph Container
+            graphContainer.classList.remove("hidden");
+            
+            // Generate Graph
+            generateSPCChart(xbarNum, UCL, LCL);
+            
+            placeholder.classList.add('hidden');
+            resultValue.classList.remove('hidden');
+        }
+
+        function generateSPCChart(xbar, UCL, LCL) {
+            const ctx = document.getElementById('spcChart').getContext('2d');
+
+            // Destroy existing chart if it exists
+            if (spcChart) {
+                spcChart.destroy();
+            }
+
+            // Sample data for the chart
+            const labels = Array.from({ length: 20 }, (_, i) => `Sample ${i + 1}`);
+            const data = Array.from({ length: 20 }, () => xbar + (Math.random() - 0.5) * (UCL - LCL));
+
+            // Create the chart
+            spcChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Process Data',
+                            data: data,
+                            borderColor: '#1560bd',
+                            backgroundColor: 'rgba(21, 96, 189, 0.2)',
+                            fill: true,
+                        },
+                        {
+                            label: 'UCL',
+                            data: Array(labels.length).fill(UCL),
+                            borderColor: '#ff0000',
+                            borderDash: [5, 5],
+                            borderWidth: 1,
+                            fill: false,
+                        },
+                        {
+                            label: 'LCL',
+                            data: Array(labels.length).fill(LCL),
+                            borderColor: '#ff0000',
+                            borderDash: [5, 5],
+                            borderWidth: 1,
+                            fill: false,
+                        },
+                        {
+                            label: 'X̄ (Average)',
+                            data: Array(labels.length).fill(xbar),
+                            borderColor: '#00ff00',
+                            borderWidth: 1,
+                            fill: false,
+                        },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Values',
+                            },
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Samples',
+                            },
+                        },
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            enabled: true,
+                        },
+                    },
+                },
+            });
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+*----------------Input Validation Rules --------------------*
+a. Average of Sample Means (X̄)
+
+Type: Numeric (float, up to 4 decimals).
+
+Range: Must be > 0. In most manufacturing/QEHS processes, realistic values are typically between 0.01 and 10,000 (depending on the measurement units: mm, pressure, ppm, etc.).
+
+Unit: Must be aligned with measurement system (same unit as range R).
+
+Rule: Cannot be negative. Zero indicates no process activity, which invalidates SPC analysis.
+
+b. Average Range (R̄)
+
+Type: Numeric (float, up to 4 decimals).
+
+Range: Must be > 0, typically between 0.001 and 5000 depending on units.
+
+Rule: If R̄ = 0, it means no variation — impossible in real life (natural variation always exists).
+
+Cross-dependency: R̄ must be consistent with X̄ — e.g., R̄ should not exceed 10×X̄ for most processes (otherwise indicates extreme instability).
+
+c. Control Chart Constant (A₂)
+
+Type: Numeric (float, up to 3 decimals).
+
+Range: Must be > 0.
+
+Industry Reference Range: 0.18 ≤ A₂ ≤ 2.66 (standard SPC constants from AIAG/ISO tables).
+
+Rule: Values outside this range indicate wrong input (wrong subgroup size).
+
+*---------- Output Validation Logic-----------------*
+
+Formulas Used:
+
+UCL = X̄ + (A₂ × R̄)
+
+LCL = X̄ - (A₂ × R̄)
+
+Rules:
+
+UCL must always be ≥ LCL. If not, inputs are invalid.
+
+LCL < 0 → If units cannot be negative (e.g., defect count, diameter), clamp to 0 with a warning.
+
+Control Limit Range (UCL - LCL):
+
+< 1% of X̄ → suspiciously tight, may indicate rounding or input error.
+
+> 50× X̄ → indicates uncontrolled process or wrong constants.
+
+*---------------- Edge Case Validations-----------------------*
+
+Division by zero: Not applicable (no division in formula), but must catch R̄ = 0.
+
+Negative inputs: Must be rejected.
+
+Extremely large values (e.g., > 1e6): Warn user — outliers unlikely in real SPC.
+
+Non-numeric / empty fields: Block calculation.
+
+Logical dependency: If R̄ is greater than X̄ by factor > 10, raise a warning.
+
+A₂ out of table range (> 2.66): Show warning
+
+*-----------------------------------------------------------------------------------*
+            <div class="note-card formula-card">
+                <h3>📐 Formulas</h3>
+                <p>The control limits are calculated using:</p>
+                <code>UCL = X̄ + (A₂ × R)</code><br>
+                <code>LCL = X̄ - (A₂ × R)</code>
+                <p>Where:</p>
+                <ul class="note-list">
+                    <li><strong>UCL</strong> = Upper Control Limit</li>
+                    <li><strong>LCL</strong> = Lower Control Limit</li>
+                    <li><strong>X̄</strong> = Average of Sample Means</li>
+                    <li><strong>A₂</strong> = Control Chart Constant</li>
+                    <li><strong>R</strong> = Average Range</li>
+                </ul>
+            </div>
+-->

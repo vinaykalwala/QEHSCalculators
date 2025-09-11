@@ -1,0 +1,673 @@
+{% extends 'base.html' %}
+{% block title %}Wind Profile Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acidity Calculator based on Hydrogen Ion Concentration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 38px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+        
+        select.form-input {
+            appearance: menulist;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+
+
+<div class="calculator-container printable" id="printArea">
+
+    {% include "includes/print_header_footer.html" %}
+    
+    <div class="calculator-header">
+        <h1>Wind Profile Calculator</h1>
+        <p>Calculate the <strong>Wind Speed at Elevation (m/s)</strong> using the Wind Profile Power Law .</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Calculator -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+
+            <div class="form-group">
+                <label for="windSpeed">Wind Speed at 10m (U<sub>10</sub>) in m/s</label>
+                <input type="number" id="windSpeed" class="form-input" min="0.1" step="0.1" placeholder="e.g., 5.0">
+            </div>
+
+            <div class="form-group">
+                <label for="elevation">Elevation (Z) in meters</label>
+                <input type="number" id="elevation" class="form-input" min="1" step="0.1" placeholder="e.g., 50">
+            </div>
+            
+            <div class="form-group">
+                <label for="terrainType">Terrain Type (p coefficient)</label>
+                <select id="terrainType" class="form-input">
+                    <option value="0.4">Urban (p=0.4)</option>
+                    <option value="0.28">Suburban (p=0.28)</option>
+                    <option value="0.16" selected>Rural (p=0.16)</option>
+                </select>
+            </div>
+            
+            <button class="calculate-btn" onclick="calculateWindSpeed()">Calculate Wind Speed</button>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Wind speed illustration">
+                <p>This tool will calculate the <strong>Wind Speed at Elevation (m/s)</strong> using the Wind Profile Power Law.</p>
+            </div>
+            
+            <div class="result-error hidden" id="resultError">
+                <div class="error-icon">❌</div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+             
+            <div class="result-value hidden" id="resultValue">
+                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Calculated Wind Speed</h2>
+                </div>
+
+                <div class="rate-display">
+                    <div class="rate-value" id="rateValue">0.00</div>
+                    <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">m/s</div>
+                </div>
+
+                <div class="result-feedback">
+                    <div class="feedback-title">Assessment</div>
+                    <div class="feedback-content" id="feedbackContent"></div>
+                </div>
+                <div class="btn-wrapper">
+                   <button type="button" class="calculate-btn print-btn" onclick="handlePrintReport()">Print Report</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="note-section">
+        <div class="note-card">
+            <h3>📘 About This Calculator</h3>
+            <p>
+                The <strong>Wind Profile Calculator</strong> estimates wind speed at different elevations using the Wind Profile Power Law formula. This is essential for environmental impact assessments, structural design, 
+                and pollution dispersion modeling in QEHS applications.
+            </p>
+        </div>
+        
+        <div class="note-card">
+            <h3>📊 Interpretation</h3>
+            <ul class="note-list">
+                <li><span class="good">Wind Speed &lt; 5 m/s</span> → ✅ Low wind conditions (Generally safe for most operations)</li>
+                <li><span class="average">5 ≤ Wind Speed ≤ 15 m/s</span> → ⚠️ Moderate wind (Monitor operations, potential restrictions)</li>
+                <li><span class="bad">Wind Speed &gt; 15 m/s</span> → 🔴 High wind (Operations likely restricted, safety concerns)</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+        <h3>⚠️ Input Validations</h3>
+        <ul class="note-list">
+            <li>✔️ <strong>Wind Speed at 10m</strong> must be a numeric, positive value</li>
+            <li>✔️ Minimum Wind Speed: <strong>0.1 m/s</strong> (instrument resolution)</li>
+            <li>⚠️ Maximum Wind Speed: <strong>50 m/s</strong> → triggers warning (hurricane-force winds)</li>
+            <li>✔️ <strong>Elevation</strong> must be a numeric, positive value</li>
+            <li>✔️ Minimum Elevation: <strong>1 meter</strong> (surface level measurement)</li>
+            <li>⚠️ Elevation &gt; <strong>300 meters</strong> → warning (beyond typical measurement range)</li>
+            <li>❌ Zero, negative, or non-numeric inputs are invalid</li>
+            <li>⚠️ Extreme wind speed &gt; <strong>30 m/s</strong> → warning (potentially dangerous conditions)</li>
+            <li>⚠️ Extremely low wind speed &lt; <strong>0.5 m/s</strong> → warning (may be instrument sensitivity issue)</li>
+        </ul>
+        </div>
+
+        <div class="note-card">
+            <h3>📏 Units & Typical Ranges</h3>
+            <ul class="note-list">
+                <li><strong>Wind Speed at 10m:</strong> Meters per second (typical range: 0.5-25 m/s)</li>
+                <li><strong>Elevation:</strong> Meters (typical range: 1-200 meters)</li>
+                <li><strong>Terrain Coefficient (p):</strong> Dimensionless (Urban: 0.4, Suburban: 0.28, Rural: 0.16)</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h3>🌍 Key Applications</h3>
+            <ul class="note-list">
+                <li><strong>Wind Energy:</strong> Estimating wind turbine performance at hub height</li>
+                <li><strong>Building Design:</strong> Calculating wind loads at different heights of tall structures</li>
+                <li><strong>Air Pollution:</strong> Modeling dispersion of emissions at various altitudes</li>
+                <li><strong>Fire Safety:</strong> Predicting fire spread and smoke dispersion patterns</li>
+                <li><strong>Aviation:</strong> Understanding wind shear effects for aircraft operations</li>
+            </ul>
+        </div>
+        
+    </div>
+
+</div>
+
+<script>
+function showErrors(errors) {
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+
+  errorMessage.innerHTML = errors.join("<br>");
+  errorBox.classList.remove("hidden");
+  placeholder.classList.add("hidden");
+  resultValue.classList.add("hidden");
+}
+
+function calculateWindSpeed() {
+  const windSpeedRaw = document.getElementById("windSpeed").value.trim();
+  const elevationRaw = document.getElementById("elevation").value.trim();
+  const terrainType = parseFloat(document.getElementById("terrainType").value);
+
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+  const rateEl = document.getElementById("rateValue");
+  const feedbackEl = document.getElementById("feedbackContent");
+
+  errorBox.classList.add("hidden");
+  errorMessage.innerHTML = "";
+  feedbackEl.innerHTML = "";
+
+  const errors = [];
+  const warnings = [];
+
+  // Required inputs
+  if (windSpeedRaw === "") errors.push("👉 Enter Wind Speed at 10m (in m/s).");
+  if (elevationRaw === "") errors.push("👉 Enter Elevation (in meters).");
+  if (errors.length) return showErrors(errors);
+
+  const windSpeed = parseFloat(windSpeedRaw);
+  const elevation = parseFloat(elevationRaw);
+
+  // Basic numeric validation
+  if (!Number.isFinite(windSpeed) || windSpeed < 0.1)
+    errors.push("👉 Wind Speed must be ≥ 0.1 m/s.");
+  if (!Number.isFinite(elevation) || elevation < 1)
+    errors.push("👉 Elevation must be ≥ 1 meter.");
+  if (errors.length) return showErrors(errors);
+
+  // Logical consistency checks
+  if (windSpeed > 50) warnings.push("⚠️ Wind speed > 50 m/s: hurricane-force winds, verify data.");
+  if (elevation > 300) warnings.push("⚠️ Elevation > 300m: beyond typical measurement range.");
+  if (windSpeed < 0.5) warnings.push("⚠️ Very low wind speed - may be within instrument error.");
+  if (elevation < 10) warnings.push("⚠️ Elevation below 10m: power law less accurate near surface.");
+
+  // Calculate wind speed at elevation
+  const windSpeedAtElevation = windSpeed * Math.pow(elevation / 10, terrainType);
+  if (!Number.isFinite(windSpeedAtElevation) || windSpeedAtElevation < 0) {
+    return showErrors(["⚠️ Computed wind speed is invalid."]);
+  }
+
+  // Output warnings
+  if (windSpeedAtElevation > 30)
+    warnings.push("⚠️ High wind speed at elevation - potential safety concerns.");
+  if (windSpeedAtElevation < 0.1)
+    warnings.push("⚠️ Extremely low wind speed - verify input values.");
+
+  // Assessment classification
+  let statusMsg = "";
+  if (windSpeedAtElevation < 5) {
+    statusMsg = "✅ Low wind conditions (Generally safe for most operations)";
+  } else if (windSpeedAtElevation <= 15) {
+    statusMsg = "⚠️ Moderate wind conditions (Monitor operations, potential restrictions)";
+  } else {
+    statusMsg = "🔴 High wind conditions (Operations likely restricted, safety concerns)";
+  }
+
+  // Compose feedback
+  let details = `<div>Wind Speed at ${elevation}m: <b>${windSpeedAtElevation.toFixed(2)}</b> m/s</div>`;
+  details += `<div>Wind Speed at 10m: <b>${windSpeed.toFixed(1)}</b> m/s</div>`;
+  details += `<div>Elevation: <b>${elevation}</b> m</div>`;
+  details += `<div>Terrain Coefficient (p): <b>${terrainType}</b></div>`;
+  if (warnings.length) {
+    details += `<div style="margin-top:6px; color:#b35d00; font-size:0.95em;">${warnings.join(" | ")}</div>`;
+  }
+
+  rateEl.textContent = windSpeedAtElevation.toFixed(2);
+  feedbackEl.innerHTML = `<div>${statusMsg}</div>${details}`;
+
+  placeholder.classList.add("hidden");
+  resultValue.classList.remove("hidden");
+  errorBox.classList.add("hidden");
+}
+
+function handlePrintReport() {
+    window.print();
+}
+</script>
+  <script src="{% static 'js/print.js' %}"></script>
+
+</body>
+</html>
+
+{% endblock %}
+<!--
+Updated Formula Implementation: Applied the wind profile formula U_z = U_10 × (Z / 10)^p with appropriate variables.
+
+Input Fields:
+
+Wind Speed at 10m (U₁₀) in m/s
+
+Elevation (Z) in meters
+
+Terrain Type (p coefficient) dropdown
+
+Comprehensive Validations:
+
+Wind Speed must be ≥ 0.1 m/s (instrument resolution)
+
+Elevation must be ≥ 1 meter (surface level)
+
+Warnings for extreme values (wind > 50 m/s, elevation > 300m)
+
+Validation for non-numeric, zero, and negative inputs
+
+Output Assessment:
+
+Classification based on calculated wind speed
+
+Safety recommendations based on wind speed ranges
+
+Documentation:
+
+Detailed explanation of the formula and its parameters
+
+Real-world applications in QEHS and fire safety contexts
+
+Input validation rules and interpretation guidelines
+
+
+-->

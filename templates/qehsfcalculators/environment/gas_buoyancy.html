@@ -1,0 +1,700 @@
+{% extends 'base.html' %}
+{% block title %}Gas Buoyancy Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gas Buoyancy Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 38px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+
+<!-- ===== Gas Buoyancy Calculator (replaces Corrosion Rate UI) ===== -->
+<div class="calculator-header">
+  <h1>Gas Buoyancy Calculator</h1>
+  <p>Calculate the <strong>initial buoyant acceleration</strong> of a released gas relative to ambient air. Result shown in <strong>m/s²</strong> and interpreted for dispersion/HS risk.</p>
+</div>
+
+<div class="calc-content">
+  <!-- Calculator -->
+  <div class="calc-card">
+    <h2>Enter Data</h2>
+
+    <div class="form-group">
+      <label for="materialDensity">Released Gas Density (ρ₀) — kg/m³ *</label>
+      <input type="number" id="materialDensity" class="form-input" step="0.001" min="0.001" placeholder="e.g., 0.717 (methane)">
+    </div>
+
+    <div class="form-group">
+      <label for="airDensity">Ambient Air Density (ρₐ) — kg/m³ *</label>
+      <input type="number" id="airDensity" class="form-input" step="0.001" min="0.001" placeholder="e.g., 1.225 (sea level)" value="1.225">
+    </div>
+
+    <button class="calculate-btn" onclick="calculateCorrosionRate()">Calculate Buoyancy</button>
+  </div>
+
+  <!-- Result Section -->
+  <div class="result-card">
+    <div class="result-placeholder" id="placeholder">
+      <img src="/static/images/mlc_environment_result.png" alt="Buoyancy illustration">
+      <p>This tool computes initial buoyant acceleration of a released gas parcel using the formula <em>g₀ = g·(ρ₀ − ρₐ)/ρₐ</em>.</p>
+    </div>
+
+    <div class="result-error hidden" id="resultError">
+      <div class="error-icon">❌</div>
+      <div class="error-message" id="errorMessage"></div>
+    </div>
+
+    <div class="result-value hidden" id="resultValue">
+      <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+        <h2>Initial Buoyancy</h2>
+      </div>
+
+      <div class="rate-display">
+        <div class="rate-value" id="rateValue">0.0000</div>
+        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">m/s²</div>
+      </div>
+
+      <div class="result-feedback">
+        <div class="feedback-title">Assessment</div>
+        <div class="feedback-content" id="feedbackContent"></div>
+      </div>
+
+      <div class="btn-wrapper">
+        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Notes Section (updated to match formula & validation) -->
+<div class="note-section">
+  <div class="note-card">
+    <h3>📘 About</h3>
+    <p>
+      This calculator estimates the <strong>initial buoyant acceleration</strong> of a released gas parcel using:
+      <strong>negative g₀ → gas tends to rise</strong> (released gas less dense than air), and
+      <strong>positive g₀ → gas tends to sink</strong> (released gas denser than air).
+    </p>
+  </div>
+
+  <div class="note-card">
+    <h3>✅ Input Validations (summary)</h3>
+    <ul class="note-list">
+      <li><b>ρ₀ (kg/m³):</b> required; numeric; allowed range <b>0.01 – 100.0</b>. Typical gases: 0.1–5 kg/m³.</li>
+      <li><b>ρₐ (kg/m³):</b> required; numeric; allowed range <b>0.1 – 2.0</b>. Typical sea-level ≈ 1.225 kg/m³.</li>
+      <li><b>Decimals:</b> up to 4 decimals allowed; UI step = 0.001.</li>
+      <li><b>Cross-check:</b> both densities must be in the same units (kg/m³). If ρ₀ ≈ ρₐ → neutral buoyancy.</li>
+      <li><b>Guardrails:</b> If density ratio ρ₀/ρₐ &gt; 50 or &lt; 0.02 → warning or error (likely unit/phase error).</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>🔎 Interpretation guidance</h3>
+    <ul class="note-list">
+      <li><b>g₀ &lt; 0</b> → upward acceleration (gas tends to rise). Example: methane, ammonia.</li>
+      <li><b>g₀ = 0</b> → neutral buoyancy — careful monitoring; geometry/ventilation will control dispersion.</li>
+      <li><b>g₀ &gt; 0</b> → downward acceleration (gas tends to sink). Example: CO₂, chlorine — ground-level hazard.</li>
+      <li>Classify magnitude (absolute): < 0.1 m/s² (weak), 0.1–1.0 (moderate), &gt; 1.0 (strong).</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>🛑 Limitations</h3>
+    <ul class="note-list">
+      <li>Initial buoyancy alone doesn't predict transport — advection, turbulence, obstacles, temperature, and entrainment dominate plume behavior.</li>
+      <li>Outputs are theoretical initial acceleration ignoring drag and mixing.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+/* Show error messages (re-used pattern) */
+function showErrors(errors) {
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+
+  errorMessage.innerHTML = errors.join("<br>");
+  errorBox.classList.remove("hidden");
+  placeholder.classList.add("hidden");
+  resultValue.classList.add("hidden");
+}
+
+/* Main calculation (keeps function name calculateCorrosionRate to preserve original wiring if desired) */
+function calculateCorrosionRate() {
+  // inputs (strings)
+  const mRaw = document.getElementById("materialDensity").value.trim();
+  const aRaw = document.getElementById("airDensity").value.trim();
+
+  const placeholder = document.getElementById("placeholder");
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const resultValue = document.getElementById("resultValue");
+  const rateEl = document.getElementById("rateValue");
+  const feedbackEl = document.getElementById("feedbackContent");
+
+  errorBox.classList.add("hidden");
+  errorMessage.innerHTML = "";
+  feedbackEl.innerHTML = "";
+
+  const errors = [];
+  const warnings = [];
+
+  const isFiniteNum = (v) => Number.isFinite(v) && !Number.isNaN(v);
+  const decimals = (s) => (s && s.includes(".")) ? s.split(".")[1].length : 0;
+
+  // presence
+  if (mRaw === "") errors.push("👉 Please enter Released Gas Density (ρ₀) in kg/m³.");
+  if (aRaw === "") errors.push("👉 Please enter Ambient Air Density (ρₐ) in kg/m³.");
+  if (errors.length) return showErrors(errors);
+
+  // parse
+  const rho0 = parseFloat(mRaw);
+  const rhoa = parseFloat(aRaw);
+  if (!isFiniteNum(rho0)) errors.push("👉 ρ₀ must be a numeric value (kg/m³).");
+  if (!isFiniteNum(rhoa)) errors.push("👉 ρₐ must be a numeric value (kg/m³).");
+  if (errors.length) return showErrors(errors);
+
+  // strong numeric range checks (errors)
+  if (rho0 <= 0) errors.push("👉 Released gas density ρ₀ must be > 0 kg/m³.");
+  if (rhoa <= 0) errors.push("👉 Ambient air density ρₐ must be > 0 kg/m³.");
+
+  // Enforce practical ranges to catch unit/phase errors
+  if (rho0 < 0.01 || rho0 > 100.0) errors.push("👉 ρ₀ should be between 0.01 and 100.0 kg/m³ (are units correct?).");
+  if (rhoa < 0.1 || rhoa > 2.0) errors.push("👉 ρₐ should be between 0.1 and 2.0 kg/m³ (typical air at altitudes).");
+
+  if (errors.length) return showErrors(errors);
+
+  // precision warnings
+  if (decimals(mRaw) > 4) warnings.push("⚠️ ρ₀ has >4 decimals; results will be rounded.");
+  if (decimals(aRaw) > 4) warnings.push("⚠️ ρₐ has >4 decimals; results will be rounded.");
+
+  // logical/cross-field checks
+  const ratio = rho0 / rhoa;
+  if (ratio > 50) {
+    // likely unit mismatch (e.g., kg/m³ vs g/m³) or liquid density
+    return showErrors(["⚠️ Density ratio ρ₀ / ρₐ is > 50 — likely units or phase error (check if ρ₀ is a liquid density)."]);
+  }
+  if (ratio < 0.02) warnings.push("⚠️ Density ratio ρ₀ / ρₐ is very small — check units; extreme light gas.");
+
+  // calculation: extracted formula
+  const g = 9.81; // m/s^2
+  const buoyancy = g * ((rho0 - rhoa) / rhoa); // as extracted
+
+  if (!isFiniteNum(buoyancy)) return showErrors(["⚠️ Computed buoyancy invalid."]);
+
+  // Interpret sign correctly vs. physical behavior:
+  // Using the extracted formula g0 = g*(ρ0 - ρa)/ρa:
+  //  - If g0 < 0 → released gas is less dense than air → it tends to rise.
+  //  - If g0 > 0 → released gas is denser than air → it tends to sink.
+  let directionText = "";
+  if (buoyancy < -1e-12) {
+    directionText = "Upward tendency — released gas is lighter than air (tends to rise).";
+  } else if (buoyancy > 1e-12) {
+    directionText = "Downward tendency — released gas is heavier than air (tends to sink).";
+  } else {
+    directionText = "Neutral buoyancy — densities are virtually equal.";
+  }
+
+  // Magnitude classification (initial-acceleration magnitude)
+  const absG0 = Math.abs(buoyancy);
+  let strength = "";
+  if (absG0 < 0.1) strength = "Weak initial buoyancy (< 0.1 m/s²).";
+  else if (absG0 < 1.0) strength = "Moderate initial buoyancy (0.1–1.0 m/s²).";
+  else strength = "Strong initial buoyancy (> 1.0 m/s²).";
+
+  // Guardrail: physically unrealistic outputs likely due to unit error
+  if (absG0 > 1000) {
+    return showErrors(["⚠️ Computed buoyancy extremely large — check units (kg/m³ expected) and values."]);
+  }
+
+  // Prepare display
+  rateEl.textContent = buoyancy.toFixed(4);
+
+  let details = `<div>Initial buoyant acceleration (g₀): <b>${buoyancy.toFixed(4)}</b> m/s²</div>`;
+  details += `<div>Interpretation: <b>${directionText}</b></div>`;
+  details += `<div style="margin-top:6px;">Strength: <b>${strength}</b></div>`;
+  details += `<div style="margin-top:6px;">Inputs → ρ₀: <b>${rho0.toFixed(4)}</b> kg/m³, ρₐ: <b>${rhoa.toFixed(4)}</b> kg/m³, ratio ρ₀/ρₐ: <b>${ratio.toFixed(3)}</b></div>`;
+  if (warnings.length) details += `<div style="margin-top:6px; color:#b35d00;">${warnings.join(" | ")}</div>`;
+
+  feedbackEl.innerHTML = `<div>${details}</div>`;
+
+  // show results
+  placeholder.classList.add("hidden");
+  resultValue.classList.remove("hidden");
+  errorBox.classList.add("hidden");
+}
+
+/* Print helper retained */
+function printReport() {
+  const el = document.getElementById('printDate');
+  if (el) {
+    const now = new Date();
+    el.textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+  window.print();
+}
+</script>
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+<!-- 
+📌 Gas Buoyancy / Dispersion Tendency Calculator
+
+Formula:
+ g₀ = g × (ρ₀ − ρₐ) / ρₐ
+ → Units: m/s²
+ where g = 9.81 m/s²
+
+Inputs:
+ - ρ₀ → Released gas density [kg/m³]
+ - ρₐ → Ambient air density [kg/m³]
+
+Input Validations:
+ - Required: Both ρ₀ and ρₐ must be entered
+ - Numeric check: Must be valid numbers
+ - ρ₀ > 0, expected 0.01 – 100.0 kg/m³ (warn if outside)
+ - ρₐ > 0, expected 0.1 – 2.0 kg/m³ (warn if outside)
+ - Precision: Warn if more than 4 decimals
+ - Cross-check: ρ₀/ρₐ > 50 → error (likely unit mismatch); <0.02 → warning (extremely light gas)
+
+Outputs:
+ - g₀ → Initial buoyant acceleration [m/s²]
+ - Direction:
+    • g₀ < 0 → Gas lighter than air → rises
+    • g₀ > 0 → Gas heavier than air → sinks
+    • g₀ ≈ 0 → Neutral buoyancy
+ - Strength:
+    • |g₀| < 0.1 → Weak
+    • 0.1–1.0 → Moderate
+    • >1.0 → Strong
+
+Output Validations:
+ - g₀ must be a finite number
+ - Guardrail: |g₀| > 1000 → error (non-physical, likely unit issue)
+-->

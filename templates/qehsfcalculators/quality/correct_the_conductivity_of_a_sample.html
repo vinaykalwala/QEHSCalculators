@@ -477,7 +477,7 @@ function calculateCorrectedConductivity() {
     let errors = [];
     let warnings = [];
 
-    // Presence check
+    // Presence checks
     if (!conductivity25Raw) errors.push("👉 Enter conductivity at 25°C (µS/cm).");
     if (!alphaRaw) errors.push("👉 Enter temperature coefficient (α).");
     if (!tempRaw) errors.push("👉 Enter sample temperature (°C).");
@@ -490,22 +490,23 @@ function calculateCorrectedConductivity() {
         return;
     }
 
-    // Parse numbers
+    // Parse as numbers
     const conductivity25 = Number(conductivity25Raw);
     const alpha = Number(alphaRaw);
     const temp = Number(tempRaw);
 
-    // Input sanity checks
-    if (conductivity25 <= 0 || conductivity25 > 2000000) {
-        errors.push("👉 Conductivity at 25°C must be between 0.1 and 2,000,000 µS/cm.");
+    // Validation rules
+    if (conductivity25 < 0.1 || conductivity25 > 2000000) {
+        errors.push("👉 σ₂₅ must be between 0.1 and 2,000,000 µS/cm.");
     }
-    if (alpha <= 0 || alpha > 0.1) {
-        errors.push("👉 Temperature coefficient must be >0 and ≤0.1 (typical 0.01–0.03).");
+    if (alpha < 0.001 || alpha > 0.1) {
+        errors.push("👉 α must be between 0.001 and 0.1 per °C.");
     }
     if (temp < 0 || temp > 100) {
-        errors.push("👉 Temperature must be between 0 and 100°C for valid correction.");
+        errors.push("👉 Temperature must be between 0 and 100 °C.");
     }
 
+    // Stop if hard errors
     if (errors.length > 0) {
         errorMessage.innerHTML = errors.join("<br>");
         errorBox.classList.remove("hidden");
@@ -534,18 +535,21 @@ function calculateCorrectedConductivity() {
     else if (temp < 25) feedback = "Conductivity decreased due to lower temperature.";
     else feedback = "No correction needed at 25°C.";
 
-    // Add warnings for edge conditions
+    // Soft warnings
     if (alpha < 0.01 || alpha > 0.03) {
-        warnings.push("⚠️ Temperature coefficient is outside typical water range (0.01–0.03).");
+        warnings.push("⚠️ α is outside the typical range for natural waters (0.01–0.03).");
     }
     if (correctedConductivity > 200000) {
-        warnings.push("⚠️ Extremely high corrected conductivity — likely brine or input error.");
+        warnings.push("⚠️ Extremely high conductivity — likely brine or input error.");
+    }
+    if (correctedConductivity < 0.1) {
+        warnings.push("⚠️ Very low conductivity — could indicate ultrapure water (check meter sensitivity).");
     }
 
     if (warnings.length > 0) {
         feedback += " " + warnings.join(" ");
         errorMessage.innerHTML = warnings.join("<br>");
-        errorBox.classList.remove("hidden"); // Show as soft alerts
+        errorBox.classList.remove("hidden");
     } else {
         errorBox.classList.add("hidden");
     }
@@ -556,100 +560,87 @@ function calculateCorrectedConductivity() {
     resultValue.classList.remove("hidden");
 }
 
+
     </script>
     <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
 {% endblock %}
 <!--
-Input Validation Rules (Real-World, QEHS/Fire Safety Aligned)
-Conductivity at 25°C (σ₂₅, µS/cm)
 
-Required.
+==========Real-World Input Validation Rules (QEHS Standards)==============
+Inputs
 
-Type: Numeric (decimals allowed).
+Conductivity at 25 °C (σ₂₅, µS/cm):
 
-Range (Hard Limits): 0.1 ≤ σ₂₅ ≤ 2,000,000 µS/cm
+Acceptable range: 0.1 – 2,000,000 µS/cm
+(covers ultra-pure water, drinking water, wastewater, brines).
 
-Rationale:
+Precision: ≤ 3 decimals (µS/cm meters generally report up to 0.001).
 
-Ultra-pure water ~0.05 µS/cm
+Unit must always be µS/cm (don’t allow mS/cm mix-ups unless converted).
+---------------------------------------------------------------------------------
+🚨 Validation needed: reject 0 or negative values.
 
-Drinking water ~50–1500 µS/cm
+Temperature Coefficient (α, per °C):
 
-Industrial brines >1,000,000 µS/cm.
+Normal range: 0.01 – 0.03 (i.e., 1–3% per °C for aqueous systems).
 
-Soft Warning Range: If σ₂₅ < 0.1 or σ₂₅ > 5000 µS/cm, flag as unusual for typical QA labs.
+Expanded valid range: 0.001 – 0.1 (for brines and unusual chemicals).
 
-Decimals: Up to 3 decimals recommended (false precision otherwise).
+Precision: ≤ 4 decimals.
+-------------------------------------------------------------------------
+🚨 Validation needed: reject 0 or negative coefficients.
 
-Temperature Coefficient (α, per °C)
+Sample Temperature (T, °C):
 
-Required.
+Range: 0 – 100 °C (matches most water quality meters & lab standards).
 
-Type: Numeric, decimal allowed.
+Precision: ≤ 2 decimals.
+------------------------------------------------------------------------------
+🚨 Validation needed: reject unrealistic field values (<0 or >100).
 
-Range (Hard Limits): 0.001 ≤ α ≤ 0.1 (0.1 = 10%/°C max).
+Cross-check: If T = 25, correction factor must be 1.000 (no correction).
 
-Typical Value: 0.02 (2%/°C) for water — warn if outside 0.01–0.03.
-
-Decimals: Up to 4 decimals.
-
-Temperature (T, °C)
-
-Required.
-
-Type: Numeric (decimal allowed).
-
-Range (Hard Limits): 0 ≤ T ≤ 100 °C (practical for water conductivity).
-
-Soft Warnings:
-
-T < 0 °C → likely unit error (Kelvin vs °C).
-
-T > 80 °C → caution: equipment/material safety limits.
-
-T > 100 °C → critical warning unless pressurized system.
-
-Decimals: Up to 2 decimals.
-
-2. Output Validation & Thresholds
+========================= Output Validation & Threshold Logic===============================
 
 Formula:
+σ T=σ 25×(1+α×(T−25))
 
-𝜎T = σ25 * (1 + α * (T−25))
+Output Rules:
 
-Corrected Conductivity (σ_T, µS/cm)
+Must always be ≥ 0.
 
-Must be finite, positive, and realistic.
+Round to 3 decimals for reporting.
 
-Hard Limits: 0 ≤ σ_T ≤ 2,000,000 µS/cm.
+Provide interpretation:
 
-Interpretation Bands:
+T > 25 °C → Conductivity increased (due to higher ion mobility).
 
-< 1 µS/cm → ultrapure/RO water (used in power plants, labs).
+T < 25 °C → Conductivity decreased.
 
-50–1500 µS/cm → potable water range (WHO guidelines).
+T = 25 °C → No correction needed.
 
-> 5000 µS/cm → industrial/high-salinity water.
+Threshold Alerts:
 
-> 200,000 µS/cm → brines; flag as extreme.
+If corrected σ > 200,000 µS/cm → likely seawater/brine or input error.
 
-Safety Flags:
+If σ < 0.1 µS/cm → probably ultrapure water; warn about measurement sensitivity.
 
-If σ_T increases > 100% from σ₂₅ → show “check input — unrealistic correction.”
+If α outside 0.01–0.03 → warn as “unusual for natural water”.
+=================Edge Case Handling============================
 
-3. Edge Case Validations
+Division by zero: Not possible in this formula, but we prevent α = 0.
 
-Division by zero: Not present in formula, but α = 0 → meaningless → block.
+Negative conductivity: Blocked at input stage.
 
-Negative σ₂₅: Block, conductivity cannot be negative.
+Unrealistic α (e.g., 1.5): Caught by validation.
 
-α = 0 or negative: Block, invalid physical input.
+Extreme temperature (e.g., 200 °C): Rejected as invalid.
 
-Temperature way outside range (e.g., -273, 5000): Block as unit error.
+Floating point issues: Limited to 3 decimals for output.
 
-NaN or Infinity: Block.
+All inputs at zero: Returns error, not misleading “0.00 µS/cm”.
 
-False precision: Warn if > 6 decimals entered (misleading in audit reports).
+
 -->

@@ -71,8 +71,8 @@
             display: flex;
             flex-direction: column;
             transition: transform 0.3s ease;
-            height: auto;
-            min-height: 420px;
+            height: 420px; /* Fixed height to match reference */
+            overflow-y: auto;
         }
         .calc-card:hover {
             transform: translateY(-5px);
@@ -116,6 +116,22 @@
             cursor: pointer;
             transition: 0.3s;
             margin-top: 10px;
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
         }
         /* Result Card */
         .result-placeholder {
@@ -307,29 +323,82 @@
                         <div class="feedback-title">Personalized Range</div>
                         <div class="feedback-content" id="feedbackContent"></div>
                     </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="note-section">
             <div class="note-card">
-                <h3>Why is Protein Essential?</h3>
-                <p>Protein is a vital macronutrient that serves as the building block for tissues, muscles, enzymes, and hormones. Adequate protein intake is crucial for muscle repair and growth, immune function, and maintaining a healthy metabolism. Your specific needs depend on factors like age, weight, and activity level.</p>
+                <h3>🍗 Max Healthcare Protein Intake Calculator</h3>
+                <p>
+                    Protein is a crucial macronutrient that supports muscle repair, metabolic function, and overall well-being.
+                    Use this guide to understand how your <strong>age, gender, body weight, and activity level</strong>
+                    influence
+                    your daily protein needs.
+                </p>
             </div>
+        
             <div class="note-card">
-                <h3>General Protein Intake Guidelines (g per kg of body weight)</h3>
+                <h3>📊 Protein Intake Parameters</h3>
                 <ul class="note-list">
-                    <li><strong>Sedentary Adults:</strong> 0.8 g/kg (This is the Recommended Dietary Allowance - RDA).</li>
-                    <li><strong>Active Adults:</strong> 1.2 - 1.7 g/kg.</li>
-                    <li><strong>Building Muscle:</strong> 1.6 - 2.2 g/kg.</li>
-                    <li><strong>Older Adults (>65):</strong> 1.0 - 1.2 g/kg to help prevent age-related muscle loss (sarcopenia).</li>
+                    <li><strong>Age:</strong> Children and adolescents require more for growth, while older adults need
+                        increased intake to maintain muscle mass and strength.</li>
+                    <li><strong>Gender:</strong> Men generally require more protein due to higher muscle mass, while women need
+                        consistent intake for hormonal balance and tissue repair.</li>
+                    <li><strong>Body Weight:</strong> Protein requirements are calculated based on body weight—the more you
+                        weigh, the higher your needs.</li>
+                    <li><strong>Activity Level:</strong> Active individuals need more protein for muscle repair and recovery,
+                        while sedentary individuals require less.</li>
                 </ul>
             </div>
-             <div class="note-card">
+        
+            <div class="note-card">
+                <h3>📌 Recommended Daily Protein Intake</h3>
+                <ul class="note-list">
+                    <li><strong>General Adults (CDC Guideline):</strong> 0.8 g per kg of body weight to maintain basic
+                        functions.</li>
+                    <li><strong>Athletes:</strong> 1.2 – 2.0 g per kg of body weight to support muscle recovery and endurance.
+                    </li>
+                    <li><strong>Older Adults:</strong> 1.0 – 1.2 g per kg of body weight to prevent muscle loss and maintain
+                        strength.</li>
+                </ul>
+            </div>
+        
+            <div class="note-card">
+                <h3>💪 Why is Protein Essential?</h3>
+                <p>
+                    Protein is vital for building and repairing tissues, producing enzymes, and supporting immune health.
+                    Adequate intake is linked to improved muscle retention, better metabolic health, and faster recovery from
+                    physical activity.
+                </p>
+            </div>
+        
+            <div class="note-card">
+                <h3>ℹ️ Input Validation Rules</h3>
+                <ul class="note-list">
+                    <li>👉 <strong>Age</strong>: Must be a positive number (up to 120 years).</li>
+                    <li>👉 <strong>Weight</strong>: Must be a positive number in kilograms (reasonable range: up to 300kg).</li>
+                    <li>👉 <strong>Height</strong>: Must be entered in centimeters (reasonable range: up to 250cm).</li>
+                    <li>👉 <strong>Activity Level</strong>: Choose from the dropdown (Sedentary, Light, Moderate, Active, Extra
+                        Active).</li>
+                    <li>❌ Negative, zero, or blank values are not accepted.</li>
+                    <li>⚠️ Unrealistic values trigger warnings to help ensure correct input.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
                 <h3>⚠️ Disclaimer</h3>
-                <p>This calculator provides an estimated range for daily protein intake for healthy adults. Individual needs may vary based on health status, specific fitness goals, or medical conditions. Consult with a registered dietitian or healthcare provider for personalized nutritional advice.</p>
+                <p>
+                    This calculator provides estimated daily protein intake ranges for healthy individuals.
+                    Actual needs may vary based on health conditions, fitness goals, or medical concerns.
+                    Consult a registered dietitian or healthcare provider for personalized advice.
+                </p>
             </div>
         </div>
+
     </div>
 
     <script>
@@ -339,12 +408,15 @@
             const placeholder = document.getElementById('placeholder');
             const resultValueBox = document.getElementById('resultValue');
 
+            // Reset display
             errorBox.classList.add('hidden');
             resultValueBox.classList.add('hidden');
             placeholder.classList.remove('hidden');
 
             let errors = [];
-            function getVal(id, label) {
+
+            // Generic validation function
+            function getVal(id, label, maxLimit = null) {
                 const el = document.getElementById(id);
                 const raw = el.value?.toString().trim();
                 if (!raw) {
@@ -356,21 +428,26 @@
                     errors.push(`👉 Enter a valid positive number for ${label}.`);
                     return null;
                 }
+                if (maxLimit && num > maxLimit) {
+                    errors.push(`👉 ${label} seems too high (max ${maxLimit}). Please check again.`);
+                }
                 return num;
             }
 
-            const age = getVal('age', 'Age');
-            const weight = getVal('weight', 'Weight');
-            const height = getVal('height', 'Height'); // Not used in this specific calc but good to validate
+            const age = getVal('age', 'Age', 120);
+            const weight = getVal('weight', 'Weight (kg)', 300);
+            const height = getVal('height', 'Height (cm)', 250); // validated but not used
             const activity = document.getElementById('activity').value;
-            
+
+            // Stop if validation failed
             if (errors.length > 0) {
                 errorMessage.innerHTML = errors.join("<br>");
                 errorBox.classList.remove("hidden");
                 placeholder.classList.add('hidden');
                 return;
             }
-            
+
+            // Default multipliers (sedentary baseline)
             let minMultiplier = 0.8, maxMultiplier = 1.0;
 
             switch (activity) {
@@ -380,6 +457,7 @@
                 case "extra": minMultiplier = 1.7; maxMultiplier = 2.2; break;
             }
 
+            // Seniors (65+) special adjustment
             if (age >= 65) {
                 minMultiplier = Math.max(minMultiplier, 1.0);
                 maxMultiplier = Math.max(maxMultiplier, 1.2);
@@ -389,22 +467,101 @@
             const maxProtein = maxMultiplier * weight;
             const avgProtein = (minProtein + maxProtein) / 2;
 
+            // Show result
             placeholder.classList.add('hidden');
             resultValueBox.classList.remove('hidden');
 
             document.getElementById('rateValue').textContent = avgProtein.toFixed(0);
-            
+
             const meterFill = document.getElementById('meterFill');
-            // Scale meter from 0.8 g/kg to 2.2 g/kg
             const absoluteMin = 0.8 * weight;
             const absoluteMax = 2.2 * weight;
+
             let pct = ((avgProtein - absoluteMin) / (absoluteMax - absoluteMin)) * 100;
-            pct = Math.max(5, Math.min(100, pct)); // Ensure even sedentary has some fill
+            pct = Math.max(5, Math.min(100, pct));
             meterFill.style.width = pct + '%';
-            
-            document.getElementById('feedbackContent').innerHTML = `Your recommended daily protein intake is between <strong>${minProtein.toFixed(0)}g</strong> and <strong>${maxProtein.toFixed(0)}g</strong>.`;
+
+            document.getElementById('feedbackContent').innerHTML = `
+                🍗 Your recommended daily protein intake is between 
+                <strong>${minProtein.toFixed(0)}g</strong> and 
+                <strong>${maxProtein.toFixed(0)}g</strong>.
+            `;
+        }
+
+        function printReport() {
+            window.print();
         }
     </script>
 </body>
 </html>
 {% endblock %}
+
+<!-- 
+1. Input Validation Rules (Real-world, QEHS-Compliant)
+
+From a safety and occupational health standpoint, inputs must be realistic, consistent, and bounded by medical and ergonomic standards.
+
+Age
+
+Range: 2 – 120 years (infants not supported in this calculator).
+
+Validation: Must be an integer, no decimals.
+
+Reason: Below 2 years → medical supervision required, >120 years → unrealistic entry.
+
+Height (cm)
+
+Range: 50 – 250 cm.
+
+Validation: Positive number, max 2 decimal places allowed.
+
+Reason: Below 50 cm = infant/invalid entry, above 250 cm = outlier.
+
+Weight (kg)
+
+Range: 10 – 250 kg.
+
+Validation: Positive number, max 1 decimal place allowed.
+
+Reason: <10 kg = pediatric case, >250 kg = morbid obesity (calculator not designed for clinical use).
+
+Gender
+
+Must be explicitly selected (male/female).
+
+Dependency: Used to adjust protein thresholds in future (muscle mass difference).
+
+Activity Level
+
+Must be chosen from predefined options.
+
+Dependency: Protein multiplier changes with workload → critical for ergonomic safety and avoiding protein over-supplementation.
+
+2. Output Validation Logic
+
+Base Formula: Protein = multiplier × body weight (kg).
+
+Ranges (grams/kg/day):
+
+Sedentary: 0.8 – 1.2
+
+Light: 1.0 – 1.5
+
+Moderate: 1.2 – 1.7
+
+Active: 1.4 – 2.0
+
+Athlete: 1.6 – 2.2
+
+Adjustment for Age ≥ 50: Add 0.2 – 0.3 g/kg/day → aligns with sarcopenia prevention guidelines.
+
+Cap: 300 g/day absolute upper limit → prevents unsafe recommendations (renal overload risk).
+
+Meaningful Output: Show range (min–max) with interpretation:
+
+✅ Within safe protein range.
+
+⚠️ Approaching upper safe intake (risk of dehydration, kidney stress).
+
+❌ Invalid or dangerous input combination.
+-->

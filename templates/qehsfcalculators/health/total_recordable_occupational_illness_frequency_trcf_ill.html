@@ -1,0 +1,567 @@
+{% extends 'base.html' %}
+{% block title %}Occupational Illness Frequency Rate Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRCF-ILL Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        /* Result Card */
+        .result-placeholder {
+            text-align: center;
+            margin: auto;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: baseline;
+            justify-content: center;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0 10px;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out, background-color 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list { margin: 0; padding-left: 18px; }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px; padding: 20px;
+            text-align: left; gap: 12px; margin-top: 20px;
+        }
+        .error-icon { font-size: 76px; flex-shrink: 0; text-align: center; }
+        .error-message { font-size: 24px; line-height: 1.6; }
+        .hidden { display: none; }
+        .btn-container { display: flex; justify-content: center; margin: 30px 0; }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040); color: #ffffff; border: 2px solid #1560bd;
+            padding: 10px 20px; font-size: 14px; font-weight: 600; border-radius: 8px;
+            text-decoration: none; transition: all 0.3s ease; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'healthcategory_calculators'%}" class="back-btn">Back To Health Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Occupational Illness Frequency Rate (TRCF-ILL)</h1>
+            <p>Measure the rate of workplace illnesses per 1 million hours worked.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Safety Data</h2>
+                <div class="form-group">
+                    <label for="illnessCases">Total Recordable Occupational Illness Cases</label>
+                    <input type="number" id="illnessCases" class="form-input" placeholder="Enter number of cases">
+                </div>
+                <div class="form-group">
+                    <label for="workHours">Total Employee Work Hours</label>
+                    <input type="number" id="workHours" class="form-input" placeholder="Enter total hours worked">
+                </div>
+                <button class="calculate-btn" onclick="calculateAndDisplay()">Calculate TRCF-ILL</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Health illustration">
+                    <p>Enter your safety data to calculate the Total Recordable Occupational Illness Frequency.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div id="resultValue" class="hidden" style="text-align: center;">
+                    <h2>TRCF-ILL</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                    </div>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Excellent</span>
+                        <span>Average</span>
+                        <span>High Risk</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Interpretation</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                     <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+        
+            <!-- About TRCF-ILL -->
+            <div class="note-card">
+                <h3>About TRCF-ILL</h3>
+                <p>
+                    <strong>Total Recordable Occupational Illness Frequency (TRCF-ILL)</strong> is a lagging indicator used in
+                    occupational safety
+                    to measure the rate of work-related illnesses per 1 million hours worked. Unlike injuries, which are
+                    typically sudden events,
+                    illnesses often develop over a longer period of exposure to workplace hazards.
+                </p>
+                <h4>Understanding the Parameters:</h4>
+                <ul class="note-list">
+                    <li><strong>Total Recordable Occupational Illness Cases:</strong> Number of work-related illnesses requiring
+                        medical treatment beyond first aid, restricted work, or lost time.</li>
+                    <li><strong>Total Work Hours:</strong> Total number of hours worked by all employees, including overtime and
+                        shifts.</li>
+                </ul>
+            </div>
+        
+            <!-- Examples of Occupational Illnesses -->
+            <div class="note-card">
+                <h3>Examples of Occupational Illnesses</h3>
+                <ul class="note-list">
+                    <li>Respiratory diseases (e.g., silicosis, asbestosis, occupational asthma)</li>
+                    <li>Hearing loss due to prolonged noise exposure</li>
+                    <li>Skin conditions (e.g., occupational dermatitis, chemical burns)</li>
+                    <li>Musculoskeletal disorders (MSDs) due to repetitive work</li>
+                    <li>Toxic exposure-related illnesses (e.g., lead poisoning, chemical poisoning)</li>
+                </ul>
+            </div>
+        
+            <!-- Importance of Tracking -->
+            <div class="note-card">
+                <h3>Why Track TRCF-ILL?</h3>
+                <p>
+                    Tracking this metric helps organizations identify long-term health risks in the workplace, evaluate the
+                    effectiveness
+                    of health and safety programs, and ensure compliance with regulatory reporting requirements. A lower
+                    TRCF-ILL indicates
+                    a healthier and safer work environment.
+                </p>
+                <p>
+                    Enter the required values and click <strong>"Calculate TRCF-ILL"</strong> to assess workplace occupational
+                    illness risk.
+                </p>
+            </div>
+        
+            <div class="note-card">
+                <h3>✅ Input Validations</h3>
+                <ul class="note-list">
+                    <li>👉 <strong>Illness Cases:</strong> Enter the total number of occupational illness cases reported in your
+                        workplace. Must be a whole number (e.g., 0, 5, 12). Cannot be negative.</li>
+                    <li>👉 <strong>Work Hours:</strong> Enter the total hours worked by all employees in the same period. Must be a
+                        positive number greater than 0. For reference, one full-time employee typically works ~2000 hours per year.
+                    </li>
+                    <li>👉 Avoid unrealistic numbers. Extremely high or low values may produce misleading results.</li>
+                    <li>👉 Decimals are not allowed for Illness Cases but are acceptable for Work Hours if needed.</li>
+                    <li>👉 Both fields are required. The calculator cannot perform calculations with missing data.</li>
+                    <li>⚠️ If any value is out of the expected range, the calculator will show an error message with guidance.</li>
+                </ul>
+                <p style="margin-top:10px; font-style:italic; color:#555;">This guidance ensures that TRCF-ILL calculations are
+                    accurate and compliant with occupational safety standards (OSHA, ISO 45001, ILO).</p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        function calculateAndDisplay() {
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValueBox = document.getElementById('resultValue');
+            const rateValue = document.getElementById('rateValue');
+            const feedbackContent = document.getElementById('feedbackContent');
+            const meterFill = document.getElementById('meterFill');
+
+            // Reset UI
+            errorBox.classList.add('hidden');
+            resultValueBox.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+            errorMessage.innerHTML = "";
+
+            let errors = [];
+
+            // Helper function for validation
+            function getVal(id, label, opts = {}) {
+                const el = document.getElementById(id);
+                const raw = el.value?.toString().trim();
+                if (raw === '') {
+                    errors.push(`👉 ${label} is required.`);
+                    return null;
+                }
+
+                const num = parseFloat(raw);
+                if (isNaN(num) || num < 0) {
+                    errors.push(`👉 Enter a valid, non-negative number for ${label}.`);
+                    return null;
+                }
+
+                if (opts.mustBePositive && num === 0) {
+                    errors.push(`👉 ${label} must be greater than zero.`);
+                    return null;
+                }
+
+                if (opts.integerOnly && !Number.isInteger(num)) {
+                    errors.push(`👉 ${label} must be a whole number (no decimals).`);
+                    return null;
+                }
+
+                if (opts.max !== undefined && num > opts.max) {
+                    errors.push(`👉 ${label} must be ≤ ${opts.max}.`);
+                }
+
+                if (opts.min !== undefined && num < opts.min) {
+                    errors.push(`👉 ${label} must be ≥ ${opts.min}.`);
+                }
+
+                return num;
+            }
+
+            // Apply validation rules
+            const illnessCases = getVal('illnessCases', 'Illness Cases', { integerOnly: true, max: 10000 });
+            const workHours = getVal('workHours', 'Work Hours', { mustBePositive: true, min: 2000, max: 1000000000 });
+
+            // Show errors if any
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                return;
+            }
+
+            // Calculation: TRCF-ILL = (Cases × 1,000,000) ÷ Hours
+            const trcfIll = (illnessCases * 1000000) / workHours;
+
+            // Show result section
+            placeholder.classList.add('hidden');
+            resultValueBox.classList.remove('hidden');
+            rateValue.textContent = trcfIll.toFixed(2);
+
+            // Scale meter dynamically (capped at 5.0)
+            const maxRate = 5.0;
+            let pct = (trcfIll / maxRate) * 100;
+            pct = Math.max(0, Math.min(100, pct));
+            meterFill.style.width = pct + '%';
+
+            // Feedback interpretation
+            let interpretation = "";
+            if (trcfIll < 0.5) {
+                meterFill.style.backgroundColor = '#2ecc71'; // Green
+                interpretation = "✅ <strong>Excellent:</strong> TRCF-ILL below 0.5 indicates very strong workplace health practices.";
+            } else if (trcfIll <= 1.5) {
+                meterFill.style.backgroundColor = '#27ae60'; // Darker Green
+                interpretation = "🟢 <strong>Good:</strong> Within safe limits, showing effective health risk management.";
+            } else if (trcfIll <= 3.0) {
+                meterFill.style.backgroundColor = '#f39c12'; // Yellow
+                interpretation = "🟡 <strong>Average:</strong> Potential occupational health risks detected. Consider improvement strategies.";
+            } else {
+                meterFill.style.backgroundColor = '#e74c3c'; // Red
+                interpretation = "🔴 <strong>High Risk:</strong> TRCF-ILL above 3.0 indicates significant workplace illness concerns. Immediate action required.";
+            }
+
+            feedbackContent.innerHTML = interpretation;
+        }
+
+        function printReport() {
+            window.print();
+        }
+    </script>
+
+</body>
+</html>
+{% endblock %}
+
+<!-- 
+1. Input Validation Rules (Industry-Compliant)
+Inputs
+a) Total Recordable Occupational Illness Cases (illnessCases)
+
+Unit: count (number of cases, whole number).
+
+Allowed values:
+
+Minimum: 0 (no illnesses).
+
+Maximum: 10,000 (beyond this = unrealistic for most organizations; trigger warning).
+
+Must be an integer only (decimal values not valid).
+
+Logical consistency: Cannot exceed the number of employees (if such a field existed) but here we only validate against work hours.
+
+b) Total Employee Work Hours (workHours)
+
+Unit: hours.
+
+Allowed values:
+
+Minimum: 1 (cannot be 0 or negative).
+
+Realistic minimum: 2000 (one employee × 1 year of work).
+
+Maximum: 1,000,000,000 (beyond this = global workforce).
+
+Accepts integers (decimals allowed if tracking fractional hours, e.g., 2500.5).
+
+Logical consistency: If illnessCases = 0, TRCF-ILL should still compute to 0.
+
+2. Output Validation Logic & Thresholds
+
+The formula:
+
+𝑇
+𝑅
+𝐶
+𝐹
+-
+𝐼
+𝐿
+𝐿
+=
+Total Recordable Illness Cases
+×
+1
+,
+000
+,
+000
+Total Employee Work Hours
+TRCF-ILL=
+Total Employee Work Hours
+Total Recordable Illness Cases×1,000,000
+	​
+
+
+This matches OSHA, ILO, and ISO 45001 safety reporting standards.
+
+Thresholds (Industry Best Practices)
+
+< 0.5 (Excellent): Rare illness cases, top-performing benchmark sites (world-class safety).
+
+0.5 – 1.5 (Good): Acceptable level, indicates functioning occupational health systems.
+
+1.5 – 3.0 (Average): Higher than average, requires preventive interventions.
+
+> 3.0 (High Risk): Poor control of occupational health, immediate corrective action required.
+
+3. Edge Case Validations
+
+Division by Zero: Prevent workHours = 0.
+
+Extremely High Cases: If cases > 1000 and hours < 10,000, flag as unrealistic.
+
+Floating Illness Cases: Block decimals (illness cases must be integers).
+
+Negative inputs: Block immediately with error message.
+
+Blank Inputs: User must be prompted that values are required.
+-->

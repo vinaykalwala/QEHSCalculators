@@ -88,6 +88,7 @@ urlpatterns = [
     path('quality/cost_per_minute_cpm_calculator/', quality_cost_per_minute_cpm_calculator, name='quality_cost_per_minute_cpm_calculator'),
     path('quality/cost_of_making_cm_calculator/', quality_cost_of_making_cm_calculator, name='quality_cost_of_making_cm_calculator'),
     path('quality/corrective_action_effectiveness_cae_calculator/', quality_corrective_action_effectiveness_cae_calculator, name='quality_corrective_action_effectiveness_cae_calculator'),
+    path('quality/control_score_calculator/', quality_control_score_calculator, name='quality_control_score_calculator'),
     path('quality/critical_number_of_samples_calculator/', quality_critical_number_of_samples_calculator, name='quality_critical_number_of_samples_calculator'),
     path('quality/defects_per_million_opportunities_dpmo_and_six_sigma_calculator/', quality_defects_per_million_opportunities_dpmo_and_six_sigma_calculator, name='quality_defects_per_million_opportunities_dpmo_and_six_sigma_calculator'),
     path('quality/defect_rate_calculator/', quality_defect_rate_calculator, name='quality_defect_rate_calculator'),
@@ -127,6 +128,8 @@ urlpatterns = [
     path('quality/turndown_ratio_of_a_steam_flowmeter_calculator/', quality_turndown_ratio_of_a_steam_flowmeter_calculator, name='quality_turndown_ratio_of_a_steam_flowmeter_calculator'),
     path('quality/training_efficiency_calculator/', quality_training_efficiency_calculator, name='quality_training_efficiency_calculator'),
     path('quality/two_pack_mix_density_calculator/', quality_two_pack_mix_density_calculator, name='quality_two_pack_mix_density_calculator'),
+    path('quality/venturi_meter_flow_calculator/', quality_venturi_meter_flow_calculator, name='quality_venturi_meter_flow_calculator'),
+   
     path('quality/vortex_shedding_frequency_calculator/', quality_vortex_shedding_frequency_calculator, name='quality_vortex_shedding_frequency_calculator'),
     path('quality/volume_solids_vs_calculator/', quality_volume_solids_vs_calculator, name='quality_volume_solids_vs_calculator'),
     path('quality/volume_of_paint_required_calculator/', quality_volume_of_paint_required_calculator, name='quality_volume_of_paint_required_calculator'),

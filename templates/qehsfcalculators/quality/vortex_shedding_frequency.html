@@ -1,0 +1,616 @@
+{% extends 'base.html' %}
+{% block title %}Vortex Shedding Frequency Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vortex Shedding Frequency Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+        
+        .error {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 5px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'qualitycategory_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Vortex Shedding Frequency Calculator</h1>
+            <p>Calculates the vortex shedding frequency based on Strouhal number, flow velocity, and bluff body diameter</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator Input Card -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="sr">Strouhal Number (Sr)</label>
+                    <input type="number" id="sr" class="form-input" min="0" step="0.01" placeholder="Enter Strouhal number">
+                    <span class="error" id="sr-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="velocity">Mean Flow Velocity (u) in m/s</label>
+                    <input type="number" id="velocity" class="form-input" min="0" step="0.1" placeholder="Enter flow velocity">
+                    <span class="error" id="velocity-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="diameter">Bluff Body Diameter (d) in meters</label>
+                    <input type="number" id="diameter" class="form-input" min="0" step="0.01" placeholder="Enter diameter">
+                    <span class="error" id="diameter-error"></span>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateFrequency()">Calculate Frequency</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Vortex illustration">
+                    <p>This tool calculates the <strong>vortex shedding frequency</strong> in Hz. Enter the Strouhal number, flow velocity, and bluff body diameter to see results.</p>
+                </div>
+
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Vortex Shedding Frequency</h2>
+                    </div>
+                    <div class="rate-value" id="frequencyValue">0.00</div>
+                    <div class="rate-label"><strong>Hz</strong></div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">Vibration Risk Assessment</div>
+                        <div class="feedback-content" id="frequencyFeedback"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🔎 About This Calculator</h3>
+                <p>
+                    The <strong>Vortex Shedding Frequency Calculator</strong> estimates the frequency at which vortices are shed from a bluff body in a fluid flow using the Strouhal relation. It helps predict vortex-induced vibrations in various engineering applications.
+                </p> 
+            </div>
+            
+            <div class="note-card">
+                <h3>📌 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Strouhal Number (Sr):</strong> Required, must be > 0 and ≤ 0.3 (typically 0.1-0.3)</li>
+                    <li><strong>Mean Flow Velocity (u):</strong> Required, must be > 0 m/s</li>
+                    <li><strong>Bluff Body Diameter (d):</strong> Required, must be >100 meters</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ Explanation of Parameters</h3>
+                <ul class="note-list">
+                    <li><strong>Sr (Strouhal Number):</strong> A dimensionless number that describes oscillating flow mechanisms (typically between 0.1 and 0.3).</li>
+                    <li><strong>u (Mean Flow Velocity):</strong> The speed of the fluid moving past the object, measured in meters per second (m/s).</li>
+                    <li><strong>d (Bluff Body Diameter):</strong> The characteristic width of the object disrupting the flow, measured in meters (m).</li>
+                    <li><strong>f (Shedding Frequency):</strong> The rate at which vortices are shed from the bluff body, measured in Hertz (Hz).</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📊 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Structural Engineering:</strong> Preventing vibrations in bridges, chimneys, and tall buildings.</li>
+                    <li><strong>Environmental Science:</strong> Understanding air and water flow patterns around obstacles.</li>
+                    <li><strong>Industrial Quality Control:</strong> Ensuring stable fluid flow in pipes, heat exchangers, and reactors.</li>
+                    <li><strong>Aerospace Engineering:</strong> Analyzing flow around aircraft components and reducing vibration risks.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Conclusion</h3>
+                <p>Understanding vortex shedding frequency is crucial in engineering to optimize designs, ensure structural stability, and improve process control. By calculating this frequency, engineers can prevent resonance effects, reduce vibration risks, and enhance the safety and longevity of structures in fluid flow environments.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateFrequency() {
+    const sr = document.getElementById("sr").value.trim();
+    const velocity = document.getElementById("velocity").value.trim();
+    const diameter = document.getElementById("diameter").value.trim();
+
+    const srError = document.getElementById("sr-error");
+    const velocityError = document.getElementById("velocity-error");
+    const diameterError = document.getElementById("diameter-error");
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const outputValue = document.getElementById('frequencyValue');
+    const feedbackBox = document.getElementById('frequencyFeedback');
+
+    // Reset previous errors
+    srError.textContent = "";
+    velocityError.textContent = "";
+    diameterError.textContent = "";
+    let errors = [];
+
+    // ✅ Strouhal validation
+    if (sr === "") {
+        errors.push("👉 Enter Strouhal number (Sr).");
+    } else if (isNaN(sr)) {
+        errors.push("👉 Sr must be numeric.");
+    } else {
+        const srNum = parseFloat(sr);
+        if (srNum <= 0) errors.push("👉 Sr must be > 0.");
+        if (srNum > 0.3) errors.push("👉 Sr typically ≤ 0.3 (check input).");
+    }
+
+    // ✅ Velocity validation
+    if (velocity === "") {
+        errors.push("👉 Enter flow velocity (u).");
+    } else if (isNaN(velocity)) {
+        errors.push("👉 Velocity must be numeric.");
+    } else {
+        const vNum = parseFloat(velocity);
+        if (vNum <= 0) errors.push("👉 Velocity must be > 0 m/s.");
+        if (vNum > 200) errors.push("👉 Velocity exceeds realistic design (>200 m/s).");
+    }
+
+    // ✅ Diameter validation
+    if (diameter === "") {
+        errors.push("👉 Enter bluff body diameter (d).");
+    } else if (isNaN(diameter)) {
+        errors.push("👉 Diameter must be numeric.");
+    } else {
+        const dNum = parseFloat(diameter);
+        if (dNum <= 0) errors.push("👉 Diameter must be > 0 m.");
+        if (dNum > 100) errors.push("👉 Diameter exceeds realistic size (>100 m).");
+    }
+
+    // Show errors if any
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // Safe parsing
+    const srNum = parseFloat(sr);
+    const velocityNum = parseFloat(velocity);
+    const diameterNum = parseFloat(diameter);
+
+    // ✅ Edge case: Prevent division by zero
+    if (diameterNum === 0) {
+        errorMessage.innerHTML = "🚨 Division by zero error: Diameter cannot be 0.";
+        errorBox.classList.remove("hidden");
+        return;
+    }
+
+    // Calculate frequency
+    const frequency = (srNum * velocityNum) / diameterNum;
+    outputValue.textContent = frequency.toFixed(2);
+
+    // Feedback classification
+    let feedback = "";
+    if (frequency < 5) {
+        feedback = "✅ Very low frequency, minimal vibration risk.";
+    } else if (frequency >= 5 && frequency < 30) {
+        feedback = "✅ Moderate frequency, typically stable.";
+    } else if (frequency >= 30 && frequency < 100) {
+        feedback = "⚠️ High frequency, check resonance risk.";
+    } else {
+        feedback = "🚨 Critical frequency! Structural risk likely.";
+    }
+
+    feedbackBox.textContent = feedback;
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+
+*--------------Detailed Input Validation Rules -----------------
+Strouhal Number (Sr)
+
+Range: > 0 and ≤ 0.3 (industry-accepted, typically 0.1–0.3).
+
+Precision: Allow up to 3 decimals (e.g., 0.123).
+
+Invalid Inputs: Negative, zero, or values > 0.3 → must be flagged.
+
+Compliance Reason: Strouhal number is empirical and not arbitrary. Wrong input leads to false vibration risk analysis and non-compliance with ISO 9001/ISO 45001 reporting accuracy.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Mean Flow Velocity (u) [m/s]
+
+Range: > 0 m/s. Practical ranges:
+
+Air/Atmosphere: 0.1 – 100 m/s
+
+Industrial Piping: 0.5 – 50 m/s
+
+Precision: Allow up to 2 decimals.
+
+Invalid Inputs: Zero (no flow), negative (nonsense physically), > 200 m/s (outlier for normal design).
+
+Compliance Reason: Unrealistic velocity may mask resonance hazards in chimneys, exhaust stacks, ducts, or HVAC systems.
+--------------------------------------------------------------------------------------------------------------------------------------
+Bluff Body Diameter (d) [m]:
+
+Range: > 0 m.
+
+Engineering reality: 0.001 m (1 mm) up to ~20 m (bridge pier or chimney).
+
+Precision: Allow up to 3 decimals (e.g., 0.125 m).
+
+Invalid Inputs: Zero (division by zero → infinite frequency), negative, > 100 m (outlier).
+
+Compliance Reason: Wrong diameter gives false safety risk report; OSHA/ISO audits require traceable input justification.
+
+----------------------- Output Validation & Thresholds (Hz)----------------------------
+
+Formula:
+formula f = (Sr × u) / d
+Risk Interpretation:
+
+< 5 Hz: ✅ Negligible vibration risk. Below structural resonance of most equipment.
+
+5 – 30 Hz: ✅ Acceptable. Typical safe operational band.
+
+30 – 100 Hz: ⚠️ Caution. May overlap with structural natural frequencies of pipes, HVAC ducts, thin walls.
+
+> 100 Hz: 🚨 Critical. High chance of fatigue, fire-induced resonance, or component failure (e.g., stack cracking, NFPA fire duct collapse).
+
+Compliance Reason: Safety audits (ISO 45001/NFPA) require risk banding of results instead of raw values, so engineers can act.
+
+
+-->

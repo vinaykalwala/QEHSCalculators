@@ -1,0 +1,616 @@
+{% extends 'base.html' %}
+{% block title %}Sample Size Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sample Size Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'qualitycategory_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Sample Size Calculator</h1>
+            <p>Calculates the required sample size based on Z-score, estimated proportion of defects, and margin of error</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator Input Card -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="zScore">Z-Score (based on confidence level)</label>
+                    <input type="number" id="zScore" class="form-input" step="0.01" placeholder="Enter Z-score">
+                </div>
+
+                <div class="form-group">
+                    <label for="proportion">Estimated Proportion of Defects (p)</label>
+                    <input type="number" id="proportion" class="form-input" step="0.01" min="0" max="1" placeholder="Enter proportion (0 to 1)">
+                </div>
+
+                <div class="form-group">
+                    <label for="marginError">Margin of Error (E)</label>
+                    <input type="number" id="marginError" class="form-input" step="0.01" min="0" max="1" placeholder="Enter margin of error (0 to 1)">
+                </div>
+
+                <button class="calculate-btn" onclick="calculateSampleSize()">Calculate Sample Size</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Sample size illustration">
+                    <p>This tool calculates the <strong>required sample size</strong>. Enter Z-score, proportion of defects, and margin of error to see results.</p>
+                </div>
+
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Required Sample Size</h2>
+                    </div>
+                    <div class="rate-value" id="sampleSizeValue">0</div>
+                    <div class="rate-label"><strong>items</strong></div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">Interpretation</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🔎 About This Calculator</h3>
+                <p>
+                    The <strong>Sample Size Calculator</strong> determines the number of items to inspect to ensure accurate results. It is based on the Z-score (confidence level), estimated proportion of defects, and margin of error.
+                </p> 
+            </div>
+            
+            <div class="note-card">
+                <h3>📌 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Z-Score:</strong> Required, must be > 0 (e.g., 1.96 for 95% confidence)</li>
+                    <li><strong>Estimated Proportion of Defects (p):</strong> Required, must be between 0 and 1</li>
+                    <li><strong>Margin of Error (E):</strong> Required, must be between 0 and 1</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ Explanation of Parameters</h3>
+                <ul class="note-list">
+                    <li><strong>Z-Score:</strong> A statistical value that corresponds to the desired confidence level (e.g., 1.96 for 95% confidence).</li>
+                    <li><strong>Estimated Proportion of Defects (p):</strong> The expected proportion of defective items in the population (0 to 1).</li>
+                    <li><strong>Margin of Error (E):</strong> The acceptable error margin in the estimation (0 to 1).</li>
+                    <li><strong>Sample Size (n):</strong> The number of items needed for inspection to achieve the desired confidence level and margin of error.</li>
+                </ul>
+            </div>
+            
+
+            <div class="note-card">
+                <h3>📊 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Quality Control:</strong> Ensuring inspections are statistically valid.</li>
+                    <li><strong>Cost Efficiency:</strong> Avoiding over-inspection or under-inspection.</li>
+                    <li><strong>Decision-Making:</strong> Providing reliable data for process improvement.</li>
+                    <li><strong>Research Studies:</strong> Determining appropriate sample sizes for surveys and experiments.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Conclusion</h3>
+                <p>Calculating the correct sample size is essential for obtaining statistically significant results while optimizing resources. This calculator helps quality professionals, researchers, and analysts determine the appropriate sample size for their studies and inspections, ensuring reliable outcomes and informed decision-making.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateSampleSize() {
+    const zScore = document.getElementById("zScore").value.trim();
+    const proportion = document.getElementById("proportion").value.trim();
+    const marginError = document.getElementById("marginError").value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const outputValue = document.getElementById('sampleSizeValue');
+    const feedbackBox = document.getElementById('feedbackContent'); 
+
+    let errors = [];
+
+    // --- Validation ---
+
+    // Z-Score
+    if (zScore === "") {
+        errors.push("👉 Please enter the Z-score.");
+    } else if (isNaN(zScore)) {
+        errors.push("👉 Z-score must be a number.");
+    } else if (parseFloat(zScore) <= 0) {
+        errors.push("👉 Z-score must be greater than 0.");
+    } else if (parseFloat(zScore) < 1.28 || parseFloat(zScore) > 4) {
+        errors.push("👉 Z-score must be realistic (1.28–3.3 typical, max 4).");
+    }
+
+    // Proportion (p)
+    if (proportion === "") {
+        errors.push("👉 Please enter the estimated proportion of defects.");
+    } else if (isNaN(proportion)) {
+        errors.push("👉 Proportion must be a number.");
+    } else if (parseFloat(proportion) <= 0 || parseFloat(proportion) >= 1) {
+        errors.push("👉 Proportion must be between 0 and 1 (exclusive).");
+    }
+
+    // Margin of Error (E)
+    if (marginError === "") {
+        errors.push("👉 Please enter the margin of error.");
+    } else if (isNaN(marginError)) {
+        errors.push("👉 Margin of error must be a number.");
+    } else if (parseFloat(marginError) <= 0 || parseFloat(marginError) >= 0.5) {
+        errors.push("👉 Margin of error must be between 0.01 and 0.49.");
+    }
+
+    // Show errors
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // --- Calculation ---
+    const z = parseFloat(zScore);
+    const p = parseFloat(proportion);
+    const e = parseFloat(marginError);
+
+    let sampleSize = (Math.pow(z, 2) * p * (1 - p)) / Math.pow(e, 2);
+    let sampleSizeRounded = Math.ceil(sampleSize);
+
+    // --- Output validation ---
+    outputValue.textContent = sampleSizeRounded;
+
+    let feedback = "";
+    if (sampleSizeRounded < 30) {
+        feedback = "⚠️ Small Sample Size (< 30) – Results may not be statistically valid. Consider adjusting parameters.";
+    } else if (sampleSizeRounded < 100) {
+        feedback = "✅ Moderate Sample Size (30–100) – Suitable for limited quality checks.";
+    } else if (sampleSizeRounded < 1000) {
+        feedback = "🔍 Large Sample Size (100–1000) – Provides strong reliability for audits.";
+    } else if (sampleSizeRounded < 10000) {
+        feedback = "📊 Very Large Sample Size (1000–10,000) – High confidence, suitable for critical inspections.";
+    } else {
+        feedback = "⚠️ Extremely Large Sample Size (>10,000) – May be impractical. Consider relaxing confidence or margin of error.";
+    }
+
+    feedbackBox.textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+*-------------------------------------------------------*
+Inputs and Rules
+Z-Score (Confidence Level)
+
+Allowed range: > 0 but practically 1.28 – 3.3 (80%–99.9% confidence).
+
+Decimals: up to 2 decimals is sufficient (1.96, 2.58, etc.).
+
+Invalid cases: Negative, zero, or excessively high (>4) should be rejected.
+
+Cross-field dependency: Higher Z means stricter margin of error expectations.
+---------------***---------------------
+Proportion of Defects (p)
+
+Allowed range: 0 ≤ p ≤ 1 (fraction).
+
+Decimals: up to 2–3 decimals (e.g., 0.05, 0.1).
+
+Invalid cases:
+
+Exactly 0 → means "perfect quality," unrealistic in QEHS inspections.
+
+Exactly 1 → means "100% defects," invalid for sample testing.
+
+Both should be rejected as impractical.
+
+Typical values: 0.01 – 0.5 (1%–50% defects is realistic).
+---------------***---------------------
+Margin of Error (E)
+
+Allowed range: 0 < E < 0.5.
+
+Decimals: up to 2 decimals.
+
+Invalid cases:
+
+Zero → causes division by zero in formula.
+
+≥0.5 → meaningless in audits (50% error tolerance is not acceptable).
+
+Typical acceptable ranges: 0.01 – 0.1 (1%–10%).
+
+Cross-field dependency: Stricter confidence (Z) → must pair with smaller E.
+---------------***---------------------
+Output Validation and Interpretation
+
+The formula:
+n = (Z² * p * (1 - p)) / E²
+-----------------------***------------------------
+Threshold Guidance
+
+n < 30 → Statistically weak, not audit-worthy.
+
+30–100 → Acceptable for spot checks, visual inspections.
+
+100–1000 → Standard for safety/quality sampling plans.
+
+>1000 → High confidence, used in critical risk areas (fire suppression systems, PPE batch testing, etc.).
+
+>10,000 → Practically infeasible; warn user about resources.
+
+Outputs must always be rounded up (never down) since under-sampling violates ISO/NFPA audit reliability principles.
+
+*------- Edge Cases & Handling------------*
+
+Division by Zero: If E = 0 → show error.
+
+Z < 1: Warn → "Confidence level too low for valid sampling."
+
+p = 0 or 1: Reject → "Proportion of defects must be between 0 and 1 (exclusive)."
+
+Extreme Z (e.g., >4): Reject → "Unrealistic confidence level."
+
+Sample Size > 10,000: Warn → "Inspection may be impractical. Consider relaxing confidence or error margin."
+
+Non-numeric / Empty values: Error message and no calculation.
+
+-->

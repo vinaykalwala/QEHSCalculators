@@ -1,0 +1,619 @@
+{% extends 'base.html' %}
+{% block title %}fire load density calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accident Rate Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+        @media (max-width: 768px) {
+    .rate-value {
+        font-size: 28px; /* smaller font for tablets/mobiles */
+    }
+}
+
+@media (max-width: 480px) {
+    .rate-value {
+        font-size: 24px; /* even smaller for phones */
+    }
+}
+    </style>
+</head>
+<body>
+   <div class="btn-container">
+    <a href="{% url 'firecategory_calculators' %}" class="back-btn">Back To Fire Calculators</a>
+</div>
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+    <div class="calculator-header">
+        <h1>Fire Load Density Calculator</h1>
+        <p>Determine the potential energy stored in combustible materials per square meter of floor area to assess fire hazard severity.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Input Card -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+            <div class="form-group">
+                <label for="totalEnergy">Total Combustible Material (MJ)</label>
+                <input type="number" id="totalEnergy" class="form-input" placeholder="Enter total energy in MJ">
+            </div>
+            <div class="form-group">
+                <label for="floorArea">Floor Area (m²)</label>
+                <input type="number" id="floorArea" class="form-input" placeholder="Enter floor area">
+            </div>
+            <button class="calculate-btn" onclick="calculateFireLoadDensity()">Calculate Fire Load Density</button>
+        </div>
+
+        <!-- Result Card -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="{% static 'images/fireload.png' %}" alt="Fire Load Illustration">
+                <p>This tool will calculate the <strong>Fire Load Density</strong>. Enter your data to see results here.</p>
+            </div>
+
+            <div class="result-error hidden" id="resultError" style="font-size: 28px;"></div>
+
+            <div class="result-value hidden" id="resultValue">
+                <div class="rate-value">Fire Load Density</div>
+                <div class="rate-value" id="fireLoadValue">0.00</div>
+                <div class="rate-label" style="font-size:16px; font-weight:bold;">MJ/m²</div>
+                <div class="result-feedback" id="feedbackContent"></div>
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="note-section">
+        <div class="note-card">
+            <h3>📘 About This Calculator</h3>
+            <p>
+                This calculator determines the <strong>Fire Load Density (FLD)</strong>, 
+                representing the potential energy stored in combustible materials per square meter of floor area. 
+                FLD is essential for fire safety assessment and hazard evaluation in buildings and industrial spaces.
+            </p>
+        </div>
+
+        <div class="note-card">
+            <h3>⚙️ Parameters</h3>
+            <ul class="note-list">
+                <li><strong>Total Combustible Material (MJ):</strong> The total heat energy content of all flammable materials in the space.</li>
+                <li><strong>Floor Area (m²):</strong> The total area of the space being evaluated.</li>
+                <li><strong>Fire Load Density (MJ/m²):</strong> Energy per unit area, calculated as Total Combustible Material ÷ Floor Area.</li>
+            </ul>
+        </div>
+<div class="note-card">
+        <h3>❓ What is Fire Load Density?</h3>
+        <p>
+            Fire Load Density (FLD) is a measure of the total heat energy released by combustible materials in a 
+            specific area during a fire. It is expressed in megajoules per square meter (MJ/m²).
+        </p>
+    </div>
+      <div class="note-card">
+        <h3>💡 Why is Fire Load Density Important?</h3>
+        <p>
+            Fire Load Density is used to evaluate the fire risk in buildings, factories, and other enclosed spaces. 
+            It helps in:
+        </p>
+        <ul class="note-list">
+            <li><strong>Fire Risk Assessment:</strong> Higher FLD values indicate greater fire intensity and longer burn durations.</li>
+            <li><strong>Fire Protection Design:</strong> Used to determine the need for fire-resistant materials, sprinklers, and evacuation plans.</li>
+            <li><strong>Regulatory Compliance:</strong> Many fire codes and safety standards set FLD limits to ensure workplace and residential safety.</li>
+            <li><strong>Structural Safety:</strong> High fire loads may weaken building structures due to excessive heat.</li>
+        </ul>
+    </div>
+        <!-- Input Validations Note Card -->
+<div class="note-card">
+    <h3>🛡️ Input Validations</h3>
+    <ul class="note-list">
+        <li>All fields are <strong>mandatory</strong>. Empty inputs trigger a warning.</li>
+        <li><strong>Numeric values only:</strong> Non-numeric entries are rejected.</li>
+        <li><strong>Positive values required:</strong> Zero or negative numbers are invalid.</li>
+        <li><strong>Maximum decimals:</strong> Values must have at most 2 decimal places.</li>
+        <li><strong>Total Combustible Material:</strong> Typical range 1 – 1,000,000 MJ; values beyond this trigger caution.</li>
+        <li><strong>Floor Area:</strong> Typical range 1 – 100,000 m²; values beyond this trigger caution.</li>
+        <li><strong>Division by zero:</strong> Floor area ≤ 0 is blocked to prevent calculation errors.</li>
+        <li>Any validation errors are displayed in the result box; the placeholder image is hidden once calculation is attempted.</li>
+    </ul>
+</div>
+
+<!-- Interpretation Note Card -->
+<div class="note-card">
+    <h3>💡 Interpretation of Fire Load Density (FLD)</h3>
+    <ul class="note-list">
+        <li>✅ <strong>Low FLD (&lt; 100 MJ/m²):</strong> Minimal fire hazard, safe conditions.</li>
+        <li>⚠️ <strong>Moderate FLD (100 – 500 MJ/m²):</strong> Monitor environment; consider fire prevention measures (sprinklers, PPE, ventilation).</li>
+        <li>🚨 <strong>High FLD (500 – 1000 MJ/m²):</strong> Significant fire risk; implement protective measures immediately.</li>
+        <li>🔴 <strong>Extreme FLD (&gt; 1000 MJ/m²):</strong> Severe hazard; emergency planning, evacuation, and strict fire control protocols required.</li>
+    </ul>
+</div>
+
+
+        <div class="note-card">
+            <p>
+                Click <strong>"Calculate Fire Load Density"</strong> to assess the fire hazard level in your space. 
+                Understanding and managing fire load density is crucial for fire prevention and regulatory compliance.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+function calculateFireLoadDensity() {
+    const totalEnergyInput = document.getElementById('totalEnergy').value.trim();
+    const floorAreaInput = document.getElementById('floorArea').value.trim();
+    const resultValue = document.getElementById('resultValue');
+    const placeholder = document.getElementById('placeholder');
+    const feedbackContent = document.getElementById('feedbackContent');
+    const resultError = document.getElementById('resultError');
+    const fireLoadValue = document.getElementById('fireLoadValue');
+
+    // Reset displays
+    resultError.classList.add('hidden');
+    resultValue.classList.add('hidden');
+    placeholder.classList.add('hidden');
+    resultError.innerHTML = "";
+    feedbackContent.innerHTML = "";
+
+    // Empty check
+    if (totalEnergyInput === "" || floorAreaInput === "") {
+        resultError.innerHTML = "⚠️ Please fill in all required fields.";
+        resultError.style.color = "orange";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    const totalEnergy = parseFloat(totalEnergyInput);
+    const floorArea = parseFloat(floorAreaInput);
+
+    // Numeric validation
+    if (isNaN(totalEnergy) || isNaN(floorArea)) {
+        resultError.innerHTML = "❌ Invalid entry. Please enter numeric values only.";
+        resultError.style.color = "red";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    // Positive values validation
+    if (totalEnergy <= 0) {
+        resultError.innerHTML = "❌ Total Combustible Material must be greater than zero.";
+        resultError.style.color = "red";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    if (floorArea <= 0) {
+        resultError.innerHTML = "❌ Floor Area must be greater than zero.";
+        resultError.style.color = "red";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    // Decimal precision check (max 2 decimals)
+    if (!/^\d+(\.\d{1,2})?$/.test(totalEnergyInput) || !/^\d+(\.\d{1,2})?$/.test(floorAreaInput)) {
+        resultError.innerHTML = "⚠️ Please enter values with maximum 2 decimal places.";
+        resultError.style.color = "orange";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    // Extreme outlier checks
+    if (totalEnergy > 1000000) {
+        resultError.innerHTML = "⚠️ Total energy unusually high (>1,000,000 MJ). Please verify units.";
+        resultError.style.color = "orange";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    if (floorArea > 100000) {
+        resultError.innerHTML = "⚠️ Floor area unusually large (>100,000 m²). Please verify units.";
+        resultError.style.color = "orange";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    // Calculation
+    const fireLoadDensity = totalEnergy / floorArea;
+    fireLoadValue.innerText = fireLoadDensity.toFixed(2);
+    resultValue.classList.remove('hidden');
+
+    // Feedback logic
+    let feedback = "";
+    if (fireLoadDensity < 100) {
+        feedback = "✅ Low FLD: Safe conditions.";
+        feedbackContent.style.color = "green";
+    } else if (fireLoadDensity <= 500) {
+        feedback = "⚠️ Moderate FLD: Monitor and implement precautions.";
+        feedbackContent.style.color = "orange";
+    } else if (fireLoadDensity <= 1000) {
+        feedback = "🚨 High FLD: High fire risk; take immediate action!";
+        feedbackContent.style.color = "red";
+    } else {
+        feedback = "🔴 Extreme FLD: Severe hazard; follow emergency protocols.";
+        feedbackContent.style.color = "darkred";
+    }
+    feedbackContent.innerHTML = feedback;
+}
+
+
+function printReport() {
+    window.print();
+}
+</script>
+
+
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+<!-- 1️⃣ Input Validation Rules (Industry Standard)
+Field	Units	Acceptable Range	Decimal Rules	Cross-field/Logical Checks	QEHS Rationale
+Total Combustible Material	MJ	1 – 1,000,000 MJ	Max 2 decimals	Must be > 0	Ensures meaningful energy content. Prevents negative or zero inputs which are physically impossible.
+Floor Area	m²	1 – 100,000 m²	Max 2 decimals	Must be > 0	Prevents division by zero and ensures a realistic evaluation of enclosed spaces.
+Rate/Proportions	—	N/A	—	If FLD > 1000 MJ/m², flag as extreme hazard	Ensures compliance with NFPA, ISO 13571 for fire risk assessment.
+
+Additional Notes:
+
+Inputs must be numeric only.
+
+Empty fields trigger a warning.
+
+Very high inputs trigger a caution warning but still allow calculation (e.g., warehouses, industrial areas).
+
+2️⃣ Output Validation Logic and Threshold Explanations
+Fire Load Density (MJ/m²)	QEHS Interpretation	Recommended Action
+< 100	Low FLD	Safe; normal monitoring; ventilation standard.
+100 – 500	Moderate FLD	Increased fire potential; monitor, consider sprinklers/PPE.
+500 – 1000	High FLD	Significant risk; implement active fire protection measures.
+> 1000	Extreme FLD	Severe hazard; emergency planning, evacuation, strict fire control.
+
+Rationale: Thresholds are consistent with NFPA 557, ISO 13571, and OSHA guidelines for assessing potential fire severity.
+
+3️⃣ Edge Case Validations
+
+Division by zero:
+
+Floor area ≤ 0 → must block calculation. Prevents computational errors.
+
+Extreme outliers:
+
+Total energy > 1,000,000 MJ or floor area > 100,000 m² → flag as unusual, allow review.
+
+Negative numbers:
+
+Not allowed; violates physical reality.
+
+Non-numeric entries:
+
+Must reject to prevent NaN results.
+
+Precision limits:
+
+Limit decimals to 2 to avoid false precision beyond measurement reliability. -->

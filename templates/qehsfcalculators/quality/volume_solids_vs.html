@@ -1,0 +1,631 @@
+{% extends 'base.html' %}
+{% block title %}Volume Solids (VS) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volume Solids (VS) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+        
+        .error {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 5px;
+            display: block;
+        }
+        
+        .calculation-nav {
+            list-style: none;
+            padding-left: 0;
+            margin-top: 15px;
+        }
+        
+        .calculation-item {
+            margin-bottom: 10px;
+        }
+        
+        .calculation-link {
+            display: inline-block;
+            background: #1560bd;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        
+        .calculation-link:hover {
+            background: #0d47a1;
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'qualitycategory_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Volume Solids (VS) Calculator</h1>
+            <p>Calculates the percentage of solid material in a coating that remains after drying</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator Input Card -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="dft">Dry Film Thickness (DFT) - µm</label>
+                    <input type="number" id="dft" class="form-input" min="0" step="0.01" placeholder="Enter DFT value">
+                    <span class="error" id="dft-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="wft">Wet Film Thickness (WFT) - µm</label>
+                    <input type="number" id="wft" class="form-input" min="0" step="0.01" placeholder="Enter WFT value">
+                    <span class="error" id="wft-error"></span>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateVS()">Calculate VS</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Coating illustration">
+                    <p>This tool calculates the <strong>Volume Solids (VS)</strong> percentage. Enter your DFT and WFT values to see results.</p>
+                </div>
+
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Volume Solids (VS)</h2>
+                    </div>
+                    <div class="rate-value" id="vsValue">0.00</div>
+                    <div class="rate-label"><strong>%</strong></div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">Coating Quality Assessment</div>
+                        <div class="feedback-content" id="vsFeedback"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🔎 About This Calculator</h3>
+                <p>
+                    The <strong>Volume Solids (VS) Calculator</strong> determines the percentage of solid material in a coating that remains after drying. It is crucial for determining the correct application thickness and ensuring coating performance and durability.
+                </p> 
+            </div>
+            
+            <div class="note-card">
+                <h3>📌 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Dry Film Thickness (DFT):</strong> Required, must be > 2000 µm</li>
+                    <li><strong>Wet Film Thickness (WFT):</strong> Required, must be > 0 µm</li>
+                    <li><strong>WFT must be greater than DFT:</strong> WFT cannot be less than DFT</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ Explanation of Parameters</h3>
+                <ul class="note-list">
+                    <li><strong>Dry Film Thickness (DFT):</strong> The final thickness of the coating after drying, measured in micrometers (µm).</li>
+                    <li><strong>Wet Film Thickness (WFT):</strong> The thickness of the applied coating before drying, measured in micrometers (µm).</li>
+                    <li><strong>Volume Solids (VS):</strong> The percentage of solid material in a coating that remains after drying.</li>
+                </ul>
+            </div>
+            
+
+            <div class="note-card">
+                <h3>📊 Quality Assurance Implications</h3>
+                <ul class="note-list">
+                    <li><strong>Coating Performance:</strong> Higher VS values typically indicate better durability and protection.</li>
+                    <li><strong>Application Efficiency:</strong> Proper VS calculation ensures correct coating thickness and coverage.</li>
+                    <li><strong>Cost Optimization:</strong> Accurate VS measurement helps minimize material waste and reduce costs.</li>
+                    <li><strong>Compliance:</strong> Meeting specified VS requirements ensures regulatory and specification compliance.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📋 How to calculate Dry Film Thickness and Wet Film Thickness?</h3>
+                <p>If you need more information on how to calculate the Dry Film Thickness and Wet Film Thickness, you can refer to the following resources:</p>
+                <ul class="calculation-nav">
+                    <li class="calculation-item">
+                        <a href="{% url 'quality_dry_film_thickness_dft_calculator' %}" class="calculation-link">Dry Film Thickness (DFT) Calculator</a>
+                    </li>
+                    <li class="calculation-item">
+                        <a href="{% url 'quality_wet_film_thickness_wft_calculator' %}" class="calculation-link">Wet Film Thickness (WFT) Calculator</a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Conclusion</h3>
+                <p>Calculating Volume Solids is essential for quality control in coating applications. It ensures that the applied coating will provide the intended protection, durability, and performance. Regular monitoring of VS values helps maintain consistency, reduce material waste, and ensure compliance with project specifications and industry standards.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    
+    function calculateVS() {
+    const dft = document.getElementById("dft").value.trim();
+    const wft = document.getElementById("wft").value.trim();
+
+    const dftError = document.getElementById("dft-error");
+    const wftError = document.getElementById("wft-error");
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const outputValue = document.getElementById('vsValue');
+    const feedbackBox = document.getElementById('vsFeedback');
+
+    // Reset errors
+    dftError.textContent = "";
+    wftError.textContent = "";
+    errorMessage.textContent = "";
+    errorBox.classList.add("hidden");
+
+    let errors = [];
+
+    // Convert safely to number
+    const dftNum = parseFloat(dft);
+    const wftNum = parseFloat(wft);
+
+    // ===== Validation Rules =====
+    if (dft === "" || isNaN(dftNum)) {
+        errors.push("👉 Please enter a valid Dry Film Thickness (DFT) in µm.");
+    } else if (dftNum <= 0 || dftNum > 2000) {
+        errors.push("👉 DFT must be between 1 and 2000 µm (per ISO 2808 limits).");
+    }
+
+    if (wft === "" || isNaN(wftNum)) {
+        errors.push("👉 Please enter a valid Wet Film Thickness (WFT) in µm.");
+    } else if (wftNum <= 0 || wftNum > 5000) {
+        errors.push("👉 WFT must be between 1 and 5000 µm (per ASTM D4414 limits).");
+    }
+
+    if (!isNaN(dftNum) && !isNaN(wftNum)) {
+        if (wftNum <= dftNum) {
+            errors.push("👉 WFT must be greater than DFT (drying reduces thickness).");
+        }
+    }
+
+    // Show errors if any
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    // ===== Calculation =====
+    const vs = (dftNum / wftNum) * 100;
+
+    // Edge-case output validation
+    if (vs <= 0 || vs > 90) {
+        errorMessage.innerHTML = `❌ Unrealistic Volume Solids result (${vs.toFixed(2)}%). Please check input values or instrument calibration.`;
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    outputValue.textContent = vs.toFixed(2);
+
+    // ===== Feedback messages =====
+    let feedback = "";
+    if (vs < 30) {
+        feedback = "⚠️ Low Volume Solids - Multiple coats required, high VOC content.";
+    } else if (vs >= 30 && vs < 50) {
+        feedback = "✅ Moderate Volume Solids - Typical for conventional coatings.";
+    } else if (vs >= 50 && vs < 70) {
+        feedback = "✅ Good Volume Solids - Good coverage and durability.";
+    } else if (vs >= 70 && vs <= 85) {
+        feedback = "👍 High Volume Solids - Excellent performance, low VOC compliant.";
+    }
+
+    feedback += ` Based on WFT = ${wftNum.toFixed(2)} µm and DFT = ${dftNum.toFixed(2)} µm, the coating retains ${vs.toFixed(2)}% solids after drying.`;
+
+    feedbackBox.textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+Input Validation Rules
+-------------------------------------------------------------------------
+Units
+
+DFT (Dry Film Thickness) → µm (micrometers), measured using calibrated instruments per ISO 2808.
+
+WFT (Wet Film Thickness) → µm, measured using wet film gauges per ASTM D4414.
+
+Validation Ranges
+| Parameter         | Typical Range | Validation Rule           | Reason (Compliance)                                                                |
+| ----------------- | ------------- | ------------------------- | ---------------------------------------------------------------------------------- |
+| DFT               | 10 – 1000 µm  | Must be > 0 and ≤ 2000 µm | Ensures realistic coating thickness (fireproofing max \~2000 µm per pass)          |
+| WFT               | 25 – 4000 µm  | Must be > 0 and ≤ 5000 µm | Ensures physical applicability; >5000 µm wet coats are impractical                 |
+| Relationship      | DFT < WFT     | Must always hold true     | Solids evaporate on drying → DFT cannot exceed WFT                                 |
+| Decimal Precision | 2 places max  | Restrict decimals         | Measurement instruments (magnetic gauge, comb gauge) only allow \~±1–5 µm accuracy |
+
+---------Output Validation Logic-------------------
+
+Formula:VS = (DFT / WFT) × 100
+
+
+Practical Range: 20–85% (per ISO 3233, ASTM D2697).
+
+Validation: If result <20% or >90%, flag as outlier (likely measurement error).
+
+Interpretation Thresholds:
+
+<30% → ⚠️ Low solids → multiple coats, high VOC.
+
+30–50% → Standard conventional coatings.
+
+50–70% → Good durability & balance.
+
+70–85% → High-performance, compliant with many low-VOC regulations.
+
+>85% → 🚩 Unrealistic for most liquid coatings (except powder coatings).
+
+--------------Edge Cases to Handle--------------------------------
+Division by zero: If WFT = 0 → block calculation.
+
+Negative inputs: Should not occur, reject.
+
+DFT = WFT: VS = 100% → impossible in practice, must warn as invalid.
+
+Extreme Outliers:
+
+If VS < 10% or > 90% → flag as likely measurement/calibration error.
+
+String/invalid input: Reject non-numeric values.
+
+-->

@@ -166,12 +166,30 @@
         }
 
         /* Result Card */
-        .result-card {
-            justify-content: center;
-            align-items: center;
-            min-height: 420px;
-            text-align: center;
-        }
+                
+.result-card::-webkit-scrollbar {
+    width: 8px;
+}
+
+.result-card::-webkit-scrollbar-thumb {
+    background: #1560bd;
+    border-radius: 6px;
+}
+
+.result-card::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.result-card {
+    justify-content: flex-start; /* align from top */
+    align-items: stretch;
+    min-height: 420px;
+    text-align: center;
+    overflow-y: auto;       /* Enable vertical scrolling */
+    max-height: 450px;      /* Set max height to control output size */
+    padding: 20px;          /* keep spacing */
+}
+
         
         .result-placeholder img {
             max-width: 240px;
@@ -328,42 +346,40 @@
             border-color: #000040;
             transform: scale(1.05); /* Subtle hover effect */
         }
-
-        /* Additional styles for Cp/Cpk layout */
-        .input-row {
+        
+        /* Cp/Cpk specific styles */
+        .cp-results {
             display: flex;
-            gap: 20px;
-            margin-bottom: 15px;
+            justify-content: space-around;
+            width: 100%;
+            margin-bottom: 20px;
         }
         
-        .input-row .form-group {
-            flex: 1;
-        }
-        
-        .cp-cpk-results {
-            display: flex;
-            gap: 20px;
-            margin-top: 20px;
-        }
-        
-        .cp-result, .cpk-result {
-            flex: 1;
-            background: #1560bd;
+        .cp-result-item {
+            background: linear-gradient(135deg, #1560bd, #000040);
             color: white;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            min-width: 120px;
         }
         
-        .cp-result h3, .cpk-result h3 {
-            margin: 0 0 10px 0;
+        .cp-result-item h3 {
+            margin: 0 0 10px;
             font-size: 18px;
         }
         
-        .cp-result p, .cpk-result p {
-            font-size: 24px;
-            font-weight: bold;
-            margin: 0;
+        .cp-result-value {
+            font-size: 32px;
+            font-weight: 700;
+        }
+        
+        .feedback-alert {
+            background: #e3f2fd;
+            border-left: 4px solid #1976d2;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            text-align: left;
         }
     </style>
 </head>
@@ -378,30 +394,32 @@
 
         <div class="calculator-header">
             <h1>Process Capability (Cp, Cpk) Calculator</h1>
-            <p>Calculates process capability indices to determine how well a process can produce outputs within specification limits</p>
+            <p>Calculates the process capability indices Cp and Cpk to evaluate how well a process meets specification limits</p>
         </div>
 
         <div class="calc-content">
             <!-- Calculator Input Card -->
             <div class="calc-card">
                 <h2>Enter Data</h2>
-                    <div class="form-group">
-                        <label for="usl">Upper Specification Limit (USL)</label>
-                        <input type="number" id="usl" class="form-input" step="0.01" placeholder="Enter USL">
-                    </div>
-                    <div class="form-group">
-                        <label for="lsl">Lower Specification Limit (LSL)</label>
-                        <input type="number" id="lsl" class="form-input" step="0.01" placeholder="Enter LSL">
-                    </div>
-                    <div class="form-group">
-                        <label for="mean">Process Mean (μ)</label>
-                        <input type="number" id="mean" class="form-input" step="0.01" placeholder="Enter μ">
-                    </div>
-                    <div class="form-group">
-                        <label for="sigma">Standard Deviation (σ)</label>
-                        <input type="number" id="sigma" class="form-input" step="0.01" placeholder="Enter σ">
-                    </div>
-        
+                <div class="form-group">
+                    <label for="usl">Upper Specification Limit (USL)</label>
+                    <input type="number" id="usl" class="form-input" step="0.01" placeholder="Enter USL">
+                </div>
+
+                <div class="form-group">
+                    <label for="lsl">Lower Specification Limit (LSL)</label>
+                    <input type="number" id="lsl" class="form-input" step="0.01" placeholder="Enter LSL">
+                </div>
+
+                <div class="form-group">
+                    <label for="mean">Process Mean (μ)</label>
+                    <input type="number" id="mean" class="form-input" step="0.01" placeholder="Enter process mean">
+                </div>
+
+                <div class="form-group">
+                    <label for="sigma">Standard Deviation (σ)</label>
+                    <input type="number" id="sigma" class="form-input" step="0.01" min="0.01" placeholder="Enter standard deviation">
+                </div>
 
                 <button class="calculate-btn" onclick="calculateCpCpk()">Calculate Cp and Cpk</button>
             </div>
@@ -410,7 +428,7 @@
             <div class="result-card">
                 <div class="result-placeholder" id="placeholder">
                     <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Quality control illustration">
-                    <p>This tool calculates <strong>process capability indices</strong> (Cp and Cpk). Enter your specification limits and process parameters to see results.</p>
+                    <p>This tool calculates the <strong>process capability indices Cp and Cpk</strong>. Enter your specification limits, process mean, and standard deviation to see results.</p>
                 </div>
 
                 <div class="result-error hidden" id="resultError">
@@ -419,18 +437,18 @@
                 </div>
 
                 <div class="result-value hidden" id="resultValue">
-                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:15px; color:#1560bd;">
                         <h2>Process Capability Results</h2>
                     </div>
                     
-                    <div class="cp-cpk-results">
-                        <div class="cp-result">
+                    <div class="cp-results">
+                        <div class="cp-result-item">
                             <h3>Cp</h3>
-                            <p id="cpValue">0.00</p>
+                            <div class="cp-result-value" id="cpValue">0.00</div>
                         </div>
-                        <div class="cpk-result">
+                        <div class="cp-result-item">
                             <h3>Cpk</h3>
-                            <p id="cpkValue">0.00</p>
+                            <div class="cp-result-value" id="cpkValue">0.00</div>
                         </div>
                     </div>
                     
@@ -451,18 +469,17 @@
             <div class="note-card">
                 <h3>🔎 About This Calculator</h3>
                 <p>
-                    The <strong>Process Capability Calculator</strong> helps determine how well a process can produce outputs within specified limits. It calculates the Cp (potential capability) and Cpk (actual capability) indices, which are critical for quality control and process improvement.
+                    The <strong>Process Capability Calculator</strong> evaluates how well a process can produce outputs within specified limits by calculating Cp (potential capability) and Cpk (actual capability) indices. These metrics are critical for quality control and process improvement in manufacturing and service industries.
                 </p> 
             </div>
             
             <div class="note-card">
                 <h3>📌 Input Validations</h3>
                 <ul class="note-list">
-                    <li><strong>Upper Specification Limit (USL):</strong> Required, must be a valid number</li>
-                    <li><strong>Lower Specification Limit (LSL):</strong> Required, must be a valid number</li>
-                    <li><strong>Process Mean (μ):</strong> Required, must be a valid number</li>
+                    <li><strong>Upper Specification Limit (USL):</strong> Required, must be greater than LSL</li>
+                    <li><strong>Lower Specification Limit (LSL):</strong> Required, must be less than USL</li>
+                    <li><strong>Process Mean (μ):</strong> Required, must be between LSL and USL for meaningful results</li>
                     <li><strong>Standard Deviation (σ):</strong> Required, must be > 0</li>
-                    <li><strong>Specification Range:</strong> USL must be greater than LSL</li>
                 </ul>
             </div>
 
@@ -474,165 +491,233 @@
                     <li><strong>Process Mean (μ):</strong> The average value of the process output.</li>
                     <li><strong>Standard Deviation (σ):</strong> A measure of the variability in the process output.</li>
                     <li><strong>Cp (Process Capability):</strong> Measures the potential capability by comparing process spread to specification limits.</li>
-                    <li><strong>Cpk (Process Capability Index):</strong> Considers both process variability and how centered the process is between limits.</li>
+                    <li><strong>Cpk (Process Capability Index):</strong> Considers both variability and how centered the process is between limits.</li>
                 </ul>
             </div>
-      
+            
+
             <div class="note-card">
                 <h3>📊 Interpretation Guidelines</h3>
                 <ul class="note-list">
-                    <li><strong>Cp/Cpk < 1:</strong> Process is not capable - outputs exceed specification limits</li>
-                    <li><strong>Cp/Cpk = 1:</strong> Process is marginally capable</li>
-                    <li><strong>Cp/Cpk ≥ 1.33:</strong> Process is capable and meets quality standards</li>
-                    <li><strong>Cp/Cpk ≥ 1.67:</strong> Process is highly capable (Six Sigma target: 2.0)</li>
+                    <li><strong>Cp/Cpk < 1.0:</strong> Process is not capable - outputs frequently exceed specification limits</li>
+                    <li><strong>Cp/Cpk = 1.0-1.33:</strong> Process is marginally capable but requires close monitoring</li>
+                    <li><strong>Cp/Cpk > 1.33:</strong> Process is capable and meets quality standards</li>
+                    <li><strong>Cp/Cpk > 2.0:</strong> Process is considered excellent (Six Sigma quality)</li>
+                    <li><strong>Cp > Cpk:</strong> Process is capable but not centered between specification limits</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📈 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Manufacturing Quality Control:</strong> Monitor production processes to ensure consistent output quality.</li>
+                    <li><strong>Supplier Evaluation:</strong> Assess capability of suppliers to meet specification requirements.</li>
+                    <li><strong>Process Improvement:</strong> Identify opportunities to reduce variation and improve centering.</li>
+                    <li><strong>New Process Validation:</strong> Verify that new processes meet capability requirements before full implementation.</li>
                 </ul>
             </div>
             
             <div class="note-card">
                 <h3>💡 Conclusion</h3>
-                <p>Maintaining high Cp and Cpk values indicates a consistent and reliable process, ensuring better product quality and reduced defects. Regular monitoring of these indices helps identify process improvements and maintain quality standards in manufacturing and service industries.</p>
+                <p>Process capability analysis is essential for maintaining and improving quality in any organization. By regularly calculating and monitoring Cp and Cpk values, businesses can identify processes that need improvement, reduce defects, and ensure customer satisfaction. A capable process (Cpk ≥ 1.33) not only produces fewer defects but also operates more efficiently and predictably.</p>
             </div>
         </div>
     </div>
 
     <script>
         function calculateCpCpk() {
-    const usl = document.getElementById("usl").value.trim();
-    const lsl = document.getElementById("lsl").value.trim();
-    const mean = document.getElementById("mean").value.trim();
-    const sigma = document.getElementById("sigma").value.trim();
+            // Get input values
+            const usl = document.getElementById("usl").value.trim();
+            const lsl = document.getElementById("lsl").value.trim();
+            const mean = document.getElementById("mean").value.trim();
+            const sigma = document.getElementById("sigma").value.trim();
 
-    const errorBox = document.getElementById('resultError');
-    const errorMessage = document.getElementById('errorMessage');
-    const placeholder = document.getElementById('placeholder');
-    const resultValue = document.getElementById('resultValue');
-    const cpValue = document.getElementById('cpValue');
-    const cpkValue = document.getElementById('cpkValue');
-    const feedbackBox = document.getElementById('capabilityFeedback'); 
+            // Get DOM elements for results and errors
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+            const cpValue = document.getElementById('cpValue');
+            const cpkValue = document.getElementById('cpkValue');
+            const feedbackBox = document.getElementById('capabilityFeedback'); 
 
-    let errors = [];
+            let errors = [];
+            let warnings = [];
 
-    // ✅ Input presence
-    if (!usl) errors.push("👉 Enter the Upper Specification Limit (USL).");
-    if (!lsl) errors.push("👉 Enter the Lower Specification Limit (LSL).");
-    if (!mean) errors.push("👉 Enter the Process Mean (μ).");
-    if (!sigma) errors.push("👉 Enter the Standard Deviation (σ).");
+            // Validate inputs
+            if (usl === "") errors.push("👉 Please enter the Upper Specification Limit (USL).");
+            else if (isNaN(usl)) errors.push("👉 USL must be a number.");
+            
+            if (lsl === "") errors.push("👉 Please enter the Lower Specification Limit (LSL).");
+            else if (isNaN(lsl)) errors.push("👉 LSL must be a number.");
+            
+            if (mean === "") errors.push("👉 Please enter the Process Mean (μ).");
+            else if (isNaN(mean)) errors.push("👉 Process Mean must be a number.");
+            
+            if (sigma === "") errors.push("👉 Please enter the Standard Deviation (σ).");
+            else if (isNaN(sigma)) errors.push("👉 Standard Deviation must be a number.");
+            else if (parseFloat(sigma) <= 0) errors.push("👉 Standard Deviation must be greater than 0.");
 
-    if (errors.length > 0) {
-        errorMessage.innerHTML = errors.join("<br>");
-        errorBox.classList.remove("hidden");
-        placeholder.classList.add("hidden");
-        resultValue.classList.add("hidden");
-        return;
-    }
+            // Check if all inputs are valid numbers
+            if (errors.length === 0) {
+                const uslNum = parseFloat(usl);
+                const lslNum = parseFloat(lsl);
+                const meanNum = parseFloat(mean);
+                const sigmaNum = parseFloat(sigma);
+                
+                // Additional validation
+                if (uslNum <= lslNum) {
+                    errors.push("👉 USL must be greater than LSL.");
+                }
+                
+                if (meanNum < lslNum || meanNum > uslNum) {
+                    warnings.push("⚠️ Process mean is outside specification limits. This indicates a high defect rate.");
+                }
+            }
 
-    const uslNum = parseFloat(usl);
-    const lslNum = parseFloat(lsl);
-    const meanNum = parseFloat(mean);
-    const sigmaNum = parseFloat(sigma);
+            // Show errors if any
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden");
+            }
 
-    // ✅ Numeric validations
-    if (isNaN(uslNum) || isNaN(lslNum) || isNaN(meanNum) || isNaN(sigmaNum)) {
-        errorMessage.innerHTML = "❌ All inputs must be valid numbers.";
-        errorBox.classList.remove("hidden");
-        placeholder.classList.add("hidden");
-        resultValue.classList.add("hidden");
-        return;
-    }
+            // Calculate Cp and Cpk
+            const uslNum = parseFloat(usl);
+            const lslNum = parseFloat(lsl);
+            const meanNum = parseFloat(mean);
+            const sigmaNum = parseFloat(sigma);
+            
+            const Cp = (uslNum - lslNum) / (6 * sigmaNum);
+            const Cpu = (uslNum - meanNum) / (3 * sigmaNum);
+            const Cpl = (meanNum - lslNum) / (3 * sigmaNum);
+            const Cpk = Math.min(Cpu, Cpl);
 
-    if (uslNum <= lslNum) {
-        errorMessage.innerHTML = "❌ USL must be greater than LSL.";
-        errorBox.classList.remove("hidden");
-        placeholder.classList.add("hidden");
-        resultValue.classList.add("hidden");
-        return;
-    }
+            // Update result display
+            cpValue.textContent = Cp.toFixed(4);
+            cpkValue.textContent = Cpk.toFixed(4);
 
-    if (sigmaNum <= 0) {
-        errorMessage.innerHTML = "❌ Standard Deviation must be greater than zero.";
-        errorBox.classList.remove("hidden");
-        placeholder.classList.add("hidden");
-        resultValue.classList.add("hidden");
-        return;
-    }
+            // Generate feedback
+            let feedback = "";
+            
+            if (Cp < 1) {
+                feedback += `<div class="feedback-alert">The process is not capable (Cp < 1). High variation causes outputs to exceed specification limits, resulting in defects.</div>`;
+            }
+            
+            if (Cpk < 1) {
+                feedback += `<div class="feedback-alert">The process is not centered or is too variable (Cpk < 1). Outputs frequently exceed specification limits.</div>`;
+            }
+            
+            if (Cp >= 1.33 && Cpk >= 1.33) {
+                feedback += `<div class="feedback-alert" style="background: #e8f5e9; border-left-color: #4caf50;">The process is capable and centered (Cp ≥ 1.33 and Cpk ≥ 1.33).</div>`;
+            } else if (Cp >= 1.33 && Cpk < 1.33) {
+                feedback += `<div class="feedback-alert">The process is capable but not centered (Cp ≥ 1.33 and Cpk < 1.33). Consider adjusting the process mean.</div>`;
+            }
+            
+            if (Cp > 2 && Cpk > 2) {
+                feedback += `<div class="feedback-alert" style="background: #e8f5e9; border-left-color: #4caf50;">Excellent process capability (Six Sigma quality level).</div>`;
+            }
+            
+            // Add warnings if any
+            if (warnings.length > 0) {
+                warnings.forEach(warning => {
+                    feedback += `<div class="feedback-alert" style="background: #fff3e0; border-left-color: #ff9800;">${warning}</div>`;
+                });
+            }
+            
+            feedbackBox.innerHTML = feedback;
 
-    // ✅ Warning for mean outside limits
-    if (meanNum < lslNum || meanNum > uslNum) {
-        errorMessage.innerHTML = "⚠️ Process Mean is outside specification limits. This will result in a very low Cpk.";
-        errorBox.classList.remove("hidden");
-    } else {
-        errorBox.classList.add("hidden");
-    }
-
-    // ✅ Calculations
-    const Cp = (uslNum - lslNum) / (6 * sigmaNum);
-    const Cpk = Math.min(
-        (uslNum - meanNum) / (3 * sigmaNum),
-        (meanNum - lslNum) / (3 * sigmaNum)
-    );
-
-    cpValue.textContent = Cp.toFixed(2);
-    cpkValue.textContent = Cpk.toFixed(2);
-
-    // ✅ Interpretation
-    let feedback = "";
-    if (Cp < 1) feedback += "❌ Process not capable (Cp < 1). ";
-    if (Cpk < 1) feedback += "❌ Process not centered or too variable (Cpk < 1). ";
-    if (Cp >= 1.33 && Cpk >= 1.33) feedback += "✅ Process is capable and meets industry standards. ";
-    if (Cp >= 1.67 && Cpk >= 1.67) feedback += "🎯 Process is highly capable (world-class quality). ";
-
-    feedbackBox.innerHTML = feedback;
-
-    placeholder.classList.add('hidden');
-    resultValue.classList.remove('hidden');
-}
-
-function printReport() {
-    window.print();
-}
-
+            // Show results
+            placeholder.classList.add('hidden');
+            resultValue.classList.remove('hidden');
+        }
+        
+        function printReport() {
+            window.print();
+        }
     </script>
     <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
 {% endblock %}
 <!--
-Input Validation Rules
-Input	Validation	Acceptable Range	Justification
-USL (Upper Spec Limit)	Required, numeric, > LSL	Engineering realistic values	USL must exceed LSL.
-LSL (Lower Spec Limit)	Required, numeric, < USL	Non-negative (≥ 0 unless negative specs are justified)	Ensures proper spec range.
-Process Mean (μ)	Required, numeric	Should lie between USL & LSL (flag warning if not)	If outside, process is unstable.
-Standard Deviation (σ)	Required, numeric, > 0	0.01 ≤ σ ≤ 1000	Zero σ = division by zero, negative is invalid.
-Decimals	Max 2–3 decimals	Matches industrial reporting precision	Avoids misleading false precision.
-3. Edge Case Validations
 
-Division by zero → If σ = 0, Cp and Cpk are undefined. Must reject.
+Input Validation Rules:
+Upper Specification Limit (USL)
 
-USL = LSL → Cp = 0 (process tolerance = 0). Invalid spec design.
+Required field
 
-Mean outside USL/LSL → Warn user; Cpk will be very low.
+Must be a valid number
 
-Unrealistic ratios → Cp > 10 or Cpk > 10 → likely data entry error.
+Must be greater than LSL (USL > LSL)
 
-Extreme σ (e.g., > tolerance range) → Show warning of unstable process.
+Realistic range: Based on your process (e.g., 0.1 to 1000 for most manufacturing)
 
-4. Output Validation Logic & Thresholds
+Decimal precision: Allow up to 6 decimal places for precision processes
 
-Industry standard (AIAG, Six Sigma, ISO):
+Lower Specification Limit (LSL)
 
-Cp < 1.0 → Not capable (process spread > spec range).
+Required field
 
-Cp ≥ 1.33 → Capable (common industry minimum).
+Must be a valid number
 
-Cp ≥ 1.67 → Highly capable (critical safety equipment).
+Must be less than USL (LSL < USL)
 
-Cp ≥ 2.0 → Six Sigma level.
+Realistic range: Context-dependent, but typically LSL ≥ 0 for physical measurements
 
-Cpk considers centering:
+Decimal precision: Allow up to 6 decimal places
 
-Cpk < 1.0 → Process off-center or too variable.
+Process Mean (μ)
 
-Cp good but Cpk poor → Misalignment between process mean and target.
+Required field
 
+Must be a valid number
+
+Should ideally be between LSL and USL (though mathematically can be outside)
+
+Decimal precision: Allow up to 6 decimal places
+
+Standard Deviation (σ)
+
+Required field
+
+Must be a valid number > 0 (σ > 0)
+
+Typically σ > 0.001 for most measurable processes
+
+Maximum reasonable value: (USL - LSL)/2 (beyond this, process is extremely variable)
+
+Decimal precision: Allow up to 6 decimal places
+
+Cross-Field Dependencies:
+USL must be greater than LSL
+
+Process mean should ideally be between LSL and USL for a capable process
+
+Standard deviation should be less than (USL - LSL)/6 for Cp > 1
+
+Edge Cases:
+Division by zero if σ = 0
+
+USL = LSL (no tolerance range)
+
+Extremely large or small values that don't represent real processes
+
+Negative values for σ (mathematically impossible)
+
+Output Validation & Interpretation
+From a QEHS perspective, Cp and Cpk values should be interpreted as:
+
+Cp/Cpk < 1.0: Process not capable - immediate corrective action required
+
+Cp/Cpk = 1.0-1.33: Marginal capability - process requires close monitoring
+
+Cp/Cpk > 1.33: Process is capable (industry standard)
+
+Cp/Cpk > 2.0: Excellent capability (Six Sigma level)
 
 -->

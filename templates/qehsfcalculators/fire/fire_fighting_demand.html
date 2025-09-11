@@ -1,0 +1,669 @@
+{% extends 'base.html' %}
+{% block title %}Fire Fighting Demand Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accident Rate Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+           justify-content: center;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+         @media (max-width: 768px) {
+    .rate-value {
+        font-size: 28px; /* smaller font for tablets/mobiles */
+    }
+}
+
+@media (max-width: 480px) {
+    .rate-value {
+        font-size: 24px; /* even smaller for phones */
+    }
+}
+    </style>
+</head>
+<body>
+   <div class="btn-container">
+    <a href="{% url 'firecategory_calculators' %}" class="back-btn">Back To Fire Calculators</a>
+</div>
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+    <div class="calculator-header">
+        <h1>Fire Fighting Demand Calculator</h1>
+        <p>Estimate the amount of water required to effectively combat fires based on population and planning standards.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Input Card -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+            <div class="form-group">
+                <label for="population">Population</label>
+                <input type="number" id="population" class="form-input" placeholder="Enter Population">
+            </div>
+            <button class="calculate-btn" onclick="calculateFireDemand()">Calculate Fire Demand</button>
+        </div>
+
+        <!-- Result Card -->
+        <div class="result-card">
+            <!-- Placeholder -->
+            <div class="result-placeholder" id="placeholder">
+                <img src="{% static 'images/flame.png' %}" alt="Fire Demand Illustration">
+                <p>This tool will calculate the <strong>Fire Fighting Demand</strong>. Enter your data to see results and insights here.</p>
+            </div>
+
+            <!-- Error -->
+            <div class="result-error hidden" id="resultError" style="font-size: 28px;"></div>
+
+            <!-- Result -->
+            <div class="result-value hidden" id="resultValue">
+                <div class="rate-value">Fire Fighting Demand</div>
+                <div class="result-feedback" id="feedbackContent"></div>
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="note-section">
+
+        <!-- About This Calculator -->
+        <div class="note-card">
+            <h3>📘 About This Calculator</h3>
+           <p>
+                Fire Fighting Demand refers to the amount of water required to effectively combat fires in a given area. 
+                It is calculated based on the population of the area and is used to design firefighting systems and 
+                water supply networks.
+            </p>
+        </div>
+
+       
+        <div class="note-card">
+            <h3>Why is Fire Fighting Demand Important?</h3>
+            <p>
+                Estimating firefighting demand is crucial for:
+            </p>
+            <ul>
+                <li><strong>Urban Planning:</strong> Designing water supply systems to meet firefighting needs.</li>
+                <li><strong>Emergency Preparedness:</strong> Ensuring adequate water supply during fire emergencies.</li>
+                <li><strong>Infrastructure Design:</strong> Building fire hydrants, reservoirs, and pumping stations.</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h3>How to Use the Calculator</h3>
+            <p>
+                Follow these steps to calculate the firefighting water demand:
+            </p>
+            <ol>
+                <li><strong>Enter Population:</strong> Input the total population of the area. Formulae (P in thousand).</li>
+                <li><strong>Calculate:</strong> Click "Calculate Fire Demand" to see the required water flow rate.</li>
+            </ol>
+        </div>
+
+        <div class="note-card">
+            <h3>Understanding the Formulas</h3>
+            <p>
+                Firefighting water demand is calculated using different formulas, each developed for specific contexts and purposes. 
+                These formulas consider factors like population size, fire risk, and water supply infrastructure. Below is a detailed 
+                explanation of the formulas used in this calculator:
+            </p>
+            <strong>1. American Insurance Association (AIA) Formula</strong>
+            <p>
+                The AIA formula is one of the most widely used methods for estimating firefighting water demand. It takes into 
+                account the population size and adjusts for the likelihood of fires in densely populated areas. The formula 
+                provides a balance between water supply and fire risk, making it suitable for urban planning and fire safety 
+                assessments.
+            </p>
+            <strong>2. Kuchling's Formula</strong>
+            <p>
+                Kuchling's formula is another method for estimating firefighting water demand. It is simpler than the AIA formula 
+                and is often used for quick calculations. This formula focuses on the relationship between population size and 
+                water demand, making it useful for preliminary assessments and smaller communities.
+            </p>
+            <strong>3. Freeman's Formula</strong>
+            <p>
+                Freeman's formula is designed to estimate firefighting water demand based on population and fire risk. It considers 
+                the potential for multiple fires occurring simultaneously in larger populations. This formula is particularly useful 
+                for areas with higher fire risks or where firefighting resources need to be allocated efficiently.
+            </p>
+            <strong>4. Ministry of Urban Development Formula</strong>
+            <p>
+                The Ministry of Urban Development formula is used for larger populations (typically over 50,000). It provides a 
+                more conservative estimate of water demand, ensuring that sufficient water is available for firefighting in densely 
+                populated urban areas. This formula is often used in national or regional planning for water supply systems.
+            </p>
+        </div>
+
+        <div class="note-card">
+            <h3>Why Are Multiple Formulas Used?</h3>
+            <p>
+                Different formulas are used because firefighting water demand depends on various factors, such as population density, 
+                fire risk, and infrastructure. Each formula is designed for specific scenarios, and using multiple formulas provides 
+                a range of estimates. This helps planners and engineers make informed decisions based on the most relevant data.
+            </p>
+        </div>
+          <div class="note-card">
+    <h3>🛡️ Input Validation Rules</h3>
+    <p>To ensure accurate and reliable fire demand calculations, the following validation rules are applied:</p>
+    <ul class="note-list">
+        <li><strong>Required Field:</strong> Population must be entered.</li>
+        <li><strong>Numeric Only:</strong> Accepts positive numbers; non-numeric entries are rejected.</li>
+        <li><strong>Positive Values:</strong> Population must be greater than 0; zero or negative values trigger an error.</li>
+        <li><strong>Minimum Threshold:</strong> Population below 1 is too small to generate meaningful demand; shows a warning.</li>
+        <li><strong>Maximum Threshold:</strong> Population above 10,000,000 triggers a warning to verify data and units.</li>
+        <li><strong>Logical Consistency:</strong> Ministry of Urban Development formula applies only for populations &gt; 50,000.</li>
+        <li><strong>Decimals:</strong> Allowed for thousands (e.g., 12.5k), but fractions of individuals are not meaningful.</li>
+        <li><strong>Edge Cases:</strong> Handles extremely small, large, or non-numeric inputs safely; prevents negative or zero fire demand outputs.</li>
+    </ul>
+    <p><strong>Compliance Note:</strong> These validations ensure the calculator produces realistic, auditable, and regulatory-compliant fire demand estimates.</p>
+</div>
+
+        <div class="note-card">
+            <h3>Disclaimer</h3>
+            <p>
+                This calculator provides estimates for informational purposes only. It should not replace professional advice or 
+                planning. Always consult with fire safety experts for accurate and detailed firefighting system design.
+            </p>
+        </div>
+
+
+    </div>
+</div>
+
+<script>
+function calculateFireDemand() {
+    const populationInput = document.getElementById('population').value.trim();
+    const resultValue = document.getElementById('resultValue');
+    const placeholder = document.getElementById('placeholder');
+    const feedbackContent = document.getElementById('feedbackContent');
+    const resultError = document.getElementById('resultError');
+
+    // Reset display states
+    resultError.classList.add('hidden');
+    resultValue.classList.add('hidden');
+    placeholder.classList.add('hidden');
+    resultError.innerHTML = "";
+    feedbackContent.innerHTML = "";
+
+    // Empty check
+    if (populationInput === "") {
+        resultError.innerHTML = "⚠️ Please enter the population.";
+        resultError.style.color = "orange";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    const population = parseFloat(populationInput);
+
+    // Numeric and positive check
+    if (isNaN(population) || population <= 0) {
+        resultError.innerHTML = "❌ Invalid entry. Please enter a positive numeric value for population.";
+        resultError.style.color = "red";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    // Upper and lower bounds
+    if (population < 1) {
+        resultError.innerHTML = "⚠️ Population is too small to generate meaningful fire demand.";
+        resultError.style.color = "orange";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    if (population > 10000000) {
+        resultError.innerHTML = "⚠️ Population entered is extremely high. Verify units and data.";
+        resultError.style.color = "orange";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    // Fire demand calculations
+    const fireDemandAIA = 4637 * Math.sqrt(population) * (1 - 0.01 * Math.sqrt(population));
+    const fireDemandKuchling = 3182 * Math.sqrt(population);
+    const fireDemandFreeman = 1136.5 * ((population / 5) + 10);
+    let fireDemandUrbanDev = "Not applicable for this population";
+    if (population > 50000) {
+        fireDemandUrbanDev = 100 * Math.sqrt(population) * 1000; // L/day
+    }
+
+    // Ensure outputs are positive
+    if (fireDemandAIA <= 0 || fireDemandKuchling <= 0 || fireDemandFreeman <= 0) {
+        resultError.innerHTML = "❌ Calculated fire demand is non-positive. Check input values.";
+        resultError.style.color = "red";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    // Round values
+    const AIA = fireDemandAIA.toFixed(2);
+    const Kuchling = fireDemandKuchling.toFixed(2);
+    const Freeman = fireDemandFreeman.toFixed(2);
+    const UrbanDev = (typeof fireDemandUrbanDev === "number") ? fireDemandUrbanDev.toFixed(2) : fireDemandUrbanDev;
+
+    // Display results visually
+    feedbackContent.innerHTML = `
+        <div style="display:flex; flex-direction:column; gap:12px; margin-top:15px;">
+            <div style="background:#e8f4fc; padding:15px; border-left:5px solid #1560bd; border-radius:8px;">
+                <strong>AIA Formula:</strong> ${AIA} L/min
+            </div>
+            <div style="background:#fff3e0; padding:15px; border-left:5px solid #ff9800; border-radius:8px;">
+                <strong>Kuchling's Formula:</strong> ${Kuchling} L/min
+            </div>
+            <div style="background:#fce4ec; padding:15px; border-left:5px solid #e91e63; border-radius:8px;">
+                <strong>Freeman's Formula:</strong> ${Freeman} L/min
+            </div>
+            <div style="background:#e0f7fa; padding:15px; border-left:5px solid #00acc1; border-radius:8px;">
+                <strong>Ministry of Urban Development:</strong> ${UrbanDev} L/day
+            </div>
+        </div>
+    `;
+    resultValue.classList.remove('hidden');
+}
+
+
+function printReport() {
+    window.print();
+}
+</script>
+
+
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+<!-- 1. Analysis of Inputs, Outputs, and Formulas
+Input
+
+Population (population):
+
+Represents the total number of people in the area under consideration.
+
+Used as a scaling factor for firefighting water demand (per AIA, Kuchling, Freeman, Ministry of Urban Development).
+
+Units: number of people (no fractions for individuals, but some formulas may allow decimals for thousands).
+
+Outputs
+
+Fire Fighting Demand (L/min or L/day):
+
+AIA Formula: 4637 * sqrt(P) * (1 - 0.01 * sqrt(P)) (L/min)
+
+Kuchling Formula: 3182 * sqrt(P) (L/min)
+
+Freeman Formula: 1136.5 * ((P / 5) + 10) (L/min)
+
+Ministry of Urban Development: 100 * sqrt(P) * 1000 (L/day), only if P > 50,000
+
+Notes:
+
+Outputs must be positive, physically meaningful, and within expected real-world ranges.
+
+Extremely high populations (> 1,000,000) may produce unrealistic water demand and require a warning.
+
+2. Input Validation Rules (QEHS Perspective)
+Input	Validation	Justification / Compliance
+Population	Required	Cannot calculate demand with empty value
+	Numeric only	Non-numeric values are invalid; may crash formulas
+	Positive integers (>=1)	Zero or negative populations are physically impossible
+	Max population: 10,000,000 (ten million)	Realistic upper bound for large cities; exceeding this triggers review
+	Allowed decimals? Optional	For planning, fractions in thousands (e.g., 12.5k) are acceptable, but no negative decimals
+	Logical check: Population < 50 for Ministry of Urban Development	Ensures formula applicability
+	No extremely small population (<1)	Fire demand for <1 person is meaningless
+
+Compliance Note: These rules prevent unrealistic water demand calculations, ensuring estimates can be used in audits, emergency planning, and regulatory compliance.
+
+3. Edge Case Validations
+
+Empty input → warning.
+
+Population = 0 → error.
+
+Negative population → error.
+
+Extremely high population (>10,000,000) → warning, may need manual review.
+
+Population < 1 → warning, negligible demand, but calculated values can mislead.
+
+Non-numeric input → error.
+
+Extremely large population but Ministry of Urban Development formula triggered → check for overflow.
+
+Division by zero is not an issue here, but sqrt of negative numbers should be prevented.
+
+4. Output Validation / Thresholds
+
+Fire Fighting Demand should always be positive.
+
+Expected ranges based on population:
+
+Formula	Population Range	Typical L/min or L/day
+AIA	1 – 1,000,000	4,600 – 100,000 L/min
+Kuchling	1 – 1,000,000	3,200 – 30,000 L/min
+Freeman	1 – 1,000,000	1,100 – 50,000 L/min
+Ministry of Urban Development	50,000+	700,000 – 1,000,000+ L/day
+
+Compliance Note: Any output below 1 L/min or extremely high values (> max expected) should trigger a warning for verification. -->

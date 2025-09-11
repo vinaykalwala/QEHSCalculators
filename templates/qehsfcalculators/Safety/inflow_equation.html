@@ -1,0 +1,748 @@
+{% extends 'base.html' %}
+{% block title %}Inflow Equation Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inflow Equation Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        /* Input rows for side-by-side fields */
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        .error {
+            color: #ff6b6b;
+            font-size: 14px;
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+       
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Inflow Equation Calculator</h1>
+            <p>Calculate oil production rate based on reservoir and well conditions</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="k">Formation Permeability (k) [md]</label>
+                        <input type="number" id="k" class="form-input" min="0" step="any" placeholder="e.g., 100">
+                        <div class="error" id="kError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="h">Formation Thickness (h) [ft]</label>
+                        <input type="number" id="h" class="form-input" min="0" step="any" placeholder="e.g., 50">
+                        <div class="error" id="hError"></div>
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="Pe">Reservoir Pressure (Pe) [psi]</label>
+                        <input type="number" id="Pe" class="form-input" min="0" step="any" placeholder="e.g., 3000">
+                        <div class="error" id="PeError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="Pw">Wellbore Pressure (Pw) [psi]</label>
+                        <input type="number" id="Pw" class="form-input" min="0" step="any" placeholder="e.g., 1500">
+                        <div class="error" id="PwError"></div>
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="Bo">Formation Volume Factor (Bo) [RB/STB]</label>
+                        <input type="number" id="Bo" class="form-input" min="0" step="any" placeholder="e.g., 1.2">
+                        <div class="error" id="BoError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="uo">Oil Viscosity (μo) [cp]</label>
+                        <input type="number" id="uo" class="form-input" min="0" step="any" placeholder="e.g., 2.5">
+                        <div class="error" id="uoError"></div>
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="re">Drainage Radius (re) [ft]</label>
+                        <input type="number" id="re" class="form-input" min="0" step="any" placeholder="e.g., 1000">
+                        <div class="error" id="reError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="rw">Wellbore Radius (rw) [ft]</label>
+                        <input type="number" id="rw" class="form-input" min="0" step="any" placeholder="e.g., 0.5">
+                        <div class="error" id="rwError"></div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="Sf">Skin Factor (Sf)</label>
+                    <input type="number" id="Sf" class="form-input" step="any" placeholder="e.g., 0 (default)">
+                    <div class="error" id="SfError"></div>
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateInflow()">Calculate Production Rate</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                   <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Safety illustration">
+
+                    <p>This tool will calculate the <strong>Production Rate</strong> for oil wells. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Production Rate</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">STB/D</div>
+                    </div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low</span><span>Moderate</span><span>Good</span><span>High</span><span>Very High</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Production Rate Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    This tool calculates the <strong>Production Rate</strong> for oil wells using the Inflow Performance Relationship (IPR) equation, 
+                    which estimates oil well productivity based on reservoir and well conditions.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Formation Permeability (k):</strong> Determines ease of fluid flow in the rock formation (md).</li>
+                    <li><strong>Formation Thickness (h):</strong> The height of the producing formation (ft).</li>
+                    <li><strong>Reservoir Pressure (Pe):</strong> The pressure at the reservoir boundary (psi).</li>
+                    <li><strong>Wellbore Pressure (Pw):</strong> The pressure at the wellbore (psi).</li>
+                    <li><strong>Formation Volume Factor (Bo):</strong> Adjusts for expansion effects (RB/STB).</li>
+                    <li><strong>Oil Viscosity (μo):</strong> Higher viscosity slows flow (cp).</li>
+                    <li><strong>Drainage Radius (re):</strong> Defines the drainage area (ft).</li>
+                    <li><strong>Wellbore Radius (rw):</strong> The radius of the wellbore (ft).</li>
+                    <li><strong>Skin Factor (Sf):</strong> Indicates well performance (damage or enhancement).</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <p>
+                    <b>Production Rate Guidelines:</b>
+                </p>
+                <ul class="note-list">
+                    <li><span class="bad">Below 100 STB/D</span> → Low production rate</li>
+                    <li><span class="average">100-500 STB/D</span> → Moderate production rate</li>
+                    <li><span class="good">500-2000 STB/D</span> → Good production rate</li>
+                    <li><span class="good">2000-5000 STB/D</span> → High production rate</li>
+                    <li><span class="good">Above 5000 STB/D</span> → Very high production rate</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>🔑 Key Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Well Performance Prediction:</strong> Estimates production rates for oil wells.</li>
+                    <li><strong>Reservoir Management:</strong> Helps in planning reservoir development strategies.</li>
+                    <li><strong>Economic Evaluation:</strong> Supports economic decisions regarding well development.</li>
+                    <li><strong>Production Optimization:</strong> Guides decisions to enhance oil extraction efficiency.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+    <h3>✅ Validation Rules & Input Constraints</h3>
+    <ul class="note-list">
+        <li><strong>Total Resolution Time (hours):</strong> Must be ≥ 0 and ≤ 10,000. Decimals allowed (max 2 places).</li>
+        <li><strong>Number of Issues Resolved:</strong> Must be an integer ≥ 1 and ≤ 10,000.</li>
+        <li><strong>Logical Consistency:</strong> ART = TRT ÷ NI. Division by zero not allowed.</li>
+        <li><strong>Edge Cases:</strong> ART = 0 → Warning (check data); ART > 24 h/issue → Flagged as unrealistic.</li>
+        <li><strong>Output:</strong> Rounded to 2 decimals, expressed in <em>hours per issue resolved</em>.</li>
+    </ul>
+</div>
+
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateAverageResolutionTime() {
+    const totalTime = document.getElementById('totalResolutionTime').value.trim();
+    const numberOfIssues = document.getElementById('numberOfIssues').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+    let warnings = [];
+
+    // Validate Total Resolution Time
+    if (totalTime === "" || isNaN(totalTime)) {
+        errors.push("👉 Please enter a valid Total Resolution Time in hours.");
+    } else if (parseFloat(totalTime) < 0) {
+        errors.push("👉 Total Resolution Time cannot be negative.");
+    } else if (parseFloat(totalTime) > 10000) {
+        errors.push("👉 Total Resolution Time is unrealistically high (>10,000 h).");
+    }
+
+    // Validate Number of Issues
+    if (numberOfIssues === "" || isNaN(numberOfIssues)) {
+        errors.push("👉 Please enter the Number of Issues resolved.");
+    } else if (!Number.isInteger(parseFloat(numberOfIssues))) {
+        errors.push("👉 Number of Issues must be an integer.");
+    } else if (parseInt(numberOfIssues) <= 0) {
+        errors.push("👉 Number of Issues must be greater than 0.");
+    } else if (parseInt(numberOfIssues) > 10000) {
+        warnings.push("⚠️ Number of Issues is very high (>10,000). Verify data.");
+    }
+
+    // Handle errors
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    const time = parseFloat(totalTime);
+    const issues = parseInt(numberOfIssues);
+    const averageTime = time / issues;
+
+    // Output validation
+    if (averageTime === 0) {
+        warnings.push("⚠️ ART is 0 hours/issue. Check if resolution time was recorded correctly.");
+    } else if (averageTime > 24) {
+        warnings.push("⚠️ ART exceeds 24 h/issue. Likely unrealistic in safety contexts.");
+    }
+
+    document.getElementById('rateValue').textContent = averageTime.toFixed(2);
+
+    // Meter & Feedback
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+
+    if (averageTime < 2) {
+        meterWidth = '20%'; meterColor = '#27ae60';
+        feedback = '🌟 Excellent performance. Fast resolution!';
+    } else if (averageTime < 4) {
+        meterWidth = '40%'; meterColor = '#2ecc71';
+        feedback = '👍 Good response time. Keep improving.';
+    } else if (averageTime < 8) {
+        meterWidth = '60%'; meterColor = '#f39c12';
+        feedback = '⚠️ Moderate performance. Streamline processes.';
+    } else if (averageTime < 16) {
+        meterWidth = '80%'; meterColor = '#e67e22';
+        feedback = '🚨 Slow response time. Investigate bottlenecks.';
+    } else {
+        meterWidth = '95%'; meterColor = '#e74c3c';
+        feedback = '❌ Critical delay. Immediate corrective action needed!';
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').textContent = feedback + (warnings.length ? " " + warnings.join(" ") : "");
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+
+{% comment %} 
+📘 Step 1: Formula & Context
+
+Formula (used in ART Calculator):
+
+Average Resolution Time (ART) = Total Resolution Time (hours) ÷ Number of Issues Resolved
+
+
+Total Resolution Time (TRT): Sum of all hours spent resolving issues.
+
+Number of Issues (NI): Count of issues resolved in the defined reporting period.
+
+Units: Hours per issue (h/issue).
+
+Why It Matters (QEHS/Fire Safety):
+
+ART is a lagging KPI for efficiency and responsiveness.
+
+In safety-critical environments, high ART could delay hazard mitigation, emergency response, or corrective actions — impacting OSHA incident response requirements, ISO 45001 continual improvement, and NFPA emergency readiness.
+
+📘 Step 2: Input Validation Rules
+Input	Validation Rule	Rationale
+Total Resolution Time (hours)	- Must be ≥ 0 and ≤ 10,000 h.
+- Allow decimals up to 2 places.
+- Warning if ART > 24 h/issue (unrealistic for safety-critical tasks).	Negative or excessive values distort KPI. A cap (10,000 h) prevents abuse or data entry errors.
+Number of Issues Resolved	- Must be ≥ 1 and ≤ 10,000.
+- Integer only.
+- Warning if extremely high (> 5,000 in a reporting cycle).	Division by zero must be prevented. Unrealistic large numbers indicate bad data.
+📘 Step 3: Output Validation & Thresholds
+
+Thresholds (Aligned to Safety/Service Benchmarks):
+
+< 2 h/issue → Excellent: Fast hazard closure, high responsiveness.
+
+2 – 4 h/issue → Good: Acceptable performance.
+
+4 – 8 h/issue → Moderate: Needs process improvement.
+
+8 – 16 h/issue → Slow: Response delay may risk compliance.
+
+> 16 h/issue → Critical: Immediate action required.
+
+📘 Step 4: Edge Cases
+
+Division by Zero: Prevented (issues must be ≥1).
+
+Zero Time with Issues >0: ART = 0 → Warning (“Check data integrity”).
+
+Large TRT with Small NI: ART becomes extreme (flag as outlier).
+
+Decimals Handling: Round ART to 2 decimals for reporting consistency.
+
+📘 Step 5: Corrected JavaScript Validation
+/*
+=====================================================
+ Average Resolution Time (ART) Calculator
+ Formula:
+   ART = Total Resolution Time (hours) / Number of Issues Resolved
+
+ Input Validations:
+ - Total Resolution Time (TRT): 
+      Must be ≥ 0 and ≤ 10,000 hours
+      Allow decimals (max 2 places)
+ - Number of Issues (NI): 
+      Must be ≥ 1 and ≤ 10,000
+      Integer only
+ Edge Cases:
+ - Division by zero (NI = 0) → Prevent
+ - ART > 24 h/issue → Flag as unrealistic
+ - ART = 0 → Warn user (check data)
+=====================================================
+*/ {% endcomment %}
