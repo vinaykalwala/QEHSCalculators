@@ -723,7 +723,7 @@ CALCULATORS = [
 
 {"name": "Kinetic Energy Calculator", "url_name":"safety_kinetic_energy_calculator", "plan_type": "corporate", "category": "safety"}, 
 
-{"name": "Kv Flow Coefficient Calculator", "url_name":"afety_kv_flow_coeffient_calculator", "plan_type": "corporate", "category": "safety"}, 
+{"name": "Kv Flow Coefficient Calculator", "url_name":"safety_kv_flow_coeffient_calculator", "plan_type": "corporate", "category": "safety"}, 
 
 {"name": "Ladder Length Calculator", "url_name":"safety_ladder_length_calculator", "plan_type": "corporate", "category": "safety"}, 
 
