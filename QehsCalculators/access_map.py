@@ -434,6 +434,51 @@ CALCULATORS = [
 {"name": "Monod Kinetics - Substrate Limited Growth Calculator", "url_name": "environment_monod_kinetics_substrate_limited_growth_calculator", "plan_type": "corporate", "category": "environment"},
 
 
+{"name": "Manning’s Formula For Hydraulic Flow Velocity Calculator", "url_name": "environment_mannings_formula_for_hydraulic_flow_velocity_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Mean Cell Residence Sludge Retention Time (SRT) Calculator", "url_name": "environment_mean_cell_residence_sludge_retention_time_srt_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Mass of Waste Activated Sludge Calculator", "url_name": "environment_mass_of_waste_activated_sludge_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Minor Losses (Fittings) Calculator", "url_name": "environment_minor_losses_fittings_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Maximum Plume Concentration Calculator", "url_name": "environment_maximum_plume_concentration_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Mass Transfer Rate Calculator", "url_name": "environment_mass_transfer_rate_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Molar Humidity Calculator", "url_name": "environment_molar_humidity_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Net Microbial Growth Rate Calculator", "url_name": "environment_net_microbial_growth_rate_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Overburden Pressure Calculator", "url_name": "environment_overburden_pressure_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Oxygen Requirement O2 Calculator - Activated Sludge Process", "url_name": "environment_oxygen_requirement_o2_activated_sludge_process_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
