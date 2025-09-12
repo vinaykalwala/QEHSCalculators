@@ -1,0 +1,778 @@
+{% extends 'base.html' %}
+{% block title %}Water Demand Fluctuation Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Demand Fluctuation Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        
+
+
+.result-card::-webkit-scrollbar {
+    width: 8px;
+}
+
+.result-card::-webkit-scrollbar-thumb {
+    background: #1560bd;
+    border-radius: 6px;
+}
+
+.result-card::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.result-card {
+    justify-content: flex-start; /* align from top */
+    align-items: stretch;
+    min-height: 420px;
+    text-align: center;
+    overflow-y: auto;       /* Enable vertical scrolling */
+    max-height: 450px;      /* Set max height to control output size */
+    padding: 20px;          /* keep spacing */
+}
+
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 38px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+        
+        .demand-results {
+            width: 100%;
+            text-align: left;
+        }
+        
+        .demand-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .demand-item:last-child {
+            border-bottom: none;
+        }
+        
+        .demand-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .demand-value {
+            font-size: 18px;
+            color: #2980b9;
+            font-weight: 600;
+        }
+        
+        .demand-unit {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 15px 0;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+    <div class="calculator-header">
+        <h1>Water Demand Fluctuation Calculator</h1>
+        <p>Calculate <strong>Average Daily, Maximum Daily, and Peak Hourly Water Demand</strong> for water supply system planning.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Calculator -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+
+            <div class="form-group">
+                <label for="totalWater">Total Annual Water Consumption (liters)</label>
+                <input type="number" id="totalWater" class="form-input" min="1" step="any" placeholder="e.g., 10000000">
+            </div>
+
+            <div class="form-group">
+                <label for="population">Population Served</label>
+                <input type="number" id="population" class="form-input" min="1" step="1" placeholder="e.g., 5000">
+            </div>
+            
+            <button class="calculate-btn" onclick="calculateWaterDemand()">Calculate Water Demand</button>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="/static/images/mlc_environment_result.png" alt="Water demand illustration">
+                <p>This tool will calculate <strong>Average Daily, Maximum Daily, and Peak Hourly Water Demand</strong>.</p>
+            </div>
+            
+            <div class="result-error hidden" id="resultError">
+                <div class="error-icon">❌</div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+             
+            <div class="result-value hidden" id="resultValue">
+                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Calculated Water Demand</h2>
+                </div>
+
+                <div class="demand-results">
+                    <div class="demand-item">
+                        <div class="demand-label">Average Daily Per Capita Demand</div>
+                        <div class="demand-value" id="avgDailyValue">0.000</div>
+                        <div class="demand-unit">liters/person/day</div>
+                    </div>
+                    
+                    <div class="demand-item">
+                        <div class="demand-label">Maximum Daily Demand</div>
+                        <div class="demand-value" id="maxDailyValue">0.000</div>
+                        <div class="demand-unit">liters/person/day</div>
+                    </div>
+                    
+                    <div class="demand-item">
+                        <div class="demand-label">Peak Hourly Demand</div>
+                        <div class="demand-value" id="peakHourlyValue">0.0000</div>
+                        <div class="demand-unit">liters/person/hour</div>
+                    </div>
+                </div>
+
+                <div id="warningContainer"></div>
+
+                <div class="result-feedback">
+                    <div class="feedback-title">Assessment</div>
+                    <div class="feedback-content" id="feedbackContent"></div>
+                </div>
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="note-section">
+        <div class="note-card">
+            <h3>📘 About This Calculator</h3>
+            <p>
+                The <strong>Water Demand Fluctuation Calculator</strong> determines different levels of water demand which are essential for designing and managing water supply systems. Water demand fluctuates daily, seasonally, and even hourly, requiring proper planning to avoid shortages or inefficiencies.
+            </p>
+        </div>
+        
+        <div class="note-card">
+            <h3>📊 Interpretation</h3>
+            <ul class="note-list">
+                <li><span class="good">Average Daily Demand &lt; 100 L/person/day</span> → ✅ Efficient water use</li>
+                <li><span class="average">100-200 L/person/day</span> → ⚠️ Moderate water consumption</li>
+                <li><span class="bad">Average Daily Demand &gt; 200 L/person/day</span> → 🔴 High water consumption (Review usage patterns)</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h3>⚠️ Input Validations</h3>
+            <ul class="note-list">
+                <li>✔️ <strong>Total Annual Water Consumption</strong> must be a numeric, positive value</li>
+                <li>✔️ Minimum Water Consumption: <strong>1,000 liters</strong> (smallest meaningful system)</li>
+                <li>⚠️ Water Consumption &lt; <strong>10,000 liters</strong> → warning (very small system)</li>
+                <li>⚠️ Water Consumption &gt; <strong>1 billion liters</strong> → warning (very large system)</li>
+                <li>✔️ <strong>Population</strong> must be a numeric, positive integer</li>
+                <li>✔️ Minimum Population: <strong>1 person</strong></li>
+                <li>⚠️ Population &lt; <strong>10 people</strong> → warning (very small community)</li>
+                <li>⚠️ Population &gt; <strong>1 million people</strong> → warning (very large city)</li>
+                <li>❌ Zero, negative, or non-numeric inputs are invalid</li>
+                <li>⚠️ Average Daily Demand &lt; <strong>50 L/person/day</strong> → warning (below WHO minimum recommendation)</li>
+                <li>⚠️ Average Daily Demand &gt; <strong>400 L/person/day</strong> → warning (extremely high consumption)</li>
+            </ul>
+        </div>
+
+
+        <div class="note-card">
+            <h3>📝 How to Use</h3>
+            <ol class="note-list">
+                <li>Enter the <strong>Total Annual Water Consumption</strong> in liters</li>
+                <li>Enter the <strong>Population Served</strong> by the water system</li>
+                <li>Click <strong>"Calculate Water Demand"</strong> to get results</li>
+                <li>Review the calculated demand values and assessment</li>
+                <li>Use the <strong>"Print Report"</strong> button to save or share results</li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Function to calculate water demand
+    function calculateWaterDemand() {
+        // Get input values
+        const totalWaterInput = document.getElementById('totalWater').value.trim();
+        const populationInput = document.getElementById('population').value.trim();
+        
+        // Get result elements
+        const placeholder = document.getElementById('placeholder');
+        const resultValue = document.getElementById('resultValue');
+        const resultError = document.getElementById('resultError');
+        const errorMessage = document.getElementById('errorMessage');
+        const warningContainer = document.getElementById('warningContainer');
+        
+        // Clear previous warnings
+        warningContainer.innerHTML = '';
+        
+        // Hide all result sections initially
+        placeholder.classList.add('hidden');
+        resultValue.classList.add('hidden');
+        resultError.classList.add('hidden');
+        
+        // Validate inputs
+        let errors = [];
+        let warnings = [];
+        
+        // Check if inputs are provided
+        if (totalWaterInput === '') {
+            errors.push("Please enter Total Annual Water Consumption.");
+        }
+        
+        if (populationInput === '') {
+            errors.push("Please enter Population Served.");
+        }
+        
+        // If there are basic errors, display them and stop calculation
+        if (errors.length > 0) {
+            errorMessage.innerHTML = errors.join("<br>");
+            resultError.classList.remove('hidden');
+            return;
+        }
+        
+        // Parse values
+        const totalWater = parseFloat(totalWaterInput);
+        const population = parseInt(populationInput);
+        
+        // Validate numeric values
+        if (isNaN(totalWater) || totalWater <= 0) {
+            errors.push("Please enter a valid Total Annual Water Consumption (must be a positive number).");
+        }
+        
+        if (isNaN(population) || population <= 0) {
+            errors.push("Please enter a valid Population (must be a positive integer).");
+        }
+        
+        // Additional validation rules
+        if (totalWater < 1000) {
+            warnings.push("Total Annual Water Consumption is very low (less than 1,000 liters). Verify your input.");
+        } else if (totalWater > 1000000000) {
+            warnings.push("Total Annual Water Consumption exceeds 1 billion liters. Please verify your input.");
+        }
+        
+        if (population < 10) {
+            warnings.push("Population is very small (less than 10 people). Verify your input.");
+        } else if (population > 1000000) {
+            warnings.push("Population exceeds 1 million people. Please verify your input.");
+        }
+        
+        // If there are errors, display them and stop calculation
+        if (errors.length > 0) {
+            errorMessage.innerHTML = errors.join("<br>");
+            resultError.classList.remove('hidden');
+            return;
+        }
+        
+        // Calculate water demand values
+        const averageDailyDemand = totalWater / (365 * population);
+        const maxDailyDemand = 1.8 * averageDailyDemand;
+        const peakHourlyDemand = (2.7 * averageDailyDemand) / 24;
+        
+        // Additional validation for calculated values
+        if (averageDailyDemand < 50) {
+            warnings.push("Average Daily Demand is below WHO minimum recommendation of 50-100 liters per person per day.");
+        } else if (averageDailyDemand > 400) {
+            warnings.push("Average Daily Demand exceeds typical consumption (usually 100-300 liters per person per day).");
+        }
+        
+        // Display results
+        document.getElementById('avgDailyValue').textContent = averageDailyDemand.toFixed(3);
+        document.getElementById('maxDailyValue').textContent = maxDailyDemand.toFixed(3);
+        document.getElementById('peakHourlyValue').textContent = peakHourlyDemand.toFixed(4);
+        
+        // Display warnings if any
+        if (warnings.length > 0) {
+            let warningHTML = '<div class="warning-box">';
+            warningHTML += '<strong>⚠️ Warnings:</strong><ul style="margin: 8px 0 0 0; padding-left: 20px;">';
+            warnings.forEach(warning => {
+                warningHTML += `<li>${warning}</li>`;
+            });
+            warningHTML += '</ul></div>';
+            warningContainer.innerHTML = warningHTML;
+        }
+        
+        // Generate feedback based on average daily demand
+        let feedback = "";
+        if (averageDailyDemand < 100) {
+            feedback = "✅ Your water consumption is efficient. This is below the typical range of 100-200 liters per person per day.";
+        } else if (averageDailyDemand >= 100 && averageDailyDemand <= 200) {
+            feedback = "⚠️ Your water consumption is within the typical range of 100-200 liters per person per day.";
+        } else {
+            feedback = "🔴 Your water consumption is higher than typical. Consider implementing water conservation measures.";
+        }
+        
+        document.getElementById('feedbackContent').textContent = feedback;
+        
+        // Show results
+        resultValue.classList.remove('hidden');
+    }
+    
+    // Function to print the report
+    function printReport() {
+        window.print();
+    }
+</script>
+
+  <script src="{% static 'js/print.js' %}"></script>
+
+</body>
+</html>
+{% endblock %}
+<!--
+Comprehensive Input Validation:
+
+Validates that inputs are positive numbers
+
+Checks for minimum and maximum realistic values
+
+Validates population as integer
+
+Provides specific error messages for different validation failures
+---------------------------------------------------------
+Accurate Calculations:
+
+Implements the exact formula:
+
+Average Daily Demand = Total Annual Water ÷ (365 × Population)
+
+Maximum Daily Demand = Average Daily Demand × 1.8
+
+Peak Hourly Demand = (Average Daily Demand × 2.7) ÷ 24
+
+----------------------------------------------------------------
+Edge Case Handling:
+
+Division by zero prevention
+
+Extremely large/small value detection
+
+Warning messages for unusual inputs
+
+Industry-Standard Interpretation:
+
+Provides context for results based on WHO recommendations
+
+Categorizes consumption as efficient, moderate, or high
+
+
+-->

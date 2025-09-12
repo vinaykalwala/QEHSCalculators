@@ -1,0 +1,727 @@
+{% extends 'base.html' %}
+{% block title %}Wet Steam Enthalpy Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wet Steam Enthalpy Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        
+.result-card::-webkit-scrollbar {
+    width: 8px;
+}
+
+.result-card::-webkit-scrollbar-thumb {
+    background: #1560bd;
+    border-radius: 6px;
+}
+
+.result-card::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.result-card {
+    justify-content: flex-start; /* align from top */
+    align-items: stretch;
+    min-height: 420px;
+    text-align: center;
+    overflow-y: auto;       /* Enable vertical scrolling */
+    max-height: 450px;      /* Set max height to control output size */
+    padding: 20px;          /* keep spacing */
+}
+
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 38px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+        
+        .result-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: left;
+        }
+        
+        .result-item-title {
+            font-weight: bold;
+            color: #1560bd;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+    <div class="calculator-header">
+        <h1>Wet Steam Enthalpy Calculator</h1>
+        <p>Calculate the <strong>Actual Enthalpy of Evaporation</strong> and <strong>Total Enthalpy of Wet Steam</strong> for industrial applications.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Calculator -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+
+            <div class="form-group">
+                <label for="hf">Liquid Enthalpy (hf) (kJ/kg)</label>
+                <input type="number" id="hf" class="form-input" min="1" step="any" placeholder="e.g., 500">
+            </div>
+
+            <div class="form-group">
+                <label for="hfg">Enthalpy of Evaporation (hfg) (kJ/kg)</label>
+                <input type="number" id="hfg" class="form-input" min="1" step="any" placeholder="e.g., 2257">
+            </div>
+            
+            <div class="form-group">
+                <label for="drynessFraction">Dryness Fraction (x) (0 to 1)</label>
+                <input type="number" id="drynessFraction" class="form-input" min="0" max="1" step="any" placeholder="e.g., 0.9">
+            </div>
+            
+            <button class="calculate-btn" onclick="calculateEnthalpy()">Calculate Enthalpy</button>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="/static/images/mlc_environment_result.png" alt="Steam enthalpy illustration">
+                <p>This tool will calculate the <strong>Actual Enthalpy of Evaporation</strong> and <strong>Total Enthalpy of Wet Steam</strong>.</p>
+            </div>
+            
+            <div class="result-error hidden" id="resultError">
+                <div class="error-icon">❌</div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+             
+            <div class="result-value hidden" id="resultValue">
+                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Calculated Enthalpy Values</h2>
+                </div>
+
+                <div class="result-item">
+                    <div class="result-item-title">Actual Enthalpy of Evaporation:</div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="evaporationValue">0.00</div>
+                        <div class="rate-label">kJ/kg</div>
+                    </div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-item-title">Total Enthalpy of Wet Steam:</div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="totalValue">0.00</div>
+                        <div class="rate-label">kJ/kg</div>
+                    </div>
+                </div>
+
+                <div class="result-feedback">
+                    <div class="feedback-title">Assessment</div>
+                    <div class="feedback-content" id="feedbackContent"></div>
+                </div>
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="note-section">
+        <div class="note-card">
+            <h3>📘 About This Calculator</h3>
+            <p>
+                The <strong>Wet Steam Enthalpy Calculator</strong> determines the energy content of wet steam, which is crucial for optimizing boiler efficiency, power generation, and industrial steam systems.
+            </p>
+        </div>
+        
+        <div class="note-card">
+            <h3>📊 Steam Quality Interpretation</h3>
+            <ul class="note-list">
+                <li><span class="good">Dryness Fraction ≥ 0.95</span> → ✅ High-quality steam (Excellent for turbines)</li>
+                <li><span class="average">0.85 ≤ Dryness Fraction < 0.95</span> → ⚠️ Acceptable steam quality (Monitor regularly)</li>
+                <li><span class="bad">Dryness Fraction < 0.85</span> → 🔴 Poor steam quality (Maintenance required)</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+        <h3>⚠️ Input Validations</h3>
+        <ul class="note-list">
+            <li>✔️ <strong>Liquid Enthalpy (hf)</strong> must be a positive number (typical range: 100-800 kJ/kg)</li>
+            <li>✔️ <strong>Enthalpy of Evaporation (hfg)</strong> must be a positive number (typical range: 1500-2800 kJ/kg)</li>
+            <li>✔️ <strong>Dryness Fraction (x)</strong> must be between 0 and 1 (inclusive)</li>
+            <li>⚠️ Dryness Fraction <strong>below 0.7</strong> → warning (very wet steam, inefficient operation)</li>
+            <li>⚠️ Dryness Fraction <strong>above 0.99</strong> → warning (approaching superheated steam)</li>
+            <li>❌ Zero, negative, or non-numeric inputs are invalid</li>
+            <li>⚠️ hf values <strong>below 100 kJ/kg</strong> → warning (below typical saturation enthalpy at atmospheric pressure)</li>
+            <li>⚠️ hfg values <strong>below 1500 kJ/kg</strong> → warning (unusually low for water at typical pressures)</li>
+        </ul>
+        </div>
+
+        <div class="note-card">
+            <h3>📏 Units & Typical Ranges</h3>
+            <ul class="note-list">
+                <li><strong>Liquid Enthalpy (hf):</strong> kJ/kg (typical range: 100-800 kJ/kg)</li>
+                <li><strong>Enthalpy of Evaporation (hfg):</strong> kJ/kg (typical range: 1500-2800 kJ/kg)</li>
+                <li><strong>Dryness Fraction (x):</strong> Dimensionless (0 to 1)</li>
+            </ul>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function calculateEnthalpy() {
+        // Get input elements
+        const hfInput = document.getElementById('hf');
+        const hfgInput = document.getElementById('hfg');
+        const xInput = document.getElementById('drynessFraction');
+        
+        // Get result elements
+        const placeholder = document.getElementById('placeholder');
+        const resultError = document.getElementById('resultError');
+        const resultValue = document.getElementById('resultValue');
+        const errorMessage = document.getElementById('errorMessage');
+        const evaporationValue = document.getElementById('evaporationValue');
+        const totalValue = document.getElementById('totalValue');
+        const feedbackContent = document.getElementById('feedbackContent');
+        
+        // Reset styles
+        hfInput.style.border = "";
+        hfgInput.style.border = "";
+        xInput.style.border = "";
+        
+        // Convert input values to floats
+        const hf = parseFloat(hfInput.value);
+        const hfg = parseFloat(hfgInput.value);
+        const x = parseFloat(xInput.value);
+        
+        // Validation checks
+        let errorMsg = "";
+        
+        // Check if inputs are numbers
+        if (isNaN(hf)) {
+            errorMsg = "❌ Please enter a valid number for Liquid Enthalpy (hf).";
+            hfInput.style.border = "2px solid #e74c3c";
+        } else if (hf <= 0) {
+            errorMsg = "❌ Liquid Enthalpy (hf) must be a positive value.";
+            hfInput.style.border = "2px solid #e74c3c";
+        } else if (hf < 100) {
+            errorMsg = "⚠️ Warning: Liquid Enthalpy (hf) is unusually low for water at typical pressures. Please verify your input.";
+            hfInput.style.border = "2px solid #f39c12";
+        } else if (hf > 800) {
+            errorMsg = "⚠️ Warning: Liquid Enthalpy (hf) is unusually high for water at typical pressures. Please verify your input.";
+            hfInput.style.border = "2px solid #f39c12";
+        }
+        
+        if (!errorMsg && isNaN(hfg)) {
+            errorMsg = "❌ Please enter a valid number for Enthalpy of Evaporation (hfg).";
+            hfgInput.style.border = "2px solid #e74c3c";
+        } else if (!errorMsg && hfg <= 0) {
+            errorMsg = "❌ Enthalpy of Evaporation (hfg) must be a positive value.";
+            hfgInput.style.border = "2px solid #e74c3c";
+        } else if (!errorMsg && hfg < 1500) {
+            errorMsg = "⚠️ Warning: Enthalpy of Evaporation (hfg) is unusually low for water at typical pressures. Please verify your input.";
+            hfgInput.style.border = "2px solid #f39c12";
+        } else if (!errorMsg && hfg > 2800) {
+            errorMsg = "⚠️ Warning: Enthalpy of Evaporation (hfg) is unusually high for water at typical pressures. Please verify your input.";
+            hfgInput.style.border = "2px solid #f39c12";
+        }
+        
+        if (!errorMsg && isNaN(x)) {
+            errorMsg = "❌ Please enter a valid number for Dryness Fraction (x).";
+            xInput.style.border = "2px solid #e74c3c";
+        } else if (!errorMsg && (x < 0 || x > 1)) {
+            errorMsg = "❌ Dryness Fraction (x) must be between 0 and 1 (inclusive).";
+            xInput.style.border = "2px solid #e74c3c";
+        } else if (!errorMsg && x < 0.7) {
+            errorMsg = "⚠️ Warning: Dryness Fraction is very low (steam is very wet). This indicates inefficient operation and potential for water hammer.";
+            xInput.style.border = "2px solid #f39c12";
+        } else if (!errorMsg && x > 0.99) {
+            errorMsg = "⚠️ Warning: Dryness Fraction is approaching 1 (superheated steam). Verify if this is intentional.";
+            xInput.style.border = "2px solid #f39c12";
+        }
+        
+        // If there are validation errors, show them
+        if (errorMsg) {
+            placeholder.classList.add('hidden');
+            resultError.classList.remove('hidden');
+            resultValue.classList.add('hidden');
+            errorMessage.innerHTML = errorMsg;
+            return;
+        }
+        
+        // Perform calculations
+        const actualEnthalpyEvaporation = hfg * x;
+        const totalEnthalpy = hf + actualEnthalpyEvaporation;
+        
+        // Display results
+        evaporationValue.textContent = actualEnthalpyEvaporation.toFixed(2);
+        totalValue.textContent = totalEnthalpy.toFixed(2);
+        
+        // Generate feedback based on dryness fraction
+        let feedback = "";
+        if (x >= 0.95) {
+            feedback = "✅ <strong>Excellent steam quality</strong>. This dryness fraction indicates high-quality steam suitable for turbines and efficient heat transfer.";
+        } else if (x >= 0.85) {
+            feedback = "⚠️ <strong>Acceptable steam quality</strong>. Monitor regularly as lower dryness fraction reduces efficiency and increases the risk of erosion.";
+        } else {
+            feedback = "🔴 <strong>Poor steam quality</strong>. The steam contains significant moisture which reduces efficiency and increases corrosion risk. Consider maintenance or system adjustments.";
+        }
+        
+        feedbackContent.innerHTML = feedback;
+        
+        // Show results, hide placeholder and errors
+        placeholder.classList.add('hidden');
+        resultError.classList.add('hidden');
+        resultValue.classList.remove('hidden');
+        
+        // Highlight valid inputs
+        hfInput.style.border = "2px solid #2ecc71";
+        hfgInput.style.border = "2px solid #2ecc71";
+        xInput.style.border = "2px solid #2ecc71";
+    }
+    
+    function printReport() {
+        window.print();
+    }
+</script>
+
+  <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+Input Validations:
+
+Added comprehensive validation for all inputs with specific error messages
+
+Set acceptable ranges based on industry standards (hf: 100-800 kJ/kg, hfg: 1500-2800 kJ/kg, x: 0-1)
+
+Added warnings for edge cases (very low/high values)
+-------------------------------------------------------------
+Output Validation:
+
+Results are displayed with proper units (kJ/kg)
+
+Added assessment feedback based on dryness fraction value
+
+Formatted results to 2 decimal places for precision
+--------------------------------------------------------------------
+Edge Cases:
+
+Very low dryness fraction (<0.7) - warning for wet steam
+
+Very high dryness fraction (>0.99) - warning for approaching superheated steam
+
+Unusually low/high hf and hfg values with appropriate warnings
+-------------------------------------------------------------------------------------------------
+Formula Implementation:
+
+Actual Enthalpy of Evaporation: h_evap_actual = hfg × x
+
+Total Enthalpy of Wet Steam: h_total = hf + (hfg × x)
+-->

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Water Flux Through Membrane Calculator{% endblock %}
+{% block title %}Volumetric Flow Through An Equal Percentage Valve Calculator{% endblock %}
 {% block content %}
 {% load static %}
 
@@ -8,10 +8,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Water Flux Through Membrane Calculator</title>
+    <title>Volumetric Flow Through An Equal Percentage Valve Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
-<style>
+    <style>
         /* Main container */
         .calculator-container {
             max-width: 1200px;
@@ -459,300 +459,274 @@
 </head>
 <body>
 
-<div class="btn-container">
+    <div class="btn-container">
         <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
     </div>
+
 <div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
 
-{% include "includes/print_header_footer.html" %}
+    <div class="calculator-header">
+        <h1>Volumetric Flow Through An Equal Percentage Valve Calculator</h1>
+        <p>Calculate the <strong>Volumetric Flow Rate (V̇)</strong> through an equal percentage valve based on valve lift, rangeability, and maximum flow.</p>
+    </div>
 
-<div class="calculator-header">
-    <h1>Water Flux Through Membrane Calculator</h1>
-    <p>Calculate water flux across a membrane using the standard formula (result shown in kmol/(m²·s)).</p>
-</div>
-
-<div class="calc-content">
-    <!-- Calculator -->
-    <div class="calc-card">
-        <h2>Enter Parameters</h2>
+    <div class="calc-content">
+        <!-- Calculator -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
 
         <div class="input-row">
             <div class="form-group">
-                <label for="permeability">Water Permeability Coefficient (W<sub>p</sub>, kmol/(m²·s·Pa))</label>
-                <input type="number" id="permeability" class="form-input" step="any" min="0" placeholder="e.g., 1.5e-8" aria-label="Water permeability coefficient">
+                <label for="e">Exponential Constant (e)</label>
+                <input type="number" id="e" class="form-input" value="2.7183" step="any" readonly>
             </div>
 
             <div class="form-group">
-                <label for="pressureIn">Pressure at Inlet (P<sub>in</sub>, Pa)</label>
-                <input type="number" id="pressureIn" class="form-input" step="any" min="0" placeholder="e.g., 500000" aria-label="Pressure at inlet">
+                <label for="H">Valve Lift (H) [0 < H ≤ 1]</label>
+                <input type="number" id="H" class="form-input" min="0.001" max="1" step="0.001" placeholder="e.g., 0.5">
             </div>
-        </div>
+            </div>
 
         <div class="input-row">
             <div class="form-group">
-                <label for="pressureOut">Pressure at Outlet (P<sub>out</sub>, Pa)</label>
-                <input type="number" id="pressureOut" class="form-input" step="any" min="0" placeholder="e.g., 100000" aria-label="Pressure at outlet">
+                <label for="tau">Valve Rangeability (τ) [τ > 0]</label>
+                <input type="number" id="tau" class="form-input" min="0.001" step="any" placeholder="e.g., 20">
             </div>
 
             <div class="form-group">
-                <label for="osmoticIn">Osmotic Pressure at Inlet (π<sub>in</sub>, Pa)</label>
-                <input type="number" id="osmoticIn" class="form-input" step="any" min="0" placeholder="e.g., 250000" aria-label="Osmotic pressure at inlet">
+                <label for="Vmax">Max Volumetric Flow (Vmax) [Vmax > 0]</label>
+                <input type="number" id="Vmax" class="form-input" min="0.001" step="any" placeholder="e.g., 100">
             </div>
+            </div>
+            
+            <button class="calculate-btn" onclick="calculateVolumetricFlow()">Calculate Volumetric Flow</button>
         </div>
 
-        <div class="input-row">
-            <div class="form-group">
-                <label for="osmoticOut">Osmotic Pressure at Outlet (π<sub>out</sub>, Pa)</label>
-                <input type="number" id="osmoticOut" class="form-input" step="any" min="0" placeholder="e.g., 50000" aria-label="Osmotic pressure at outlet">
+        <!-- Result Section -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="/static/images/mlc_environment_result.png" alt="Volumetric flow illustration">
+                <p>This tool will calculate the <strong>Volumetric Flow Rate (V̇)</strong> through an equal percentage valve.</p>
             </div>
-        </div>
-
-        <button class="calculate-btn" onclick="calculateWaterFlux()">Calculate Water Flux</button>
-    </div>
-
-    <!-- Result Section -->
-    <div class="result-card">
-        <div class="result-placeholder" id="placeholder">
-            <img src="/static/images/mlc_environment_result.png" alt="Membrane illustration">
-            <p>This tool calculates water flux across a membrane using the standard formula.</p>
-        </div>
-
-        <div class="result-error hidden" id="resultError" role="alert" aria-live="polite">
-            <div class="error-icon">❌</div>
-            <div class="error-message" id="errorMessage"></div>
-        </div>
-
-        <div class="result-value hidden" id="resultValue" aria-live="polite">
-            <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
-                <h2>Water Flux</h2>
+            
+            <div class="result-error hidden" id="resultError" role="alert" aria-live="polite">
+                <div class="error-icon">❌</div>
+                <div class="error-message" id="errorMessage"></div>
             </div>
+             
+            <div class="result-value hidden" id="resultValue" aria-live="polite">
+                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Calculated Volumetric Flow Rate</h2>
+                </div>
 
-            <div class="rate-display" style="gap:12px; align-items:center; justify-content:center;">
-                <div class="rate-value" id="waterFlux">0.00</div>
-                <div class="rate-unit">kmol/(m²·s)</div>
-            </div>
+                <div class="rate-display" style="gap:12px; align-items:center; justify-content:center;">
+                    <div class="rate-value" id="rateValue">0.0000</div>
+                    <div class="rate-label" style="font-size:16px; color: #2980b9;">units/time</div>
+                </div>
 
-            <div class="result-feedback">
-                <div class="feedback-title">Membrane Performance Assessment</div>
-                <div class="feedback-content" id="feedbackContent"></div>
-            </div>
-
-            <div class="btn-wrapper">
-                <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                <div class="result-feedback">
+                    <div class="feedback-title">Assessment</div>
+                    <div class="feedback-content" id="feedbackContent"></div>
+                </div>
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Notes Section -->
-<div class="note-section">
-    <div class="note-card">
-        <h3>📘 About This Calculator</h3>
-        <p>
-            This calculator determines the water flux across a membrane, a crucial parameter in separation processes like reverse osmosis, nanofiltration, and other membrane-based separation technologies. It calculates the flow rate of water per unit membrane area, which is essential for designing efficient membrane systems and selecting appropriate operating conditions.
-        </p>
-    </div>
+    <!-- Notes Section -->
+    <div class="note-section">
+        <div class="note-card">
+            <h3>📘 About This Calculator</h3>
+            <p>
+                The <strong>Volumetric Flow Through An Equal Percentage Valve Calculator</strong> determines the flow rate through an equal percentage valve based on valve lift, rangeability, and maximum flow. This is essential for process control and safety in industrial applications.
+            </p>
+        </div>
+        
+        <div class="note-card">
+            <h3>📊 Interpretation</h3>
+            <ul class="note-list">
+                <li><span class="good">Flow &lt; 10% of Vmax</span> → ⚠️ Low flow (Valve nearly closed, efficiency low)</li>
+                <li><span class="average">10% ≤ Flow ≤ 100% of Vmax</span> → ✅ Optimal flow (Safe and efficient operation)</li>
+                <li><span class="bad">Flow &gt; 100% of Vmax</span> → 🔴 Excessive flow (Dangerous operation, potential safety risk)</li>
+            </ul>
+        </div>
 
-    <div class="note-card">
-        <h3>✅ Input Validations</h3>
+        <div class="note-card">
+        <h3>⚠️ Input Validations</h3>
         <ul class="note-list">
-            <li><strong>Water Permeability Coefficient (W<sub>p</sub>):</strong> Must be <em>greater than 0</em> and typically ranges from 1×10⁻¹⁰ to 1×10⁻⁶ kmol/(m²·s·Pa).</li>
-            <li><strong>Pressure at Inlet (P<sub>in</sub>):</strong> Must be <em>greater than 0</em> and typically ≤ 8,000,000 Pa (80 bar) for most membrane systems.</li>
-            <li><strong>Pressure at Outlet (P<sub>out</sub>):</strong> Must be <em>non-negative</em> and less than P<sub>in</sub>.</li>
-            <li><strong>Osmotic Pressures (π<sub>in</sub> and π<sub>out</sub>):</strong> Must be <em>non-negative</em> and typically ≤ 3,000,000 Pa (30 bar) for seawater applications.</li>
-            <li><strong>Net Driving Pressure:</strong> (P<sub>in</sub> - P<sub>out</sub>) must be greater than (π<sub>in</sub> - π<sub>out</sub>) for positive water flux.</li>
+            <li>✔️ <strong>Valve Lift (H)</strong> must be between 0.001 and 1 (0 = fully closed, 1 = fully open)</li>
+            <li>✔️ <strong>Valve Rangeability (τ)</strong> must be a positive value greater than 0.001</li>
+            <li>✔️ <strong>Maximum Volumetric Flow (Vmax)</strong> must be a positive value greater than 0.001</li>
+            <li>❌ Zero, negative, or non-numeric inputs are invalid</li>
+            <li>⚠️ Valve Lift values approaching 0 may cause calculation issues due to logarithmic function limitations</li>
+            <li>⚠️ Extremely high rangeability values (&gt; 1000) may indicate unrealistic valve specifications</li>
+            <li>⚠️ Extremely low rangeability values (&lt; 1.1) may not represent true equal percentage valves</li>
         </ul>
-    </div>
+        </div>
 
-    
-    <div class="note-card">
-        <h3>📊 Interpretation Guidelines</h3>
-        <ul class="note-list">
-            <li><span class="good">Optimal Range:</span> 0.001 - 0.01 kmol/(m²·s) for most industrial applications</li>
-            <li><span class="average">Moderate:</span> 0.0001 - 0.001 kmol/(m²·s) may indicate fouling or scaling</li>
-            <li><span class="bad">Low:</span> Below 0.0001 kmol/(m²·s) suggests significant membrane issues requiring attention</li>
-            <li><span class="bad">Excessively High:</span> Above 0.01 kmol/(m²·s) may indicate membrane damage or incorrect operating conditions</li>
-        </ul>
-    </div>
+        <div class="note-card">
+            <h3>📏 Units & Typical Ranges</h3>
+            <ul class="note-list">
+                <li><strong>Valve Lift (H):</strong> Dimensionless (range: 0.001-1.0)</li>
+                <li><strong>Valve Rangeability (τ):</strong> Dimensionless (typical range: 20-50 for equal percentage valves)</li>
+                <li><strong>Maximum Volumetric Flow (Vmax):</strong> Volume per time unit (e.g., m³/h, gpm)</li>
+                <li><strong>Volumetric Flow Rate (V̇):</strong> Same units as Vmax</li>
+            </ul>
+        </div>
 
-    <div class="note-card">
-        <h3>⚠️ Common Issues</h3>
-        <ul class="note-list">
-            <li><strong>Negative Water Flux:</strong> Occurs when (π<sub>in</sub> - π<sub>out</sub>) > (P<sub>in</sub> - P<sub>out</sub>), indicating reverse osmosis is not occurring</li>
-            <li><strong>Zero Water Flux:</strong> Driving pressure equals osmotic pressure difference</li>
-            <li><strong>Unrealistically High Values:</strong> May indicate incorrect units or measurement errors</li>
-        </ul>
+        <div class="note-card">
+            <h3>🌍 Key Applications</h3>
+            <ul class="note-list">
+                <li><strong>Process Control & Automation:</strong> Precise regulation of fluid flow in industries like oil & gas, water treatment, and chemical plants</li>
+                <li><strong>HVAC Systems:</strong> Optimizing air and fluid flow in heating, ventilation, and cooling systems</li>
+                <li><strong>Boiler & Steam Systems:</strong> Controlling steam and gas flow efficiently in power plants</li>
+                <li><strong>Industrial Safety:</strong> Preventing excessive or insufficient flow that may lead to operational failures or safety hazards</li>
+            </ul>
+        </div>
     </div>
 </div>
 
 <script>
-    function calculateWaterFlux() {
+    function calculateVolumetricFlow() {
         // Get input values
-        const W_p = parseFloat(document.getElementById("permeability").value);
-        const P_in = parseFloat(document.getElementById("pressureIn").value);
-        const P_out = parseFloat(document.getElementById("pressureOut").value);
-        const pi_in = parseFloat(document.getElementById("osmoticIn").value);
-        const pi_out = parseFloat(document.getElementById("osmoticOut").value);
+        const H = parseFloat(document.getElementById("H").value);
+        const tau = parseFloat(document.getElementById("tau").value);
+        const Vmax = parseFloat(document.getElementById("Vmax").value);
         
-        // Get result elements
+        // Get DOM elements
         const placeholder = document.getElementById("placeholder");
-        const resultError = document.getElementById("resultError");
         const resultValue = document.getElementById("resultValue");
-        const waterFluxElement = document.getElementById("waterFlux");
+        const resultError = document.getElementById("resultError");
+        const rateValue = document.getElementById("rateValue");
         const feedbackContent = document.getElementById("feedbackContent");
         const errorMessage = document.getElementById("errorMessage");
         
-        // Reset display
+        // Reset visibility
         placeholder.classList.add("hidden");
-        resultError.classList.add("hidden");
         resultValue.classList.add("hidden");
+        resultError.classList.add("hidden");
         
-        // Validate inputs
-        let errorMessages = [];
-        
-        // Check if all fields are filled
-        if (isNaN(W_p) || isNaN(P_in) || isNaN(P_out) || isNaN(pi_in) || isNaN(pi_out)) {
-            errorMessages.push("All fields must contain valid numbers.");
-        }
-        
-        // Check for positive values where required
-        if (W_p <= 0) {
-            errorMessages.push("Water permeability coefficient must be greater than zero.");
-        }
-        
-        if (P_in <= 0) {
-            errorMessages.push("Inlet pressure must be greater than zero.");
-        }
-        
-        if (P_out < 0) {
-            errorMessages.push("Outlet pressure cannot be negative.");
-        }
-        
-        if (pi_in < 0) {
-            errorMessages.push("Inlet osmotic pressure cannot be negative.");
-        }
-        
-        if (pi_out < 0) {
-            errorMessages.push("Outlet osmotic pressure cannot be negative.");
-        }
-        
-        // Check pressure relationships
-        if (P_in <= P_out) {
-            errorMessages.push("Inlet pressure must be greater than outlet pressure.");
-        }
-        
-        // Check for realistic values
-        if (W_p > 1e-4) {
-            errorMessages.push("Water permeability coefficient appears too high. Please check units (expected kmol/(m²·s·Pa)).");
-        }
-        
-        if (P_in > 1e7) {
-            errorMessages.push("Inlet pressure appears too high. Please check units (expected Pa).");
-        }
-        
-        // If there are validation errors, show them
-        if (errorMessages.length > 0) {
-            errorMessage.innerHTML = "<strong>Validation Error:</strong><br>" + errorMessages.join("<br>");
-            resultError.classList.remove("hidden");
+        // Input validation
+        if (isNaN(H) || isNaN(tau) || isNaN(Vmax)) {
+            showError("❌ All inputs must be numeric values.");
             return;
         }
         
-        // Calculate pressure differentials
-        const deltaP = P_in - P_out;
-        const deltaPi = pi_in - pi_out;
-        
-        // Check if net driving pressure is positive
-        if (deltaP <= deltaPi) {
-            errorMessages.push("Net driving pressure (ΔP - Δπ) must be positive for water flux. Current value: " + (deltaP - deltaPi).toExponential(2) + " Pa");
-            errorMessage.innerHTML = "<strong>Calculation Error:</strong><br>" + errorMessages.join("<br>");
-            resultError.classList.remove("hidden");
+        if (H <= 0 || H > 1) {
+            showError("❌ Valve lift (H) must be between 0.001 and 1.0 (0 < H ≤ 1).");
             return;
         }
         
-        // Calculate Water Flux (J_w)
-        const J_w = W_p * (deltaP - deltaPi);
-        
-        // Display result with appropriate formatting
-        if (J_w < 1e-6) {
-            waterFluxElement.textContent = J_w.toExponential(4);
-        } else {
-            waterFluxElement.textContent = J_w.toFixed(6);
+        if (tau <= 0) {
+            showError("❌ Valve rangeability (τ) must be a positive value (τ > 0).");
+            return;
         }
         
-        // Provide feedback based on result
-        let feedbackText = "";
-        let feedbackClass = "";
-        
-        if (J_w > 0.01) {
-            feedbackText = "⚠️ <strong>High water flux detected:</strong> This value is unusually high and may indicate membrane damage, incorrect operating conditions, or measurement errors. Verify all input values and check membrane integrity.";
-        } else if (J_w > 0.001) {
-            feedbackText = "✅ <strong>Optimal water flux:</strong> The calculated flux falls within the typical range for efficient membrane operation. This suggests good membrane performance and appropriate operating conditions.";
-        } else if (J_w > 0.0001) {
-            feedbackText = "🔹 <strong>Moderate water flux:</strong> The flux is lower than optimal, which may indicate early stages of membrane fouling, scaling, or suboptimal operating conditions. Consider monitoring and maintenance.";
-        } else {
-            feedbackText = "❌ <strong>Low water flux:</strong> This value is significantly lower than expected for normal operation. Possible causes include severe membrane fouling, incorrect pressure settings, or membrane compaction. Immediate inspection and maintenance are recommended.";
+        if (Vmax <= 0) {
+            showError("❌ Maximum volumetric flow (Vmax) must be a positive value (Vmax > 0).");
+            return;
         }
         
-        feedbackContent.innerHTML = feedbackText;
+        if (tau < 1.1) {
+            showError("⚠️ Rangeability values below 1.1 may not represent true equal percentage valves. Please verify your input.");
+            return;
+        }
+        
+        if (tau > 1000) {
+            showError("⚠️ Rangeability values above 1000 may indicate unrealistic valve specifications. Please verify your input.");
+            return;
+        }
+        
+        if (H < 0.001) {
+            showError("⚠️ Valve lift values below 0.001 may cause calculation issues due to logarithmic function limitations.");
+            return;
+        }
+        
+        // Calculate volumetric flow using the formula: V = (e^(ln(H)) / τ) * Vmax
+        // Since e^(ln(H)) simplifies to H, the formula becomes: V = (H / τ) * Vmax
+        const V = (H / tau) * Vmax;
+        
+        // Display result
+        rateValue.textContent = V.toFixed(4);
+        
+        // Provide feedback based on the result
+        if (V < 0.1 * Vmax) {
+            feedbackContent.innerHTML = "⚠️ <strong>Low Flow:</strong> Valve is nearly closed, efficiency is low. Consider increasing valve lift for better performance.";
+        } else if (V <= Vmax) {
+            feedbackContent.innerHTML = "✅ <strong>Optimal Flow:</strong> The flow is within a safe and efficient range. Valve is operating as expected.";
+        } else {
+            feedbackContent.innerHTML = "❌ <strong>Excessive Flow:</strong> The calculated flow exceeds maximum capacity! This may indicate an input error or valve malfunction. Verify inputs and check valve condition.";
+        }
+        
         resultValue.classList.remove("hidden");
+    }
+    
+    function showError(message) {
+        const resultError = document.getElementById("resultError");
+        const errorMessage = document.getElementById("errorMessage");
+        const placeholder = document.getElementById("placeholder");
+        
+        placeholder.classList.add("hidden");
+        errorMessage.textContent = message;
+        resultError.classList.remove("hidden");
     }
     
     function printReport() {
         window.print();
     }
+    
+    // Add input event listeners for real-time validation
+    document.getElementById("H").addEventListener("input", function() {
+        if (this.value < 0) this.value = 0;
+        if (this.value > 1) this.value = 1;
+    });
+    
+    document.getElementById("tau").addEventListener("input", function() {
+        if (this.value < 0) this.value = "";
+    });
+    
+    document.getElementById("Vmax").addEventListener("input", function() {
+        if (this.value < 0) this.value = "";
+    });
 </script>
-  <script src="{% static 'js/print.js' %}"></script>
 
+  <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
 {% endblock %}
 <!--
-============================================================
-Comprehensive Validation Rules
-Based on industry standards for membrane processes:
+Enhanced Input Validation:
 
-Parameter	Validation Rules	Typical Range	Units
-Water Permeability Coefficient (W<sub>p</sub>)	> 0, ≤ 1×10⁻⁴	1×10⁻¹⁰ to 1×10⁻⁶	kmol/(m²·s·Pa)
-Pressure at Inlet (P<sub>in</sub>)	> P<sub>out</sub>, ≤ 8×10⁶	1×10⁵ to 8×10⁶	Pa
-Pressure at Outlet (P<sub>out</sub>)	≥ 0, < P<sub>in</sub>	0 to 7.9×10⁶	Pa
-Osmotic Pressure at Inlet (π<sub>in</sub>)	≥ 0, ≤ 3×10⁶	0 to 3×10⁶	Pa
-Osmotic Pressure at Outlet (π<sub>out</sub>)	≥ 0, ≤ π<sub>in</sub>	0 to 3×10⁶	Pa
-Cross-field dependencies:
+Added comprehensive validation for all inputs with specific error messages
 
-(P<sub>in</sub> - P<sub>out</sub>) must be > (π<sub>in</sub> - π<sub>out</sub>)
+Implemented range checks for valve lift (0.001-1.0)
 
-π<sub>out</sub> should not exceed π<sub>in</sub> in normal operation
+Added validation for realistic rangeability values (1.1-1000)
 
-=============Edge Case Validations=====================
-Negative values for any parameter (except osmotic pressure differences)
+Added validation for positive values only
 
-P<sub>out</sub> > P<sub>in</sub> (reverse pressure scenario)
+Improved User Experience:
 
-π<sub>out</sub> > π<sub>in</sub> (unrealistic osmotic relationship)
+Added real-time input validation
 
-Net driving pressure ≤ 0 (no flux condition)
+Enhanced error messages with specific guidance
 
-Extremely high values suggesting unit conversion errors
+Added visual feedback for different flow conditions
 
-Zero permeability coefficient (membrane completely impermeable)
+Included detailed notes about input constraints
+-----------------------------------------------------------------------
+Formula Implementation:
 
-==========Meaningful Outputs for Audits and Safety Reports=============
-The calculator should provide:
+Correctly implemented the formula V = (H / τ) * Vmax
 
-Clear water flux value with proper units
+Added appropriate unit handling and display
 
-Classification of flux rate (optimal, moderate, low, critical)
+Safety Considerations:
 
-Warning if values approach operational limits
+Added warnings for potentially dangerous operating conditions
 
-Indication of potential membrane issues
-
-Suggestion for corrective actions if needed
-===================================================
-FORMULA:
- <p>The water flux (J<sub>w</sub>) is calculated using the following equation:</p>
-        <p><code>J<sub>w</sub> = W<sub>p</sub> × [(P<sub>in</sub> - P<sub>out</sub>) - (π<sub>in</sub> - π<sub>out</sub>)]</code></p>
-        
-
-
+Included guidance for interpreting results in industrial contexts
 -->

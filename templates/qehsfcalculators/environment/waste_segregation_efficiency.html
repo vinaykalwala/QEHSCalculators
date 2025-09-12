@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Water Pollutant Load Calculator{% endblock %}
+{% block title %}Waste Segregation Efficiency Calculator{% endblock %}
 {% block content %}
 {% load static %}
 
@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Water Pollutant Load Calculator</title>
+    <title>Waste Segregation Efficiency Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
@@ -192,12 +192,30 @@
         }
 
         /* Result Card */
-        .result-card {
-            justify-content: center;
-            align-items: center;
-            min-height: 420px;
-            text-align: center;
-        }
+        
+.result-card::-webkit-scrollbar {
+    width: 8px;
+}
+
+.result-card::-webkit-scrollbar-thumb {
+    background: #1560bd;
+    border-radius: 6px;
+}
+
+.result-card::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.result-card {
+    justify-content: flex-start; /* align from top */
+    align-items: stretch;
+    min-height: 420px;
+    text-align: center;
+    overflow-y: auto;       /* Enable vertical scrolling */
+    max-height: 450px;      /* Set max height to control output size */
+    padding: 20px;          /* keep spacing */
+}
+
         
         .result-placeholder img {
             max-width: 240px;
@@ -289,6 +307,30 @@
             .rate-label {
                 font-size: 14px;
             }
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
         }
 
         /* Feedback */
@@ -391,10 +433,6 @@
         .hidden { 
             display: none; 
         }
-        
-        select.form-input {
-            appearance: menulist;
-        }
     </style>
 </head>
 <body>
@@ -403,14 +441,12 @@
         <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
     </div>
 
-
 <div class="calculator-container printable" id="printArea">
-
     {% include "includes/print_header_footer.html" %}
-    
+
     <div class="calculator-header">
-        <h1>Water Pollutant Load Calculator</h1>
-        <p>Calculate the <strong>Pollutant Load (M)</strong> using the formula</p>
+        <h1>Waste Segregation Efficiency Calculator</h1>
+        <p>Calculate the <strong>Waste Segregation Efficiency (%)</strong> to measure how effectively waste is being sorted in your facility.</p>
     </div>
 
     <div class="calc-content">
@@ -419,23 +455,23 @@
             <h2>Enter Data</h2>
 
             <div class="form-group">
-                <label for="concentration">Pollutant Concentration (C) [mg/L]</label>
-                <input type="number" id="concentration" class="form-input" min="0" step="any" placeholder="e.g., 15.5">
+                <label for="segregatedWaste">Correctly Segregated Waste (Kg)</label>
+                <input type="number" id="segregatedWaste" class="form-input" min="0" step="any" placeholder="e.g., 150">
             </div>
 
             <div class="form-group">
-                <label for="flow">Flow Rate (Q) [MGD]</label>
-                <input type="number" id="flow" class="form-input" min="0.001" step="any" placeholder="e.g., 2.5">
+                <label for="totalWaste">Total Waste Generated (Kg)</label>
+                <input type="number" id="totalWaste" class="form-input" min="0.1" step="any" placeholder="e.g., 200">
             </div>
             
-            <button class="calculate-btn" onclick="calculatePollutantLoad()">Calculate Pollutant Load</button>
+            <button class="calculate-btn" onclick="calculateEfficiency()">Calculate Efficiency</button>
         </div>
 
         <!-- Result Section -->
         <div class="result-card">
             <div class="result-placeholder" id="placeholder">
-                <img src="/static/images/mlc_environment_result.png" alt="Water pollution illustration">
-                <p>This tool will calculate the <strong>Pollutant Load (M)</strong> using the formula .</p>
+                <img src="/static/images/mlc_environment_result.png" alt="Waste segregation efficiency illustration">
+                <p>This tool will calculate the <strong>Waste Segregation Efficiency (%)</strong>.</p>
             </div>
             
             <div class="result-error hidden" id="resultError">
@@ -445,12 +481,12 @@
              
             <div class="result-value hidden" id="resultValue">
                 <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
-                    <h2>Calculated Pollutant Load</h2>
+                    <h2>Calculated Waste Segregation Efficiency</h2>
                 </div>
 
                 <div class="rate-display">
                     <div class="rate-value" id="rateValue">0.00</div>
-                    <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">lb/day</div>
+                    <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">%</div>
                 </div>
 
                 <div class="result-feedback">
@@ -458,7 +494,7 @@
                     <div class="feedback-content" id="feedbackContent"></div>
                 </div>
                 <div class="btn-wrapper">
-                   <button type="button" class="calculate-btn print-btn" onclick="handlePrintReport()">Print Report</button>
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
                 </div>
             </div>
         </div>
@@ -469,205 +505,212 @@
         <div class="note-card">
             <h3>📘 About This Calculator</h3>
             <p>
-                The <strong>Water Pollutant Load Calculator</strong> determines the pollutant load using the formula:
-                M = C × Q × 8.34. This is essential in environmental engineering for measuring pollutant discharge
-                in wastewater treatment plants, industrial effluents, and surface water bodies.
+                The <strong>Waste Segregation Efficiency Calculator</strong> determines how effectively waste is being sorted
+                into appropriate categories (recyclable, organic, hazardous, etc.), helping facilities measure and improve
+                their waste management practices.
             </p>
         </div>
         
         <div class="note-card">
             <h3>📊 Interpretation</h3>
             <ul class="note-list">
-                <li><span class="bad">Pollutant Load > 10000 lb/day</span> → ⚠️ High Pollutant Load: Potential environmental risk, consider treatment options</li>
-                <li><span class="average">1000 ≤ Pollutant Load ≤ 10000 lb/day</span> → ✅ Acceptable Pollutant Load: Within normal environmental discharge limits</li>
-                <li><span class="good">Pollutant Load < 1000 lb/day</span> → ❌ Low Pollutant Load: Check for underestimation or inaccurate inputs</li>
+                <li><span class="good">Efficiency ≥ 90%</span> → ✅ Excellent segregation (Industry best practice)</li>
+                <li><span class="average">70% ≤ Efficiency < 90%</span> → ⚠️ Moderate segregation (Room for improvement)</li>
+                <li><span class="bad">Efficiency < 70%</span> → 🔴 Poor segregation (Immediate action required)</li>
             </ul>
         </div>
 
         <div class="note-card">
-            <h3>⚠️ Input Validations</h3>
-            <ul class="note-list">
-                <li>✔️ <strong>Pollutant Concentration (C)</strong> must be a non-negative number</li>
-                <li>✔️ <strong>Flow Rate (Q)</strong> must be a positive number (water must be flowing)</li>
-                <li>⚠️ High Pollutant Load: May indicate severe contamination requiring immediate treatment</li>
-                <li>⚠️ Low Pollutant Load: Could indicate underestimated measurements or highly efficient treatment</li>
-                <li>❌ Zero, negative, or non-numeric inputs are invalid</li>
-            </ul>
+        <h3>⚠️ Input Validations</h3>
+        <ul class="note-list">
+            <li>✔️ <strong>Correctly Segregated Waste</strong> must be a numeric, non-negative value</li>
+            <li>✔️ <strong>Total Waste Generated</strong> must be a numeric, positive value (≥ 0.1 kg)</li>
+            <li>⚠️ Segregated waste > Total waste → Invalid (Segregated cannot exceed total)</li>
+            <li>❌ Zero or negative total waste is invalid (must be at least 0.1 kg)</li>
+            <li>⚠️ Total waste > 100,000 kg → Warning (extremely large quantity, verify data)</li>
+            <li>⚠️ Segregated waste = 0 → Warning (no waste properly segregated)</li>
+            <li>⚠️ Efficiency > 100% → Error (check input values)</li>
+            <li>⚠️ Efficiency < 1% → Warning (extremely poor segregation)</li>
+        </ul>
         </div>
 
         <div class="note-card">
             <h3>📏 Units & Typical Ranges</h3>
             <ul class="note-list">
-                <li><strong>Pollutant Concentration (C):</strong> Milligrams per liter (mg/L) (typical range: 0-1000 mg/L)</li>
-                <li><strong>Flow Rate (Q):</strong> Million Gallons per Day (MGD) (typical range: 0.1-100 MGD)</li>
-                <li><strong>Conversion Factor:</strong> 8.34 (converts mg/L and MGD to lb/day)</li>
+                <li><strong>Correctly Segregated Waste:</strong> Kilograms (typical range: 1-10,000 kg)</li>
+                <li><strong>Total Waste Generated:</strong> Kilograms (typical range: 1-15,000 kg)</li>
+                <li><strong>Efficiency:</strong> Percentage (typical range: 0-100%)</li>
             </ul>
         </div>
 
         <div class="note-card">
             <h3>🌍 Key Applications</h3>
             <ul class="note-list">
-                <li><strong>Wastewater Treatment:</strong> Ensuring compliance with discharge permits</li>
-                <li><strong>Industrial Effluent Monitoring:</strong> Tracking pollutant discharge from factories and power plants</li>
-                <li><strong>Environmental Impact Assessments:</strong> Evaluating pollution levels in rivers and lakes</li>
-                <li><strong>Drinking Water Safety:</strong> Identifying contamination sources in water supplies</li>
-                <li><strong>Agricultural Runoff Studies:</strong> Measuring nutrient loads in farming areas</li>
+                <li><strong>Facility Management:</strong> Monitoring waste segregation performance in commercial buildings</li>
+                <li><strong>Municipal Waste Programs:</strong> Assessing effectiveness of community recycling initiatives</li>
+                <li><strong>Industrial Compliance:</strong> Meeting regulatory requirements for waste management</li>
+                <li><strong>Sustainability Reporting:</strong> Tracking progress toward waste reduction goals</li>
             </ul>
         </div>
         
-        <div class="note-card">
-            <h3>📝 Explanation of Parameters</h3>
-            <ul class="note-list">
-                <li><strong>Pollutant Concentration (C):</strong> The concentration of a specific contaminant in water, measured in mg/L (milligrams per liter)</li>
-                <li><strong>Flow Rate (Q):</strong> The volume of water flowing per day, measured in MGD (Million Gallons per Day)</li>
-                <li><strong>Conversion Factor (8.34):</strong> Converts the concentration and flow rate to a standardized mass unit (lb/day)</li>
-            </ul>
-        </div>
-        
-        <div class="note-card">
-            <h3>💡 Why Pollutant Load is Important?</h3>
-            <p>Understanding pollutant load is crucial for water quality management, regulatory compliance, and environmental protection. It helps determine:</p>
-            <ul class="note-list">
-                <li>Whether wastewater treatment facilities are meeting discharge limits</li>
-                <li>The impact of industrial and municipal effluents on rivers, lakes, and groundwater</li>
-                <li>The effectiveness of pollution control measures</li>
-            </ul>
-        </div>
-        
-        <div class="note-card">
-            <h3>⚠️ Limitations</h3>
-            <p>This formula assumes a steady-state flow and does not account for seasonal variations, dilution effects, or intermittent pollution sources.</p>
-        </div>
-        
-        <div class="note-card">
-            <h3>🔚 Conclusion</h3>
-            <p>The Pollutant Load formula is a key tool in environmental management. Understanding pollutant discharge levels helps industries and municipalities protect water resources, comply with regulations, and implement effective pollution control strategies.</p>
-        </div>
     </div>
+
 </div>
 
 <script>
-    function calculatePollutantLoad() {
-        const concentration = parseFloat(document.getElementById("concentration").value);
-        const flow = parseFloat(document.getElementById("flow").value);
-        const placeholder = document.getElementById("placeholder");
-        const resultValue = document.getElementById("resultValue");
-        const resultError = document.getElementById("resultError");
-        const rateValue = document.getElementById("rateValue");
-        const feedbackContent = document.getElementById("feedbackContent");
-        const errorMessage = document.getElementById("errorMessage");
+function showErrors(errors) {
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
 
-        // Reset display
-        placeholder.classList.add("hidden");
-        resultValue.classList.add("hidden");
-        resultError.classList.add("hidden");
+  errorMessage.innerHTML = errors.join("<br>");
+  errorBox.classList.remove("hidden");
+  placeholder.classList.add("hidden");
+  resultValue.classList.add("hidden");
+}
 
-        // Validations
-        if (isNaN(concentration) || concentration < 0) {
-            errorMessage.textContent = "Pollutant concentration (C) must be a non-negative number.";
-            resultError.classList.remove("hidden");
-            return;
-        }
+function showResult(efficiency, feedback) {
+  const errorBox = document.getElementById("resultError");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+  const rateValue = document.getElementById("rateValue");
+  const feedbackContent = document.getElementById("feedbackContent");
 
-        if (isNaN(flow) || flow <= 0) {
-            errorMessage.textContent = "Flow rate (Q) must be a positive number.";
-            resultError.classList.remove("hidden");
-            return;
-        }
+  rateValue.textContent = efficiency.toFixed(2);
+  feedbackContent.innerHTML = feedback;
 
-        // Pollutant Load Calculation
-        const pollutantLoad = concentration * flow * 8.34;
+  errorBox.classList.add("hidden");
+  placeholder.classList.add("hidden");
+  resultValue.classList.remove("hidden");
+}
 
-        // Feedback Message
-        let feedbackMessage = "";
-        let feedbackClass = "";
+function calculateEfficiency() {
+  // Get input values
+  const segregatedWaste = parseFloat(document.getElementById('segregatedWaste').value);
+  const totalWaste = parseFloat(document.getElementById('totalWaste').value);
+  
+  // Validation checks
+  const errors = [];
+  
+  // Check if inputs are numbers
+  if (isNaN(segregatedWaste) || isNaN(totalWaste)) {
+    errors.push("❌ Please enter valid numbers for both inputs.");
+    showErrors(errors);
+    return;
+  }
+  
+  // Check for negative values
+  if (segregatedWaste < 0) {
+    errors.push("❌ Correctly segregated waste cannot be negative.");
+  }
+  
+  if (totalWaste <= 0) {
+    errors.push("❌ Total waste must be greater than zero.");
+  }
+  
+  // Check if segregated waste exceeds total waste
+  if (segregatedWaste > totalWaste) {
+    errors.push("❌ Correctly segregated waste cannot exceed total waste generated.");
+  }
+  
+  // Check for extremely large values (potential data entry errors)
+  if (totalWaste > 100000) {
+    errors.push("⚠️ Total waste exceeds 100,000 kg. Please verify this value.");
+  }
+  
+  // Show errors if any
+  if (errors.length > 0) {
+    showErrors(errors);
+    return;
+  }
+  
+  // Calculate efficiency
+  const efficiency = (segregatedWaste / totalWaste) * 100;
+  
+  // Determine feedback based on efficiency
+  let feedback = "";
+  if (efficiency >= 90) {
+    feedback = "✅ <strong>Excellent segregation efficiency!</strong> Your waste management practices are performing at industry best practice levels.";
+  } else if (efficiency >= 70) {
+    feedback = "⚠️ <strong>Moderate segregation efficiency.</strong> There is room for improvement in your waste segregation practices.";
+  } else {
+    feedback = "🔴 <strong>Poor segregation efficiency.</strong> Immediate action is required to improve waste segregation practices.";
+  }
+  
+  // Add specific recommendations
+  if (efficiency < 70) {
+    feedback += "<br><br>💡 <strong>Recommendations:</strong> Consider implementing employee training, clearer bin labeling, and regular waste audits.";
+  } else if (efficiency < 90) {
+    feedback += "<br><br>💡 <strong>Recommendations:</strong> Focus on addressing contamination issues and improving collection processes.";
+  } else {
+    feedback += "<br><br>💡 <strong>Recommendations:</strong> Maintain current practices and consider setting more ambitious waste reduction targets.";
+  }
+  
+  // Show warnings for edge cases
+  const warnings = [];
+  if (segregatedWaste === 0) {
+    warnings.push("⚠️ No waste was correctly segregated. This indicates a critical need for waste management improvements.");
+  }
+  
+  if (efficiency < 1) {
+    warnings.push("⚠️ Extremely low segregation efficiency detected. Immediate intervention is required.");
+  }
+  
+  if (warnings.length > 0) {
+    feedback = warnings.join("<br>") + "<br><br>" + feedback;
+  }
+  
+  // Display the result
+  showResult(efficiency, feedback);
+}
 
-        if (pollutantLoad > 10000) {
-            feedbackMessage = "⚠️ High Pollutant Load: Potential environmental risk, consider treatment options.";
-            feedbackClass = "bad";
-        } else if (pollutantLoad >= 1000 && pollutantLoad <= 10000) {
-            feedbackMessage = "✅ Acceptable Pollutant Load: Within normal environmental discharge limits.";
-            feedbackClass = "average";
-        } else {
-            feedbackMessage = "❌ Low Pollutant Load: Check for underestimation or inaccurate inputs.";
-            feedbackClass = "good";
-        }
-
-        // Display Results
-        rateValue.textContent = pollutantLoad.toFixed(4);
-        feedbackContent.innerHTML = `<span class="${feedbackClass}">${feedbackMessage}</span>`;
-        resultValue.classList.remove("hidden");
-    }
-    
-    function handlePrintReport() {
-        window.print();
-    }
+function printReport() {
+    window.print();
+}
 </script>
-  <script src="{% static 'js/print.js' %}"></script>
 
+  <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
 {% endblock %}
 <!--
-Formula
-𝑀=𝐶×𝑄×8.34
+Formula Integration: Implemented the exact formula:
+ Efficiency (%) = (Correctly Segregated Waste / Total Waste Generated) × 100
+---------------------------------------------
+Comprehensive Validations:
 
-M=C×Q×8.34
+Non-negative segregated waste values
 
-M = Pollutant Load (lb/day)
+Positive total waste values (minimum 0.1 kg)
 
-C = Concentration (mg/L)
+Segregated waste cannot exceed total waste
 
-Q = Flow (MGD)
+Input must be numeric values
 
-8.34 = unit conversion factor
+Warning for extremely large values (>100,000 kg)
 
-===Validation Rules==
+Warning for zero segregated waste
 
-Concentration (C, mg/L):
+Warning for extremely low efficiency (<1%)
+-----------------------------------------------------------
+Realistic Output Assessment:
 
-Must be ≥ 0
+Excellent (≥90%): Industry best practice
 
-Typical: 0–1000 mg/L
+Moderate (70-89%): Room for improvement
 
-Hard cap: 1,000,000 mg/L (warn about wrong units if >1000)
+Poor (<70%): Immediate action required
+-------------------------------------------
+Edge Case Handling:
 
-Flow (Q, MGD):
+Division by zero prevention
 
-Must be > 0
+Unrealistic input combinations
 
-Typical: 0.1–100 MGD
+Extreme outliers detection
 
-Hard cap: 1000 MGD
 
-Cross checks:
 
-If C = 0 → Load = 0, show info message
 
-If load > 1e6 lb/day → likely unit error
-
-Must be finite numbers (no NaN/Infinity)
-=======Edge Cases=============
-
-Empty input → error
-
-Negative C or Q → error
-
-Zero Q → error
-
-Extremely small Q (<0.001 MGD) → warning
-
-Extremely high C or Q → unit mismatch warning
-
-========Output Rules===========
-
-Show M in lb/day, plus kg/day and g/day for audits
-
-Classify:
-
-High: >10,000 lb/day (critical)
-
-Moderate: 1,000–10,000 lb/day
-
-Low: <1,000 lb/day
 -->
