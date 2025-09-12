@@ -485,6 +485,29 @@ CALCULATORS = [
 #environment calculators from  bottom to top
 
 
+
+{"name": "Volumetric Flow Through An Equal Percentage Valve Calculator", "url_name": "environment_volumetric_flow_throw_an_equal_percentage_valve_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Vegan Footprint Calculator", "url_name": "environment_vegan_footprint_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Vertical Settling Velocity Calculator", "url_name": "environment_vertical_settling_velocity_vt_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Van't Hoff Reaction Isochore Calculator", "url_name": "environment_vant_hoff_reaction_isochore_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Wet Steam Enthalpy Calculator", "url_name": "environment_wet_steam_enthalpy_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Waste Segregation Efficiency Calculator", "url_name": "environment_waste_segregation_efficiency_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Water Mass to Volumetric Flowrate Calculator", "url_name": "environment_water_mass_to_volumetric_flowrate_converter_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Water Demand Fluctuation Calculator", "url_name": "environment_water_demand_fluctuation_calculator", "plan_type": "corporate", "category": "environment"},
+
+
 {"name": "Water Pollutant Load Calculator", "url_name": "environment_water_pollutant_load_calculator", "plan_type": "corporate", "category": "environment"},
 
 {"name": "Water Flux Through Membrane Calculator", "url_name": "environment_water_flux_through_the_membrane_calculator", "plan_type": "corporate", "category": "environment"},
