@@ -1,0 +1,673 @@
+{% extends 'base.html' %}
+{% block title %}Load Distribution & Lifting Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Load Distribution & Lifting Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 480px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display:flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+      
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+        
+        .tension-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #2980b9;
+            margin: 15px 0;
+        }
+        
+        .tension-label {
+            font-size: 18px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Load Distribution & Lifting Calculator</h1>
+            <p>Calculate the tension per sling for safe lifting operations</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="totalLoad">Total Load (W in kg)</label>
+                    <input type="number" id="totalLoad" class="form-input" min="1" placeholder="e.g., 1000">
+                </div>
+                <div class="form-group">
+                    <label for="slingCount">Number of Slings (n)</label>
+                    <input type="number" id="slingCount" class="form-input" min="1" placeholder="e.g., 4">
+                </div>
+                <div class="form-group">
+                    <label for="slingAngle">Sling Angle (β in degrees)</label>
+                    <input type="number" id="slingAngle" class="form-input" min="1" max="89" placeholder="e.g., 45">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateLiftingTension()">Calculate Lifting Tension</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Lifting illustration">
+                    <p>This tool will calculate the <strong>Lifting Sling Tension</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Lifting Sling Tension</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="tension-value" id="tensionValue">0.00</div>
+                        <div class="tension-label" style="color:#2980b9; font-size:20px; font-weight:bold;">kg per sling</div>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Safety Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Load Distribution & Lifting Calculator</strong> determines the tension on each sling 
+                    when lifting a load, helping ensure safe lifting operations by preventing overloading of slings.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ Why This Calculation Matters?</h3>
+                <p>
+                    Lifting loads safely requires understanding the center of gravity and tension on the slings. 
+                    Improper calculations can lead to load imbalance and accidents.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Key Parameters</h3>
+                <ul class="note-list">
+                    <li><strong>Total Load (W):</strong> The overall weight being lifted (in kg)</li>
+                    <li><strong>Number of Slings (n):</strong> The number of slings supporting the load</li>
+                    <li><strong>Sling Angle (β):</strong> The angle at which the sling is attached (in degrees). A smaller angle increases tension.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <p>
+                    <b>Higher tension values</b> indicate greater stress on individual slings. Always compare calculated tension values with the rated capacity of your lifting equipment.
+                </p>
+                <ul class="note-list">
+                    <li><span class="good">Below 50% of sling capacity</span> → Safe working condition</li>
+                    <li><span class="average">50-80% of sling capacity</span> → Acceptable but monitor carefully</li>
+                    <li><span class="bad">Above 80% of sling capacity</span> → Risk of overload - reconsider configuration</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>🌍 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Construction</strong> - Ensuring proper lifting of heavy beams and materials</li>
+                    <li><strong>Shipping</strong> - Secure lifting of cargo using cranes</li>
+                    <li><strong>Manufacturing</strong> - Handling heavy machine parts safely</li>
+                    <li><strong>Rigging Operations</strong> - Planning safe lifting configurations</li>
+                    <li><strong>Equipment Installation</strong> - Moving heavy machinery safely</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📋 Industry Standards</h3>
+                <p>
+                    These calculations follow OSHA 29 CFR 1926, ASME B30.9, and other international standards for lifting safety and sling operations.
+                </p>
+            </div>
+            
+            <div class="note-card">
+    <h3>✅ Validation Rules</h3>
+    <ul class="note-list">
+        <li><b>Total Load (W):</b> Must be 1 – 1,000,000 kg (positive number, decimals allowed)</li>
+        <li><b>Number of Slings (n):</b> Must be an integer between 1 – 100</li>
+        <li><b>Sling Angle (β):</b> Must be 1 – 89° (angles ≥90° are unsafe and invalid)</li>
+        <li><b>Cross-Validation:</b> Formula denominator (n × cos β) must not be zero</li>
+        <li><b>Output Check:</b> Tension is flagged as safe (<50% WLL), caution (50–80% WLL), or unsafe (>80% WLL)</li>
+    </ul>
+</div>
+
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateLiftingTension() {
+    const totalLoad = document.getElementById('totalLoad').value.trim();
+    const slingCount = document.getElementById('slingCount').value.trim();
+    const slingAngle = document.getElementById('slingAngle').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+
+    /*
+    VALIDATION RULES:
+    - Total Load (W): 1 – 1,000,000 kg (positive number, decimals allowed)
+    - Sling Count (n): 1 – 100 (integer only)
+    - Sling Angle (β): 1 – 89° (no zero or 90°)
+    - Cross-field: Ensure n* cos(β) ≠ 0 (avoids division by zero)
+    */
+
+    // Total Load
+    if (totalLoad === "" || isNaN(totalLoad)) {
+        errors.push("👉 Please enter the total load.");
+    } else if (parseFloat(totalLoad) <= 0) {
+        errors.push("👉 Total load must be greater than 0 kg.");
+    } else if (parseFloat(totalLoad) > 1000000) {
+        errors.push("👉 Total load cannot exceed 1,000,000 kg.");
+    }
+
+    // Sling Count
+    if (slingCount === "" || isNaN(slingCount)) {
+        errors.push("👉 Please enter the number of slings.");
+    } else if (!Number.isInteger(parseFloat(slingCount))) {
+        errors.push("👉 Number of slings must be a whole number.");
+    } else if (parseInt(slingCount) <= 0) {
+        errors.push("👉 Number of slings must be at least 1.");
+    } else if (parseInt(slingCount) > 100) {
+        errors.push("👉 Number of slings cannot exceed 100.");
+    }
+
+    // Sling Angle
+    if (slingAngle === "" || isNaN(slingAngle)) {
+        errors.push("👉 Please enter the sling angle.");
+    } else if (parseFloat(slingAngle) <= 0) {
+        errors.push("👉 Sling angle must be greater than 0°.");
+    } else if (parseFloat(slingAngle) >= 90) {
+        errors.push("👉 Sling angle must be less than 90°.");
+    }
+
+    // Show errors if any
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join('<br>');
+        errorBox.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        resultValue.classList.add('hidden');
+        return;
+    }
+
+    errorBox.classList.add('hidden'); // hide error if none
+
+    // Parse safe values
+    const W = parseFloat(totalLoad);
+    const n = parseInt(slingCount);
+    const beta = parseFloat(slingAngle);
+    const betaRad = beta * (Math.PI / 180);
+
+    // Edge Case: Avoid division by zero
+    if (n * Math.cos(betaRad) === 0) {
+        errorMessage.innerHTML = "⚠️ Invalid configuration: sling angle too close to 90° or sling count invalid.";
+        errorBox.classList.remove('hidden');
+        return;
+    }
+
+    // Calculate tension
+    const T = W / (n * Math.cos(betaRad));
+    document.getElementById('tensionValue').textContent = T.toFixed(2);
+
+    // Feedback based on load share
+    let feedback = "";
+    const verticalShare = W / n;
+
+    if (T <= verticalShare * 1.1) {
+        feedback = "✅ <strong>Good configuration:</strong> Sling tension close to vertical share, safe setup.";
+    } else if (T <= verticalShare * 2) {
+        feedback = "⚠️ <strong>Caution:</strong> Increased tension due to angle. Monitor carefully.";
+    } else {
+        feedback = "❌ <strong>Unsafe:</strong> Sling angle creates excessive tension. Reconfigure lift.";
+    }
+
+    feedback += `<br><br>For ${n} slings at ${beta}°, each sling experiences <strong>${T.toFixed(2)} kg</strong> of tension when lifting a ${W} kg load.`;
+
+    document.getElementById('feedbackContent').innerHTML = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+
+        function printReport() {
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+{% comment %} 
+📐 Formula (for commenting in code)
+/*
+FORMULA USED (based on rigging/lifting engineering principles):
+
+T = W / (n * cos(β))
+
+Where:
+  T = Tension per sling (kg)
+  W = Total Load (kg)
+  n = Number of slings
+  β = Sling angle from vertical (degrees)
+
+NOTES:
+- As sling angle β decreases, cos(β) decreases → Tension per sling increases.
+- At β = 90°, cos(β) = 0 → tension approaches infinity (unsafe, prohibited).
+- Reference: OSHA 29 CFR 1926.251, ASME B30.9, ISO 12480-1, NFPA 70E rigging guidance.
+*/
+
+✅ Detailed Input Validation Rules (real-world QEHS/fire safety perspective)
+
+Total Load (W in kg)
+
+Unit: kilograms (kg)
+
+Acceptable range: 1 – 1,000,000 kg
+
+Must be numeric, positive, and not exceed industry lifting limits.
+
+Decimal values allowed (e.g., 1234.56 kg).
+
+Validation reason: Negative or zero loads are nonsensical; overly large loads exceed safe working loads for most lifting systems.
+
+Number of Slings (n)
+
+Unit: count (no decimals)
+
+Acceptable range: 1 – 100 slings
+
+Must be a whole integer.
+
+Validation reason: Fractional slings aren’t possible; too many slings (>100) is unrealistic. OSHA/ASME usually consider up to 8–12 slings practical.
+
+Sling Angle (β in degrees)
+
+Unit: degrees (° from vertical)
+
+Acceptable range: 1 – 89°
+
+Must be numeric, non-zero, and strictly less than 90°.
+
+Validation reason: Angles ≥90° → infinite or undefined tension. Angles <1° unrealistic in practice (sling would be nearly vertical).
+
+Decimal values allowed for precision.
+
+⚠️ Output Validation & Safety Thresholds
+
+Compare calculated T (kg per sling) against the theoretical vertical share W/n:
+
+If T ≈ W/n → efficient, low-angle lift.
+
+If T = 1.5–2× (W/n) → moderate tension, caution.
+
+If T > 2× (W/n) → unsafe, reconfigure lift.
+
+Suggested traffic-light thresholds (as in industry audits):
+
+<50% of sling WLL → Safe (green)
+
+50–80% of sling WLL → Caution (yellow)
+
+>80% of sling WLL → Unsafe (red, stop lifting) {% endcomment %}

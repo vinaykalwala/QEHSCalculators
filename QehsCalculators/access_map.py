@@ -821,6 +821,27 @@ CALCULATORS = [
 
 {"name": "Total Dead Load Calculator", "url_name":"safety_total_dead_load_dl_calculator", "plan_type": "corporate", "category": "safety"},
 
+{"name": "Leading Safety Indicators Calculator", "url_name":"safety_leading_safety_indicator_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Lost Time Case Rate (LTC) Calculator", "url_name":"safety_lost_time_case_rate_ltc_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Long-Term Corrosion Rate Calculator", "url_name":"safety_long_term_corrosion_rate_ltcr_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Load Distribution & Lifting Calculator", "url_name":"safety_load_distribution_and_lifting_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Lifting Force per Anchor at Building Site", "url_name":"safety_lifting_force_per_anchor_at_building_site_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Lifting Force per Anchor at Precast Factory", "url_name":"safety_lifting_force_per_anchor_at_precast_factory_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Load per Anchor During De-Moulding Calculator", "url_name":"safety_load_per_anchor_during_de_moulding_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Load per Anchor During Transport Calculator", "url_name":"safety_load_per_anchor_during_transport_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Lifting Force per Anchor (Pitching) Calculator", "url_name":"safety_lifting_force_per_anchor_pitching_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Liquid Sizing Calculator", "url_name":"safety_liquid_sizing_calculator", "plan_type": "corporate", "category": "safety"},
+
+
     # Fire Calculators
     {"name": "Burn Rate (chemical Exposure) Calculator", "url_name": "fire_burn_rate_chemical_exposure_calculator", "plan_type": "corporate", "category": "fire"},
     {"name": "Base Design Quantity for CO₂ Calculator", "url_name": "fire_base_design_quantity_for_co_calculator", "plan_type": "corporate", "category": "fire"},

@@ -1,0 +1,785 @@
+{% extends 'base.html' %}
+{% block title %}Load per Anchor During Transport Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Load per Anchor During Transport Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        /* Input rows for side-by-side fields */
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+        
+        /* Table styling */
+.parameters-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #ccc; /* outer border */
+}
+
+.parameters-table thead {
+    background: linear-gradient(135deg, #1560bd, #000040);
+    color: white;
+}
+
+.parameters-table th {
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid #ddd; /* line below header */
+}
+
+.parameters-table td {
+    padding: 10px 15px;
+    border-bottom: 1px solid #d0d0d0; /* 👈 line between each row */
+}
+
+.parameters-table tbody tr:last-child td {
+    border-bottom: none; /* remove line after last row */
+}
+
+.parameters-table tbody tr:nth-child(even) {
+    background-color: #f5f9ff;
+}
+
+.parameters-table tbody tr:hover {
+    background-color: #e6f0ff;
+}
+
+@media (max-width: 600px) {
+    .parameters-table {
+        display: block;
+        overflow-x: auto;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Load per Anchor During Transport Calculator</h1>
+            <p>Calculate the load each anchor must bear during transportation of precast elements</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="weight">Weight (G) (kN)</label>
+                        <input type="number" id="weight" class="form-input" min="0" placeholder="e.g., 50">
+                    </div>
+                    <div class="form-group">
+                        <label for="liftingCoeff">Lifting Coefficient (f)</label>
+                        <input type="number" id="liftingCoeff" class="form-input" min="0.1" step="0.01" value="1.3" placeholder="e.g., 1.3">
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="spreadFactor">Spread Angle Factor (z)</label>
+                        <input type="number" id="spreadFactor" class="form-input" min="0.1" step="0.01" value="1.16" placeholder="e.g., 1.16">
+                    </div>
+                    <div class="form-group">
+                        <label for="numAnchors">Number of Anchors (n)</label>
+                        <input type="number" id="numAnchors" class="form-input" min="1" value="2" placeholder="e.g., 2">
+                    </div>
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateLoadPerAnchor()">Calculate Load Per Anchor</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Safety illustration">
+                    <p>This tool will calculate the <strong>Load per Anchor</strong> during transport. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Load per Anchor</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">kN</div>
+                    </div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low</span><span>Moderate</span><span>High</span><span>Very High</span><span>Critical</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Load Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    This tool calculates the <strong>Load per Anchor During Transport</strong> for precast elements, 
+                    ensuring safe handling and preventing overloading of anchors during transportation.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Weight (G):</strong> The total weight of the element being transported in kN. Must be greater than zero.</li>
+                    <li><strong>Lifting Coefficient (f):</strong> A factor that accounts for dynamic forces during lifting, typically 1.3 for transportation. Must be greater than zero.</li>
+                    <li><strong>Spread Angle Factor (z):</strong> A factor based on the spread angle of the lifting cables, typically 1.16 for a 30° spread angle. Must be greater than zero.</li>
+                    <li><strong>Number of Anchors (n):</strong> The number of anchors supporting the load. Must be at least 1.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <p>
+                    <b>Load per Anchor Guidelines:</b>
+                </p>
+                <ul class="note-list">
+                    <li><span class="good">Below 50 kN</span> → Low load, generally safe</li>
+                    <li><span class="average">50-100 kN</span> → Moderate load, ensure sufficient safety margin</li>
+                    <li><span class="bad">Above 100 kN</span> → High load, verify equipment certification</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>🔑 Key Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Construction:</strong> Safely transporting and mounting precast concrete elements on-site.</li>
+                    <li><strong>Manufacturing:</strong> Moving heavy machinery and equipment during setup and relocation.</li>
+                    <li><strong>Marine Industry:</strong> Hoisting heavy loads on ships and docks.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+    <h3>✅ Validation Rules</h3>
+    <ul class="note-list">
+        <li><strong>Weight (G):</strong> 0.5 – 10,000 kN, up to 2 decimals.</li>
+        <li><strong>Lifting Coefficient (f):</strong> 0.8 – 3.0, typical ~1.3.</li>
+        <li><strong>Spread Factor (z):</strong> 1.0 – 2.5, typical ~1.16.</li>
+        <li><strong>Number of Anchors (n):</strong> Integer, 1 – 50 only.</li>
+        <li>Negative or zero values are not allowed.</li>
+        <li>Inputs outside realistic ranges are rejected.</li>
+    </ul>
+</div>
+
+            
+            <div class="note-card">
+                <h3>📋 Standard Parameters</h3>
+                <table class="parameters-table">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Transport/Mount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Concrete strength</td>
+                            <td>45 N/mm²</td>
+                        </tr>
+                        <tr>
+                            <td>Weight (G)</td>
+                            <td>50 kN</td>
+                        </tr>
+                        <tr>
+                            <td>Spread angle (θ)</td>
+                            <td>30°</td>
+                        </tr>
+                        <tr>
+                            <td>Spread factor (z)</td>
+                            <td>1.16</td>
+                        </tr>
+                        <tr>
+                            <td>Lifting coeff (f)</td>
+                            <td>1.3</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+         // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+        function calculateLoadPerAnchor() {
+    /*
+    Formula:
+    Q = (G × f × z) ÷ n
+    Where:
+    G = Weight (kN), f = Lifting Coefficient, z = Spread Angle Factor, n = Number of Anchors
+    */
+
+    const weightInput = document.getElementById('weight');
+    const liftingCoeffInput = document.getElementById('liftingCoeff');
+    const spreadFactorInput = document.getElementById('spreadFactor');
+    const numAnchorsInput = document.getElementById('numAnchors');
+
+    const resultPlaceholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const resultError = document.getElementById('resultError');
+    const rateValue = document.getElementById('rateValue');
+    const feedbackContent = document.getElementById('feedbackContent');
+    const meterFill = document.getElementById('meterFill');
+
+    resultValue.classList.add('hidden');
+    resultError.classList.add('hidden');
+    resultPlaceholder.classList.add('hidden');
+
+    let weight = parseFloat(weightInput.value);
+    let liftingCoeff = parseFloat(liftingCoeffInput.value);
+    let spreadFactor = parseFloat(spreadFactorInput.value);
+    let numAnchors = parseFloat(numAnchorsInput.value);
+
+    // ✅ Validation Rules
+    if (isNaN(weight) || weight <= 0.5 || weight > 10000) {
+        showError("⚠️ Weight (G) must be between 0.5 and 10,000 kN.");
+        return;
+    }
+
+    if (isNaN(liftingCoeff) || liftingCoeff < 0.8 || liftingCoeff > 3.0) {
+        showError("⚠️ Lifting Coefficient (f) must be between 0.8 and 3.0.");
+        return;
+    }
+
+    if (isNaN(spreadFactor) || spreadFactor < 1.0 || spreadFactor > 2.5) {
+        showError("⚠️ Spread Angle Factor (z) must be between 1.0 and 2.5.");
+        return;
+    }
+
+    if (!Number.isInteger(numAnchors) || numAnchors < 1 || numAnchors > 50) {
+        showError("⚠️ Number of Anchors (n) must be an integer between 1 and 50.");
+        return;
+    }
+
+    // ✅ Calculation
+    const loadPerAnchor = (weight * liftingCoeff * spreadFactor) / numAnchors;
+    rateValue.textContent = loadPerAnchor.toFixed(2);
+
+    // ✅ Output Feedback
+    let meterWidth, feedback, meterColor;
+    if (loadPerAnchor < 50) {
+        meterWidth = 20;
+        feedback = "✅ Safe: Load per anchor is within safe limits.";
+        meterColor = "#2ecc71";
+    } else if (loadPerAnchor <= 100) {
+        meterWidth = 50;
+        feedback = "⚠️ Caution: Load is moderate. Ensure safety margins.";
+        meterColor = "#f39c12";
+    } else {
+        meterWidth = 90;
+        feedback = "❌ Warning: High load. Verify anchor certification!";
+        meterColor = "#e74c3c";
+    }
+
+    meterFill.style.width = meterWidth + "%";
+    meterFill.style.backgroundColor = meterColor;
+    feedbackContent.innerHTML = feedback;
+
+    resultValue.classList.remove('hidden');
+}
+
+        
+        function showError(message) {
+            const resultError = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const resultPlaceholder = document.getElementById('placeholder');
+            
+            resultPlaceholder.classList.add('hidden');
+            errorMessage.innerHTML = message;
+            resultError.classList.remove('hidden');
+        }
+        
+        function printReport() {
+            window.print();
+        }
+        
+        // Add event listeners for Enter key
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('.form-input');
+            inputs.forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        calculateLoadPerAnchor();
+                    }
+                });
+            });
+        });
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+{% comment %} 
+1. Formula Used
+
+We need the formula explicitly in the code as a comment for compliance reference:
+
+/*
+Formula:
+Load per Anchor (Q) = (G × f × z) ÷ n
+
+Where:
+- G = Weight of the precast element (kN)
+- f = Lifting coefficient (dynamic factor, typically 1.3 for transport)
+- z = Spread angle factor (depends on cable angle, typically 1.16 for 30°)
+- n = Number of anchors
+
+Purpose:
+To determine the load each anchor must bear during transport.
+Ensures anchors are not overloaded beyond their safe working load capacity.
+*/
+
+2. Detailed Validation Rules (QEHS / Fire Safety Aligned)
+Weight (G) [kN]
+
+Must be > 0
+
+Practical lower bound: > 0.5 kN (smallest meaningful precast element ~50 kg).
+
+Upper bound: ≤ 10,000 kN (≈1,000 tons) for construction/marine lifts. Anything beyond is unrealistic.
+
+Allow up to 2 decimal places.
+
+Unit: kN only.
+
+Lifting Coefficient (f)
+
+Must be > 0.
+
+Standard values: 1.1 – 2.0 (OSHA & ISO 12480 recommend ~1.3 for transport, higher for critical lifts).
+
+Validation: 0.8 ≤ f ≤ 3.0 (to allow margin for unusual conditions).
+
+Up to 2 decimal places.
+
+Spread Angle Factor (z)
+
+Must be > 0.
+
+Typical range: 1.0 – 2.0 (depends on sling angle, as per EN 1991 & lifting gear standards).
+
+Recommended limit: 1.0 ≤ z ≤ 2.5.
+
+More than 2.5 means extreme/unrealistic sling angles.
+
+Up to 2 decimal places.
+
+Number of Anchors (n)
+
+Must be an integer ≥ 1.
+
+Real-world range: 1 – 16 anchors (most precast lifting setups).
+
+Reject decimals (anchors must be whole).
+
+Reject excessive values (n > 50 → unrealistic setup).
+
+3. Output Validation & Thresholds
+Load per Anchor (Q, kN):
+
+Q < 50 kN → Low load → Safe ✅
+
+50 ≤ Q ≤ 100 kN → Moderate load → Caution ⚠️
+
+> 100 kN → High/Critical → Verify anchor certification ❌
+
+🔹 Rationale: These thresholds are aligned with EN 1991-1-6, OSHA 1926.251, and typical precast anchor certifications. {% endcomment %}

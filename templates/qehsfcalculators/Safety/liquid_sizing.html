@@ -1,0 +1,833 @@
+{% extends 'base.html' %}
+{% block title %}Liquid Sizing Calculator{% endblock %}
+{% block content %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liquid Sizing Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        /* Input rows for side-by-side fields */
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+         /* Table styling */
+.parameters-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #ccc; /* outer border */
+}
+
+.parameters-table thead {
+    background: linear-gradient(135deg, #1560bd, #000040);
+    color: white;
+}
+
+.parameters-table th {
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid #ddd; /* line below header */
+}
+
+.parameters-table td {
+    padding: 10px 15px;
+    border-bottom: 1px solid #d0d0d0; /* 👈 line between each row */
+}
+
+.parameters-table tbody tr:last-child td {
+    border-bottom: none; /* remove line after last row */
+}
+
+.parameters-table tbody tr:nth-child(even) {
+    background-color: #ffffff;
+}
+
+.parameters-table tbody tr:hover {
+    background-color: #e6f0ff;
+}
+
+@media (max-width: 600px) {
+    .parameters-table {
+        display: block;
+        overflow-x: auto;
+    }
+}
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+     <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+          {% include "includes/print_header_footer.html" %}
+        <div class="calculator-header">
+            <h1>Liquid Sizing Calculator</h1>
+            <p>Calculate the required orifice area for liquid service pressure relief valves</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="W">Mass Flow Rate (W) (kg/hr)</label>
+                        <input type="number" step="0.1" id="W" class="form-input" placeholder="e.g., 5000">
+                    </div>
+                    <div class="form-group">
+                        <label for="P">Upstream Pressure (P) (kPa)</label>
+                        <input type="number" step="0.1" id="P" class="form-input" placeholder="e.g., 1000">
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="Pc">Back Pressure (Pc) (kPa)</label>
+                        <input type="number" step="0.1" id="Pc" class="form-input" placeholder="e.g., 100">
+                    </div>
+                    <div class="form-group">
+                        <label for="rho">Density (ρ) (kg/m³)</label>
+                        <input type="number" step="0.1" id="rho" class="form-input" placeholder="e.g., 1000">
+                    </div>
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateLiquidSizing()">Calculate Required Area</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Safety illustration">
+                    <p>This tool will calculate the <strong>Required Orifice Area</strong> for liquid service pressure relief valves. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Required Orifice Area</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">Area (mm²)</div>
+                    </div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Small</span><span>Optimal</span><span>Moderate</span><span>Large</span><span>Very Large</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Orifice Area Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    This tool calculates the <strong>Required Orifice Area</strong> for liquid service pressure relief valves, 
+                    ensuring proper discharge capacity under specified operating conditions.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Mass Flow Rate (W):</strong> The total mass of liquid to be discharged per hour through the valve (kg/hr).</li>
+                    <li><strong>Upstream Pressure (P):</strong> The absolute pressure at the valve inlet during relief conditions (kPa).</li>
+                    <li><strong>Back Pressure (Pc):</strong> The absolute pressure at the valve outlet during relief conditions (kPa).</li>
+                    <li><strong>Density (ρ):</strong> The density of the fluid being discharged (kg/m³).</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <p>
+                    <b>Orifice Area Size Guidelines:</b>
+                </p>
+                <ul class="note-list">
+                    <li><span class="good">Below 20 mm²</span> → Small orifice area, may indicate an undersized valve</li>
+                    <li><span class="average">20-5000 mm²</span> → Optimal range for most industrial applications</li>
+                    <li><span class="bad">Above 5000 mm²</span> → Large orifice area, may require multiple valves</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>🔑 Key Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Chemical Plants</strong> - Reactor overpressure protection</li>
+                    <li><strong>Oil Refineries</strong> - Liquid hydrocarbon relief systems</li>
+                    <li><strong>Water Treatment</strong> - Pump discharge protection</li>
+                    <li><strong>Pharmaceutical</strong> - Batch process safety valves</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h4>✅ Validation Rules for Liquid Sizing</h4>
+  <ul>
+    <li><b>Mass Flow Rate (W):</b> >0, typical 100–100,000 kg/hr.</li>
+    <li><b>Upstream Pressure (P):</b> >0 absolute, must be greater than Pc.</li>
+    <li><b>Back Pressure (Pc):</b> ≥0 and less than P.</li>
+    <li><b>Density (ρ):</b> >0, typical 500–1500 kg/m³ (warn if <200 or >2000).</li>
+    <li><b>Delta Pressure (P–Pc):</b> must be >0 to allow flow.</li>
+    <li><b>Orifice Area:</b> valid if between 1–50,000 mm²; outside range triggers warnings.</li>
+  </ul>
+            </div>
+
+            <div class="table-container">
+                <table class="parameters-table">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Description</th>
+                            <th>Typical Values</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Mass Flow Rate (W)</strong></td>
+                            <td>Relief capacity required (kg/hr)</td>
+                            <td>100 - 100,000</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Upstream Pressure (P)</strong></td>
+                            <td>Set pressure plus overpressure (kPa absolute)</td>
+                            <td>&gt; 0</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Back Pressure (Pc)</strong></td>
+                            <td>Pressure at valve outlet (kPa absolute)</td>
+                            <td>&gt; 0</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Density (ρ)</strong></td>
+                            <td>Liquid density at flowing conditions (kg/m³)</td>
+                            <td>700 - 1500</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Constant (2407)</strong></td>
+                            <td>Derived from unit conversion factors for flow rate, pressure, and density</td>
+                            <td>Fixed</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+         // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+        function calculateLiquidSizing() {
+    // --- INPUTS ---
+    const W = parseFloat(document.getElementById('W').value);   // Mass flow rate [kg/hr]
+    const P = parseFloat(document.getElementById('P').value);   // Upstream pressure [bar abs]
+    const Pc = parseFloat(document.getElementById('Pc').value); // Back pressure [bar abs]
+    const rho = parseFloat(document.getElementById('rho').value); // Density [kg/m3]
+
+    const placeholder = document.getElementById('placeholder');
+    const resultError = document.getElementById('resultError');
+    const resultValue = document.getElementById('resultValue');
+    const errorMessage = document.getElementById('errorMessage');
+    const rateValue = document.getElementById('rateValue');
+    const feedbackContent = document.getElementById('feedbackContent');
+    const meterFill = document.getElementById('meterFill');
+
+    // Reset previous messages
+    resultError.classList.add('hidden');
+    placeholder.classList.add('hidden');
+    resultValue.classList.add('hidden');
+
+    // --- VALIDATION RULES ---
+    let isValid = true;
+    let errorMsg = '';
+
+    // Mass Flow Rate
+    if (isNaN(W) || W <= 0) {
+        errorMsg = '❌ Mass Flow Rate (W) must be > 0 (typical 100–100,000 kg/hr)';
+        isValid = false;
+    } else if (W < 50 || W > 200000) {
+        errorMsg = '⚠️ Mass Flow Rate seems unrealistic for typical relief sizing.';
+    }
+
+    // Pressure Checks
+    if (isValid && (isNaN(P) || P <= 0)) {
+        errorMsg = '❌ Upstream Pressure (P) must be > 0 (absolute, typical 1–500 bar)';
+        isValid = false;
+    } else if (isValid && (isNaN(Pc) || Pc < 0)) {
+        errorMsg = '❌ Back Pressure (Pc) cannot be negative';
+        isValid = false;
+    } else if (isValid && P <= Pc) {
+        errorMsg = '❌ Upstream Pressure must be greater than Back Pressure';
+        isValid = false;
+    }
+
+    // Density Check
+    if (isValid && (isNaN(rho) || rho <= 0)) {
+        errorMsg = '❌ Density must be > 0 (typical 500–1500 kg/m³)';
+        isValid = false;
+    } else if (rho < 200 || rho > 2000) {
+        errorMsg = '⚠️ Density outside normal liquid range. Verify input.';
+    }
+
+    if (!isValid) {
+        errorMessage.textContent = errorMsg;
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    // --- CALCULATION ---
+    // Formula: A = W / (2407 * sqrt((P - Pc) * rho))
+    const deltaP = P - Pc;
+    if (deltaP <= 0) {
+        errorMessage.textContent = '❌ Pressure difference (P - Pc) must be > 0';
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    const A_calc = W / (2407 * Math.sqrt(deltaP * rho)); // [m²]
+    const A_mm2 = A_calc * 1e6; // Convert to mm²
+
+    // --- OUTPUT VALIDATION ---
+    if (A_mm2 < 1) {
+        errorMessage.textContent = '⚠️ Calculated orifice area too small (<1 mm²). Check units.';
+        resultError.classList.remove('hidden');
+        return;
+    }
+    if (A_mm2 > 50000) {
+        errorMessage.textContent = '⚠️ Orifice area extremely large (>50,000 mm²). Verify inputs.';
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    // Display results
+    rateValue.textContent = A_mm2.toFixed(2);
+
+    // Meter visualization
+    let meterWidth = 0;
+    let feedbackText = '';
+    if (A_mm2 < 20) {
+        meterWidth = 10;
+        feedbackText = 'Very small orifice area — possible undersizing or wrong input.';
+        meterFill.style.background = '#e74c3c';
+    } else if (A_mm2 < 100) {
+        meterWidth = 25;
+        feedbackText = 'Small orifice area — suitable for low-flow but prone to clogging.';
+        meterFill.style.background = '#f39c12';
+    } else if (A_mm2 < 1000) {
+        meterWidth = 50;
+        feedbackText = 'Moderate orifice area — typical for industrial applications.';
+        meterFill.style.background = '#3498db';
+    } else if (A_mm2 < 5000) {
+        meterWidth = 75;
+        feedbackText = 'Large orifice area — high flow, may need special valve selection.';
+        meterFill.style.background = '#2ecc71';
+    } else {
+        meterWidth = 100;
+        feedbackText = 'Very large orifice — consider multiple valves in parallel.';
+        meterFill.style.background = '#27ae60';
+    }
+
+    meterFill.style.width = meterWidth + '%';
+    feedbackContent.textContent = feedbackText;
+
+    // Show results
+    resultValue.classList.remove('hidden');
+}
+
+/* 
+=== FORMULA & VALIDATIONS ===
+Formula: A = W / (2407 * √((P - Pc) * ρ))
+- W [kg/hr] : Mass Flow Rate (100–100,000 typical)
+- P [bar abs] : Upstream Pressure (>0, >Pc)
+- Pc [bar abs] : Back Pressure (≥0, <P)
+- ρ [kg/m³] : Density (500–1500 typical)
+
+Validation rules:
+1. W > 0, warn if <100 or >100,000
+2. P > 0, Pc ≥ 0, and P > Pc
+3. ρ > 0, warn if <200 or >2000
+4. deltaP = P - Pc must be > 0
+5. A_mm2 must be 1–50,000 realistic
+*/
+
+        
+        function printReport() {
+    // Update date just before printing
+    const now = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+    
+    window.print();
+}
+        
+        // Allow Enter key to trigger calculation
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('.form-input');
+            inputs.forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        calculateLoadPerAnchor();
+                    }
+                });
+            });
+        });
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+{% comment %} 
+1. Input Validation Rules (Real-World QEHS / Fire Safety Perspective)
+Inputs
+
+Mass Flow Rate (W) [kg/hr]
+
+Must be > 0
+
+Practical industrial range: 100 – 100,000 kg/hr
+
+Too low (<100) → not meaningful for relief sizing.
+
+Too high (>100,000) → may indicate unrealistic or incorrectly scaled data.
+
+Upstream Pressure (P) [bar(a) or Pa(abs)]
+
+Must be > 0 (absolute pressure).
+
+Should be expressed in absolute pressure, not gauge.
+
+Typical process safety range: 1 – 500 bar(a).
+
+Must always be greater than Back Pressure (Pc).
+
+Back Pressure (Pc) [bar(a) or Pa(abs)]
+
+Cannot be negative.
+
+Must be less than P.
+
+Realistic range: 0 – 50 bar(a) depending on vent/flare systems.
+
+Density (ρ) [kg/m³]
+
+Must be > 0.
+
+Typical range for industrial liquids: 500 – 1500 kg/m³ (e.g., hydrocarbons, water, acids).
+
+Values outside 200–2000 kg/m³ should trigger a warning.
+
+2. Output Validation Logic
+
+Formula Used:
+
+A = W / (2407 * √((P - Pc) * ρ))
+
+
+A_calc → orifice area [m²]
+
+A_mm2 = A_calc * 1,000,000 → orifice area [mm²]
+
+Output Thresholds:
+
+<20 mm² → likely undersized / input error.
+
+20 – 100 mm² → small relief valves (low-flow).
+
+100 – 1000 mm² → typical industrial PSV/relief valves.
+
+1000 – 5000 mm² → large custom valves.
+
+>5000 mm² → unrealistic, consider multiple valves.
+
+Validation:
+
+If A_mm2 < 1 → show warning: "Area too small, check units."
+
+If A_mm2 > 50,000 mm² → unrealistic, warn about scaling error.
+ {% endcomment %}
