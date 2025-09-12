@@ -798,6 +798,19 @@ CALCULATORS = [
     {"name": "Relief Vent Rate (Homogeneous-Vessel Venting) Calculator", "url_name": "fire_relief_vent_rate_homogeneous_vessel_venting_calculator", "plan_type": "corporate", "category": "fire"},
     {"name": "Relief Vent Rate Formula (External Heating) Calculator", "url_name": "fire_relief_vent_rate_formula_external_heating_calculator", "plan_type": "corporate", "category": "fire"},
 
+    {"name": "Smoke detector spacing calculator", "url_name": "fire_smoke_detector_spacing_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Smoke detector quantity calculator", "url_name": "fire_smoke_detector_quantity_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Specific volume calculator", "url_name": "fire_specific_volume_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Sprinkler Flow Rate Calculator", "url_name": "fire_sprinkler_flow_rate_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "SCBA (Self-Contained Breathing Apparatus) Cylinder Breathing Duration Calculation", "url_name": "fire_scba_self_contained_breathing_apparatus_cylinder_breathing_duration_calculation_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Turnaround Time Calculator", "url_name": "fire_turnaround_time_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Temperature History Equation (All-Vapor and All-Liquid Venting) Calculator", "url_name": "fire_temperature_history_equation_all_vapor_and_all_liquid_venting_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Temperature History Equation (External Heating) Calculator", "url_name": "fire_temperature_history_equation_external_heating_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Volumetric flowrate of liquid is proportional to the square root of pressure drop", "url_name": "fire_volumetric_flowrate_of_liquid_is_proportional_to_the_square_root_of_pressure_drop_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Venting Energy Balance Calculator", "url_name": "fire_venting_energy_balance_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Water Control Valve Capacity Calculator", "url_name": "fire_water_control_valve_capacity_calculator", "plan_type": "corporate", "category": "fire"},
+
+
 
 
 

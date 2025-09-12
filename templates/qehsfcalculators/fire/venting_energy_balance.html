@@ -1,0 +1,855 @@
+{% extends 'base.html' %}
+{% block title %}Venting Energy Balance Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accident Rate Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+         @media (max-width: 768px) {
+    .rate-value {
+        font-size: 28px; /* smaller font for tablets/mobiles */
+    }
+}
+
+@media (max-width: 480px) {
+    .rate-value {
+        font-size: 24px; /* even smaller for phones */
+    }
+}
+    </style>
+</head>
+<body>
+   <div class="btn-container">
+    <a href="{% url 'firecategory_calculators' %}" class="back-btn">Back To Fire Calculators</a>
+</div>
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+    <!-- Header -->
+    <div class="calculator-header">
+        <h1>Venting Energy Balance Calculator</h1>
+        <p>Analyze the net energy change in a system considering heat transfer, venting, and fluid properties to ensure safe and efficient operation.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Input Card -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+
+            <div class="form-group">
+                <label for="density">Density (ρ in kg/m³)</label>
+                <input type="number" id="density" class="form-input" placeholder="Enter density">
+            </div>
+
+            <div class="form-group">
+                <label for="volume">Volume (V in m³)</label>
+                <input type="number" id="volume" class="form-input" placeholder="Enter volume">
+            </div>
+
+            <div class="form-group">
+                <label for="internalEnergy">Internal Energy (u in J/kg)</label>
+                <input type="number" id="internalEnergy" class="form-input" placeholder="Enter internal energy">
+            </div>
+
+            <div class="form-group">
+                <label for="heatTransfer">Heat Transfer (Q in J)</label>
+                <input type="number" id="heatTransfer" class="form-input" placeholder="Enter heat transfer">
+            </div>
+
+            <div class="form-group">
+                <label for="massFlowRate">Mass Flow Rate (W in kg/s)</label>
+                <input type="number" id="massFlowRate" class="form-input" placeholder="Enter mass flow rate">
+            </div>
+
+            <div class="form-group">
+                <label for="internalEnergyVent">Internal Energy at Vent (u₁ in J/kg)</label>
+                <input type="number" id="internalEnergyVent" class="form-input" placeholder="Enter internal energy at vent">
+            </div>
+
+            <div class="form-group">
+                <label for="pressure">Pressure (P in Pa)</label>
+                <input type="number" id="pressure" class="form-input" placeholder="Enter pressure">
+            </div>
+
+            <div class="form-group">
+                <label for="liquidDensity">Liquid Density (ρ₁ in kg/m³)</label>
+                <input type="number" id="liquidDensity" class="form-input" placeholder="Enter liquid density">
+            </div>
+
+            <button class="calculate-btn" onclick="calculateEnergyBalance()">Calculate</button>
+        </div>
+
+        <!-- Result Card -->
+        <div class="result-card">
+            <!-- Placeholder -->
+            <div class="result-placeholder" id="placeholder">
+                <img src="{% static 'images/resultimage.png' %}" alt="Energy Balance Illustration">
+                <p>This tool will calculate the <strong>Energy Balance</strong>. Enter your data to see results and insights here.</p>
+            </div>
+
+            <!-- Error -->
+            <div class="result-error hidden" id="resultError" style="font-size: 22px;"></div>
+
+            <!-- Result -->
+            <div class="result-value hidden" id="resultValue">
+                <div class="rate-value">Energy Balance</div>
+                <div class="rate-value" id="energyBalanceValue">0.00</div>
+                <div class="rate-label" style="font-size:16px; font-weight:bold;">Joules (J)</div>
+                <div class="result-feedback" id="feedbackContent"></div>
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="note-section">
+        <!-- About -->
+        <div class="note-card">
+    <h3>📘 About This Calculator</h3>
+    <p>
+        The <strong>Venting Energy Balance Calculator</strong> is designed to analyze how energy behaves in a system 
+        when venting takes place. It helps engineers and operators understand whether the system is gaining, losing, 
+        or maintaining energy during the release of fluids or gases.
+    </p>
+    <p>
+        This calculation is widely used in areas such as boilers, pressure vessels, chemical reactors, and 
+        safety systems. By applying energy balance principles, it provides insights into the efficiency, 
+        safety, and stability of operations where controlled venting is essential.
+    </p>
+    <p>
+        The result can indicate:
+    </p>
+    <ul class="note-list">
+        <li><strong>Positive balance:</strong> Energy is entering the system faster than it is leaving.</li>
+        <li><strong>Negative balance:</strong> The system is losing energy through venting.</li>
+        <li><strong>Zero balance:</strong> The system is in equilibrium with no net energy change.</li>
+    </ul>
+    <p>
+        In short, this calculator is a practical tool for monitoring and improving the 
+        <strong>safety and performance</strong> of thermodynamic systems where venting is involved.
+    </p>
+</div>
+
+
+        <!-- Parameters -->
+        <div class="note-card">
+            <h3>⚙️ Parameters</h3>
+            <ul class="note-list">
+                <li><strong>ρ (Density in kg/m³):</strong> Mass per unit volume of a substance.</li>
+                <li><strong>V (Volume in m³):</strong> Space occupied by the fluid.</li>
+                <li><strong>u (Internal Energy in J/kg):</strong> Energy due to molecular motion.</li>
+                <li><strong>Q (Heat Transfer in J):</strong> Heat added/removed from the system.</li>
+                <li><strong>W (Mass Flow Rate in kg/s):</strong> Rate at which mass enters/leaves the system.</li>
+                <li><strong>u₁ (Internal Energy at Vent in J/kg):</strong> Energy per unit mass at vent outlet.</li>
+                <li><strong>P (Pressure in Pa):</strong> Fluid pressure inside the system.</li>
+                <li><strong>ρ₁ (Liquid Density in kg/m³):</strong> Liquid density at vent outlet.</li>
+            </ul>
+        </div>
+
+      <!-- Interpretation -->
+<div class="note-card">
+    <h3>💡 Interpretation</h3>
+    <ul class="note-list">
+        <li>✅ <strong>Positive Result:</strong> The system is accumulating energy, which may indicate heating or pressurization. Continuous monitoring is required to prevent unsafe overpressure conditions.</li>
+        <li>⚠️ <strong>Negative Result:</strong> The system is losing energy through venting or inefficiencies. This may reduce efficiency but can also indicate controlled depressurization for safety.</li>
+        <li>🔵 <strong>Zero Result:</strong> The system is in stable equilibrium with no net change in energy. This condition is generally desirable in steady-state operations.</li>
+    </ul>
+</div>
+
+<!-- Validations -->
+<div class="note-card">
+    <h3>🛡️ Input Validations</h3>
+    <ul class="note-list">
+        <li>All fields are <strong>mandatory</strong> for accurate calculations.</li>
+        <li>Inputs must be <strong>numeric, positive values</strong> within realistic engineering limits.</li>
+        <li><strong>Zero or negative entries</strong> are not accepted (physically invalid).</li>
+        <li><strong>Density:</strong> Must be between 0.1 and 20,000 kg/m³ (covers gases, liquids, and some slurries).</li>
+        <li><strong>Volume:</strong> Must be greater than 0 and below 10⁶ m³ (industrial scale limit).</li>
+        <li><strong>Internal Energy (u, u₁):</strong> Must be >0 and below 10⁷ J/kg (beyond which indicates unit error).</li>
+        <li><strong>Heat Transfer (Q):</strong> Valid between -10⁹ J and +10⁹ J (negative values allowed for cooling).</li>
+        <li><strong>Mass Flow Rate (W):</strong> Between 0.0001 and 10⁵ kg/s (valid for small vents to large industrial vents).</li>
+        <li><strong>Pressure (P):</strong> Between 0 and 10⁹ Pa (values above this exceed known engineering systems).</li>
+        <li><strong>Liquid Density (ρ₁):</strong> Must be >0 and ≤20,000 kg/m³.</li>
+        <li>⚠️ Extremely large or inconsistent inputs will trigger <strong>caution warnings</strong> to check units (e.g., mixing Pa with bar, J with kJ).</li>
+        <li>❌ Invalid inputs will display <strong>error messages</strong> and stop calculation to prevent misleading results.</li>
+    </ul>
+</div>
+
+
+        <!-- Usage -->
+        <div class="note-card">
+            <p>
+                Click <strong>"Calculate"</strong> to compute the system’s energy balance. 
+                This is essential in <strong>industrial venting, safety design, fire suppression, and HVAC efficiency</strong>.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+function toNumber(value) {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : NaN;
+}
+
+function showError(message, color = "orange") {
+    const resultError = document.getElementById("resultError");
+    resultError.innerHTML = message;
+    resultError.style.color = color;
+    resultError.classList.remove("hidden");
+}
+
+function clearMessages() {
+    const resultError = document.getElementById("resultError");
+    const resultValue = document.getElementById("resultValue");
+    const placeholder = document.getElementById("placeholder");
+    const feedbackContent = document.getElementById("feedbackContent");
+
+    resultError.classList.add("hidden");
+    resultValue.classList.add("hidden");
+    placeholder.classList.add("hidden");
+    resultError.innerHTML = "";
+    feedbackContent.innerHTML = "";
+}
+
+function calculateEnergyBalance() {
+    // Read inputs (as strings first to preserve user entry detection)
+    const density = toNumber(document.getElementById("density").value);
+    const volume = toNumber(document.getElementById("volume").value);
+    const internalEnergy = toNumber(document.getElementById("internalEnergy").value);
+    const heatTransfer = toNumber(document.getElementById("heatTransfer").value);
+    const massFlowRate = toNumber(document.getElementById("massFlowRate").value);
+    const internalEnergyVent = toNumber(document.getElementById("internalEnergyVent").value);
+    const pressure = toNumber(document.getElementById("pressure").value);
+    const liquidDensity = toNumber(document.getElementById("liquidDensity").value);
+
+    const resultValueEl = document.getElementById("resultValue");
+    const placeholderEl = document.getElementById("placeholder");
+    const feedbackContent = document.getElementById("feedbackContent");
+    const resultError = document.getElementById("resultError");
+
+    // Reset UI messages
+    clearMessages();
+
+    // Basic presence check
+    const inputs = { density, volume, internalEnergy, heatTransfer, massFlowRate, internalEnergyVent, pressure, liquidDensity };
+    for (const [k, v] of Object.entries(inputs)) {
+        if (isNaN(v)) {
+            showError(`⚠️ "${k}" is missing or not a valid number. Please enter numeric values and include units (see labels).`);
+            return;
+        }
+    }
+
+    // Per-field sanity ranges (recommended)
+    if (!(density >= 0.1 && density <= 3000)) {
+        showError("⚠️ Density (ρ) out of expected range (0.1 – 3000 kg/m³). Verify units (kg/m³ vs g/cm³).");
+        return;
+    }
+    if (!(volume > 0 && volume <= 1e7)) {
+        showError("⚠️ Volume (V) must be > 0 and realistically ≤ 1e7 m³. Check units (m³).");
+        return;
+    }
+    if (!(internalEnergy > 0 && internalEnergy <= 1e7)) {
+        showError("⚠️ Internal Energy (u) should be > 0 and ≤ 1e7 J/kg. Verify units.");
+        return;
+    }
+    // Allow Q negative (cooling), but check magnitude
+    if (!(Math.abs(heatTransfer) <= 1e10)) {
+        showError("⚠️ Heat Transfer (Q) magnitude is unrealistic (>1e10). Verify units (use J if expected).");
+        return;
+    }
+    if (!(massFlowRate >= 1e-6 && massFlowRate <= 1e6)) {
+        showError("⚠️ Mass Flow Rate (W) out of expected range (1e-6 – 1e6 kg/s). Verify instrument units.");
+        return;
+    }
+    if (!(internalEnergyVent > 0 && internalEnergyVent <= 1e7)) {
+        showError("⚠️ Internal Energy at Vent (u₁) should be > 0 and ≤ 1e7 J/kg. Verify units/phase.");
+        return;
+    }
+    if (!(pressure >= 100 && pressure <= 5e8)) {
+        showError("⚠️ Pressure (P) out of expected range (≥100 Pa and ≤5e8 Pa). Check units (Pa vs kPa or bar).");
+        return;
+    }
+    if (!(liquidDensity >= 0.1 && liquidDensity <= 3000)) {
+        showError("⚠️ Liquid Density (ρ₁) out of expected range (0.1 – 3000 kg/m³). Verify units.");
+        return;
+    }
+
+    // Cross-field checks
+    // 1) Prevent division-by-near-zero
+    if (liquidDensity < 0.1) {
+        showError("❌ Liquid density is too small — division would be unstable. Use correct units or increase density >= 0.1 kg/m³.");
+        return;
+    }
+
+    // 2) Check for unit mismatch: compare scales of Q and W*u₁
+    const convTerm = massFlowRate * internalEnergyVent; // J/s if u in J/kg and W in kg/s
+    if (convTerm === 0 && Math.abs(heatTransfer) > 0) {
+        // mass term zero while heatTransfer large -> strange
+        showError("⚠️ Mass flow × energy term is zero while heat transfer is nonzero — check mass flow and internal energy inputs.");
+        return;
+    }
+
+    // If convTerm vastly different from Q, warn (possible unit mismatch)
+    const ratio = Math.abs(convTerm) / (Math.abs(heatTransfer) + 1e-12);
+    if (ratio > 1e3) {
+        showError("⚠️ The mass-flow energy term is >1000× larger than heat transfer. This often indicates unit mismatch (kJ vs J, kg vs g). Verify units.");
+        return;
+    }
+    if (ratio < 1e-6 && Math.abs(heatTransfer) > 1e3) {
+        showError("⚠️ The mass-flow term is negligibly small compared to Q. Check that mass flow units are correct and u₁ is in J/kg.");
+        return;
+    }
+
+    // 3) Check pressure / liquidDensity magnitude
+    const pOverRho = pressure / liquidDensity;
+    if (!Number.isFinite(pOverRho) || Math.abs(pOverRho) > 1e9) {
+        showError("⚠️ The pressure / liquidDensity term is unrealistic. Verify pressure (Pa) and liquid density (kg/m³).");
+        return;
+    }
+
+    // All validations passed — compute result
+    // NOTE: Ensure that Q and convTerm are consistent (Q units vs convTerm units).
+    // Many practitioners treat Q as rate (J/s) — if Q is total energy (J) user must convert to rate.
+    const energyBalance = heatTransfer - massFlowRate * (internalEnergyVent + pOverRho);
+
+    // Safety: ensure finite result
+    if (!Number.isFinite(energyBalance)) {
+        showError("❌ Computation produced a non-finite result. Check input magnitudes and units.");
+        return;
+    }
+
+    // Display results: value, normalized percent (relative to |Q|), and per-volume metric
+    const energyDisplay = Math.abs(energyBalance) >= 1 ? energyBalance.toFixed(2) : energyBalance.toFixed(6);
+    document.getElementById("energyBalanceValue").innerText = energyDisplay;
+
+    resultValueEl.classList.remove("hidden");
+
+    // Normalized metrics
+    const relativePercent = (Math.abs(heatTransfer) > 1e-12) ? (100 * energyBalance / heatTransfer) : null; // could be null if Q approx 0
+    const perVolume = energyBalance / volume; // J per m^3
+
+    // Determine feedback
+    let feedback = "";
+    // Treat very small relative differences as balanced (within measurement uncertainty)
+    const isEffectivelyZero = (relativePercent !== null) ? Math.abs(relativePercent) < 0.1 : Math.abs(energyBalance) < 1e-6;
+
+    if (isEffectivelyZero) {
+        feedback = "🔵 Balanced: Net energy change is within measurement uncertainty (effectively zero).";
+        feedbackContent.style.color = "blue";
+    } else if (energyBalance > 0) {
+        feedback = "✅ Positive Energy Balance: net energy entering system (heating/increase).";
+        feedbackContent.style.color = "green";
+    } else {
+        feedback = "⚠️ Negative Energy Balance: net energy leaving system (cooling/venting losses).";
+        feedbackContent.style.color = "red";
+    }
+
+    // Add contextual KPIs
+    let details = `<div style="margin-top:8px;">${feedback}</div>`;
+    if (relativePercent !== null) {
+        const rp = relativePercent.toFixed(3);
+        details += `<div style="margin-top:6px;">Relative imbalance: ${rp}% (relative to Q)</div>`;
+        // Interpret relative percent for audits
+        if (Math.abs(relativePercent) >= 20) {
+            details += `<div style="color:darkred;">Significant discrepancy (≥20%): investigate instrumentation, units, and process anomalies.</div>`;
+        } else if (Math.abs(relativePercent) >= 5) {
+            details += `<div style="color:darkorange;">Moderate discrepancy (5%–20%): review recent measurements and controls.</div>`;
+        } else {
+            details += `<div style="color:green;">Minor discrepancy (<5%): within typical operational variance.</div>`;
+        }
+    } else {
+        details += `<div style="margin-top:6px;">Relative imbalance: not reported (Q ≈ 0). Use absolute values and per-volume KPI below.</div>`;
+    }
+    details += `<div style="margin-top:6px;">Per-volume: ${perVolume.toExponential(3)} J/m³</div>`;
+
+    // Show the feedback
+    feedbackContent.innerHTML = details;
+}
+</script>
+
+
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+<!-- 1) Quick QEHS safety analysis (practical)
+
+Your calculator computes a simple venting energy balance: it compares heat added/removed (Q) with the energy carried away by venting mass (mass flow × energy per mass term that includes internal energy and a pressure term). In QEHS / fire-safety work this kind of indicator is used to:
+
+Determine whether a vessel or system will heat up or cool down during venting (affects ignition risk, overpressure, relief sizing).
+
+Support decisions about ventilation, suppression and evacuation (positive energy → potential temperature rise; negative → cooling / depressurisation).
+
+Provide an audit KPI showing whether process controls (valves/relief devices/heat sources) are behaving as expected.
+
+To be useful in audits it must: (a) produce physically plausible numbers, (b) guard against unit mistakes, (c) detect unrealistic outliers that invalidate interpretation, and (d) express results with context (absolute J and normalized KPI where helpful).
+
+2) Recommended input validation rules (per field)
+
+General rules for all fields:
+
+Type: numeric, finite (no NaN, Infinity).
+
+Allowed decimals: up to 6 decimal places (displayed to 2–4 depending on magnitude in output).
+
+Mandatory: yes (display a single clear error if any required field is missing).
+
+Provide units next to inputs and in any error messages (helps auditors spot unit mistakes).
+
+Per-field rules:
+
+Density (ρ) — kg/m³
+
+Acceptable range (recommended): 0.1 → 3000 kg/m³
+
+Rationale: covers light gases (~0.1–10), air (~1.2), gases at high pressure, liquids up to heavy oils ~ >1000.
+
+Min 0.1 (density below this likely wrong units - e.g., g/cm³ confusion).
+
+Max 3000 (above that likely wrong units or solids).
+
+Decimals: allow up to 6.
+
+Volume (V) — m³
+
+Acceptable range: 1e-4 → 1e7 m³ (0.0001 m³ ~ small lab vessel; 1e7 m³ ~ very large storage tank / cavern)
+
+Min > 0, forbid 0.
+
+If volume > 1e6 m³, show caution message (“very large volume — verify units”).
+
+Internal Energy (u) — J/kg
+
+Acceptable range: 0 → 1e7 J/kg
+
+Many fluids have internal energies in range 1e3–1e6 J/kg. 1e7 is safety cap.
+
+Allow zero only if physically meaningful (rare). Recommend enforce >= 1 J/kg to avoid degenerate cases, but allow 0 if you expect vacuum-like values — better to require >0.
+
+For audits require user confirmation if >1e6 (large) or <1 (very small).
+
+Heat Transfer (Q) — J
+
+Acceptable range: -1e10 → 1e10 J
+
+Negative allowed (heat removal). Magnitude limited to avoid unit confusion (kJ vs J).
+
+If |Q| < 1 (tiny), warn about rounding/measurement resolution.
+
+If |Q| > 1e9, show caution: likely wrong units (kJ vs J) — ask to verify.
+
+Mass Flow Rate (W) — kg/s
+
+Acceptable range: 1e-6 → 1e6 kg/s
+
+Extremely small flows (micro leaks) to very large relief flows for industrial blowdown.
+
+For W < 1e-6 or >1e6 → flag unrealistic.
+
+Internal Energy at Vent (u₁) — J/kg
+
+Same rules as u; acceptable > 0 to 1e7.
+
+If u₁ differs from u by large factor (e.g., > × 100) alert for plausibility (temperature/phase change).
+
+Pressure (P) — Pa
+
+Acceptable range: 100 → 5e8 Pa (approx. from near-vacuum to extremely high pressures used in specialized industry).
+
+Note: Standard atmospheric pressure ~101325 Pa.
+
+If P < 100 Pa -> warn (likely wrong units: kPa vs Pa).
+
+If P > 5e8 Pa -> definitely verify units.
+
+Liquid Density (ρ₁) — kg/m³
+
+Acceptable range: 0.1 → 3000 kg/m³ (same as density)
+
+Crucial: must be > 0 and not extremely small (to avoid division by near-zero).
+
+Cross-field and logical consistency checks:
+
+Division safety: pressure / liquidDensity must be finite and reasonably sized. Enforce liquidDensity >= 0.1 and if pressure / liquidDensity > 1e8 flag as unrealistic.
+
+Heat vs mass energy scale: compare magnitude of massFlowRate × internalEnergyVent to |Q|. If massFlowRate × internalEnergyVent >> |Q| (e.g. > 1e3 ×|Q|), warn user: likely inconsistent units (e.g., Q in kJ and u in J/kg). Suggest unit check.
+
+Close to zero result detection: if computed result is ± extremely small relative to |Q| (e.g., |result| < 0.001 × |Q|), consider result effectively balanced (report as “balanced within measurement uncertainty”).
+
+Phase change flag: If internal energies imply different phases (u vs u₁ difference consistent with latent heats), warn user that phase change models are different and this equation may not be valid without enthalpy/phase data.
+
+Formatting / allowed decimals:
+
+Inputs accept up to 6 decimal places. Show output to 2 decimal places if >1 J, or to 6 decimal places if <1 J.
+
+3) Edge-case validations (must detect & handle)
+
+Division by zero / tiny denominator: liquidDensity <= 0 or < 0.1 → reject or force confirmation. Avoid pressure / liquidDensity producing Infinity.
+
+Infinity / NaN: Any computed !Number.isFinite(value) → show error to user and log.
+
+Unit mismatch cues: Very large/small magnitudes (e.g., Q in range of 1e3–1e6 vs u in 1e3) indicate user may have used kJ instead of J, or kg vs g — warn and suggest conversions.
+
+Overflows: if intermediate product massFlowRate * internalEnergyVent > 1e15 → flag and stop.
+
+Opposite sign logic: previously you rejected negative Q; in real systems Q can be negative (cooling). Allow negative Q but mark it explicitly as cooling.
+
+Extreme outliers: if any value exceeds recommended max by factor >10 → require confirmation.
+
+Physically inconsistent combos: very low density with huge pressure — suspicious.
+
+4) Output validation logic and KPI thresholds (how to present result in audits)
+
+Primary computed value:
+EnergyBalance = Q − W × (u₁ + P/ρ₁) (units: Joules per second? — your implementation produces Joules if Q is energy (J) and W is kg/s * J/kg → J/s, so unit consistency: ensure Q is power (J/s) or convert. Important note: Q units must match W×(u₁ + P/ρ₁) units. If Q is energy (J) but W*(...) is power (J/s), you’ll have units mismatch. This is the single most common audit error. Verify whether Q is energy (J) or heat transfer rate (J/s).)
+
+KPI normalization (recommended for audits):
+
+Absolute imbalance (J or J/s) — report raw value and sign.
+
+Relative imbalance (%) = 100 × result / max(|Q|, epsilon) — useful to judge magnitude relative to heat input/ removal.
+
+Interpretations:
+
+|result| < 0.1% of |Q| → trivial / within measurement noise.
+
+0.1% ≤ |result| < 5% → acceptable / expected variance.
+
+5% ≤ |result| < 20% → caution: investigate instrumentation, controls.
+
+|result| ≥ 20% → significant discrepancy — immediate investigation.
+
+Normalized per volume: result / V (J/m³) can help compare different units/vessel sizes.
+
+Reporting for audits:
+
+Always show value, units, relative percent vs |Q|, and per volume if volume known.
+
+If unit mismatch suspected (Q vs W×...), show an explicit warning and do not auto-interpret the KPI. -->

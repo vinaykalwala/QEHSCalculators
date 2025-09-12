@@ -1,0 +1,739 @@
+{% extends 'base.html' %}
+{% block title %}Turnaround Time Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accident Rate Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+         @media (max-width: 768px) {
+    .rate-value {
+        font-size: 28px; /* smaller font for tablets/mobiles */
+    }
+}
+
+@media (max-width: 480px) {
+    .rate-value {
+        font-size: 24px; /* even smaller for phones */
+    }
+}
+    </style>
+</head>
+<body>
+   <div class="btn-container">
+    <a href="{% url 'firecategory_calculators' %}" class="back-btn">Back To Fire Calculators</a>
+</div>
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+    <div class="calculator-header">
+        <h1>Turnaround Time Calculator</h1>
+        <p>Calculate the time required to complete a process considering heat effects and mass changes. Useful in thermal safety, fire protection, and environmental safety.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Input Card -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+            <div class="form-group">
+                <label for="tr">Emptying Time (t<sub>r</sub>)</label>
+                <input type="number" id="tr" class="form-input" placeholder="Enter Emptying Time">
+            </div>
+            <div class="form-group">
+                <label for="V">Volume (V)</label>
+                <input type="number" id="V" class="form-input" placeholder="Enter Volume">
+            </div>
+            <div class="form-group">
+                <label for="hfa">Latent Heat of Vaporization (h<sub>fa</sub>)</label>
+                <input type="number" id="hfa" class="form-input" placeholder="Enter Latent Heat">
+            </div>
+            <div class="form-group">
+                <label for="mo">Initial Mass (m<sub>o</sub>)</label>
+                <input type="number" id="mo" class="form-input" placeholder="Enter Initial Mass">
+            </div>
+            <div class="form-group">
+                <label for="vfa">Specific Volume of Liquid (v<sub>fa</sub>)</label>
+                <input type="number" id="vfa" class="form-input" placeholder="Enter Specific Volume">
+            </div>
+            <div class="form-group">
+                <label for="q">Heat Release Rate per Unit Mass (q)</label>
+                <input type="number" id="q" class="form-input" placeholder="Enter Heat Release Rate">
+            </div>
+            <button class="calculate-btn" onclick="calculateTurnaroundTime()">Calculate Turnaround Time</button>
+        </div>
+
+        <!-- Result Card -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="{% static 'images/resultimage.png' %}" alt="Turnaround Time Illustration">
+                <p>This tool will calculate the <strong>Turnaround Time</strong>. Enter your data to see results and insights here.</p>
+            </div>
+
+            <div class="result-error hidden" id="resultError" style="font-size: 28px;"></div>
+
+            <div class="result-value hidden" id="resultValue">
+                <div class="rate-value">Turnaround Time</div>
+                <div class="rate-value" id="turnaroundTimeValue">0.00</div>
+                <div class="rate-label" style="font-size:16px; font-weight:bold;">seconds</div>
+                <div class="result-feedback" id="feedbackContent"></div>
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="note-section">
+
+    <!-- About This Calculator -->
+    <div class="note-card">
+        <h3>📘 About This Calculator</h3>
+        <p>
+            The <strong>Turnaround Time Calculator</strong> helps determine the time required to complete a process while accounting for heat effects and changes in mass. 
+            It is widely used in <strong>thermal safety calculations</strong>, <strong>fire protection engineering</strong>, and <strong>environmental safety assessments</strong>. 
+            By calculating turnaround time, engineers and safety professionals can evaluate risks, plan process timings, and implement protective measures.
+        </p>
+    </div>
+
+    <!-- Parameters -->
+    <div class="note-card">
+        <h3>⚙️ Parameters</h3>
+        <ul class="note-list">
+            <li><strong>t<sub>r</sub> (Emptying Time):</strong> The time it takes for a liquid to be emptied from a container or system. 
+                <ul>
+                    <li>Measured in seconds (s).</li>
+                    <li>Shorter emptying times can indicate rapid process but may increase hazard if heat release is high.</li>
+                </ul>
+            </li>
+            <li><strong>V (Volume):</strong> Total volume of the liquid being processed. 
+                <ul>
+                    <li>Measured in cubic meters (m³).</li>
+                    <li>Larger volumes generally take longer to process and require careful monitoring of heat effects.</li>
+                </ul>
+            </li>
+            <li><strong>h<sub>fa</sub> (Latent Heat of Vaporization):</strong> The energy required to vaporize a unit mass of the liquid.
+                <ul>
+                    <li>Measured in Joules per kilogram (J/kg).</li>
+                    <li>Higher latent heat indicates more energy is needed, affecting the process time.</li>
+                </ul>
+            </li>
+            <li><strong>m<sub>o</sub> (Initial Mass):</strong> Mass of the substance at the start of the process.
+                <ul>
+                    <li>Measured in kilograms (kg).</li>
+                    <li>Directly affects the time required to complete the process.</li>
+                </ul>
+            </li>
+            <li><strong>v<sub>fa</sub> (Specific Volume of Liquid):</strong> Volume occupied by a unit mass of the liquid.
+                <ul>
+                    <li>Measured in m³/kg.</li>
+                    <li>Influences the overall energy distribution and evaporation rate.</li>
+                </ul>
+            </li>
+            <li><strong>q (Heat Release Rate per Unit Mass):</strong> Rate at which heat is released per unit mass during the process.
+                <ul>
+                    <li>Measured in Watts per kilogram (W/kg).</li>
+                    <li>Higher heat release increases the speed of phase change and impacts turnaround time.</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+   <!-- Interpretation -->
+<div class="note-card">
+    <h3>💡 Interpretation</h3>
+    <ul class="note-list">
+        <li>✅ <strong>Low Turnaround Time (&lt;10 s):</strong> The process completes quickly, indicating low operational risk. Minimal heat accumulation and substance exposure; normal monitoring is sufficient.</li>
+        <li>⚠️ <strong>Moderate Turnaround Time (10–60 s):</strong> Process duration is moderate. Increased monitoring is recommended, with safety measures such as ventilation, temperature control, or protective equipment in place.</li>
+        <li>🚨 <strong>High Turnaround Time (&gt;60 s):</strong> The process is slow, potentially leading to prolonged heat exposure, accumulation of hazardous substances, or elevated fire risk. Immediate assessment and mitigation are necessary to prevent incidents.</li>
+    </ul>
+</div>
+
+<!-- Input Validations -->
+<div class="note-card">
+    <h3>🛡️ Input Validations</h3>
+    <ul class="note-list">
+        <li>All fields are <strong>mandatory</strong>; empty fields will trigger a warning.</li>
+        <li>Only <strong>numeric values greater than zero</strong> are accepted. Negative values or zero are physically invalid and will show an error.</li>
+        <li><strong>Threshold limits</strong> are applied based on industrial standards to ensure realistic and safe calculations:
+            <ul>
+                <li>t<sub>r</sub> (Emptying Time): 0.001–10,000 s</li>
+                <li>V (Volume): 0.001–10,000 m³</li>
+                <li>h<sub>fa</sub> (Latent Heat): 100–500,000 J/kg</li>
+                <li>m<sub>o</sub> (Initial Mass): 0.001–50,000 kg</li>
+                <li>v<sub>fa</sub> (Specific Volume): 0.0001–0.01 m³/kg</li>
+                <li>q (Heat Release Rate): 0.001–1,000,000 W/kg</li>
+            </ul>
+        </li>
+        <li>Cross-field consistency: <strong>V ≈ m<sub>o</sub> × v<sub>fa</sub></strong>. Large deviations trigger a caution warning.</li>
+        <li>Any invalid or inconsistent input will <strong>hide the placeholder</strong> and display a detailed error message in the result section.</li>
+        <li>Edge cases like <strong>division by zero</strong> or <strong>negative turnaround time</strong> are automatically flagged for review.</li>
+    </ul>
+</div>
+
+
+    <!-- Real-Life Applications -->
+    <div class="note-card">
+        <h3>🌍 Real-Life Applications</h3>
+        <ul class="note-list">
+            <li><strong>Fire Safety Engineering:</strong> Helps estimate time for heat release and safe evacuation planning.</li>
+            <li><strong>Environmental Protection:</strong> Used to determine the safe handling time for volatile or hazardous liquids.</li>
+            <li><strong>Industrial Process Safety:</strong> Assists in evaluating process durations and energy requirements in chemical plants.</li>
+            <li><strong>Thermal Risk Assessment:</strong> Identifies potential overheating hazards and mitigates risk.</li>
+        </ul>
+    </div>
+
+    <!-- Usage / Conclusion -->
+    <div class="note-card">
+        <h3>📌 Usage / Conclusion</h3>
+        <p>
+            By using this calculator, professionals can accurately estimate the <strong>Turnaround Time</strong> for processes involving liquids, heat, and mass changes. 
+            This enables proper safety measures, risk assessment, and operational planning in industrial, environmental, and fire safety scenarios.
+        </p>
+    </div>
+
+</div>
+
+
+<script>
+function calculateTurnaroundTime() {
+    const tr = parseFloat(document.getElementById('tr').value.trim());
+    const V = parseFloat(document.getElementById('V').value.trim());
+    const hfa = parseFloat(document.getElementById('hfa').value.trim());
+    const mo = parseFloat(document.getElementById('mo').value.trim());
+    const vfa = parseFloat(document.getElementById('vfa').value.trim());
+    const q = parseFloat(document.getElementById('q').value.trim());
+
+    const resultValue = document.getElementById('resultValue');
+    const placeholder = document.getElementById('placeholder');
+    const feedbackContent = document.getElementById('feedbackContent');
+    const resultError = document.getElementById('resultError');
+
+    // Reset
+    resultError.classList.add('hidden');
+    resultValue.classList.add('hidden');
+    placeholder.classList.add('hidden');
+    resultError.innerHTML = "";
+    feedbackContent.innerHTML = "";
+
+    // Input validation rules
+    const validations = [
+        {val: tr, name: "Emptying Time (t_r)", min: 0.001, max: 10000, unit: "seconds"},
+        {val: V, name: "Volume (V)", min: 0.001, max: 10000, unit: "m³"},
+        {val: hfa, name: "Latent Heat (h_fa)", min: 100, max: 500000, unit: "J/kg"},
+        {val: mo, name: "Initial Mass (m_o)", min: 0.001, max: 50000, unit: "kg"},
+        {val: vfa, name: "Specific Volume (v_fa)", min: 0.0001, max: 0.01, unit: "m³/kg"},
+        {val: q, name: "Heat Release Rate (q)", min: 0.001, max: 1000000, unit: "W/kg"}
+    ];
+
+    for (let i of validations) {
+        if (isNaN(i.val) || i.val < i.min || i.val > i.max) {
+            resultError.innerHTML = `❌ ${i.name} must be between ${i.min} and ${i.max} ${i.unit}.`;
+            resultError.style.color = "red";
+            resultError.classList.remove('hidden');
+            return;
+        }
+    }
+
+    // Cross-field consistency check
+    const estimatedVolume = mo * vfa;
+    if (V / estimatedVolume > 10) { // Volume much larger than mass * specific volume
+        resultError.innerHTML = `⚠️ Volume seems inconsistent with mass and specific volume. Check input values.`;
+        resultError.style.color = "orange";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    // Calculation
+    const denominator = mo * vfa * q;
+    if (denominator === 0) {
+        resultError.innerHTML = "❌ Invalid input combination (division by zero).";
+        resultError.style.color = "red";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    const term = (V * hfa * tr) / denominator;
+    const tau = tr - Math.sqrt(term);
+
+    if (tau < 0) {
+        resultError.innerHTML = "⚠️ Calculation resulted in negative Turnaround Time. Check input values.";
+        resultError.style.color = "orange";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    // Display result
+    document.getElementById('turnaroundTimeValue').innerText = tau.toFixed(2);
+    resultValue.classList.remove('hidden');
+
+    // Risk feedback
+    let feedback = "";
+    if (tau < 10) {
+        feedback = "✅ Low Turnaround Time: Process completes quickly, low risk.";
+        feedbackContent.style.color = "green";
+    } else if (tau <= 60) {
+        feedback = "⚠️ Moderate Turnaround Time: Monitor process, ensure safety.";
+        feedbackContent.style.color = "orange";
+    } else {
+        feedback = "🚨 High Turnaround Time: Process is slow; assess heat and mass effects to avoid hazards.";
+        feedbackContent.style.color = "red";
+    }
+    feedbackContent.innerHTML = feedback;
+}
+
+</script>
+
+
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+<!-- 1. Analysis of Inputs, Outputs, and Formula
+
+Calculator Inputs:
+
+Input	Description	Units	Role in Calculation
+t_r	Emptying Time	seconds (s)	Baseline process time; shorter time may indicate faster hazards.
+V	Volume	m³	Total volume affects substance accumulation and thermal effects.
+h_fa	Latent Heat of Vaporization	J/kg	Energy required for phase change; impacts turnaround time.
+m_o	Initial Mass	kg	Mass to be processed; larger mass increases duration.
+v_fa	Specific Volume	m³/kg	Influences energy distribution per unit mass.
+q	Heat Release Rate	W/kg	Higher heat release accelerates phase change, reducing turnaround time.
+
+Calculation Formula:
+
+𝜏
+=
+𝑡
+𝑟
+−
+𝑉
+⋅
+ℎ
+𝑓
+𝑎
+⋅
+𝑡
+𝑟
+𝑚
+𝑜
+⋅
+𝑣
+𝑓
+𝑎
+⋅
+𝑞
+τ=t
+r
+	​
+
+−
+m
+o
+	​
+
+⋅v
+fa
+	​
+
+⋅q
+V⋅h
+fa
+	​
+
+⋅t
+r
+	​
+
+	​
+
+	​
+
+
+Represents the effective turnaround time, accounting for energy/mass effects.
+
+Outputs in seconds.
+
+Output:
+
+Turnaround Time (τ) in seconds
+
+Risk feedback: Low / Moderate / High turnaround time
+
+2. Recommended Input Validation Rules (QEHS Perspective)
+
+Each input must be physically meaningful, safe, and auditable.
+
+Input	Validation Rules	Industry Considerations
+t_r	Numeric, > 0, max 10,000 s (~2.7 hr), decimals allowed	Emptying time cannot be zero; very high times may indicate unrealistic tank/process.
+V	Numeric, > 0, max 10,000 m³, decimals allowed	Industrial tank volumes rarely exceed this; ensures realistic risk calculations.
+h_fa	Numeric, > 0, typical 100–500,000 J/kg, decimals allowed	Ensures latent heat matches real substances; protects against unrealistic energy input.
+m_o	Numeric, > 0, max 50,000 kg	Avoids division by zero and unreasonably high mass.
+v_fa	Numeric, > 0, typical 0.0001–0.01 m³/kg	Matches physical density ranges; prevents negative or zero volume per unit mass.
+q	Numeric, > 0, max 1,000,000 W/kg	Prevents unrealistic heat release rate; follows NFPA fire modeling ranges.
+
+Cross-field Consistency:
+
+V / v_fa should roughly match m_o to ensure physical consistency:
+
+V
+≈
+𝑚
+𝑜
+⋅
+𝑣
+𝑓
+𝑎
+V≈m
+o
+	​
+
+⋅v
+fa
+	​
+
+
+If V >> m_o * v_fa, result may be negative → warn user.
+
+3. Edge Case Handling
+Case	Handling
+Division by zero (mo * vfa * q = 0)	Reject inputs <= 0; show error.
+Negative output (τ < 0)	Display warning: “Check inputs; values unrealistic.”
+Extreme outliers	Values above industry thresholds (see table) trigger caution warnings but allow calculation for simulation.
+Empty fields	Show warning: “All fields required.”
+Unrealistic combinations (V >> m_o * v_fa)	Display warning: “Volume and mass combination is inconsistent.”
+4. Output Validation Logic
+
+Turnaround Time (τ) should be > 0.
+
+Risk interpretation thresholds (seconds):
+
+τ	Feedback
+< 10 s	✅ Low Turnaround Time
+10–60 s	⚠️ Moderate Turnaround Time
+> 60 s	🚨 High Turnaround Time / Potential hazard
+
+Thresholds are example KPIs from industrial fire safety calculations (adjustable per site-specific risk assessment). -->

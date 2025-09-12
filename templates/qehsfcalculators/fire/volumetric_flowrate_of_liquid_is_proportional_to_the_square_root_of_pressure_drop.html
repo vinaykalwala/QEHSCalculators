@@ -1,0 +1,632 @@
+{% extends 'base.html' %}
+{% block title %}Volumetric flowrate of liquid is proportional to the square root of pressure drop{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accident Rate Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+         @media (max-width: 768px) {
+    .rate-value {
+        font-size: 28px; /* smaller font for tablets/mobiles */
+    }
+}
+
+@media (max-width: 480px) {
+    .rate-value {
+        font-size: 24px; /* even smaller for phones */
+    }
+}
+    </style>
+</head>
+<body>
+   <div class="btn-container">
+    <a href="{% url 'firecategory_calculators' %}" class="back-btn">Back To Fire Calculators</a>
+</div>
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+    <div class="calculator-header">
+        <h1>Volumetric Flowrate of Liquid (√ΔP) Calculator</h1>
+        <p>Calculate the volumetric flow rate of liquid, which is directly proportional to the square root of the pressure drop in a system.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Input Card -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+            <div class="form-group">
+                <label for="pressureDrop">Pressure Drop (Pa)</label>
+                <input type="number" id="pressureDrop" class="form-input" placeholder="Enter pressure drop in Pascals">
+            </div>
+            <div class="form-group">
+                <label for="kValue">Proportionality Constant (K)</label>
+                <input type="number" id="kValue" class="form-input" placeholder="Enter proportionality constant">
+            </div>
+            <button class="calculate-btn" onclick="calculateFlowRate()">Calculate Flow Rate</button>
+        </div>
+
+        <!-- Result Card -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="{% static 'images/resultimage.png' %}" alt="Flow Rate Illustration">
+                <p>This tool calculates the <strong>Volumetric Flow Rate</strong>. Enter your data to see results and insights here.</p>
+            </div>
+
+            <!-- Error -->
+            <div class="result-error hidden" id="resultError" style="font-size: 28px;"></div>
+
+            <!-- Result -->
+            <div class="result-value hidden" id="resultValue">
+                <div class="rate-value">Volumetric Flow Rate</div>
+                <div class="rate-value" id="flowRateValue">0.00</div>
+                <div class="rate-label" style="font-size:16px; font-weight:bold;">m³/s</div>
+                <div class="result-feedback" id="feedbackContent"></div>
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="note-section">
+
+        <!-- About This Calculator -->
+        <div class="note-card">
+            <h3>📘 About This Calculator</h3>
+            <p>
+                This calculator determines the <strong>volumetric flow rate</strong> (qₑ) of a liquid in a system based on the pressure drop (ΔP) across a pipe, valve, or nozzle. 
+                The flow rate is directly proportional to the square root of the pressure drop, using a proportionality constant (K) which depends on system properties such as pipe diameter, fluid density, and friction losses.
+            </p>
+        </div>
+
+        <!-- Parameters -->
+        <div class="note-card">
+            <h3>⚙️ Parameters</h3>
+            <ul class="note-list">
+                <li><strong>qₑ (Volumetric Flow Rate, m³/s):</strong> Amount of liquid passing through the system per unit time.
+                    <ul>
+                        <li>Higher flow rates indicate more liquid transported per second.</li>
+                        <li>Used for designing piping, sprinklers, and industrial fluid systems.</li>
+                    </ul>
+                </li>
+                <li><strong>ΔP (Pressure Drop, Pa):</strong> Difference in pressure across the system component.
+                    <ul>
+                        <li>Measured in Pascals (Pa).</li>
+                        <li>Greater pressure drop generally increases flow rate, following the square root relationship.</li>
+                        <li>Must account for losses due to friction and bends in the system.</li>
+                    </ul>
+                </li>
+                <li><strong>K (Proportionality Constant):</strong> Depends on pipe diameter, fluid properties, and system layout.
+                    <ul>
+                        <li>Typically derived from experiments or manufacturer data.</li>
+                        <li>A larger K indicates higher flow rate for the same pressure drop.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+<!-- Real-Life Applications -->
+<div class="note-card">
+    <h3>🌐 Real-Life Applications</h3>
+    <ul class="note-list">
+        <li><strong>Fire Safety Systems:</strong> Design and optimize fire sprinkler and hydrant systems to ensure sufficient water flow for firefighting.</li>
+        <li><strong>Piping and Fluid Transport:</strong> Calculate flow rates in industrial pipelines for chemical, petroleum, and water distribution systems.</li>
+        <li><strong>HVAC and Cooling Systems:</strong> Ensure proper flow of water or coolant through heating, ventilation, and air conditioning systems for efficiency.</li>
+        <li><strong>Oil & Gas Industry:</strong> Optimize flow in transport of crude oil, refined products, or process fluids while maintaining safety limits.</li>
+        <li><strong>Process Engineering:</strong> Maintain consistent flow rates in manufacturing and processing plants to achieve operational stability.</li>
+        <li><strong>Water Treatment Plants:</strong> Design systems for pumping and distributing treated water at controlled rates.</li>
+    </ul>
+    <p>Understanding and applying this formula ensures safe, efficient, and reliable fluid transport in various industrial and safety-critical systems.</p>
+</div>
+
+      <!-- Interpretation -->
+<div class="note-card">
+    <h3>💡 Interpretation</h3>
+    <ul class="note-list">
+        <li>✅ <strong>Low Flow Rate (&lt;1 m³/s):</strong> Minimal liquid transport; system may be underutilized. Suitable for small piping, sprinklers, or low-demand applications. Ensure system components are not oversized for efficiency.</li>
+        <li>⚠️ <strong>Moderate Flow Rate (1–10 m³/s):</strong> Typical operational conditions for standard industrial, HVAC, and fire safety systems. Monitor for consistent operation and prevent gradual wear on valves or pipes.</li>
+        <li>🚨 <strong>High Flow Rate (10–50 m³/s):</strong> May stress system components; check pipe, pump, and valve ratings. Ensure system pressure limits are not exceeded to prevent damage or leaks.</li>
+        <li>🔴 <strong>Extreme Flow Rate (&gt;50 m³/s):</strong> Risk of serious damage to pipes, valves, or pumps. Immediate system review required. Such rates are uncommon and may indicate input errors or unsafe conditions.</li>
+    </ul>
+</div>
+
+<!-- Input Validations -->
+<div class="note-card">
+    <h3>🛡️ Input Validations</h3>
+    <ul class="note-list">
+        <li>All fields are <strong>mandatory</strong> – empty fields trigger a warning to ensure no missing data in calculations.</li>
+        <li><strong>Numeric values only:</strong> Non-numeric or text entries are invalid and will prevent proper calculation.</li>
+        <li><strong>Positive values required:</strong> Zero or negative numbers are physically meaningless for pressure drop or proportionality constant.</li>
+        <li><strong>Pressure Drop (Pa):</strong> Acceptable range is 1 – 1,000,000 Pa. Values outside this range should trigger a caution to verify units or system conditions.</li>
+        <li><strong>Proportionality Constant (K):</strong> Acceptable range is 0.01 – 10,000. Extremely high K may indicate unusual system configuration or input error.</li>
+        <li><strong>Logical consistency:</strong> Ensure combination of ΔP and K produces a realistic flow rate. Extremely high flow rates (>1000 m³/s) should trigger a warning for potential input errors or unsafe conditions.</li>
+        <li><strong>Decimal precision:</strong> Up to two decimal places recommended to ensure accuracy and alignment with engineering and safety reports.</li>
+    </ul>
+</div>
+
+
+        <!-- Usage -->
+        <div class="note-card">
+            <p>
+                Enter the <strong>pressure drop (Pa)</strong> and the <strong>proportionality constant (K)</strong>, then click <strong>"Calculate Flow Rate"</strong> to determine the volumetric flow rate of the liquid.
+                This calculation is essential for designing safe, efficient, and optimized fluid transport systems in industrial, fire safety, and HVAC applications.
+            </p>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function calculateFlowRate() {
+    const pressureDropInput = document.getElementById('pressureDrop').value.trim();
+    const kValueInput = document.getElementById('kValue').value.trim();
+    const resultValue = document.getElementById('resultValue');
+    const placeholder = document.getElementById('placeholder');
+    const feedbackContent = document.getElementById('feedbackContent');
+    const resultError = document.getElementById('resultError');
+
+    // Reset display
+    resultError.classList.add('hidden');
+    resultValue.classList.add('hidden');
+    placeholder.classList.add('hidden');
+    resultError.innerHTML = "";
+    feedbackContent.innerHTML = "";
+
+    // Mandatory field check
+    if (!pressureDropInput || !kValueInput) {
+        resultError.innerHTML = "⚠️ Please fill in all required fields.";
+        resultError.style.color = "orange";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    const pressureDrop = parseFloat(pressureDropInput);
+    const kValue = parseFloat(kValueInput);
+
+    // Numeric and positive validation
+    if (isNaN(pressureDrop) || isNaN(kValue)) {
+        resultError.innerHTML = "❌ Invalid entry. Enter numeric values only.";
+        resultError.style.color = "red";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    if (pressureDrop <= 0) {
+        resultError.innerHTML = "❌ Pressure Drop must be greater than zero.";
+        resultError.style.color = "red";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    if (kValue <= 0) {
+        resultError.innerHTML = "❌ Proportionality Constant (K) must be greater than zero.";
+        resultError.style.color = "red";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    // Upper thresholds (caution)
+    if (pressureDrop > 1000000) {
+        resultError.innerHTML = "⚠️ Pressure Drop unusually high (>1,000,000 Pa). Verify units.";
+        resultError.style.color = "orange";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    if (kValue > 10000) {
+        resultError.innerHTML = "⚠️ K value unusually high (>10,000). Verify system.";
+        resultError.style.color = "orange";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    // Calculation
+    const flowRate = kValue * Math.sqrt(pressureDrop);
+    document.getElementById('flowRateValue').innerText = flowRate.toFixed(2);
+    resultValue.classList.remove('hidden');
+
+    // Feedback
+    let feedback = "";
+    if (flowRate < 1) {
+        feedback = "✅ Low Flow Rate: Safe system operation.";
+        feedbackContent.style.color = "green";
+    } else if (flowRate <= 10) {
+        feedback = "⚠️ Moderate Flow Rate: Normal operation; monitor system.";
+        feedbackContent.style.color = "orange";
+    } else if (flowRate <= 50) {
+        feedback = "🚨 High Flow Rate: Check pipes, valves, and system safety margins.";
+        feedbackContent.style.color = "red";
+    } else {
+        feedback = "🔴 Extreme Flow Rate: Risk of system damage. Immediate review required!";
+        feedbackContent.style.color = "darkred";
+    }
+    feedbackContent.innerHTML = feedback;
+}
+
+function printReport() {
+    window.print();
+}
+
+</script>
+
+
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+<!-- 1. Input Validation Rules (QEHS & Fire Safety Perspective)
+Input	Type	Acceptable Range	Units	Precision	Rationale / Compliance
+Pressure Drop (ΔP)	Number (float)	1 Pa – 1,000,000 Pa	Pascal (Pa)	2 decimal places	Must be positive; negative or zero values are non-physical and will cause calculation errors. Exceeding 1 MPa may indicate unit mismatch or hazardous system pressure. Aligns with NFPA, ISO 45001, OSHA piping and system safety standards.
+Proportionality Constant (K)	Number (float)	0.01 – 10,000	Dimensionless or system-dependent units	2 decimal places	Must be positive; values beyond 10,000 indicate a potential input error or extreme system configuration. Derived from experimental or manufacturer data, ensuring safety-compliant flow predictions.
+
+Cross-field checks:
+
+Logical consistency: Extreme combinations (e.g., very high K with low ΔP or very low K with high ΔP) can produce unrealistic volumetric flow rates (>1,000 m³/s). Such cases should trigger warnings.
+
+Units validation: Users may enter Pa vs bar or K in wrong units; alert if values are unusually large.
+
+2. Output Validation and Thresholds
+
+The formula:
+
+𝑞
+𝑒
+=
+𝐾
+⋅
+Δ
+𝑃
+q
+e
+	​
+
+=K⋅
+ΔP
+	​
+
+Flow Rate (m³/s)	Interpretation	Compliance Notes
+< 1	✅ Low Flow Rate	Safe, minimal system load; typical for small pipelines, sprinklers.
+1 – 10	⚠️ Moderate Flow Rate	Normal operation; standard industrial, HVAC, or fire systems; monitor for system wear.
+10 – 50	🚨 High Flow Rate	High load; could stress pipes, valves, pumps; check system ratings per NFPA 13/ISO 45001.
+> 50	🔴 Extreme Flow Rate	Hazardous; immediate review needed; may require system redesign or custom components.
+
+Why thresholds matter:
+
+Prevents pipe/pump failure and ensures system operates within design limits.
+
+Ensures compliance during audits (NFPA, OSHA, ISO 45001).
+
+Helps engineers select appropriate valves and system parameters to prevent overpressure or overloading.
+
+3. Edge Case Handling
+Edge Case	Handling
+ΔP = 0 or negative	Error: “Pressure Drop must be >0.” Prevents sqrt of zero/negative.
+K = 0 or negative	Error: “Proportionality Constant (K) must be >0.” Prevents zero flow.
+Extremely high ΔP (>1,000,000 Pa)	Warning: “Check units or system pressure.”
+Extremely high K (>10,000)	Warning: “Unusually high K; verify system.”
+Non-numeric input	Error: “Enter numeric values only.”
+Unrealistic combination	If flowRate > 1000 m³/s, warn user; unusual in real systems. -->

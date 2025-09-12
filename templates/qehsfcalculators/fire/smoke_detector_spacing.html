@@ -1,0 +1,641 @@
+{% extends 'base.html' %}
+{% block title %}Smoke detector spacing calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accident Rate Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            justify-content: center;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+         @media (max-width: 768px) {
+    .rate-value {
+        font-size: 28px; /* smaller font for tablets/mobiles */
+    }
+}
+
+@media (max-width: 480px) {
+    .rate-value {
+        font-size: 24px; /* even smaller for phones */
+    }
+}
+    </style>
+</head>
+<body>
+   <div class="btn-container">
+    <a href="{% url 'firecategory_calculators' %}" class="back-btn">Back To Fire Calculators</a>
+</div>
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+    <!-- Header -->
+    <div class="calculator-header">
+        <h1>Smoke Detector Spacing Calculator</h1>
+        <p>Determine the recommended spacing between smoke detectors to ensure early fire detection and effective protection.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Input Card -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+            <div class="form-group">
+                <label for="maxSpacing">Maximum Listed Spacing (D) (m)</label>
+                <input type="number" id="maxSpacing" class="form-input" placeholder="Enter maximum listed spacing">
+                <span id="maxSpacingWarning" class="warning-msg"></span> <!-- Inline warning message -->
+            </div>
+            <button class="calculate-btn" onclick="calculateSmokeDetectorSpacing()">Calculate Spacing</button>
+        </div>
+
+        <!-- Result Card -->
+        <div class="result-card">
+            <!-- Placeholder -->
+            <div class="result-placeholder" id="placeholder">
+                <img src="{% static 'images/smoke.jpg' %}" alt="Smoke Detector Illustration">
+                <p>This tool will calculate the <strong>Recommended Smoke Detector Spacing</strong>. Enter your data to see results and insights here.</p>
+            </div>
+
+            <!-- Error (hard errors appear here; when shown the placeholder/default content will disappear) -->
+            <div class="result-error hidden" id="resultError" style="font-size: 20px; padding:12px; border-radius:6px;"></div>
+
+            <!-- Result -->
+            <div class="result-value hidden" id="resultValue">
+                <div class="rate-value">Recommended Spacing</div>
+                <div class="rate-value" id="spacingValue">0.00</div>
+                <div class="rate-label" style="font-size:16px; font-weight:bold;">meters</div>
+                <div class="result-feedback" id="feedbackContent"></div>
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="note-section">
+
+        <!-- About -->
+        <div class="note-card">
+            <h3>📘 About This Calculator</h3>
+            <p>
+                This calculator helps determine the <strong>recommended spacing</strong> between smoke detectors.
+                Proper detector placement is critical for early fire warning and compliance with fire safety standards (e.g., NFPA 72).
+            </p>
+        </div>
+
+        <!-- Parameters -->
+        <div class="note-card">
+            <h3>⚙️ Parameters</h3>
+            <ul class="note-list">
+                <li><strong>Maximum Listed Spacing (D):</strong>
+                    The spacing value provided by the detector manufacturer under ideal test conditions.
+                    <ul>
+                        <li>Measured in meters (m).</li>
+                        <li>Represents maximum allowable detector-to-detector distance under controlled conditions (no obstructions, uniform ceilings, stable air movement).</li>
+                    </ul>
+                </li>
+                <li><strong>Recommended Spacing (S):</strong>
+                    The spacing adjusted for real-world conditions (airflow, obstructions, ceiling height).
+                    <ul>
+                        <li>Calculated using an industry reduction factor to ensure overlapping coverage and earlier detection.</li>
+                        <li>Provides a safety margin versus the listed maximum to compensate for non-ideal conditions.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <!-- How It Works -->
+        <div class="note-card">
+            <h3>🔎 How the Calculation Works</h3>
+            <p>
+                The calculator reduces the manufacturer's maximum listed spacing by a standard percentage (a reduction factor) to produce a recommended spacing.
+                This reduction accounts for variables such as ceiling height, obstructions, and airflow which can delay smoke reaching a detector.
+            </p>
+            <ul class="note-list">
+                <li>Codes like <strong>NFPA 72</strong> recommend tighter spacing in the presence of high ceilings, beams, or atypical airflow.</li>
+                <li>Using a portion of the maximum listed spacing creates overlapping coverage to improve early detection reliability.</li>
+            </ul>
+        </div>
+
+        <!-- Interpretation -->
+        <div class="note-card">
+            <h3>💡 Interpretation</h3>
+            <ul class="note-list">
+                <li>✅ <strong>Within Recommended Range:</strong> Detector coverage is adequate for early warning.</li>
+                <li>⚠️ <strong>Approaching Maximum Spacing:</strong> Inspect for obstructions, ceiling features, or HVAC influences.</li>
+                <li>🚨 <strong>Exceeds Safe Spacing:</strong> Additional detectors or layout changes required to meet acceptable detection performance.</li>
+            </ul>
+        </div>
+
+        <!-- Validations -->
+        <div class="note-card">
+            <h3>🛡️ Input Validations</h3>
+            <ul class="note-list">
+                <li>All fields are required for a proper assessment.</li>
+                <li>Numeric values only (meters).</li>
+                <li>Positive values required (no zero or negative spacing).</li>
+                <li>Acceptable range: <code>1 – 100 m</code>. Values outside this range are treated as errors and shown in the result box.</li>
+                <li>Warnings (orange) appear inline beneath the input for unusual-but-still-valid values; errors (red) appear in the result box and block calculation.</li>
+            </ul>
+        </div>
+
+        <!-- Usage -->
+        <div class="note-card">
+            <p>
+                Enter the manufacturer's maximum listed spacing (D) and click <strong>Calculate Spacing</strong>. Inline warnings will notify you if the entered value is unusual.
+                Hard errors (e.g., non-numeric, zero/negative, >100 m) will be displayed in the result box and the placeholder/default content will be hidden.
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+.hidden { display: none; }
+.warning-msg {
+    display: block;
+    font-size: 13px;
+    margin-top: 6px;
+    color: orange;
+}
+
+</style>
+
+<script>
+function calculateSmokeDetectorSpacing() {
+    const maxSpacingInput = document.getElementById('maxSpacing').value.trim();
+    const warningSpan = document.getElementById('maxSpacingWarning');
+    const resultValue = document.getElementById('resultValue');
+    const placeholder = document.getElementById('placeholder');
+    const feedbackContent = document.getElementById('feedbackContent');
+    const resultError = document.getElementById('resultError');
+
+    // Reset UI
+    warningSpan.innerText = "";
+    resultError.classList.add('hidden');
+    resultError.innerHTML = "";
+    resultError.classList.remove('error-red');
+    resultValue.classList.add('hidden');
+    feedbackContent.innerHTML = "";
+    // Show placeholder by default (will be hidden on error or when showing result)
+    placeholder.classList.remove('hidden');
+
+    // --- EMPTY CHECK ---
+    if (maxSpacingInput === "") {
+        // Hard warning in result box (user requested errors in result box)
+        resultError.innerHTML = "⚠️ Please fill in the maximum spacing (D) in meters.";
+        resultError.style.color = "orange";
+        resultError.classList.remove('hidden');
+        // hide placeholder/default content when error shown
+        placeholder.classList.add('hidden');
+        return;
+    }
+
+    // Parse numeric value
+    const D = parseFloat(maxSpacingInput);
+
+    // --- HARD ERRORS (shown in result box, hide placeholder) ---
+    if (isNaN(D)) {
+        resultError.innerHTML = "❌ Invalid entry. Please enter a numeric value (meters only).";
+        resultError.style.color = "red";
+        resultError.classList.remove('hidden');
+        resultError.classList.add('error-red');
+        placeholder.classList.add('hidden');
+        return;
+    }
+
+    if (D <= 0) {
+        resultError.innerHTML = "❌ Maximum spacing must be greater than zero.";
+        resultError.style.color = "red";
+        resultError.classList.remove('hidden');
+        resultError.classList.add('error-red');
+        placeholder.classList.add('hidden');
+        return;
+    }
+
+    if (D > 100) {
+        resultError.innerHTML = "❌ Value entered exceeds maximum supported range (>100 m). Check manufacturer guidelines and code compliance.";
+        resultError.style.color = "red";
+        resultError.classList.remove('hidden');
+        resultError.classList.add('error-red');
+        placeholder.classList.add('hidden');
+        return;
+    }
+
+    // --- WARNINGS (inline below the input only, do NOT block calculation) ---
+    // Clear previous warning text (already done above)
+    if (D > 80) {
+        warningSpan.innerText = "⚠️ Very large spacing entered. Verify against NFPA 72 and manufacturer instructions.";
+    } else if (D < 5) {
+        warningSpan.innerText = "⚠️ Extremely close spacing entered. Consider design efficiency and confirm manufacturer's intent.";
+    } else if (!/^\d+(\.\d+)?$/.test(maxSpacingInput)) {
+        // if user typed something odd (shouldn't happen because value is parsed), show subtle warning
+        warningSpan.innerText = "⚠️ Check input format.";
+    } else if (maxSpacingInput.indexOf('.') !== -1 && (!/^\d+(\.\d{1,2})?$/.test(maxSpacingInput))) {
+        warningSpan.innerText = "⚠️ Value has more than 2 decimal places; round to 2 decimals if possible.";
+    } else {
+        // No inline warning necessary
+        warningSpan.innerText = "";
+    }
+
+    // --- CALCULATION ---
+    const S = 0.7 * D;
+    document.getElementById('spacingValue').innerText = S.toFixed(2);
+
+    // Hide placeholder and show result
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+
+    // --- FEEDBACK (color-coded message) ---
+    if (S < 10) {
+        feedbackContent.innerHTML = "✅ Close detector spacing ensures excellent coverage.";
+        feedbackContent.style.color = "green";
+    } else if (S <= 20) {
+        feedbackContent.innerHTML = "⚠️ Moderate spacing. Ensure ceiling height, obstructions, and airflow are reviewed.";
+        feedbackContent.style.color = "orange";
+    } else {
+        feedbackContent.innerHTML = "🚨 Wide spacing detected. Consider adding more detectors to meet detection performance.";
+        feedbackContent.style.color = "red";
+    }
+}
+
+function printReport() {
+    window.print();
+}
+</script>
+
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+<!-- 1. Detailed Input Validation Rules
+
+The calculator currently takes Maximum Listed Spacing (D) as input. To make it robust for real-world QEHS/fire safety applications:
+
+🔹 General Rules
+
+Mandatory field → User cannot leave blank.
+
+Numeric only → Reject text, symbols, or units typed in.
+
+Positive values only → Negative or zero spacing is invalid.
+
+Decimal handling → Accept up to 2 decimal places (precision up to centimeters is reasonable).
+
+Unit consistency → All inputs must be in meters (m).
+
+🔹 Acceptable Ranges
+
+Minimum threshold: 1 m
+
+Below 1 m is unrealistic (detectors never installed that close).
+
+Maximum threshold: 100 m
+
+Consistent with NFPA 72 & manufacturer data (most common max spacing is 9.1 m (30 ft), but we allow up to 100 m for custom detectors or research values).
+
+Typical standard values: 7.5 – 15 m for smoke detectors.
+
+If input deviates, issue caution message.
+
+🔹 Cross-field Dependencies (future-proofing)
+
+If extended later to room length/width/area, then:
+
+Room area ÷ detector coverage must not exceed NFPA 72 standard (typically 84 m² per detector for 30 ft spacing).
+
+Avoid division by zero if room size = 0 or invalid.
+
+2. Output Validation Logic & Threshold Explanations
+
+The calculator computes Recommended Spacing (S) = 0.7 × D.
+From safety perspective:
+
+S < 10 m →
+“Excellent coverage. Exceeds NFPA minimum spacing standards. Safe margin maintained.”
+
+10 m ≤ S ≤ 20 m →
+“Moderate spacing. Acceptable but should be reviewed for ceiling height, airflow, obstructions.”
+
+S > 20 m →
+“Spacing too wide. Likely exceeds NFPA recommendations. Additional detectors required.”
+
+👉 This aligns results with compliance-oriented interpretation instead of just raw numbers. -->

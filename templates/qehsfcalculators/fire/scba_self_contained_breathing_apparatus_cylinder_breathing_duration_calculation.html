@@ -1,0 +1,764 @@
+{% extends 'base.html' %}
+{% block title %}SCBA (Self-Contained Breathing Apparatus) Cylinder Breathing Duration Calculation{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accident Rate Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+         @media (max-width: 768px) {
+    .rate-value {
+        font-size: 28px; /* smaller font for tablets/mobiles */
+    }
+}
+
+@media (max-width: 480px) {
+    .rate-value {
+        font-size: 24px; /* even smaller for phones */
+    }
+}
+.image-container {
+    text-align: center;           /* Center image horizontally */
+    margin: 20px auto;            /* Space above and below */
+    padding: 10px;                /* Inner spacing */
+    background: #f9f9f9;          /* Light background */
+    border: 1px solid #ddd;       /* Subtle border */
+    border-radius: 12px;          /* Smooth rounded corners */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Soft shadow */
+    max-width: 1100px;             /* Prevents image from stretching too wide */
+}
+
+.responsive-image {
+    max-width: 100%;              /* Make image scale responsively */
+    height: auto;                 /* Keep aspect ratio */
+    border-radius: 8px;           /* Slight rounding for the image */
+    display: block;               /* Removes inline gaps */
+    margin: 0 auto;               /* Ensures centering */
+}
+/* Wrapper for responsive scroll */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Table Styling */
+.custom-table {
+    width: 100%;
+    min-width: 600px; /* ensures proper format on small screens */
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 15px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* Header */
+.custom-table thead {
+    background-color: #1560bd; /* theme blue */
+    color: #fff;
+}
+
+.custom-table th {
+    padding: 12px 16px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+/* Body cells */
+.custom-table td {
+    padding: 12px 16px;
+    text-align: center;
+    border: 1px solid #ddd;
+    white-space: nowrap;
+}
+
+/* Row striping */
+.custom-row:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.custom-row:nth-child(odd) {
+    background-color: #ffffff;
+}
+
+/* Hover effect */
+
+
+    </style>
+</head>
+<body>
+   <div class="btn-container">
+    <a href="{% url 'firecategory_calculators' %}" class="back-btn">Back To Fire Calculators</a>
+</div>
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+    <!-- Header -->
+    <div class="calculator-header">
+        <h1>SCBA (Self-Contained Breathing Apparatus) Cylinder Breathing Duration Calculator</h1>
+        <p>Calculate how long your SCBA cylinder will last based on pressure, volume, and breathing rate to ensure safe operations in hazardous environments.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Input Card -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+            <div class="form-group">
+                <label for="cylinderPressure">Cylinder Pressure (Bar)</label>
+                <input type="number" id="cylinderPressure" class="form-input" placeholder="Enter cylinder pressure in Bar">
+            </div>
+            <div class="form-group">
+                <label for="cylinderVolume">Cylinder Volume (Liters)</label>
+                <input type="number" id="cylinderVolume" class="form-input" placeholder="Enter cylinder volume in liters">
+            </div>
+            <div class="form-group">
+                <label for="breathingRate">Breathing Rate (LPM)</label>
+                <input type="number" id="breathingRate" class="form-input" placeholder="Enter breathing rate in LPM">
+            </div>
+            <button class="calculate-btn" onclick="calculateSCBADuration()">Calculate Duration</button>
+        </div>
+
+        <!-- Result Card -->
+        <div class="result-card">
+            <!-- Placeholder -->
+            <div class="result-placeholder" id="placeholder">
+                <img src="{% static 'images/resultimage.png' %}" alt="SCBA Image">
+                <p>This tool will calculate your <strong>SCBA Duration</strong>. Enter your data to see results and insights here.</p>
+            </div>
+
+            <!-- Error -->
+            <div class="result-error hidden" id="resultError" style="font-size: 28px;"></div>
+
+            <!-- Result -->
+            <div class="result-value hidden" id="resultValue">
+                <div class="rate-value">SCBA Duration</div>
+                <div class="rate-value" id="scbaDurationValue">0</div>
+                <div class="rate-label" style="font-size:16px; font-weight:bold;">Minutes</div>
+                <div class="result-feedback" id="feedbackContent"></div>
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="note-section">
+
+        <!-- About -->
+       <div class="note-card">
+    <h3>📘 About This Calculator</h3>
+    <p>
+        This calculator estimates the <strong>breathing duration</strong> of an SCBA (Self-Contained Breathing Apparatus) cylinder. 
+        SCBA cylinders provide a portable supply of breathable air, which is crucial for personnel working in environments with 
+        hazardous atmospheres, including smoke, toxic gases, low oxygen areas, or chemical exposure zones.
+    </p>
+    <p>
+        By entering the cylinder's <strong>pressure</strong>, <strong>volume</strong>, and your <strong>breathing rate</strong>, 
+        this tool calculates how long the air supply will last. Understanding this duration is essential for planning safe 
+        operations, avoiding dangerous situations, and ensuring that personnel have enough time to complete tasks or evacuate 
+        safely.
+    </p>
+    <p>
+        The calculator is designed for:
+    </p>
+    <ul class="note-list">
+        <li>Firefighters assessing how long they can safely operate in smoke-filled environments.</li>
+        <li>Industrial safety teams working in confined spaces or areas with hazardous gases.</li>
+        <li>Rescue personnel planning missions where air supply is limited.</li>
+        <li>Training purposes to help personnel understand air consumption under different workloads.</li>
+    </ul>
+    <p>
+        It also highlights the importance of monitoring <strong>breathing rates</strong>, as increased physical exertion or stress can significantly reduce the available duration of the cylinder. Using this calculator helps teams make informed decisions, plan backup air supplies, and maintain overall safety during critical operations.
+    </p>
+</div>
+
+        <div class="note-card">
+    <h3>⚙️ Parameters</h3>
+    <ul class="note-list">
+        <li>
+            <strong>Cylinder Pressure (Bar):</strong> The pressure of the air in the SCBA cylinder, typically measured in Bar (e.g., 300 Bar for a full cylinder).
+        </li>
+        <li>
+            <strong>Cylinder Volume (Liters):</strong> The volume of the SCBA cylinder, typically measured in liters (e.g., 6 liters).
+        </li>
+        <li>
+            <strong>Breathing Rate (LPM):</strong> The rate at which the user consumes air, measured in liters per minute (LPM). A typical breathing rate ranges from 40-60 LPM.
+        </li>
+    </ul>
+</div>
+
+<!-- Validation Rules Card -->
+<div class="note-card">
+    <h3>🛡️ Input Validation Rules</h3>
+    <ul class="note-list">
+        <li><strong>All fields are mandatory:</strong> Leaving any input empty will trigger a warning.</li>
+        <li><strong>Numeric values only:</strong> Non-numeric entries are invalid.</li>
+        <li><strong>Positive numbers required:</strong> Zero or negative values are not allowed.</li>
+        <li><strong>Cylinder Pressure:</strong> Acceptable range is <code>50–450 Bar</code>. Values outside this range will show a caution.</li>
+        <li><strong>Cylinder Volume:</strong> Acceptable range is <code>2–15 Liters</code>. Values outside this range will show a caution.</li>
+        <li><strong>Breathing Rate:</strong> Acceptable range is <code>10–100 LPM</code>. Values outside this range will show a caution.</li>
+        <li><strong>Cross-field checks:</strong> Extremely high pressure with very low volume or extremely low pressure with high breathing rate will trigger warnings for unrealistic durations.</li>
+        <li><strong>Edge cases:</strong> Division by zero (breathing rate = 0) and calculated durations below 5 minutes or above 120 minutes will trigger warnings or critical alerts.</li>
+        <li><strong>Feedback compliance:</strong> All results are categorized according to safe, moderate, short, or critical durations to ensure operational safety in line with NFPA/OSHA guidelines.</li>
+    </ul>
+</div>
+
+<div class="note-card">
+    <h3>💡 Interpretation</h3>
+    <ul class="note-list">
+        <li>✅ <strong>Long Duration:</strong> Adequate time for safe task completion.</li>
+        <li>⚠️ <strong>Moderate Duration:</strong> Monitor closely, plan for exit strategy.</li>
+        <li>🚨 <strong>Short Duration:</strong> High consumption, ensure backup cylinders available.</li>
+        <li>🔴 <strong>Critical:</strong> Emergency – air may run out before task completion.</li>
+    </ul>
+</div>
+
+        <!-- Reference Table -->
+        <div class="note-card">
+            <h3>📊 SCBA Cylinder Duration Table</h3>
+           
+    </div>
+     <div class="table-responsive">
+            <table class="custom-table">
+                <tr class="custom-row custom-header" style="background-color: #1560bd;color: white;">
+                    <th class="custom-cell custom-heading">Cylinder Pressure (Bar)</th>
+                    <th class="custom-cell custom-heading">Cylinder Volume (Liters)</th>
+                    <th class="custom-cell custom-heading">Duration (Minutes)</th>
+                    <th class="custom-cell custom-heading">Notes</th>
+                </tr>
+                <tr class="custom-row">
+                    <td class="custom-cell">300</td>
+                    <td class="custom-cell">6</td>
+                    <td class="custom-cell">45</td>
+                    <td class="custom-cell">Full Pressure</td>
+                </tr>
+                <tr class="custom-row custom-alt-row">
+                    <td class="custom-cell">250</td>
+                    <td class="custom-cell">6</td>
+                    <td class="custom-cell">37.5</td>
+                    <td class="custom-cell"></td>
+                </tr>
+                <tr class="custom-row">
+                    <td class="custom-cell">200</td>
+                    <td class="custom-cell">6</td>
+                    <td class="custom-cell">30</td>
+                    <td class="custom-cell"></td>
+                </tr>
+                <tr class="custom-row custom-alt-row">
+                    <td class="custom-cell">100</td>
+                    <td class="custom-cell">6</td>
+                    <td class="custom-cell">15</td>
+                    <td class="custom-cell"></td>
+                </tr>
+                <tr class="custom-row">
+                    <td class="custom-cell">50</td>
+                    <td class="custom-cell">6</td>
+                    <td class="custom-cell">7.5</td>
+                    <td class="custom-cell">Buzzer or whistle is blown</td>
+                </tr>
+            </table>
+        </div>
+         <div class="image-container">
+                <img src="{% static 'images/scba.png' %}" alt="Leakage Calculation Image" class="responsive-image">
+            </div>
+        <!-- Usage -->
+        <div class="note-card">
+            <p>
+                Enter your values and click <strong>"Calculate Duration"</strong> to know how long your SCBA will last. 
+                Always plan conservatively and maintain safety margins.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+function calculateSCBADuration() {
+    const pressureInput = document.getElementById('cylinderPressure').value.trim();
+    const volumeInput = document.getElementById('cylinderVolume').value.trim();
+    const rateInput = document.getElementById('breathingRate').value.trim();
+    
+    const resultValue = document.getElementById('resultValue');
+    const placeholder = document.getElementById('placeholder');
+    const feedbackContent = document.getElementById('feedbackContent');
+    const resultError = document.getElementById('resultError');
+
+    // Reset
+    resultError.classList.add('hidden');
+    resultValue.classList.add('hidden');
+    placeholder.classList.add('hidden');
+    resultError.innerHTML = "";
+    feedbackContent.innerHTML = "";
+
+    // Empty check
+    if (!pressureInput || !volumeInput || !rateInput) {
+        resultError.innerHTML = "⚠️ Please fill in all required fields.";
+        resultError.style.color = "orange";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    const cylinderPressure = parseFloat(pressureInput);
+    const cylinderVolume = parseFloat(volumeInput);
+    const breathingRate = parseFloat(rateInput);
+
+    // Numeric check
+    if (isNaN(cylinderPressure) || isNaN(cylinderVolume) || isNaN(breathingRate)) {
+        resultError.innerHTML = "❌ Invalid entry. Please enter numeric values only.";
+        resultError.style.color = "red";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    // Positive check
+    if (cylinderPressure <= 0 || cylinderVolume <= 0 || breathingRate <= 0) {
+        resultError.innerHTML = "❌ All values must be greater than zero.";
+        resultError.style.color = "red";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    // Industry-specific ranges
+    if (cylinderPressure < 50 || cylinderPressure > 450) {
+        resultError.innerHTML = "⚠️ Cylinder pressure out of typical safe range (50–450 Bar).";
+        resultError.style.color = "orange";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    if (cylinderVolume < 2 || cylinderVolume > 15) {
+        resultError.innerHTML = "⚠️ Cylinder volume out of typical range (2–15 L).";
+        resultError.style.color = "orange";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    if (breathingRate < 10 || breathingRate > 100) {
+        resultError.innerHTML = "⚠️ Breathing rate outside expected range (10–100 L/min).";
+        resultError.style.color = "orange";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    // Calculation
+    const scbaDuration = (cylinderPressure * cylinderVolume) / breathingRate;
+
+    // Extreme outliers
+    if (scbaDuration < 5) {
+        resultError.innerHTML = "🔴 Critical: Air supply extremely limited! Check inputs.";
+        resultError.style.color = "darkred";
+        resultError.classList.remove('hidden');
+        return;
+    }
+    if (scbaDuration > 120) {
+        resultError.innerHTML = "⚠️ Unrealistic duration calculated (>120 min). Verify cylinder specs.";
+        resultError.style.color = "orange";
+        resultError.classList.remove('hidden');
+        return;
+    }
+
+    // Show result
+    document.getElementById('scbaDurationValue').innerText = Math.floor(scbaDuration);
+    resultValue.classList.remove('hidden');
+
+    // Feedback
+    let feedback = "";
+    if (scbaDuration > 40) {
+        feedback = "✅ Long Duration: Safe working window available.";
+        feedbackContent.style.color = "green";
+    } else if (scbaDuration >= 20) {
+        feedback = "⚠️ Moderate Duration: Plan carefully, monitor time.";
+        feedbackContent.style.color = "orange";
+    } else if (scbaDuration >= 10) {
+        feedback = "🚨 Short Duration: Use with caution, ensure escape route.";
+        feedbackContent.style.color = "red";
+    }
+    feedbackContent.innerHTML = feedback;
+}
+
+</script>
+
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+<!-- 1. Analysis of Inputs, Outputs, and Calculation
+
+Inputs:
+
+Cylinder Pressure (Bar) – typical SCBA pressures are 200–300 Bar (some industrial can go up to 450 Bar).
+
+Cylinder Volume (Liters) – standard SCBA cylinder sizes: 4–10 L.
+
+Breathing Rate (LPM) – average resting rate ~40 LPM, high exertion can reach 60–100 LPM.
+
+Output:
+
+SCBA Duration (minutes) = (Cylinder Pressure × Cylinder Volume) / Breathing Rate
+
+Purpose:
+
+Determines how long a firefighter or worker can operate safely in hazardous environments.
+
+Compliance relevance: OSHA and NFPA require proper planning for air supply in confined spaces or smoke-filled areas.
+
+2. Input Validation Rules
+Field	Type	Unit	Min	Max	Decimals	Comments / Real-World Rationale
+Cylinder Pressure	Number	Bar	50	450	0–2	Ensure the cylinder is within safe operating range. Pressures <50 Bar are unsafe; >450 Bar are rare and may indicate wrong units.
+Cylinder Volume	Number	Liters	2	15	0–2	Typical SCBA cylinder volumes; ensures realistic inputs.
+Breathing Rate	Number	LPM	10	100	0–1	Safety-critical; resting adult ~40–50 LPM, high exertion up to 100 LPM.
+Cross-field	Logical	–	–	–	–	High pressure + small cylinder volume may still give unrealistic duration; flag extremely high (>100 min) or extremely low (<5 min).
+
+Additional Validations:
+
+Ensure all inputs > 0.
+
+Validate numeric entries only.
+
+Warn if duration calculated is unusually long (>120 min) or short (<5 min).
+
+Ensure consistent units: Pressure in Bar, Volume in liters, Rate in LPM.
+
+3. Edge Case Validations
+Edge Case	Handling
+Division by zero	Breathing rate = 0 → show error “Breathing rate must be greater than zero.”
+Extremely high pressure & low volume	Duration > 200 min → warning “Unrealistic duration, verify cylinder specs.”
+Extremely low pressure & high breathing	Duration < 5 min → warning “Critical air supply; emergency risk.”
+Negative values	Show error, prevent calculation.
+Empty inputs	Show “All fields required” error.
+Non-numeric inputs	Show error, reject calculation.
+4. Output Validation / Feedback Thresholds
+Duration (min)	Status	Feedback	Rationale
+>40	✅ Long Duration	Safe working window; standard operations can proceed	Aligns with NFPA recommended safe SCBA usage
+20–40	⚠️ Moderate	Plan operations carefully, monitor air	Planning needed, adequate margin
+10–20	🚨 Short	Use with caution, ensure escape route	High consumption, safety risk
+<10	🔴 Critical	Air extremely limited, high danger	Immediate risk, backup required
+
+Note: Thresholds are aligned with typical firefighting & industrial SCBA safety standards. -->

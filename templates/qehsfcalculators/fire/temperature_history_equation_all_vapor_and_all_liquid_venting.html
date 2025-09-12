@@ -1,0 +1,651 @@
+{% extends 'base.html' %}
+{% block title %}Temperature History Equation (All-Vapor and All-Liquid Venting) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accident Rate Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+         @media (max-width: 768px) {
+    .rate-value {
+        font-size: 28px; /* smaller font for tablets/mobiles */
+    }
+}
+
+@media (max-width: 480px) {
+    .rate-value {
+        font-size: 24px; /* even smaller for phones */
+    }
+}
+    </style>
+</head>
+<body>
+   <div class="btn-container">
+    <a href="{% url 'firecategory_calculators' %}" class="back-btn">Back To Fire Calculators</a>
+</div>
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+    <div class="calculator-header">
+        <h1>Temperature History Equation (All-Vapor and All-Liquid Venting) Calculator</h1>
+        <p>Predict the temperature evolution in a system considering heat release, phase change, and emptying time.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Input Card -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+
+            <div class="form-group">
+                <label for="Tr">Initial Temperature (Tr) in K</label>
+                <input type="number" id="Tr" class="form-input" placeholder="Enter Tr (K)">
+            </div>
+
+            <div class="form-group">
+                <label for="q">Heat Release Rate (q) in J/kg</label>
+                <input type="number" id="q" class="form-input" placeholder="Enter q (J/kg)">
+            </div>
+
+            <div class="form-group">
+                <label for="Cv">Specific Heat (Cv) in J/kg·K</label>
+                <input type="number" id="Cv" class="form-input" placeholder="Enter Cv (J/kg·K)">
+            </div>
+
+            <div class="form-group">
+                <label for="t">Elapsed Time (t) in s</label>
+                <input type="number" id="t" class="form-input" placeholder="Enter t (s)">
+            </div>
+
+            <div class="form-group">
+                <label for="hfa">Latent Heat of Vaporization (hfa) in J/kg</label>
+                <input type="number" id="hfa" class="form-input" placeholder="Enter hfa (J/kg)">
+            </div>
+
+            <div class="form-group">
+                <label for="vfa">Specific Volume (vfa) in m³/kg</label>
+                <input type="number" id="vfa" class="form-input" placeholder="Enter vfa (m³/kg)">
+            </div>
+
+            <div class="form-group">
+                <label for="tr">Emptying Time (tr) in s</label>
+                <input type="number" id="tr" class="form-input" placeholder="Enter tr (s)">
+            </div>
+
+            <button class="calculate-btn" onclick="calculateTemperature()">Calculate Temperature</button>
+        </div>
+
+        <!-- Result Card -->
+        <div class="result-card">
+            <!-- Placeholder -->
+            <div class="result-placeholder" id="placeholder">
+                <img src="{% static 'images/temp.jpg' %}" alt="Temperature Illustration">
+                <p>This tool will calculate the <strong>Final Temperature</strong>. Enter your data to see results and insights here.</p>
+            </div>
+
+            <!-- Error -->
+            <div class="result-error hidden" id="resultError" style="font-size: 28px;"></div>
+
+            <!-- Result -->
+            <div class="result-value hidden" id="resultValue">
+                <div class="field-warning" id="hfa-warning"></div>
+                <div class="field-warning" id="vfa-warning"></div>
+                <div class="field-warning" id="tr-warning"></div>
+                <div class="field-warning" id="hfa-warning"></div>
+                <div class="field-warning" id="t-warning"></div>
+                <div class="field-warning" id="Cv-warning"></div>
+                <div class="field-warning" id="q-warning"></div>
+                <div class="field-warning" id="Tr-warning"></div>
+
+
+
+
+                <div class="rate-value">Final Temperature</div>
+                <div class="rate-value" id="tempValue">0.00 K</div>
+                <div class="rate-label" style="font-size:16px; font-weight:bold;">Kelvin (K)</div>
+                <div class="result-feedback" id="feedbackContent"></div>
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   <div class="note-card">
+    <h3>⚙️ Parameters Explained</h3>
+    <ul class="note-list">
+        <li><strong>Tr (K) – Initial Temperature:</strong> The starting temperature before any heat is applied.</li>
+        <li><strong>q (J/kg) – Heat Release Rate:</strong> Amount of energy released or absorbed per kilogram of substance.</li>
+        <li><strong>Cv (J/kg·K) – Specific Heat:</strong> Heat required to increase 1 kg of substance by 1 K at constant volume.</li>
+        <li><strong>t (s) – Time Elapsed:</strong> Duration of heat application; must be less than emptying time (tr).</li>
+        <li><strong>hfa (J/kg) – Latent Heat of Vaporization:</strong> Energy required to convert liquid to vapor without temperature change.</li>
+        <li><strong>vfa (m³/kg) – Specific Volume of Liquid:</strong> Volume occupied by 1 kg of liquid.</li>
+        <li><strong>tr (s) – Emptying Time:</strong> Time required for the system to be emptied or evacuated.</li>
+    </ul>
+</div>
+
+<div class="note-card">
+    <h3>🔥 Real-life Applications</h3>
+    <ul class="note-list">
+        <li>Fire safety engineering – predicting temperature rise in pressure vessels or enclosed spaces exposed to heat.</li>
+        <li>Chemical and process industries – assessing thermal hazards during reactions or heat transfer processes.</li>
+        <li>Explosion risk analysis – estimating conditions under which phase change or rapid heating may lead to overpressure.</li>
+        <li>Safety equipment design – ensuring materials can withstand predicted temperature rises without failure.</li>
+        <li>Environmental safety – predicting heat stress in confined areas or storage tanks during thermal events.</li>
+    </ul>
+</div>
+
+<div class="note-card">
+    <h3>💡 Interpretation</h3>
+    <ul class="note-list">
+        <li>✅ <strong>Low Temperature Rise:</strong> Temperature increase is minimal; the system remains within safe operational limits. Normal operations can continue with routine monitoring.</li>
+        <li>⚠️ <strong>Moderate Temperature Rise:</strong> Temperature is elevated; monitor the system closely. Consider implementing ventilation, cooling, or temporary operational adjustments to prevent overheating.</li>
+        <li>🚨 <strong>High Temperature Rise:</strong> Temperature increase is significant and potentially hazardous. Immediate actions required: consider system shutdown, personnel evacuation, and activation of heat mitigation measures. Ensure compliance with fire safety and industrial standards (NFPA, OSHA, ISO 45001).</li>
+    </ul>
+</div>
+
+<div class="note-card">
+    <h3>🛡️ Input Validations</h3>
+    <ul class="note-list">
+        <li>All fields are <strong>mandatory</strong> — leaving any field empty will trigger an error.</li>
+        <li>Only <strong>positive numeric values</strong> are allowed; zero or negative values are invalid.</li>
+        <li>Elapsed time (t) must be <strong>greater than 0 and less than emptying time (tr)</strong> — ensures logical consistency for the ln(1 - t/tr) calculation.</li>
+        <li>Values outside typical industrial ranges will trigger a <strong>warning</strong> (orange) but will not block the calculation. Typical thresholds for reference:
+            <ul>
+                <li>Initial Temperature (Tr): ≤ 1500 K</li>
+                <li>Heat Release Rate (q): ≤ 10,000,000 J/kg</li>
+                <li>Specific Heat (Cv): ≤ 5000 J/kg·K</li>
+                <li>Latent Heat of Vaporization (hfa): ≤ 3,000,000 J/kg</li>
+                <li>Specific Volume (vfa): ≤ 0.5 m³/kg</li>
+                <li>Emptying Time (tr): ≤ 100,000 s</li>
+            </ul>
+        </li>
+        <li>Calculation errors (e.g., ln(1 - t/tr) undefined, division by zero, non-finite results) will display a <strong>red error</strong> and prevent result display.</li>
+        <li>All warnings and errors appear in the result box after the placeholder image disappears, maintaining consistent user feedback.</li>
+    </ul>
+</div>
+
+
+        <div class="note-card">
+            <p>Click <strong>"Calculate Temperature"</strong> to determine the final temperature. Proper understanding helps ensure fire safety and chemical process management.</p>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function setFieldWarning(fieldId, message){
+    const warningDiv = document.getElementById(fieldId + "-warning");
+    warningDiv.innerText = message || "";
+    warningDiv.style.color = "orange";
+}
+
+function calculateTemperature() {
+    const Tr = parseFloat(document.getElementById("Tr").value.trim());
+    const q = parseFloat(document.getElementById("q").value.trim());
+    const Cv = parseFloat(document.getElementById("Cv").value.trim());
+    const t = parseFloat(document.getElementById("t").value.trim());
+    const hfa = parseFloat(document.getElementById("hfa").value.trim());
+    const vfa = parseFloat(document.getElementById("vfa").value.trim());
+    const tr = parseFloat(document.getElementById("tr").value.trim());
+
+    const resultValue = document.getElementById("resultValue");
+    const placeholder = document.getElementById("placeholder");
+    const feedbackContent = document.getElementById("feedbackContent");
+    const resultError = document.getElementById("resultError");
+
+    // Reset warnings and results
+    ["Tr","q","Cv","t","hfa","vfa","tr"].forEach(f => setFieldWarning(f,""));
+    resultError.classList.add('hidden');
+    resultValue.classList.add('hidden');
+    placeholder.classList.remove('hidden');
+    resultError.innerHTML = "";
+    feedbackContent.innerHTML = "";
+
+    // Fatal error checks
+    if ([Tr,q,Cv,t,hfa,vfa,tr].some(v => isNaN(v))) {
+        resultError.innerHTML = "❌ All fields must be numeric.";
+        resultError.style.color = "red";
+        resultError.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        return;
+    }
+    if (Tr<=0 || q<=0 || Cv<=0 || hfa<=0 || vfa<=0 || tr<=0) {
+        resultError.innerHTML = "❌ All values must be greater than zero.";
+        resultError.style.color = "red";
+        resultError.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        return;
+    }
+    if (t<0 || t>=tr) {
+        resultError.innerHTML = "❌ Elapsed time (t) must be ≥0 and < tr.";
+        resultError.style.color = "red";
+        resultError.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        return;
+    }
+
+    const logInput = 1 - (t/tr);
+    if (logInput <= 0) {
+        resultError.innerHTML = "❌ Invalid calculation: ln(1 - t/tr) undefined for t ≥ tr.";
+        resultError.style.color = "red";
+        resultError.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        return;
+    }
+
+    // Field-level warnings (non-fatal)
+    if (Tr > 1500) setFieldWarning("Tr","⚠️ Tr unusually high, verify units.");
+    if (q > 1e7) setFieldWarning("q","⚠️ Heat Release Rate unusually high, verify input.");
+    if (Cv > 5000) setFieldWarning("Cv","⚠️ Cv unusually high, verify units.");
+    if (hfa > 3e6) setFieldWarning("hfa","⚠️ hfa unusually high, verify input.");
+    if (vfa > 0.5) setFieldWarning("vfa","⚠️ vfa unusually high, verify input.");
+    if (tr > 1e5) setFieldWarning("tr","⚠️ Emptying time unusually high, verify input.");
+
+    // Calculation
+    const T = Tr + (q * t / Cv) + ((hfa / (Cv * vfa)) * Math.log(logInput));
+
+    if (!isFinite(T) || T < 0) {
+        resultError.innerHTML = "❌ Calculation error! Check input values.";
+        resultError.style.color = "red";
+        resultError.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        return;
+    }
+
+    // Show result
+    document.getElementById("tempValue").innerText = T.toFixed(2);
+    resultValue.classList.remove("hidden");
+    placeholder.classList.add('hidden');
+
+    // Feedback based on ΔT
+    const deltaT = T - Tr;
+    let feedback = "";
+    if (deltaT < 10) {
+        feedback = "✅ Low Temperature Rise: Safe conditions.";
+        feedbackContent.style.color = "green";
+    } else if (deltaT < 50) {
+        feedback = "⚠️ Moderate Temperature Rise: Monitor system and ventilate if necessary.";
+        feedbackContent.style.color = "orange";
+    } else {
+        feedback = "🚨 High Temperature Rise: Immediate action required!";
+        feedbackContent.style.color = "red";
+    }
+    feedbackContent.innerHTML = feedback;
+}
+</script>
+
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+<!-- 1. Input Validation Rules (QEHS-Compliant)
+Field	Units	Recommended Range	Decimal Precision	Cross-field Dependency	Compliance/Reason
+Tr (Initial Temperature)	K	273 – 1500 K (ambient to extreme fire conditions)	2 decimals	Tr < T (final temp)	Ensure physically realistic temperature; ISO 13571 recommends reasonable ambient and expected max temperatures for fire risk assessment.
+q (Heat Release Rate)	J/kg	0 < q ≤ 1×10⁷	0–2 decimals	Positive only	Prevent unrealistic energy input; NFPA 68 & 92 recommend ranges for venting/heat release.
+Cv (Specific Heat)	J/kg·K	100 ≤ Cv ≤ 5000	0–2 decimals	Positive	Matches real substance properties; avoids division by zero; ensures temperature calculation physically realistic.
+t (Elapsed Time)	s	0 ≤ t < tr	0–1 decimal	t < tr	Must be less than emptying time to avoid log(0) or negative values; ensures evacuation/venting logic is valid.
+hfa (Latent Heat of Vaporization)	J/kg	1×10⁴ – 3×10⁶	0–2 decimals	Positive	Matches water/chemical latent heat ranges; prevents unphysical phase change effects.
+vfa (Specific Volume of Liquid)	m³/kg	1×10⁻⁴ – 0.5	4 decimals	Positive	Ensures realistic density/volume; avoids division by zero in formula.
+tr (Emptying Time)	s	t < tr ≤ 1×10⁵	0–1 decimal	tr > t	Ensures venting/evacuation is physically meaningful; prevents ln(≤0) errors.
+Key QEHS Logic
+
+All inputs must be positive and numeric.
+
+t < tr is critical for safe log calculation.
+
+Extreme outliers flagged as warnings, e.g., q > 1×10⁶ J/kg, Tr > 1000 K.
+
+Units enforced in tooltips/labels to reduce operator error.
+
+2. Output Validation Logic
+
+Final Temperature (T):
+T = Tr + (q * t / Cv) + ((hfa / (Cv * vfa)) * ln(1 - t/tr))
+
+Validation Rules:
+
+Check T is finite and > Tr (temperature should rise or stay same under heating).
+
+Thresholds for feedback (example based on fire safety standards):
+
+ΔT < 10 K → ✅ Low rise, safe.
+
+10 K ≤ ΔT < 50 K → ⚠️ Moderate rise, monitor and ventilate.
+
+ΔT ≥ 50 K → 🚨 High rise, immediate action; potential fire/explosion hazard.
+
+Thresholds align with fire safety best practices: NFPA 92 & ISO 13571 indicate temperature rise over 50 K in enclosed spaces is a serious hazard.
+
+3. Edge Case Validations
+Case	Handling
+t = 0	ΔT = 0; valid minimal scenario.
+t ≥ tr	Reject input; ln(1 - t/tr) undefined.
+Cv = 0	Reject; division by zero.
+vfa = 0	Reject; division by zero.
+Negative Tr, q, hfa, vfa, Cv, tr	Reject; unphysical.
+Unrealistic high values	Warn user; may indicate unit mismatch or input error.
+Resulting T < 0 K	Reject; impossible.
+log(1 - t/tr) ≤ 0	Reject; ensures mathematical validity. -->
