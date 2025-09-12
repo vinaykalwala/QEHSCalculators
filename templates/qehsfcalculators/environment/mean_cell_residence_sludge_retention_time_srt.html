@@ -1,0 +1,815 @@
+{% extends 'base.html' %}
+{% block title %}Mean Cell Residence Sludge Retention Time (SRT) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mean Cell Residence Sludge Retention Time (SRT) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+<style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+             /* display: flex;  */
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            /* overflow-y: auto;  */
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Input rows for better organization */
+        .input-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+        
+        @media (max-width: 600px) {
+            .input-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+                .rate-display {
+                display: flex;
+                gap: 20px;
+                justify-content: center;
+                align-items: center;
+                flex-wrap: wrap; /* responsive */
+                text-align: center;
+            }
+
+            .rate-block {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                min-width: 120px; /* keeps blocks same width */
+            }
+
+            .rate-label {
+                font-weight: bold;
+                font-size: 16px;
+                color: #444;
+                margin-bottom: 5px;
+            }
+
+            .rate-value {
+                font-size: 40px;
+                font-weight: 700;
+                color: #2980b9;
+                line-height: 1.2;
+            }
+
+            .rate-unit {
+                font-size: 14px;
+                color: #777;
+                margin-top: 4px;
+            }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+                .rate-value { font-size: 32px; }
+            }
+
+            @media (max-width: 480px) {
+                .rate-value { font-size: 26px; }
+                
+                .rate-unit { font-size: 12px; }
+                
+            }
+
+
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+                .result-feedback {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 18px 20px;
+    border-left: 4px solid #3498db;
+    text-align: left;
+    max-width: 800px; /* keeps it readable on large screens */
+    margin: 0 auto;   /* centers it */
+}
+
+.feedback-title {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #2c3e50;
+    font-size: 18px;
+}
+
+.feedback-content { 
+    color: #34495e; 
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 768px) {
+    .result-feedback {
+        padding: 15px;
+        font-size: 15px;
+    }
+
+    .feedback-title {
+        font-size: 16px;
+    }
+
+    .feedback-content {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .result-feedback {
+        padding: 12px;
+        border-left-width: 3px;
+    }
+
+    .feedback-title {
+        font-size: 15px;
+    }
+
+    .feedback-content {
+        font-size: 13px;
+    }
+}
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+<div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+<div class="calculator-container printable" id="printArea">
+
+
+{% include "includes/print_header_footer.html" %}
+
+<!-- Header -->
+<div class="calculator-header">
+    <h1>Mean Cell Residence Sludge Retention Time (SRT) Calculator</h1>
+    <p>Calculate Sludge Retention Time using reactor and solids/wasteflow values. Result shown in <strong>days</strong>.</p>
+</div>
+
+<div class="calc-content">
+  <!-- Calculator -->
+  <div class="calc-card">
+    <h2>Enter Parameters</h2>
+
+    <div class="input-row">
+      <div class="form-group">
+        <label for="V">Reactor Volume (V) [m³]</label>
+        <input type="number" id="V" class="form-input" step="any" min="0.01" placeholder="e.g., 5000" aria-label="Reactor volume">
+      </div>
+
+      <div class="form-group">
+        <label for="X">MLSS in Reactor (X) [mg/L]</label>
+        <input type="number" id="X" class="form-input" step="any" min="1" placeholder="e.g., 3000" aria-label="MLSS in reactor">
+      </div>
+    </div>
+
+    <div class="input-row">
+      <div class="form-group">
+        <label for="Qw">Waste Activated Sludge Flow (Qw) [m³/day]</label>
+        <input type="number" id="Qw" class="form-input" step="any" min="0" placeholder="e.g., 5" aria-label="Waste sludge flow">
+      </div>
+
+      <div class="form-group">
+        <label for="Xr">MLSS in Return Sludge (Xr) [mg/L]</label>
+        <input type="number" id="Xr" class="form-input" step="any" min="1" placeholder="e.g., 9000" aria-label="MLSS in return sludge">
+      </div>
+    </div>
+
+    <div class="input-row">
+      <div class="form-group">
+        <label for="Xe">MLSS in Effluent (Xe) [mg/L]</label>
+        <input type="number" id="Xe" class="form-input" step="any" min="0" placeholder="e.g., 30" aria-label="MLSS in effluent">
+      </div>
+
+      <div class="form-group">
+        <label for="Q">Total Influent Flow (Q) [m³/day]</label>
+        <input type="number" id="Q" class="form-input" step="any" min="0.0001" placeholder="e.g., 1000" aria-label="Total influent flow">
+      </div>
+    </div>
+
+    <button class="calculate-btn" onclick="calculateSRT()">Calculate SRT</button>
+  </div>
+
+  <!-- Result Section (kept original ids to preserve styling) -->
+  <div class="result-card">
+    <div class="result-placeholder" id="placeholder">
+      <img src="/static/images/mlc_environment_result.png" alt="SRT illustration">
+      <p>This tool calculates Sludge Retention Time (SRT) in days and provides diagnostics.</p>
+    </div>
+
+    <div class="result-error hidden" id="resultError" role="alert" aria-live="polite">
+      <div class="error-icon">❌</div>
+      <div class="error-message" id="errorMessage"></div>
+    </div>
+
+    <div class="result-value hidden" id="resultValue" aria-live="polite">
+      <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+        <h2>Sludge Retention Time (SRT)</h2>
+      </div>
+
+      <div class="rate-display" style="gap:12px; align-items:center; justify-content:center;">
+        <div class="rate-value" id="headLoss">0.00</div>
+        <div class="rate-label" style="font-size:16px; color: #2980b9;">days</div>
+      </div>
+
+      <div class="result-feedback">
+        <div class="feedback-title">Calculation Details</div>
+        <div class="feedback-content" id="feedbackContent"></div>
+      </div>
+
+      <div class="btn-wrapper">
+        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Notes (short, related to SRT) -->
+<div class="note-section">
+  <div class="note-card">
+    <h3>📘 About</h3>
+    <p>This calculator computes SRT (days) from reactor solids and wastage flows. Inputs must use consistent units: V in m³, flows in m³/day, concentrations in mg/L.</p>
+  </div>
+
+  <div class="note-card">
+    <h3>✅ Input Validations (summary)</h3>
+    <ul class="note-list">
+      <li><strong>V (m³):</strong> 0.01 – 1,000,000</li>
+      <li><strong>X, Xr, Xe (mg/L):</strong> X: 50–20,000; Xr: 100–200,000; Xe: 0–2,000</li>
+      <li><strong>Q, Qw (m³/day):</strong> Q: 0.0001–10,000,000; 0 ≤ Qw &lt; Q</li>
+      <li>Decimals: concentrations ≤3 dp; volumes/flows ≤3 dp. Warnings shown if exceeded.</li>
+      <li>Denominator must be &gt; 0 (error if zero or negative).</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>🏭 Applications</h3>
+        <ul class="note-list">
+        <li><strong>Wastewater Treatment Plants:</strong> Optimizing sludge age for stable biological treatment.</li>
+        <li><strong>Industrial Effluent Treatment:</strong> Maintaining adequate biomass for specific pollutant removal.</li>
+        <li><strong>Environmental Compliance:</strong> Ensuring discharge quality meets regulatory standards.</li>
+        <li><strong>Process Control:</strong> Adjusting sludge wasting to balance microbial growth and decay.</li>
+        <li><strong>Energy & Cost Efficiency:</strong> Reducing excess sludge production and optimizing aeration demand.</li>
+        </ul>
+
+  </div>
+</div>
+
+<script>
+/* Helper: show errors (preserve UI behavior) */
+function showErrors(errors) {
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+
+  errorMessage.innerHTML = errors.join("<br>");
+  errorBox.classList.remove("hidden");
+  placeholder.classList.add("hidden");
+  resultValue.classList.add("hidden");
+}
+
+/* Count decimal places (loose) */
+function countDecimals(rawStr) {
+  if (typeof rawStr !== 'string') rawStr = String(rawStr || '');
+  if (!rawStr.includes('.')) return 0;
+  let decPart = rawStr.split('.')[1].split(/e|E/)[0];
+  decPart = decPart.replace(/[^0-9]/g, '');
+  return decPart.length;
+}
+
+function calculateSRT() {
+  // raw inputs
+  const rawV = (document.getElementById("V")?.value || "").trim();
+  const rawX = (document.getElementById("X")?.value || "").trim();
+  const rawQw = (document.getElementById("Qw")?.value || "").trim();
+  const rawXr = (document.getElementById("Xr")?.value || "").trim();
+  const rawXe = (document.getElementById("Xe")?.value || "").trim();
+  const rawQ = (document.getElementById("Q")?.value || "").trim();
+
+  const placeholder = document.getElementById("placeholder");
+  const errorBox = document.getElementById("resultError");
+  const resultValueEl = document.getElementById("resultValue");
+  const srtEl = document.getElementById("headLoss"); // reuse id for numeric display
+  const feedbackEl = document.getElementById("feedbackContent");
+
+  // reset UI
+  errorBox.classList.add("hidden");
+  feedbackEl.innerHTML = "";
+  resultValueEl.classList.add("hidden");
+  placeholder.classList.remove("hidden");
+
+  const errors = [];
+  const warnings = [];
+
+  // parse numbers
+  const V = parseFloat(rawV);
+  const X = parseFloat(rawX);
+  const Qw = parseFloat(rawQw);
+  const Xr = parseFloat(rawXr);
+  const Xe = parseFloat(rawXe);
+  const Q = parseFloat(rawQ);
+
+  // presence checks
+  if ([rawV, rawX, rawQw, rawXr, rawXe, rawQ].some(v => v === "")) {
+    errors.push("👉 All inputs (V, X, Qw, Xr, Xe, Q) are required.");
+    return showErrors(errors);
+  }
+
+  // numeric checks
+  if (!Number.isFinite(V)) errors.push("👉 V must be a valid number (m³).");
+  if (!Number.isFinite(X)) errors.push("👉 X must be a valid number (mg/L).");
+  if (!Number.isFinite(Qw)) errors.push("👉 Qw must be a valid number (m³/day).");
+  if (!Number.isFinite(Xr)) errors.push("👉 Xr must be a valid number (mg/L).");
+  if (!Number.isFinite(Xe)) errors.push("👉 Xe must be a valid number (mg/L).");
+  if (!Number.isFinite(Q)) errors.push("👉 Q must be a valid number (m³/day).");
+  if (errors.length) return showErrors(errors);
+
+  // ranges (practical)
+  const ranges = {
+    V: { min: 0.01, max: 1e6 },
+    X: { min: 50, max: 20000 },
+    Xr: { min: 100, max: 200000 },
+    Xe: { min: 0, max: 2000 },
+    Q: { min: 0.0001, max: 1e7 },
+    Qw: { min: 0, max: 1e7 }
+  };
+
+  if (V < ranges.V.min || V > ranges.V.max) errors.push(`👉 Reactor volume V must be between ${ranges.V.min} and ${ranges.V.max} m³.`);
+  if (X < ranges.X.min || X > ranges.X.max) errors.push(`👉 MLSS in reactor X must be between ${ranges.X.min} and ${ranges.X.max} mg/L.`);
+  if (Xr < ranges.Xr.min || Xr > ranges.Xr.max) errors.push(`👉 MLSS in return Xr must be between ${ranges.Xr.min} and ${ranges.Xr.max} mg/L.`);
+  if (Xe < ranges.Xe.min || Xe > ranges.Xe.max) errors.push(`👉 Effluent MLSS Xe must be between ${ranges.Xe.min} and ${ranges.Xe.max} mg/L.`);
+  if (Q < ranges.Q.min || Q > ranges.Q.max) errors.push(`👉 Influent flow Q must be between ${ranges.Q.min} and ${ranges.Q.max} m³/day.`);
+  if (Qw < ranges.Qw.min || Qw > ranges.Qw.max) errors.push(`👉 Waste flow Qw must be between ${ranges.Qw.min} and ${ranges.Qw.max} m³/day.`);
+  if (errors.length) return showErrors(errors);
+
+  // cross-field consistency
+  if (!(Qw < Q)) {
+    errors.push("👉 Waste flow Qw must be less than total influent flow Q.");
+    return showErrors(errors);
+  }
+
+  // compute numerator & denominator
+  const numerator_mg = V * X * 1000; // mg solids
+  const denom_mg_per_day = (Qw * Xr * 1000) + ((Q - Qw) * Xe * 1000); // mg/day
+
+  if (denom_mg_per_day <= 0) {
+    return showErrors(["❌ Denominator (mass leaving per day) must be > 0. Check Q, Qw, Xr and Xe."]);
+  }
+
+  // compute SRT (days)
+  const SRT = numerator_mg / denom_mg_per_day;
+
+  if (!Number.isFinite(SRT) || SRT <= 0) {
+    return showErrors(["❌ Computed SRT invalid. Check inputs for correctness and units."]);
+  }
+
+  // sanity thresholds
+  if (SRT > 365) warnings.push("⚠️ Computed SRT > 365 days — likely unit mismatch or inputs invalid.");
+  if (SRT > 50) warnings.push("⚠️ Computed SRT > 50 days — very long sludge age; verify operations.");
+  if (SRT < 0.1) warnings.push("⚠️ Computed SRT < 0.1 days — unrealistically short; check inputs.");
+
+  // classification guidance
+  let classification = "";
+  let suggestion = "";
+  if (SRT < 2) {
+    classification = "Too Short";
+    suggestion = "Biomass washout risk — increase solids retention or reduce wastage.";
+  } else if (SRT < 5) {
+    classification = "Marginal";
+    suggestion = "Biomass is just stable — monitor process closely.";
+  } else if (SRT <= 15) {
+    classification = "Typical";
+    suggestion = "SRT is in recommended range for stable operation.";
+  } else if (SRT <= 30) {
+    classification = "Long";
+    suggestion = "Long SRT — watch for sludge bulking and endogenous decay.";
+  } else {
+    classification = "Very Long";
+    suggestion = "Very long SRT — investigate sludge handling strategy.";
+  }
+
+  // Build result explanation only
+  let details = `<div><b>SRT</b> = <b>${SRT.toFixed(2)}</b> days</div>`;
+  details += `<div style="margin-top:6px;">Classification: <b>${classification}</b></div>`;
+  details += `<div style="margin-top:6px;">Guidance: ${suggestion}</div>`;
+  if (warnings.length) details += `<div style="margin-top:8px; color:#b35d00;">${warnings.join(" | ")}</div>`;
+
+  // Update UI
+  srtEl.textContent = SRT.toFixed(2);
+  feedbackEl.innerHTML = details;
+  placeholder.classList.add("hidden");
+  resultValueEl.classList.remove("hidden");
+  errorBox.classList.add("hidden");
+}
+
+
+function printReport() {
+  const el = document.getElementById('printDate');
+  if (el) {
+    const now = new Date();
+    el.textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+  window.print();
+}
+</script>
+
+<script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+<!-- /*
+---------------------------------------------------------
+📌 Formula (Sludge Retention Time, SRT):
+    SRT = (V * X) / [ Qw * Xr + (Q - Qw) * Xe ]
+
+    Where:
+      - SRT = solids retention time (days)
+      - V   = reactor volume (m³)
+      - X   = MLSS in reactor (mg/L)
+      - Qw  = waste sludge flow (m³/day)
+      - Xr  = MLSS in return sludge (mg/L)
+      - Xe  = MLSS in effluent (mg/L)
+      - Q   = influent flow (m³/day)
+
+---------------------------------------------------------
+✅ Inputs (with validation rules):
+
+1. Reactor Volume (V, m³)
+   - Required, numeric
+   - Range: 0.01 – 1,000,000
+2. MLSS in Reactor (X, mg/L)
+   - Required, numeric
+   - Range: 50 – 20,000
+3. Waste Flow (Qw, m³/day)
+   - Required, numeric
+   - Range: 0 – 10,000,000
+   - Must be < Q
+4. MLSS in Return Sludge (Xr, mg/L)
+   - Required, numeric
+   - Range: 100 – 200,000
+5. Effluent MLSS (Xe, mg/L)
+   - Required, numeric
+   - Range: 0 – 2,000
+6. Influent Flow (Q, m³/day)
+   - Required, numeric
+   - Range: 0.0001 – 10,000,000
+
+---------------------------------------------------------
+⚠️ Input Validations / Warnings:
+
+- Missing or non-numeric inputs → error
+- Out-of-range values → error
+- Cross-check: Qw < Q → otherwise error
+- Denominator (mass leaving) must be >0 → error
+- Decimal precision not specifically flagged
+- SRT sanity thresholds (warnings):
+    • SRT > 50 days → very long sludge age
+    • SRT > 365 days → possible unit mismatch
+    • SRT < 0.1 days → unrealistically short
+
+---------------------------------------------------------
+📊 Outputs:
+
+- SRT (days)
+    • Non-finite or invalid → error
+    • Classification & Guidance:
+        • SRT < 2 → Too Short: washout risk
+        • 2 ≤ SRT < 5 → Marginal: monitor process
+        • 5 ≤ SRT ≤ 15 → Typical: stable operation
+        • 15 < SRT ≤ 30 → Long: watch for bulking
+        • SRT > 30 → Very Long: investigate sludge handling
+
+- Warnings display any extreme SRT or potential input issues
+- Feedback includes classification and operational guidance
+
+---------------------------------------------------------
+*/ -->
