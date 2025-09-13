@@ -1,9 +1,199 @@
-{% extends "base.html" %}
+{% extends "login_base.html" %}
 {% block content %}
-<h1>{% if edit %}Edit Blog Post{% else %}Create Blog Post{% endif %}</h1>
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-success">{% if edit %}Update{% else %}Publish{% endif %}</button>
-</form>
+{% load static %}
+<style>
+/* ====== Container ====== */
+.blog-form-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* ====== Banner Image ====== */
+.blog-banner {
+    width: 100%;
+    height: 250px; /* Adjust height as needed */
+    border-radius: 15px 15px 0 0;
+    background: url("{% static 'images/banner.webp' %}") center/cover no-repeat;
+}
+
+/* ====== Form Wrapper ====== */
+.blog-form-wrapper {
+    padding: 35px 40px;
+    border-radius: 0 0 15px 15px;
+    background: linear-gradient(145deg, #000040, #1560bd);
+    box-shadow: 0 0 30px rgba(21, 96, 189, 0.6);
+    color: #fff;
+    font-family: "Segoe UI", sans-serif;
+}
+
+/* ====== Heading ====== */
+.blog-form-wrapper h1 {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+    color: #00d4ff;
+    text-shadow: 0 0 15px #00d4ff80;
+}
+
+/* ====== Form Styling ====== */
+.blog-form-wrapper form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.blog-form-wrapper p {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+}
+
+/* ====== Labels ====== */
+.blog-form-wrapper label {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #e0e0e0;
+    margin-bottom: 6px;
+}
+.blog-form-wrapper ::placeholder {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #e0e0e0;
+    margin-bottom: 6px;
+}
+/* Force input & textarea text color */
+.blog-form-wrapper input,
+.blog-form-wrapper select,
+.blog-form-wrapper textarea {
+    color: #fff !important; /* Ensures text is visible */
+}
+
+/* Fix placeholder color */
+.blog-form-wrapper ::placeholder {
+    color: #e0e0e0 !important;
+    opacity: 1; /* ensures placeholder is not too faint */
+}
+
+/* Fix Chrome autofill background/text */
+.blog-form-wrapper input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0px 1000px rgba(21, 96, 189, 0.25) inset;
+    -webkit-text-fill-color: #fff !important;
+    caret-color: #fff; /* white cursor */
+}
+
+/* ====== Inputs ====== */
+.blog-form-wrapper input,
+.blog-form-wrapper select,
+.blog-form-wrapper textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #1560bd;
+    background: rgba(21, 96, 189, 0.25);
+    color: #fff;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.blog-form-wrapper textarea {
+    min-height: 120px;
+}
+
+/* ====== Checkbox / Radio Alignment ====== */
+.blog-form-wrapper input[type="checkbox"],
+.blog-form-wrapper input[type="radio"] {
+    width: auto;
+    margin-right: 10px;
+    transform: scale(1.2);
+    accent-color: #00d4ff;
+    vertical-align: middle;
+}
+
+.blog-form-wrapper .field-checkbox,
+.blog-form-wrapper .field-radio {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ====== Focus Styling ====== */
+.blog-form-wrapper input:focus,
+.blog-form-wrapper select:focus,
+.blog-form-wrapper textarea:focus {
+    border: 1px solid #00d4ff;
+    background: rgba(21, 96, 189, 0.45);
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+    outline: none;
+}
+
+/* ====== Submit Button ====== */
+.blog-form-wrapper button {
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(90deg, #0073ff, #007bff);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.blog-form-wrapper button:hover {
+    background: linear-gradient(90deg, #0073ff, #007bff);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* ====== Responsive ====== */
+@media (max-width: 768px) {
+    .blog-form-wrapper {
+        padding: 25px 20px;
+    }
+    .blog-form-wrapper h1 {
+        font-size: 1.6rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .blog-form-wrapper {
+        padding: 20px 15px;
+    }
+    .blog-form-wrapper button {
+        font-size: 0.95rem;
+        padding: 12px;
+    }
+}
+</style>
+
+<div class="main-content">
+    <div class="blog-form-container">
+        <!-- Banner Image -->
+        <div class="blog-banner"></div>
+
+        <!-- Form Wrapper -->
+        <div class="blog-form-wrapper">
+            <h1>{% if edit %}Edit Blog Post{% else %}Create Blog Post{% endif %}</h1>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% for field in form %}
+                    <p class="{% if field.field.widget.input_type == 'checkbox' %}field-checkbox{% endif %}{% if field.field.widget.input_type == 'radio' %}field-radio{% endif %}">
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {% if field.help_text %}
+                            <small style="color: #a0d4ff;">{{ field.help_text }}</small>
+                        {% endif %}
+                        {% for error in field.errors %}
+                            <span style="color: #ff6b6b;">{{ error }}</span>
+                        {% endfor %}
+                    </p>
+                {% endfor %}
+                <button type="submit">{% if edit %}Update{% else %}Publish{% endif %}</button>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -30,7 +30,10 @@ urlpatterns = [
     path('user-devices/', user_devices_list, name='user_devices_list'),
 
     path('blog_list/', blog_list, name='blog_list'),
+    path('blog_list_admin/', blog_list_admin, name='blog_list_admin'),
     path('blog_detail/<int:post_id>/', blog_detail, name='blog_detail'),
+    path('blog_detail_admin/<int:post_id>/', blog_detail_admin, name='blog_detail_admin'),
+
     path('blog_create/', blog_create, name='blog_create'),
     path('blog_edit/<int:post_id>/', blog_edit, name='blog_edit'),
     path('blog_delete/<int:post_id>/', blog_delete, name='blog_delete'),
