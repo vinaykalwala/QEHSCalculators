@@ -1,0 +1,708 @@
+{% extends 'base.html' %}
+{% block title %}Psychrometric Mixed Air Temperature Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Psychrometric Mixed Air Temperature Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+<style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+             /* display: flex;  */
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            /* overflow-y: auto;  */
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Input rows for better organization */
+        .input-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+        
+        @media (max-width: 600px) {
+            .input-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+                .rate-display {
+                display: flex;
+                gap: 20px;
+                justify-content: center;
+                align-items: center;
+                flex-wrap: wrap; /* responsive */
+                text-align: center;
+            }
+
+            .rate-block {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                min-width: 120px; /* keeps blocks same width */
+            }
+
+            .rate-label {
+                font-weight: bold;
+                font-size: 16px;
+                color: #444;
+                margin-bottom: 5px;
+            }
+
+            .rate-value {
+                font-size: 40px;
+                font-weight: 700;
+                color: #2980b9;
+                line-height: 1.2;
+            }
+
+            .rate-unit {
+                font-size: 14px;
+                color: #777;
+                margin-top: 4px;
+            }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+                .rate-value { font-size: 32px; }
+            }
+
+            @media (max-width: 480px) {
+                .rate-value { font-size: 26px; }
+                
+                .rate-unit { font-size: 12px; }
+                
+            }
+
+
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+                .result-feedback {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 18px 20px;
+    border-left: 4px solid #3498db;
+    text-align: left;
+    max-width: 800px; /* keeps it readable on large screens */
+    margin: 0 auto;   /* centers it */
+}
+
+.feedback-title {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #2c3e50;
+    font-size: 18px;
+}
+
+.feedback-content { 
+    color: #34495e; 
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 768px) {
+    .result-feedback {
+        padding: 15px;
+        font-size: 15px;
+    }
+
+    .feedback-title {
+        font-size: 16px;
+    }
+
+    .feedback-content {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .result-feedback {
+        padding: 12px;
+        border-left-width: 3px;
+    }
+
+    .feedback-title {
+        font-size: 15px;
+    }
+
+    .feedback-content {
+        font-size: 13px;
+    }
+}
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+<div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+<div class="calculator-container printable" id="printArea">
+
+
+{% include "includes/print_header_footer.html" %}
+
+<div class="calculator-header">
+    <h1>Mixed Air Temperature Calculator</h1>
+    <p>Calculate the resulting Mixed Air Temperature (°F) when combining outdoor and recirculated air. Essential for ventilation, energy use, and indoor air quality.</p>
+</div>
+
+<div class="calc-content">
+    <div class="calc-card">
+        <h2>Enter Parameters</h2>
+        <div class="input-row">
+            <div class="form-group">
+                <label for="outdoorTemp">Outdoor Air Temperature (°F)</label>
+                <input type="number" id="outdoorTemp" class="form-input" step="any" placeholder="e.g., 75">
+            </div>
+            <div class="form-group">
+                <label for="returnTemp">Return Air Temperature (°F)</label>
+                <input type="number" id="returnTemp" class="form-input" step="any" placeholder="e.g., 70">
+            </div>
+        </div>
+        <div class="input-row">
+            <div class="form-group">
+                <label for="percentOA">Outdoor Air Percentage OA (%)</label>
+                <input type="number" id="percentOA" class="form-input" step="0.1" placeholder="0–100">
+            </div>
+            <div class="form-group">
+                <label for="percentRA">Return Air Percentage RA (%)</label>
+                <input type="number" id="percentRA" class="form-input" step="0.1" placeholder="0–100">
+            </div>
+        </div>
+        <button class="calculate-btn" onclick="calculateMixedAirTemp()">Calculate Mixed Air Temperature</button>
+    </div>
+
+    <div class="result-card">
+        <div class="result-placeholder" id="placeholder">
+            <img src="/static/images/mlc_environment_result.png" alt="Air mixing illustration">
+            <p>This tool calculates the mixed air temperature for HVAC and ventilation systems.</p>
+        </div>
+
+        <div class="result-error hidden" id="resultError" role="alert" aria-live="polite">
+            <div class="error-icon">❌</div>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <div class="result-value hidden" id="resultValue" aria-live="polite">
+            <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                <h2>Mixed Air Temperature</h2>
+            </div>
+            <div class="rate-display" style="gap:12px; align-items:center; justify-content:center;">
+                <div class="rate-value" id="headLoss">0.0</div>
+                <div class="rate-label" style="font-size:16px; color: #2980b9;">°F</div>
+            </div>
+            <div class="result-feedback">
+                <div class="feedback-title">Feedback</div>
+                <div class="feedback-content" id="feedbackContent"></div>
+            </div>
+            <div class="btn-wrapper">
+                <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="note-section">
+    <div class="note-card">
+        <h3>📘 About</h3>
+        <p>
+            Mixed Air Temperature (T<sub>mixed</sub>) represents the resulting temperature when outdoor and return air streams are combined.
+            Proper calculation helps optimize HVAC energy use, indoor air quality, and compliance with ventilation standards.
+        </p>
+    </div>
+
+    <div class="note-card">
+        <h3>✅ Input Validations</h3>
+        <ul class="note-list">
+            <li>Outdoor Temp: -50°F ≤ T<sub>outdoor</sub> ≤ 150°F</li>
+            <li>Return Temp: 50°F ≤ T<sub>return</sub> ≤ 90°F</li>
+            <li>Outdoor Air %: 0–100%</li>
+            <li>Return Air %: 0–100%</li>
+            <li>OA% + RA% must equal 100%</li>
+            <li>Warn if OA% = 100% in extreme temps or RA% = 100% (IAQ risk)</li>
+            <li>Warn if |T<sub>outdoor</sub> - T<sub>return</sub>| > 50°F</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>🏭 Applications</h3>
+        <ul class="note-list">
+            <li>HVAC System Design</li>
+            <li>Energy Management & Economizers</li>
+            <li>Indoor Air Quality Compliance</li>
+            <li>Retrocommissioning and Safety Checks</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+function showErrors(errors) {
+    const errorBox = document.getElementById("resultError");
+    const errorMessage = document.getElementById("errorMessage");
+    const placeholder = document.getElementById("placeholder");
+    const resultValue = document.getElementById("resultValue");
+
+    errorMessage.innerHTML = errors.join("<br>");
+    errorBox.classList.remove("hidden");
+    placeholder.classList.add("hidden");
+    resultValue.classList.add("hidden");
+}
+
+function calculateMixedAirTemp() {
+    const outdoorTemp = parseFloat(document.getElementById('outdoorTemp')?.value.trim());
+    const returnTemp = parseFloat(document.getElementById('returnTemp')?.value.trim());
+    const percentOA = parseFloat(document.getElementById('percentOA')?.value.trim());
+    const percentRA = parseFloat(document.getElementById('percentRA')?.value.trim());
+
+    const resultEl = document.getElementById("headLoss");
+    const feedbackEl = document.getElementById("feedbackContent");
+    const errors = [];
+
+    feedbackEl.innerHTML = "";
+    document.getElementById("resultError").classList.add("hidden");
+
+    // Numeric validation
+    if (![outdoorTemp, returnTemp, percentOA, percentRA].every(Number.isFinite)) {
+        errors.push("All inputs are required and must be numeric.");
+    }
+
+    // Temperature validations
+    if (outdoorTemp < -50 || outdoorTemp > 150) errors.push("Outdoor Air Temp must be -50°F to 150°F.");
+    if (returnTemp < 50 || returnTemp > 90) errors.push("Return Air Temp must be 50°F to 90°F.");
+
+    // Percent validations
+    if (percentOA < 0 || percentOA > 100) errors.push("Outdoor Air % must be 0–100.");
+    if (percentRA < 0 || percentRA > 100) errors.push("Return Air % must be 0–100.");
+    if (Math.round(percentOA + percentRA) !== 100) errors.push(`Sum of OA% + RA% must be 100% (current: ${percentOA + percentRA}%).`);
+
+    if (errors.length) return showErrors(errors);
+
+    // Calculation
+    const mixedTemp = (percentOA/100 * outdoorTemp) + (percentRA/100 * returnTemp);
+    resultEl.textContent = mixedTemp.toFixed(1);
+
+    // Build a meaningful result section
+    let resultHTML = `
+        <table style="width:100%; border-collapse: collapse; margin-top:10px;">
+            <tr style="background-color:#f0f0f0;">
+                <th style="padding:5px; border:1px solid #ccc;">Parameter</th>
+                <th style="padding:5px; border:1px solid #ccc;">Value</th>
+            </tr>
+            <tr>
+                <td>Mixed Air Temperature</td>
+                <td><b>${mixedTemp.toFixed(1)} °F</b></td>
+            </tr>
+            <tr>
+                <td>Outdoor Air Contribution</td>
+                <td>${percentOA}% of ${outdoorTemp}°F → ${(percentOA/100*outdoorTemp).toFixed(1)}°F</td>
+            </tr>
+            <tr>
+                <td>Return Air Contribution</td>
+                <td>${percentRA}% of ${returnTemp}°F → ${(percentRA/100*returnTemp).toFixed(1)}°F</td>
+            </tr>
+        </table>
+        <div style="margin-top:10px; font-weight:bold;">Operational Feedback:</div>
+    `;
+
+    if (mixedTemp < returnTemp) {
+        resultHTML += "<div style='color:green;'>✅ Economizer mode possible – increase OA% for energy savings.</div>";
+    } else if (mixedTemp > returnTemp + 5) {
+        resultHTML += "<div style='color:red;'>⚠️ High cooling load – consider adjusting OA% or using heat recovery.</div>";
+    } else {
+        resultHTML += "<div style='color:blue;'>Normal operating range – system should handle efficiently.</div>";
+    }
+
+    if (percentOA === 100) resultHTML += "<div style='color:orange;'>⚠️ 100% OA – check extreme outdoor temperatures for comfort/IAQ risks.</div>";
+    if (percentRA === 100) resultHTML += "<div style='color:orange;'>⚠️ 100% RA – indoor air quality may be compromised.</div>";
+    if (Math.abs(outdoorTemp - returnTemp) > 50) resultHTML += "<div style='color:orange;'>⚠️ Extreme temperature difference between outdoor and return air.</div>";
+
+    feedbackEl.innerHTML = resultHTML;
+
+    document.getElementById("placeholder").classList.add("hidden");
+    document.getElementById("resultValue").classList.remove("hidden");
+}
+
+function printReport() {
+    const el = document.getElementById('printDate');
+    if (el) {
+        const now = new Date();
+        el.textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+    window.print();
+}
+</script>
+
+
+
+<script src="{% static 'js/print.js' %}"></script>
+
+</body>
+</html>
+{% endblock %}
+
+
+<!--
+  🔹 Mixed Air Temperature Calculator - Formula & Validations
+
+  1️⃣ Formula:
+      T_mixed = (OA% / 100 * T_outdoor) + (RA% / 100 * T_return)
+
+      where:
+        • T_mixed = Mixed air temperature (°F)
+        • T_outdoor = Outdoor air temperature (°F)
+        • T_return = Return air temperature (°F)
+        • OA% = Percentage of outdoor air (0–100%)
+        • RA% = Percentage of return air (0–100%)
+      Note: OA% + RA% must equal 100%.
+
+  2️⃣ Inputs:
+      - Outdoor Air Temperature (T_outdoor): numeric, -50 to 150 °F
+      - Return Air Temperature (T_return): numeric, 50 to 90 °F
+      - Outdoor Air Percentage (OA%): numeric, 0–100%
+      - Return Air Percentage (RA%): numeric, 0–100%
+      - Precision: Inputs should be reasonable; extreme decimals are not restricted but should be practical
+
+  3️⃣ Outputs & Validations:
+      - Mixed Air Temperature (T_mixed) in °F (1 decimal)
+      - Contributions:
+          • Outdoor Air Contribution = (OA% × T_outdoor / 100)
+          • Return Air Contribution = (RA% × T_return / 100)
+      - Status / Operational Feedback:
+          • T_mixed < T_return → "Economizer mode possible"
+          • T_mixed > T_return + 5 → "High cooling load"
+          • Otherwise → "Normal operating range"
+      - Warnings:
+          • OA% = 100 → potential IAQ or extreme temperature risk
+          • RA% = 100 → potential indoor air quality risk
+          • |T_outdoor − T_return| > 50 → extreme temperature difference
+      - Input errors:
+          • Missing or non-numeric inputs
+          • OA% + RA% ≠ 100
+          • Inputs out of specified ranges
+-->

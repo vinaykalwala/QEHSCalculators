@@ -22,6 +22,7 @@ urlpatterns = [
     path("device-limit/", device_limit_exceeded, name="device_limit_exceeded"),
     path("subscription-expired/", subscription_expired, name="subscription_expired"),
     path("profile/", profile_view, name="profile"),
+    path("plans/", plans_and_pricing, name="plans_and_pricing"),
 
     path('transactions/', transaction_list, name='transaction_list'),
     path('transactions/delete/<int:pk>/', delete_transaction, name='delete_transaction'),
@@ -60,6 +61,11 @@ urlpatterns = [
     path('subscriptions/add/', subscription_add, name='subscription_add'),
     path('subscriptions/edit/<int:pk>/', subscription_edit, name='subscription_edit'),
     path('subscriptions/delete/<int:pk>/',subscription_delete, name='subscription_delete'),
+
+    path("trainings/", training_list, name="training_list"),
+    path("trainings/create/", training_create, name="training_create"),
+    path("trainings/<int:pk>/edit/", training_update, name="training_update"),
+    path("trainings/<int:pk>/delete/", training_delete, name="training_delete"),
 
     path('calculators/quality/', qualitycategory_calculators, name='qualitycategory_calculators'),
     path('calculators/environment/', environmentcategory_calculators, name='environmentcategory_calculators'),
