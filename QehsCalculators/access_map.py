@@ -462,15 +462,25 @@ CALCULATORS = [
 
 {"name": "Oxygen Requirement O2 Calculator - Activated Sludge Process", "url_name": "environment_oxygen_requirement_o2_activated_sludge_process_calculator", "plan_type": "corporate", "category": "environment"},
 
+{"name": "Oxygen Transfer Under Field Conditions Calculator", "url_name": "environment_oxygen_transfer_under_field_conditions_calculator", "plan_type": "corporate", "category": "environment"},
 
+{"name": "Pressure Drop Across a Valve In A Liquid Calculator", "url_name": "environment_pressure_drop_across_a_valve_in_a_liquid_calculator", "plan_type": "corporate", "category": "environment"},
 
+{"name": "Population Projection Calculator", "url_name": "environment_population_projection_calculator", "plan_type": "corporate", "category": "environment"},
 
+{"name": "Percent Growth Calculator", "url_name": "environment_percent_growth_calculator", "plan_type": "corporate", "category": "environment"},
 
+{"name": "Psychrometric Mixed Air Temperature Calculator", "url_name": "environment_psychrometric_mixed_air_temperature_calculator", "plan_type": "corporate", "category": "environment"},
 
+{"name": "Pressure Drop Calculator (Darcy-Weisbach)", "url_name": "environment_pressure_drop_darcy_weisbach_calculator", "plan_type": "corporate", "category": "environment"},
 
+{"name": "Pipe Flow Velocity Calculator", "url_name": "environment_pipe_flow_velocity_calculator", "plan_type": "corporate", "category": "environment"},
 
+{"name": "Pipe Friction Factor Calculator", "url_name": "environment_pipe_friction_factor_calculator", "plan_type": "corporate", "category": "environment"},
 
+{"name": "Pipe Diameter Sizing Calculator", "url_name": "environment_pipe_diameter_sizing_calculator", "plan_type": "corporate", "category": "environment"},
 
+{"name": "Power Required (kW) Calculator", "url_name": "environment_power_required_kw_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 
