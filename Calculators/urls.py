@@ -65,6 +65,11 @@ urlpatterns = [
     path('subscriptions/edit/<int:pk>/', subscription_edit, name='subscription_edit'),
     path('subscriptions/delete/<int:pk>/',subscription_delete, name='subscription_delete'),
 
+    path("trainings/", training_list, name="training_list"),
+    path("trainings/create/", training_create, name="training_create"),
+    path("trainings/<int:pk>/edit/", training_update, name="training_update"),
+    path("trainings/<int:pk>/delete/", training_delete, name="training_delete"),
+
     path('calculators/quality/', qualitycategory_calculators, name='qualitycategory_calculators'),
     path('calculators/environment/', environmentcategory_calculators, name='environmentcategory_calculators'),
     path('calculators/health/', healthcategory_calculators, name='healthcategory_calculators'),

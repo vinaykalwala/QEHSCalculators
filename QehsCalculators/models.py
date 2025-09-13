@@ -212,3 +212,25 @@ class BlogPost(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.get_category_display()})"
+
+
+class Training(models.Model):
+    CATEGORY_CHOICES = [
+        ("quality", "Quality"),
+        ("environment", "Environment"),
+        ("health", "Health"),
+        ("safety", "Safety"),
+        ("fire", "Fire"),
+        ("other", "Other"),
+    ]
+
+    title = models.CharField(max_length=200)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default="other")
+    media = models.FileField(upload_to="trainings/media/",blank=True,null=True,help_text="Upload any file (Image Or Promo video)")
+    external_video_url = models.URLField(blank=True,null=True,help_text="Optional external video URL (e.g., YouTube, Vimeo)")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.title} ({self.get_category_display()})"

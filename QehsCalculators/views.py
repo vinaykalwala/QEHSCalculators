@@ -1063,8 +1063,54 @@ def delete_user(request, pk):
 
     return render(request, 'delete_user_confirm.html', {'user_obj': user_obj})
 
+from .models import Training
+from .forms import TrainingForm
+
+@login_required
+def training_list(request):
+    trainings = Training.objects.filter(is_active=True)
+    return render(request, "trainings/training_list.html", {"trainings": trainings})
 
 
+# 📌 Create Training (superuser only)
+@login_required
+@user_passes_test(is_superuser)
+def training_create(request):
+    if request.method == "POST":
+        form = TrainingForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Training created successfully.")
+            return redirect("training_list")
+    else:
+        form = TrainingForm()
+    return render(request, "trainings/training_form.html", {"form": form})
+
+
+# 📌 Update Training (superuser only)
+@login_required
+@user_passes_test(is_superuser)
+def training_update(request, pk):
+    training = get_object_or_404(Training, pk=pk)
+    if request.method == "POST":
+        form = TrainingForm(request.POST, request.FILES, instance=training)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Training updated successfully.")
+            return redirect("training_list")
+    else:
+        form = TrainingForm(instance=training)
+    return render(request, "trainings/training_form.html", {"form": form})
+
+
+# 📌 Delete Training (superuser only)
+@login_required
+@user_passes_test(is_superuser)
+def training_delete(request, pk):
+    training = get_object_or_404(Training, pk=pk)
+    training.delete()
+    messages.success(request, "Training deleted successfully.")
+    return redirect("training_list")
 
 from .forms import ProfileUpdateForm
 from .models import UserSubscription, UserDevice, Transaction
