@@ -494,6 +494,31 @@ CALCULATORS = [
 
 #environment calculators from  bottom to top
 
+{"name": "Transition Flow General Velocity Calculator", "url_name": "environment_transition_flow_general_velocity_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Total Height of Soak Pit Calculator", "url_name": "environment_total_height_of_soak_pit_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+
+{"name": "Two-Phase Flow Parameter Calculator", "url_name": "environment_two_phase_flow_parameter_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+
+{"name": "Threshold Limit Value (TLV) Calculator for Silica Dust", "url_name": "environment_threshold_limit_value_tlv_for_silica_dust_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Time to Settle (t₀) Calculator", "url_name": "environment_time_to_settle_t_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "U-Factor Calculation for Walls", "url_name": "environment_u_factor_calculation_for_walls_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Vapor Pressure Calculator", "url_name": "environment_vapor_pressure_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Volumetric Flow Rate Calculator", "url_name": "environment_volumetric_flow_rate_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Volumetric Flowrate From The Shedding Frequency Calculator", "url_name": "environment_volumetric_flowrate_from_the_shedding_frequency_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 {"name": "Volumetric Flow Through An Equal Percentage Valve Calculator", "url_name": "environment_volumetric_flow_throw_an_equal_percentage_valve_calculator", "plan_type": "corporate", "category": "environment"},
