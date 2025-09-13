@@ -113,3 +113,9 @@ class BlogPostForm(forms.ModelForm):
             'featured_image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
             'is_published': forms.CheckboxInput(),
         }
+
+
+class TrainingForm(forms.ModelForm):
+    class Meta:
+        model = Training
+        fields = ["title", "category", "media", "external_video_url", "is_active"]
