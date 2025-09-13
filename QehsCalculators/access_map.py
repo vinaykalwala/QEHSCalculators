@@ -608,7 +608,7 @@ CALCULATORS = [
 {"name": "MAP & Pulse Pressure Calculator", "url_name": "health_mean_arterial_pressure_map_and_pulse_pressure_pp_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Noise Exposure Level Calculator", "url_name": "health_noise_exposure_level_leq_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Ponderal Index (PI) Calculator", "url_name": "health_ponderal_index_pi_calculator", "plan_type": "corporate", "category": "health"},
-{"name": "Daily Protein Intake Calculator", "url_name": "health_protein_intake_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Protein Intake Calculator", "url_name": "health_protein_intake_calculator", "plan_type": "corporate", "category": "health"},
 
 
 {"name": "Plasma Volume Calculator", "url_name": "health_plasma_volume_calculator", "plan_type": "corporate", "category": "health"},
@@ -901,6 +901,15 @@ CALCULATORS = [
 # {"name": "Total Intended Load (TIL) Calculator", "url_name":"safety_total_intend_load_calculator", "plan_type": "corporate", "category": "safety"},
 
 # {"name": "Total Dead Load Calculator", "url_name":"safety_total_dead_load_dl_calculator", "plan_type": "corporate", "category": "safety"},
+
+
+# safety calculators from  bottom to top
+
+{"name": "Vent Sizing Calculator (API RP520)", "url_name":"safety_vent_sizing_api_rp520_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Wire Rope Grip (Bulldog Grip) Calculator", "url_name":"safety_wire_rope_grips_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Well Control Kill Mud Weight Calculator", "url_name":"safety_well_control_kill_mud_weight_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Work Done By A Pump In Horsepower Hp", "url_name":"safety_work_done_by_a_pump_in_horsepower_hp_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "2:1 Ellipsoidal Head Radius Calculator", "url_name":"safety_21_ellipsoidal_head_radius_calculator", "plan_type": "corporate", "category": "safety"},
 
 
 
