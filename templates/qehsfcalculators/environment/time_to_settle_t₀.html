@@ -1,0 +1,755 @@
+{% extends 'base.html' %}
+{% block title %}Time to Settle Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time to Settle Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 38px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+        
+        /* Unit select styling */
+        .unit-select {
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            margin-top: 5px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+    <div class="calculator-header">
+        <h1>Time to Settle Calculator</h1>
+        <p>Calculate the <strong>Time to Settle (t₀)</strong> to determine how long particles take to settle in sedimentation basins.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Calculator -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+
+            <div class="form-group">
+                <label for="Z0">Depth of Basin (Z₀)</label>
+                <input type="number" id="Z0" class="form-input" min="0.1" step="any" placeholder="e.g., 3.5">
+                <select id="Z0_unit" class="unit-select">
+                    <option value="m">meters (m)</option>
+                    <option value="ft">feet (ft)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="v0">Terminal Settling Velocity (v₀)</label>
+                <input type="number" id="v0" class="form-input" min="0.0001" step="any" placeholder="e.g., 0.002">
+                <select id="v0_unit" class="unit-select">
+                    <option value="m/s">m/s</option>
+                    <option value="ft/s">ft/s</option>
+                    <option value="cm/s">cm/s</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="t0_unit">Display Result in</label>
+                <select id="t0_unit" class="unit-select">
+                    <option value="s">seconds (s)</option>
+                    <option value="min">minutes (min)</option>
+                    <option value="hr">hours (hr)</option>
+                </select>
+            </div>
+            
+            <button class="calculate-btn" onclick="calculateTimeToSettle()">Calculate Time to Settle</button>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="/static/images/mlc_environment_result.png" alt="Time to settle illustration">
+                <p>This tool will calculate the <strong>Time to Settle (t₀)</strong> for sedimentation processes.</p>
+            </div>
+            
+            <div class="result-error hidden" id="resultError">
+                <div class="error-icon">❌</div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+             
+            <div class="result-value hidden" id="resultValue">
+                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Calculated Time to Settle</h2>
+                </div>
+
+                <div class="rate-display">
+                    <div class="rate-value" id="rateValue">0.00</div>
+                    <div class="rate-label" id="rateUnit">seconds</div>
+                </div>
+
+                <div class="result-feedback">
+                    <div class="feedback-title">Assessment</div>
+                    <div class="feedback-content" id="feedbackContent"></div>
+                </div>
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="note-section">
+        <div class="note-card">
+            <h3>📘 About This Calculator</h3>
+            <p>
+                The <strong>Time to Settle Calculator</strong> determines how long particles take to settle through a sedimentation basin,
+                helping engineers design efficient water treatment systems and ensure regulatory compliance.
+            </p>
+        </div>
+        
+        <div class="note-card">
+            <h3>📊 Interpretation</h3>
+            <ul class="note-list">
+                <li><span class="good">t₀ &lt; 10 minutes</span> → ✅ Fast settling (Efficient process)</li>
+                <li><span class="average">10 ≤ t₀ ≤ 60 minutes</span> → ⚠️ Moderate settling (May need optimization)</li>
+                <li><span class="bad">t₀ &gt; 60 minutes</span> → 🔴 Slow settling (Inefficient, redesign needed)</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+        <h3>⚠️ Input Validations</h3>
+        <ul class="note-list">
+            <li>✔️ <strong>Depth of Basin (Z₀)</strong> must be a positive numeric value</li>
+            <li>✔️ Minimum Depth: <strong>0.1 m</strong> (practical sedimentation basin depth)</li>
+            <li>⚠️ Maximum Depth: <strong>10 m</strong> → triggers warning (unusually deep basin)</li>
+            <li>✔️ <strong>Terminal Settling Velocity (v₀)</strong> must be a positive numeric value</li>
+            <li>✔️ Minimum Velocity: <strong>0.0001 m/s</strong> (very fine particles)</li>
+            <li>⚠️ Maximum Velocity: <strong>0.1 m/s</strong> → triggers warning (very fast settling)</li>
+            <li>❌ Zero, negative, or non-numeric inputs are invalid</li>
+            <li>⚠️ Extremely short settling time &lt; <strong>1 second</strong> → warning (verify inputs)</li>
+            <li>⚠️ Extremely long settling time &gt; <strong>24 hours</strong> → warning (impractical for treatment)</li>
+        </ul>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function calculateTimeToSettle() {
+        // Get inputs and units
+        const Z0 = parseFloat(document.getElementById("Z0").value);
+        const Z0_unit = document.getElementById("Z0_unit").value;
+        const v0 = parseFloat(document.getElementById("v0").value);
+        const v0_unit = document.getElementById("v0_unit").value;
+        const t0_unit = document.getElementById("t0_unit").value;
+        
+        // Get result elements
+        const placeholder = document.getElementById("placeholder");
+        const resultValue = document.getElementById("resultValue");
+        const resultError = document.getElementById("resultError");
+        const rateValue = document.getElementById("rateValue");
+        const rateUnit = document.getElementById("rateUnit");
+        const feedbackContent = document.getElementById("feedbackContent");
+        const errorMessage = document.getElementById("errorMessage");
+        
+        // Hide all result sections first
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        resultError.classList.add("hidden");
+        
+        // Input validations
+        if (isNaN(Z0) || isNaN(v0)) {
+            showError("❌ Error: Both Depth (Z₀) and Velocity (v₀) must be valid numbers.");
+            return;
+        }
+        
+        if (Z0 <= 0 || v0 <= 0) {
+            showError("❌ Error: Both Depth (Z₀) and Velocity (v₀) must be positive values.");
+            return;
+        }
+        
+        // Depth validation (0.1m to 10m)
+        const Z0_m = (Z0_unit === "ft") ? Z0 * 0.3048 : Z0;
+        if (Z0_m < 0.1) {
+            showError("❌ Error: Depth (Z₀) must be at least 0.1 meters (0.33 feet).");
+            return;
+        }
+        if (Z0_m > 10) {
+            showWarning("⚠️ Warning: Depth exceeds typical sedimentation basin depth (10m). Verify your input.");
+        }
+        
+        // Velocity validation (0.0001 m/s to 0.1 m/s)
+        const v0_m_s = (v0_unit === "ft/s") ? v0 * 0.3048 : 
+                      (v0_unit === "cm/s") ? v0 / 100 : v0;
+                      
+        if (v0_m_s < 0.0001) {
+            showError("❌ Error: Settling velocity is too low (< 0.0001 m/s). Verify your input.");
+            return;
+        }
+        if (v0_m_s > 0.1) {
+            showWarning("⚠️ Warning: Settling velocity exceeds typical values (0.1 m/s). Verify your input.");
+        }
+        
+        // Calculate t0 in seconds
+        const t0_s = Z0_m / v0_m_s;
+        
+        // Check for extreme values
+        if (t0_s < 1) {
+            showWarning("⚠️ Warning: Settling time is extremely short (< 1 second). Verify your inputs.");
+        }
+        if (t0_s > 86400) { // 24 hours in seconds
+            showWarning("⚠️ Warning: Settling time exceeds 24 hours, which is impractical for treatment processes.");
+        }
+        
+        // Convert t0 to user's chosen unit
+        let t0, unitLabel;
+        switch (t0_unit) {
+            case "min": 
+                t0 = t0_s / 60; 
+                unitLabel = "minutes";
+                break;
+            case "hr":  
+                t0 = t0_s / 3600; 
+                unitLabel = "hours";
+                break;
+            default:    
+                t0 = t0_s; 
+                unitLabel = "seconds";
+        }
+        
+        // Generate feedback based on settling time in minutes
+        const t0_min = t0_s / 60;
+        let feedbackMessage, feedbackColor;
+        
+        if (t0_min < 10) {
+            feedbackMessage = "✅ <strong>Fast Settling:</strong> Particles settle quickly, indicating an efficient sedimentation process. This is ideal for most treatment applications.";
+            feedbackColor = "#2ecc71";
+        } else if (t0_min <= 60) {
+            feedbackMessage = "⚠️ <strong>Moderate Settling:</strong> Particles settle at a moderate rate. This may be acceptable but could potentially be optimized for better efficiency.";
+            feedbackColor = "#f39c12";
+        } else {
+            feedbackMessage = "❌ <strong>Slow Settling:</strong> Particles take too long to settle, which may indicate inefficient design or inappropriate particle characteristics. Consider redesigning the basin or using coagulants to improve settling.";
+            feedbackColor = "#e74c3c";
+        }
+        
+        // Display Results
+        rateValue.textContent = t0.toFixed(2);
+        rateUnit.textContent = unitLabel;
+        feedbackContent.innerHTML = feedbackMessage;
+        
+        // Show result section
+        resultValue.classList.remove("hidden");
+    }
+    
+    function showError(message) {
+        const errorMessage = document.getElementById("errorMessage");
+        const resultError = document.getElementById("resultError");
+        
+        errorMessage.innerHTML = message;
+        resultError.classList.remove("hidden");
+    }
+    
+    function showWarning(message) {
+        // For warnings, we'll just log to console and continue calculation
+        console.warn(message);
+    }
+    
+    function printReport() {
+        window.print();
+    }
+</script>
+
+  <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+-------------------------------------------------------------------------------------------
+Input Validations
+Depth of Basin (Z₀)
+
+Must be a positive numeric value.
+
+Minimum: 0.1 m (≈ 0.33 ft).
+
+Maximum: 10 m (warning if exceeded).
+
+Units: meters (m), feet (ft) (auto-converted to meters).
+
+Terminal Settling Velocity (v₀)
+
+Must be a positive numeric value.
+
+Minimum: 0.0001 m/s (very fine particles).
+
+Maximum: 0.1 m/s (warning if exceeded).
+
+Units: m/s, ft/s, cm/s (all converted to m/s).
+
+General Input Rules
+
+❌ Invalid if: zero, negative, or non-numeric values.
+
+Must select valid result unit (s, min, hr).
+-----------------------------------------------------------------------------------------
+🔹 Output Validations
+
+Time to Settle (t₀) is calculated in seconds, then converted to user’s choice:
+
+seconds (s)
+
+minutes (min)
+
+hours (hr)
+
+Feedback ranges (based on minutes):
+
+< 10 min → ✅ Fast settling (efficient).
+
+10–60 min → ⚠ Moderate settling (may need optimization).
+
+> 60 min → 🔴 Slow settling (inefficient).
+------------------------------------------------------------------------------------------------
+🔹 Edge Case Validations
+
+Extremely short time (t₀ < 1 s) → Warning: unrealistic, verify inputs.
+
+Extremely long time (t₀ > 24 hr) → Warning: impractical for treatment.
+
+Depth < 0.1 m → Error: invalid (too shallow).
+
+Depth > 10 m → Warning: unusually deep, verify input.
+
+Velocity < 0.0001 m/s → Error: too low, invalid.
+
+Velocity > 0.1 m/s → Warning: too high, unusual.
+
+Missing or empty inputs → Error: must enter both Z₀ and v₀.
+------------------------------------------------------------------------------------------
+The formula used in the code is:
+
+t₀ = Z₀ / v₀
+
+Where:
+
+t₀ = Time to Settle (seconds)
+
+Z₀ = Depth of Basin (meters)
+
+v₀ = Terminal Settling Velocity (meters/second)
+
+-->

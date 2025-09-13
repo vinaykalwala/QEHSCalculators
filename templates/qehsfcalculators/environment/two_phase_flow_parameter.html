@@ -1,0 +1,724 @@
+{% extends 'base.html' %}
+{% block title %}Two-Phase Flow Parameter Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two-Phase Flow Parameter Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        
+.result-card::-webkit-scrollbar {
+    width: 8px;
+}
+
+.result-card::-webkit-scrollbar-thumb {
+    background: #1560bd;
+    border-radius: 6px;
+}
+
+.result-card::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.result-card {
+    justify-content: flex-start; /* align from top */
+    align-items: stretch;
+    min-height: 420px;
+    text-align: center;
+    overflow-y: auto;       /* Enable vertical scrolling */
+    max-height: 450px;      /* Set max height to control output size */
+    padding: 20px;          /* keep spacing */
+}
+
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 38px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+    <div class="calculator-header">
+        <h1>Two-Phase Flow Parameter Calculator</h1>
+        <p>Calculate the <strong>Lockhart-Martinelli Parameter (X²)</strong> to characterize interaction between liquid and gas phases in mixed flow.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Calculator -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+
+            <div class="form-group">
+                <label for="liquidPressureDrop">Liquid Phase ΔP (Pa/m)</label>
+                <input type="number" id="liquidPressureDrop" class="form-input" min="0.01" step="any" placeholder="e.g., 150.5">
+            </div>
+
+            <div class="form-group">
+                <label for="gasPressureDrop">Gas Phase ΔP (Pa/m)</label>
+                <input type="number" id="gasPressureDrop" class="form-input" min="0.01" step="any" placeholder="e.g., 75.2">
+            </div>
+            
+            <button class="calculate-btn" onclick="calculateMartinelliParam()">Calculate Parameter</button>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="/static/images/mlc_environment_result.png" alt="Two-phase flow illustration">
+                <p>This tool will calculate the <strong>Lockhart-Martinelli Parameter (X²)</strong> and identify the flow regime.</p>
+            </div>
+            
+            <div class="result-error hidden" id="resultError">
+                <div class="error-icon">❌</div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+             
+            <div class="result-value hidden" id="resultValue">
+                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Lockhart-Martinelli Parameter</h2>
+                </div>
+
+                <div class="rate-display">
+                    <div class="rate-value" id="xSquaredValue">0.0000</div>
+                    <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">X² (dimensionless)</div>
+                </div>
+
+                <div class="rate-display" style="margin-top: 20px;">
+                    <div class="rate-value" id="xValue">0.0000</div>
+                    <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">X (dimensionless)</div>
+                </div>
+
+                <div class="result-feedback">
+                    <div class="feedback-title">Flow Regime Assessment</div>
+                    <div class="feedback-content" id="feedbackContent"></div>
+                </div>
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="note-section">
+        <div class="note-card">
+            <h3>📘 About This Calculator</h3>
+            <p>
+                The <strong>Lockhart-Martinelli Parameter Calculator</strong> determines the interaction between liquid and gas phases in two-phase flow systems, helping predict flow patterns and pressure drops in industrial applications.
+            </p>
+        </div>
+        
+        <div class="note-card">
+            <h3>📊 Flow Regime Interpretation</h3>
+            <ul class="note-list">
+                <li><span class="good">X &lt; 0.3</span> → Dispersed Bubble Flow (liquid continuous with gas bubbles)</li>
+                <li><span class="average">0.3 ≤ X ≤ 1.0</span> → Intermittent/Slug Flow (alternating liquid and gas slugs)</li>
+                <li><span class="average">1.0 &lt; X &lt; 3.0</span> → Stratified/Annular Flow (separated phases or liquid film)</li>
+                <li><span class="bad">X ≥ 3.0</span> → Mist Flow (gas continuous with liquid droplets)</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+        <h3>⚠️ Input Validations</h3>
+        <ul class="note-list">
+            <li>✔️ Both <strong>Liquid Phase ΔP</strong> and <strong>Gas Phase ΔP</strong> must be positive numeric values</li>
+            <li>✔️ Minimum pressure drop: <strong>0.01 Pa/m</strong> (instrument resolution)</li>
+            <li>⚠️ Pressure drop &lt; <strong>0.1 Pa/m</strong> → warning (verify measurement accuracy)</li>
+            <li>⚠️ Pressure drop &gt; <strong>10,000 Pa/m</strong> → warning (extremely high, check system conditions)</li>
+            <li>❌ Zero, negative, or non-numeric inputs are invalid</li>
+            <li>⚠️ Gas phase ΔP approaching zero → potential division error</li>
+            <li>⚠️ X² &gt; <strong>10,000</strong> → warning (unrealistic ratio, verify inputs)</li>
+        </ul>
+        </div>
+
+
+        <div class="note-card">
+            <h3>🌍 Key Applications</h3>
+            <ul class="note-list">
+                <li><strong>Refrigeration Systems:</strong> Designing efficient evaporators and condensers</li>
+                <li><strong>Oil & Gas Pipelines:</strong> Managing slug flow in risers and flowlines</li>
+                <li><strong>Nuclear Reactors:</strong> Boiling water reactor design and safety analysis</li>
+                <li><strong>Firefighting Systems:</strong> Optimizing foam-water mixtures for fire suppression</li>
+                <li><strong>Geothermal Plants:</strong> Handling flash steam and two-phase flow in pipes</li>
+            </ul>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function calculateMartinelliParam() {
+        // Get input values
+        const liquidPressureDrop = parseFloat(document.getElementById('liquidPressureDrop').value);
+        const gasPressureDrop = parseFloat(document.getElementById('gasPressureDrop').value);
+        
+        // Get DOM elements
+        const placeholder = document.getElementById('placeholder');
+        const resultValue = document.getElementById('resultValue');
+        const resultError = document.getElementById('resultError');
+        const xSquaredValue = document.getElementById('xSquaredValue');
+        const xValue = document.getElementById('xValue');
+        const feedbackContent = document.getElementById('feedbackContent');
+        const errorMessage = document.getElementById('errorMessage');
+        
+        // Hide all result sections initially
+        placeholder.classList.add('hidden');
+        resultValue.classList.add('hidden');
+        resultError.classList.add('hidden');
+        
+        // Validate inputs
+        let errors = [];
+        
+        // Check if inputs are numbers
+        if (isNaN(liquidPressureDrop)) {
+            errors.push("Liquid Phase ΔP must be a valid number");
+        }
+        
+        if (isNaN(gasPressureDrop)) {
+            errors.push("Gas Phase ΔP must be a valid number");
+        }
+        
+        // If any validation errors, show them and return
+        if (errors.length > 0) {
+            errorMessage.innerHTML = errors.join("<br>");
+            resultError.classList.remove('hidden');
+            return;
+        }
+        
+        // Check for positive values
+        if (liquidPressureDrop <= 0) {
+            errors.push("Liquid Phase ΔP must be greater than 0. A zero or negative value means no resistance to flow, which is unrealistic.");
+        }
+        
+        if (gasPressureDrop <= 0) {
+            errors.push("Gas Phase ΔP must be greater than 0. Without a pressure difference, there is no flow in the system.");
+        }
+        
+        // Check for extremely low values (measurement resolution)
+        if (liquidPressureDrop < 0.01) {
+            errors.push("Liquid Phase ΔP is extremely low (&lt; 0.01 Pa/m). Verify measurement accuracy and units.");
+        }
+        
+        if (gasPressureDrop < 0.01) {
+            errors.push("Gas Phase ΔP is extremely low (&lt; 0.01 Pa/m). Verify measurement accuracy and units.");
+        }
+        
+        // Check for extremely high values
+        if (liquidPressureDrop > 10000) {
+            errors.push("Liquid Phase ΔP is extremely high (&gt; 10,000 Pa/m). Verify system conditions and units.");
+        }
+        
+        if (gasPressureDrop > 10000) {
+            errors.push("Gas Phase ΔP is extremely high (&gt; 10,000 Pa/m). Verify system conditions and units.");
+        }
+        
+        // Check for division by zero risk
+        if (gasPressureDrop < 0.1) {
+            errors.push("Gas Phase ΔP is very low (&lt; 0.1 Pa/m). This may cause numerical instability in calculations.");
+        }
+        
+        // If any validation errors, show them and return
+        if (errors.length > 0) {
+            errorMessage.innerHTML = errors.join("<br>");
+            resultError.classList.remove('hidden');
+            return;
+        }
+        
+        // Calculate Martinelli Parameter (X²) and X
+        const X_squared = liquidPressureDrop / gasPressureDrop;
+        const X = Math.sqrt(X_squared);
+        
+        // Check for unrealistic X² values
+        if (X_squared > 10000) {
+            errors.push("Calculated X² parameter is extremely high (&gt; 10,000). Verify input values as this ratio is unrealistic in practical systems.");
+        }
+        
+        // If any validation errors, show them and return
+        if (errors.length > 0) {
+            errorMessage.innerHTML = errors.join("<br>");
+            resultError.classList.remove('hidden');
+            return;
+        }
+        
+        // Display results
+        xSquaredValue.textContent = X_squared.toExponential(4);
+        xValue.textContent = X.toFixed(4);
+        
+        // Determine flow regime
+        let flowRegime, feedback, colorClass;
+        
+        if (X < 0.3) {
+            flowRegime = "Dispersed Bubble Flow";
+            feedback = "Liquid continuous with gas bubbles. Typically occurs at high liquid fractions and low gas velocities. Good for heat transfer but may cause erosion in long horizontal runs.";
+            colorClass = "good";
+        } else if (X < 1) {
+            flowRegime = "Intermittent/Slug Flow";
+            feedback = "Alternating liquid and gas slugs. Can cause significant vibration and pressure fluctuations in piping systems. Requires careful system design to mitigate slugging effects.";
+            colorClass = "average";
+        } else if (X < 3) {
+            flowRegime = "Stratified/Annular Flow";
+            feedback = "Separated phases or liquid film with gas core. Generally stable with moderate pressure drop. Annular flow provides efficient heat transfer in vertical systems.";
+            colorClass = "average";
+        } else {
+            flowRegime = "Mist Flow";
+            feedback = "Gas continuous with liquid droplets. High gas velocities can cause droplet entrainment and erosion at pipe bends. Effective for long-distance transport but may require liquid separation.";
+            colorClass = "bad";
+        }
+        
+        feedbackContent.innerHTML = `<span class="${colorClass}">${flowRegime}</span><br>${feedback}`;
+        
+        // Show result section
+        resultValue.classList.remove('hidden');
+    }
+    
+    function printReport() {
+        window.print();
+    }
+</script>
+
+  <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+----------------------------------------------------------------------------
+Formula Implementation:
+
+Added the Lockhart-Martinelli Parameter formula: X² = (ΔP_liquid) / (ΔP_gas)
+
+Added calculation of X = √(X²)
+---------------------------------------------------------------------------------
+Input Validations:
+
+Added comprehensive validation for both pressure drop inputs
+
+Checks for positive values, numeric inputs, and realistic ranges
+
+Added warnings for extremely low/high values that might indicate measurement errors
+-----------------------------------------------------------------------------------
+Output Display:
+
+Shows both X² and X values with proper formatting
+
+Provides flow regime interpretation based on X value
+
+Includes detailed feedback about the flow characteristics
+----------------------------------------------------------------------------
+Edge Cases:
+
+Zero inputs: Should show appropriate error messages
+
+Negative inputs: Should show appropriate error messages
+
+Extremely low values (< 0.01): Should show warnings
+
+Extremely high values (> 10000): Should show warnings
+
+
+-->
