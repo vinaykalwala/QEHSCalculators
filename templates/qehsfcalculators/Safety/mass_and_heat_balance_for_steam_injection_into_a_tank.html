@@ -1,0 +1,620 @@
+{% extends 'base.html' %}
+{% block title %}Mass and Heat Balance for Steam Injection into a Tank{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mass and Heat Balance for Steam Injection into a Tank</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        /* Input rows for side-by-side fields */
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+            text-align: center;
+        }
+        
+        .result-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .result-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .result-number {
+            font-size: 20px;
+            color: #2980b9;
+            font-weight: 600;
+            
+        }
+        
+        .balance-status {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .balanced {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+        
+        .not-balanced {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+
+        /* Note Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .warning { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .error { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Mass and Heat Balance for Steam Injection into a Tank</h1>
+            <p>Calculate the heat balance when injecting steam into a tank or system</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="input-row">
+                <div class="form-group">
+                    <label for="massWater">Initial Mass of Water (ṁ) (kg)</label>
+                    <input type="number" id="massWater" class="form-input" min="10" max="10000" placeholder="e.g., 700">
+                </div>
+                <div class="form-group">
+                    <label for="massSteam">Mass of Steam Injected (ṁs) (kg)</label>
+                    <input type="number" id="massSteam" class="form-input" min="1" max="1000" placeholder="e.g., 700">
+                </div></div>
+                <div class="input-row">
+                <div class="form-group">
+                    <label for="h1">Heat at Initial Temperature (h₁) (kJ/kg)</label>
+                    <input type="number" id="h1" class="form-input" min="100" max="1000" step="0.1" placeholder="e.g., 400">
+                </div>
+                <div class="form-group">
+                    <label for="h2">Heat at Final Temperature (h₂) (kJ/kg)</label>
+                    <input type="number" id="h2" class="form-input" min="200" max="2000" step="0.1" placeholder="e.g., 1550">
+                </div></div>
+                <div class="form-group">
+                    <label for="hg">Total Enthalpy of Steam (h<sub>g</sub>) (kJ/kg)</label>
+                    <input type="number" id="hg" class="form-input" min="1500" max="3500" step="0.1" placeholder="e.g., 2700">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateHeatBalance()">Calculate Heat Balance</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Heat balance illustration">
+                    <p>This tool will calculate the <strong>Heat Balance</strong> for steam injection into a tank. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Heat Balance Results</h2>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Energy Input (Left Side)</div>
+                        <div class="result-number" id="leftSideValue">0.00 kJ</div>
+                      
+                    </div>
+                    
+                    <div class="result-item">
+                        <div class="result-label">Energy Output (Right Side)</div>
+                        <div class="result-number" id="rightSideValue">0.00 kJ</div>
+                      
+                    </div>
+                    
+                    <div class="result-item">
+                        <div class="result-label">Energy Difference</div>
+                        <div class="result-number" id="differenceValue">0.00 kJ</div>
+                    </div>
+                    
+                    <div class="balance-status" id="balanceStatus">
+                        Heat balance status will appear here
+                    </div>
+
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    This calculator determines the <strong>heat balance</strong> when injecting steam into a tank or system. 
+                    It ensures that the energy introduced by steam matches the final energy level of the combined system.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Initial Mass of Water (ṁ):</strong> The mass of water in the tank before steam injection (kg).</li>
+                    <li><strong>Mass of Steam Injected (ṁs):</strong> The amount of steam injected into the tank (kg).</li>
+                    <li><strong>Heat at Initial Temperature (h₁):</strong> The specific enthalpy of water before steam injection (kJ/kg).</li>
+                    <li><strong>Heat at Final Temperature (h₂):</strong> The target specific enthalpy after steam mixing (kJ/kg).</li>
+                    <li><strong>Total Enthalpy of Steam (h<sub>g</sub>):</strong> The specific enthalpy of the injected steam (kJ/kg).</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <p>
+                    <b>Heat Balance Assessment:</b>
+                </p>
+                <ul class="note-list">
+                    <li><span class="good">Difference < 0.01 kJ</span> → Heat balance is maintained</li>
+                    <li><span class="warning">Difference 0.01-10 kJ</span> → Minor imbalance, may be acceptable</li>
+                    <li><span class="error">Difference > 10 kJ</span> → Significant imbalance, system needs adjustment</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>🔑 Key Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Fire suppression systems:</strong> Controlling temperature during fire outbreaks.</li>
+                    <li><strong>Industrial boilers & heat exchangers:</strong> Regulating energy balance.</li>
+                    <li><strong>Emergency steam injection:</strong> Preventing overheating in pressure vessels.</li>
+                    <li><strong>Marine industry:</strong> Managing heat energy in steam turbines.</li>
+                </ul>
+            </div>
+            <div class="note-card">
+  <h3>✅ Validation Rules & Input Constraints</h3>
+  <ul class="note-list">
+    <li><strong>Initial Mass of Water (ṁ):</strong> 10 – 10,000 kg</li>
+    <li><strong>Mass of Steam Injected (ṁs):</strong> 1 – 1,000 kg</li>
+    <li><strong>Heat at Initial Temperature (h₁):</strong> 100 – 1,000 kJ/kg</li>
+    <li><strong>Heat at Final Temperature (h₂):</strong> 200 – 2,000 kJ/kg</li>
+    <li><strong>Total Enthalpy of Steam (h<sub>g</sub>):</strong> 1,500 – 3,500 kJ/kg</li>
+    <li><strong>Outputs classified as:</strong></li>
+    <ul>
+      <li>✅ Perfect Balance → ΔQ = 0</li>
+      <li>⚠ Minor Imbalance → 0 < ΔQ ≤ 0.1% of input energy</li>
+      <li>❌ Significant Imbalance → ΔQ > 0.1% of input energy</li>
+    </ul>
+  </ul>
+</div>
+
+
+        </div>
+    </div>
+
+    <script>
+          // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+       function calculateHeatBalance() {
+    // Get input values
+    const m = parseFloat(document.getElementById("massWater").value);
+    const ms = parseFloat(document.getElementById("massSteam").value);
+    const h1 = parseFloat(document.getElementById("h1").value);
+    const h2 = parseFloat(document.getElementById("h2").value);
+    const hg = parseFloat(document.getElementById("hg").value);
+
+    // Reset UI
+    document.getElementById("placeholder").classList.add("hidden");
+    document.getElementById("resultError").classList.add("hidden");
+    document.getElementById("resultValue").classList.add("hidden");
+
+    // Validate inputs
+    let errorMessage = "";
+    if (isNaN(m) || isNaN(ms) || isNaN(h1) || isNaN(h2) || isNaN(hg)) {
+        errorMessage = "❌ Please enter all values.";
+    } else if (m < 10 || m > 10000) {
+        errorMessage = "❌ Initial Mass of Water must be between 10 kg and 10,000 kg.";
+    } else if (ms < 1 || ms > 1000) {
+        errorMessage = "❌ Mass of Steam Injected must be between 1 kg and 1,000 kg.";
+    } else if (h1 < 100 || h1 > 1000) {
+        errorMessage = "❌ Heat at Initial Temperature must be between 100 kJ/kg and 1,000 kJ/kg.";
+    } else if (h2 < 200 || h2 > 2000) {
+        errorMessage = "❌ Heat at Final Temperature must be between 200 kJ/kg and 2,000 kJ/kg.";
+    } else if (hg < 1500 || hg > 3500) {
+        errorMessage = "❌ Total Enthalpy of Steam must be between 1,500 kJ/kg and 3,500 kJ/kg.";
+    }
+
+    // Show error
+    if (errorMessage) {
+        document.getElementById("errorMessage").innerHTML = errorMessage;
+        document.getElementById("resultError").classList.remove("hidden");
+        return;
+    }
+
+    // Perform calculation
+    const leftSide = (m * h1) + (ms * hg);
+    const rightSide = (m + ms) * h2;
+    const difference = leftSide - rightSide;
+    const deltaQ = Math.abs(difference);
+
+    // Define threshold (0.1% of input energy)
+    const thresholdMinor = leftSide * 0.001;
+
+    // Update UI
+    document.getElementById("leftSideValue").textContent = leftSide.toFixed(2) + " kJ";
+    document.getElementById("rightSideValue").textContent = rightSide.toFixed(2) + " kJ";
+    document.getElementById("differenceValue").textContent = deltaQ.toFixed(2) + " kJ";
+
+    const balanceStatus = document.getElementById("balanceStatus");
+    if (deltaQ === 0) {
+        balanceStatus.textContent = "✅ Perfect heat balance maintained!";
+        balanceStatus.className = "balance-status balanced";
+    } else if (deltaQ <= thresholdMinor) {
+        balanceStatus.textContent = "⚠ Minor imbalance. Acceptable but monitor.";
+        balanceStatus.className = "balance-status minor";
+    } else {
+        balanceStatus.textContent = "❌ Significant imbalance! Requires corrective action.";
+        balanceStatus.className = "balance-status not-balanced";
+    }
+
+    document.getElementById("resultValue").classList.remove("hidden");
+}
+
+
+        
+        function printReport() {
+            window.print();
+        }
+    </script>
+</body>
+</html>
+{% endblock %}
+
+{% comment %} 
+1. Formula Used (for code comments)
+// Formula Reference (Heat Balance for Steam Injection)
+//
+// Left Side (Energy Input)   = (ṁ * h1) + (ṁs * hg)
+// Right Side (Energy Output) = (ṁ + ṁs) * h2
+// Difference                 = |Left Side – Right Side|
+//
+// Where:
+// ṁ  = Mass of water (kg)
+// ṁs = Mass of steam injected (kg)
+// h1 = Specific enthalpy at initial water temperature (kJ/kg)
+// h2 = Specific enthalpy at final temperature (kJ/kg)
+// hg = Specific enthalpy of injected steam (kJ/kg)
+
+2. Detailed Input Validation Rules (QEHS / Fire Safety Standards)
+Parameter	Acceptable Range	Decimals	Dependencies	Rationale (QEHS)
+Initial Mass of Water (ṁ)	10 – 10,000 kg	≤ 3 dp	Must be > 0	Too low = irrelevant for tank ops; too high = exceeds safe tank design
+Mass of Steam Injected (ṁs)	1 – 1,000 kg	≤ 3 dp	Must be ≤ 20% of water mass (to avoid shock/flash boiling)	Steam injection rate must respect process design and tank relief safety
+h₁ (Initial Enthalpy)	100 – 1,000 kJ/kg	≤ 2 dp	h₂ > h₁	Represents sensible heat of liquid water (subcooled/saturated)
+h₂ (Final Enthalpy)	200 – 2,000 kJ/kg	≤ 2 dp	h₂ > h₁	Final energy must logically exceed initial
+h<sub>g</sub> (Steam Enthalpy)	1,500 – 3,500 kJ/kg	≤ 2 dp	Must be > h₂	Steam enthalpy must exceed final enthalpy to heat water
+General	All values > 0, numeric only	≤ 3 dp	Consistency checks between fields	Avoids nonsensical or unsafe calculations
+3. Output Validation & Thresholds
+Output	Validation Rule	Audit Significance
+Left Side / Right Side (Energy terms)	Must be finite numbers	Division by zero or NaN avoided
+Difference	< 0.01 kJ → Balanced	Acceptable under ISO 14122-4 auditing
+	0.01 – 10 kJ → Minor Imbalance	Tolerable, but must be noted in reports
+	> 10 kJ → Imbalance	Requires corrective action (OSHA, ISO 45001 energy audit compliance) {% endcomment %}

@@ -852,9 +852,6 @@ CALCULATORS = [
 
 {"name": "Load Distribution Per Leg Calculator", "url_name":"safety_load_distribution_per_leg_calculator", "plan_type": "corporate", "category": "safety"},
 
-{"name": "Total Intended Load (TIL) Calculator", "url_name":"safety_total_intend_load_calculator", "plan_type": "corporate", "category": "safety"},
-
-{"name": "Total Dead Load Calculator", "url_name":"safety_total_dead_load_dl_calculator", "plan_type": "corporate", "category": "safety"},
 
 {"name": "Leading Safety Indicators Calculator", "url_name":"safety_leading_safety_indicator_calculator", "plan_type": "corporate", "category": "safety"},
 
@@ -875,6 +872,36 @@ CALCULATORS = [
 {"name": "Lifting Force per Anchor (Pitching) Calculator", "url_name":"safety_lifting_force_per_anchor_pitching_calculator", "plan_type": "corporate", "category": "safety"},
 
 {"name": "Liquid Sizing Calculator", "url_name":"safety_liquid_sizing_calculator", "plan_type": "corporate", "category": "safety"},
+
+
+{"name": "Mud Weight (Density) Calculator", "url_name":"safety_mud_weight_density_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Mud Pump Output Calculator", "url_name":"safety_mud_pump_output_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Marsh Funnel Viscosity Calculator", "url_name":"safety_marsh_funnel_viscosity_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Mass and Heat Balance for Steam Injection into a Tank", "url_name":"safety_mass_and_heat_balance_for_steam_injection_into_a_tank_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Motor Vehicle Crash Rate (MVCR) Calculator", "url_name":"safety_motor_vehicle_crash_rate_mvcr_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Motor Vehicle Crash Frequency Rate Calculator", "url_name":"safety_motor_vehicle_crash_frequency_rate_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Mean Temperature Difference Calculator", "url_name":"safety_mean_temperature_difference_bw_primary_and_secondary_fluid_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Maximum Inspection Interval Calculator", "url_name":"safety_maximum_inspection_interval_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "NEMA and IP Rating Reference", "url_name":"safety_nema_and_ip_rating_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "No-Overpressure Vent Area Calculator", "url_name":"safety_no_overpressure_vent_area_calculator", "plan_type": "corporate", "category": "safety"},
+
+
+
+
+
+# {"name": "Total Intended Load (TIL) Calculator", "url_name":"safety_total_intend_load_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Total Dead Load Calculator", "url_name":"safety_total_dead_load_dl_calculator", "plan_type": "corporate", "category": "safety"},
+
 
 
     # Fire Calculators
