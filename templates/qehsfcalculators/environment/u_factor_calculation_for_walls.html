@@ -1,0 +1,646 @@
+{% extends 'base.html' %}
+{% block title %}U-Factor Calculator for Walls{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>U-Factor Calculator for Walls</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 38px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+        
+        select.form-input {
+            appearance: menulist;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+
+
+<div class="calculator-container printable" id="printArea">
+
+    {% include "includes/print_header_footer.html" %}
+    
+    <div class="calculator-header">
+        <h1>U-Factor Calculator for Walls</h1>
+        <p>Calculate the based on thermal resistance values.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Calculator -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+
+            <div class="form-group">
+                <label for="outdoorAirResistance">Outdoor Air Resistance (R-value)</label>
+                <input type="number" id="outdoorAirResistance" class="form-input" min="0.01" step="0.01" placeholder="e.g., 0.17">
+            </div>
+
+            <div class="form-group">
+                <label for="wallLayersResistance">Wall Layers Resistance (R-value)</label>
+                <input type="number" id="wallLayersResistance" class="form-input" min="0.01" step="0.01" placeholder="e.g., 15.0">
+            </div>
+            
+            <div class="form-group">
+                <label for="indoorAirResistance">Indoor Air Resistance (R-value)</label>
+                <input type="number" id="indoorAirResistance" class="form-input" min="0.01" step="0.01" placeholder="e.g., 0.68">
+            </div>
+            
+            <button class="calculate-btn" onclick="calculateUFactor()">Calculate U-Factor</button>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="/static/images/mlc_environment_result.png" alt="U-Factor illustration">
+                <p>This tool will calculate the U-Factor based on thermal resistance values.</p>
+            </div>
+            
+            <div class="result-error hidden" id="resultError">
+                <div class="error-icon">❌</div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+             
+            <div class="result-value hidden" id="resultValue">
+                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Calculated U-Factor</h2>
+                </div>
+
+                <div class="rate-display">
+                    <div class="rate-value" id="rateValue">0.0000</div>
+                    <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">BTU/(hr·ft²·°F)</div>
+                </div>
+
+                <div class="result-feedback">
+                    <div class="feedback-title">Assessment</div>
+                    <div class="feedback-content" id="feedbackContent"></div>
+                </div>
+                <div class="btn-wrapper">
+                   <button type="button" class="calculate-btn print-btn" onclick="handlePrintReport()">Print Report</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="note-section">
+        <div class="note-card">
+            <h3>📘 About This Calculator</h3>
+            <p>
+                The <strong>U-Factor Calculator</strong> determines how well a wall insulates against heat transfer. Lower U-factors mean better insulation. It's the reciprocal of the total thermal resistance (R-value) of the wall assembly.
+            </p>
+        </div>
+        
+        <div class="note-card">
+            <h3>📊 Interpretation</h3>
+            <ul class="note-list">
+                <li><span class="good">U-Factor &lt; 0.05</span> → ✅ Excellent insulation (Passivhaus standards)</li>
+                <li><span class="good">0.05 ≤ U-Factor ≤ 0.1</span> → ✅ Good insulation (Meets energy codes)</li>
+                <li><span class="average">0.1 &lt; U-Factor ≤ 0.2</span> → ⚠️ Moderate insulation (Consider improvements)</li>
+                <li><span class="bad">U-Factor &gt; 0.2</span> → 🔴 Poor insulation (Significant heat loss)</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+        <h3>⚠️ Input Validations</h3>
+        <ul class="note-list">
+            <li>✔️ All R-values must be positive numbers greater than 0</li>
+            <li>✔️ Minimum R-value: <strong>0.01 hr·ft²·°F/BTU</strong> (practical lower limit)</li>
+            <li>⚠️ Outdoor Air Resistance typically ranges from <strong>0.15 to 0.25</strong> (0.17 is standard)</li>
+            <li>⚠️ Indoor Air Resistance typically ranges from <strong>0.65 to 0.75</strong> (0.68 is standard)</li>
+            <li>⚠️ Wall Layers Resistance typically ranges from <strong>10 to 40</strong> for insulated walls</li>
+            <li>❌ Zero, negative, or non-numeric inputs are invalid</li>
+            <li>⚠️ Total R-value &lt; <strong>1.0</strong> → warning (extremely low insulation)</li>
+            <li>⚠️ Total R-value &gt; <strong>50</strong> → warning (extremely high insulation)</li>
+        </ul>
+        </div>
+
+
+        <div class="note-card">
+            <h3>🌍 Key Applications</h3>
+            <ul class="note-list">
+                <li><strong>Building Design:</strong> Architects use U-factor to design energy-efficient buildings</li>
+                <li><strong>Energy Code Compliance:</strong> Many building codes specify maximum U-factor values</li>
+                <li><strong>Retrofit Projects:</strong> Helps evaluate insulation upgrades for existing buildings</li>
+                <li><strong>HVAC System Sizing:</strong> Proper U-factor calculations prevent oversizing of heating/cooling equipment</li>
+                <li><strong>Environmental Impact:</strong> Lower U-factors reduce energy consumption and greenhouse gas emissions</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    function calculateUFactor() {
+        // Get input values
+        const outdoorAirResistance = parseFloat(document.getElementById('outdoorAirResistance').value);
+        const wallLayersResistance = parseFloat(document.getElementById('wallLayersResistance').value);
+        const indoorAirResistance = parseFloat(document.getElementById('indoorAirResistance').value);
+        
+        // Get DOM elements
+        const placeholder = document.getElementById('placeholder');
+        const resultValue = document.getElementById('resultValue');
+        const resultError = document.getElementById('resultError');
+        const rateValue = document.getElementById('rateValue');
+        const feedbackContent = document.getElementById('feedbackContent');
+        const errorMessage = document.getElementById('errorMessage');
+        
+        // Hide all result sections initially
+        placeholder.classList.add('hidden');
+        resultValue.classList.add('hidden');
+        resultError.classList.add('hidden');
+        
+        // Validate inputs
+        let errorMsg = '';
+        
+        // Check if inputs are numbers
+        if (isNaN(outdoorAirResistance) || isNaN(wallLayersResistance) || isNaN(indoorAirResistance)) {
+            errorMsg = 'Please enter valid numbers for all fields.';
+        }
+        // Check if inputs are positive
+        else if (outdoorAirResistance <= 0 || wallLayersResistance <= 0 || indoorAirResistance <= 0) {
+            errorMsg = 'All R-values must be positive numbers greater than 0.';
+        }
+        // Check for extremely low values
+        else if (outdoorAirResistance < 0.01 || wallLayersResistance < 0.01 || indoorAirResistance < 0.01) {
+            errorMsg = 'R-values must be at least 0.01 hr·ft²·°F/BTU.';
+        }
+        // Check for unrealistically high values
+        else if (outdoorAirResistance > 1 || indoorAirResistance > 1) {
+            errorMsg = 'Air film resistances are typically less than 1.0 hr·ft²·°F/BTU. Please check your inputs.';
+        }
+        // Check for extremely high total R-value
+        else if ((outdoorAirResistance + wallLayersResistance + indoorAirResistance) > 50) {
+            errorMsg = 'Total R-value exceeds typical maximum (50 hr·ft²·°F/BTU). Please verify your inputs.';
+        }
+        // Check for extremely low total R-value
+        else if ((outdoorAirResistance + wallLayersResistance + indoorAirResistance) < 1) {
+            errorMsg = 'Total R-value is extremely low (<1.0 hr·ft²·°F/BTU). Please verify your inputs.';
+        }
+        
+        // If there's an error, display it and return
+        if (errorMsg) {
+            errorMessage.textContent = errorMsg;
+            resultError.classList.remove('hidden');
+            return;
+        }
+        
+        // Calculate total resistance and U-factor
+        const totalResistance = outdoorAirResistance + wallLayersResistance + indoorAirResistance;
+        const uFactor = 1 / totalResistance;
+        
+        // Display result
+        rateValue.textContent = uFactor.toFixed(4);
+        
+        // Provide feedback based on result
+        let feedback = '';
+        let feedbackClass = '';
+        
+        if (uFactor < 0.05) {
+            feedback = '✅ Excellent insulation! This meets Passivhaus standards.';
+        } else if (uFactor < 0.1) {
+            feedback = '✅ Good insulation. Meets most energy code requirements.';
+        } else if (uFactor < 0.2) {
+            feedback = '⚠️ Moderate insulation. Consider adding more insulation for better energy efficiency.';
+        } else {
+            feedback = '🔴 Poor insulation. Significant heat loss will occur. Strongly recommend adding insulation.';
+        }
+        
+        feedbackContent.textContent = feedback;
+        resultValue.classList.remove('hidden');
+    }
+
+    function handlePrintReport() {
+        window.print();
+    }
+</script>
+
+  <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+---------------------------------------------------------------------------
+Applied the U-Factor Formula: 
+Implemented U = 1 / (R_outdoor + R_wall + R_indoor) as specified.
+---------------------------------------------------------------------------------
+Enhanced Input Validations:
+
+All inputs must be positive numbers > 0
+
+Minimum R-value of 0.01 (practical lower limit)
+
+Range checks for typical values
+
+Warning for extremely low/high total R-values
+
+Non-numeric input detection
+-------------------------------------------------------------------------------------
+Edge Cases:
+Very Low Total R-value: (0.17, 0.5, 0.68) → Total R=1.35, U≈0.7407
+
+Very High Total R-value: (0.17, 45, 0.68) → Total R=45.85, U≈0.0218
+
+Typical Well-Insulated Wall: (0.17, 20, 0.68) → Total R=20.85, U≈0.0480
+
+Poorly Insulated Wall: (0.17, 5, 0.68) → Total R=5.85, U≈0.1709
+-------------------------------------------------------------------------------------
+Output Validations:
+U-factor < 0.05: Should show "Excellent insulation" message
+
+0.05 ≤ U-factor ≤ 0.1: Should show "Good insulation" message
+
+0.1 < U-factor ≤ 0.2: Should show "Moderate insulation" message
+
+U-factor > 0.2: Should show "Poor insulation" message
+
+
+-->
