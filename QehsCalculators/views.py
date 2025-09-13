@@ -450,6 +450,8 @@ def subscription_expired(request):
         "message": "Your subscription has expired. Please renew to continue using the service."
     })
 # Other views (home, about, etc.) remain unchanged as per previous code
+
+
 def home(request):
     return render(request, 'home.html')
 
@@ -476,6 +478,11 @@ def disclaimer(request):
 
 def calendar(request):
     return render(request,'calendar.html')
+
+def plans_and_pricing(request):
+    plans = SubscriptionPlan.objects.filter(is_active=True)
+    return render(request, "pricing.html", {"plans": plans})
+
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages

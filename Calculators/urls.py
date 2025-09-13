@@ -22,6 +22,7 @@ urlpatterns = [
     path("device-limit/", device_limit_exceeded, name="device_limit_exceeded"),
     path("subscription-expired/", subscription_expired, name="subscription_expired"),
     path("profile/", profile_view, name="profile"),
+    path("plans/", plans_and_pricing, name="plans_and_pricing"),
 
     path('transactions/', transaction_list, name='transaction_list'),
     path('transactions/delete/<int:pk>/', delete_transaction, name='delete_transaction'),
