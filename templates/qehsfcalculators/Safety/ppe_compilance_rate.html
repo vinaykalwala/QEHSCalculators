@@ -1,0 +1,691 @@
+{% extends 'base.html' %}
+{% block title %}PPE Compliance Rate Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPE Compliance Rate Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            height: 420px;
+            overflow-y: auto;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .rate-display {
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+      
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>PPE Compliance Rate Calculator</h1>
+            <p>Calculate the percentage of employees correctly following Personal Protective Equipment protocols</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="compliantEmployees">Number of Compliant Employees</label>
+                    <input type="number" id="compliantEmployees" class="form-input" min="0" placeholder="e.g., 85">
+                </div>
+                <div class="form-group">
+                    <label for="totalEmployees">Total Employees</label>
+                    <input type="number" id="totalEmployees" class="form-input" min="1" placeholder="e.g., 100">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateCompliance()">Calculate Compliance Rate</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Safety illustration">
+                    <p>This tool will calculate the <strong>PPE Compliance Rate</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd; margin-top:30px;">
+                        <h2>PPE Compliance Rate</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00%</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">Percentage of compliant employees</div>
+                    </div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Poor</span><span>Fair</span><span>Good</span><span>Very Good</span><span>Excellent</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Compliance Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>PPE Compliance Rate Calculator</strong> measures the percentage of employees 
+                    who are correctly following Personal Protective Equipment protocols, providing insight 
+                    into workplace safety culture and compliance.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ What is PPE Compliance Rate?</h3>
+                <p>
+                    PPE Compliance Rate is a safety metric that quantifies the percentage of employees 
+                    who properly use required personal protective equipment in the workplace.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Compliant Employees:</strong> Number of employees correctly following PPE protocols</li>
+                    <li><strong>Total Employees:</strong> Total number of employees in the workforce or area being assessed</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <p>
+                    <b>Higher Compliance Values</b> = better safety culture.  
+                    Generally:
+                </p>
+                <ul class="note-list">
+                    <li><span class="bad">Below 70%</span> → Poor compliance - immediate action needed</li>
+                    <li><span class="average">70% - 85%</span> → Fair compliance - improvement needed</li>
+                    <li><span class="average">85% - 95%</span> → Good compliance - maintain and improve</li>
+                    <li><span class="good">Above 95%</span> → Excellent compliance - industry benchmark</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>🌍 Importance of PPE Compliance</h3>
+                <ul class="note-list">
+                    <li><strong>Injury Prevention</strong> - Reduces workplace accidents and injuries</li>
+                    <li><strong>Regulatory Compliance</strong> - Meets OSHA and other regulatory requirements</li>
+                    <li><strong>Cost Reduction</strong> - Lowers workers' compensation and healthcare costs</li>
+                    <li><strong>Safety Culture</strong> - Indicates overall safety awareness and commitment</li>
+                    <li><strong>Productivity</strong> - Fewer accidents mean less downtime</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📋 Industry Standards</h3>
+                <p>
+                    OSHA requires employers to provide appropriate PPE and ensure employees use it properly. 
+                    Many industries aim for compliance rates of 95% or higher as a best practice standard.
+                </p>
+            </div>
+            
+            <div class="note-card">
+    <h3>✅ Validation Rules (Applied in Calculator)</h3>
+    <ul class="note-list">
+        <li><b>Compliant Employees:</b> Integer only, 0 – 10,000. Cannot exceed total employees.</li>
+        <li><b>Total Employees:</b> Integer only, 1 – 10,000. Cannot be zero.</li>
+        <li><b>Cross-check:</b> Compliant employees ≤ Total employees.</li>
+        <li><b>Units:</b> Both are counts of people (headcount, no decimals).</li>
+        <li><b>Edge Cases:</b> Division by zero prevented, negative values rejected, unrealistic inputs flagged.</li>
+    </ul>
+</div>
+
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateCompliance() {
+    const compliantEmployees = document.getElementById('compliantEmployees').value.trim();
+    const totalEmployees = document.getElementById('totalEmployees').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+
+    // --- Validation: Compliant Employees ---
+    if (compliantEmployees === "" || isNaN(compliantEmployees)) {
+        errors.push("👉 Please enter the number of compliant employees.");
+    } else if (!Number.isInteger(Number(compliantEmployees))) {
+        errors.push("👉 Compliant employees must be a whole number (no decimals).");
+    } else if (parseInt(compliantEmployees) < 0) {
+        errors.push("👉 Compliant employees cannot be negative.");
+    } else if (parseInt(compliantEmployees) > 10000) {
+        errors.push("👉 Compliant employees cannot exceed 10,000 (out of range).");
+    }
+
+    // --- Validation: Total Employees ---
+    if (totalEmployees === "" || isNaN(totalEmployees)) {
+        errors.push("👉 Please enter the total number of employees.");
+    } else if (!Number.isInteger(Number(totalEmployees))) {
+        errors.push("👉 Total employees must be a whole number (no decimals).");
+    } else if (parseInt(totalEmployees) <= 0) {
+        errors.push("👉 Total employees must be greater than zero.");
+    } else if (parseInt(totalEmployees) > 10000) {
+        errors.push("👉 Total employees cannot exceed 10,000 (out of range).");
+    }
+
+    // --- Cross-check Validation ---
+    if (compliantEmployees !== "" && totalEmployees !== "" &&
+        !isNaN(compliantEmployees) && !isNaN(totalEmployees) &&
+        parseInt(compliantEmployees) > parseInt(totalEmployees)) {
+        errors.push("👉 Compliant employees cannot exceed total employees.");
+    }
+
+    // --- Show Errors if Any ---
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join('<br>');
+        errorBox.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        resultValue.classList.add('hidden');
+        return;
+    }
+
+    // --- Clear Errors & Proceed with Calculation ---
+    errorBox.classList.add('hidden');
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+
+    // Calculate Compliance Rate
+    const complianceRate = (parseInt(compliantEmployees) / parseInt(totalEmployees)) * 100;
+    document.getElementById('rateValue').textContent = complianceRate.toFixed(2) + '%';
+
+    // Update meter visualization
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth = complianceRate > 100 ? 100 : complianceRate;
+    meterFill.style.width = meterWidth + '%';
+
+    // Color thresholds
+    if (complianceRate < 70) {
+        meterFill.style.background = '#e74c3c'; // Poor
+    } else if (complianceRate < 85) {
+        meterFill.style.background = '#f39c12'; // Fair
+    } else if (complianceRate < 95) {
+        meterFill.style.background = '#3498db'; // Good
+    } else {
+        meterFill.style.background = '#2ecc71'; // Excellent
+    }
+
+    // Feedback messages
+    const feedbackContent = document.getElementById('feedbackContent');
+    if (complianceRate >= 95) {
+        feedbackContent.innerHTML = "<span class='good'>Excellent Compliance!</span> Outstanding adherence to PPE protocols. Maintain and audit regularly.";
+    } else if (complianceRate >= 85) {
+        feedbackContent.innerHTML = "<span class='average'>Good Compliance</span> Strong PPE culture, but some improvements possible.";
+    } else if (complianceRate >= 70) {
+        feedbackContent.innerHTML = "<span class='average'>Fair Compliance</span> Noticeable gaps exist. Reinforce training and supervision.";
+    } else {
+        feedbackContent.innerHTML = "<span class='bad'>Poor Compliance</span> Immediate corrective actions required.";
+    }
+}
+
+        function printReport() {
+            window.print();
+        }
+
+        // Allow Enter key to trigger calculation
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                calculateCompliance();
+            }
+        });
+    </script>
+</body>
+</html>
+{% endblock %}
+
+{% comment %} 
+
+1. Formula for PPE Compliance Rate
+// Formula:
+// PPE Compliance Rate (%) = (Compliant Employees ÷ Total Employees) × 100
+
+
+✅ This formula is consistent with OSHA and ISO 45001 audit methodologies:
+
+Numerator: workers observed correctly using required PPE.
+
+Denominator: total workers observed in that task/area.
+
+Expressed as a percentage for benchmarking against compliance targets (usually ≥95%).
+
+2. Detailed Input Validation Rules (QEHS Perspective)
+Compliant Employees
+
+Type: Integer only (no decimals, no fractions of people).
+
+Range: 0 – 10,000 (practical audit upper limit for a site/day).
+
+Cross-check: Cannot exceed Total Employees.
+
+Unit: People count (headcount).
+
+Total Employees
+
+Type: Integer only.
+
+Range: 1 – 10,000.
+
+Minimum: Must be ≥ 1 (avoid division by zero).
+
+Unit: People count.
+
+3. Output Validation & Threshold Explanations
+
+Industry benchmarking for PPE compliance (OSHA, ISO 45001, safety audit practices):
+
+< 70% → ❌ Poor compliance: Immediate intervention needed.
+
+70% – 85% → ⚠️ Fair: Improvement required; reinforce training & supervision.
+
+85% – 95% → ✅ Good: Acceptable but needs ongoing monitoring.
+
+≥ 95% → 🌟 Excellent: Benchmark compliance, industry best practice.
+
+4. Edge Case Handling
+
+Division by Zero → Prevent if Total Employees = 0.
+
+Compliant > Total → Block and return error.
+
+Negative Inputs → Reject (cannot have negative employees).
+
+Extremely High Inputs (>10,000) → Flag as unrealistic (large audits are split by shift/department).
+
+Blank Inputs → Prompt user to fill both fields.
+
+5. Corrected JavaScript Code with Validations
+
+I’ve refined your function with clear validation rules, comments, and compliance logic:
+
+/*
+--------------------------------------------------
+ PPE Compliance Rate Calculator
+ Formula: PPE Compliance Rate (%) = (Compliant Employees ÷ Total Employees) × 100
+
+ Validation Rules:
+ 1. Compliant Employees: Integer only, 0–10,000, cannot exceed Total Employees.
+ 2. Total Employees: Integer only, 1–10,000 (cannot be zero).
+ 3. Cross-check: Compliant ≤ Total.
+ 4. Units: Both are headcounts (people).
+ 5. Edge Cases: Prevent division by zero, blank inputs, negatives, and unrealistic values.
+--------------------------------------------------
+*/ {% endcomment %}

@@ -1,0 +1,796 @@
+{% extends 'base.html' %}
+{% block title %}Normalized Mass Flux Formula (Low-Quality Region) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Normalized Mass Flux Formula (Low-Quality Region) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        .error {
+            color: #ff6b6b;
+            font-size: 14px;
+            margin-top: 5px;
+            display: block;
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Normalized Mass Flux Formula (Low-Quality Region) Calculator</h1>
+            <p>Calculate the mass flux in low-quality regions using pressure, specific volume, and critical flow scaling parameter</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="P"><strong>Pressure (P) in Pa</strong></label>
+                    <input type="number" id="P" class="form-input" step="any" placeholder="e.g., 101325">
+                    <span class="error" id="errorP"></span>
+                </div>
+                <div class="form-group">
+                    <label for="v"><strong>Specific Volume (v)</strong></label>
+                    <input type="number" id="v" class="form-input" step="any" placeholder="e.g., 0.001">
+                    <span class="error" id="errorV"></span>
+                </div>
+                <div class="form-group">
+                    <label for="omega"><strong>Critical Flow Scaling Parameter (ω)</strong></label>
+                    <input type="number" id="omega" class="form-input" step="any" placeholder="e.g., 0.5">
+                    <span class="error" id="errorOmega"></span>
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateMassFlux()">Calculate Mass Flux</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Safety illustration">
+                    <p>This tool will calculate the <strong>Normalized Mass Flux</strong> for low-quality regions. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Normalized Mass Flux (G)</h2>
+                    </div>
+                    <div class="rate-value" id="rateValue">0.00</div>
+                    <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">kg/m²·s</div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Calculation Details</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Normalized Mass Flux Calculator</strong> for low-quality regions calculates mass flux (G) 
+                    by normalizing it using pressure (P) and specific volume (v). This is particularly useful in 
+                    fluid dynamics, fire safety, and steam system calculations.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ What is Mass Flux?</h3>
+                <p>
+                    Mass flux represents the mass flow rate per unit area. It's a critical parameter in fluid dynamics 
+                    that describes how much mass passes through a given surface per unit time.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Pressure (P):</strong> The pressure of the fluid in Pascals (Pa)</li>
+                    <li><strong>Specific Volume (v):</strong> Volume occupied per unit mass (m³/kg)</li>
+                    <li><strong>Critical Flow Scaling Parameter (ω):</strong> A dimensionless parameter that influences flow conditions</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <p>
+                    The calculated mass flux value helps engineers and safety professionals:
+                </p>
+                <ul class="note-list">
+                    <li>Determine flow rates in safety valves and relief systems</li>
+                    <li>Design appropriate venting systems for pressure vessels</li>
+                    <li>Assess potential hazards in industrial processes</li>
+                    <li>Optimize fluid transport systems</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>🌍 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Fire Protection Systems</strong> - Modeling steam or gas flow in emergency venting</li>
+                    <li><strong>Industrial Safety</strong> - Ensuring safe mass flux in high-pressure systems</li>
+                    <li><strong>Boiler Design</strong> - Optimizing heat transfer in boilers and heat exchangers</li>
+                    <li><strong>Chemical Processing</strong> - Designing safe and efficient fluid transport systems</li>
+                    <li><strong>Nuclear Safety</strong> - Calculating critical flow rates in emergency cooling systems</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📋 Industry Standards</h3>
+                <p>
+                    This calculation aligns with principles from ASME Boiler and Pressure Vessel Code, 
+                    API standards for pressure relief sizing, and international standards for process safety.
+                </p>
+            </div>
+            
+            <div class="note-card">
+    <h3>✅ Validation Rules</h3>
+    <ul class="note-list">
+        <li><b>Pressure (P):</b> Must be > 0. Valid range: 1e3–1e9 Pa.</li>
+        <li><b>Specific Volume (v):</b> Must be > 0. Valid range: 1e-6–10 m³/kg.</li>
+        <li><b>Critical Flow Scaling Parameter (ω):</b> Must be > 0. Recommended range: 0.01–10.</li>
+        <li><b>Logical Consistency:</b> Inputs must produce finite results (no NaN/Infinity).</li>
+        <li><b>Edge Handling:</b> Extremely small or large inputs will trigger warnings.</li>
+    </ul>
+</div>
+
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateMassFlux() {
+    const P = document.getElementById('P').value.trim();
+    const v = document.getElementById('v').value.trim();
+    const omega = document.getElementById('omega').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    const errorP = document.getElementById('errorP');
+    const errorV = document.getElementById('errorV');
+    const errorOmega = document.getElementById('errorOmega');
+
+    let errors = [];
+
+    // Reset field errors
+    errorP.textContent = "";
+    errorV.textContent = "";
+    errorOmega.textContent = "";
+
+    // --- Validation ---
+
+    // Pressure (P)
+    if (P === "" || isNaN(P)) {
+        errors.push("👉 Pressure field cannot be empty.");
+        errorP.textContent = "Enter a valid pressure value.";
+    } else if (parseFloat(P) <= 0) {
+        errors.push("👉 Pressure must be greater than zero.");
+        errorP.textContent = "Pressure must be > 0.";
+    } else if (parseFloat(P) < 1e3 || parseFloat(P) > 1e9) {
+        errors.push("👉 Pressure value is outside realistic range (1,000 Pa–1,000,000,000 Pa (1 billion Pa) Pa).");
+    }
+
+    // Specific Volume (v)
+    if (v === "" || isNaN(v)) {
+        errors.push("👉 Specific volume field cannot be empty.");
+        errorV.textContent = "Enter a valid specific volume.";
+    } else if (parseFloat(v) <= 0) {
+        errors.push("👉 Specific volume must be greater than zero.");
+        errorV.textContent = "Specific volume must be > 0.";
+    } else if (parseFloat(v) < 1e-6 || parseFloat(v) > 10) {
+        errors.push("👉 Specific volume value is outside realistic range 0.000001 m³/kg (1e-6–10 m³/kg).");
+    }
+
+    // Critical Flow Scaling Parameter (ω)
+    if (omega === "" || isNaN(omega)) {
+        errors.push("👉 Critical flow scaling parameter cannot be empty.");
+        errorOmega.textContent = "Enter a valid ω value.";
+    } else if (parseFloat(omega) <= 0) {
+        errors.push("👉 Critical flow scaling parameter must be greater than zero.");
+        errorOmega.textContent = "ω must be > 0.";
+    } else if (parseFloat(omega) < 0.01 || parseFloat(omega) > 10) {
+        errors.push("👉 ω value is outside recommended range (0.01–10).");
+    }
+
+    // If errors exist, show them
+    if (errors.length > 0) {
+        placeholder.classList.add('hidden');
+        resultValue.classList.add('hidden');
+        errorBox.classList.remove('hidden');
+        errorMessage.innerHTML = errors.join('<br>');
+        return;
+    }
+
+    errorBox.classList.add('hidden');
+
+    // Convert inputs
+    const P_num = parseFloat(P);
+    const v_num = parseFloat(v);
+    const omega_num = parseFloat(omega);
+
+    try {
+        let lnOmega = Math.log(omega_num);
+        let normalizedMassFlux = (0.6055 + (0.1356 * lnOmega) - (0.0131 * lnOmega * lnOmega)) / Math.sqrt(omega_num);
+        let G = normalizedMassFlux * Math.sqrt(P_num / v_num);
+
+        if (!isFinite(G) || isNaN(G)) {
+            throw new Error("Calculation resulted in invalid number (NaN/Infinity).");
+        }
+
+        document.getElementById('rateValue').textContent = G.toFixed(5);
+
+        // Feedback
+        let feedback = "";
+        if (G < 0) {
+            feedback = "⚠️ Negative result (impossible). Check input values.";
+        } else if (G < 100) {
+            feedback = "✅ Low Mass Flux: Typical of controlled processes.";
+        } else if (G < 1000) {
+            feedback = "✅ Moderate Mass Flux: Common in industrial systems.";
+        } else if (G < 10000) {
+            feedback = "⚠️ High Mass Flux: Found in relief valves and venting.";
+        } else {
+            feedback = "⚠️ Very High Mass Flux: Critical/choked flow. Review safety implications.";
+        }
+
+        document.getElementById('feedbackContent').innerHTML = feedback;
+        placeholder.classList.add('hidden');
+        resultValue.classList.remove('hidden');
+
+    } catch (err) {
+        placeholder.classList.add('hidden');
+        resultValue.classList.add('hidden');
+        errorBox.classList.remove('hidden');
+        errorMessage.textContent = err.message;
+    }
+}
+
+        function printReport() {
+            window.print();
+        }
+
+        // Allow Enter key to trigger calculation
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                calculateMassFlux();
+            }
+        });
+    </script>
+</body>
+</html>
+{% endblock %}
+
+{% comment %} 
+1. Formula Used
+
+The calculator currently implements the Normalized Mass Flux (Low-Quality Region) formula:
+
+𝐺
+=
+(
+0.6055
++
+(
+0.1356
+⋅
+ln
+⁡
+𝜔
+)
+−
+(
+0.0131
+⋅
+(
+ln
+⁡
+𝜔
+)
+2
+)
+𝜔
+)
+⋅
+𝑃
+𝑣
+G=(
+ω
+	​
+
+0.6055+(0.1356⋅lnω)−(0.0131⋅(lnω)
+2
+)
+	​
+
+)⋅
+v
+P
+	​
+
+	​
+
+
+Where:
+
+𝑃
+P = Pressure (Pa)
+
+𝑣
+v = Specific Volume (m³/kg)
+
+𝜔
+ω = Critical Flow Scaling Parameter (dimensionless)
+
+𝐺
+G = Normalized Mass Flux (kg/m²·s)
+
+2. Detailed Input Validation Rules
+
+From a real-world QEHS/fire safety perspective:
+
+Pressure (P) – in Pascals
+
+Unit: Pa (absolute, not gauge)
+
+Range: 
+1
+×
+10
+3
+ 
+Pa
+1×10
+3
+Pa (≈ 0.01 bar) to 
+1
+×
+10
+9
+ 
+Pa
+1×10
+9
+Pa (≈ 10,000 bar)
+
+Decimals: Up to 2–3 decimals allowed
+
+Rules:
+
+Must be greater than 0
+
+Must not exceed material/equipment design limits (per ASME BPVC or API codes).
+
+Specific Volume (v) – in m³/kg
+
+Unit: m³/kg
+
+Range: 
+1
+×
+10
+−
+6
+ 
+m³/kg
+1×10
+−6
+m³/kg (very dense liquids/metals) to 
+10
+ 
+m³/kg
+10m³/kg (very light gases/steam)
+
+Decimals: Allow up to 6 decimals for precision
+
+Rules:
+
+Must be > 0 (cannot divide by zero)
+
+Extremely low values (< 
+1
+𝑒
+−
+6
+1e−6) or extremely high values (> 10) should raise a warning.
+
+Critical Flow Scaling Parameter (ω) – dimensionless
+
+Unit: Dimensionless
+
+Range: 0.01 to 10 (common engineering range)
+
+Decimals: Allow up to 4 decimals
+
+Rules:
+
+Must be > 0
+
+Values far outside range (e.g., <0.001 or >100) usually indicate bad inputs.
+
+3. Output Validation / Thresholds
+
+The mass flux result (G, in kg/m²·s) should be interpreted with safety context:
+
+G < 0 → Invalid (physically impossible). Must trigger error.
+
+0 ≤ G < 100 → Low flux: Controlled, safe, normal piping flow.
+
+100 ≤ G < 1000 → Moderate flux: Typical in many industrial systems.
+
+1000 ≤ G < 10000 → High flux: Relief valves, safety devices, high-pressure systems.
+
+G ≥ 10000 → Very high flux: Critical/choked flow. Requires engineering safety review.
+
+4. Edge Case Validations
+
+Division by zero → If 
+𝑣
+=
+0
+v=0, throw error before calculation.
+
+Negative inputs → Not allowed for P, v, ω.
+
+Extremely small ω (<0.01) → Logarithm instability, raise warning.
+
+Extremely large P/v ratio → May cause overflow → cap result display with a warning.
+
+NaN / Infinity from formula → display error instead of misleading result.
+
+5. Corrected JavaScript Code with Validations
+
+I’ve kept your structure but strengthened validations + comments.
+
+/*
+--------------------------------------------------------
+Normalized Mass Flux Formula (Low-Quality Region)
+Formula:
+    G = [ (0.6055 + 0.1356*ln(ω) - 0.0131*(ln(ω))^2 ) / √ω ] * √(P/v)
+
+Inputs & Validation Rules:
+- Pressure (P) [Pa]
+  • Must be > 0
+  • Typical range: 1e3 to 1e9 Pa
+- Specific Volume (v) [m³/kg]
+  • Must be > 0
+  • Typical range: 1e-6 to 10 m³/kg
+- Critical Flow Scaling Parameter (ω) [dimensionless]
+  • Must be > 0
+  • Recommended range: 0.01 to 10
+--------------------------------------------------------
+*/ {% endcomment %}
