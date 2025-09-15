@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Ladder Length Calculator{% endblock %}
+{% block title %}Motor Vehicle Crash Frequency Rate Calculator{% endblock %}
 {% block content %}
 {% load static %}
 
@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ladder Length Calculator</title>
+    <title>Motor Vehicle Crash Frequency Rate Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
@@ -104,9 +104,8 @@
             display: flex;
             flex-direction: column;
             transition: transform 0.3s ease;
-            height: 380px;
+            height: 420px;
             overflow-y: auto;
-            justify-content: center;
         }
         
         .calc-card:hover { 
@@ -195,8 +194,8 @@
         .result-card {
             justify-content: center;
             align-items: center;
-            height: 380px;
-            overflow-y:auto;
+            height: 420px;
+            overflow-y: auto;
             text-align: center;
         }
         
@@ -211,32 +210,70 @@
             font-size: 16px;
             line-height: 1.6;
         }
+        .rate-display {
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
         
         .result-value { 
             width: 100%; 
         }
         
-        .result-item {
-            margin-bottom: 15px;
-            padding: 15px;
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
             background: #f8f9fa;
             border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
             text-align: left;
         }
         
-        .result-label {
+        .feedback-title {
             font-weight: 600;
+            margin-bottom: 8px;
             color: #2c3e50;
-            margin-bottom: 5px;
         }
         
-        .result-data {
-            font-size: 18px;
-            color: #2980b9;
-            font-weight: 600;
+        .feedback-content { 
+            color: #34495e; 
         }
 
-        /* Note Section */
         .note-section {
             font-family: 'Segoe UI', sans-serif;
             background-color: #f0faff;
@@ -275,6 +312,22 @@
         .note-list {
             margin: 0;
             padding-left: 18px;
+        }
+      
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
         }
 
         .result-error {
@@ -315,8 +368,8 @@
         {% include "includes/print_header_footer.html" %}
 
         <div class="calculator-header">
-            <h1>Ladder Length Calculator</h1>
-            <p>Calculate the ideal ladder length needed for a given vertical height</p>
+            <h1>Motor Vehicle Crash Frequency Rate Calculator</h1>
+            <p>Calculate the rate of motor vehicle crashes per 200,000 work hours</p>
         </div>
 
         <div class="calc-content">
@@ -324,18 +377,22 @@
             <div class="calc-card">
                 <h2>Enter Data</h2>
                 <div class="form-group">
-                    <label for="verticalHeight">Vertical Height (VH) (m)</label>
-                    <input type="number" id="verticalHeight" class="form-input" step="0.01" min="0.1" placeholder="e.g., 5.5">
+                    <label for="motorVehicleCrashes">Number of Motor Vehicle Crashes</label>
+                    <input type="number" id="motorVehicleCrashes" class="form-input" min="0" placeholder="e.g., 5">
+                </div>
+                <div class="form-group">
+                    <label for="totalWorkHours">Total Work Hours</label>
+                    <input type="number" id="totalWorkHours" class="form-input" min="1" placeholder="e.g., 50000">
                 </div>
                 
-                <button class="calculate-btn" onclick="calculateLadderLength()">Calculate Ladder Length</button>
+                <button class="calculate-btn" onclick="calculateMVCFR()">Calculate MVCFR</button>
             </div>
 
             <!-- Result Section -->
             <div class="result-card">
                 <div class="result-placeholder" id="placeholder">
                     <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Safety illustration">
-                    <p>This tool will calculate the <strong>Ladder Length</strong>. Enter your data to see results here.</p>
+                    <p>This tool will calculate the <strong>Motor Vehicle Crash Frequency Rate</strong>. Enter your data to see results and insights here.</p>
                 </div>
                 
                 <div class="result-error hidden" id="resultError">
@@ -344,23 +401,25 @@
                 </div>
                  
                 <div class="result-value hidden" id="resultValue">
-                    <h2 style="color: #1560bd; margin-bottom: 20px; margin-top:30px;">Calculated Ladder Length</h2>
-                    
-                    <div class="result-item">
-                        <div class="result-label">Base Distance</div>
-                        <div class="result-data" id="baseDistance">0.00 meters</div>
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd; margin-top:20px;">
+                        <h2>Motor Vehicle Crash Frequency Rate</h2>
                     </div>
-                    
-                    <div class="result-item">
-                        <div class="result-label">Ladder Length (without safety margin)</div>
-                        <div class="result-data" id="ladderLength">0.00 meters</div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">Crashes per 200,000 work hours</div>
                     </div>
-                    
-                    <div class="result-item">
-                        <div class="result-label">Total Ladder Length (with safety margin)</div>
-                        <div class="result-data" id="totalLadderLength">0.00 meters</div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
                     </div>
-                    
+                    <div class="meter-labels">
+                        <span>Excellent</span><span>Good</span><span>Needs Improvement</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Safety Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
                     <div class="btn-wrapper">
                         <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
                     </div>
@@ -373,65 +432,64 @@
             <div class="note-card">
                 <h3>📘 About This Calculator</h3>
                 <p>
-                    The <strong>Ladder Length Calculator</strong> helps determine the ideal length of a ladder needed for a given vertical height. 
-                    Proper ladder length is essential for ensuring safety and maintaining the recommended setup angle.
+                    The <strong>Motor Vehicle Crash Frequency Rate (MVCFR) Calculator</strong> measures how many vehicle crashes occur per 200,000 work hours, providing a standardized way to assess fleet safety performance.
                 </p>
             </div>
 
             <div class="note-card">
-                <h3>❓ How to Use This Calculator</h3>
-                <ul class="note-list">
-                    <li><strong>Vertical Height (VH):</strong> Enter the height you need to reach, measured from the ground to the point of support (in meters).</li>
-                    <li>The calculator applies the <strong>4:1 rule</strong>, which means for every 4 meters of height, the ladder base should be 1 meter away from the wall.</li>
-                    <li>It uses the <strong>Pythagorean theorem</strong> to calculate the actual ladder length and includes a safety margin of 1 meter.</li>
-                </ul>
+                <h3>❓ What is MVCFR?</h3>
+                <p>
+                    Motor Vehicle Crash Frequency Rate is a safety metric that quantifies the frequency of motor vehicle crashes relative to the total hours worked by employees.
+                </p>
             </div>
 
             <div class="note-card">
                 <h3>⚙️ Parameters Used</h3>
                 <ul class="note-list">
-                    <li><strong>Vertical Height:</strong> The height to be reached (in meters)</li>
-                    <li><strong>Base Distance:</strong> Calculated using the 4:1 ratio rule</li>
-                    <li><strong>Safety Margin:</strong> Additional 1 meter for safe access above the support point</li>
+                    <li><strong>Number of Motor Vehicle Crashes:</strong> Total crashes involving company or work-related vehicles</li>
+                    <li><strong>Total Work Hours:</strong> Total hours worked by employees including overtime</li>
                 </ul>
             </div>
             
             <div class="note-card">
-                <h3>📊 Safety Standards</h3>
+                <h3>📊 Interpretation</h3>
                 <p>
-                    This calculator follows OSHA and ANSI ladder safety standards:
+                    <b>Lower MVCFR Values</b> = better fleet safety performance. Generally:
                 </p>
                 <ul class="note-list">
-                    <li>4:1 ratio for proper ladder angle (75.5 degrees)</li>
-                    <li>1-meter safety extension above the support point</li>
-                    <li>Non-slip base requirements</li>
-                    <li>Three-point contact climbing technique</li>
+                    <li><span class="good">Below 1.0</span> → Excellent safety performance</li>
+                    <li><span class="average">1.0 - 3.0</span> → Good, with room for improvement</li>
+                    <li><span class="bad">Above 3.0</span> → Needs significant improvement</li>
                 </ul>
             </div>
 
             <div class="note-card">
                 <h3>🌍 Real-Life Applications</h3>
                 <ul class="note-list">
-                    <li><strong>Construction:</strong> Determining proper ladder sizes for various tasks</li>
-                    <li><strong>Maintenance:</strong> Selecting appropriate ladders for facility upkeep</li>
-                    <li><strong>Home Use:</strong> Choosing safe ladders for DIY projects</li>
-                    <li><strong>Emergency Services:</strong> Planning rescue operations requiring ladder access</li>
+                    <li><strong>Fleet Management</strong> - Monitoring company vehicle safety</li>
+                    <li><strong>Transportation Safety</strong> - Evaluating driver safety programs</li>
+                    <li><strong>Insurance Assessment</strong> - Determining risk profiles and premiums</li>
+                    <li><strong>Regulatory Compliance</strong> - Meeting OSHA and DOT requirements</li>
+                    <li><strong>Safety Benchmarking</strong> - Comparing performance across organizations</li>
                 </ul>
             </div>
 
             <div class="note-card">
-    <h3>✅ Validation Rules</h3>
-    <ul class="note-list">
-        <li><b>Vertical Height:</b> Must be between <b>0.1 m</b> and <b>6 m</b>.</li>
-        <li><b>Decimals:</b> Up to <b>two decimal places</b> allowed.</li>
-        <li><b>Base Distance:</b> Calculated using 4:1 rule (must be ≥0.25 m).</li>
-        <li><b>Ladder Length:</b> Computed via Pythagoras theorem.</li>
-        <li><b>Safety Margin:</b> 1 m added above support point.</li>
-        <li><b>Warnings:</b> If total ladder length > 6 m → scaffolding/aerial lifts recommended.</li>
-        <li><b>Compliance:</b> Follows OSHA 1926.1053, ANSI A14.2, ISO 14122-4 ladder safety standards.</li>
-    </ul>
-</div>
-
+                <h3>📋 Industry Standards</h3>
+                <p>
+                    OSHA recordkeeping requirements, DOT compliance standards, and industry benchmarks for fleet safety performance.
+                </p>
+            </div>
+            
+            <div class="note-card">
+                <h3>✅ Validation Rules</h3>
+                <ul class="note-list">
+                    <li><b>Motor Vehicle Crashes:</b> Must be an integer, 0 – 10,000.</li>
+                    <li><b>Total Work Hours:</b> Must be a positive number, 1 – 10,000,000.</li>
+                    <li><b>Units:</b> Crashes are counts (no decimals), work hours can include decimals.</li>
+                    <li><b>Compliance:</b> Based on OSHA, DOT, and industry safety standards.</li>
+                </ul>
+            </div>
         </div>
     </div>
 
@@ -443,144 +501,92 @@
             document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
         });
 
-        function calculateLadderLength() {
-    const verticalHeightInput = document.getElementById('verticalHeight').value.trim();
-    const verticalHeight = parseFloat(verticalHeightInput);
+        function calculateMVCFR() {
+            const crashes = document.getElementById('motorVehicleCrashes').value.trim();
+            const hours = document.getElementById('totalWorkHours').value.trim();
 
-    const errorBox = document.getElementById('resultError');
-    const errorMessage = document.getElementById('errorMessage');
-    const placeholder = document.getElementById('placeholder');
-    const resultValue = document.getElementById('resultValue');
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
 
-    let errors = [];
-    let warnings = [];
+            let errors = [];
 
-    // ✅ Input Validations
-    if (verticalHeightInput === "" || isNaN(verticalHeight)) {
-        errors.push("👉 Please enter the vertical height in meters.");
-    } else if (verticalHeight <= 0) {
-        errors.push("👉 Vertical height must be greater than 0.");
-    } else if (verticalHeight < 0.1) {
-        errors.push("👉 Vertical height must be at least 0.1 meters.");
-    } else if (verticalHeight > 6) {
-        errors.push("👉 Vertical height cannot exceed 6 meters. Use scaffolding or aerial lift.");
-    } else if (!/^\d+(\.\d{1,2})?$/.test(verticalHeightInput)) {
-        errors.push("👉 Please enter a valid number with up to two decimal places.");
-    }
+            // --- Validation Rules ---
+            // Motor Vehicle Crashes
+            if (crashes === "" || isNaN(crashes)) {
+                errors.push("👉 Please enter the number of motor vehicle crashes.");
+            } else if (!Number.isInteger(parseFloat(crashes))) {
+                errors.push("👉 Motor vehicle crashes must be a whole number (no decimals).");
+            } else if (parseInt(crashes) < 0) {
+                errors.push("👉 Motor vehicle crashes cannot be negative.");
+            } else if (parseInt(crashes) > 10000) {
+                errors.push("👉 Motor vehicle crashes cannot exceed 10,000 (out of range).");
+            }
 
-    // ❌ Error Handling
-    if (errors.length > 0) {
-        errorMessage.innerHTML = errors.join("<br>");
-        errorBox.classList.remove("hidden");
-        placeholder.classList.add("hidden");
-        resultValue.classList.add("hidden");
-        return;
-    } else {
-        errorBox.classList.add("hidden");
-    }
+            // Total Work Hours
+            if (hours === "" || isNaN(hours)) {
+                errors.push("👉 Please enter the total work hours.");
+            } else if (parseFloat(hours) <= 0) {
+                errors.push("👉 Total work hours must be greater than 0.");
+            } else if (parseFloat(hours) > 10000000) {
+                errors.push("👉 Total work hours cannot exceed 10,000,000 (out of range).");
+            }
 
-    // ✅ Calculations
-    const baseDistance = verticalHeight / 4;
-    const ladderLength = Math.sqrt(Math.pow(verticalHeight, 2) + Math.pow(baseDistance, 2));
-    const totalLadderLength = ladderLength + 1;
+            // Show errors if any
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join('<br>');
+                errorBox.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                resultValue.classList.add('hidden');
+                return;
+            }
 
-    // ⚠️ Warning if ladder impractically long
-    if (totalLadderLength > 6) {
-        errors.push("⚠️ Total ladder length exceeds 6m. Consider scaffolding or aerial lifts instead of a portable ladder.");
-    }
+            // Hide error box and show results
+            errorBox.classList.add('hidden');
+            placeholder.classList.add('hidden');
+            resultValue.classList.remove('hidden');
 
-    // Display results
-    document.getElementById('baseDistance').textContent = baseDistance.toFixed(2) + " meters";
-    document.getElementById('ladderLength').textContent = ladderLength.toFixed(2) + " meters";
-    document.getElementById('totalLadderLength').textContent = totalLadderLength.toFixed(2) + " meters";
+            // Calculate MVCFR
+            const mvcfr = (parseInt(crashes) * 200000) / parseFloat(hours);
+            document.getElementById('rateValue').textContent = mvcfr.toFixed(2);
 
-    placeholder.classList.add('hidden');
-    resultValue.classList.remove('hidden');
+            // Set meter fill
+            const meterFill = document.getElementById('meterFill');
+            let meterWidth = Math.min(mvcfr / 5 * 100, 100);
+            meterFill.style.width = meterWidth + '%';
 
-    // Show warnings in result section (optional)
-    if (warnings.length > 0) {
-        alert(warnings.join("\n"));
-    }
-}
+            // Set meter color based on value
+            if (mvcfr < 1) {
+                meterFill.style.background = 'linear-gradient(to right, #2ecc71, #27ae60)';
+            } else if (mvcfr < 3) {
+                meterFill.style.background = 'linear-gradient(to right, #f39c12, #e67e22)';
+            } else {
+                meterFill.style.background = 'linear-gradient(to right, #e74c3c, #c0392b)';
+            }
+
+            // Provide feedback
+            const feedbackContent = document.getElementById('feedbackContent');
+            if (mvcfr < 1) {
+                feedbackContent.innerHTML = "<span class='good'>🌟 Excellent Safety Performance!</span><br>Your MVCFR is below 1.0, indicating strong fleet safety management and effective driver training programs.";
+            } else if (mvcfr < 3) {
+                feedbackContent.innerHTML = "<span class='average'>✅ Good Safety Performance</span><br>Your MVCFR is within an acceptable range, but there may be opportunities to improve driver training, vehicle maintenance, or route planning.";
+            } else {
+                feedbackContent.innerHTML = "<span class='bad'>🔴 Needs Improvement</span><br>Your MVCFR is higher than recommended. Consider implementing enhanced driver training, stricter safety protocols, and regular vehicle safety inspections.";
+            }
+        }
 
         function printReport() {
-            // Update date just before printing
-            const now = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
-            
             window.print();
         }
+
+        // Allow Enter key to trigger calculation
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                calculateMVCFR();
+            }
+        });
     </script>
-    <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
 {% endblock %}
-
-
-{% comment %} 
-1️⃣ Input Validation Rules (QEHS/Fire Safety Perspective)
-
-Field: Vertical Height (VH) (m)
-
-✔ Unit: Meters only (SI standard, universally used in safety compliance).
-✔ Range:
-
-Min: 0.1 m (anything less is negligible, impractical, or unsafe to climb).
-
-Max: 100 m (OSHA & ANSI ladders are not practical above this; beyond ~15 m, scaffolds or lifts are required).
-✔ Precision: Up to 2 decimals (0.01 m resolution is more than sufficient).
-✔ Logical Consistency:
-
-VH must be numeric.
-
-Cannot be negative, zero, or blank.
-
-Must not exceed maximum rated ladder use (≈100 m).
-
-2️⃣ Output Validation Rules & Thresholds
-
-Base Distance (BD): VH ÷ 4 (4:1 safety ratio). Must be ≥0.25 m for practical ladder placement.
-
-Ladder Length (LL): √(VH² + BD²). Always > VH.
-
-Total Ladder Length (TLL): LL + 1 m (safety margin). Must not exceed commercially available ladders (usually ≤15–20 m for portable ladders).
-
-➡️ If TLL > 20 m → Show a warning message: “⚠️ Consider scaffolding or aerial lift. Portable ladders may not be safe at this height.”
-
-3️⃣ Edge Case Validations
-
-Blank input / Non-numeric → Error: “Please enter a numeric value.”
-
-Zero or Negative VH → Error: “Vertical height must be greater than 0.”
-
-VH > 100 m → Error: “Vertical height cannot exceed 100 m. Use scaffolding/lift.”
-
-Too many decimals (>2) → Error: “Please enter up to two decimal places.”
-
-Unrealistic combos → If calculated ladder length > 20 m → Warning instead of error.
-
-4️⃣ Compliance Justification
-
-OSHA 1926.1053(b)(5)(i): Ladders must extend ≥1 m (3 ft) above support point.
-
-ANSI A14.2: Portable ladders max angle ≈ 75.5° (4:1 ratio).
-
-ISO 14122-4: Requires permanent access above certain heights instead of ladders.
-
-Practical fire safety: ladders over 15 m introduce instability; scaffolds or lifts are recommended.
-
-5️⃣ Corrected JavaScript Validation Function
-/*
- FORMULAS USED:
- Base Distance (BD) = Vertical Height (VH) ÷ 4   // 4:1 rule
- Ladder Length (LL) = √(VH² + BD²)               // Pythagoras theorem
- Total Ladder Length (TLL) = LL + 1              // 1m OSHA/ANSI safety margin
-
- VALIDATIONS:
- - VH must be numeric, > 0, ≤ 100 (m)
- - VH min: 0.1m (practical minimum)
- - VH max: 100m (beyond this → scaffold/lift required)
- - Decimals: max 2 places
- - Outputs: if TLL > 20m → show warning about portable ladder limits
-*/ {% endcomment %}

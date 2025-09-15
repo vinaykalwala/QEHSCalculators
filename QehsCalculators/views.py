@@ -879,10 +879,17 @@ from .forms import BlogPostForm
 def blog_list(request):
     posts = BlogPost.objects.filter(is_published=True)
     return render(request, 'blog/blog_list.html', {'posts': posts})
+def blog_list_admin(request):
+    posts = BlogPost.objects.filter(is_published=True)
+    return render(request, 'blog/blog_list_admin.html', {'posts': posts})
 
 def blog_detail(request, post_id):
     post = get_object_or_404(BlogPost, id=post_id, is_published=True)
     return render(request, 'blog/blog_detail.html', {'post': post})
+
+def blog_detail_admin(request, post_id):
+    post = get_object_or_404(BlogPost, id=post_id, is_published=True)
+    return render(request, 'blog/blog_detail_admin.html', {'post': post})
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -892,7 +899,7 @@ def blog_create(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Blog post created successfully!")
-            return redirect('blog_list')
+            return redirect('blog_list_admin')
     else:
         form = BlogPostForm()
     return render(request, 'blog/blog_form.html', {'form': form})
@@ -906,7 +913,7 @@ def blog_edit(request, post_id):
         if form.is_valid():
             form.save()
             messages.success(request, "Blog post updated successfully!")
-            return redirect('blog_list')
+            return redirect('blog_list_admin')
     else:
         form = BlogPostForm(instance=post)
     return render(request, 'blog/blog_form.html', {'form': form, 'edit': True})
@@ -917,7 +924,7 @@ def blog_delete(request, post_id):
     post = get_object_or_404(BlogPost, id=post_id)
     post.delete()
     messages.success(request, "Blog post deleted successfully!")
-    return redirect('blog_list')
+    return redirect('blog_list_admin')
 
 from django.shortcuts import render
 from django.utils import timezone

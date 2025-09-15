@@ -1,0 +1,520 @@
+{% extends 'base.html' %}
+{% block title %}Vent Sizing Calculator (API RP520){% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vent Sizing Calculator (API RP520)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        /* Result Card */
+        .result-placeholder {
+            text-align: center;
+            margin: auto;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: baseline;
+            justify-content: center;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+        }
+        .rate-label {
+            color: #2980b9;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list { margin: 0; padding-left: 18px; }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px; padding: 20px;
+            text-align: left; gap: 12px; margin-top: 20px;
+        }
+        .error-icon { font-size: 76px; flex-shrink: 0; text-align: center; }
+        .error-message { font-size: 24px; line-height: 1.6; }
+        .hidden { display: none; }
+        .btn-container { display: flex; justify-content: center; margin: 30px 0; }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040); color: #ffffff; border: 2px solid #1560bd;
+            padding: 10px 20px; font-size: 14px; font-weight: 600; border-radius: 8px;
+            text-decoration: none; transition: all 0.3s ease; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Vent Sizing Calculator (API RP520)</h1>
+            <p>Calculate the required pressure relief vent area for gas systems.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>System Parameters</h2>
+                <div class="form-group">
+                    <label for="massFlowRate">Mass Flow Rate (W) in lb/hr</label>
+                    <input type="number" id="massFlowRate" class="form-input" placeholder="Enter mass flow rate">
+                </div>
+                <div class="form-group">
+                    <label for="pressure">Pressure (P) in psia</label>
+                    <input type="number" id="pressure" class="form-input" placeholder="Enter absolute pressure">
+                </div>
+                <div class="form-group">
+                    <label for="dischargeCoeff">Discharge Coefficient (Kᴅ)</label>
+                    <input type="number" id="dischargeCoeff" class="form-input" placeholder="e.g., 0.975">
+                </div>
+                <div class="form-group">
+                    <label for="nozzleCoeff">Nozzle Coefficient (Kɴ)</label>
+                    <input type="number" id="nozzleCoeff" class="form-input" placeholder="e.g., 1.0">
+                </div>
+                <div class="form-group">
+                    <label for="superheatCoeff">Superheat Correction (Kꜱʜ)</label>
+                    <input type="number" id="superheatCoeff" class="form-input" placeholder="e.g., 1.0">
+                </div>
+                <button class="calculate-btn" onclick="calculateAndDisplay()">Calculate Vent Area</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Safety illustration">
+                    <p>Enter system parameters to calculate the required vent area according to API RP520 for gas service.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div id="resultValue" class="hidden" style="text-align: center;">
+                    <h2>Required Vent Area (A)</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.000</div>
+                        <div class="rate-label">in²</div>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Summary</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                     <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <!-- About API RP520 Vent Sizing -->
+            <div class="note-card">
+                <h3>About API RP520 Vent Sizing</h3>
+                <p>
+                    The <strong>API Recommended Practice 520</strong> provides guidelines for sizing, selection, and
+                    installation of pressure-relieving systems in refineries.
+                    This calculator uses the formula for determining the required vent area for gas systems, which is critical
+                    for preventing overpressure events and ensuring facility safety.
+                </p>
+                <p>
+                    Proper vent sizing prevents pressure buildup, reducing the risk of explosions and equipment failure.
+                    Compliance with API RP520 ensures safe operation of industrial gas systems and emergency venting procedures.
+                </p>
+            </div>
+        
+            <!-- Parameters Explained -->
+            <div class="note-card">
+                <h3>Parameters Explained</h3>
+                <ul class="note-list">
+                    <li><strong>Mass Flow Rate (W):</strong> The rate at which gas flows through the system, typically in lb/hr.
+                    </li>
+                    <li><strong>Pressure (P):</strong> The absolute pressure of the gas (psia), including set pressure,
+                        overpressure, and atmospheric pressure.</li>
+                    <li><strong>Discharge Coefficient (Kᴅ):</strong> Efficiency of the pressure relief valve, usually provided
+                        by the manufacturer.</li>
+                    <li><strong>Nozzle Coefficient (Kɴ):</strong> Factor depending on nozzle geometry or presence of upstream
+                        devices; use 1.0 if none.</li>
+                    <li><strong>Superheat Correction Factor (Kꜱʜ):</strong> Adjusts for superheated gases; use 1.0 for saturated
+                        gases or standard conditions.</li>
+                </ul>
+            </div>
+        
+            <!-- Validation Rules -->
+            <div class="note-card">
+                <h3>✅ Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Mass Flow Rate (W in lb/hr):</strong> Must be a positive number greater than zero. A zero or
+                        negative flow rate is unrealistic and would result in no venting required.</li>
+                    <li><strong>Pressure (P in psia):</strong> Must be greater than zero. Zero or negative pressure is invalid as it
+                        would not drive gas flow through the vent.</li>
+                    <li><strong>Discharge Coefficient (Kᴅ):</strong> Acceptable range: 0.5 – 1.0. Values outside this range may
+                        represent inefficient or non-functional vent orifices.</li>
+                    <li><strong>Nozzle Coefficient (Kɴ):</strong> Acceptable range: 0.7 – 1.0. Ensures proper nozzle flow; values
+                        too low or high lead to incorrect vent sizing.</li>
+                    <li><strong>Superheat Correction Factor (KSH):</strong> Must be ≥ 1.0. Ensures the effect of superheated vapor
+                        is correctly accounted for in vent sizing.</li>
+                    <li><strong>Decimals:</strong> All inputs can have decimals. Use realistic precision (e.g., 0.001 for small
+                        values) for calculation accuracy.</li>
+                    <li><strong>Logical Consistency:</strong> Ensure that all parameters are physically possible for the system.
+                        Unrealistic combinations (e.g., very high flow with very low pressure) will produce extreme vent areas and
+                        trigger warnings.</li>
+                    <li><strong>Edge Cases Handled:</strong>
+                        <ul>
+                            <li>Division by zero prevented.</li>
+                            <li>Blank or non-numeric inputs are flagged immediately.</li>
+                            <li>Extremely small (<0.1 in²) or large (>500 in²) vent areas generate a safety warning.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Compliance Perspective:</strong> These validations align with QEHS practices to prevent overpressure
+                        incidents, ensure API RP520 compliance, and provide auditable warnings for safety reporting.</li>
+                </ul>
+            </div>
+        
+            <!-- Real-Life Applications -->
+            <div class="note-card">
+                <h3>Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Safety Relief Valves:</strong> Prevents dangerous overpressure in pipelines or vessels.</li>
+                    <li><strong>Industrial Gas Systems:</strong> Ensures safe operation of high-pressure equipment.</li>
+                    <li><strong>Fire Protection:</strong> Provides emergency venting in fire situations.</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function calculateAndDisplay() {
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValueBox = document.getElementById('resultValue');
+
+            // Reset UI
+            errorBox.classList.add('hidden');
+            resultValueBox.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+
+            let errors = [];
+
+            // Helper function to validate inputs
+            function getVal(id, label, opts = {}) {
+                const el = document.getElementById(id);
+                const raw = el.value?.toString().trim();
+                if (!raw) {
+                    errors.push(`👉 ${label} is required.`);
+                    return null;
+                }
+                const num = parseFloat(raw);
+                if (isNaN(num)) {
+                    errors.push(`👉 ${label} must be a valid number.`);
+                    return null;
+                }
+                if (num <= 0) {
+                    errors.push(`👉 ${label} must be greater than zero.`);
+                    return null;
+                }
+                if (opts.min !== undefined && num < opts.min) errors.push(`👉 ${label} must be ≥ ${opts.min}.`);
+                if (opts.max !== undefined && num > opts.max) errors.push(`👉 ${label} must be ≤ ${opts.max}.`);
+                return num;
+            }
+
+            // Validate all inputs
+            const W = getVal('massFlowRate', 'Mass Flow Rate (W)', { min: 0.0001 });
+            const P = getVal('pressure', 'Pressure (P)', { min: 0.0001 });
+            const KD = getVal('dischargeCoeff', 'Discharge Coefficient (Kᴅ)', { min: 0.5, max: 1.0 });
+            const KN = getVal('nozzleCoeff', 'Nozzle Coefficient (Kɴ)', { min: 0.7, max: 1.0 });
+            const KSH = getVal('superheatCoeff', 'Superheat Correction (KSH)', { min: 1.0 });
+
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                return;
+            }
+
+            // API RP520 vent area formula
+            const A = W / (515 * P * KD * KN * KSH);
+
+            // Display result
+            placeholder.classList.add('hidden');
+            resultValueBox.classList.remove('hidden');
+            document.getElementById('rateValue').textContent = A.toFixed(4);
+
+            // Feedback based on result
+            let feedback = `The calculated relief area is based on the provided system parameters. Select the next larger standard orifice size for the pressure relief valve.`;
+            if (A < 0.1) {
+                feedback += ` <strong>⚠️ Warning:</strong> The calculated vent area is very small. Verify input values.`;
+            } else if (A > 500) {
+                feedback += ` <strong>⚠️ Warning:</strong> The calculated vent area is unusually large. Check system parameters for realism.`;
+            }
+            document.getElementById('feedbackContent').innerHTML = feedback;
+        }
+
+        function printReport() {
+            window.print();
+        }
+    </script>
+
+</body>
+</html>
+{% endblock %}
+
+<!-- 
+1. Input Validation Rules (QEHS & Fire Safety Perspective)
+Input	Units	Acceptable Range	Decimal / Integer	Notes / Logic Checks
+Mass Flow Rate (W)	lb/hr	> 0	Allow decimals	Must be realistic based on system size; cannot be zero or negative.
+Pressure (P)	psia	> 0	Allow decimals	Absolute pressure; zero or negative invalid. Check if P < W factor leading to unrealistic venting.
+Discharge Coefficient (Kᴅ)	dimensionless	0.5 – 1.0 (typical)	Allow decimals	Should be <1; represents nozzle efficiency.
+Nozzle Coefficient (Kɴ)	dimensionless	0.7 – 1.0 (typical)	Allow decimals	Reflects actual nozzle geometry.
+Superheat Correction (KSH)	dimensionless	≥1.0	Allow decimals	Accounts for gas superheat; cannot be <1.
+
+Additional Logical Checks:
+
+All inputs must be numeric.
+
+None of the denominators (KD, KN, KSH) can be zero.
+
+Cross-field check: extremely high W with very low P should trigger warning (physically unrealistic).
+
+2. Output Validation Logic & Thresholds
+
+Vent Area (A) formula:
+
+𝐴
+=
+𝑊
+515
+⋅
+𝑃
+⋅
+𝐾
+𝐷
+⋅
+𝐾
+𝑁
+⋅
+𝐾
+𝑆
+𝐻
+A=
+515⋅P⋅K
+D
+	​
+
+⋅K
+N
+	​
+
+⋅K
+SH
+	​
+
+W
+	​
+
+
+If A < 0.5 in² → Flag as very small, verify inputs.
+
+If A > 500 in² → Flag as unusually large, verify inputs (potentially overpressure or miscalculation).
+
+Outputs rounded to 4 decimal places for precision.
+
+Why: Ensures the vent area remains within practical ranges for installation and compliance.
+
+3. Edge Case Validations
+
+Division by zero: KD, KN, or KSH cannot be 0.
+
+Negative inputs: Invalid for mass flow rate, pressure, or coefficients.
+
+Unrealistic combinations: High W with low P, KD, KN, or KSH can give impractical vent sizes.
+
+Extremely small or large vent areas: Provide feedback warnings.
+-->
