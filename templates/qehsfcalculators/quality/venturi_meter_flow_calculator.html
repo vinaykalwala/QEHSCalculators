@@ -1,0 +1,658 @@
+{% extends 'base.html' %}
+{% block title %}Venturi Meter Flow Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Venturi Meter Flow Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'qualitycategory_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Venturi Meter Flow Calculator</h1>
+            <p>Calculates the flow velocity at the throat of a Venturi meter based on pressure difference, fluid properties, and meter geometry</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator Input Card -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="pressureDiff">Pressure Difference (ΔP in Pa)</label>
+                    <input type="number" id="pressureDiff" class="form-input" min="0" step="0.1" placeholder="Enter pressure difference">
+                </div>
+
+                <div class="form-group">
+                    <label for="density">Fluid Density (ρ in kg/m³)</label>
+                    <input type="number" id="density" class="form-input" min="0" step="0.1" placeholder="Enter fluid density">
+                </div>
+
+                <div class="form-group">
+                    <label for="velocityCoeff">Velocity Coefficient (Cᵥ)</label>
+                    <input type="number" id="velocityCoeff" class="form-input" min="0.9" max="1.0" step="0.01" value="0.98" placeholder="Enter coefficient (0.9-1.0)">
+                </div>
+
+                <div class="form-group">
+                    <label for="areaRatio">Area Ratio (β = Aₐ/Aᵦ)</label>
+                    <input type="number" id="areaRatio" class="form-input" min="1.01" step="0.01" placeholder="Enter area ratio (>1)">
+                </div>
+
+                <div class="form-group">
+                    <label for="gc">Conversion Factor (g_c)</label>
+                    <input type="number" id="gc" class="form-input" value="1" readonly>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateVenturiFlow()">Calculate Flow Velocity</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Venturi meter illustration">
+                    <p>This tool calculates the <strong>flow velocity at the throat</strong> of a Venturi meter. Enter your parameters to see results.</p>
+                </div>
+
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Venturi Throat Velocity</h2>
+                    </div>
+                    <div class="rate-value" id="velocityValue">0.00</div>
+                    <div class="rate-label"><strong>m/s</strong></div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">Flow Velocity Interpretation</div>
+                        <div class="feedback-content" id="flowFeedback"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>🔎 About This Calculator</h3>
+                <p>
+                    The <strong>Venturi Meter Flow Calculator</strong> calculates flow velocity based on pressure difference across a constriction. It utilizes Bernoulli's principle and continuity equation to provide accurate flow measurements with minimal energy loss, essential for process control and environmental monitoring.
+                </p> 
+            </div>
+            
+            <div class="note-card">
+                <h3>📌 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Pressure Difference (ΔP):</strong> Required, must be > 0 Pa (no pressure drop means no flow)</li>
+                    <li><strong>Fluid Density (ρ):</strong> Required, must be > 0 kg/m³ (fluids must have mass)</li>
+                    <li><strong>Velocity Coefficient (Cᵥ):</strong> Required, must be between 0.9-1.0 (typical efficiency range)</li>
+                    <li><strong>Area Ratio (β):</strong> Required, must be > 1 (throat must be narrower than pipe)</li>
+                    <li><strong>Area Ratio Range:</strong> Typically 1.5-4.0 for practical Venturi designs</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ Explanation of Parameters</h3>
+                <ul class="note-list">
+                    <li><strong>ΔP (Pressure Difference):</strong> The pressure drop between the inlet and throat of the Venturi meter, measured in Pascals (Pa).</li>
+                    <li><strong>ρ (Fluid Density):</strong> The mass per unit volume of the fluid, measured in kg/m³, which influences how much the fluid accelerates.</li>
+                    <li><strong>Cᵥ (Velocity Coefficient):</strong> A correction factor (0.9-1.0) accounting for energy losses like friction and turbulence.</li>
+                    <li><strong>β (Area Ratio):</strong> The ratio of inlet area to throat area (Aₐ/Aᵦ), which must be greater than 1 to create velocity change.</li>
+                    <li><strong>Vᵦ (Throat Velocity):</strong> The calculated flow velocity at the throat of the Venturi meter, measured in m/s.</li>
+                </ul>
+            </div>
+            
+
+            <div class="note-card">
+                <h3>📊 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Water Treatment:</strong> Chemical dosing control and flow measurement</li>
+                    <li><strong>Oil & Gas:</strong> Pipeline flow measurement and custody transfer</li>
+                    <li><strong>HVAC Systems:</strong> Airflow monitoring and balancing</li>
+                    <li><strong>Chemical Processing:</strong> Reactor feed control and batch monitoring</li>
+                    <li><strong>Environmental Monitoring:</strong> Stack gas emissions and water discharge measurements</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>⚠️ Important Considerations</h3>
+                <ul class="note-list">
+                    <li>Requires laminar flow for maximum accuracy (Re > 10,000 typically)</li>
+                    <li>Pressure taps must be properly located and maintained</li>
+                    <li>Fluid must completely fill the pipe with no air pockets</li>
+                    <li>Not suitable for slurries or dirty fluids that may cause clogging</li>
+                    <li>Regular calibration improves measurement accuracy</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>💡 Conclusion</h3>
+                <p>The Venturi meter provides one of the most reliable methods for flow measurement in quality control and environmental applications. Its accuracy and minimal pressure loss make it ideal for applications where precise flow data is essential for process control, regulatory compliance, and safety monitoring. Regular validation of Venturi meter calculations helps ensure accurate measurements and optimal system performance.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateVenturiFlow() {
+            const pressureDiff = document.getElementById("pressureDiff").value.trim();
+            const density = document.getElementById("density").value.trim();
+            const velocityCoeff = document.getElementById("velocityCoeff").value.trim();
+            const areaRatio = document.getElementById("areaRatio").value.trim();
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+            const outputValue = document.getElementById('velocityValue');
+            const feedbackBox = document.getElementById('flowFeedback'); 
+
+            let errors = [];
+            let warnings = [];
+
+            // ✅ Pressure difference validation
+            if (pressureDiff === "") {
+                errors.push("👉 Please enter the pressure difference (ΔP).");
+            } else if (isNaN(pressureDiff)) {
+                errors.push("👉 Pressure difference must be a number.");
+            } else if (parseFloat(pressureDiff) <= 0) {
+                errors.push("👉 Pressure difference must be greater than 0 Pa.");
+            } else if (parseFloat(pressureDiff) > 1000000) {
+                warnings.push("⚠️ Pressure difference exceeds typical maximum (1,000,000 Pa). Please verify input.");
+            }
+
+            // ✅ Fluid density validation
+            if (density === "") {
+                errors.push("👉 Please enter the fluid density.");
+            } else if (isNaN(density)) {
+                errors.push("👉 Fluid density must be a number.");
+            } else if (parseFloat(density) <= 0) {
+                errors.push("👉 Fluid density must be greater than 0 kg/m³.");
+            } else if (parseFloat(density) < 0.1 || parseFloat(density) > 15000) {
+                warnings.push("⚠️ Density value is outside normal range (0.1-15,000 kg/m³). Check units and inputs.");
+            }
+
+            // ✅ Velocity coefficient validation
+            if (velocityCoeff === "") {
+                errors.push("👉 Please enter the velocity coefficient.");
+            } else if (isNaN(velocityCoeff)) {
+                errors.push("👉 Velocity coefficient must be a number.");
+            } else if (parseFloat(velocityCoeff) < 0.9 || parseFloat(velocityCoeff) > 1.0) {
+                errors.push("👉 Velocity coefficient must be between 0.9 and 1.0.");
+            }
+
+            // ✅ Area ratio validation
+            if (areaRatio === "") {
+                errors.push("👉 Please enter the area ratio.");
+            } else if (isNaN(areaRatio)) {
+                errors.push("👉 Area ratio must be a number.");
+            } else if (parseFloat(areaRatio) <= 1) {
+                errors.push("👉 Area ratio must be greater than 1.");
+            } else if (parseFloat(areaRatio) > 10) {
+                warnings.push("⚠️ Area ratio exceeds typical maximum (10). Please verify input.");
+            } else if (parseFloat(areaRatio) < 1.5 || parseFloat(areaRatio) > 4.0) {
+                warnings.push("⚠️ Area ratio is outside typical design range (1.5-4.0).");
+            }
+
+            // Check for division by zero in formula
+            if (parseFloat(areaRatio) === 1) {
+                errors.push("👉 Area ratio cannot be exactly 1 (division by zero in formula).");
+            }
+
+            // Show errors
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            }
+
+            const deltaP = parseFloat(pressureDiff);
+            const rho = parseFloat(density);
+            const Cv = parseFloat(velocityCoeff);
+            const beta = parseFloat(areaRatio);
+            const gc = 1; // SI units conversion factor
+
+            // Calculate Venturi throat velocity
+            const numerator = Cv * Math.sqrt(2 * gc * deltaP / rho);
+            const denominator = Math.sqrt(1 - Math.pow(1/beta, 2));
+            const Vb = numerator / denominator;
+
+            // Check for unrealistic results
+            if (Vb > 100) {
+                warnings.push("⚠️ Calculated velocity exceeds typical maximum (100 m/s). Verify inputs.");
+            } else if (Vb < 0.1) {
+                warnings.push("⚠️ Very low velocity calculated (< 0.1 m/s). Check measurement accuracy.");
+            }
+
+            // Display the result
+            outputValue.textContent = Vb.toFixed(4);
+
+            // Provide interpretation
+            let interpretation = "";
+            if (Vb < 5) {
+                interpretation = "✅ Low flow velocity - suitable for precise measurements.";
+            } else if (Vb < 15) {
+                interpretation = "✅ Moderate flow velocity - typical for many applications.";
+            } else if (Vb < 30) {
+                interpretation = "⚠️ High flow velocity - check for potential erosion issues.";
+            } else {
+                interpretation = "🚨 Very high velocity - may indicate unrealistic inputs or extreme conditions.";
+            }
+
+            // Add warnings if any
+            if (warnings.length > 0) {
+                interpretation = warnings.join("<br>") + "<br><br>" + interpretation;
+            }
+
+            feedbackBox.innerHTML = interpretation;
+
+            // Show result, hide error and placeholder
+            errorBox.classList.add("hidden");
+            placeholder.classList.add("hidden");
+            resultValue.classList.remove("hidden");
+        }
+
+        function printReport() {
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+
+Input Validations:
+Pressure Difference (ΔP):
+
+Required field validation
+
+Must be a number > 0 Pa
+
+Warning if exceeds 1,000,000 Pa (typical maximum)
+-----------------------------------------------------------------------------------
+Fluid Density (ρ):
+
+Required field validation
+
+Must be a number > 0 kg/m³
+
+Warning if outside 0.1-15,000 kg/m³ (typical range)
+----------------------------------------------------------------------------------
+Velocity Coefficient (Cᵥ):
+
+Required field validation
+
+Must be between 0.9 and 1.0 (inclusive)
+
+Typical efficiency range for Venturi meters
+-------------------------------------------------------------------------------------
+Area Ratio (β):
+
+Required field validation
+
+Must be > 1 (throat narrower than pipe)
+
+Warning if outside 1.5-4.0 (typical design range)
+
+Prevents division by zero (β ≠ 1)
+---------------------------------------------------------------------------------------
+Output Validations:
+Velocity is calculated using: Vᵦ = (Cᵥ × √(2 × g_c × ΔP / ρ)) / √(1 - (1/β²))
+
+Results are displayed with 4 decimal places
+
+Color-coded interpretation based on velocity ranges
+
+Warnings for unrealistic results (< 0.1 m/s or > 100 m/s)
+-----------------------------------------------------------------------------
+Edge Cases:
+Division by zero protection (β ≠ 1)
+
+Extreme values that might indicate data entry errors
+
+Values outside typical industry ranges
+
+Unrealistic velocity results
+
+-->
