@@ -1,0 +1,686 @@
+{% extends 'base.html' %}
+{% block title %}Pitot Tube Velocity Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pitot Tube Velocity Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+             /* display: flex;  */
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            /* overflow-y: auto;  */
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Input rows for better organization */
+        .input-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+        
+        @media (max-width: 600px) {
+            .input-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+                .rate-display {
+                display: flex;
+                gap: 20px;
+                justify-content: center;
+                align-items: center;
+                flex-wrap: wrap; /* responsive */
+                text-align: center;
+            }
+
+            .rate-block {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                min-width: 120px; /* keeps blocks same width */
+            }
+
+            .rate-label {
+                font-weight: bold;
+                font-size: 16px;
+                color: #444;
+                margin-bottom: 5px;
+            }
+
+            .rate-value {
+                font-size: 40px;
+                font-weight: 700;
+                color: #2980b9;
+                line-height: 1.2;
+            }
+
+            .rate-unit {
+                font-size: 14px;
+                color: #777;
+                margin-top: 4px;
+            }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+                .rate-value { font-size: 32px; }
+            }
+
+            @media (max-width: 480px) {
+                .rate-value { font-size: 26px; }
+                
+                .rate-unit { font-size: 12px; }
+                
+            }
+
+
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+                .result-feedback {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 18px 20px;
+    border-left: 4px solid #3498db;
+    text-align: left;
+    max-width: 800px; /* keeps it readable on large screens */
+    margin: 0 auto;   /* centers it */
+}
+
+.feedback-title {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #2c3e50;
+    font-size: 18px;
+}
+
+.feedback-content { 
+    color: #34495e; 
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 768px) {
+    .result-feedback {
+        padding: 15px;
+        font-size: 15px;
+    }
+
+    .feedback-title {
+        font-size: 16px;
+    }
+
+    .feedback-content {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .result-feedback {
+        padding: 12px;
+        border-left-width: 3px;
+    }
+
+    .feedback-title {
+        font-size: 15px;
+    }
+
+    .feedback-content {
+        font-size: 13px;
+    }
+}
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+
+<div class="calculator-header">
+    <h1>Pitot Tube Velocity Calculator</h1>
+    <p>Calculate <strong>Fluid Velocity (m/s)</strong> using the Pitot Tube Equation for ventilation, stack gas, or duct monitoring applications.</p>
+</div>
+
+<div class="calc-content">
+    <!-- Calculator -->
+    <div class="calc-card">
+        <h2>Enter Data</h2>
+
+        <div class="input-row">
+        <div class="form-group">
+            <label for="pressureDiff">Pressure Difference (ΔP = P<sub>s</sub> - P) in Pa</label>
+            <input type="number" id="pressureDiff" class="form-input" min="0" step="0.1" placeholder="e.g., 50">
+        </div>
+
+        <div class="form-group">
+            <label for="density">Fluid Density (ρ in kg/m³)</label>
+            <input type="number" id="density" class="form-input" min="0.1" step="0.01" placeholder="e.g., 1.2">
+        </div>
+        </div>
+
+        <div class="input-row">
+        <div class="form-group">
+            <label for="pitotCoeff">Pitot Tube Coefficient (C<sub>p</sub>)</label>
+            <input type="number" id="pitotCoeff" class="form-input" value="1.0" min="0.95" max="1.0" step="0.01" placeholder="0.98–1.0">
+        </div>
+
+        <div class="form-group">
+            <label for="gc">Conversion Factor (g<sub>c</sub>)</label>
+            <input type="number" id="gc" class="form-input" value="1" readonly>
+        </div>
+        </div>
+        <button class="calculate-btn" onclick="calculateVelocity()">Calculate Velocity</button>
+    </div>
+
+    <!-- Result Section -->
+    <div class="result-card">
+        <div class="result-placeholder" id="placeholder">
+            <img src="/static/images/mlc_environment_result.png" alt="Velocity illustration">
+            <p>This tool calculates fluid velocity (m/s) using the Pitot Tube Equation.</p>
+        </div>
+
+        <div class="result-error hidden" id="resultError">
+            <div class="error-icon">❌</div>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <div class="result-value hidden" id="resultValue">
+            <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                <h2>Calculated Velocity</h2>
+            </div>
+
+            <div class="rate-display">
+                <div class="rate-value" id="rateValue">0.0000</div>
+                <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">m/s</div>
+            </div>
+
+            <div class="result-feedback">
+                <div class="feedback-title">Assessment</div>
+                <div class="feedback-content" id="feedbackContent"></div>
+            </div>
+
+            <div class="btn-wrapper">
+                <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notes Section -->
+<div class="note-section">
+    <div class="note-card">
+        <h3>📘 About This Calculator</h3>
+        <p>
+            The Pitot Tube Velocity Calculator determines the instantaneous fluid velocity in a duct, pipe, or stack by measuring the pressure difference between stagnation and static pressure. It is widely used for ventilation, environmental monitoring, and industrial safety audits.
+        </p>
+    </div>
+
+    <div class="note-card">
+        <h3>⚠️Input Validations </h3>
+        <ul class="note-list">
+            <li>✔️ Pressure Difference ΔP ≥ 0 Pa</li>
+            <li>✔️ Fluid Density ρ &gt; 0 kg/m³</li>
+            <li>✔️ Pitot Coefficient 0.95 ≤ C<sub>p</sub> ≤ 1.0</li>
+            <li>✔️ Non-numeric or empty values are invalid</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>🌍 Applications</h3>
+        <ul class="note-list">
+            <li><strong>Environmental Monitoring:</strong> Stack gas emissions, air quality sampling</li>
+            <li><strong>HVAC Systems:</strong> Duct airflow measurement, ventilation balance checks</li>
+            <li><strong>Industrial Safety:</strong> Fume hoods, dust collection systems, process ventilation</li>
+            <li><strong>Aerospace & Automotive:</strong> Airspeed and wind tunnel measurements</li>
+            <li><strong>QEHS Audits:</strong> Compliance verification for flow velocities in critical systems</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+function showErrors(errors) {
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+
+  errorMessage.innerHTML = errors.join("<br>");
+  errorBox.classList.remove("hidden");
+  placeholder.classList.add("hidden");
+  resultValue.classList.add("hidden");
+}
+
+function calculateVelocity() {
+  const deltaPRaw = document.getElementById("pressureDiff").value.trim();
+  const densityRaw = document.getElementById("density").value.trim();
+  const cpRaw = document.getElementById("pitotCoeff").value.trim();
+
+  const errors = [];
+  const warnings = [];
+
+  if (deltaPRaw === "") errors.push("👉 Enter Pressure Difference (ΔP) in Pa.");
+  if (densityRaw === "") errors.push("👉 Enter Fluid Density (ρ) in kg/m³.");
+  if (cpRaw === "") errors.push("👉 Enter Pitot Coefficient (Cₚ).");
+
+  if (errors.length) return showErrors(errors);
+
+  const deltaP = parseFloat(deltaPRaw);
+  const density = parseFloat(densityRaw);
+  const cp = parseFloat(cpRaw);
+
+  // Validations
+  if (!Number.isFinite(deltaP) || deltaP < 0) errors.push("👉 Pressure Difference (ΔP) must be ≥ 0 Pa.");
+  if (!Number.isFinite(density) || density <= 0) errors.push("👉 Fluid Density (ρ) must be > 0 kg/m³.");
+  if (!Number.isFinite(cp) || cp < 0.95 || cp > 1.0) errors.push("👉 Pitot Coefficient (Cₚ) must be between 0.95 and 1.0.");
+
+  if (errors.length) return showErrors(errors);
+
+  if (deltaP < 0.1) warnings.push("⚠️ Very low pressure difference; velocity may be near zero.");
+  if (density < 0.1 || density > 5000) warnings.push("⚠️ Fluid density out of realistic range.");
+  if (cp < 0.98) warnings.push("⚠️ Low Pitot Coefficient; check calibration or losses.");
+
+  // Velocity calculation
+  const velocity = cp * Math.sqrt((2 * deltaP) / density);
+
+  const rateEl = document.getElementById("rateValue");
+  const feedbackEl = document.getElementById("feedbackContent");
+  rateEl.textContent = velocity.toFixed(4);
+
+  // Feedback
+  let statusMsg = "";
+  if (velocity < 1) statusMsg = "⚠️ Very low airflow - check for blockages or errors";
+  else if (velocity <= 20) statusMsg = "✅ Normal operational velocity";
+  else if (velocity <= 50) statusMsg = "⚠️ High velocity - verify duct design and safety";
+  else statusMsg = "🔴 Extremely high velocity - likely measurement error";
+
+  let details = `<div>Velocity: <b>${velocity.toFixed(4)}</b> m/s</div>`;
+  details += `<div>ΔP: <b>${deltaP.toFixed(2)}</b> Pa | ρ: <b>${density.toFixed(2)}</b> kg/m³ | Cₚ: <b>${cp.toFixed(2)}</b></div>`;
+  if (warnings.length) details += `<div style="margin-top:6px; color:#b35d00;">${warnings.join(" | ")}</div>`;
+
+  feedbackEl.innerHTML = `<div>${statusMsg}</div>${details}`;
+
+  document.getElementById("placeholder").classList.add("hidden");
+  document.getElementById("resultValue").classList.remove("hidden");
+  document.getElementById("resultError").classList.add("hidden");
+}
+
+function printReport() {
+  const el = document.getElementById('printDate');
+  if (el) {
+    el.textContent = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  }
+  window.print();
+}
+</script>
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+<!-- 
+📌 Pitot Tube Velocity Calculator Notes
+
+🔹 Formula Used:
+    Velocity (V) = Cp × √(2 × ΔP / ρ)
+    where:
+      ΔP  = Pressure difference (Pa)
+      ρ   = Fluid density (kg/m³)
+      Cp  = Pitot coefficient (dimensionless, typically 0.95–1.0)
+
+🔹 Input Validations:
+    • ΔP (Pressure Difference):
+        - Must be numeric
+        - Must be ≥ 0 Pa
+        - Warning if < 0.1 Pa (velocity may be near zero)
+    • ρ (Fluid Density):
+        - Must be numeric
+        - Must be > 0 kg/m³
+        - Warning if < 0.1 or > 5000 kg/m³ (unrealistic)
+    • Cp (Pitot Coefficient):
+        - Must be numeric
+        - Must be between 0.95 and 1.0
+        - Warning if < 0.98 (check calibration)
+
+🔹 Output Validations / Classification:
+    • Velocity (m/s) displayed to 4 decimal places
+    • Classification:
+        - V < 1 m/s → ⚠️ Very low airflow
+        - 1 ≤ V ≤ 20 m/s → ✅ Normal operational velocity
+        - 20 < V ≤ 50 m/s → ⚠️ High velocity, verify duct design
+        - V > 50 m/s → 🔴 Extremely high velocity, likely measurement error
+    • Feedback includes ΔP, ρ, Cp values and any warnings
+-->

@@ -486,7 +486,25 @@ CALCULATORS = [
 
 {"name": "Power Required (kW) Calculator", "url_name": "environment_power_required_kw_calculator", "plan_type": "corporate", "category": "environment"},
 
+{"name": "Plug Flow Biochemical Oxygen Demand (BOD) Removal (Effluent BOD) Calculator", "url_name": "environment_plug_flow_biochemical_oxygen_demand_bod_removal_effluent_bod_calculator", "plan_type": "corporate", "category": "environment"},
 
+{"name": "PPM to mg/m³ Conversion Calculator (Air Pollution)", "url_name": "environment_ppm_to_mg_m_conversion_air_pollution_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Plume Rise Estimation Calculator (Holland’s Equation)", "url_name": "environment_plume_rise_estimation_hollands_equation_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Percentage of Saturation (Humidity Ratio) Calculator", "url_name": "environment_percentage_of_saturation_humidity_ratio_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Plume Rise Height (ΔH) Calculator Under Stable & Calm Conditions", "url_name": "environment_plume_rise_height_under_stable_and_calm_conditions", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Plume Rise Height (ΔH) Calculator In Large Flow Rate", "url_name": "environment_plume_rise_height_large_flow_rate_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Plume Rise Height (ΔH) Calculator for Non-Buoyant Plumes", "url_name": "environment_plume_rise_height_non_buoyant_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Pitot Tube Velocity Calculator", "url_name": "pitot_tube_velocity_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Recycling Carbon Footprint Savings Calculator", "url_name": "environment_recycling_carbon_footprint_savings_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Recycling impact calculator", "url_name": "environment_recycling_impact_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 

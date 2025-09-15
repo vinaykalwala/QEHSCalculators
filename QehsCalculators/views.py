@@ -2311,6 +2311,31 @@ def environment_percentage_of_saturation_humidity_ratio_calculator(request):
 
 @login_required
 @subscription_required(plan_type="corporate")
+def environment_plume_rise_height_under_stable_and_calm_conditions(request):
+    return render(request, 'qehsfcalculators/environment/plume_rise_height_under_stable_and_calm_conditions.html',{'title': 'Plume Rise Height (ΔH) Calculator Under Stable & Calm Conditions'})
+
+
+@login_required
+@subscription_required(plan_type="corporate")
+def environment_plume_rise_height_large_flow_rate_calculator(request):
+    return render(request,'qehsfcalculators/environment/plume_rise_height_large_flow_rate.html',{'title': 'Plume Rise Height (ΔH) Calculator In Large Flow Rate'})
+
+
+@login_required
+@subscription_required(plan_type="corporate")
+def environment_plume_rise_height_non_buoyant_calculator(request):
+    return render(request,'qehsfcalculators/environment/plume_rise_height_non_buoyant.html',{'title': 'Plume Rise Height (ΔH) Calculator for Non-Buoyant Plumes'})
+
+
+@login_required
+@subscription_required(plan_type="corporate")
+def pitot_tube_velocity_calculator(request):
+    return render(request,'qehsfcalculators/environment/pitot_tube_velocity.html',{'title': 'Pitot Tube Velocity Calculator'})
+
+
+
+@login_required
+@subscription_required(plan_type="corporate")
 def environment_recycling_carbon_footprint_savings_calculator(request):
     return render(request, 'qehsfcalculators/environment/recycling_carbon_footprint_savings.html', {'title': 'Recycling Carbon Footprint Savings Calculator '})
 

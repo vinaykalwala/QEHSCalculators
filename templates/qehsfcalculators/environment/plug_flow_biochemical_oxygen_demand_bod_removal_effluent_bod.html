@@ -1,0 +1,693 @@
+{% extends 'base.html' %}
+{% block title %}Plug Flow Biochemical Oxygen Demand (BOD) Removal (Effluent BOD) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plug Flow Biochemical Oxygen Demand (BOD) Removal (Effluent BOD) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 38px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+<div class="calculator-header">
+    <h1>Plug Flow Biochemical Oxygen Demand (BOD) Removal (Effluent BOD) Calculator</h1>
+    <p>Calculate the <strong>Effluent BOD (mg/L)</strong> and <strong>Treatment Efficiency (%)</strong> based on first-order BOD removal kinetics in a plug flow reactor.</p>
+</div>
+
+<div class="calc-content">
+    <!-- Calculator -->
+    <div class="calc-card">
+        <h2>Enter Data</h2>
+
+        <div class="form-group">
+            <label for="li">Influent BOD (L<sub>i</sub>) (mg/L)</label>
+            <input type="number" id="li" class="form-input" min="0.1" step="any" placeholder="e.g., 250">
+        </div>
+
+        <div class="form-group">
+            <label for="k1">BOD Rate Constant (k₁) (1/day)</label>
+            <input type="number" id="k1" class="form-input" min="0.00" step="any" placeholder="e.g., 0.23">
+        </div>
+
+        <div class="form-group">
+            <label for="t">Detention Time (t) (days)</label>
+            <input type="number" id="t" class="form-input" min="0.0001" step="any" placeholder="e.g., 2.5">
+        </div>
+        
+        <button class="calculate-btn" onclick="calculateEffluentBOD()">Calculate Effluent BOD</button>
+    </div>
+
+    <!-- Result Section -->
+    <div class="result-card">
+        <div class="result-placeholder" id="placeholder">
+            <img src="/static/images/mlc_environment_result.png" alt="Effluent BOD illustration">
+            <p>This tool will calculate the <strong>Effluent BOD (mg/L)</strong> and <strong>Efficiency (%)</strong>.</p>
+        </div>
+        
+        <div class="result-error hidden" id="resultError">
+            <div class="error-icon">❌</div>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+         
+        <div class="result-value hidden" id="resultValue">
+            <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                <h2>Calculated Effluent BOD & Efficiency</h2>
+            </div>
+
+            <div class="rate-display">
+                <div class="rate-value" id="rateValue">0.0000</div>
+                <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">mg/L</div>
+            </div>
+
+            <div class="result-feedback">
+                <div class="feedback-title">Assessment</div>
+                <div class="feedback-content" id="feedbackContent"></div>
+            </div>
+            <div class="btn-wrapper">
+                <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notes Section -->
+<div class="note-section">
+    <div class="note-card">
+        <h3>📘 About This Calculator</h3>
+        <p>
+            The <strong>Plug Flow BOD Removal Calculator</strong> estimates <strong>Effluent BOD (L<sub>e</sub>)</strong> and
+            <strong>Treatment Efficiency (%)</strong> in a plug flow biological reactor using
+            first-order kinetics. This helps evaluate treatment performance and compliance.
+        </p>
+    </div>
+    
+    <div class="note-card">
+        <h3>📊 Interpretation</h3>
+        <ul class="note-list">
+            <li><span class="good">Efficiency &gt; 85%</span> → ✅ High removal (Excellent treatment)</li>
+            <li><span class="average">50% ≤ Efficiency ≤ 85%</span> → ⚠️ Moderate removal (May need optimization)</li>
+            <li><span class="bad">Efficiency &lt; 50%</span> → 🔴 Low removal (Inadequate treatment)</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>⚠️Input Validations</h3>
+        <ul>
+            <li>✔️ <strong>L<sub>i</sub> (Influent BOD):</strong> Must be &gt;= 0.1 mg/L, typically 20–2000 mg/L.</li>
+            <li>✔️ <strong>k₁ (Rate Constant):</strong> Must be ≥ 0; typical range 0.05–0.30 1/day.</li>
+            <li>✔️ <strong>t (Detention Time):</strong> Must be &gt; 0.0001 days (8.6 seconds); typical 0.5–10 days.</li>
+            <li>❌ Negative values are invalid.</li>
+            <li>⚠️ Extremely large inputs (e.g., L<sub>i</sub> &gt; 10000 mg/L, k₁ &gt; 5/day, t &gt; 3650 days) trigger warnings.</li>
+            <li>⚠️ k₁ = 0 is allowed but efficiency will be 0% (no treatment).</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>🌍 Key Applications</h3>
+        <ul class="note-list">
+            <li><strong>Sewage Treatment:</strong> Effluent compliance monitoring</li>
+            <li><strong>Design Optimization:</strong> Aeration tanks, oxidation ditches</li>
+            <li><strong>Process Control:</strong> Predict treatment efficiency under different operating conditions</li>
+            <li><strong>Regulatory Reporting:</strong> QEHS and environmental audits</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+/* Error handling */
+function showErrors(errors) {
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+
+  errorMessage.innerHTML = errors.join("<br>");
+  errorBox.classList.remove("hidden");
+  placeholder.classList.add("hidden");
+  resultValue.classList.add("hidden");
+}
+
+/* Main BOD calculation */
+function calculateEffluentBOD() {
+  const liRaw = document.getElementById("li").value.trim();
+  const k1Raw = document.getElementById("k1").value.trim();
+  const tRaw = document.getElementById("t").value.trim();
+
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+  const rateEl = document.getElementById("rateValue");
+  const feedbackEl = document.getElementById("feedbackContent");
+
+  errorBox.classList.add("hidden");
+  errorMessage.innerHTML = "";
+  feedbackEl.innerHTML = "";
+
+  const errors = [];
+  const warnings = [];
+
+  /* Required fields check */
+  if (liRaw === "") errors.push("👉 Please enter Influent BOD (mg/L).");
+  if (k1Raw === "") errors.push("👉 Please enter BOD Rate Constant (1/day).");
+  if (tRaw === "") errors.push("👉 Please enter Detention Time (days).");
+
+  if (errors.length) return showErrors(errors);
+
+  const Li = parseFloat(liRaw);
+  const k1 = parseFloat(k1Raw);
+  const t = parseFloat(tRaw);
+
+  /* Input Validations */
+  if (!Number.isFinite(Li) || Li < 0.1) {
+    errors.push("👉 Influent BOD must be ≥ 0.1 mg/L.");
+  } else if (Li > 50000) {
+    warnings.push("⚠️ Influent BOD is extremely high — verify units (mg/L vs g/L).");
+  }
+
+  if (!Number.isFinite(k1) || k1 < 0) {
+    errors.push("👉 BOD rate constant (k₁) must be ≥ 0 (1/day).");
+  } else if (k1 > 5) {
+    warnings.push("⚠️ Very high k₁ — check if input is realistic.");
+  }
+
+  if (!Number.isFinite(t) || t < 0.0001) {
+    errors.push("👉 Detention time must be ≥ 0.0001 days (~8.6 sec).");
+  } else if (t < 0.01) {
+    warnings.push("⚠️ Very short detention time — results may not represent realistic treatment.");
+  } else if (t > 365) {
+    warnings.push("⚠️ Very large detention time — verify if units are correct.");
+  }
+
+  if (errors.length) return showErrors(errors);
+
+  /* Calculation: Le = Li * exp(-k1 * t) */
+  const Le = Li * Math.exp(-k1 * t);
+  if (!Number.isFinite(Le) || Le < 0) {
+    return showErrors(["⚠️ Computed effluent BOD is invalid."]);
+  }
+
+  if (Le > Li) {
+    warnings.push("⚠️ Effluent BOD > Influent BOD — check inputs.");
+  }
+
+  const efficiency = ((Li - Le) / Li) * 100;
+
+  if (efficiency > 100.0001 || efficiency < -0.0001) {
+    return showErrors(["⚠️ Efficiency is outside valid range (0–100%). Check inputs."]);
+  }
+
+  /* Format result for display */
+  let LeDisplay = (Le < 0.001 && Le > 0) ? Le.toExponential(3) : Le.toFixed(4);
+  const efficiencyDisplay = efficiency.toFixed(2);
+
+  /* Classification */
+  let statusMsg = "";
+  if (efficiency > 85) statusMsg = "✅ High efficiency (Excellent treatment)";
+  else if (efficiency >= 50) statusMsg = "⚠️ Moderate efficiency (May need optimization)";
+  else statusMsg = "🔴 Low efficiency (Inadequate treatment)";
+
+  /* Detailed breakdown */
+  let details = `<div>Effluent BOD (L<sub>e</sub>): <b>${LeDisplay}</b> mg/L</div>`;
+  details += `<div>Influent BOD (L<sub>i</sub>): <b>${Li.toFixed(2)}</b> mg/L</div>`;
+  details += `<div>BOD Rate Constant (k₁): <b>${k1.toFixed(3)}</b> 1/day</div>`;
+  details += `<div>Detention Time (t): <b>${t.toFixed(3)}</b> days</div>`;
+  details += `<div>Efficiency: <b>${efficiencyDisplay}%</b></div>`;
+  if (warnings.length) details += `<div style="margin-top:6px; color:#b35d00; font-size:0.95em;">${warnings.join(" | ")}</div>`;
+
+  /* Update UI */
+  rateEl.textContent = LeDisplay;
+  feedbackEl.innerHTML = `<div>${statusMsg}</div>${details}`;
+
+  placeholder.classList.add("hidden");
+  resultValue.classList.remove("hidden");
+  errorBox.classList.add("hidden");
+}
+
+/* Print functionality */
+function printReport() {
+  const el = document.getElementById('printDate');
+  if (el) {
+    el.textContent = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  }
+  window.print();
+
+}
+</script>
+
+
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+<!-- 
+📌 BOD Efficiency Calculator Notes
+
+🔹 Formula Used:
+    Le = Li × exp(-k1 × t)
+    Efficiency (%) = ((Li - Le) / Li) × 100
+
+🔹 Input Validations:
+    • Influent BOD (Li):
+        - Must be ≥ 0.1 mg/L
+        - Warning if > 50,000 mg/L (possible unit issue)
+    • BOD Rate Constant (k1):
+        - Must be ≥ 0 (1/day)
+        - Warning if > 5 (unrealistic)
+    • Detention Time (t):
+        - Must be ≥ 0.0001 days (~8.6 sec)
+        - Warning if < 0.01 days (too short)
+        - Warning if > 365 days (too large)
+
+🔹 Output Validations:
+    • Effluent BOD (Le):
+        - Must be finite and ≥ 0
+        - Warning if Le > Li
+    • Efficiency:
+        - Must be within 0–100% range
+        - Classified as:
+            > 85% → ✅ High efficiency (Excellent treatment)
+            50–85% → ⚠️ Moderate efficiency (May need optimization)
+            < 50% → 🔴 Low efficiency (Inadequate treatment)
+-->
