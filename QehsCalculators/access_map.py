@@ -36,6 +36,8 @@ CALCULATORS = [
 {"name": "Corrective Action Effectiveness (CAE) Calculator", "url_name": "quality_corrective_action_effectiveness_cae_calculator", "plan_type": "corporate", "category": "quality"},
 
 
+{"name": "Control Score Calculator", "url_name": "quality_control_score_calculator", "plan_type": "corporate", "category": "quality"},
+
 
 
 {"name": "Critical Number of Samples Calculator", "url_name": "quality_critical_number_of_samples_calculator", "plan_type": "corporate", "category": "quality"},
@@ -90,6 +92,7 @@ CALCULATORS = [
 
 
 {"name": "Overall Equipment Effectiveness (OEE) Calculator", "url_name": "quality_overall_equipment_effectiveness_oee_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Orifice Meter Flow Calculator", "url_name": "quality_orifice_meter_flow_calculator", "plan_type": "corporate", "category": "quality"},
 
 
 {"name": "Percentage Error when using velocity Calculator", "url_name": "quality_percentage_error_when_using_velocity_calculator", "plan_type": "corporate", "category": "quality"},
@@ -152,6 +155,7 @@ CALCULATORS = [
 {"name": "Two-Pack Mix Density Calculator", "url_name": "quality_two_pack_mix_density_calculator", "plan_type": "corporate", "category": "quality"},
 
 
+{"name": "Venturi Meter Flow Calculator", "url_name": "quality_venturi_meter_flow_calculator", "plan_type": "corporate", "category": "quality"},
 {"name": "Vortex Shedding Frequency Calculator", "url_name": "quality_vortex_shedding_frequency_calculator", "plan_type": "corporate", "category": "quality"},
 
 
