@@ -895,6 +895,26 @@ CALCULATORS = [
 {"name": "No-Overpressure Vent Area Calculator", "url_name":"safety_no_overpressure_vent_area_calculator", "plan_type": "corporate", "category": "safety"},
 
 
+{"name": "No-Overpressure Vent Area Formula (External Heating)", "url_name":"safety_no_overpressure_vent_area_formula_external_heating_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "No-Overpressure Vent Area Formula (All-Liquid Venting)", "url_name":"safety_no_overpressure_vent_area_formula_all_liquid_venting_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Normalized Mass Flux Formula (Low-Quality Region) Calculator", "url_name":"safety_normalized_mass_flux_formula_low_quality_region_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "NIOSH Lifting Index (LI) Calculator", "url_name":"safety_niosh_lifting_index_li_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Non-Viscous Liquid Vent Area Calculator", "url_name":"safety_non_viscous_liquid_vent_area_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "OSHA Total Recordable Incident Rate (TRIR) Calculator", "url_name":"safety_osha_total_recordable_incident_rate_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "OSHA DART Rate Calculator", "url_name":"safety_osha_dart_rate_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Ohm's Law Calculator", "url_name":"safety_ohms_law_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Orifice Plate Beta Ratio Calculator", "url_name":"safety_orifice_plate_beta_ratio_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "PPE Compliance Rate Calculator", "url_name":"safety_ppe_compilance_rate_calculator", "plan_type": "corporate", "category": "safety"},
+
 
 
 
