@@ -1502,6 +1502,13 @@ def quality_wet_film_thickness_wft_calculator(request):
 def quality_water_ion_product_calculator(request):
     return render(request, 'qehsfcalculators/quality/water_ion_product.html', {'title': 'Water Ion Product Calculator'})
 
+
+@login_required
+@subscription_required(plan_type="corporate")
+def quality_orifice_meter_flow_calculator(request):
+    return render(request, 'qehsfcalculators/quality/orifice_meter_flow.html', {'title': 'Orifice Meter Flow Calculator'})
+
+
 @login_required
 @subscription_required(plan_type="corporate")
 def environment_main_calculator(request):
