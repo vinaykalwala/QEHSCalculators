@@ -956,6 +956,14 @@ CALCULATORS = [
 {"name": "Orifice Plate Beta Ratio Calculator", "url_name":"safety_orifice_plate_beta_ratio_calculator", "plan_type": "corporate", "category": "safety"},
 
 {"name": "PPE Compliance Rate Calculator", "url_name":"safety_ppe_compilance_rate_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Pressure Gradient Calculator", "url_name":"safety_pressure_gradient_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Potential Energy Calculator", "url_name":"safety_potential_energy_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Proportion of Vapor in Two-Phase Discharge Calculator", "url_name":"safety_proportion_of_vapor_in_two_phase_discharge_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Pore Pressure Calculator", "url_name":"safety_pore_pressure_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Pressure Drop Calculator", "url_name":"safety_pressure_drop_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Pressure Drop Across A Steam Valve  Calculator", "url_name":"safety_pressure_drop_across_a_steam_valve_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Pit Area Calculation", "url_name":"safety_pit_area_calculation_calculator", "plan_type": "corporate", "category": "safety"},
+
 
 
 

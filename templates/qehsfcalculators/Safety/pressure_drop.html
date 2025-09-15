@@ -1,0 +1,619 @@
+{% extends 'base.html' %}
+{% block title %}Pressure Drop Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accident Rate Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+          @media (max-width: 768px) {
+    .rate-value {
+        font-size: 28px; /* smaller font for tablets/mobiles */
+    }
+}
+
+@media (max-width: 480px) {
+    .rate-value {
+        font-size: 24px; /* even smaller for phones */
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+   <div class="calculator-container printable" id="printArea">
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+
+    <div class="calculator-header">
+        <h1>Pressure Drop Calculator</h1>
+        <p>Estimate the pressure drop per meter in a pipeline due to fluid flow.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Calculator -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+            <div class="form-group">
+                <label for="P1">Upstream Pressure (P<sub>1</sub>) in bar</label>
+                <input type="number" id="P1" class="form-input" min="0" placeholder="e.g., 10">
+            </div>
+            <div class="form-group">
+                <label for="P2">Downstream Pressure (P<sub>2</sub>) in bar</label>
+                <input type="number" id="P2" class="form-input" min="0" placeholder="e.g., 8">
+            </div>
+            <div class="form-group">
+                <label for="L">Pipe Length (L) in meters</label>
+                <input type="number" id="L" class="form-input" min="0" placeholder="e.g., 100">
+            </div>
+            <div class="form-group">
+                <label for="m">Mass Flow Rate (ṁ) in kg/h</label>
+                <input type="number" id="m" class="form-input" min="0" placeholder="e.g., 5000">
+            </div>
+            <div class="form-group">
+                <label for="D">Pipe Diameter (D) in mm</label>
+                <input type="number" id="D" class="form-input" min="0" placeholder="e.g., 50">
+            </div>
+
+            <button class="calculate-btn" onclick="calculatePressureDrop()">Calculate Pressure Drop</button>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="{% static 'images/resultimage.png' %}" alt="Pipe illustration">
+                <p>This tool calculates <strong>Pressure Drop per meter</strong>. Enter your data to see results and feedback.</p>
+            </div>
+
+            <div class="result-error hidden" id="resultError">
+                <div class="error-icon">❌</div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+
+            <div class="result-value hidden" id="resultValue">
+                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Pressure Drop Result</h2>
+                </div>
+                <div class="rate-value" id="pressureDropValue">0.0000</div>
+                <div class="rate-label" style="color:#2980b9; font-size:16px; font-weight:bold;">
+                    bar/m
+                </div>
+
+                <div class="result-feedback">
+                    <div class="feedback-title">Assessment</div>
+                    <div class="feedback-content" id="feedbackContent"></div>
+                </div>
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="note-section">
+       <div class="note-card">
+    <h3>📘 About This Calculator</h3>
+    <p>
+        The <strong>Pressure Drop Calculator</strong> is designed for engineers, technicians, and system designers to evaluate the loss of pressure that occurs as a fluid flows through a pipeline. 
+        This loss occurs due to friction between the fluid and the pipe walls, changes in pipe diameter, bends, fittings, and other flow obstructions.
+    </p>
+    <p>
+        Accurate pressure drop calculation is critical for ensuring that pumps, compressors, and other equipment operate efficiently. It helps to prevent excessive energy consumption, maintain proper flow rates, and reduce the risk of equipment failure due to overpressure or cavitation.
+    </p>
+    <p>
+        By using this calculator, users can:
+        <ul>
+            <li>Quickly estimate pressure losses along a pipeline section without manual calculations.</li>
+            <li>Assess whether pipe diameter or flow rate adjustments are needed.</li>
+            <li>Design safe and efficient piping systems in industrial or municipal applications.</li>
+            <li>Understand the effect of fluid properties, flow rate, and pipe geometry on pressure drop.</li>
+        </ul>
+    </p>
+</div>
+<div class="note-card">
+    <h3>❓ What is Pressure Drop?</h3>
+    <p>
+        <strong>Pressure drop</strong> is the reduction in pressure of a fluid as it moves through a pipeline or flow system. It occurs due to:
+        <ul>
+            <li>Friction between the fluid and the pipe wall.</li>
+            <li>Changes in pipe diameter, direction, or fittings (like elbows, valves, bends).</li>
+            <li>Obstructions or turbulence in the flow.</li>
+        </ul>
+    </p>
+    <p>
+        Pressure drop is usually measured in units of <strong>bar/m</strong> or <strong>Pa/m</strong>. A higher pressure drop means more energy is required to move the fluid, which can impact system efficiency and operating costs.
+    </p>
+    <p>
+        Understanding pressure drop is crucial for:
+        <ul>
+            <li>Proper pump or compressor sizing.</li>
+            <li>Maintaining desired flow rates in pipelines.</li>
+            <li>Preventing excessive stress and wear on pipes and equipment.</li>
+            <li>Optimizing energy usage and reducing operational costs.</li>
+        </ul>
+    </p>
+</div>
+
+
+        <div class="note-card">
+            <h3>⚙️ Parameters Used</h3>
+            <ul class="note-list">
+                 <li><strong>P₁ (Upstream Pressure):</strong> Pressure at the start of the pipeline.</li>
+        <li><strong>P₂ (Downstream Pressure):</strong> Pressure at the end of the pipeline.</li>
+        <li><strong>L (Pipe Length):</strong> The total distance over which pressure drop occurs.</li>
+        <li><strong>ṁ (Mass Flow Rate):</strong> The rate at which fluid moves through the pipe.</li>
+        <li><strong>D (Pipe Diameter):</strong> The width of the pipe, affecting resistance.</li>
+
+            </ul>
+        </div>
+
+       <div class="note-card">
+    <h3>📊 Interpretation</h3>
+    <ul class="note-list">
+        <li><span class="good">0 – 2 bar/m</span> → Low pressure drop. System operates efficiently; minimal energy loss; safe for standard industrial pipelines.</li>
+        <li><span class="average">2 – 10 bar/m</span> → Moderate pressure drop. Normal range in typical pipelines; monitor for energy efficiency and pump sizing; ensure equipment ratings are sufficient.</li>
+        <li><span class="bad">&gt;10 bar/m</span> → High pressure drop. Indicates potential system stress; consider increasing pipe diameter, reducing flow rate, or verifying pipeline design; could impact safety and equipment lifespan.</li>
+        <li><span class="warning">Negative value</span> → Invalid calculation. Likely input error (e.g., P₂ ≥ P₁, zero length, or zero diameter); review input parameters carefully.</li>
+    </ul>
+</div>
+
+<div class="note-card">
+    <h3>✅ Input Validation Rules</h3>
+    <ul class="note-list">
+        <li><strong>P₁ (Upstream Pressure):</strong> Must be positive (0.1–500 bar) and greater than P₂. Ensures physically realistic flow and safety compliance.</li>
+        <li><strong>P₂ (Downstream Pressure):</strong> Must be positive and less than P₁. Maintains correct flow direction and prevents negative pressure drop.</li>
+        <li><strong>L (Pipe Length):</strong> Must be positive (>0 m). Prevents division by zero and ensures realistic pipeline lengths.</li>
+        <li><strong>ṁ (Mass Flow Rate):</strong> Must be positive (>0 kg/h). Ensures fluid is moving; extremely high values (>1,000,000 kg/h) should be verified for unit correctness.</li>
+        <li><strong>D (Pipe Diameter):</strong> Must be positive (>0 mm). Extremely large values (>1000 mm) should be verified to avoid unrealistic calculations or unit errors.</li>
+        <li><strong>Cross-field consistency:</strong> P₂ &lt; P₁, L &gt; 0, D &gt; 0, ṁ &gt; 0. Violations indicate input errors or unsafe assumptions.</li>
+        <li><strong>Edge cases:</strong> Zero or negative values, extremely high or low pressures, or unusually large diameters trigger warnings and require verification before proceeding.</li>
+    </ul>
+</div>
+
+    </div>
+</div>
+
+<script>
+function calculatePressureDrop() {
+    const P1 = parseFloat(document.getElementById("P1").value);
+    const P2 = parseFloat(document.getElementById("P2").value);
+    const L = parseFloat(document.getElementById("L").value);
+    const m = parseFloat(document.getElementById("m").value);
+    const D = parseFloat(document.getElementById("D").value);
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const feedbackContent = document.getElementById('feedbackContent');
+
+    let errors = [];
+
+    // Input validations
+    if (isNaN(P1) || P1 <= 0) errors.push("👉 P₁ must be positive and realistic (0.1–500 bar).");
+    if (isNaN(P2) || P2 <= 0) errors.push("👉 P₂ must be positive and less than P₁.");
+    if (!isNaN(P1) && !isNaN(P2) && P2 >= P1) errors.push("👉 P₂ must be less than P₁ to maintain downstream flow.");
+    if (isNaN(L) || L <= 0) errors.push("👉 Pipe length (L) must be positive.");
+    if (isNaN(m) || m <= 0) errors.push("👉 Mass flow rate (ṁ) must be positive.");
+    if (isNaN(D) || D <= 0) errors.push("👉 Pipe diameter (D) must be positive.");
+
+    // Extreme value checks with detailed guidance
+if (P1 > 500) 
+    errors.push("⚠️ P₁ unusually high (>500 bar). Verify the units and application. Typical industrial pipelines operate between 0.1–500 bar. Exceeding this may indicate a unit conversion issue or a non-standard system. Consult design specifications and safety limits before proceeding.");
+
+if (D > 1000) 
+    errors.push("⚠️ Pipe diameter unusually large (>1000 mm). Verify units (mm vs. cm vs. inches) and ensure this matches the intended pipeline. Extremely large diameters may cause unrealistic pressure drop calculations or indicate data entry errors.");
+
+if (m > 1000000) 
+    errors.push("⚠️ Mass flow rate unusually high (>1,000,000 kg/h). Check that the units are correct (kg/h vs. kg/s) and ensure this value reflects the actual process conditions. Such high flow rates are uncommon in standard industrial systems and may result in calculation errors or unsafe design recommendations.");
+
+
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // Pressure drop formula
+    const leftSide = (Math.pow(P1, 1.9375) - Math.pow(P2, 1.9375)) / L;
+    const rightSide = Math.pow(m, 1.883) / (0.011 * Math.pow(D, 4.997));
+    const pressureDrop = leftSide - rightSide;
+
+    document.getElementById('pressureDropValue').textContent = pressureDrop.toFixed(4);
+
+    // Feedback & Interpretation
+    let feedback = "", color = "";
+
+    if (pressureDrop < 0) {
+        feedback = "❌ Invalid result: Check input values.";
+        color = "red";
+    } else if (pressureDrop <= 2) {
+        feedback = "✅ Low pressure drop: system efficient.";
+        color = "green";
+    } else if (pressureDrop <= 10) {
+        feedback = "⚠️ Moderate pressure drop: normal range.";
+        color = "orange";
+    } else {
+        feedback = "🔥 High pressure drop: consider design adjustments.";
+        color = "red";
+    }
+
+    feedbackContent.innerHTML = `<strong style="color:${color}">${feedback}</strong>`;
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+</script>
+
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+<!-- 1️⃣ Input Validation Rules (QEHS Perspective)
+Input	Unit	Min	Max	Decimals	Logical Constraints	Rationale
+P₁ (Upstream Pressure)	bar	0.1	500	2	Must be > P₂	Prevents negative/zero pressures which are physically impossible; ensures downstream < upstream.
+P₂ (Downstream Pressure)	bar	0.1	P₁-0.01	2	Must be < P₁	Ensures flow is physically possible; avoids negative or zero pressure drop.
+L (Pipe Length)	m	0.1	5000	2	—	Prevents division by zero and ensures realistic industrial pipeline lengths.
+ṁ (Mass Flow Rate)	kg/h	0.1	1,000,000	2	—	Ensures fluid is moving; extremely high values trigger verification for unit correctness.
+D (Pipe Diameter)	mm	1	1000	2	—	Prevents division by zero in formula; ensures realistic industrial pipe sizes.
+
+Additional Cross-field Validations:
+
+P₂ < P₁ (flow must move downstream).
+
+L > 0 (prevents division by zero in formula).
+
+D > 0 (prevents mathematical errors).
+
+ṁ and D extreme values (unit verification).
+
+2️⃣ Output Validation & Threshold Logic
+Pressure Drop (bar/m)	Interpretation	QEHS/Compliance Rationale
+< 0	❌ Invalid	Indicates incorrect inputs; impossible scenario; must be flagged.
+0 – 2	✅ Low	Safe system operation; low energy loss.
+2 – 10	⚠️ Moderate	Normal range; monitor for system efficiency; ensure pumps/compressors rated for this loss.
+> 10	🔥 High	Potential safety and operational risk; may cause equipment stress or cavitation; corrective action needed.
+
+Compliance Notes:
+
+Negative or extreme values must stop calculations and prompt corrective actions.
+
+High pressure drops are logged in safety/audit reports for design review.
+
+3️⃣ Edge Case Handling
+Scenario	Handling	Compliance Rationale
+P₂ ≥ P₁	Block calculation	Ensures flow direction is correct.
+L = 0	Block calculation	Prevents division by zero, which could produce unrealistic output.
+D = 0	Block calculation	Prevents infinite pressure drop; protects user from calculation errors.
+ṁ = 0	Block calculation	Static fluid has no pressure drop; prevents meaningless result.
+Extreme values (P₁>500, D>1000, ṁ>1,000,000)	Show warning to verify units	Ensures data accuracy and audit compliance. -->

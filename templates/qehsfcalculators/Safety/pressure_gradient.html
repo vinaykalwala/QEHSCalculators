@@ -1,0 +1,633 @@
+{% extends 'base.html' %}
+{% block title %}Pressure Gradient Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accident Rate Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+          @media (max-width: 768px) {
+    .rate-value {
+        font-size: 28px; /* smaller font for tablets/mobiles */
+    }
+}
+
+@media (max-width: 480px) {
+    .rate-value {
+        font-size: 24px; /* even smaller for phones */
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+   <div class="calculator-container printable" id="printArea">
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+
+    <!-- Header -->
+    <div class="calculator-header">
+        <h1>Pressure Gradient Calculator</h1>
+        <p>Calculate the pressure gradient (psi/ft) to analyze fluid mechanics and safety system performance</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Calculator -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+            <div class="form-group">
+                <label for="pressure">Pressure (psi)</label>
+                <input type="number" id="pressure" class="form-input" min="0" placeholder="e.g., 3500">
+            </div>
+            <div class="form-group">
+                <label for="depth">Depth (ft)</label>
+                <input type="number" id="depth" class="form-input" min="1" placeholder="e.g., 5000">
+            </div>
+
+            <button class="calculate-btn" onclick="calculatePressureGradient()">Calculate Pressure Gradient</button>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="{% static 'images/resultimage.png' %}" alt="Pressure illustration">
+                <p>This tool will calculate the <strong>Pressure Gradient</strong>. Enter your data to see results and insights here.</p>
+            </div>
+
+            <div class="result-error hidden" id="resultError">
+                <div class="error-icon">❌</div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+
+            <div class="result-value hidden" id="resultValue">
+                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Pressure Gradient Result</h2>
+                </div>
+                <div class="rate-value" id="pressureGradientValue">0.0000</div>
+                <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">psi per ft</div>
+
+                <div class="result-feedback">
+                    <div class="feedback-title">Safety & Engineering Assessment</div>
+                    <div class="feedback-content" id="feedbackContent"></div>
+                </div>
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="note-section">
+        <div class="note-card">
+            <h3>📘 About This Calculator</h3>
+            <p>
+                The <strong>Pressure Gradient Calculator</strong> computes the rate of pressure change with depth, 
+                expressed in <strong>psi per foot (psi/ft)</strong>. This metric is essential in drilling, 
+                fire suppression systems, hydraulic engineering, and environmental safety.
+            </p>
+        </div>
+
+        <div class="note-card">
+            <h3>❓ What is Pressure Gradient?</h3>
+            <p>
+                The <strong>Pressure Gradient (PG)</strong> is the change in pressure per unit of depth. 
+                It indicates how rapidly pressure increases as depth increases, 
+                and is critical in predicting system stability, safety, and equipment requirements.
+            </p>
+        </div>
+                <div class="note-card">
+
+  <h3> Real-Life Applications of Pressure Gradient Calculation</h3>
+    <p>The pressure gradient formula is widely used in various industries, including:</p>
+    <ul>
+        <li><strong>Oil & Gas Industry</strong>: Determines wellbore pressure to prevent blowouts and optimize drilling operations.</li>
+        <li><strong>Fire Safety Systems</strong>: Helps in designing fire suppression systems, ensuring proper water pressure distribution.</li>
+        <li><strong>Pipeline Engineering</strong>: Ensures pipelines handle appropriate pressure changes across different depths.</li>
+        <li><strong>Environmental Safety</strong>: Used in underground storage tanks and gas reservoirs to monitor pressure variations.</li>
+        <li><strong>Hydraulic Engineering</strong>: Determines the required pressure for fluid movement in dams, canals, and irrigation systems.</li>
+    </ul>
+                </div>
+        <div class="note-card">
+            <h3>⚙️ Parameters Used</h3>
+            <ul class="note-list">
+                <li><strong>PG (Pressure Gradient)</strong>: The rate of pressure change with depth, measured in psi/ft. A higher PG indicates a steeper pressure change.</li>
+        <li><strong>P (Pressure)</strong>: The total pressure at a given point, measured in pounds per square inch (psi).</li>
+        <li><strong>D (Depth)</strong>: The vertical depth from the surface, measured in feet. This represents how deep the pressure is being measured.</li>
+          </ul>
+        </div>
+
+       <div class="note-card">
+    <h3>📊 Interpretation</h3>
+    <ul class="note-list">
+        <li><span class="good">≤ 0.45 psi/ft</span> → Normal hydrostatic gradient. Safe baseline; typical for fresh water systems. No immediate action required.</li>
+        <li><span class="average">0.45 – 0.70 psi/ft</span> → Moderate gradient. May indicate saline water or moderate-pressure fluid. Monitor system stability and ensure operational controls.</li>
+        <li><span class="bad">0.70 – 1.0 psi/ft</span> → High gradient. Could indicate abnormally pressured formations or high-pressure fire suppression systems. Review system design and enforce safety controls.</li>
+        <li><span class="critical">> 1.0 psi/ft</span> → Critical gradient. Extremely high pressure; requires immediate engineering assessment and corrective action to prevent potential hazards.</li>
+        <li><span class="extreme">> 5.0 psi/ft</span> → Unrealistic or physically impossible. Likely input error. Recheck pressure and depth values before reporting.</li>
+    </ul>
+</div>
+
+<div class="note-card">
+    <h3>✅ Input Validation Rules</h3>
+    <ul class="note-list">
+        <li><strong>Pressure (psi):</strong> Must be a positive number. Typical range: 0–20,000 psi for standard systems; extreme cases up to 100,000 psi. Warn if >20,000 psi. Reject if >100,000 psi.</li>
+        <li><strong>Depth (ft):</strong> Must be a positive number greater than zero. Typical operational range: 1–50,000 ft. Reject values ≤0 or >50,000 ft.</li>
+        <li><strong>Division check:</strong> Depth cannot be zero (to prevent division by zero errors).</li>
+        <li><strong>Decimal precision:</strong> Pressure: max 2 decimal places. Depth: max 1 decimal place. Aligns with audit-reporting standards.</li>
+        <li><strong>Cross-field consistency:</strong> Extremely high pressure with very shallow depth resulting in PG > 5.0 psi/ft should trigger a warning and be flagged for review.</li>
+        <li><strong>Missing/invalid inputs:</strong> Blank, non-numeric, or negative entries must be blocked with an error message before calculation.</li>
+    </ul>
+</div>
+
+        <div class="note-card">
+            <h3>💡 Important Note</h3>
+            <p>
+                A realistic pressure gradient helps ensure structural integrity of wells, pipelines, and fire suppression systems. 
+                Always compare calculated values with industry references before making engineering or safety decisions.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+   function calculatePressureGradient() {
+    const pressureInput = document.getElementById('pressure').value.trim();
+    const depthInput = document.getElementById('depth').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+
+    // --- Validation: Pressure (P, psi) ---
+    if (pressureInput === "") {
+        errors.push("👉 Please enter pressure (psi).");
+    } else if (isNaN(pressureInput)) {
+        errors.push("👉 Pressure must be a number.");
+    } else {
+        const P = parseFloat(pressureInput);
+        if (P < 0) errors.push("👉 Pressure cannot be negative.");
+        if (P > 100000) errors.push("👉 Pressure exceeds realistic maximum (>100,000 psi).");
+        if (P > 20000 && P <= 100000) errors.push("⚠️ Pressure above 20,000 psi is unusually high. Verify inputs.");
+        if (!/^\d+(\.\d{1,2})?$/.test(pressureInput)) {
+            errors.push("👉 Pressure can have max 2 decimal places.");
+        }
+    }
+
+    // --- Validation: Depth (D, ft) ---
+    if (depthInput === "") {
+        errors.push("👉 Please enter depth (ft).");
+    } else if (isNaN(depthInput)) {
+        errors.push("👉 Depth must be a number.");
+    } else {
+        const D = parseFloat(depthInput);
+        if (D <= 0) errors.push("👉 Depth must be greater than zero (cannot divide by zero).");
+        if (D > 50000) errors.push("👉 Depth exceeds realistic maximum (>50,000 ft).");
+        if (!/^\d+(\.\d{1})?$/.test(depthInput)) {
+            errors.push("👉 Depth can have max 1 decimal place.");
+        }
+    }
+
+    // Display errors if any
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // --- Calculation ---
+    const P = parseFloat(pressureInput);
+    const D = parseFloat(depthInput);
+    const PG = P / D;
+
+    // Handle unrealistic PG
+    if (PG > 5) {
+        errorMessage.innerHTML = "❌ Calculated PG exceeds 5.0 psi/ft. This is unrealistic. Recheck inputs.";
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    document.getElementById('pressureGradientValue').textContent = PG.toFixed(4);
+
+    // --- Feedback interpretation ---
+    let feedback = "";
+    if (PG === 0) {
+        feedback = "✅ <strong>No gradient.</strong> Pressure is zero.";
+    } else if (PG <= 0.45) {
+        feedback = "✅ <strong>Safe range.</strong> Typical hydrostatic gradient.";
+    } else if (PG > 0.45 && PG <= 0.70) {
+        feedback = "⚠️ <strong>Moderate range.</strong> Monitor system conditions.";
+    } else if (PG > 0.70 && PG <= 1.0) {
+        feedback = "🚨 <strong>High pressure.</strong> Ensure safety controls are in place.";
+    } else {
+        feedback = "❌ <strong>Critical!</strong> Extremely high gradient. Investigate immediately.";
+    }
+
+    document.getElementById('feedbackContent').innerHTML = feedback;
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+   
+</script>
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+<!-- 1. Input Validation Rules (Real-World, QEHS & Fire Safety)
+Pressure (P, psi)
+
+Type: Positive number, decimals allowed.
+
+Range (Typical industry):
+
+Normal operating ranges: 0 – 20,000 psi (fire systems, pipelines, wellbores).
+
+Extreme but possible: up to 100,000 psi (specialized drilling/experimental cases).
+
+Validation rules:
+
+Must be ≥ 0.
+
+Warn if P > 20,000 (abnormally high).
+
+Reject if P > 100,000 (likely input error).
+
+Allow up to 2 decimal places (precision beyond that is not meaningful in field reporting).
+
+Depth (D, ft)
+
+Type: Positive integer or decimal (some safety reports use decimals in meters/converted to feet).
+
+Range (Typical industry):
+
+Fire systems: 1 – 200 ft (sprinkler/hydrant risers).
+
+Oil/gas drilling: 1 – 30,000 ft typical.
+
+Absolute max accepted: 50,000 ft.
+
+Validation rules:
+
+Must be > 0 (cannot divide by zero).
+
+Reject if D > 50,000.
+
+Allow up to 1 decimal place (depth reporting is rarely beyond 0.1 ft).
+
+Cross-Field Dependency
+
+If P > 0, then D > 0.
+
+If P = 0, gradient must always return 0 psi/ft (valid, but only if D > 0).
+
+Prevent meaningless ratios: e.g., P > 50,000 psi with D < 10 ft → would result in PG > 5000 psi/ft which is non-physical.
+
+2. Output Validation & Thresholds
+
+Pressure Gradient (PG = P ÷ D, psi/ft)
+Thresholds grounded in safety audits and fire/oil standards:
+
+≤ 0.45 psi/ft → Normal hydrostatic water column (baseline, safe).
+
+0.45 – 0.70 psi/ft → Saline water/brine systems, moderate. Requires monitoring.
+
+0.70 – 1.0 psi/ft → Abnormally pressured systems. Action required.
+
+> 1.0 psi/ft → Red flag. Can indicate blowout risk, pipe rupture risk, or unsafe fire system design.
+
+> 5.0 psi/ft → Impossible/unrealistic → warn user to recheck inputs. -->
