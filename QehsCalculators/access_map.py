@@ -494,6 +494,26 @@ CALCULATORS = [
 
 #environment calculators from  bottom to top
 
+{"name": "Thermal transmittance (U) from the individual thermal resistances Calculator", "url_name": "environment_thermal_transmittance_u_from_the_individual_thermal_resistances_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+
+{"name": "Thermal Transmittance (U-Value) From Thermal Resistance Calculator", "url_name": "environment_thermal_transmittance_u_value_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Thermal Resistivity From Conductivity Calculator", "url_name": "environment_thermal_resistivity_from_conductivity_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+
+{"name": "TDS Calculator (Density Method)", "url_name": "environment_tds_density_method_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+
+{"name": "TDS (Total Dissolved Solids) Calculator", "url_name": "environment_tds_total_dissolved_solids_conductivity_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Transient Mass Balance Calculator", "url_name": "environment_transient_mass_balance_calculator", "plan_type": "corporate", "category": "environment"},
+
 {"name": "Transition Flow General Velocity Calculator", "url_name": "environment_transition_flow_general_velocity_calculator", "plan_type": "corporate", "category": "environment"},
 
 
