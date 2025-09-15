@@ -1,0 +1,387 @@
+{% extends 'base.html' %}
+{% block title %}Volumetric Flow Rate of Water Through a Valve{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volumetric Flow Rate of Water Through a Valve</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+            justify-content: center;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        /* Result Card */
+        .result-placeholder {
+            text-align: center;
+            margin: auto;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: baseline;
+            justify-content: center;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+        }
+        .rate-label {
+            color: #2980b9;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0 10px;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out, background-color 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list { margin: 0; padding-left: 18px; }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px; padding: 20px;
+            text-align: left; gap: 12px; margin-top: 20px;
+        }
+        .error-icon { font-size: 76px; flex-shrink: 0; text-align: center; }
+        .error-message { font-size: 24px; line-height: 1.6; }
+        .hidden { display: none; }
+        .btn-container { display: flex; justify-content: center; margin: 30px 0; }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040); color: #ffffff; border: 2px solid #1560bd;
+            padding: 10px 20px; font-size: 14px; font-weight: 600; border-radius: 8px;
+            text-decoration: none; transition: all 0.3s ease; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Volumetric Flow Rate of Water Through a Valve</h1>
+            <p>Calculate the volume of water flowing through a valve based on its Kv and pressure drop.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Valve & System Parameters</h2>
+                <div class="form-group">
+                    <label for="flowCoefficient">Flow Coefficient (Kv)</label>
+                    <input type="number" id="flowCoefficient" class="form-input" placeholder="Enter Kv value">
+                </div>
+                <div class="form-group">
+                    <label for="pressureDrop">Pressure Drop (ΔP) in bar</label>
+                    <input type="number" id="pressureDrop" class="form-input" placeholder="Enter ΔP value">
+                </div>
+                <button class="calculate-btn" onclick="calculateAndDisplay()">Calculate Flow Rate</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Engineering illustration">
+                    <p>Enter the valve's flow coefficient and the pressure drop across it to calculate the flow rate.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div id="resultValue" class="hidden" style="text-align: center;">
+                    <h2>Volumetric Flow Rate (Q̇)</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label">m³/h</div>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Summary</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                     <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <div class="note-card">
+                <h3>About Volumetric Flow Rate</h3>
+                <p>The volumetric flow rate through a valve is essential for designing and managing fluid systems. It determines the volume of a fluid passing through the valve per unit of time, based on the valve's specific flow coefficient (Kv) and the pressure drop across it.</p>
+            </div>
+            <div class="note-card">
+                <h3>Parameters Explained</h3>
+                <ul class="note-list">
+                    <li><strong>Flow Coefficient (Kv):</strong> A standard value indicating the volume of water (in m³/h) that will pass through a valve with a 1-bar pressure drop. It is a key measure of a valve's capacity.</li>
+                    <li><strong>Pressure Drop (ΔP):</strong> The difference in fluid pressure between the inlet and outlet of the valve, measured in bars.</li>
+                </ul>
+            </div>
+             <div class="note-card">
+                <h3>✅ Validation Rules</h3>
+                <ul class="note-list">
+                    <li><strong>Flow Coefficient (Kv):</strong> Must be a positive number. A value of 0 would mean the valve is closed.</li>
+                    <li><strong>Pressure Drop (ΔP):</strong> Must be a non-negative number. A negative pressure drop is not physically possible.</li>
+                </ul>
+            </div>
+             <div class="note-card">
+                <h3>Applications</h3>
+                <p>This calculation is widely used in industrial pipelines (oil, gas, chemical), HVAC systems, fire suppression systems (sprinklers), and water treatment plants to ensure proper fluid control, safety, and efficiency.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateAndDisplay() {
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValueBox = document.getElementById('resultValue');
+
+            errorBox.classList.add('hidden');
+            resultValueBox.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+
+            let errors = [];
+            function getVal(id, label, opts = {}) {
+                const el = document.getElementById(id);
+                const raw = el.value?.toString().trim();
+                if (!raw) {
+                    errors.push(`👉 ${label} is required.`);
+                    return null;
+                }
+                const num = parseFloat(raw);
+                if (isNaN(num)) {
+                    errors.push(`👉 Enter a valid number for ${label}.`);
+                    return null;
+                }
+                if (opts.allowZero ? num < 0 : num <= 0) {
+                    errors.push(`👉 ${label} must be a positive number.`);
+                    return null;
+                }
+                return num;
+            }
+
+            const kv = getVal('flowCoefficient', 'Flow Coefficient (Kv)');
+            const dp = getVal('pressureDrop', 'Pressure Drop (ΔP)', { allowZero: true });
+
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add('hidden');
+                return;
+            }
+            
+            const flowrate = kv * Math.sqrt(dp);
+
+            placeholder.classList.add('hidden');
+            resultValueBox.classList.remove('hidden');
+
+            document.getElementById('rateValue').textContent = flowrate.toFixed(2);
+            document.getElementById('feedbackContent').innerHTML = `The calculated flow rate represents the volume of water passing through the valve per hour, based on a Kv of <strong>${kv}</strong> and a pressure drop of <strong>${dp} bar</strong>.`;
+        }
+        
+        function printReport() {
+            window.print();
+        }
+    </script>
+</body>
+</html>
+{% endblock %}

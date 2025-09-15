@@ -64,6 +64,7 @@ urlpatterns = [
     path('subscriptions/add/', subscription_add, name='subscription_add'),
     path('subscriptions/edit/<int:pk>/', subscription_edit, name='subscription_edit'),
     path('subscriptions/delete/<int:pk>/',subscription_delete, name='subscription_delete'),
+    path('analytics_dashboard/',admin_analytics, name='analytics_dashboard'),
 
     path("trainings/", training_list, name="training_list"),
     path("trainings/create/", training_create, name="training_create"),
