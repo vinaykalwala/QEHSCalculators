@@ -895,6 +895,26 @@ CALCULATORS = [
 {"name": "No-Overpressure Vent Area Calculator", "url_name":"safety_no_overpressure_vent_area_calculator", "plan_type": "corporate", "category": "safety"},
 
 
+{"name": "No-Overpressure Vent Area Formula (External Heating)", "url_name":"safety_no_overpressure_vent_area_formula_external_heating_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "No-Overpressure Vent Area Formula (All-Liquid Venting)", "url_name":"safety_no_overpressure_vent_area_formula_all_liquid_venting_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Normalized Mass Flux Formula (Low-Quality Region) Calculator", "url_name":"safety_normalized_mass_flux_formula_low_quality_region_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "NIOSH Lifting Index (LI) Calculator", "url_name":"safety_niosh_lifting_index_li_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Non-Viscous Liquid Vent Area Calculator", "url_name":"safety_non_viscous_liquid_vent_area_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "OSHA Total Recordable Incident Rate (TRIR) Calculator", "url_name":"safety_osha_total_recordable_incident_rate_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "OSHA DART Rate Calculator", "url_name":"safety_osha_dart_rate_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Ohm's Law Calculator", "url_name":"safety_ohms_law_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Orifice Plate Beta Ratio Calculator", "url_name":"safety_orifice_plate_beta_ratio_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "PPE Compliance Rate Calculator", "url_name":"safety_ppe_compilance_rate_calculator", "plan_type": "corporate", "category": "safety"},
+
 
 
 
@@ -905,6 +925,17 @@ CALCULATORS = [
 
 # safety calculators from  bottom to top
 
+{"name": "Velocity of Steam Passing Through an Orifice Calculator", "url_name":"safety_velocity_of_steam_passing_through_an_orifice1_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Velocity of Steam Passing Through an Orifice Calculator(2)", "url_name":"safety_velocity_of_steam_passing_through_an_orifice2_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Velocity Energy Conversion Calculator", "url_name":"safety_velocity_energy_conversion_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Velocity of Liquid through orifice calculator", "url_name":"safety_velocity_of_liquid_through_orifice_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Volumetric Flowrate of a liquid through orifice Calculator", "url_name":"safety_volumetric_flowrate_of_a_liquid_through_orifice_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Valve Closing Force Calculator", "url_name":"safety_valve_closing_force_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Volumetric Flow Rate of Water Through a Valve", "url_name":"safety_volumetric_flow_of_water_through_a_valve_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Valve Authority Calculator", "url_name":"safety_valve_authority_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Venting Time Calculator", "url_name":"safety_venting_time_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Vent Area Reduction Calculator", "url_name":"safety_vent_area_reduction_formula_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Vent Area Calculator (ASME Section VIII)", "url_name":"safety_vent_area_asme_section_viii_calculator", "plan_type": "corporate", "category": "safety"},
 {"name": "Vent Sizing Calculator (API RP520)", "url_name":"safety_vent_sizing_api_rp520_calculator", "plan_type": "corporate", "category": "safety"},
 {"name": "Wire Rope Grip (Bulldog Grip) Calculator", "url_name":"safety_wire_rope_grips_calculator", "plan_type": "corporate", "category": "safety"},
 {"name": "Well Control Kill Mud Weight Calculator", "url_name":"safety_well_control_kill_mud_weight_calculator", "plan_type": "corporate", "category": "safety"},

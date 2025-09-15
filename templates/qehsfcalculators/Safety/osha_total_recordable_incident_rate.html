@@ -1,0 +1,669 @@
+{% extends 'base.html' %}
+{% block title %}OSHA TRIR Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSHA TRIR Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            height: 420px;
+            overflow-y:auto;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .rate-display {
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+      
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>OSHA Total Recordable Incident Rate (TRIR) Calculator</h1>
+            <p>Calculate the OSHA TRIR to evaluate workplace safety performance</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="recordableInjuries">Number of Recordable Injuries and Illnesses</label>
+                    <input type="number" id="recordableInjuries" class="form-input" min="0" placeholder="e.g., 5">
+                </div>
+                <div class="form-group">
+                    <label for="employeeHours">Total Employee Hours Worked</label>
+                    <input type="number" id="employeeHours" class="form-input" min="1" placeholder="e.g., 200000">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateTRIR()">Calculate TRIR</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Safety illustration">
+                    <p>This tool will calculate the <strong>OSHA Total Recordable Incident Rate (TRIR)</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd; margin-top:60px;">
+                        <h2>OSHA Total Recordable Incident Rate</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">Recordable incidents per 100 full-time workers</div>
+                    </div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Good (≤1)</span><span>Acceptable (1-3)</span><span>Needs Improvement (>3)</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Safety Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>OSHA Total Recordable Incident Rate (TRIR) Calculator</strong> measures workplace safety performance by calculating the number of recordable injuries and illnesses per 100 full-time workers.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ What is OSHA TRIR?</h3>
+                <p>
+                    The Total Recordable Incident Rate (TRIR) is a key safety metric used by OSHA to compare injury and illness incidence rates across industries, companies, and operations.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Recordable Injuries and Illnesses:</strong> Total number of OSHA-recordable workplace injuries and illnesses</li>
+                    <li><strong>Employee Hours Worked:</strong> Total number of hours worked by all employees during the period</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Interpretation</h3>
+                <p>
+                    <b>Lower TRIR Values</b> = safer workplace conditions. Generally:
+                </p>
+                <ul class="note-list">
+                    <li><span class="good">1.0 or below</span> → Good safety performance</li>
+                    <li><span class="average">1.0 - 3.0</span> → Acceptable but needs improvement</li>
+                    <li><span class="bad">Above 3.0</span> → Needs significant improvement</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>🌍 Real-Life Applications</h3>
+                <ul class="note-list">
+                    <li><strong>Workplace Safety Benchmarking</strong> - Compare safety performance across companies and industries</li>
+                    <li><strong>Regulatory Compliance</strong> - Meet OSHA recording and reporting requirements</li>
+                    <li><strong>Safety Program Evaluation</strong> - Measure effectiveness of safety initiatives</li>
+                    <li><strong>Insurance Premiums</strong> - Influence workers' compensation insurance rates</li>
+                    <li><strong>Contractor Prequalification</strong> - Assess safety records of potential contractors</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📋 Industry Standards</h3>
+                <p>
+                    Based on OSHA's recordkeeping requirements (29 CFR 1904) and industry benchmarking data from the Bureau of Labor Statistics.
+                </p>
+            </div>
+            
+            <div class="note-card">
+    <h3>✅ Validation Rules</h3>
+    <ul class="note-list">
+        <li><b>DART Incidents:</b> Integer only, 0 – 10,000 (no decimals).</li>
+        <li><b>Employee Hours:</b> Integer only, 1 – 10,000,000,000 (no decimals).</li>
+        <li><b>Cross-check:</b> High incidents with very low hours will be flagged as unrealistic.</li>
+        <li><b>Division by Zero:</b> Hours cannot be 0 (formula requires valid denominator).</li>
+        <li><b>Output:</b> Always expressed as <i>incidents per 200,000 hours worked</i>.</li>
+        <li><b>Compliance:</b> Based on OSHA recordkeeping requirements (29 CFR 1904).</li>
+    </ul>
+</div>
+
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateTRIR() {
+    const recordableInjuries = document.getElementById('recordableInjuries').value.trim();
+    const employeeHours = document.getElementById('employeeHours').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+
+    // ----------------------------
+    // OSHA TRIR Formula Reference:
+    // TRIR = (Recordable Injuries × 200,000) ÷ Employee Hours Worked
+    // 200,000 = base factor (100 employees × 40 hrs × 50 wks)
+    // ----------------------------
+
+    // --- Validation Rules ---
+
+    // Recordable Injuries
+    if (recordableInjuries === "" || isNaN(recordableInjuries)) {
+        errors.push("👉 Please enter the number of recordable injuries and illnesses.");
+    } else if (!Number.isInteger(parseFloat(recordableInjuries))) {
+        errors.push("👉 Recordable injuries must be a whole number (no decimals).");
+    } else if (parseInt(recordableInjuries) < 0) {
+        errors.push("👉 Recordable injuries cannot be negative.");
+    } else if (parseInt(recordableInjuries) > 10000) {
+        errors.push("👉 Recordable injuries value seems too high. Please verify your input.");
+    }
+
+    // Employee Hours
+    if (employeeHours === "" || isNaN(employeeHours)) {
+        errors.push("👉 Please enter the total employee hours worked.");
+    } else if (!Number.isInteger(parseFloat(employeeHours))) {
+        errors.push("👉 Employee hours must be a whole number (no decimals).");
+    } else if (parseInt(employeeHours) < 1) {
+        errors.push("👉 Employee hours must be at least 1.");
+    } else if (parseInt(employeeHours) > 100000000) {
+        errors.push("👉 Employee hours value seems too high. Please verify your input.");
+    }
+
+    // Cross-field logic: sanity check
+    if (parseInt(employeeHours) > 0 && parseInt(recordableInjuries) > 0) {
+        const ratio = parseInt(employeeHours) / parseInt(recordableInjuries);
+        if (ratio < 100) {
+            errors.push("👉 Too many recordables compared to hours worked. Please recheck inputs.");
+        }
+    }
+
+    // --- Error Handling ---
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join('<br>');
+        errorBox.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        resultValue.classList.add('hidden');
+        return;
+    }
+
+    // Clear any previous errors
+    errorBox.classList.add('hidden');
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+
+    // --- TRIR Calculation ---
+    const trir = (parseInt(recordableInjuries) * 200000) / parseInt(employeeHours);
+    const trirRounded = trir.toFixed(2);
+
+    // Display result
+    document.getElementById('rateValue').textContent = trirRounded;
+
+    // --- Meter update ---
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth = 0;
+
+    if (trir <= 3) {
+        meterWidth = (trir / 3) * 100;
+    } else {
+        meterWidth = 100;
+    }
+    meterFill.style.width = `${meterWidth}%`;
+
+    if (trir <= 1) {
+        meterFill.style.background = '#2ecc71'; // Green
+    } else if (trir <= 3) {
+        meterFill.style.background = '#f39c12'; // Orange
+    } else {
+        meterFill.style.background = '#e74c3c'; // Red
+    }
+
+    // --- Feedback ---
+    const feedbackContent = document.getElementById('feedbackContent');
+    if (trir <= 1) {
+        feedbackContent.innerHTML = `<span class="good">Good Safety Performance</span><br>
+        TRIR = ${trirRounded}. Below average and demonstrates effective safety management.`;
+    } else if (trir <= 3) {
+        feedbackContent.innerHTML = `<span class="average">Acceptable Safety Performance</span><br>
+        TRIR = ${trirRounded}. Acceptable but indicates room for safety improvements.`;
+    } else {
+        feedbackContent.innerHTML = `<span class="bad">Needs Significant Improvement</span><br>
+        TRIR = ${trirRounded}. High risk. Immediate corrective action required.`;
+    }
+}
+
+
+        function printReport() {            
+            window.print();
+        }
+
+        // Allow Enter key to trigger calculation
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                calculateTRIR();
+            }
+        });
+    </script>
+</body>
+</html>
+{% endblock %}
+
+{% comment %} 
+1. OSHA TRIR Formula
+// OSHA Total Recordable Incident Rate (TRIR) Formula:
+// TRIR = (Number of Recordable Cases × 200,000) ÷ Total Employee Hours Worked
+//
+// 200,000 = Standard base (100 employees × 40 hrs/week × 50 weeks/year)
+// Units: Recordable cases = count; Employee hours = hours worked by all employees
+
+2. Detailed Input Validation Rules
+Recordable Injuries and Illnesses (OSHA Recordables)
+
+Type: Integer only (no decimals)
+
+Range: 0 – 10,000 (10k is upper bound for validation to catch data-entry errors)
+
+No negatives allowed
+
+Cross-field rule: Cannot be greater than the workforce size could realistically sustain (if employeeHours is too small compared to recordables, show warning).
+
+Employee Hours Worked
+
+Type: Integer only (whole hours, not decimals)
+
+Range: 1 – 100,000,000 (100 million ~ max for very large global organizations)
+
+Minimum: 1 (avoid division by zero)
+
+Cross-field rule: Must always be ≥ recordable cases × minimum plausible hours (sanity check).
+
+3. Output Validation Logic & Thresholds
+
+The calculator’s categories are reasonable and align with OSHA benchmarking:
+
+Good Performance: TRIR ≤ 1.0
+(Well below most industry averages; often best-in-class target.)
+
+Acceptable: 1.0 < TRIR ≤ 3.0
+(Within normal OSHA/BLS ranges for most industries.)
+
+Needs Improvement: TRIR > 3.0
+(Significant risk exposure, may attract regulatory or insurer concern.)
+
+Extra note: TRIR should never be negative or NaN (Not a Number). {% endcomment %}

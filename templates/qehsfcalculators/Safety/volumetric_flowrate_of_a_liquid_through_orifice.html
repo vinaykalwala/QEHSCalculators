@@ -1,0 +1,433 @@
+{% extends 'base.html' %}
+{% block title %}Volumetric Flowrate of a liquid through orifice Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volumetric Flowrate of a liquid through orifice Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-input[readonly] {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        /* Result Card */
+        .result-placeholder {
+            text-align: center;
+            margin: auto;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: baseline;
+            justify-content: center;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+        }
+        .rate-label {
+            color: #2980b9;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0 10px;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out, background-color 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list { margin: 0; padding-left: 18px; }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px; padding: 20px;
+            text-align: left; gap: 12px; margin-top: 20px;
+        }
+        .error-icon { font-size: 76px; flex-shrink: 0; text-align: center; }
+        .error-message { font-size: 24px; line-height: 1.6; }
+        .hidden { display: none; }
+        .btn-container { display: flex; justify-content: center; margin: 30px 0; }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040); color: #ffffff; border: 2px solid #1560bd;
+            padding: 10px 20px; font-size: 14px; font-weight: 600; border-radius: 8px;
+            text-decoration: none; transition: all 0.3s ease; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Volumetric Flowrate of a liquid through orifice Calculator</h1>
+            <p>Calculate the flow rate of a liquid through an orifice using hydraulic principles.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Orifice & Fluid Parameters</h2>
+                <div class="form-group">
+                    <label for="coefficient">Coefficient of Discharge (C)</label>
+                    <input type="number" id="coefficient" class="form-input" placeholder="e.g., 0.6 to 0.9">
+                </div>
+                <div class="form-group">
+                    <label for="area">Orifice Area (A)</label>
+                    <input type="number" id="area" class="form-input" placeholder="Enter area in m²">
+                </div>
+                <div class="form-group">
+                    <label for="height">Differential Pressure Height (h)</label>
+                    <input type="number" id="height" class="form-input" placeholder="Enter height in m">
+                </div>
+                <div class="form-group">
+                    <label for="gravity">Gravitational Constant (g)</label>
+                    <input type="number" id="gravity" class="form-input" value="9.81" readonly>
+                </div>
+                <button class="calculate-btn" onclick="calculateAndDisplay()">Calculate Flow Rate</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Engineering illustration">
+                    <p>Enter the system parameters to calculate the volumetric flow rate of the liquid.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div id="resultValue" class="hidden" style="text-align: center;">
+                    <h2>Volumetric Flow Rate (qᵥ)</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.000</div>
+                        <div class="rate-label">m³/s</div>
+                    </div>
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low Flow</span>
+                        <span>Moderate Flow</span>
+                        <span>High Flow</span>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Interpretation</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                     <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <div class="note-card">
+                <h3>About Volumetric Flow Rate</h3>
+                <p>The volumetric flow rate is the volume of fluid that passes through a given surface per unit of time. This calculator determines the flow rate through an orifice using a standard hydraulic formula that incorporates the orifice's physical properties and the fluid's pressure head.</p>
+            </div>
+            <div class="note-card">
+                <h3>Parameters Explained</h3>
+                <ul class="note-list">
+                    <li><strong>Coefficient of Discharge (C):</strong> A dimensionless factor that accounts for energy losses as the fluid flows through the orifice. It is typically between 0.6 and 0.95.</li>
+                    <li><strong>Orifice Area (A):</strong> The cross-sectional area of the opening in square meters (m²).</li>
+                    <li><strong>Differential Pressure Height (h):</strong> The height of the fluid creating the pressure that drives the flow, measured in meters (m).</li>
+                    <li><strong>Gravitational Acceleration (g):</strong> A constant fixed at 9.81 m/s².</li>
+                </ul>
+            </div>
+             <div class="note-card">
+                <h3>✅ Validation Rules</h3>
+                <ul class="note-list">
+                    <li>All fields are required.</li>
+                    <li>The <strong>Coefficient of Discharge (C)</strong> must be a positive number less than or equal to 1.</li>
+                    <li>The <strong>Orifice Area (A)</strong> must be a positive number.</li>
+                    <li>The <strong>Differential Pressure Height (h)</strong> must be a non-negative number (0 is acceptable).</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateAndDisplay() {
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValueBox = document.getElementById('resultValue');
+
+            errorBox.classList.add('hidden');
+            resultValueBox.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+
+            let errors = [];
+            function getVal(id, label, opts = {}) {
+                const el = document.getElementById(id);
+                const raw = el.value?.toString().trim();
+                if (raw === '') {
+                    errors.push(`👉 ${label} is required.`);
+                    return null;
+                }
+                const num = parseFloat(raw);
+                if (isNaN(num)) {
+                    errors.push(`👉 Enter a valid number for ${label}.`);
+                    return null;
+                }
+                if (opts.allowZero ? num < 0 : num <= 0) {
+                    errors.push(`👉 ${label} must be a positive number.`);
+                    return null;
+                }
+                if (opts.max !== undefined && num > opts.max) {
+                    errors.push(`👉 ${label} cannot be greater than ${opts.max}.`);
+                }
+                return num;
+            }
+
+            const C = getVal('coefficient', 'Coefficient of Discharge', { max: 1 });
+            const A = getVal('area', 'Orifice Area');
+            const h = getVal('height', 'Differential Pressure Height', { allowZero: true });
+            const g = 9.81;
+
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add('hidden');
+                return;
+            }
+            
+            const flowrate = C * A * Math.sqrt(2 * g * h);
+
+            placeholder.classList.add('hidden');
+            resultValueBox.classList.remove('hidden');
+
+            document.getElementById('rateValue').textContent = flowrate.toFixed(4);
+            
+            const meterFill = document.getElementById('meterFill');
+            const maxFlow = 5; // Set a reasonable max flow rate for the visual scale
+            let pct = (flowrate / maxFlow) * 100;
+            pct = Math.max(0, Math.min(100, pct));
+            meterFill.style.width = pct + '%';
+
+            let interpretation = "";
+            if (h === 0) {
+                interpretation = "🔵 <strong>No Flow:</strong> With zero pressure head, there is no liquid movement.";
+                meterFill.style.backgroundColor = '#3498db';
+            } else if (flowrate < 0.1) {
+                interpretation = "✅ <strong>Minimal Flow:</strong> The discharge rate is very low.";
+                 meterFill.style.backgroundColor = '#2ecc71';
+            } else if (flowrate <= 1) {
+                interpretation = "⚠️ <strong>Moderate Flow:</strong> The flow rate is within a typical operational range.";
+                 meterFill.style.backgroundColor = '#f39c12';
+            } else {
+                interpretation = "❌ <strong>High Flow Rate:</strong> The discharge is high and may indicate significant pressure or a large orifice.";
+                 meterFill.style.backgroundColor = '#e74c3c';
+            }
+            
+            document.getElementById('feedbackContent').innerHTML = interpretation;
+        }
+        
+        function printReport() {
+            window.print();
+        }
+    </script>
+</body>
+</html>
+{% endblock %}
