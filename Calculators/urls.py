@@ -64,6 +64,7 @@ urlpatterns = [
     path('subscriptions/add/', subscription_add, name='subscription_add'),
     path('subscriptions/edit/<int:pk>/', subscription_edit, name='subscription_edit'),
     path('subscriptions/delete/<int:pk>/',subscription_delete, name='subscription_delete'),
+    path('analytics_dashboard/',admin_analytics, name='analytics_dashboard'),
 
     path("trainings/", training_list, name="training_list"),
     path("trainings/create/", training_create, name="training_create"),
@@ -116,6 +117,7 @@ urlpatterns = [
     path('quality/line_target_calculator/', quality_line_target_calculator, name='quality_line_target_calculator'),
     path('quality/mass_flow_rate_of_steam_through_an_orifice_calculator/', quality_mass_flow_rate_of_steam_through_an_orifice_calculator, name='quality_mass_flow_rate_of_steam_through_an_orifice_calculator'),
     path('quality/overall_equipment_effectiveness_oee_calculator/', quality_overall_equipment_effectiveness_oee_calculator, name='quality_overall_equipment_effectiveness_oee_calculator'),
+    path('quality/orifice_meter_flow_calculator/', quality_orifice_meter_flow_calculator, name='quality_orifice_meter_flow_calculator'),
     path('quality/percentage_error_when_using_velocity_calculator/', quality_percentage_error_when_using_velocity_calculator, name='quality_percentage_error_when_using_velocity_calculator'),
     path('quality/percentage_error_when_using_pressure_calculator/', quality_percentage_error_when_using_pressure_calculator, name='quality_percentage_error_when_using_pressure_calculator'),
     path('quality/pressure_drop_and_friction_loss_calculator/', quality_pressure_drop_and_friction_loss_calculator, name='quality_pressure_drop_and_friction_loss_calculator'),
@@ -138,7 +140,6 @@ urlpatterns = [
     path('quality/training_efficiency_calculator/', quality_training_efficiency_calculator, name='quality_training_efficiency_calculator'),
     path('quality/two_pack_mix_density_calculator/', quality_two_pack_mix_density_calculator, name='quality_two_pack_mix_density_calculator'),
     path('quality/venturi_meter_flow_calculator/', quality_venturi_meter_flow_calculator, name='quality_venturi_meter_flow_calculator'),
-   
     path('quality/vortex_shedding_frequency_calculator/', quality_vortex_shedding_frequency_calculator, name='quality_vortex_shedding_frequency_calculator'),
     path('quality/volume_solids_vs_calculator/', quality_volume_solids_vs_calculator, name='quality_volume_solids_vs_calculator'),
     path('quality/volume_of_paint_required_calculator/', quality_volume_of_paint_required_calculator, name='quality_volume_of_paint_required_calculator'),

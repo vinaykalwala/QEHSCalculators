@@ -1150,6 +1150,151 @@ def profile_view(request):
         "transactions": transactions,
     })
 
+from django.shortcuts import render
+from django.db.models import Count, Sum, Avg, Q
+from datetime import datetime
+
+from .models import CustomUser, UserSubscription, SubscriptionPlan, Transaction, UserDevice, Training, BlogPost, Contact
+
+
+def admin_analytics(request):
+    # ---------------- Filters ----------------
+    filter_type = request.GET.get("filter_type", "all")  # all, month, year, custom
+    selected_year = request.GET.get("year")
+    selected_month = request.GET.get("month")
+    from_date = request.GET.get("from_date")
+    to_date = request.GET.get("to_date")
+
+    start_date, end_date = None, None
+
+    if filter_type == "year" and selected_year:
+        start_date = datetime(int(selected_year), 1, 1)
+        end_date = datetime(int(selected_year), 12, 31)
+
+    elif filter_type == "month" and selected_year and selected_month:
+        start_date = datetime(int(selected_year), int(selected_month), 1)
+        if int(selected_month) == 12:
+            end_date = datetime(int(selected_year), 12, 31)
+        else:
+            end_date = datetime(int(selected_year), int(selected_month) + 1, 1) - timedelta(days=1)
+
+    elif filter_type == "custom" and from_date and to_date:
+        start_date = datetime.strptime(from_date, "%Y-%m-%d")
+        end_date = datetime.strptime(to_date, "%Y-%m-%d")
+
+    # ---------------- Filters for all models ----------------
+    user_filter = Q()
+    subscription_filter = Q()
+    transaction_filter = Q()
+    device_filter = Q()
+    training_filter = Q()
+    blog_filter = Q()
+    contact_filter = Q()
+
+    if start_date and end_date:
+        user_filter &= Q(date_joined__range=[start_date, end_date])
+        subscription_filter &= Q(created_at__range=[start_date, end_date])
+        transaction_filter &= Q(created_at__range=[start_date, end_date])
+        device_filter &= Q(last_seen__range=[start_date, end_date])
+        training_filter &= Q(created_at__range=[start_date, end_date])
+        blog_filter &= Q(created_at__range=[start_date, end_date])
+        contact_filter &= Q(created_at__range=[start_date, end_date])
+
+    # ---------------- User Analytics ----------------
+    total_users = CustomUser.objects.filter(user_filter).count()
+    active_users = CustomUser.objects.filter(user_filter, is_active=True).count()
+    inactive_users = total_users - active_users
+    new_signups_daily = CustomUser.objects.filter(user_filter).extra(
+        {'day': "date(date_joined)"}
+    ).values('day').annotate(count=Count('id')).order_by('day')
+
+    superusers = CustomUser.objects.filter(user_filter, is_superuser=True).count()
+    regular_users = total_users - superusers
+    users_with_profile_image = CustomUser.objects.filter(user_filter, profile_image__isnull=False).count()
+    users_by_industry = CustomUser.objects.filter(user_filter).values('industry').annotate(count=Count('id'))
+
+    # ---------------- Subscription Analytics ----------------
+    subscription_status = UserSubscription.objects.filter(subscription_filter).values('status').annotate(count=Count('id'))
+    subscriptions_by_plan = UserSubscription.objects.filter(subscription_filter).values('plan__name').annotate(count=Count('id'))
+    upgrades_count = UserSubscription.objects.filter(subscription_filter, is_upgrade=True).count()
+    revenue_per_plan = Transaction.objects.filter(transaction_filter).values('subscription__plan__name').annotate(total=Sum('amount'))
+    avg_sub_duration = UserSubscription.objects.filter(subscription_filter).aggregate(avg_days=Avg('plan__duration_days'))['avg_days']
+
+    # ---------------- Revenue Analytics ----------------
+    total_revenue = Transaction.objects.filter(transaction_filter).aggregate(total=Sum('amount'))['total'] or 0
+    revenue_by_month = Transaction.objects.filter(transaction_filter).extra(
+        {'month': "strftime('%%Y-%%m', created_at)"}
+    ).values('month').annotate(total=Sum('amount')).order_by('month')
+
+    avg_payment = Transaction.objects.filter(transaction_filter).aggregate(avg=Avg('amount'))['avg']
+    top_paying_users = Transaction.objects.filter(transaction_filter).values(
+        'subscription__user__email'
+    ).annotate(total=Sum('amount')).order_by('-total')[:10]
+
+    # ---------------- Device Analytics ----------------
+    total_devices = UserDevice.objects.filter(device_filter).count()
+    avg_devices_per_user = total_devices / total_users if total_users else 0
+    last_seen = UserDevice.objects.filter(device_filter).values('last_seen').order_by('-last_seen')[:10]
+
+    # ---------------- Training Analytics ----------------
+    total_trainings = Training.objects.filter(training_filter).count()
+    active_trainings = Training.objects.filter(training_filter, is_active=True).count()
+    trainings_by_category = Training.objects.filter(training_filter).values('category').annotate(count=Count('id'))
+
+    # ---------------- Blog Analytics ----------------
+    total_blogs = BlogPost.objects.filter(blog_filter).count()
+    published_blogs = BlogPost.objects.filter(blog_filter, is_published=True).count()
+    blogs_by_category = BlogPost.objects.filter(blog_filter).values('category').annotate(count=Count('id'))
+
+    # ---------------- Contact Analytics ----------------
+    total_inquiries = Contact.objects.filter(contact_filter).count()
+    inquiries_by_subject = Contact.objects.filter(contact_filter).values('subject').annotate(count=Count('id'))
+
+    context = {
+        "filter_type": filter_type,
+        "selected_year": selected_year,
+        "selected_month": selected_month,
+        "from_date": from_date,
+        "to_date": to_date,
+
+        "total_users": total_users,
+        "active_users": active_users,
+        "inactive_users": inactive_users,
+        "new_signups_daily": new_signups_daily,
+        "superusers": superusers,
+        "regular_users": regular_users,
+        "users_with_profile_image": users_with_profile_image,
+        "users_by_industry": users_by_industry,
+
+        "subscription_status": subscription_status,
+        "subscriptions_by_plan": subscriptions_by_plan,
+        "upgrades_count": upgrades_count,
+        "revenue_per_plan": revenue_per_plan,
+        "avg_sub_duration": avg_sub_duration,
+
+        "total_revenue": total_revenue,
+        "revenue_by_month": revenue_by_month,
+        "avg_payment": avg_payment,
+        "top_paying_users": top_paying_users,
+
+        "total_devices": total_devices,
+        "avg_devices_per_user": avg_devices_per_user,
+        "last_seen": last_seen,
+
+        "total_trainings": total_trainings,
+        "active_trainings": active_trainings,
+        "trainings_by_category": trainings_by_category,
+
+        "total_blogs": total_blogs,
+        "published_blogs": published_blogs,
+        "blogs_by_category": blogs_by_category,
+
+        "total_inquiries": total_inquiries,
+        "inquiries_by_subject": inquiries_by_subject,
+    }
+
+    return render(request, "analytics_dashboard.html", context)
+
 
 from .models import SubscriptionPlan
 from .forms import SubscriptionPlanForm
@@ -1501,6 +1646,13 @@ def quality_wet_film_thickness_wft_calculator(request):
 @subscription_required(plan_type="corporate")
 def quality_water_ion_product_calculator(request):
     return render(request, 'qehsfcalculators/quality/water_ion_product.html', {'title': 'Water Ion Product Calculator'})
+
+
+@login_required
+@subscription_required(plan_type="corporate")
+def quality_orifice_meter_flow_calculator(request):
+    return render(request, 'qehsfcalculators/quality/orifice_meter_flow.html', {'title': 'Orifice Meter Flow Calculator'})
+
 
 @login_required
 @subscription_required(plan_type="corporate")

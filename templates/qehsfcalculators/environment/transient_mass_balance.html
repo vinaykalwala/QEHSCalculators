@@ -1,0 +1,733 @@
+{% extends 'base.html' %}
+{% block title %}Transient Mass Balance Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transient Mass Balance Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 38px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+    <div class="calculator-header">
+        <h1>Transient Mass Balance Calculator</h1>
+        <p>Calculate the <strong>Rate of Change of Mass (dM/dt)</strong> in a system using the transient mass balance equation.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Calculator -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+
+            <div class="form-group">
+                <label for="density">Density (ρ in kg/m³)</label>
+                <input type="number" id="density" class="form-input" min="0.001" step="any" placeholder="e.g., 1.225">
+            </div>
+
+            <div class="form-group">
+                <label for="volume">Volume (V in m³)</label>
+                <input type="number" id="volume" class="form-input" min="0.001" step="any" placeholder="e.g., 10">
+            </div>
+            
+            <div class="form-group">
+                <label for="massFlowRate">Mass Flow Rate (W in kg/s)</label>
+                <input type="number" id="massFlowRate" class="form-input" min="0" step="any" placeholder="e.g., 2.5">
+            </div>
+            
+            <button class="calculate-btn" onclick="calculateMassBalance()">Calculate Mass Balance</button>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="/static/images/mlc_environment_result.png" alt="Mass balance illustration">
+                <p>This tool will calculate the <strong>Rate of Change of Mass (dM/dt)</strong>.</p>
+            </div>
+            
+            <div class="result-error hidden" id="resultError">
+                <div class="error-icon">❌</div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+             
+            <div class="result-value hidden" id="resultValue">
+                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Calculated Mass Balance</h2>
+                </div>
+
+                <div class="rate-display">
+                    <div class="rate-value" id="rateValue">0.00</div>
+                    <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">kg/s</div>
+                </div>
+
+                <div class="result-feedback">
+                    <div class="feedback-title">Assessment</div>
+                    <div class="feedback-content" id="feedbackContent"></div>
+                </div>
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="note-section">
+        <div class="note-card">
+            <h3>📘 About This Calculator</h3>
+            <p>
+                The <strong>Transient Mass Balance Calculator</strong> determines the rate of change of mass in a system using the formula:
+            </p>
+        </div>
+        
+        <div class="note-card">
+            <h3>📊 Interpretation</h3>
+            <ul class="note-list">
+                <li><span class="good">dM/dt = 0</span> → ✅ System at steady state (mass inflow = outflow)</li>
+                <li><span class="bad">dM/dt &lt; 0</span> → 🔴 Mass decreasing (outflow > inflow)</li>
+                <li><span class="average">dM/dt &gt; 0</span> → ⚠️ Mass increasing (inflow > outflow)</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+        <h3>⚠️ Input Validations</h3>
+        <ul class="note-list">
+            <li>✔️ <strong>Density (ρ)</strong> must be a numeric, positive value</li>
+            <li>✔️ Minimum Density: <strong>0.001 kg/m³</strong> (approximate air density at high altitude)</li>
+            <li>⚠️ Maximum Density: <strong>20,000 kg/m³</strong> → triggers warning (unrealistic for most applications)</li>
+            <li>✔️ <strong>Volume (V)</strong> must be a numeric, positive value</li>
+            <li>✔️ Minimum Volume: <strong>0.001 m³</strong> (small enclosed spaces)</li>
+            <li>⚠️ Maximum Volume: <strong>100,000 m³</strong> → triggers warning (large industrial spaces)</li>
+            <li>✔️ <strong>Mass Flow Rate (W)</strong> must be a numeric, non-negative value</li>
+            <li>⚠️ Mass Flow Rate &gt; <strong>1000 kg/s</strong> → warning (extreme flow, verify data)</li>
+            <li>❌ Zero, negative, or non-numeric inputs are invalid</li>
+        </ul>
+        </div>
+
+
+        <div class="note-card">
+            <h3>🌍 Key Applications</h3>
+            <ul class="note-list">
+                <li><strong>Environmental Engineering:</strong> Tracking pollutant dispersion in air/water systems</li>
+                <li><strong>Fire Safety:</strong> Calculating smoke movement and ventilation requirements</li>
+                <li><strong>Industrial Safety:</strong> Monitoring hazardous gas leaks in confined spaces</li>
+                <li><strong>Process Engineering:</strong> Designing chemical reactors and storage systems</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Function to validate inputs
+    function validateInputs(density, volume, massFlowRate) {
+        const errors = [];
+        const warnings = [];
+        
+        // Validate density
+        if (isNaN(density) || density <= 0) {
+            errors.push("Density must be a positive number");
+        } else if (density < 0.001) {
+            errors.push("Density is too low (minimum: 0.001 kg/m³)");
+        } else if (density > 20000) {
+            warnings.push("Density value is extremely high (maximum: 20,000 kg/m³)");
+        } else if (density > 1500) {
+            warnings.push("Density is higher than typical values (verify input)");
+        }
+        
+        // Validate volume
+        if (isNaN(volume) || volume <= 0) {
+            errors.push("Volume must be a positive number");
+        } else if (volume < 0.001) {
+            errors.push("Volume is too low (minimum: 0.001 m³)");
+        } else if (volume > 100000) {
+            warnings.push("Volume is extremely large (maximum: 100,000 m³)");
+        } else if (volume > 10000) {
+            warnings.push("Volume is larger than typical values (verify input)");
+        }
+        
+        // Validate mass flow rate
+        if (isNaN(massFlowRate) || massFlowRate < 0) {
+            errors.push("Mass flow rate must be a non-negative number");
+        } else if (massFlowRate > 1000) {
+            warnings.push("Mass flow rate is extremely high (maximum: 1000 kg/s)");
+        } else if (massFlowRate > 100) {
+            warnings.push("Mass flow rate is higher than typical values (verify input)");
+        }
+        
+        return { errors, warnings };
+    }
+    
+    // Function to calculate mass balance
+    function calculateMassBalance() {
+        // Get input values
+        const density = parseFloat(document.getElementById("density").value);
+        const volume = parseFloat(document.getElementById("volume").value);
+        const massFlowRate = parseFloat(document.getElementById("massFlowRate").value);
+        
+        // Validate inputs
+        const { errors, warnings } = validateInputs(density, volume, massFlowRate);
+        
+        // Show errors if any
+        if (errors.length > 0) {
+            document.getElementById("placeholder").classList.add("hidden");
+            document.getElementById("resultValue").classList.add("hidden");
+            
+            const errorDiv = document.getElementById("resultError");
+            const errorMessage = document.getElementById("errorMessage");
+            
+            errorMessage.innerHTML = `<strong>Input Error:</strong> ${errors.join("<br>")}`;
+            errorDiv.classList.remove("hidden");
+            return;
+        }
+        
+        // Calculate mass balance
+        const mass = density * volume; // Total mass inside the system
+        const dMass_dt = -massFlowRate; // Change in mass per second
+        
+        // Show warnings if any
+        let warningMessage = "";
+        if (warnings.length > 0) {
+            warningMessage = `<div style="background:#fff3cd; border-left:4px solid #ffc107; padding:10px; margin:10px 0; border-radius:4px;">
+                <strong>Warning:</strong> ${warnings.join("<br>")}
+            </div>`;
+        }
+        
+        // Determine system status
+        let systemStatus, statusClass;
+        if (dMass_dt < 0) {
+            systemStatus = "Mass decreasing (outflow > inflow)";
+            statusClass = "bad";
+        } else if (dMass_dt > 0) {
+            systemStatus = "Mass increasing (inflow > outflow)";
+            statusClass = "average";
+        } else {
+            systemStatus = "System at steady state (inflow = outflow)";
+            statusClass = "good";
+        }
+        
+        // Display results
+        document.getElementById("placeholder").classList.add("hidden");
+        document.getElementById("resultError").classList.add("hidden");
+        
+        const resultDiv = document.getElementById("resultValue");
+        resultDiv.classList.remove("hidden");
+        
+        document.getElementById("rateValue").textContent = dMass_dt.toFixed(4);
+        
+        document.getElementById("feedbackContent").innerHTML = `
+            ${warningMessage}
+            <p>The system has a mass change rate of <strong>${dMass_dt.toFixed(4)} kg/s</strong>.</p>
+            <p><span class="${statusClass}">${systemStatus}</span></p>
+            <p>Total mass in the system: <strong>${mass.toFixed(2)} kg</strong></p>
+            <p>Mass flow rate: <strong>${massFlowRate.toFixed(4)} kg/s</strong></p>
+        `;
+    }
+    
+    // Function to print report
+    function printReport() {
+        window.print();
+    }
+    
+    // Add event listeners for Enter key
+    document.addEventListener("DOMContentLoaded", function() {
+        const inputs = document.querySelectorAll(".form-input");
+        inputs.forEach(input => {
+            input.addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    calculateMassBalance();
+                }
+            });
+        });
+    });
+</script>
+
+  <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+
+Input Validations
+
+Density (ρ)
+
+Must be numeric and > 0
+
+Minimum: 0.001 kg/m³ → error if below
+
+Maximum: 20,000 kg/m³ → warning if exceeded
+
+1500 kg/m³ → warning (unrealistic for most cases)
+
+Volume (V)
+
+Must be numeric and > 0
+
+Minimum: 0.001 m³ → error if below
+
+Maximum: 100,000 m³ → warning if exceeded
+
+10,000 m³ → warning (unusually large)
+
+Mass Flow Rate (W)
+
+Must be numeric and ≥ 0
+
+1000 kg/s → warning (extreme flow)
+
+100 kg/s → warning (unusually high)
+-------------------------------------------------------------------------
+📤 Output Validations
+
+dM/dt (Rate of change of mass)
+
+Displayed in kg/s with 4 decimal places
+
+Can be negative (mass decreasing), zero (steady state), or positive (mass increasing)
+
+Must not display NaN, Infinity, or empty results
+
+Total Mass (ρ × V)
+
+Must be positive and finite
+
+Show with 2 decimal places
+
+Warnings & Errors
+
+If error → hide result, show ❌ error message
+
+If warning → show ⚠️ warning box in feedback section
+---------------------------------------------------------------------------------
+⚠️ Edge Cases
+
+Empty input → error
+
+Non-numeric input (e.g., text, symbols) → error
+
+Zero or negative density/volume → error
+
+Zero flow rate → valid (steady state check)
+
+Extremely large density/volume/flow within max limits → show warnings but still calculate
+
+Decimal precision → ensure correct rounding (not long float tails)
+
+
+-->
