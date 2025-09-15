@@ -1,0 +1,410 @@
+{% extends 'base.html' %}
+{% block title %}Vent Area Calculator (ASME Section VIII){% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vent Area Calculator (ASME Section VIII)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content {
+                flex-direction: column;
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        .calc-card:hover {
+            transform: translateY(-5px);
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        /* Result Card */
+        .result-placeholder {
+            text-align: center;
+            margin: auto;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: baseline;
+            justify-content: center;
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+        }
+        .rate-label {
+            color: #2980b9;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content {
+            color: #34495e;
+        }
+        /* Notes Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list { margin: 0; padding-left: 18px; }
+        .custom-table {
+            border-collapse: collapse; width: 100%;
+            margin: 20px 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .custom-table thead { background-color: #1560bd; color: white; }
+        .custom-table th, .custom-table td {
+            padding: 12px 16px; border: 1px solid #ddd; text-align: center;
+        }
+        .custom-table tr:nth-child(even) { background-color: #f9f9f9; }
+        /* Error Message */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px; padding: 20px;
+            text-align: left; gap: 12px; margin-top: 20px;
+        }
+        .error-icon { font-size: 76px; flex-shrink: 0; text-align: center; }
+        .error-message { font-size: 24px; line-height: 1.6; }
+        .hidden { display: none; }
+        .btn-container { display: flex; justify-content: center; margin: 30px 0; }
+        .back-btn {
+            background: linear-gradient(#1560bd,#000040); color: #ffffff; border: 2px solid #1560bd;
+            padding: 10px 20px; font-size: 14px; font-weight: 600; border-radius: 8px;
+            text-decoration: none; transition: all 0.3s ease; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Vent Area Calculator (ASME Section VIII)</h1>
+            <p>Calculate the critical flow vent area for a pressure vessel according to ASME Section VIII.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>System Parameters</h2>
+                <div class="form-group">
+                    <label for="massFlowRate">Mass Flow Rate (W) in kg/s</label>
+                    <input type="number" id="massFlowRate" class="form-input" placeholder="Enter W">
+                </div>
+                <div class="form-group">
+                    <label for="dischargeCoeff">Discharge Coefficient (Kd)</label>
+                    <input type="number" id="dischargeCoeff" class="form-input" placeholder="Enter Kd">
+                </div>
+                <div class="form-group">
+                    <label for="flowCoeff">Flow Coefficient (C)</label>
+                    <input type="number" id="flowCoeff" class="form-input" placeholder="Enter C">
+                </div>
+                <div class="form-group">
+                    <label for="pressure">Pressure (P)</label>
+                    <input type="number" id="pressure" class="form-input" placeholder="Enter P">
+                </div>
+                <div class="form-group">
+                    <label for="molWeight">Molecular Weight (M)</label>
+                    <input type="number" id="molWeight" class="form-input" placeholder="Enter M">
+                </div>
+                <div class="form-group">
+                    <label for="temp">Temperature (T) in Kelvin</label>
+                    <input type="number" id="temp" class="form-input" placeholder="Enter T">
+                </div>
+                <div class="form-group">
+                    <label for="compressibility">Compressibility Factor (Z)</label>
+                    <input type="number" id="compressibility" class="form-input" placeholder="Enter Z">
+                </div>
+                <button class="calculate-btn" onclick="calculateAndDisplay()">Calculate Vent Area</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Safety illustration">
+                    <p>Enter system parameters to calculate the required vent area based on ASME Section VIII guidelines.</p>
+                </div>
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                <div id="resultValue" class="hidden" style="text-align: center;">
+                    <h2>Calculated Vent Area (A)</h2>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.000</div>
+                        <div class="rate-label">m²</div>
+                    </div>
+                    <div class="result-feedback">
+                        <div class="feedback-title">Interpretation</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                     <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <div class="note-card">
+                <h3>About the ASME Section VIII Formula</h3>
+                <p>The formula provided calculates the minimum required vent area for critical (choked) flow of gas or vapor from a pressure vessel, as specified by ASME Section VIII. This is crucial for ensuring that a pressure relief device can discharge fluid at a sufficient rate to prevent catastrophic overpressure events.</p>
+            </div>
+            <div class="note-card">
+                <h3>✅ Validation Rules</h3>
+                <ul class="note-list">
+                    <li>All input fields are required and must contain positive numbers greater than zero.</li>
+                    <li>Ensure all units are consistent with the formula's requirements (kg/s, Kelvin, etc.).</li>
+                </ul>
+            </div>
+             <div class="note-card">
+                <h3>Gas Constants (Molecular Weights)</h3>
+                <p>For convenience, here are the molecular weights (M) and specific heat ratios (k) for common gases:</p>
+                <div style="overflow-x:auto;">
+                    <table class="custom-table">
+                        <thead><tr><th>Gas or Vapor</th><th>Molecular Weight (M)</th><th>k = cp/cv</th></tr></thead>
+                        <tbody>
+                            <tr><td>Air</td><td>28.97</td><td>1.40</td></tr>
+                            <tr><td>Ammonia</td><td>17.03</td><td>1.33</td></tr>
+                            <tr><td>Carbon Dioxide</td><td>44.01</td><td>1.30</td></tr>
+                            <tr><td>Hydrogen</td><td>2.016</td><td>1.41</td></tr>
+                            <tr><td>Methane</td><td>16.04</td><td>1.31</td></tr>
+                            <tr><td>Nitrogen</td><td>28</td><td>1.404</td></tr>
+                            <tr><td>Oxygen</td><td>32</td><td>1.40</td></tr>
+                            <tr><td>Propane</td><td>44.09</td><td>1.13</td></tr>
+                            <tr><td>Water Vapor</td><td>18.02</td><td>1.324</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateAndDisplay() {
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValueBox = document.getElementById('resultValue');
+
+            errorBox.classList.add('hidden');
+            resultValueBox.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+
+            let errors = [];
+            function getVal(id, label) {
+                const el = document.getElementById(id);
+                const raw = el.value?.toString().trim();
+                if (!raw) {
+                    errors.push(`👉 ${label} is required.`);
+                    return null;
+                }
+                const num = parseFloat(raw);
+                if (isNaN(num) || num <= 0) {
+                    errors.push(`👉 Enter a valid positive number for ${label}.`);
+                    return null;
+                }
+                return num;
+            }
+
+            const W = getVal('massFlowRate', 'Mass Flow Rate (W)');
+            const Kd = getVal('dischargeCoeff', 'Discharge Coefficient (Kd)');
+            const C = getVal('flowCoeff', 'Flow Coefficient (C)');
+            const P = getVal('pressure', 'Pressure (P)');
+            const M = getVal('molWeight', 'Molecular Weight (M)');
+            const T = getVal('temp', 'Temperature (T)');
+            const Z = getVal('compressibility', 'Compressibility Factor (Z)');
+
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add('hidden');
+                return;
+            }
+            
+            const A = (W / (Kd * C * P)) * Math.sqrt((T * Z) / M);
+
+            placeholder.classList.add('hidden');
+            resultValueBox.classList.remove('hidden');
+
+            document.getElementById('rateValue').textContent = A.toFixed(4);
+            
+            let interpretation = "The calculated area represents the minimum required orifice size. The next larger standard size should be selected.";
+            if (A < 0.01) {
+                interpretation += "<br>⚠️ <strong>Warning:</strong> The result is very small. Please double-check the accuracy of your input parameters."
+            }
+            
+            document.getElementById('feedbackContent').innerHTML = interpretation;
+        }
+        
+        function printReport() {
+            window.print();
+        }
+    </script>
+</body>
+</html>
+{% endblock %}
