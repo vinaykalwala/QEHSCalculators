@@ -1,0 +1,665 @@
+{% extends 'base.html' %}
+{% block title %}Thermal Expansion Of Pipe Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thermal Expansion Of Pipe Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: transform 0.3s ease;
+            height: 420px;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background:linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        
+        /* Result Card */
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+        
+        .sub-results {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eaeaea;
+        }
+
+        .sub-result-item {
+            text-align: center;
+        }
+        
+        .sub-result-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        .sub-result-label {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        /* Note Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        /* Error Box */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container printable" id="printArea">
+
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Thermal Expansion Of Pipe Calculator</h1>
+            <p>Calculate the change in length of a pipe due to thermal expansion or contraction, a critical factor in engineering design.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Enter Pipe & Thermal Data</h2>
+                <div class="form-group">
+                    <label for="length">Initial Length of Pipe (L) [meters]</label>
+                    <input type="number" id="length" class="form-input" placeholder="e.g., 100">
+                </div>
+                <div class="form-group">
+                    <label for="tempDiff">Temperature Difference (ΔT) [°C]</label>
+                    <input type="number" id="tempDiff" class="form-input" placeholder="e.g., 80">
+                </div>
+                <div class="form-group">
+                    <label for="expansionCoeff">Expansion Coefficient (α) [mm/m°C]</label>
+                    <input type="number" id="expansionCoeff" class="form-input" placeholder="e.g., 0.012 for Carbon Steel">
+                </div>
+                <button class="calculate-btn" onclick="calculateExpansion()">Calculate Expansion</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Engineering design illustration">
+                    <p>Enter your pipe's data to calculate its change in length and assess the need for design accommodations like expansion loops.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                    
+                <div class="result-value hidden" id="resultValue">
+                    <div class="rate-value" id="rateValue">0.000</div>
+                    <div class="rate-label" id="rateLabel">Pipe Expansion (ΔL) [mm]</div>
+                    
+                    <div class="sub-results">
+                        <div class="sub-result-item">
+                            <div class="sub-result-value" id="initialLength">0 m</div>
+                            <div class="sub-result-label">Initial Length</div>
+                        </div>
+                        <div class="sub-result-item">
+                            <div class="sub-result-value" id="finalLength">0 m</div>
+                            <div class="sub-result-label">Final Length</div>
+                        </div>
+                    </div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low</span><span>Moderate</span><span>High</span><span>Critical</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Expansion Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <!-- About This Calculator -->
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    Materials expand when heated and contract when cooled. This calculator quantifies this change in length for
+                    a pipe, a phenomenon known as linear thermal expansion.
+                    Accounting for this change is crucial in engineering design to prevent stress, buckling, or catastrophic
+                    failure in pipelines, bridges, and other structures.
+                </p>
+            </div>
+        
+            <!-- Parameters Explanation -->
+            <div class="note-card">
+                <h3>❓ Parameters Explained</h3>
+                <ul class="note-list">
+                    <li><strong>L (Length of Pipe):</strong> The initial length of the pipe before expansion, in meters.</li>
+                    <li><strong>ΔT (Temperature Difference):</strong> The difference between the initial and final temperatures
+                        of the pipe, in °C.</li>
+                    <li><strong>α (Expansion Coefficient):</strong> A material-specific value defining how much a material
+                        expands per unit length per degree of temperature rise, in mm/m°C.</li>
+                </ul>
+            </div>
+        
+            <div class="note-card">
+                <h3>📥 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Initial Length (L) [meters]:</strong> Must be a number between 0.1 m and 1000 m.</li>
+                    <li><strong>Temperature Difference (ΔT) [°C]:</strong> Must be a number between 0°C and 500°C.</li>
+                    <li><strong>Expansion Coefficient (α) [mm/m°C]:</strong> Must be a number between 0.001 and 0.03.</li>
+                    <li>Blank, non-numeric, or negative values → flagged as invalid.</li>
+                    <li>Extremely small or extremely large values → ⚠️ Warning: Check input realism.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📤 Output Validations</h3>
+                <ul class="note-list">
+                    <li>If input is invalid → <strong>👉 Please check your inputs; they must be within acceptable ranges.</strong>
+                    </li>
+                    <li>Expansion (ΔL) displayed in <strong>mm</strong> with 3 decimal places.</li>
+                    <li>Initial Length and Final Length displayed in <strong>m</strong> with 4 decimal places.</li>
+                    <li>If calculation produces NaN or infinite →
+                        <strong>❌ Calculation resulted in an invalid number. Please check your inputs.</strong>
+                    </li>
+                    <li>Feedback levels (from script):
+                        <ul>
+                            <li>✅ <strong>Low Expansion.</strong> Minimal change in length; unlikely to cause stress.</li>
+                            <li>🟡 <strong>Moderate Expansion.</strong> Noticeable change. Ensure supports allow movement.</li>
+                            <li>⚠️ <strong>High Expansion.</strong> Significant change; expansion loops or joints likely required.
+                            </li>
+                            <li>❌ <strong>Critical Expansion.</strong> Extreme change; high risk of pipe buckling or failure.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Conclusion -->
+            <div class="note-card">
+                <h3>📌 Conclusion</h3>
+                <p>
+                    Thermal expansion must be considered in construction and mechanical designs to prevent material failures.
+                    Using this formula, engineers can design safe and efficient structures that accommodate expansion without
+                    damage.
+                </p>
+            </div>
+        
+            <!-- Common Expansion Coefficients -->
+            <div class="note-card">
+                <h3>💡 Common Expansion Coefficients (α)</h3>
+                <p>Here are some typical values (in mm/m°C) for common materials:</p>
+                <ul class="note-list">
+                    <li><strong>Carbon Steel:</strong> 0.012</li>
+                    <li><strong>Stainless Steel:</strong> 0.017</li>
+                    <li><strong>Copper:</strong> 0.017</li>
+                    <li><strong>Aluminum:</strong> 0.023</li>
+                    <li><strong>PVC Plastic:</strong> 0.054</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateExpansion() {
+            // --- INPUTS ---
+            const length_val = document.getElementById('length').value.trim();
+            const tempDiff_val = document.getElementById('tempDiff').value.trim();
+            const expansionCoeff_val = document.getElementById('expansionCoeff').value.trim();
+
+            // --- DOM ELEMENTS ---
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+
+            let errors = [];
+
+            // --- VALIDATION RULES ---
+            const length = parseFloat(length_val);
+            const tempDiff = parseFloat(tempDiff_val);
+            const expansionCoeff = parseFloat(expansionCoeff_val);
+
+            if (length_val === '' || isNaN(length) || length < 0.1 || length > 1000)
+                errors.push("👉 Initial Length must be a number between 0.1 m and 1000 m.");
+            if (tempDiff_val === '' || isNaN(tempDiff) || tempDiff < 0 || tempDiff > 500)
+                errors.push("👉 Temperature Difference must be a number between 0°C and 500°C.");
+            if (expansionCoeff_val === '' || isNaN(expansionCoeff) || expansionCoeff < 0.001 || expansionCoeff > 0.03)
+                errors.push("👉 Expansion Coefficient must be a number between 0.001 and 0.03 mm/m°C.");
+
+            // --- ERROR HANDLING ---
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden");
+            }
+
+            // --- CALCULATION ---
+            let expansion = length * tempDiff * expansionCoeff; // in mm
+            let finalLength = length + (expansion / 1000); // convert mm to meters
+
+            if (!isFinite(expansion)) {
+                errorMessage.innerHTML = "❌ Calculation resulted in an invalid number. Please check your inputs.";
+                errorBox.classList.remove("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            }
+
+            // --- DISPLAY RESULTS ---
+            document.getElementById('rateValue').textContent = expansion.toFixed(3);
+            document.getElementById('rateLabel').textContent = expansion < 0 ? "Pipe Contraction (ΔL) [mm]" : "Pipe Expansion (ΔL) [mm]";
+            document.getElementById('initialLength').textContent = length.toFixed(2) + ' m';
+            document.getElementById('finalLength').textContent = finalLength.toFixed(4) + ' m';
+
+            // --- EXPANSION ASSESSMENT ---
+            const meterFill = document.getElementById('meterFill');
+            const expansionPerMeter = Math.abs(expansion / length);
+            let meterWidth, meterColor, feedback;
+
+            if (expansionPerMeter < 1) {
+                meterWidth = '20%';
+                meterColor = '#2ecc71'; // Green
+                feedback = '✅ <strong>Low Expansion.</strong> Minimal change in length; unlikely to cause stress.';
+            } else if (expansionPerMeter < 2.5) {
+                meterWidth = '45%';
+                meterColor = '#f1c40f'; // Yellow
+                feedback = '🟡 <strong>Moderate Expansion.</strong> Noticeable change. Ensure supports allow this movement.';
+            } else if (expansionPerMeter < 5) {
+                meterWidth = '70%';
+                meterColor = '#e67e22'; // Orange
+                feedback = '⚠️ <strong>High Expansion.</strong> Significant change; expansion loops or joints likely required.';
+            } else {
+                meterWidth = '95%';
+                meterColor = '#e74c3c'; // Red
+                feedback = '❌ <strong>Critical Expansion.</strong> Extreme change. High risk of pipe buckling or failure.';
+            }
+
+            meterFill.style.width = meterWidth;
+            meterFill.style.backgroundColor = meterColor;
+            document.getElementById('feedbackContent').innerHTML = feedback;
+
+            placeholder.classList.add("hidden");
+            resultValue.classList.remove("hidden");
+        }
+
+        function printReport() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            window.print();
+        }
+    </script>
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+<!-- 
+1. Analysis from QEHS & Fire Safety Perspective
+
+The calculation formula you use:
+
+Δ
+𝐿
+=
+𝐿
+×
+Δ
+𝑇
+×
+𝛼
+ΔL=L×ΔT×α
+
+Where:
+
+L = Initial pipe length (m)
+
+ΔT = Temperature difference (°C)
+
+α = Thermal expansion coefficient (mm/m°C)
+
+From a QEHS perspective:
+
+Accurate input values are critical because overlooking thermal expansion can lead to mechanical failure, leakage, or catastrophic incidents, especially in pressurized piping (e.g., boilers, chemical plants).
+
+Expansion beyond design limits can cause structural stress, joint failure, or fire hazards if hot fluid leaks onto combustible materials.
+
+Regulatory standards like NFPA 30, ASME B31.3, OSHA 1910.119, and ISO 45001 require risk assessment of thermal expansion in pipelines, particularly for high-temperature or flammable materials.
+
+2. Recommended Input Validation Rules
+Input	Unit	Acceptable Range	Decimals	Rationale
+Initial Pipe Length (L)	meters	0.1 – 1000	2	Pipes <0.1 m are trivial; >1000 m needs specialized engineering.
+Temperature Difference (ΔT)	°C	0 – 500	1	Extreme temperature differences >500°C are uncommon in industrial piping.
+Expansion Coefficient (α)	mm/m°C	0.001 – 0.03	3	Typical steel: 0.012; copper: 0.017; exceeding 0.03 may indicate input error.
+
+Additional Validation Logic:
+
+All fields required — empty values are invalid.
+
+No negative lengths or negative expansion coefficients — physically impossible.
+
+Temperature difference must be non-negative — negative ΔT is possible but should be flagged for review.
+
+Cross-field consistency — extremely high L × ΔT × α (e.g., >100 mm) should trigger a warning for potential design review.
+
+3. Edge Case Validations
+
+Division by zero – not applicable here, but zero input for L or α must be rejected.
+
+Unrealistic combinations – e.g., L = 1000 m, ΔT = 500°C, α = 0.03 → expansion = 15,000 mm. Flag as extreme outlier.
+
+Empty fields – alert user before calculation.
+
+Non-numeric inputs – prevent NaN results.
+
+Negative temperature difference – allow but indicate cooling scenario.
+
+4. Output Validation and Threshold Logic
+Expansion (ΔL)	Safety Level	Feedback
+0 – 10 mm	Low	Safe; no special accommodations needed.
+10 – 30 mm	Moderate	Monitor and consider small expansion allowances.
+30 – 50 mm	High	Evaluate expansion loops or sliding supports.
+>50 mm	Critical	Immediate design intervention required; may need expansion joints.
+
+Explanation: This aligns with industry practice, where expansion exceeding 50 mm in a single straight run is considered high risk for mechanical and fire hazards.
+-->

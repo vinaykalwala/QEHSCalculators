@@ -1021,6 +1021,27 @@ CALCULATORS = [
 # {"name": "Pit Area Calculation", "url_name":"safety_pit_area_calculation_calculator", "plan_type": "corporate", "category": "safety"},
 
 
+# {"name": "Pump Efficiency Calculator", "url_name":"safety_pump_efficiency_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Precast Lifting Safety Calculator", "url_name":"safety_precast_lifting_safety_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "PPE Stock Level Calculator", "url_name":"safety_ppe_stock_level_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Pipe Fittings Pressure Loss Calculator", "url_name":"safety_pipe_fittings_pressure_loss_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Percentage Risk Index Calculator", "url_name":"safety_percentage_risk_index_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Reorder Point (ROP) Calculator", "url_name":"safety_reorder_point_rop_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Risk Level Assessment Calculator", "url_name":"safety_risk_level_assesment_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Risk Priority Number (RPN) Calculator", "url_name":"safety_risk_priority_number_rpn_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Rate of Penetration (ROP) Calculator", "url_name":"safety_rate_of_penetration_rop_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Rheology (Viscosity) Calculator", "url_name":"safety_rheology_viscosity_calculator", "plan_type": "corporate", "category": "safety"},
+
+
 
 
 
@@ -1030,7 +1051,16 @@ CALCULATORS = [
 
 
 # safety calculators from  bottom to top
-
+# {"name": "Total Pump Delivery Head Calculator", "url_name":"safety_total_pump_delivery_head_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "To Determine The Required Steam Flowrate From A kW Rating Calculator", "url_name":"safety_to_determine_the_required_steam_flowrate_from_a_kw_rating_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "Total Recordable Case Frequency (TRCF) Calculator", "url_name":"safety_total_recordable_case_frequency_trcf_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "Thermal Penetration Time for Conductive Heat Transfer Calculator", "url_name":"safety_thermal_penetration_time_for_conductive_heat_transfer_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "Thermal Expansion Of Pipe Calculator", "url_name":"safety_thermal_expansion_of_pipe_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "Tori-Spherical Head Radius Calculator", "url_name":"safety_tori_spherical_head_radius_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "Total Brake Horsepower (BHP) Required Calculator", "url_name":"safety_total_brake_horsepower_bhp_required_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "Turnaround Time Formula (External Heating) Calculator", "url_name":"safety_turnaround_time_formula_external_heating_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "Tension Factor Calculator for Safe Lifting", "url_name":"safety_tension_factor_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "Total Integrated Dose at Ground Level Calculator (Puff Model)", "url_name":"safety_total_integrated_dose_at_ground_level_puff_model_calculator", "plan_type": "corporate", "category": "safety"},
 # {"name": "Velocity of Steam Passing Through an Orifice Calculator", "url_name":"safety_velocity_of_steam_passing_through_an_orifice1_calculator", "plan_type": "corporate", "category": "safety"},
 # {"name": "Velocity of Steam Passing Through an Orifice Calculator(2)", "url_name":"safety_velocity_of_steam_passing_through_an_orifice2_calculator", "plan_type": "corporate", "category": "safety"},
 # {"name": "Velocity Energy Conversion Calculator", "url_name":"safety_velocity_energy_conversion_calculator", "plan_type": "corporate", "category": "safety"},
