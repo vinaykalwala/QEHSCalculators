@@ -972,60 +972,60 @@ CALCULATORS = [
 {"name": "Liquid Sizing Calculator", "url_name":"safety_liquid_sizing_calculator", "plan_type": "corporate", "category": "safety"},
 
 
-# {"name": "Mud Weight (Density) Calculator", "url_name":"safety_mud_weight_density_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Mud Weight (Density) Calculator", "url_name":"safety_mud_weight_density_calculator", "plan_type": "corporate", "category": "safety"},
 
-# {"name": "Mud Pump Output Calculator", "url_name":"safety_mud_pump_output_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Mud Pump Output Calculator", "url_name":"safety_mud_pump_output_calculator", "plan_type": "corporate", "category": "safety"},
 
-# {"name": "Marsh Funnel Viscosity Calculator", "url_name":"safety_marsh_funnel_viscosity_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Marsh Funnel Viscosity Calculator", "url_name":"safety_marsh_funnel_viscosity_calculator", "plan_type": "corporate", "category": "safety"},
 
-# {"name": "Mass and Heat Balance for Steam Injection into a Tank", "url_name":"safety_mass_and_heat_balance_for_steam_injection_into_a_tank_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Mass and Heat Balance for Steam Injection into a Tank", "url_name":"safety_mass_and_heat_balance_for_steam_injection_into_a_tank_calculator", "plan_type": "corporate", "category": "safety"},
 
-# {"name": "Motor Vehicle Crash Rate (MVCR) Calculator", "url_name":"safety_motor_vehicle_crash_rate_mvcr_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Motor Vehicle Crash Rate (MVCR) Calculator", "url_name":"safety_motor_vehicle_crash_rate_mvcr_calculator", "plan_type": "corporate", "category": "safety"},
 
-# {"name": "Motor Vehicle Crash Frequency Rate Calculator", "url_name":"safety_motor_vehicle_crash_frequency_rate_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Motor Vehicle Crash Frequency Rate Calculator", "url_name":"safety_motor_vehicle_crash_frequency_rate_calculator", "plan_type": "corporate", "category": "safety"},
 
-# {"name": "Mean Temperature Difference Calculator", "url_name":"safety_mean_temperature_difference_bw_primary_and_secondary_fluid_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Mean Temperature Difference Calculator", "url_name":"safety_mean_temperature_difference_bw_primary_and_secondary_fluid_calculator", "plan_type": "corporate", "category": "safety"},
 
-# {"name": "Maximum Inspection Interval Calculator", "url_name":"safety_maximum_inspection_interval_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Maximum Inspection Interval Calculator", "url_name":"safety_maximum_inspection_interval_calculator", "plan_type": "corporate", "category": "safety"},
 
-# {"name": "NEMA and IP Rating Reference", "url_name":"safety_nema_and_ip_rating_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "NEMA and IP Rating Reference", "url_name":"safety_nema_and_ip_rating_calculator", "plan_type": "corporate", "category": "safety"},
 
-# {"name": "No-Overpressure Vent Area Calculator", "url_name":"safety_no_overpressure_vent_area_calculator", "plan_type": "corporate", "category": "safety"},
-
-
-# {"name": "No-Overpressure Vent Area Formula (External Heating)", "url_name":"safety_no_overpressure_vent_area_formula_external_heating_calculator", "plan_type": "corporate", "category": "safety"},
-
-# {"name": "No-Overpressure Vent Area Formula (All-Liquid Venting)", "url_name":"safety_no_overpressure_vent_area_formula_all_liquid_venting_calculator", "plan_type": "corporate", "category": "safety"},
-
-# {"name": "Normalized Mass Flux Formula (Low-Quality Region) Calculator", "url_name":"safety_normalized_mass_flux_formula_low_quality_region_calculator", "plan_type": "corporate", "category": "safety"},
-
-# {"name": "NIOSH Lifting Index (LI) Calculator", "url_name":"safety_niosh_lifting_index_li_calculator", "plan_type": "corporate", "category": "safety"},
-
-# {"name": "Non-Viscous Liquid Vent Area Calculator", "url_name":"safety_non_viscous_liquid_vent_area_calculator", "plan_type": "corporate", "category": "safety"},
-
-# {"name": "OSHA Total Recordable Incident Rate (TRIR) Calculator", "url_name":"safety_osha_total_recordable_incident_rate_calculator", "plan_type": "corporate", "category": "safety"},
-
-# {"name": "OSHA DART Rate Calculator", "url_name":"safety_osha_dart_rate_calculator", "plan_type": "corporate", "category": "safety"},
-
-# {"name": "Ohm's Law Calculator", "url_name":"safety_ohms_law_calculator", "plan_type": "corporate", "category": "safety"},
-
-# {"name": "Orifice Plate Beta Ratio Calculator", "url_name":"safety_orifice_plate_beta_ratio_calculator", "plan_type": "corporate", "category": "safety"},
-
-# {"name": "PPE Compliance Rate Calculator", "url_name":"safety_ppe_compilance_rate_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Pressure Gradient Calculator", "url_name":"safety_pressure_gradient_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Potential Energy Calculator", "url_name":"safety_potential_energy_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Proportion of Vapor in Two-Phase Discharge Calculator", "url_name":"safety_proportion_of_vapor_in_two_phase_discharge_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Pore Pressure Calculator", "url_name":"safety_pore_pressure_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Pressure Drop Calculator", "url_name":"safety_pressure_drop_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Pressure Drop Across A Steam Valve  Calculator", "url_name":"safety_pressure_drop_across_a_steam_valve_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Pit Area Calculation", "url_name":"safety_pit_area_calculation_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "No-Overpressure Vent Area Calculator", "url_name":"safety_no_overpressure_vent_area_calculator", "plan_type": "corporate", "category": "safety"},
 
 
-# {"name": "Pump Efficiency Calculator", "url_name":"safety_pump_efficiency_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "No-Overpressure Vent Area Formula (External Heating)", "url_name":"safety_no_overpressure_vent_area_formula_external_heating_calculator", "plan_type": "corporate", "category": "safety"},
 
-# {"name": "Precast Lifting Safety Calculator", "url_name":"safety_precast_lifting_safety_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "No-Overpressure Vent Area Formula (All-Liquid Venting)", "url_name":"safety_no_overpressure_vent_area_formula_all_liquid_venting_calculator", "plan_type": "corporate", "category": "safety"},
 
-# {"name": "PPE Stock Level Calculator", "url_name":"safety_ppe_stock_level_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Normalized Mass Flux Formula (Low-Quality Region) Calculator", "url_name":"safety_normalized_mass_flux_formula_low_quality_region_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "NIOSH Lifting Index (LI) Calculator", "url_name":"safety_niosh_lifting_index_li_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Non-Viscous Liquid Vent Area Calculator", "url_name":"safety_non_viscous_liquid_vent_area_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "OSHA Total Recordable Incident Rate (TRIR) Calculator", "url_name":"safety_osha_total_recordable_incident_rate_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "OSHA DART Rate Calculator", "url_name":"safety_osha_dart_rate_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Ohm's Law Calculator", "url_name":"safety_ohms_law_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Orifice Plate Beta Ratio Calculator", "url_name":"safety_orifice_plate_beta_ratio_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "PPE Compliance Rate Calculator", "url_name":"safety_ppe_compilance_rate_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Pressure Gradient Calculator", "url_name":"safety_pressure_gradient_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Potential Energy Calculator", "url_name":"safety_potential_energy_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Proportion of Vapor in Two-Phase Discharge Calculator", "url_name":"safety_proportion_of_vapor_in_two_phase_discharge_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Pore Pressure Calculator", "url_name":"safety_pore_pressure_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Pressure Drop Calculator", "url_name":"safety_pressure_drop_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Pressure Drop Across A Steam Valve  Calculator", "url_name":"safety_pressure_drop_across_a_steam_valve_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Pit Area Calculation", "url_name":"safety_pit_area_calculation_calculator", "plan_type": "corporate", "category": "safety"},
+
+
+{"name": "Pump Efficiency Calculator", "url_name":"safety_pump_efficiency_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "Precast Lifting Safety Calculator", "url_name":"safety_precast_lifting_safety_calculator", "plan_type": "corporate", "category": "safety"},
+
+{"name": "PPE Stock Level Calculator", "url_name":"safety_ppe_stock_level_calculator", "plan_type": "corporate", "category": "safety"},
 
 # {"name": "Pipe Fittings Pressure Loss Calculator", "url_name":"safety_pipe_fittings_pressure_loss_calculator", "plan_type": "corporate", "category": "safety"},
 
@@ -1041,6 +1041,16 @@ CALCULATORS = [
 
 # {"name": "Rheology (Viscosity) Calculator", "url_name":"safety_rheology_viscosity_calculator", "plan_type": "corporate", "category": "safety"},
 
+# {"name": "Required Opening Force For A Balanced Safety Valve  Calculator", "url_name":"safety_required_opening_force_for_a_balanced_safety_valve_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "Reaction Force at the end of Safety Valve Calculator", "url_name":"safety_reaction_force_at_the_end_of_safety_valve_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "Remaining Corrosion Life Calculator (1)", "url_name":"safety_remaining_corrosion_life1_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "Remaining Corrosion Life Calculator (2)", "url_name":"safety_remaining_corrosion_life2_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "Remaining Corrosion Allowance Calculator", "url_name":"safety_remaining_corrosion_allowance_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "Relief Vent Rate ( All-Vapor and All-Liquid ) Venting Calculator", "url_name":"safety_relief_vent_rate_all_vapor_and_all_liquid_venting_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "Relief Vent Rate Formula (All-Liquid Venting) Calculator", "url_name":"safety_relief_vent_rate_formula_all_liquid_venting_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "Road Safety - Braking Distance Calculator", "url_name":"safety_road_safety_braking_distance_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "Road Safety - Time Headway (TH) Calculator", "url_name":"safety_road_safety_time_headway_th_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "Road Safety & Speed-Flow Relationship Calculator", "url_name":"safety_road_safety_and_speed_flow_relationship_calculator", "plan_type": "corporate", "category": "safety"},
 
 
 
