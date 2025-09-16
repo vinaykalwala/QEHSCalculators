@@ -1,0 +1,756 @@
+{% extends 'base.html' %}
+{% block title %}Ratio and Correlation Growth Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ratio and Correlation Growth Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 38px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+
+<div class="calculator-header">
+  <h1>Ratio and Correlation Growth Calculator</h1>
+  <p>Estimate projected population (P₂) using the ratio between local and regional census populations and a regional projection. All inputs are population counts (persons).</p>
+</div>
+
+<div class="calc-content">
+  <!-- Calculator -->
+  <div class="calc-card">
+    <h2>Enter Data</h2>
+
+    <div class="form-group">
+      <label for="P1">Population at last census (P₁)</label>
+      <input type="number" id="P1" class="form-input" min="1" step="any" placeholder="e.g., 50000">
+    </div>
+
+    <div class="form-group">
+      <label for="P1R">Region population at last census (P₁R)</label>
+      <input type="number" id="P1R" class="form-input" min="1" step="any" placeholder="e.g., 1000000">
+    </div>
+
+    <div class="form-group">
+      <label for="P2R">Projected region population (P₂R)</label>
+      <input type="number" id="P2R" class="form-input" min="0" step="any" placeholder="e.g., 1100000">
+    </div>
+
+    <button class="calculate-btn" onclick="calculateProjectedPopulation()">Calculate Projected Population</button>
+  </div>
+
+  <!-- Result Section -->
+  <div class="result-card">
+    <div class="result-placeholder" id="placeholder">
+      <img src="/static/images/mlc_environment_result.png" alt="Projection illustration">
+      <p>This tool will calculate the <strong>Projected Population (P₂)</strong> and related metrics.</p>
+    </div>
+
+    <div class="result-error hidden" id="resultError">
+      <div class="error-icon">❌</div>
+      <div class="error-message" id="errorMessage"></div>
+    </div>
+
+    <div class="result-value hidden" id="resultValue">
+      <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+        <h2>Projection Result</h2>
+      </div>
+
+      <div class="rate-display">
+        <div class="rate-value" id="rateValue">0</div>
+        <div class="rate-label" style="color:#2980b9; font-size:16px; font-weight:bold;">persons (P₂)</div>
+      </div>
+
+      <div class="result-feedback">
+        <div class="feedback-title">Assessment</div>
+        <div class="feedback-content" id="feedbackContent"></div>
+      </div>
+
+      <div class="btn-wrapper">
+        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="note-section">
+
+  <div class="note-card">
+    <h3>📘 About This Calculator</h3>
+    <p>Estimate projected local population (<strong>P₂</strong>) based on the ratio of local to regional census populations and projected regional population. Useful for urban, regional, and infrastructure planning.</p>
+  </div>
+
+  <div class="note-card">
+    <h3>⚙ Parameters Used</h3>
+    <ul class="note-list">
+      <li><strong>P₁:</strong> Local population at last census (persons)</li>
+      <li><strong>P₁R:</strong> Regional population at last census (persons)</li>
+      <li><strong>P₂R:</strong> Projected regional population (persons)</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>✅ Input Validations</h3>
+    <ul class="note-list">
+      <li>All inputs must be numeric and positive.</li>
+      <li>P₁ must be ≤ P₁R.</li>
+      <li>P₁R cannot be zero (prevents division by zero).</li>
+      <li>Non-integer inputs trigger a warning and are rounded to nearest person.</li>
+      <li>Extremely large values (>2,000,000,000) trigger a warning for verification.</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>📊 Output Validations / Assessment</h3>
+    <ul class="note-list">
+      <li>Projected local population (<strong>P₂</strong>) is rounded to nearest person.</li>
+      <li>Local growth rate classification:</li>
+      <ul>
+        <li>High growth (≥10%) → ✅ Scale infrastructure and utilities.</li>
+        <li>Moderate growth (2–10%) → ⚠️ Incremental planning recommended.</li>
+        <li>Stable / Low growth (-2% to 2%) → Maintain assumptions; monitor trends.</li>
+        <li>Declining (≤ -2%) → ⚠️ Investigate causes; adjust planning accordingly.</li>
+      </ul>
+      <li>Proportionality check between local and regional growth: difference ≤0.5% → proportional; else warning displayed.</li>
+      <li>Warnings shown for extreme growth rates (±1000%) or inconsistent projections.</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>📏 Standards</h3>
+    <p>References for population projection and planning:</p>
+    <ul class="note-list">
+      <li>ISO 22310 – Guidelines for demographic and urban planning projections</li>
+      <li>UN World Urbanization Prospects – population projection methodology</li>
+      <li>Internal government planning standards for census and population forecasts</li>
+    </ul>
+  </div>
+
+</div>
+
+
+<script>
+/* Show error messages (keeps your UI flow) */
+function showErrors(errors) {
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+
+  errorMessage.innerHTML = errors.join("<br>");
+  errorBox.classList.remove("hidden");
+  placeholder.classList.add("hidden");
+  resultValue.classList.add("hidden");
+}
+
+/* Utility: count decimals */
+function countDecimals(str) {
+  if (!str || str.indexOf('.') === -1) return 0;
+  return str.split('.')[1].length;
+}
+
+/* Main calculation with validations */
+function calculateProjectedPopulation() {
+  const P1Raw  = document.getElementById("P1").value.trim();
+  const P1RRaw = document.getElementById("P1R").value.trim();
+  const P2RRaw = document.getElementById("P2R").value.trim();
+
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+  const rateEl = document.getElementById("rateValue");
+  const feedbackEl = document.getElementById("feedbackContent");
+
+  // Reset UI
+  errorBox.classList.add("hidden");
+  errorMessage.innerHTML = "";
+  feedbackEl.innerHTML = "";
+
+  const errors = [];
+  const warnings = [];
+
+  // Required presence
+  if (P1Raw === "")  errors.push("👉 Please enter P₁ (local population at last census).");
+  if (P1RRaw === "") errors.push("👉 Please enter P₁R (regional population at last census).");
+  if (P2RRaw === "") errors.push("👉 Please enter P₂R (projected regional population).");
+  if (errors.length) return showErrors(errors);
+
+  // Parse numeric
+  const P1f  = parseFloat(P1Raw);
+  const P1Rf = parseFloat(P1RRaw);
+  const P2Rf = parseFloat(P2RRaw);
+
+  // Basic numeric checks
+  if (!Number.isFinite(P1f)  || P1f  < 1)   errors.push("👉 P₁ must be a positive number (≥ 1).");
+  if (!Number.isFinite(P1Rf) || P1Rf < 1)   errors.push("👉 P₁R must be a positive number (≥ 1).");
+  if (!Number.isFinite(P2Rf) || P2Rf < 0)   errors.push("👉 P₂R must be a non-negative number.");
+
+  if (errors.length) return showErrors(errors);
+
+  // Integer check (populations should be integers)
+  const fractionalInputs = [];
+  if (countDecimals(P1Raw) > 0)  fractionalInputs.push("P₁");
+  if (countDecimals(P1RRaw) > 0) fractionalInputs.push("P₁R");
+  if (countDecimals(P2RRaw) > 0) fractionalInputs.push("P₂R");
+  if (fractionalInputs.length) {
+    warnings.push(`⚠️ ${fractionalInputs.join(", ")} contain decimal values — populations are counts and will be rounded.`);
+  }
+
+  // Round to nearest whole person for calculation (and show warnings if rounding happened)
+  const P1  = Math.round(P1f);
+  const P1R = Math.round(P1Rf);
+  const P2R = Math.round(P2Rf);
+
+  // Hard logical checks
+  if (P1R === 0) return showErrors(["👉 P₁R cannot be zero (division by zero)."]);
+  if (P1 > P1R) return showErrors(["👉 P₁ cannot be greater than P₁R (local cannot exceed regional recorded population)."]);
+
+  // Large value warnings
+  const MAX_SAFE = 2000000000; // 2 billion
+  if (P1 > MAX_SAFE || P1R > MAX_SAFE || P2R > MAX_SAFE) {
+    warnings.push("⚠️ Very large population value(s) detected (>2,000,000,000). Verify units and source data.");
+  }
+
+  // Calculate k and P2
+  const k = P1 / P1R;
+  const P2_raw = k * P2R;
+  const P2 = Math.round(P2_raw); // final projected population as whole persons
+
+  // Growth rates (percent)
+  const regionalGrowthRate = (P1R === 0) ? NaN : ((P2R - P1R) / P1R) * 100;
+  const localGrowthRate    = (P1 === 0)  ? NaN : ((P2 - P1) / P1) * 100;
+
+  // Suspicious / unrealistic checks
+  if (!Number.isFinite(k) || k <= 0) errors.push("⚠️ Computed growth ratio k is invalid (check inputs).");
+  if (!Number.isFinite(P2) || P2 < 0) errors.push("⚠️ Computed projected population is invalid.");
+  if (errors.length) return showErrors(errors);
+
+  // Proportionality check (tolerance in percentage points)
+  const PROPORTIONAL_TOLERANCE = 0.5; // percentage points
+  const isProportional = Number.isFinite(regionalGrowthRate) && Number.isFinite(localGrowthRate)
+    && Math.abs(regionalGrowthRate - localGrowthRate) <= PROPORTIONAL_TOLERANCE;
+
+  // Local growth classification & recommendation
+  let localClass = "";
+  let recommendation = "";
+  if (localGrowthRate >= 10) {
+    localClass = "High growth (≥10%)";
+    recommendation = "Consider scaling infrastructure, utilities and emergency services capacity.";
+  } else if (localGrowthRate >= 2) {
+    localClass = "Moderate growth (2%–10%)";
+    recommendation = "Plan for incremental service expansion and monitor trends.";
+  } else if (localGrowthRate > -2) {
+    localClass = "Stable / Low growth (-2% to 2%)";
+    recommendation = "Maintain current planning assumptions; monitor for shifts.";
+  } else {
+    localClass = "Declining population (≤ -2%)";
+    recommendation = "Investigate causes (migration, economic factors) and adjust service plans.";
+  }
+
+  // Build feedback
+  let statusMsg = isProportional
+    ? `✅ Proportional growth: local growth ${localGrowthRate.toFixed(2)}% ≈ regional growth ${regionalGrowthRate.toFixed(2)}%.`
+    : `⚠️ Local growth (${localGrowthRate.toFixed(2)}%) differs from regional growth (${regionalGrowthRate.toFixed(2)}%).`;
+
+  // Build details for display (audit friendly)
+  let details = `<div><strong>Growth ratio (k):</strong> ${k.toFixed(4)}</div>`;
+  details += `<div><strong>Projected population (P₂):</strong> ${P2.toLocaleString()} persons</div>`;
+  details += `<div><strong>Regional growth rate:</strong> ${Number.isFinite(regionalGrowthRate) ? regionalGrowthRate.toFixed(2) + '%' : 'N/A'}</div>`;
+  details += `<div><strong>Local growth rate:</strong> ${Number.isFinite(localGrowthRate) ? localGrowthRate.toFixed(2) + '%' : 'N/A'}</div>`;
+  details += `<div style="margin-top:6px;"><strong>Assessment:</strong> ${localClass}</div>`;
+  details += `<div style="margin-top:4px;">${recommendation}</div>`;
+
+  if (warnings.length) {
+    details += `<div style="margin-top:6px; color:#b35d00; font-size:0.95em;">${warnings.join(" | ")}</div>`;
+  }
+
+  // Show only P2 in big number area, and full details in feedback
+  rateEl.textContent = P2.toLocaleString();
+  feedbackEl.innerHTML = `<div style="font-weight:bold;margin-bottom:6px;">${statusMsg}</div>${details}`;
+
+  // Show/hide blocks
+  placeholder.classList.add("hidden");
+  resultValue.classList.remove("hidden");
+  errorBox.classList.add("hidden");
+}
+
+/* Print helper */
+function printReport() {
+  const el = document.getElementById('printDate');
+  if (el) {
+    const now = new Date();
+    el.textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+  window.print();
+}
+</script>
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+<!-- 
+📌 Projected Population Calculator Notes
+
+🔹 Purpose:
+    Estimate projected local population (P₂) based on historical local and regional population data.
+
+🔹 Inputs:
+    • P₁   → Local population at last census
+    • P₁R  → Regional population at last census
+    • P₂R  → Projected regional population
+
+🔹 Input Validations:
+    • Must be numeric and positive
+    • Populations ideally integers (decimal values trigger warnings)
+    • P₁ ≤ P₁R (local cannot exceed regional)
+    • P₁R ≠ 0 (prevents division by zero)
+    • Large values (> 2 billion) trigger warnings
+
+🔹 Core Calculations:
+    • k = P₁ / P₁R → proportion of local to regional population
+    • P₂ = k × P₂R → projected local population
+    • Regional growth rate = ((P₂R − P₁R) / P₁R) × 100
+    • Local growth rate = ((P₂ − P₁) / P₁) × 100
+
+🔹 Warnings:
+    • Decimal population inputs
+    • Unrealistic growth rates (±1000%)
+    • Very large population numbers
+    • Invalid computed growth ratio or projected population
+
+🔹 Output Assessment:
+    • Growth Classification (local):
+        - High growth (≥10%) → scale infrastructure
+        - Moderate growth (2%–10%) → plan incremental expansion
+        - Stable / Low growth (-2% to 2%) → maintain current assumptions
+        - Declining (≤ -2%) → investigate causes, adjust plans
+    • Proportionality check:
+        - Compares local vs regional growth rate
+        - Small difference (≤ 0.5%) → proportional
+        - Larger difference → warning displayed
+
+🔹 Display:
+    • Projected population (P₂) prominently
+    • Full details include growth ratio, local/regional growth rates, classification, recommendations
+    • Warnings highlighted in orange if applicable
+-->

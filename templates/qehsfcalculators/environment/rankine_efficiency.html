@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Cyclone Collection Particle Removal Efficiency Calculator{% endblock %}
+{% block title %}Rankine Efficiency Calculator{% endblock %}
 {% block content %}
 {% load static %}
 
@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyclone Collection Particle Removal Efficiency Calculator</title>
+    <title>Rankine Efficiency Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
@@ -55,15 +55,11 @@
         }
 
         .calculator-header h1 {
-        color: #1560bd;
-        font-weight: 700;
-        margin-bottom: 10px;
-        font-size: clamp(1.5rem, 4vw, 2.5rem); /* responsive font size */
-        line-height: 1.2; /* reduce line spacing */
-        text-align: center;
-        word-break: break-word; /* prevent overflow */
-    }
-
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
         
         .calculator-header p {
             color: #7f8c8d;
@@ -423,138 +419,134 @@
 </head>
 <body>
 
-        <div class="btn-container">
+    <div class="btn-container">
         <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
-        </div>
+    </div>
+
+
 <div class="calculator-container printable" id="printArea">
     {% include "includes/print_header_footer.html" %}
 
 
+<div class="calculator-header">
+    <h1>Rankine Efficiency (ηₖ) Calculator</h1>
+    <p>
+        Calculate the <strong>Rankine Cycle Efficiency (ηₖ)</strong> using enthalpy values at turbine 
+        inlet, turbine exhaust, and condensate. Result is expressed as a <strong>percentage (%)</strong>.
+    </p>
+</div>
 
-    <div class="calculator-header">
-        <h1>Cyclone Collection Particle Removal Efficiency Calculator</h1>
-        <p>Calculate the <strong>Fractional Collection Efficiency (η)</strong> for cyclone separators in air pollution control systems.</p>
+<div class="calc-content">
+    <!-- Calculator -->
+    <div class="calc-card">
+        <h2>Enter Data</h2>
+
+        <div class="form-group">
+            <label for="Hi">Turbine Inlet Enthalpy (Hi, kJ/kg)</label>
+            <input type="number" id="Hi" class="form-input" min="1" step="any" placeholder="e.g., 3200">
+        </div>
+
+        <div class="form-group">
+            <label for="He">Condensate Enthalpy (He, kJ/kg)</label>
+            <input type="number" id="He" class="form-input" min="1" step="any" placeholder="e.g., 500">
+        </div>
+
+        <div class="form-group">
+            <label for="Hc">Turbine Exhaust Enthalpy (Hc, kJ/kg)</label>
+            <input type="number" id="Hc" class="form-input" min="1" step="any" placeholder="e.g., 2500">
+        </div>
+
+        <button class="calculate-btn" onclick="calculateEfficiency()">Calculate Efficiency</button>
     </div>
 
-    <div class="calc-content">
-        <!-- Calculator -->
-        <div class="calc-card">
-            <h2>Enter Data</h2>
-
-            <div class="form-group">
-                <label for="particleDia">Particle Diameter (dₚ) [μm]:</label>
-                <input type="number" id="particleDia" class="form-input" min="0.001" step="any" placeholder="e.g., 5.0">
-                
-            </div>
-
-            <div class="form-group">
-                <label for="cutoffDia">Cut-off Diameter (dₚc) [μm]:</label>
-                <input type="number" id="cutoffDia" class="form-input" min="0.001" step="any" placeholder="e.g., 2.5">
-                
-            </div>
-            
-            <button class="calculate-btn" onclick="calculateEfficiency()">Calculate Efficiency</button>
+    <!-- Result Section -->
+    <div class="result-card">
+        <div class="result-placeholder" id="placeholder">
+            <img src="/static/images/mlc_environment_result.png" alt="Efficiency illustration">
+            <p>This tool will calculate the <strong>Rankine Cycle Efficiency (ηₖ)</strong>.</p>
         </div>
 
-        <!-- Result Section -->
-        <div class="result-card">
-            <div class="result-placeholder" id="placeholder">
-                <img src="/static/images/mlc_environment_result.png" alt="Cyclone efficiency illustration">
-                <p>This tool will calculate the <strong>Fractional Collection Efficiency (η)</strong>.</p>
-            </div>
-            
-            <div class="result-error hidden" id="resultError">
-                <div class="error-icon">❌</div>
-                <div class="error-message" id="errorMessage"></div>
-            </div>
-             
-            <div class="result-value hidden" id="resultValue">
-                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
-                    <h2>Calculated Collection Efficiency</h2>
-                </div>
+        <div class="result-error hidden" id="resultError">
+            <div class="error-icon">❌</div>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
 
-                <div class="rate-display">
-                    <div class="rate-value" id="rateValue">0.00</div>
-                    <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">%</div>
-                </div>
+        <div class="result-value hidden" id="resultValue">
+            <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                <h2>Calculated Efficiency</h2>
+            </div>
 
-                <div class="result-feedback">
-                    <div class="feedback-title">Performance Assessment</div>
-                    <div class="feedback-content" id="feedbackContent"></div>
-                </div>
-                <div class="btn-wrapper">
-                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
-                </div>
+            <div class="rate-display">
+                <div class="rate-value" id="effValue">0.00</div>
+                <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">%</div>
+            </div>
+
+            <div class="result-feedback">
+                <div class="feedback-title">Assessment</div>
+                <div class="feedback-content" id="feedbackContent"></div>
+            </div>
+            <div class="btn-wrapper">
+                <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Notes Section -->
-    <div class="note-section">
-        <div class="note-card">
-            <h3>📘 About This Calculator</h3>
-            <p>
-                The <strong>Cyclone Collection Efficiency Calculator</strong> determines the efficiency with which
-                a cyclone separator captures particles of a specific size, based on the cut-off diameter.
-            </p>
-        </div>
-        
-        <div class="note-card">
-            <h3>📊 Efficiency Interpretation</h3>
-            <ul class="note-list">
-                <li><span class="good">η ≥ 90%</span> → ✅ Excellent collection (Highly effective)</li>
-                <li><span class="average">70% ≤ η < 90%</span> → ⚠️ Good collection (Adequate for most applications)</li>
-                <li><span class="bad">η < 70%</span> → 🔴 Poor collection (Consider system improvements)</li>
-            </ul>
-        </div>
+<!-- Notes Section -->
+<div class="note-section">
 
-        <div class="note-card">
-            <h3>⚠️ Input Validations</h3>
-            <ul class="note-list">
-                <li>👉 <b>Particle Diameter (dₚ)</b> is required and must be > 0 μm</li>
-                <li>👉 <b>Cut-off Diameter (dₚc)</b> is required and must be > 0 μm</li>
-                <li>⚠️ Particle Diameter > 100 μm → warning: unusually large particle size</li>
-                <li>⚠️ Cut-off Diameter > 20 μm → warning: may indicate inefficient cyclone design</li>
-                <li>⚠️ Ratio (dₚ/dₚc) < 0.1 → warning: very small particles relative to cut-off size (low efficiency)</li>
-                <li>⚠️ Ratio (dₚ/dₚc) > 10 → warning: very large particles relative to cut-off size (high efficiency)</li>
-                <li>❌ Non-numeric, zero, or negative inputs are invalid</li>
-                <li>❌ Computed efficiency outside 0–100% is invalid</li>
-            </ul>
-            </div>
+  <!-- About This Calculator -->
+  <div class="note-card">
+    <h3>📘 About This Calculator</h3>
+    <p>
+      This calculator evaluates the <strong>Rankine Cycle Efficiency (ηₖ)</strong>, a thermodynamic indicator of how effectively heat energy is converted into mechanical work in steam power plants. It helps engineers, energy managers, and QEHS professionals monitor and optimize turbine performance.
+    </p>
+  </div>
 
+  <!-- Parameters Used -->
+  <div class="note-card">
+    <h3>⚙ Parameters Used</h3>
+    <ul class="note-list">
+      <li><strong>Hi:</strong> Turbine Inlet Enthalpy (kJ/kg)</li>
+      <li><strong>He:</strong> Condensate Enthalpy (kJ/kg)</li>
+      <li><strong>Hc:</strong> Turbine Exhaust Enthalpy (kJ/kg)</li>
+    </ul>
+  </div>
 
-        <div class="note-card">
-            <h3>📏 Units & Typical Ranges</h3>
-            <ul class="note-list">
-                <li><strong>Particle Diameter (dₚ):</strong> Micrometers (μm), typical range: 0.1-100 μm</li>
-                <li><strong>Cut-off Diameter (dₚc):</strong> Micrometers (μm), typical range: 0.5-10 μm</li>
-                <li><strong>Collection Efficiency (η):</strong> Percentage (0-100%)</li>
-            </ul>
-        </div>
+  <!-- Input Validation Rules -->
+  <div class="note-card">
+    <h3>✅ Input Validation Rules</h3>
+    <ul class="note-list">
+      <li>Hi, He, Hc must be numeric and ≥ 1 kJ/kg</li>
+      <li>Hi must be greater than Hc and He</li>
+      <li>Hc must be greater than He</li>
+      <li>(Hi − He) must be positive (denominator in efficiency formula)</li>
+      <li>Values above 10,000 kJ/kg trigger warnings</li>
+    </ul>
+  </div>
 
-        <div class="note-card">
-            <h3>🌍 Key Applications</h3>
-            <ul class="note-list">
-                <li><strong>Air Pollution Control:</strong> Designing and evaluating cyclone separators</li>
-                <li><strong>Industrial Processes:</strong> Dust collection in manufacturing facilities</li>
-                <li><strong>Powder Processing:</strong> Particle separation in pharmaceutical and chemical industries</li>
-                <li><strong>Environmental Monitoring:</strong> Assessing particulate matter control systems</li>
-                <li><strong>HVAC Systems:</strong> Evaluating air filtration efficiency</li>
-            </ul>
-        </div>
+  <!-- Output Validations -->
+  <div class="note-card">
+    <h3>⚠️ Output Validations</h3>
+    <ul class="note-list">
+      <li>Efficiency (ηₖ) must satisfy 0 < η ≤ 100</li>
+      <li>If η ≥ 40% → ✅ High efficiency: "System performance is excellent. Maintain current operating conditions and schedule routine monitoring."</li>
+      <li>If 20% ≤ η < 40% → ⚠️ Moderate efficiency: "Efficiency is acceptable but can be improved. Review turbine maintenance records and consider energy optimization."</li>
+      <li>If 5% ≤ η < 20% → 🔴 Low efficiency: "System is underperforming. Check for turbine wear, condenser fouling, or steam leakage. Immediate corrective action recommended."</li>
+      <li>Else → ❌ Invalid efficiency: "Inputs appear inconsistent. Please recheck enthalpy values."</li>
+    </ul>
+  </div>
 
-        <div class="note-card">
-            <h3>🔬 Technical Notes</h3>
-            <ul class="note-list">
-                <li>The formula is based on the classical cyclone efficiency model</li>
-                <li>Efficiency depends on the square of the particle diameter to cut-off diameter ratio</li>
-                <li>Small changes in dₚ/dₚc ratio significantly impact collection efficiency</li>
-                <li>Actual field performance may vary due to factors like particle shape, density, and gas viscosity</li>
-            </ul>
-        </div>
-    </div>
+  <!-- Standards -->
+  <div class="note-card">
+    <h3>📏 Standards</h3>
+    <p>
+      Recommended references include ISO 50001 for energy management, ASME boiler and turbine guidelines, and internal plant SOPs for turbine operation and thermal efficiency verification.
+    </p>
+  </div>
 
 </div>
+
 
 <script>
 /* Show error messages */
@@ -571,14 +563,15 @@ function showErrors(errors) {
 }
 
 function calculateEfficiency() {
-  const particleDiaRaw = document.getElementById("particleDia").value.trim();
-  const cutoffDiaRaw = document.getElementById("cutoffDia").value.trim();
+  const HiRaw = document.getElementById("Hi").value.trim();
+  const HeRaw = document.getElementById("He").value.trim();
+  const HcRaw = document.getElementById("Hc").value.trim();
 
   const errorBox = document.getElementById("resultError");
   const errorMessage = document.getElementById("errorMessage");
   const placeholder = document.getElementById("placeholder");
   const resultValue = document.getElementById("resultValue");
-  const rateEl = document.getElementById("rateValue");
+  const effEl = document.getElementById("effValue");
   const feedbackEl = document.getElementById("feedbackContent");
 
   errorBox.classList.add("hidden");
@@ -586,71 +579,62 @@ function calculateEfficiency() {
   feedbackEl.innerHTML = "";
 
   const errors = [];
-  const warnings = [];
 
-  // Empty field validation
-  if (particleDiaRaw === "") errors.push("👉 Please enter Particle Diameter (dₚ) in μm.");
-  if (cutoffDiaRaw === "") errors.push("👉 Please enter Cut-off Diameter (dₚc) in μm.");
+  // Required fields
+  if (HiRaw === "") errors.push("👉 Please enter Turbine Inlet Enthalpy (Hi).");
+  if (HeRaw === "") errors.push("👉 Please enter Condensate Enthalpy (He).");
+  if (HcRaw === "") errors.push("👉 Please enter Turbine Exhaust Enthalpy (Hc).");
+
   if (errors.length) return showErrors(errors);
 
-  const particleDia = parseFloat(particleDiaRaw);
-  const cutoffDia = parseFloat(cutoffDiaRaw);
+  const Hi = parseFloat(HiRaw);
+  const He = parseFloat(HeRaw);
+  const Hc = parseFloat(HcRaw);
 
-  // Numeric and positivity checks
-  if (!Number.isFinite(particleDia) || particleDia <= 0) {
-    errors.push("👉 Particle Diameter must be a positive numeric value (> 0 μm).");
-  }
-  if (!Number.isFinite(cutoffDia) || cutoffDia <= 0) {
-    errors.push("👉 Cut-off Diameter must be a positive numeric value (> 0 μm).");
-  }
+  // Basic numeric validations
+  if (!Number.isFinite(Hi) || Hi < 1) errors.push("👉 Hi must be ≥ 1 kJ/kg.");
+  if (!Number.isFinite(He) || He < 1) errors.push("👉 He must be ≥ 1 kJ/kg.");
+  if (!Number.isFinite(Hc) || Hc < 1) errors.push("👉 Hc must be ≥ 1 kJ/kg.");
+
   if (errors.length) return showErrors(errors);
 
-  // Range validations (based on QEHS/industry norms)
-  if (particleDia < 0.1) warnings.push("⚠️ Particle diameter is extremely fine (<0.1 μm). Cyclones are generally ineffective for ultrafine particles.");
-  if (particleDia > 100) warnings.push("⚠️ Particle diameter >100 μm. Large particles usually settle before cyclone entry. Verify data.");
+  // Logical validations
+  if (Hi <= Hc) errors.push("👉 Hi must be greater than Hc (turbine exhaust must be lower).");
+  if (Hi <= He) errors.push("👉 Hi must be greater than He (condensate enthalpy must be lower).");
+  if (Hc <= He) errors.push("👉 Hc must be greater than He (exhaust must be hotter than condensate).");
+  if ((Hi - He) <= 0) errors.push("👉 Denominator (Hi − He) must be positive.");
 
-  if (cutoffDia < 0.5) warnings.push("⚠️ Cut-off diameter <0.5 μm is unrealistic for cyclone separators. Check system design assumptions.");
-  if (cutoffDia > 20) warnings.push("⚠️ Cut-off diameter >20 μm may indicate poor cyclone design or abnormal conditions.");
-
-  // Logical consistency
-  if (particleDia === cutoffDia) {
-    warnings.push("ℹ️ When dₚ = dₚc, efficiency should be ~50% by definition of cut-off diameter.");
-  }
-
-  // Ratio checks
-  const ratio = particleDia / cutoffDia;
-  if (ratio < 0.1) warnings.push("⚠️ Very small particles relative to cut-off size – efficiency will be very low.");
-  if (ratio > 10) warnings.push("⚠️ Very large particles relative to cut-off size – efficiency will be very high (approaching 100%).");
+  if (errors.length) return showErrors(errors);
 
   // Efficiency calculation
-  const efficiency = 1 / (1 + Math.pow(cutoffDia / particleDia, 2)); // Corrected formula: η = 1 / [1 + (dpc/dp)^2]
-  const efficiencyPercent = efficiency * 100;
+  const efficiency = ((Hi - Hc) / (Hi - He)) * 100;
 
-  if (!Number.isFinite(efficiencyPercent) || efficiencyPercent < 0 || efficiencyPercent > 100) {
-    return showErrors(["⚠️ Computed efficiency is invalid. Check input values."]);
+  if (!Number.isFinite(efficiency) || efficiency <= 0 || efficiency > 100) {
+    return showErrors(["⚠️ Computed efficiency is outside realistic limits. Please recheck inputs."]);
   }
 
-  // Performance assessment thresholds
+  // Feedback + assessment
   let statusMsg = "";
-  if (efficiencyPercent >= 90) {
-    statusMsg = "✅ Excellent collection efficiency (Highly effective cyclone performance)";
-  } else if (efficiencyPercent >= 70) {
-    statusMsg = "⚠️ Good collection efficiency (Adequate for most applications)";
+  let feedbackMsg = "";
+
+  if (efficiency >= 40 && efficiency <= 100) {
+    statusMsg = "✅ High efficiency (well-optimized system)";
+    feedbackMsg = "System performance is excellent. Maintain current operating conditions and schedule routine monitoring.";
+  } else if (efficiency >= 20 && efficiency < 40) {
+    statusMsg = "⚠️ Moderate efficiency (typical range)";
+    feedbackMsg = "Efficiency is acceptable but can be improved. Review turbine maintenance records and consider energy optimization.";
+  } else if (efficiency >= 5 && efficiency < 20) {
+    statusMsg = "🔴 Low efficiency (needs improvement)";
+    feedbackMsg = "System is underperforming. Check for turbine wear, condenser fouling, or steam leakage. Immediate corrective action recommended.";
   } else {
-    statusMsg = "🔴 Poor collection efficiency (Consider cyclone improvements or alternative technology)";
+    statusMsg = "❌ Invalid efficiency result";
+    feedbackMsg = "Inputs appear inconsistent. Please recheck enthalpy values.";
   }
 
-  // Build result details
-  let details = `<div>Collection Efficiency: <b>${efficiencyPercent.toFixed(2)}%</b></div>`;
-  details += `<div>Ratio (dₚ/dₚc): <b>${ratio.toFixed(3)}</b></div>`;
+  // Display only result + feedback + assessment
+  effEl.textContent = efficiency.toFixed(2);
+  feedbackEl.innerHTML = `<div>${statusMsg}</div><div style="margin-top:4px;">${feedbackMsg}</div>`;
 
-  if (warnings.length) {
-    details += `<div style="margin-top:8px; color:#b35d00; font-size:0.95em; border-top:1px solid #eee; padding-top:8px;">${warnings.join("<br>")}</div>`;
-  }
-
-  // Display results
-  rateEl.textContent = efficiencyPercent.toFixed(2);
-  feedbackEl.innerHTML = `<div>${statusMsg}</div>${details}`;
   placeholder.classList.add("hidden");
   resultValue.classList.remove("hidden");
   errorBox.classList.add("hidden");
@@ -666,55 +650,49 @@ function printReport() {
 }
 </script>
 
+
+
     <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
 {% endblock %}
 
 
-<!--
-========================================================
-🌪 Cyclone Separator – Collection Efficiency Documentation
-========================================================
+<!-- 
+📌 Turbine Efficiency Calculator Notes
 
-📌 Formula:
------------
-Collection Efficiency (η) = 1 / [ 1 + (dₚc / dₚ)² ]
+🔹 Formula Used:
+    η (%) = ((Hi − Hc) / (Hi − He)) × 100
+    where:
+      Hi = Turbine Inlet Enthalpy (kJ/kg)
+      Hc = Turbine Exhaust Enthalpy (kJ/kg)
+      He = Condensate Enthalpy (kJ/kg)
 
-   where:
-     • dₚ  = Particle Diameter (μm)
-     • dₚc = Cut-off Diameter (μm)
-     • η   = Fractional efficiency (0–1)
-     • η%  = η × 100 (percentage efficiency)
+🔹 Input Validations:
+    • Hi (Inlet Enthalpy):
+        - Must be numeric, ≥ 1 kJ/kg
+    • He (Condensate Enthalpy):
+        - Must be numeric, ≥ 1 kJ/kg
+    • Hc (Exhaust Enthalpy):
+        - Must be numeric, ≥ 1 kJ/kg
+    • Logical constraints:
+        - Hi > Hc (exhaust must be lower than inlet)
+        - Hi > He (condensate must be lower than inlet)
+        - Hc > He (exhaust hotter than condensate)
+        - (Hi − He) > 0 (denominator must be positive)
 
-📥 Input Validations:
----------------------
-Required fields:
-  - Particle Diameter (dₚ, μm)
-  - Cut-off Diameter (dₚc, μm)
+🔹 Output Validations:
+    • Efficiency must be:
+        - 0 < η ≤ 100 (realistic range)
+        - Outside this → flagged as invalid
 
-Hard checks (errors):
-  - Both inputs must be positive finite numbers (>0)
-  - Reject if efficiency calculation gives NaN, <0%, or >100%
+🔹 Efficiency Assessment:
+    • η ≥ 40% → ✅ High efficiency (well-optimized system)
+    • 20% ≤ η < 40% → ⚠️ Moderate efficiency (typical range)
+    • 5% ≤ η < 20% → 🔴 Low efficiency (needs improvement)
+    • Else → ❌ Invalid efficiency (check inputs)
 
-Soft checks (warnings):
-  - Particle Diameter < 0.1 μm → cyclone ineffective for ultrafine particles
-  - Particle Diameter > 100 μm → likely settles before cyclone entry
-  - Cut-off Diameter < 0.5 μm → unrealistic for cyclone design
-  - Cut-off Diameter > 20 μm → poor cyclone performance or abnormal system
-  - dₚ = dₚc → efficiency ≈ 50% by definition
-  - Ratio dₚ/dₚc < 0.1 → efficiency very low
-  - Ratio dₚ/dₚc > 10 → efficiency very high (≈100%)
-
-📤 Output Validations:
-----------------------
-- Efficiency (%) must be between 0 and 100
-- If outside range → throw error
-
-Classification (Performance thresholds):
-  - η% ≥ 90% → ✅ Excellent efficiency (highly effective cyclone)
-  - 70% ≤ η% < 90% → ⚠️ Good efficiency (adequate for most applications)
-  - η% < 70% → 🔴 Poor efficiency (consider improvements or alternatives)
-
-========================================================
+🔹 Display:
+    • Shows efficiency (2 decimal places)
+    • Provides performance assessment + improvement feedback
 -->
