@@ -2594,6 +2594,13 @@ def environment_sludge_recirculation_rate_qr_calculator(request):
 def environment_solubility_product_ksp_calculator(request):
     return render(request, 'qehsfcalculators/environment/solubility_product_ksp.html', {'title': 'Solubility Product (Ksp) Calculator'})
 
+
+
+@login_required
+@subscription_required(plan_type="corporate")
+def environment_stability_parameter_calculator(request):
+    return render(request, 'qehsfcalculators/environment/stability_parameter.html', {'title': 'Stability Parameter(S) calculator'})
+
 @login_required
 @subscription_required(plan_type="corporate")
 def environment_thermodynamic_temperature_calculator(request):

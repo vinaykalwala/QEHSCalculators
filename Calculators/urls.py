@@ -332,6 +332,7 @@ urlpatterns = [
     path('environment/scouring_velocity_v_schields_formula_calculator/', environment_scouring_velocity_v_schields_formula_calculator, name='environment_scouring_velocity_v_schields_formula_calculator'),
     path('environment/sludge_recirculation_rate_qr_calculator/', environment_sludge_recirculation_rate_qr_calculator, name='environment_sludge_recirculation_rate_qr_calculator'),
     path('environment/solubility_product_ksp_calculator/', environment_solubility_product_ksp_calculator, name='environment_solubility_product_ksp_calculator'),
+    path('environment/stability_parameter_calculator/', environment_stability_parameter_calculator, name='environment_stability_parameter_calculator'),
     path('environment/thermodynamic_temperature_calculator/', environment_thermodynamic_temperature_calculator, name='environment_thermodynamic_temperature_calculator'),
     path('environment/travel_carbpon_footprint_calculator/', environment_travel_carbpon_footprint_calculator, name='environment_travel_carbpon_footprint_calculator'),
     path('environment/thermal_transmittance_u_from_the_individual_thicknesses_and_conductivities_calculator/', environment_thermal_transmittance_u_from_the_individual_thicknesses_and_conductivities_calculator, name='environment_thermal_transmittance_u_from_the_individual_thicknesses_and_conductivities_calculator'),
