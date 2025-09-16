@@ -603,6 +603,8 @@ urlpatterns = [
     path('safety/required_opening_force_for_a_balanced_safety_valve_calculator/', safety_required_opening_force_for_a_balanced_safety_valve_calculator, name='safety_required_opening_force_for_a_balanced_safety_valve_calculator'),
     path('safety/reaction_force_at_the_end_of_safety_valve_calculator/', safety_reaction_force_at_the_end_of_safety_valve_calculator, name='safety_reaction_force_at_the_end_of_safety_valve_calculator'),
     path('safety/remaining_corrosion_life1_calculator/', safety_remaining_corrosion_life1_calculator, name='safety_remaining_corrosion_life1_calculator'),
+    path('safety/remaining_corrosion_life2_calculator/', safety_remaining_corrosion_life2_calculator, name='safety_remaining_corrosion_life2_calculator'),
+
     path('safety/remaining_corrosion_allowance_calculator/', safety_remaining_corrosion_allowance_calculator, name='safety_remaining_corrosion_allowance_calculator'),
     path('safety/relief_vent_rate_all_vapor_and_all_liquid_venting_calculator/', safety_relief_vent_rate_all_vapor_and_all_liquid_venting_calculator, name='safety_relief_vent_rate_all_vapor_and_all_liquid_venting_calculator'),
     path('safety/relief_vent_rate_formula_all_liquid_venting_calculator/', safety_relief_vent_rate_formula_all_liquid_venting_calculator, name='safety_relief_vent_rate_formula_all_liquid_venting_calculator'),

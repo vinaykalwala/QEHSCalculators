@@ -3908,6 +3908,10 @@ def safety_reaction_force_at_the_end_of_safety_valve_calculator(request):
 @subscription_required(plan_type="corporate")
 def safety_remaining_corrosion_life1_calculator(request):
     return render(request, 'qehsfcalculators/safety/remaining_corrosion_life1.html', {'title': 'Remaining Corrosion Life Calculator (1)'})
+@login_required
+@subscription_required(plan_type="corporate")
+def safety_remaining_corrosion_life2_calculator(request):
+    return render(request, 'qehsfcalculators/safety/remaining_corrosion_life2.html', {'title': 'Remaining Corrosion Life Calculator (2)'})
 
 @login_required
 @subscription_required(plan_type="corporate")
