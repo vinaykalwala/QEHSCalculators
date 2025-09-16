@@ -2594,6 +2594,13 @@ def environment_sludge_recirculation_rate_qr_calculator(request):
 def environment_solubility_product_ksp_calculator(request):
     return render(request, 'qehsfcalculators/environment/solubility_product_ksp.html', {'title': 'Solubility Product (Ksp) Calculator'})
 
+
+
+@login_required
+@subscription_required(plan_type="corporate")
+def environment_stability_parameter_calculator(request):
+    return render(request, 'qehsfcalculators/environment/stability_parameter.html', {'title': 'Stability Parameter(S) calculator'})
+
 @login_required
 @subscription_required(plan_type="corporate")
 def environment_thermodynamic_temperature_calculator(request):
@@ -3908,6 +3915,10 @@ def safety_reaction_force_at_the_end_of_safety_valve_calculator(request):
 @subscription_required(plan_type="corporate")
 def safety_remaining_corrosion_life1_calculator(request):
     return render(request, 'qehsfcalculators/safety/remaining_corrosion_life1.html', {'title': 'Remaining Corrosion Life Calculator (1)'})
+@login_required
+@subscription_required(plan_type="corporate")
+def safety_remaining_corrosion_life2_calculator(request):
+    return render(request, 'qehsfcalculators/safety/remaining_corrosion_life2.html', {'title': 'Remaining Corrosion Life Calculator (2)'})
 
 @login_required
 @subscription_required(plan_type="corporate")

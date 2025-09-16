@@ -508,7 +508,25 @@ CALCULATORS = [
 
 # {"name": "Recycling impact calculator", "url_name": "environment_recycling_impact_calculator", "plan_type": "corporate", "category": "environment"},
 
+# {"name": "Rankine Efficiency Calculator", "url_name": "environment_rankine_efficiency_calculator", "plan_type": "corporate", "category": "environment"},
 
+# {"name": "Relative Pipe Roughness Calculator", "url_name": "environment_relative_pipe_roughness_calculator", "plan_type": "corporate", "category": "environment"},
+
+# {"name": "Ratio and Correlation Growth Calculator", "url_name": "environment_ratio_and_correlation_growth_calculator", "plan_type": "corporate", "category": "environment"},
+
+# {"name": "Rapid Mix & Flocculator Design Calculator", "url_name": "environment_rapid_mix_and_flocculator_design_calculator", "plan_type": "corporate", "category": "environment"},
+
+# {"name": "Reverse Osmosis (Osmotic Pressure Calculator)", "url_name": "environment_reverse_osmosis_osmotic_pressure_calculator", "plan_type": "corporate", "category": "environment"},
+
+# {"name": "Required Ventilation Rate Calculator For Indoor Air Quality", "url_name": "environment_required_ventilation_rate_for_indoor_air_quality_calculator", "plan_type": "corporate", "category": "environment"},
+
+# {"name": "Reynolds Flow Predictor Calculator", "url_name": "environment_reynolds_flow_predictor_calculator", "plan_type": "corporate", "category": "environment"},
+
+# {"name": "Retention Time in Settling Zone (t) Calculator", "url_name": "environment_retention_time_in_settling_zone_t_calculator", "plan_type": "corporate", "category": "environment"},
+
+# {"name": "Rankins Equation - Filter Efficiency Calculator", "url_name": "environment_rankins_equation_filter_efficiency_calculator", "plan_type": "corporate", "category": "environment"},
+
+# {"name": "Relative Saturation (Humidity) Calculator", "url_name": "environment_relative_saturation_humidity_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 

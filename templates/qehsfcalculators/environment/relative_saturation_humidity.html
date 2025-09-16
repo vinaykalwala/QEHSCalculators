@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Cyclone Collection Particle Removal Efficiency Calculator{% endblock %}
+{% block title %}Relative Saturation (Humidity) Calculator{% endblock %}
 {% block content %}
 {% load static %}
 
@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyclone Collection Particle Removal Efficiency Calculator</title>
+    <title>Relative Saturation (Humidity) Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
@@ -55,15 +55,11 @@
         }
 
         .calculator-header h1 {
-        color: #1560bd;
-        font-weight: 700;
-        margin-bottom: 10px;
-        font-size: clamp(1.5rem, 4vw, 2.5rem); /* responsive font size */
-        line-height: 1.2; /* reduce line spacing */
-        text-align: center;
-        word-break: break-word; /* prevent overflow */
-    }
-
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
         
         .calculator-header p {
             color: #7f8c8d;
@@ -423,138 +419,132 @@
 </head>
 <body>
 
-        <div class="btn-container">
+    <div class="btn-container">
         <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
-        </div>
+    </div>
+
+
 <div class="calculator-container printable" id="printArea">
     {% include "includes/print_header_footer.html" %}
 
 
+<div class="calculator-header">
+    <h1>Relative Saturation (Humidity) Calculator</h1>
+    <p>Calculate relative saturation (relative humidity) to assess moisture conditions that affect corrosion, mould risk, material durability and indoor air quality.</p>
+</div>
 
-    <div class="calculator-header">
-        <h1>Cyclone Collection Particle Removal Efficiency Calculator</h1>
-        <p>Calculate the <strong>Fractional Collection Efficiency (η)</strong> for cyclone separators in air pollution control systems.</p>
-    </div>
+<div class="calc-content">
+    <!-- Calculator -->
+    <div class="calc-card">
+        <h2>Enter Data</h2>
 
-    <div class="calc-content">
-        <!-- Calculator -->
-        <div class="calc-card">
-            <h2>Enter Data</h2>
-
-            <div class="form-group">
-                <label for="particleDia">Particle Diameter (dₚ) [μm]:</label>
-                <input type="number" id="particleDia" class="form-input" min="0.001" step="any" placeholder="e.g., 5.0">
-                
-            </div>
-
-            <div class="form-group">
-                <label for="cutoffDia">Cut-off Diameter (dₚc) [μm]:</label>
-                <input type="number" id="cutoffDia" class="form-input" min="0.001" step="any" placeholder="e.g., 2.5">
-                
-            </div>
-            
-            <button class="calculate-btn" onclick="calculateEfficiency()">Calculate Efficiency</button>
+        <div class="form-group">
+            <label for="metalLoss">Partial Pressure of Water Vapor (pₐ) — enter in Pascals (Pa)</label>
+            <input type="number" id="metalLoss" class="form-input" min="0.0001" step="any" placeholder="e.g., 1000">
         </div>
 
-        <!-- Result Section -->
-        <div class="result-card">
-            <div class="result-placeholder" id="placeholder">
-                <img src="/static/images/mlc_environment_result.png" alt="Cyclone efficiency illustration">
-                <p>This tool will calculate the <strong>Fractional Collection Efficiency (η)</strong>.</p>
-            </div>
-            
-            <div class="result-error hidden" id="resultError">
-                <div class="error-icon">❌</div>
-                <div class="error-message" id="errorMessage"></div>
-            </div>
-             
-            <div class="result-value hidden" id="resultValue">
-                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
-                    <h2>Calculated Collection Efficiency</h2>
-                </div>
-
-                <div class="rate-display">
-                    <div class="rate-value" id="rateValue">0.00</div>
-                    <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">%</div>
-                </div>
-
-                <div class="result-feedback">
-                    <div class="feedback-title">Performance Assessment</div>
-                    <div class="feedback-content" id="feedbackContent"></div>
-                </div>
-                <div class="btn-wrapper">
-                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Notes Section -->
-    <div class="note-section">
-        <div class="note-card">
-            <h3>📘 About This Calculator</h3>
-            <p>
-                The <strong>Cyclone Collection Efficiency Calculator</strong> determines the efficiency with which
-                a cyclone separator captures particles of a specific size, based on the cut-off diameter.
-            </p>
+        <div class="form-group">
+            <label for="timePeriod">Saturation Vapor Pressure at same temperature (Pₐ) — enter in Pascals (Pa)</label>
+            <input type="number" id="timePeriod" class="form-input" min="0.0001" step="any" placeholder="e.g., 2338">
         </div>
         
-        <div class="note-card">
-            <h3>📊 Efficiency Interpretation</h3>
-            <ul class="note-list">
-                <li><span class="good">η ≥ 90%</span> → ✅ Excellent collection (Highly effective)</li>
-                <li><span class="average">70% ≤ η < 90%</span> → ⚠️ Good collection (Adequate for most applications)</li>
-                <li><span class="bad">η < 70%</span> → 🔴 Poor collection (Consider system improvements)</li>
-            </ul>
-        </div>
-
-        <div class="note-card">
-            <h3>⚠️ Input Validations</h3>
-            <ul class="note-list">
-                <li>👉 <b>Particle Diameter (dₚ)</b> is required and must be > 0 μm</li>
-                <li>👉 <b>Cut-off Diameter (dₚc)</b> is required and must be > 0 μm</li>
-                <li>⚠️ Particle Diameter > 100 μm → warning: unusually large particle size</li>
-                <li>⚠️ Cut-off Diameter > 20 μm → warning: may indicate inefficient cyclone design</li>
-                <li>⚠️ Ratio (dₚ/dₚc) < 0.1 → warning: very small particles relative to cut-off size (low efficiency)</li>
-                <li>⚠️ Ratio (dₚ/dₚc) > 10 → warning: very large particles relative to cut-off size (high efficiency)</li>
-                <li>❌ Non-numeric, zero, or negative inputs are invalid</li>
-                <li>❌ Computed efficiency outside 0–100% is invalid</li>
-            </ul>
-            </div>
-
-
-        <div class="note-card">
-            <h3>📏 Units & Typical Ranges</h3>
-            <ul class="note-list">
-                <li><strong>Particle Diameter (dₚ):</strong> Micrometers (μm), typical range: 0.1-100 μm</li>
-                <li><strong>Cut-off Diameter (dₚc):</strong> Micrometers (μm), typical range: 0.5-10 μm</li>
-                <li><strong>Collection Efficiency (η):</strong> Percentage (0-100%)</li>
-            </ul>
-        </div>
-
-        <div class="note-card">
-            <h3>🌍 Key Applications</h3>
-            <ul class="note-list">
-                <li><strong>Air Pollution Control:</strong> Designing and evaluating cyclone separators</li>
-                <li><strong>Industrial Processes:</strong> Dust collection in manufacturing facilities</li>
-                <li><strong>Powder Processing:</strong> Particle separation in pharmaceutical and chemical industries</li>
-                <li><strong>Environmental Monitoring:</strong> Assessing particulate matter control systems</li>
-                <li><strong>HVAC Systems:</strong> Evaluating air filtration efficiency</li>
-            </ul>
-        </div>
-
-        <div class="note-card">
-            <h3>🔬 Technical Notes</h3>
-            <ul class="note-list">
-                <li>The formula is based on the classical cyclone efficiency model</li>
-                <li>Efficiency depends on the square of the particle diameter to cut-off diameter ratio</li>
-                <li>Small changes in dₚ/dₚc ratio significantly impact collection efficiency</li>
-                <li>Actual field performance may vary due to factors like particle shape, density, and gas viscosity</li>
-            </ul>
-        </div>
+        <button class="calculate-btn" onclick="calculateCorrosionRate()">Calculate Relative Saturation</button>
     </div>
 
+    <!-- Result Section -->
+    <div class="result-card">
+        <div class="result-placeholder" id="placeholder">
+            <img src="/static/images/mlc_environment_result.png" alt="Humidity illustration">
+            <p>This tool will calculate the relative saturation (humidity).</p>
+        </div>
+        
+        <div class="result-error hidden" id="resultError" role="alert" aria-live="polite">
+            <div class="error-icon">❌</div>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+         
+        <div class="result-value hidden" id="resultValue">
+            <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                <h2>Relative Saturation Result</h2>
+            </div>
+
+            <div class="rate-display">
+                <div class="rate-value" id="rateValue">0.00</div>
+                <div class="rate-label" id="rateLabel" style="color:#2980b9; font-size:20px; font-weight:bold;">%</div>
+            </div>
+
+            <div class="result-feedback">
+                <div class="feedback-title">Assessment</div>
+                <div class="feedback-content" id="feedbackContent"></div>
+            </div>
+            <div class="btn-wrapper">
+                <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Notes Section -->
+<div class="note-section">
+    <div class="note-card">
+        <h3>📘 About This Calculator</h3>
+        <p>
+            This calculator determines <strong>Relative Saturation (Relative Humidity, %)</strong> from
+            measured vapor pressures. It helps identify risks of condensation, corrosion, mould,
+            static electricity, and poor indoor air quality. Designed for use in QEHS, HVAC, fire safety,
+            and environmental monitoring.
+        </p>
+    </div>
+
+    <div class="note-card">
+        <h3>⚙ Parameters Used</h3>
+        <ul>
+            <li><strong>pₐ:</strong> Actual vapor pressure of water in air (Pa)</li>
+            <li><strong>Pₐ:</strong> Saturation vapor pressure at the same temperature (Pa)</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>✅ Input Validation Rules</h3>
+        <ul>
+            <li>✔ Inputs must be positive finite numbers in Pascals (Pa).</li>
+            <li>✔ Actual vapor pressure (pₐ) cannot exceed saturation vapor pressure (Pₐ).</li>
+            <li>✔ pₐ warning if &lt; 1 Pa (suspiciously small) or &gt; 200,000 Pa (likely unit error).</li>
+            <li>✔ Pₐ warning if &lt; 50 Pa (too low for normal conditions) or &gt; 200,000 Pa (likely unit error).</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>📊 Output Validations</h3>
+        <ul>
+            <li>❌ If RH result is invalid (NaN, &lt; 0, or infinite) → error displayed.</li>
+            <li>✔ If RH slightly exceeds 100% due to rounding, it is clamped to 100%.</li>
+                <li>RH ≥ 99.5% → 🔴 <strong>Saturated / Condensation likely</strong> – Immediate action: dehumidify, inspect, and protect assets.</li>
+                <li>80% ≤ RH &lt; 99.5% → ⚠️ <strong>High humidity — elevated risk</strong> – Monitor, inspect, and consider dehumidification.</li>
+                <li>60% ≤ RH &lt; 80% → ⚠️ <strong>Elevated humidity — watch</strong> – Maintain control, inspect equipment, review HVAC setpoints.</li>
+                <li>30% ≤ RH &lt; 60% → ✅ <strong>Comfortable / typical operating range</strong> – Maintain routine monitoring and preventive maintenance.</li>
+                <li>20% ≤ RH &lt; 30% → ⚠️ <strong>Low humidity — dry environment</strong> – Consider humidification, assess static risk.</li>
+                <li>RH &lt; 20% → 🔴 <strong>Very low humidity — high static risk</strong> – Immediate action: humidify, apply static-control measures.</li>
+            
+            <li>⚠ Extra warnings shown when:
+                <ul>
+                    <li>75% ≤ RH &lt; 99.5% → Moisture control recommended to avoid long-term degradation.</li>
+                    <li>RH &lt; 20% → Low RH increases static and dust issues.</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>📏 Standards</h3>
+        <p>
+            Industry references: ASHRAE Standard 55 (recommended indoor RH 30–60%),  
+            OSHA workplace guidelines (20–60% RH for comfort and health),  
+            and ISO 7730 thermal environment standards.
+        </p>
+    </div>
+</div>
+
 
 <script>
 /* Show error messages */
@@ -570,9 +560,12 @@ function showErrors(errors) {
   resultValue.classList.add("hidden");
 }
 
-function calculateEfficiency() {
-  const particleDiaRaw = document.getElementById("particleDia").value.trim();
-  const cutoffDiaRaw = document.getElementById("cutoffDia").value.trim();
+/* Main calculation + QEHS-aware validations
+   NOTE: This implements the internal calculation but does NOT display the formula in the UI. */
+function calculateCorrosionRate() {
+  // inputs (kept original element ids to preserve classes)
+  const paRaw = document.getElementById("metalLoss").value.trim();     // actual vapor pressure (pa)
+  const PaRaw = document.getElementById("timePeriod").value.trim();    // saturation vapor pressure (Pa)
 
   const errorBox = document.getElementById("resultError");
   const errorMessage = document.getElementById("errorMessage");
@@ -580,77 +573,93 @@ function calculateEfficiency() {
   const resultValue = document.getElementById("resultValue");
   const rateEl = document.getElementById("rateValue");
   const feedbackEl = document.getElementById("feedbackContent");
+  const rateLabel = document.getElementById("rateLabel");
 
+  // Reset UI
   errorBox.classList.add("hidden");
   errorMessage.innerHTML = "";
   feedbackEl.innerHTML = "";
+  rateLabel.textContent = "%";
 
   const errors = [];
   const warnings = [];
 
-  // Empty field validation
-  if (particleDiaRaw === "") errors.push("👉 Please enter Particle Diameter (dₚ) in μm.");
-  if (cutoffDiaRaw === "") errors.push("👉 Please enter Cut-off Diameter (dₚc) in μm.");
+  // Required checks
+  if (paRaw === "") errors.push("👉 Please enter the actual vapor pressure (pₐ) in Pascals (Pa).");
+  if (PaRaw === "") errors.push("👉 Please enter the saturation vapor pressure (Pₐ) in Pascals (Pa).");
   if (errors.length) return showErrors(errors);
 
-  const particleDia = parseFloat(particleDiaRaw);
-  const cutoffDia = parseFloat(cutoffDiaRaw);
+  // Parse
+  const pa = parseFloat(paRaw);
+  const Pa = parseFloat(PaRaw);
 
-  // Numeric and positivity checks
-  if (!Number.isFinite(particleDia) || particleDia <= 0) {
-    errors.push("👉 Particle Diameter must be a positive numeric value (> 0 μm).");
-  }
-  if (!Number.isFinite(cutoffDia) || cutoffDia <= 0) {
-    errors.push("👉 Cut-off Diameter must be a positive numeric value (> 0 μm).");
-  }
+  // Numeric and sign checks
+  if (!Number.isFinite(pa) || pa <= 0) errors.push("👉 Actual vapor pressure (pₐ) must be a positive finite number in Pa.");
+  if (!Number.isFinite(Pa) || Pa <= 0) errors.push("👉 Saturation vapor pressure (Pₐ) must be a positive finite number in Pa.");
   if (errors.length) return showErrors(errors);
 
-  // Range validations (based on QEHS/industry norms)
-  if (particleDia < 0.1) warnings.push("⚠️ Particle diameter is extremely fine (<0.1 μm). Cyclones are generally ineffective for ultrafine particles.");
-  if (particleDia > 100) warnings.push("⚠️ Particle diameter >100 μm. Large particles usually settle before cyclone entry. Verify data.");
-
-  if (cutoffDia < 0.5) warnings.push("⚠️ Cut-off diameter <0.5 μm is unrealistic for cyclone separators. Check system design assumptions.");
-  if (cutoffDia > 20) warnings.push("⚠️ Cut-off diameter >20 μm may indicate poor cyclone design or abnormal conditions.");
-
-  // Logical consistency
-  if (particleDia === cutoffDia) {
-    warnings.push("ℹ️ When dₚ = dₚc, efficiency should be ~50% by definition of cut-off diameter.");
+  // Logical cross-field checks
+  if (pa > Pa) {
+    // physical impossibility for same temperature — likely units or measurement error
+    return showErrors(["⚠️ Actual vapor pressure (pₐ) cannot exceed saturation vapor pressure (Pₐ). Check measurements and units."]);
   }
 
-  // Ratio checks
-  const ratio = particleDia / cutoffDia;
-  if (ratio < 0.1) warnings.push("⚠️ Very small particles relative to cut-off size – efficiency will be very low.");
-  if (ratio > 10) warnings.push("⚠️ Very large particles relative to cut-off size – efficiency will be very high (approaching 100%).");
+  // Plausibility warnings (help detect unit mistakes: hPa/kPa vs Pa)
+  if (Pa > 200000) warnings.push("⚠️ Saturation pressure is unusually large — verify units (Pa vs kPa) or that temperature is extremely high.");
+  if (pa > 200000) warnings.push("⚠️ Actual vapor pressure is unusually large — verify units (Pa vs kPa).");
+  if (Pa < 50) warnings.push("⚠️ Saturation pressure very small — verify temperature / units.");
+  if (pa < 1) warnings.push("⚠️ Actual vapor pressure very small — check sensor accuracy or units.");
 
-  // Efficiency calculation
-  const efficiency = 1 / (1 + Math.pow(cutoffDia / particleDia, 2)); // Corrected formula: η = 1 / [1 + (dpc/dp)^2]
-  const efficiencyPercent = efficiency * 100;
+  // Compute relative saturation (%)
+  const ratio = pa / Pa; // safe because Pa > 0
+  if (!Number.isFinite(ratio)) return showErrors(["⚠️ Computation error. Check inputs."]);
 
-  if (!Number.isFinite(efficiencyPercent) || efficiencyPercent < 0 || efficiencyPercent > 100) {
-    return showErrors(["⚠️ Computed efficiency is invalid. Check input values."]);
-  }
+  let hr = ratio * 100;
 
-  // Performance assessment thresholds
-  let statusMsg = "";
-  if (efficiencyPercent >= 90) {
-    statusMsg = "✅ Excellent collection efficiency (Highly effective cyclone performance)";
-  } else if (efficiencyPercent >= 70) {
-    statusMsg = "⚠️ Good collection efficiency (Adequate for most applications)";
+  // clamp tiny floating rounding issues
+  if (hr > 100 && hr < 100.0001) hr = 100;
+
+  if (!Number.isFinite(hr) || hr < 0) return showErrors(["⚠️ Computed result invalid."]);
+
+  // QEHS classification & suggested actions (audit-friendly)
+  let classification = "";
+  let advice = "";
+  if (hr >= 99.5) {
+    classification = "Saturated / Condensation likely";
+    advice = "Immediate action: reduce humidity (dehumidify), inspect for condensation, corrosion and mould; protect sensitive equipment.";
+  } else if (hr >= 80) {
+    classification = "High humidity — elevated risk";
+    advice = "Action: monitor closely and consider dehumidification; inspect for corrosion-prone components and mould-prone areas.";
+  } else if (hr >= 60) {
+    classification = "Elevated humidity — watch";
+    advice = "Action: maintain control, inspect storage and electrical equipment, and review HVAC setpoints.";
+  } else if (hr >= 30) {
+    classification = "Comfortable / typical operating range";
+    advice = "Maintain routine monitoring and preventive maintenance.";
+  } else if (hr >= 20) {
+    classification = "Low humidity — dry environment";
+    advice = "Action: consider humidification in sensitive areas; assess static discharge risk for electronics.";
   } else {
-    statusMsg = "🔴 Poor collection efficiency (Consider cyclone improvements or alternative technology)";
+    classification = "Very low humidity — high static risk";
+    advice = "Immediate action: evaluate humidification and static-control measures; consider asset protection.";
   }
 
-  // Build result details
-  let details = `<div>Collection Efficiency: <b>${efficiencyPercent.toFixed(2)}%</b></div>`;
-  details += `<div>Ratio (dₚ/dₚc): <b>${ratio.toFixed(3)}</b></div>`;
+  // Extra warnings for QEHS
+  if (hr >= 75 && hr < 99.5) warnings.push("⚠️ Moisture control recommended to avoid long-term material degradation.");
+  if (hr < 20) warnings.push("⚠️ Low RH increases static and dust issues - review ESD and worker comfort controls.");
 
+  // Display: only KPI + classification + advice + non-fatal warnings (DO NOT echo raw inputs)
+  rateEl.textContent = hr.toFixed(2);
+
+  let details = `<div style="font-weight:bold; margin-bottom:6px;">${classification}</div>`;
+  details += `<div>${advice}</div>`;
   if (warnings.length) {
-    details += `<div style="margin-top:8px; color:#b35d00; font-size:0.95em; border-top:1px solid #eee; padding-top:8px;">${warnings.join("<br>")}</div>`;
+    details += `<div style="margin-top:8px; color:#b35d00;">${warnings.join(" | ")}</div>`;
   }
 
-  // Display results
-  rateEl.textContent = efficiencyPercent.toFixed(2);
-  feedbackEl.innerHTML = `<div>${statusMsg}</div>${details}`;
+  feedbackEl.innerHTML = details;
+
+  // reveal result pane, hide placeholder / errors
   placeholder.classList.add("hidden");
   resultValue.classList.remove("hidden");
   errorBox.classList.add("hidden");
@@ -672,49 +681,43 @@ function printReport() {
 {% endblock %}
 
 
-<!--
-========================================================
-🌪 Cyclone Separator – Collection Efficiency Documentation
-========================================================
 
-📌 Formula:
------------
-Collection Efficiency (η) = 1 / [ 1 + (dₚc / dₚ)² ]
+<!-- 
+📌 Relative Humidity Calculator (Essentials)
 
-   where:
-     • dₚ  = Particle Diameter (μm)
-     • dₚc = Cut-off Diameter (μm)
-     • η   = Fractional efficiency (0–1)
-     • η%  = η × 100 (percentage efficiency)
+🔹 Formula:
+    • Ratio = pₐ / Pₐ
+    • Relative Humidity (RH, %) = (pₐ / Pₐ) × 100
 
-📥 Input Validations:
----------------------
-Required fields:
-  - Particle Diameter (dₚ, μm)
-  - Cut-off Diameter (dₚc, μm)
+🔹 Input Validations:
+    • Actual vapor pressure (pₐ):
+        - Required
+        - Must be numeric
+        - Must be > 0 Pa
+        - Warning if:
+            - pₐ > 200,000 Pa → check units (Pa vs kPa)
+            - pₐ < 1 Pa → suspiciously small, check sensor/units
+    • Saturation vapor pressure (Pₐ):
+        - Required
+        - Must be numeric
+        - Must be > 0 Pa
+        - Warning if:
+            - Pₐ > 200,000 Pa → check units or very high temperature
+            - Pₐ < 50 Pa → very small, verify input/temperature
+    • Cross-field check:
+        - pₐ cannot exceed Pₐ (physically impossible at same temperature)
 
-Hard checks (errors):
-  - Both inputs must be positive finite numbers (>0)
-  - Reject if efficiency calculation gives NaN, <0%, or >100%
-
-Soft checks (warnings):
-  - Particle Diameter < 0.1 μm → cyclone ineffective for ultrafine particles
-  - Particle Diameter > 100 μm → likely settles before cyclone entry
-  - Cut-off Diameter < 0.5 μm → unrealistic for cyclone design
-  - Cut-off Diameter > 20 μm → poor cyclone performance or abnormal system
-  - dₚ = dₚc → efficiency ≈ 50% by definition
-  - Ratio dₚ/dₚc < 0.1 → efficiency very low
-  - Ratio dₚ/dₚc > 10 → efficiency very high (≈100%)
-
-📤 Output Validations:
-----------------------
-- Efficiency (%) must be between 0 and 100
-- If outside range → throw error
-
-Classification (Performance thresholds):
-  - η% ≥ 90% → ✅ Excellent efficiency (highly effective cyclone)
-  - 70% ≤ η% < 90% → ⚠️ Good efficiency (adequate for most applications)
-  - η% < 70% → 🔴 Poor efficiency (consider improvements or alternatives)
-
-========================================================
+🔹 Output Validations:
+    • If RH invalid (NaN, <0, not finite) → error
+    • Clamp: if RH >100 but <100.0001 → set = 100%
+    • Classification:
+        - RH ≥ 99.5% → Saturated / Condensation likely
+        - 80% ≤ RH < 99.5% → High humidity (elevated risk)
+        - 60% ≤ RH < 80% → Elevated humidity (watch)
+        - 30% ≤ RH < 60% → Comfortable / typical
+        - 20% ≤ RH < 30% → Low humidity (dry environment)
+        - RH < 20% → Very low humidity (static risk)
+    • Extra warnings:
+        - 75% ≤ RH < 99.5% → “Moisture control recommended”
+        - RH < 20% → “Static and dust issues risk”
 -->
