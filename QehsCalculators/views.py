@@ -2387,7 +2387,7 @@ def environment_retention_time_in_settling_zone_t_calculator(request):
 @login_required
 @subscription_required(plan_type="corporate")
 def environment_rankins_equation_filter_efficiency_calculator(request):
-    return render(request, 'qehsfcalculators/environment/rankins_equation_filter_efficiency.html')
+    return render(request, 'qehsfcalculators/environment/rankins_equation_filter_efficiency.html', {'title': 'Rankins Equation - Filter Efficiency Calculator'})
 
 @login_required
 @subscription_required(plan_type="corporate")
