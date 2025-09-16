@@ -1,0 +1,730 @@
+{% extends 'base.html' %}
+{% block title %}Tension Factor Calculator for Safe Lifting{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tension Factor Calculator for Safe Lifting</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+            justify-content: center;
+            align-items: center;
+            min-height: 480px;
+            text-align: center;
+        }
+        
+        .input-pair {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+        }
+
+        @media (max-width: 500px) {
+            .input-pair {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+            width: 100%;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background:linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        
+        /* Result Card */
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+        
+        .sub-results {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eaeaea;
+        }
+
+        .sub-result-item {
+            text-align: center;
+        }
+        
+        .sub-result-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        .sub-result-label {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        /* Note Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        /* Error Box */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container printable" id="printArea">
+
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Tension Factor Calculator</h1>
+            <p>Determine the actual tension on each sling and the required capacity for safe lifting operations based on the load and rigging geometry.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Enter Lifting Parameters</h2>
+                <div class="input-pair">
+                    <div class="form-group">
+                        <label for="load">Total Load (lbs)</label>
+                        <input type="number" id="load" class="form-input" placeholder="e.g., 10000">
+                    </div>
+                    <div class="form-group">
+                        <label for="numSlings">Number of Slings</label>
+                        <input type="number" id="numSlings" class="form-input" min="1" step="1" placeholder="e.g., 4">
+                    </div>
+                </div>
+                 <div class="input-pair">
+                    <div class="form-group">
+                        <label for="length">Sling Length (L) [ft]</label>
+                        <input type="number" id="length" class="form-input" placeholder="e.g., 10">
+                    </div>
+                    <div class="form-group">
+                        <label for="height">Sling Height (H) [ft]</label>
+                        <input type="number" id="height" class="form-input" placeholder="e.g., 8">
+                    </div>
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateTension()">Calculate Tension</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Crane lifting illustration">
+                    <p>Enter your load and rigging dimensions to calculate the required sling capacity and assess the safety of your lift.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                    
+                <div class="result-value hidden" id="resultValue">
+                    <div class="rate-value" id="rateValue">0.00</div>
+                    <div class="rate-label" id="rateLabel">Required Capacity per Sling (lbs)</div>
+                    
+                    <div class="sub-results">
+                        <div class="sub-result-item">
+                            <div class="sub-result-value" id="tensionFactor">0.00</div>
+                            <div class="sub-result-label">Tension Factor</div>
+                        </div>
+                        <div class="sub-result-item">
+                            <div class="sub-result-value" id="weightPerSling">0 lbs</div>
+                            <div class="sub-result-label">Weight per Sling</div>
+                        </div>
+                    </div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Safe</span><span>Good</span><span>Caution</span><span>Warning</span><span>Danger</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Lift Safety Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <!-- About This Calculator -->
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    This calculator helps determine the <strong>Tension Factor (TF)</strong> and the
+                    <strong>Minimum Vertical Rated Capacity</strong> required per sling.
+                    These calculations are essential for ensuring safe and efficient lifting operations.
+                </p>
+                <p>
+                    It is a critical tool for riggers and safety professionals to ensure lifting operations are conducted
+                    safely.
+                    It calculates the **Tension Factor** (also called Load Angle Factor) and the true **Required Capacity** for
+                    each sling.
+                    As the angle of a sling decreases, the tension on it increases significantly, which can lead to sling
+                    failure if not accounted for.
+                </p>
+            </div>
+        
+            <!-- Parameters Explained -->
+            <div class="note-card">
+                <h3>📐 Parameters Explained</h3>
+                <ul class="note-list">
+                    <li><strong>Total Load (lbs):</strong> The combined weight of the object being lifted.</li>
+                    <li><strong>Number of Slings:</strong> The number of slings used to distribute the load.</li>
+                    <li><strong>Length (L) (ft):</strong> The horizontal distance from the lifting point to the attachment point
+                        on the load.</li>
+                    <li><strong>Height (H) (ft):</strong> The vertical distance from the lifting point to the load attachment.
+                    </li>
+                </ul>
+                <p>
+                    By providing these values, the calculator determines how tension changes based on lifting angles and
+                    calculates the required minimum sling rating for safe lifting.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>✅ Input Validation Rules</h3>
+                <ul class="note-list">
+                    <li><strong>Total Load (Q):</strong> Must be a positive number between <code>1</code> and
+                        <code>1,000,000 lbs</code>. <br>
+                        <em>Error shown if violated:</em> 👉 Total Load must be a positive number between 1 and 1,000,000 lbs.
+                    </li>
+            
+                    <li><strong>Number of Slings:</strong> Must be a whole number (integer) greater than 0 and not exceed 12. <br>
+                        <em>Error messages:</em>
+                        <ul>
+                            <li>👉 Number of Slings must be a whole number greater than 0.</li>
+                            <li>👉 Number of Slings must be an integer (no decimals allowed).</li>
+                            <li>👉 Number of Slings should not exceed 12 for safe rigging practice.</li>
+                        </ul>
+                    </li>
+            
+                    <li><strong>Sling Length (L):</strong> Must be between <code>1 ft</code> and <code>500 ft</code>. <br>
+                        <em>Error shown if violated:</em> 👉 Sling Length (L) must be between 1 ft and 500 ft.
+                    </li>
+            
+                    <li><strong>Sling Height (H):</strong> Must be between <code>1 ft</code> and <code>500 ft</code>. <br>
+                        <em>Error shown if violated:</em> 👉 Sling Height (H) must be between 1 ft and 500 ft.
+                    </li>
+            
+                    <li><strong>Cross-Check:</strong> Sling Height (H) cannot be greater than Sling Length (L). <br>
+                        <em>Error shown if violated:</em> 👉 Sling Height (H) cannot be greater than Sling Length (L). This is a
+                        physical impossibility.
+                    </li>
+                </ul>
+                <br>
+                <h3>💡 Allowed Decimals</h3>
+                <ul class="note-list">
+                    <li>Total Load, Sling Length, and Sling Height → up to 2 decimal places.</li>
+                    <li>Number of Slings → must be an integer (no decimals).</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Output Validations</h3>
+                <ul class="note-list">
+                    <li><strong>❌ Invalid calculation:</strong> If result is not finite or ≤ 0, show: <br>
+                        <code>❌ Invalid calculation. Please check input values.</code>
+                    </li>
+                </ul>
+            
+                <h3>📌 Lift Safety Assessment (Based on Sling Angle)</h3>
+                <ul class="note-list">
+                    <li>✅ <strong>Safe Lift:</strong> Angle ≥ 60° (Tension Factor ≤ 1.155). Tension well-controlled.</li>
+                    <li>👍 <strong>Good Lift:</strong> Angle 45°–60° (Tension Factor ≤ 1.414). Acceptable, monitor sling ratings.
+                    </li>
+                    <li>🟡 <strong>Caution:</strong> Angle 30°–45° (Tension Factor ≤ 2.0). Tension increases significantly.</li>
+                    <li>⚠️ <strong>Warning:</strong> Angle 20°–30° (Tension Factor ≤ 2.924). High sling tension, avoid if possible.
+                    </li>
+                    <li>❌ <strong>Danger:</strong> Angle < 20°. Extremely high tension. Critical sling failure risk.</li>
+                </ul>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            if (document.getElementById('printDate')) {
+                document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
+        });
+
+        function calculateTension() {
+            const load_val = document.getElementById('load').value.trim();
+            const numSlings_val = document.getElementById('numSlings').value.trim();
+            const length_val = document.getElementById('length').value.trim();
+            const height_val = document.getElementById('height').value.trim();
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+
+            let errors = [];
+
+            // --- INPUT VALIDATION RULES (QEHS Standards) ---
+            if (load_val === '' || isNaN(load_val) || parseFloat(load_val) <= 0 || parseFloat(load_val) > 1e6) {
+                errors.push("👉 Total Load must be a positive number between 1 and 1,000,000 lbs.");
+            }
+
+            const numSlings = parseFloat(numSlings_val);
+            if (numSlings_val === '' || isNaN(numSlings) || numSlings <= 0) {
+                errors.push("👉 Number of Slings must be a whole number greater than 0.");
+            } else if (!Number.isInteger(numSlings)) {
+                errors.push("👉 Number of Slings must be an integer (no decimals allowed).");
+            } else if (numSlings > 12) {
+                errors.push("👉 Number of Slings should not exceed 12 for safe rigging practice.");
+            }
+
+            if (length_val === '' || isNaN(length_val) || parseFloat(length_val) <= 0 || parseFloat(length_val) > 500) {
+                errors.push("👉 Sling Length (L) must be between 1 ft and 500 ft.");
+            }
+
+            if (height_val === '' || isNaN(height_val) || parseFloat(height_val) <= 0 || parseFloat(height_val) > 500) {
+                errors.push("👉 Sling Height (H) must be between 1 ft and 500 ft.");
+            }
+
+            if (parseFloat(height_val) > parseFloat(length_val)) {
+                errors.push("👉 Sling Height (H) cannot be greater than Sling Length (L). This is a physical impossibility.");
+            }
+
+            // --- ERROR HANDLING ---
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden");
+            }
+
+            // --- CALCULATION ---
+            const load = parseFloat(load_val);
+            const slings = parseInt(numSlings_val);
+            const length = parseFloat(length_val);
+            const height = parseFloat(height_val);
+
+            const weightPerSling = load / slings;
+            const tensionFactor = length / height;
+            const requiredCapacity = weightPerSling * tensionFactor;
+
+            if (!isFinite(requiredCapacity) || requiredCapacity <= 0) {
+                errorMessage.innerHTML = "❌ Invalid calculation. Please check input values.";
+                errorBox.classList.remove("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            }
+
+            // --- DISPLAY RESULTS ---
+            document.getElementById('rateValue').textContent = requiredCapacity.toFixed(2);
+            document.getElementById('tensionFactor').textContent = tensionFactor.toFixed(3);
+            document.getElementById('weightPerSling').textContent = weightPerSling.toFixed(2) + ' lbs';
+
+            // --- LIFT SAFETY ASSESSMENT (Based on Angle/Tension Factor) ---
+            const meterFill = document.getElementById('meterFill');
+            let meterWidth, meterColor, feedback;
+
+            if (tensionFactor <= 1.155) { // Angle >= 60°
+                meterWidth = '15%';
+                meterColor = '#27ae60';
+                feedback = '✅ <strong>Safe Lift:</strong> Sling angle > 60°, tension well-controlled.';
+            } else if (tensionFactor <= 1.414) { // Angle 45°–60°
+                meterWidth = '35%';
+                meterColor = '#2ecc71';
+                feedback = '👍 <strong>Good Lift:</strong> Angle 45°–60°. Acceptable, but monitor sling ratings.';
+            } else if (tensionFactor <= 2.0) { // Angle 30°–45°
+                meterWidth = '60%';
+                meterColor = '#f1c40f';
+                feedback = '🟡 <strong>Caution:</strong> Angle 30°–45°. Tension increases significantly.';
+            } else if (tensionFactor <= 2.924) { // Angle 20°–30°
+                meterWidth = '80%';
+                meterColor = '#e67e22';
+                feedback = '⚠️ <strong>Warning:</strong> Angle 20°–30°. High sling tension, avoid if possible.';
+            } else { // Angle < 20°
+                meterWidth = '95%';
+                meterColor = '#e74c3c';
+                feedback = '❌ <strong>Danger:</strong> Angle < 20°. Extremely high tension. Critical sling failure risk.';
+            }
+
+            meterFill.style.width = meterWidth;
+            meterFill.style.backgroundColor = meterColor;
+            document.getElementById('feedbackContent').innerHTML = feedback;
+
+            placeholder.classList.add("hidden");
+            resultValue.classList.remove("hidden");
+        }
+
+        function printReport() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            window.print();
+        }
+    </script>
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+<!-- 
+1. Input Validation Rules (Real-world QEHS Perspective)
+
+All values must represent physically meaningful rigging conditions and comply with OSHA 1926 Subpart CC, ASME B30.9 (slings), and NFPA safety considerations:
+
+Total Load (lbs):
+
+Must be > 0 and ≤ 1,000,000 lbs (realistic for cranes/lifting equipment).
+
+Must be numeric, no text.
+
+Allow up to 0 decimals (since loads are in whole pounds in rigging charts).
+
+If load > 85% of crane rated capacity → trigger a warning (per OSHA load charts).
+
+Number of Slings:
+
+Must be integer ≥ 1 and ≤ 12 (beyond this is impractical and unsafe).
+
+Decimal or fractional values invalid.
+
+If numSlings > 4 → note that industry-standard configurations are typically 2 or 4 (extra check for unusual rigging).
+
+Sling Length (ft):
+
+Must be > 0 and ≤ 200 ft.
+
+Allow up to 1 decimal place (tape measure precision).
+
+Sling length must always be ≥ height (geometry rule, otherwise TF < 1 is invalid).
+
+Sling Height (ft):
+
+Must be > 0 and ≤ 200 ft.
+
+Allow up to 1 decimal place.
+
+Height cannot exceed length (otherwise angle impossible).
+
+Height/Length ratio (sling angle) should be ≥ 0.5 (≈ 30° minimum angle). Below this → danger zone.
+
+2. Output Validation Logic & Thresholds
+
+Outputs must be interpreted against safety thresholds, not just raw numbers:
+
+Tension Factor (TF = L/H):
+
+Must be ≥ 1.0 (geometry check).
+
+TF > 2.0 → unsafe sling angle (below 30°); should flag as danger.
+
+TF between 1.0–1.2 → safe/good rigging.
+
+TF between 1.2–2.0 → caution, additional checks required.
+
+Minimum Rated Capacity per Sling:
+
+Compare with industry standard safety factor (≥ 5:1).
+
+If required sling capacity > 80% of rated → Warning.
+
+If required sling capacity exceeds rated → Danger, stop lift.
+
+Lift Safety Meter (feedback mapping):
+
+✅ Safe (TF ≤ 1.2, sling load ≤ 50% rated) → Routine lift.
+
+🟡 Caution (TF 1.2–1.5, sling load 50–80% rated) → Increased monitoring.
+
+⚠️ Warning (TF 1.5–2.0, sling load 80–100% rated) → Risk of overload.
+
+❌ Danger (TF > 2.0 or load > rated) → Prohibited, revise rigging plan.
+-->
