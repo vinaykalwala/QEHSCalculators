@@ -536,6 +536,42 @@ CALCULATORS = [
 
 #environment calculators from  bottom to top
 
+
+
+
+
+
+
+
+
+#{"name": "Sedimentation Tank Surface Area (A) Calculator", "url_name": "environment_sedimentation_tank_surface_area_a_calculator", "plan_type": "corporate", "category": "environment"},
+
+#{"name": "Sedimentation Tank Dimensions Calculator", "url_name": "environment_sedimentation_tank_dimensions_calculator", "plan_type": "corporate", "category": "environment"},
+
+#{"name": "Sedimentation Overflow Rate Calculator", "url_name": "environment_sedimentation_overflow_rate_calculator", "plan_type": "corporate", "category": "environment"},
+
+#{"name": "Scouring Velocity (V) Calculator - Schield’s Formula", "url_name": "environment_scouring_velocity_v_schields_formula_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+#{"name": "Sludge Recirculation Rate (Qr) Calculator", "url_name": "environment_sludge_recirculation_rate_qr_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+#{"name": "Solubility Product (Ksp) Calculator", "url_name": "environment_solubility_product_ksp_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+#{"name": "Stability Parameter (S) Calculator", "url_name": "environment_stability_parameter_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+#{"name": "Thermodynamic Temperature Calculator", "url_name": "environment_thermodynamic_temperature_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+
+#{"name": "Travel Carbon Footprint Calculator", "url_name": "environment_travel_carbpon_footprint_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+
+#{"name": "Thermal Transmittance (U) Calculator (From Thickness & Conductivities)", "url_name": "environment_thermal_transmittance_u_from_the_individual_thicknesses_and_conductivities_calculator", "plan_type": "corporate", "category": "environment"},
+
 # {"name": "Thermal transmittance (U) from the individual thermal resistances Calculator", "url_name": "environment_thermal_transmittance_u_from_the_individual_thermal_resistances_calculator", "plan_type": "corporate", "category": "environment"},
 
 
