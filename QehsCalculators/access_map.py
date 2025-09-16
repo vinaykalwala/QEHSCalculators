@@ -985,6 +985,27 @@ CALCULATORS = [
 # {"name": "Pit Area Calculation", "url_name":"safety_pit_area_calculation_calculator", "plan_type": "corporate", "category": "safety"},
 
 
+# {"name": "Pump Efficiency Calculator", "url_name":"safety_pump_efficiency_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Precast Lifting Safety Calculator", "url_name":"safety_precast_lifting_safety_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "PPE Stock Level Calculator", "url_name":"safety_ppe_stock_level_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Pipe Fittings Pressure Loss Calculator", "url_name":"safety_pipe_fittings_pressure_loss_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Percentage Risk Index Calculator", "url_name":"safety_percentage_risk_index_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Reorder Point (ROP) Calculator", "url_name":"safety_reorder_point_rop_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Risk Level Assessment Calculator", "url_name":"safety_risk_level_assesment_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Risk Priority Number (RPN) Calculator", "url_name":"safety_risk_priority_number_rpn_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Rate of Penetration (ROP) Calculator", "url_name":"safety_rate_of_penetration_rop_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Rheology (Viscosity) Calculator", "url_name":"safety_rheology_viscosity_calculator", "plan_type": "corporate", "category": "safety"},
+
+
 
 
 
