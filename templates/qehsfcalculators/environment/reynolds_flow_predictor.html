@@ -1,0 +1,756 @@
+{% extends 'base.html' %}
+{% block title %}Reynolds Flow Predictor Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reynolds Flow Predictor Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+<style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+             /* display: flex;  */
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            /* overflow-y: auto;  */
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Input rows for better organization */
+        .input-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+        
+        @media (max-width: 600px) {
+            .input-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+                .rate-display {
+                display: flex;
+                gap: 20px;
+                justify-content: center;
+                align-items: center;
+                flex-wrap: wrap; /* responsive */
+                text-align: center;
+            }
+
+            .rate-block {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                min-width: 120px; /* keeps blocks same width */
+            }
+
+            .rate-label {
+                font-weight: bold;
+                font-size: 16px;
+                color: #444;
+                margin-bottom: 5px;
+            }
+
+            .rate-value {
+                font-size: 40px;
+                font-weight: 700;
+                color: #2980b9;
+                line-height: 1.2;
+            }
+
+            .rate-unit {
+                font-size: 14px;
+                color: #777;
+                margin-top: 4px;
+            }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+                .rate-value { font-size: 32px; }
+            }
+
+            @media (max-width: 480px) {
+                .rate-value { font-size: 26px; }
+                
+                .rate-unit { font-size: 12px; }
+                
+            }
+
+
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+                .result-feedback {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 18px 20px;
+    border-left: 4px solid #3498db;
+    text-align: left;
+    max-width: 800px; /* keeps it readable on large screens */
+    margin: 0 auto;   /* centers it */
+}
+
+.feedback-title {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #2c3e50;
+    font-size: 18px;
+}
+
+.feedback-content { 
+    color: #34495e; 
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 768px) {
+    .result-feedback {
+        padding: 15px;
+        font-size: 15px;
+    }
+
+    .feedback-title {
+        font-size: 16px;
+    }
+
+    .feedback-content {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .result-feedback {
+        padding: 12px;
+        border-left-width: 3px;
+    }
+
+    .feedback-title {
+        font-size: 15px;
+    }
+
+    .feedback-content {
+        font-size: 13px;
+    }
+}
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+<div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+<div class="calculator-container printable" id="printArea">
+
+
+{% include "includes/print_header_footer.html" %}
+
+<div class="calculator-header">
+    <h1>Reynolds Number Calculator</h1>
+    <p>Predict the flow regime (laminar, transitional, turbulent) for pipe flow. Results are shown as a dimensionless Reynolds number and a short assessment for engineering / QEHS review.</p>
+</div>
+
+<div class="calc-content">
+    <!-- Calculator -->
+    <div class="calc-card">
+        <h2>Enter Parameters</h2>
+
+        <div class="input-row">
+            <div class="form-group">
+                <label for="fluidDensity">Fluid Density (ρ) [kg/m³]</label>
+                <input type="number" id="fluidDensity" class="form-input" step="0.1" min="0.01" placeholder="e.g., 1000" aria-label="Fluid density">
+            </div>
+
+            <div class="form-group">
+                <label for="velocity">Fluid Velocity (V) [m/s]</label>
+                <input type="number" id="velocity" class="form-input" step="0.01" min="0.0001" placeholder="e.g., 1.5" aria-label="Flow velocity">
+            </div>
+        </div>
+
+        <div class="input-row">
+            <div class="form-group">
+                <label for="diameter">Pipe Diameter (d) [m]</label>
+                <input type="number" id="diameter" class="form-input" step="0.001" min="0.0001" placeholder="e.g., 0.05" aria-label="Pipe diameter">
+            </div>
+
+            <div class="form-group">
+                <label for="dynamicViscosity">Dynamic Viscosity (μ) [Pa·s]</label>
+                <input type="number" id="dynamicViscosity" class="form-input" step="0.000001" min="0.0000001" placeholder="e.g., 0.001" aria-label="Dynamic viscosity">
+            </div>
+        </div>
+
+        <button class="calculate-btn" onclick="calculateHeadLoss()">Calculate Reynolds Number</button>
+    </div>
+
+    <!-- Result Section -->
+    <div class="result-card">
+        <div class="result-placeholder" id="placeholder">
+            <img src="/static/images/mlc_environment_result.png" alt="Flow illustration">
+            <p>This tool predicts flow regime for pipe flow and provides QEHS-relevant guidance.</p>
+        </div>
+
+        <div class="result-error hidden" id="resultError" role="alert" aria-live="polite">
+            <div class="error-icon">❌</div>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <div class="result-value hidden" id="resultValue" aria-live="polite">
+            <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                <h2>Reynolds Number & Assessment</h2>
+            </div>
+
+            <div class="rate-display" style="gap:12px; align-items:center; justify-content:center;">
+                <div class="rate-value" id="headLoss">0.00</div>
+                <div class="rate-label" style="font-size:16px; color: #2980b9;">dimensionless (Re)</div>
+            </div>
+
+            <div class="result-feedback">
+                <div class="feedback-title">Flow Assessment</div>
+                <div class="feedback-content" id="feedbackContent"></div>
+            </div>
+
+            <div class="btn-wrapper">
+                <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notes Section -->
+<div class="note-section">
+    <div class="note-card">
+        <h3>📘 About This Calculator</h3>
+        <p>
+            Reynolds number is a dimensionless parameter used to predict pipe flow regime (laminar, transitional, or turbulent).
+            It helps engineers design for pressure drop, mixing efficiency, erosion risk, and QEHS compliance in fluid systems.
+        </p>
+    </div>
+
+    <div class="note-card">
+        <h3>⚙ Parameters Used</h3>
+        <ul class="note-list">
+            <li>Fluid density (ρ) [kg/m³]</li>
+            <li>Fluid velocity (V) [m/s]</li>
+            <li>Pipe diameter (d) [m]</li>
+            <li>Dynamic viscosity (μ) [Pa·s]</li>
+            <li>Kinematic viscosity (ν = μ / ρ) [m²/s] (computed internally)</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>✅ Input Validation Rules</h3>
+        <ul class="note-list">
+            <li>ρ: Must be numeric &gt; 0; typical liquids 700–14000 kg/m³, gases ~0.5–200 kg/m³</li>
+            <li>V: Must be numeric &gt; 0; typical 0.01–25 m/s, high velocities &gt;50 m/s trigger warnings</li>
+            <li>d: Must be numeric &gt; 0; typical 0.005–5 m</li>
+            <li>μ: Must be numeric &gt; 0; water ~0.001 Pa·s, warning if &lt;1e-6 or &gt;100 Pa·s</li>
+            <li>All inputs must be finite numbers; decimal values allowed</li>
+            <li>Cross-field: ν = μ / ρ must be positive finite; warning if ν &lt; 1e-9 (Re may blow up)</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>🧾 Output Validations & Feedback</h3>
+        <ul class="note-list">
+            <li>If Re ≤ 0 or not finite → error: "Computed Reynolds number invalid"</li>
+            <li>Re &lt; 2000 → Laminar: low mixing, predictable flow. Feedback displayed: "Low mixing; predictable flow. If your process requires mixing or higher heat transfer, consider increasing velocity or reducing viscosity."</li>
+            <li>2000 ≤ Re ≤ 4000 → Transitional: unstable, avoid for critical systems. Feedback: "Unstable / unpredictable regime — avoid sustained operation in this band for critical systems."</li>
+            <li>Re &gt; 4000 → Turbulent: good mixing, higher losses. Feedback: "Good mixing and heat transfer. Monitor for possible erosion and higher pressure losses at very high Re."</li>
+            <li>Warnings: Re &lt; 100 → creeping flow; Re &gt; 1e5 → high erosion risk; Re &gt; 1e6 → severe erosion/vibration possible (shown along with result)</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>📏 Standards</h3>
+        <p>
+            Operational references include ASME fluid mechanics guidelines, ISO 5167 for flow measurement, and internal plant SOPs for pipe flow design, mixing, and QEHS risk assessment.
+        </p>
+    </div>
+</div>
+
+
+<script>
+function showErrors(errors) {
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+
+  errorMessage.innerHTML = errors.join("<br>");
+  errorBox.classList.remove("hidden");
+  placeholder.classList.add("hidden");
+  resultValue.classList.add("hidden");
+}
+
+function calculateHeadLoss() {
+  // Inputs (kept existing function name for minimal UI change)
+  const rhoRaw = document.getElementById("fluidDensity")?.value.trim();
+  const VRaw = document.getElementById("velocity")?.value.trim();
+  const dRaw = document.getElementById("diameter")?.value.trim();
+  const muRaw = document.getElementById("dynamicViscosity")?.value.trim();
+
+  const headLossEl = document.getElementById("headLoss");         // repurposed to show Re
+  const feedbackEl = document.getElementById("feedbackContent");
+  document.getElementById("resultError").classList.add("hidden");
+  feedbackEl.innerHTML = "";
+
+  const errors = [];
+  const warnings = [];
+
+  // Required checks
+  if (rhoRaw === "") errors.push("👉 Please enter fluid density (ρ).");
+  if (VRaw === "") errors.push("👉 Please enter fluid velocity (V).");
+  if (dRaw === "") errors.push("👉 Please enter pipe diameter (d).");
+  if (muRaw === "") errors.push("👉 Please enter dynamic viscosity (μ).");
+  if (errors.length) return showErrors(errors);
+
+  // Parse values
+  const rho = parseFloat(rhoRaw);
+  const V = parseFloat(VRaw);
+  const d = parseFloat(dRaw);
+  const mu = parseFloat(muRaw);
+
+  // Numeric & physical existence checks
+  if (!Number.isFinite(rho) || rho <= 0) errors.push("👉 Fluid density (ρ) must be a positive finite number (kg/m³).");
+  if (!Number.isFinite(V) || V <= 0) errors.push("👉 Fluid velocity (V) must be a positive finite number (m/s).");
+  if (!Number.isFinite(d) || d <= 0) errors.push("👉 Pipe diameter (d) must be a positive finite number (m).");
+  if (!Number.isFinite(mu) || mu <= 0) errors.push("👉 Dynamic viscosity (μ) must be a positive finite number (Pa·s).");
+  if (errors.length) return showErrors(errors);
+
+  // Reasonable range warnings (not hard errors)
+  if (rho < 0.5 || rho > 20000) warnings.push("⚠️ Fluid density outside typical range — confirm units and fluid type.");
+  if (V > 50) warnings.push("⚠️ High velocity — check for erosion, noise and pressure losses.");
+  if (d > 5) warnings.push("⚠️ Very large diameter — ensure you intended meters (m).");
+  if (mu < 1e-6) warnings.push("⚠️ Very low viscosity — likely a gas or units mismatch; verify μ units (Pa·s).");
+  if (mu > 100) warnings.push("⚠️ Very high viscosity — likely heavy oil or paste; check process assumptions.");
+
+  // Cross-field checks
+  const nu = mu / rho; // kinematic viscosity (m²/s)
+  if (!Number.isFinite(nu) || nu <= 0) return showErrors(["⚠️ Computed kinematic viscosity invalid — check ρ and μ."]);
+
+  // Protect against division by near-zero which yields astronomically large Re
+  if (nu < 1e-9) warnings.push("⚠️ Extremely low kinematic viscosity — computed Re may be extremely large (check inputs).");
+
+  // Compute Reynolds number
+  const Re = (rho * V * d) / mu; // dimensionless
+
+  if (!Number.isFinite(Re) || Re <= 0) {
+    return showErrors(["⚠️ Computed Reynolds number invalid. Check inputs."]);
+  }
+
+  // Interpretations and QEHS-focused checks
+  let regime = "";
+  let advice = "";
+  if (Re < 2000) {
+    regime = "Laminar";
+    advice = "Low mixing; predictable flow. If your process requires mixing or higher heat transfer, consider increasing velocity or reducing viscosity.";
+  } else if (Re >= 2000 && Re <= 4000) {
+    regime = "Transitional";
+    advice = "Unstable / unpredictable regime — avoid sustained operation in this band for critical systems.";
+  } else {
+    regime = "Turbulent";
+    advice = "Good mixing and heat transfer. Monitor for possible erosion and higher pressure losses at very high Re.";
+  }
+
+  // Additional safety / audit warnings based on Re magnitude
+  if (Re > 1e6) warnings.push("⚠️ Very high Reynolds number — potential for severe erosion and vibration; review material selection and supports.");
+  if (Re > 1e5 && Re <= 1e6) warnings.push("⚠️ High Reynolds number — assess erosion risk and inspect piping material.");
+  if (Re < 1e2) warnings.push("⚠️ Very low Reynolds number — may indicate nearly creeping flow; confirm process intent.");
+
+  // Build feedback (audit-friendly)
+  let details = `<div>Reynolds Number (Re): <b>${Re.toFixed(2)}</b></div>`;
+  details += `<div>Flow Regime: <b>${regime}</b></div>`;
+  details += `<div style="margin-top:8px;"><strong>Guidance:</strong> ${advice}</div>`;
+  details += `</ul>`;
+  if (warnings.length) details += `<div style="margin-top:8px; color:#b35d00;">${warnings.join(" | ")}</div>`;
+
+  // Display results
+  headLossEl.textContent = Re.toFixed(2);            // repurposed ID; retains existing UI
+  feedbackEl.innerHTML = details;
+
+  document.getElementById("placeholder").classList.add("hidden");
+  document.getElementById("resultValue").classList.remove("hidden");
+  document.getElementById("resultError").classList.add("hidden");
+}
+
+/* print helper kept the same */
+function printReport() {
+  const el = document.getElementById('printDate');
+  if (el) {
+    el.textContent = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  }
+  window.print();
+}
+</script>
+
+
+<script src="{% static 'js/print.js' %}"></script>
+
+</body>
+</html>
+{% endblock %}
+
+
+
+<!-- 
+📌 Reynolds Number Calculator (Essentials)
+
+🔹 Formula:
+    • Kinematic viscosity: ν = μ / ρ    (m²/s)
+    • Reynolds Number: Re = (ρ × V × d) / μ   (dimensionless)
+
+🔹 Input Validations:
+    • Fluid density (ρ):
+        - Must be numeric
+        - > 0
+        - Warning if < 0.5 or > 20,000 kg/m³
+    • Velocity (V):
+        - Must be numeric
+        - > 0
+        - Warning if > 50 m/s
+    • Pipe diameter (d):
+        - Must be numeric
+        - > 0
+        - Warning if > 5 m
+    • Dynamic viscosity (μ):
+        - Must be numeric
+        - > 0
+        - Warning if < 1e-6 Pa·s (too low)
+        - Warning if > 100 Pa·s (too high)
+    • Cross-field validation:
+        - ν = μ / ρ must be positive finite
+        - Warning if ν < 1e-9 (Re may blow up)
+
+🔹 Output Validations:
+    • If Re ≤ 0 or not finite → error (invalid result)
+    • Re < 2000 → Laminar (low mixing, predictable flow)
+    • 2000 ≤ Re ≤ 4000 → Transitional (unstable, avoid for critical systems)
+    • Re > 4000 → Turbulent (good mixing, higher losses)
+    • Warnings:
+        - Re < 100 → creeping flow (check process)
+        - Re > 1e5 → high → erosion risk
+        - Re > 1e6 → very high → severe erosion/vibration possible
+
+-->

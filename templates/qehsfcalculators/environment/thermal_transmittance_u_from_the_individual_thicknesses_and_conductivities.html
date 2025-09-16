@@ -1,0 +1,864 @@
+{% extends 'base.html' %}
+{% block title %}Thermal Transmittance (U) Calculator (From Thickness & Conductivities){% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thermal Transmittance (U) Calculator (From Thickness & Conductivities)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+<style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+             /* display: flex;  */
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            /* overflow-y: auto;  */
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Input rows for better organization */
+        .input-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+        
+        @media (max-width: 600px) {
+            .input-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+                .rate-display {
+                display: flex;
+                gap: 20px;
+                justify-content: center;
+                align-items: center;
+                flex-wrap: wrap; /* responsive */
+                text-align: center;
+            }
+
+            .rate-block {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                min-width: 120px; /* keeps blocks same width */
+            }
+
+            .rate-label {
+                font-weight: bold;
+                font-size: 16px;
+                color: #444;
+                margin-bottom: 5px;
+            }
+
+            .rate-value {
+                font-size: 40px;
+                font-weight: 700;
+                color: #2980b9;
+                line-height: 1.2;
+            }
+
+            .rate-unit {
+                font-size: 14px;
+                color: #777;
+                margin-top: 4px;
+            }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+                .rate-value { font-size: 32px; }
+            }
+
+            @media (max-width: 480px) {
+                .rate-value { font-size: 26px; }
+                
+                .rate-unit { font-size: 12px; }
+                
+            }
+
+
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+                .result-feedback {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 18px 20px;
+    border-left: 4px solid #3498db;
+    text-align: left;
+    max-width: 800px; /* keeps it readable on large screens */
+    margin: 0 auto;   /* centers it */
+}
+
+.feedback-title {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #2c3e50;
+    font-size: 18px;
+}
+
+.feedback-content { 
+    color: #34495e; 
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 768px) {
+    .result-feedback {
+        padding: 15px;
+        font-size: 15px;
+    }
+
+    .feedback-title {
+        font-size: 16px;
+    }
+
+    .feedback-content {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .result-feedback {
+        padding: 12px;
+        border-left-width: 3px;
+    }
+
+    .feedback-title {
+        font-size: 15px;
+    }
+
+    .feedback-content {
+        font-size: 13px;
+    }
+}
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+        
+        /* Thermal U specific styles */
+        .thermal-u {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 900px) {
+            .thermal-u {
+                flex-direction: column;
+            }
+        }
+        
+        .thermal-u .form-group {
+            flex: 1;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .thermal-u label {
+            color: #1560bd !important;
+            font-weight: 600;
+        }
+        
+        .thermal-u .form-input {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+<div class="calculator-container printable" id="printArea">
+
+{% include "includes/print_header_footer.html" %}
+
+<div class="calculator-header">
+    <h1>Thermal Transmittance (U) Calculator (From Thickness & Conductivities)</h1>
+    <p>Calculate the overall thermal transmittance (U-value) of a multi-layer system using thermal resistance in series.</p>
+</div>
+
+<div class="calc-content">
+    <!-- Calculator -->
+    <div class="calc-card">
+        <h2>Enter Parameters</h2>
+        
+        <!-- Layer 1 -->
+        <div class="thermal-u">
+            <div class="form-group">
+                <label style="color: #ffff;font-size: 18px;"><strong>Layer 1 (e.g., Air Film):</strong></label>
+                <label for="x1">Thickness x₁ (m)</label>
+                <input type="number" id="x1" class="form-input" step="0.0001" min="0" placeholder="e.g., 0.01" aria-label="Thickness for layer 1">
+                
+                <label for="k1">Thermal Conductivity k₁ (W/m·°C)</label>
+                <input type="number" id="k1" class="form-input" step="0.0001" min="0" placeholder="e.g., 0.026" aria-label="Conductivity for layer 1">
+            </div>
+
+            <div class="form-group">
+                <label style="color: #ffff;font-size: 18px;"><strong>Layer 2 (e.g., Condensate Film):</strong></label>
+                <label for="x2">Thickness x₂ (m)</label>
+                <input type="number" id="x2" class="form-input" step="0.0001" min="0" placeholder="e.g., 0.005" aria-label="Thickness for layer 2">
+                
+                <label for="k2">Thermal Conductivity k₂ (W/m·°C)</label>
+                <input type="number" id="k2" class="form-input" step="0.0001" min="0" placeholder="e.g., 0.6" aria-label="Conductivity for layer 2">
+            </div>
+        </div>
+
+        <!-- Layer 3 & 4 -->
+        <div class="thermal-u">
+            <div class="form-group">
+                <label style="color: #ffff;font-size: 18px;"><strong>Layer 3 (e.g., Scale Film):</strong></label>
+                <label for="x3">Thickness x₃ (m)</label>
+                <input type="number" id="x3" class="form-input" step="0.0001" min="0" placeholder="e.g., 0.001" aria-label="Thickness for layer 3">
+                
+                <label for="k3">Thermal Conductivity k₃ (W/m·°C)</label>
+                <input type="number" id="k3" class="form-input" step="0.0001" min="0" placeholder="e.g., 1.5" aria-label="Conductivity for layer 3">
+            </div>
+
+            <div class="form-group">
+                <label style="color: #ffff;font-size: 18px;"><strong>Layer 4 (e.g., Metal Wall):</strong></label>
+                <label for="x4">Thickness x₄ (m)</label>
+                <input type="number" id="x4" class="form-input" step="0.0001" min="0" placeholder="e.g., 0.01" aria-label="Thickness for layer 4">
+                
+                <label for="k4">Thermal Conductivity k₄ (W/m·°C)</label>
+                <input type="number" id="k4" class="form-input" step="0.0001" min="0" placeholder="e.g., 50" aria-label="Conductivity for layer 4">
+            </div>
+        </div>
+
+        <!-- Layer 5 & 6 -->
+        <div class="thermal-u">
+            <div class="form-group">
+                <label style="color: #ffff;font-size: 18px;"><strong>Layer 5 (e.g., Water Scale):</strong></label>
+                <label for="x5">Thickness x₅ (m)</label>
+                <input type="number" id="x5" class="form-input" step="0.0001" min="0" placeholder="e.g., 0.002" aria-label="Thickness for layer 5">
+                
+                <label for="k5">Thermal Conductivity k₅ (W/m·°C)</label>
+                <input type="number" id="k5" class="form-input" step="0.0001" min="0" placeholder="e.g., 1.5" aria-label="Conductivity for layer 5">
+            </div>
+
+            <div class="form-group">
+                <label style="color: #ffff;font-size: 18px;"><strong>Layer 6 (e.g., Water Film):</strong></label>
+                <label for="x6">Thickness x₆ (m)</label>
+                <input type="number" id="x6" class="form-input" step="0.0001" min="0" placeholder="e.g., 0.0005" aria-label="Thickness for layer 6">
+                
+                <label for="k6">Thermal Conductivity k₆ (W/m·°C)</label>
+                <input type="number" id="k6" class="form-input" step="0.0001" min="0" placeholder="e.g., 0.6" aria-label="Conductivity for layer 6">
+            </div>
+        </div>
+
+        <button class="calculate-btn" onclick="calculateThermalTransmittance()">Calculate U-Value</button>
+    </div>
+
+    <!-- Result Section -->
+    <div class="result-card">
+        <div class="result-placeholder" id="placeholder">
+            <img src="/static/images/mlc_environment_result.png" alt="Thermal insulation illustration">
+            <p>This tool calculates the overall thermal transmittance (U-value) of a multi-layer system.</p>
+        </div>
+
+        <div class="result-error hidden" id="resultError" role="alert" aria-live="polite">
+            <div class="error-icon">❌</div>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <div class="result-value hidden" id="resultValue" aria-live="polite">
+            <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                <h2>Thermal Transmittance (U-Value)</h2>
+            </div>
+
+            <div class="rate-display" style="gap:12px; align-items:center; justify-content:center;">
+                <div class="rate-value" id="uValue">0.00</div>
+                <div class="rate-label" style="font-size:16px; color: #2980b9;">W/(m²·°C)</div>
+            </div>
+
+            <div class="result-feedback">
+                <div class="feedback-title">Insulation Assessment</div>
+                <div class="feedback-content" id="feedbackContent"></div>
+            </div>
+
+            <div class="btn-wrapper">
+                <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notes Section -->
+<div class="note-section">
+    <div class="note-card">
+        <h3>📘 About</h3>
+        <p>
+            This calculator determines the overall thermal transmittance (U-value) of a multi-layer system using the formula for thermal resistance in series. The U-value represents the rate of heat transfer through a structure and is essential for evaluating energy efficiency in buildings and industrial systems.
+        </p>
+    </div>
+
+
+    <div class="note-card">
+        <h3>✅ Input Validations</h3>
+        <ul class="note-list">
+            <li><strong>Thickness (x):</strong> Must be <em>≥ 0</em> and ≤ 1 m. Typical values range from 0.0001 m to 0.5 m.</li>
+            <li><strong>Thermal Conductivity (k):</strong> Must be <em>greater than 0</em> and ≤ 500 W/m·°C. Typical values range from 0.02 to 400 W/m·°C.</li>
+            <li><strong>Zero Values:</strong> If thickness is 0, the layer is ignored. If conductivity is 0, it's invalid.</li>
+            <li><strong>Realistic Combinations:</strong> At least one layer must have both thickness and conductivity values.</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>🔎 U-Value Classification</h3>
+        <ul class="note-list">
+            <li><strong>Excellent Insulation (&lt; 0.5 W/m²·°C):</strong> High-performance building envelopes.</li>
+            <li><strong>Good Insulation (0.5-1.0 W/m²·°C):</strong> Well-insulated residential buildings.</li>
+            <li><strong>Moderate Insulation (1.0-2.0 W/m²·°C):</strong> Standard construction with basic insulation.</li>
+            <li><strong>Poor Insulation (&gt; 2.0 W/m²·°C):</strong> Minimal insulation, significant heat loss.</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>🏭 Applications</h3>
+        <ul class="note-list">
+            <li><strong>Building Envelopes:</strong> Calculating heat loss through walls, roofs, and floors.</li>
+            <li><strong>HVAC Systems:</strong> Designing efficient ductwork and piping insulation.</li>
+            <li><strong>Industrial Processes:</strong> Evaluating heat transfer in equipment and pipelines.</li>
+            <li><strong>Energy Audits:</strong> Assessing building energy performance for compliance.</li>
+            <li><strong>Green Building Design:</strong> Meeting sustainability standards and certifications.</li>
+            <li><strong>Retrofit Projects:</strong> Determining optimal insulation upgrades.</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>🛑 Limitations</h3>
+        <ul class="note-list">
+            <li>Assumes perfect thermal contact between layers.</li>
+            <li>Does not account for thermal bridging effects.</li>
+            <li>Assumes one-dimensional heat transfer.</li>
+            <li>Does not consider air films or surface resistances unless explicitly included as layers.</li>
+            <li>Assumes constant material properties with temperature.</li>
+            <li>Does not account for moisture effects on thermal performance.</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+function showErrors(errors) {
+  const errorBox = document.getElementById("resultError");
+  const errorMessage = document.getElementById("errorMessage");
+  const placeholder = document.getElementById("placeholder");
+  const resultValue = document.getElementById("resultValue");
+
+  errorMessage.innerHTML = errors.join("<br>");
+  errorBox.classList.remove("hidden");
+  placeholder.classList.add("hidden");
+  resultValue.classList.add("hidden");
+}
+
+function calculateThermalTransmittance() {
+  // Get all input values
+  const x1 = parseFloat(document.getElementById("x1")?.value.trim()) || 0;
+  const k1 = parseFloat(document.getElementById("k1")?.value.trim()) || 0;
+  const x2 = parseFloat(document.getElementById("x2")?.value.trim()) || 0;
+  const k2 = parseFloat(document.getElementById("k2")?.value.trim()) || 0;
+  const x3 = parseFloat(document.getElementById("x3")?.value.trim()) || 0;
+  const k3 = parseFloat(document.getElementById("k3")?.value.trim()) || 0;
+  const x4 = parseFloat(document.getElementById("x4")?.value.trim()) || 0;
+  const k4 = parseFloat(document.getElementById("k4")?.value.trim()) || 0;
+  const x5 = parseFloat(document.getElementById("x5")?.value.trim()) || 0;
+  const k5 = parseFloat(document.getElementById("k5")?.value.trim()) || 0;
+  const x6 = parseFloat(document.getElementById("x6")?.value.trim()) || 0;
+  const k6 = parseFloat(document.getElementById("k6")?.value.trim()) || 0;
+
+  const uValueEl = document.getElementById("uValue");
+  const feedbackEl = document.getElementById("feedbackContent");
+  document.getElementById("resultError").classList.add("hidden");
+  feedbackEl.innerHTML = "";
+
+  const errors = [];
+  const warnings = [];
+
+  // Validate thickness values
+  const thicknesses = [x1, x2, x3, x4, x5, x6];
+  const conductivities = [k1, k2, k3, k4, k5, k6];
+  
+  // Check if at least one layer has values
+  let hasValidLayer = false;
+  for (let i = 0; i < 6; i++) {
+    if (thicknesses[i] > 0 && conductivities[i] > 0) {
+      hasValidLayer = true;
+      break;
+    }
+  }
+  
+  if (!hasValidLayer) {
+    errors.push("👉 At least one layer must have both thickness and conductivity values.");
+    return showErrors(errors);
+  }
+
+  // Validate individual inputs
+  for (let i = 0; i < 6; i++) {
+    if (thicknesses[i] < 0 || thicknesses[i] > 1) {
+      errors.push(`👉 Layer ${i+1} thickness must be ≥ 0 and ≤ 1 m.`);
+    }
+    if (conductivities[i] < 0 || conductivities[i] > 500) {
+      errors.push(`👉 Layer ${i+1} conductivity must be > 0 and ≤ 500 W/m·°C.`);
+    }
+    if (thicknesses[i] > 0 && conductivities[i] <= 0) {
+      errors.push(`👉 Layer ${i+1} has thickness but invalid conductivity (must be > 0).`);
+    }
+  }
+  
+  if (errors.length) return showErrors(errors);
+
+  // Calculate thermal resistances
+  let totalResistance = 0;
+  const resistances = [];
+  
+  for (let i = 0; i < 6; i++) {
+    if (thicknesses[i] > 0 && conductivities[i] > 0) {
+      const resistance = thicknesses[i] / conductivities[i];
+      resistances.push(resistance);
+      totalResistance += resistance;
+      
+      // Warnings for unusual values
+      if (thicknesses[i] < 0.0001) warnings.push(`⚠️ Layer ${i+1} thickness is very small (< 0.1 mm).`);
+      if (thicknesses[i] > 0.1) warnings.push(`⚠️ Layer ${i+1} thickness is large (> 10 cm).`);
+      if (conductivities[i] < 0.03) warnings.push(`⚠️ Layer ${i+1} has very low conductivity (excellent insulator).`);
+      if (conductivities[i] > 100) warnings.push(`⚠️ Layer ${i+1} has very high conductivity (good conductor).`);
+    } else {
+      resistances.push(0);
+    }
+  }
+
+  // Check for valid total resistance
+  if (totalResistance <= 0) {
+    errors.push("👉 Total thermal resistance must be greater than 0.");
+    return showErrors(errors);
+  }
+
+  // Calculate U-value
+  const uValue = 1 / totalResistance;
+  
+  if (!Number.isFinite(uValue) || uValue <= 0) {
+    errors.push("⚠️ Computed U-value is invalid. Check inputs.");
+    return showErrors(errors);
+  }
+
+  // Classification
+  let classification, suggestion;
+  if (uValue < 0.5) {
+    classification = "Excellent Insulation";
+    suggestion = "✅ Excellent thermal performance with minimal heat loss.";
+  } else if (uValue < 1.0) {
+    classification = "Good Insulation";
+    suggestion = "⚠️ Good insulation; meets most energy efficiency standards.";
+  } else if (uValue < 2.0) {
+    classification = "Moderate Insulation";
+    suggestion = "❌ Moderate insulation; consider improving for better energy efficiency.";
+  } else {
+    classification = "Poor Insulation";
+    suggestion = "❌ Poor insulation; significant heat loss, urgent improvement needed.";
+  }
+  
+  if (uValue > 5) warnings.push("⚠️ Extremely high U-value – verify material properties.");
+
+  // Feedback
+  let details = `<div>U-Value = <b>${uValue.toFixed(4)}</b> W/(m²·°C)</div>`;
+  details += `<div>Total Thermal Resistance = <b>${totalResistance.toFixed(4)}</b> m²·°C/W</div>`;
+  details += `<div>Classification: <b>${classification}</b></div>`;
+  details += `<div style="margin-top:6px;">${suggestion}</div>`;
+  
+  // Add layer details
+  details += `<div style="margin-top:12px; font-weight:bold;">Layer Resistances:</div>`;
+  for (let i = 0; i < 6; i++) {
+    if (thicknesses[i] > 0 && conductivities[i] > 0) {
+      details += `<div style="font-size:14px;">Layer ${i+1}: ${resistances[i].toFixed(4)} m²·°C/W</div>`;
+    }
+  }
+  
+  if (warnings.length) details += `<div style="margin-top:12px; color:#b35d00;">${warnings.join(" | ")}</div>`;
+
+  uValueEl.textContent = uValue.toFixed(4);
+  feedbackEl.innerHTML = details;
+  document.getElementById("placeholder").classList.add("hidden");
+  document.getElementById("resultValue").classList.remove("hidden");
+  document.getElementById("resultError").classList.add("hidden");
+}
+
+function printReport() {
+  const el = document.getElementById('printDate');
+  if (el) {
+    el.textContent = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  }
+  window.print();
+}
+</script>
+<script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+---------------------------------------------------------------------------------------
+Input Validations:
+Thickness (x): Must be ≥ 0 and ≤ 1 m (typical range: 0.0001-0.5 m)
+
+Thermal Conductivity (k): Must be > 0 and ≤ 500 W/m·°C (typical range: 0.02-400)
+
+Zero Values: If thickness is 0, the layer is ignored. If conductivity is 0, it's invalid
+
+At least one valid layer must have both thickness and conductivity values
+---------------------------------------------------------------------------------------------
+Output Validations:
+U-value must be finite and positive
+
+Total thermal resistance must be greater than 0
+
+Classification based on U-value ranges
+-------------------------------------------------------------------------------------------
+Edge Cases:
+All layers with zero thickness
+
+Conductivity values of zero
+
+Extremely small thickness values (< 0.0001 m)
+
+Extremely large thickness values (> 0.1 m)
+
+Very low conductivity values (< 0.03 W/m·°C)
+
+Very high conductivity values (> 100 W/m·°C)
+
+Division by zero scenarios
+
+The code calculates the overall thermal transmittance (U-value) using the formula for thermal resistance in series:
+---------------------------------------------------------------------------------
+Formula
+text
+U = 1 / (R₁ + R₂ + R₃ + R₄ + R₅ + R₆)
+Where each individual thermal resistance Rₙ is calculated as:
+
+text
+Rₙ = xₙ / kₙ
+
+
+-->
