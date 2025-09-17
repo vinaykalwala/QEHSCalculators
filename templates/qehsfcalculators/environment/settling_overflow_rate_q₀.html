@@ -1,0 +1,757 @@
+{% extends 'base.html' %}
+{% block title %}Settling Overflow Rate (q₀) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settling Overflow Rate (q₀) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 38px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+        
+        /* Unit selector styles */
+        .unit-selector {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="btn-container">
+    <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+</div>
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+    <div class="calculator-header">
+        <h1>Settling Overflow Rate (q₀) Calculator</h1>
+        <p>Calculate the Settling overflow rate for sedimentation basins in water and wastewater treatment systems.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Input Card -->
+        <div class="calc-card">
+            <h2>Enter Parameters</h2>
+
+            <div class="form-group">
+                <label for="flow_rate">Flow Rate (Q)</label>
+                <input type="number" id="flow_rate" class="form-input" step="any" min="0" placeholder="e.g., 2.5">
+                <select id="flow_rate_unit" class="unit-selector">
+                    <option value="m3_s">m³/s</option>
+                    <option value="m3_day">m³/day</option>
+                    <option value="gpm">gallons/min (gpm)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="surface_area">Surface Area (Aₛ)</label>
+                <input type="number" id="surface_area" class="form-input" step="any" min="0" placeholder="e.g., 100">
+                <select id="surface_area_unit" class="unit-selector">
+                    <option value="m2">m²</option>
+                    <option value="ft2">ft²</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="result_unit">Display Result in:</label>
+                <select id="result_unit" class="unit-selector">
+                    <option value="m3_m2_s">m³/m²·s</option>
+                    <option value="m3_m2_day">m³/m²·day</option>
+                    <option value="gpm_ft2">gpm/ft²</option>
+                </select>
+            </div>
+
+            <button class="calculate-btn" onclick="calculateOverflowRate()">Calculate Overflow Rate</button>
+        </div>
+
+        <!-- Result Card -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="/static/images/mlc_environment_result.png" alt="Water treatment illustration">
+                <p>This tool calculates overflow rate for sedimentation basin design optimization.</p>
+            </div>
+
+            <div class="result-error hidden" id="resultError">
+                <div class="error-icon">❌</div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+
+            <div class="result-value hidden" id="resultValue">
+                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Overflow Rate (q₀)</h2>
+                </div>
+
+                <div class="rate-display">
+                    <div class="rate-value" id="overflowRateValue">0.000</div>
+                    <div class="rate-unit" id="overflowRateUnit">m³/m²·s</div>
+                </div>
+
+                <div class="result-feedback">
+                    <div class="feedback-title"> Assessment</div>
+                    <div class="feedback-content" id="feedbackContent"></div>
+                </div>
+
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="note-section">
+
+    <div class="note-card">
+        <h3>📘 About This Calculator</h3>
+        <p>
+            The <strong>Settling Overflow Rate (q₀) Calculator</strong> determines the surface loading rate for sedimentation basins in water and wastewater treatment systems. This critical design parameter represents the settling velocity of particles that are 100% removed and is essential for optimizing sedimentation efficiency.
+        </p>
+    </div>
+
+    <div class="note-card">
+        <h3>⚙ Parameters Used</h3>
+        <ul class="note-list">
+            <li><strong>Q (Flow Rate):</strong> The volumetric flow rate of water entering the treatment system.</li>
+            <li><strong>Aₛ (Surface Area):</strong> The top surface area of the sedimentation basin.</li>
+        </ul>
+    </div>
+
+
+    <div class="note-card">
+        <h3>✅ Input Validation Rules</h3>
+        <ul class="note-list">
+            <li><strong>Flow Rate (Q):</strong> Must be > 0 (typical range: 0.01-100 m³/s or equivalent).</li>
+            <li><strong>Surface Area (Aₛ):</strong> Must be > 0 (typical range: 10-10,000 m² or equivalent).</li>
+            <li><strong>Division Prevention:</strong> Surface area cannot be zero to avoid division errors.</li>
+            <li><strong>Realistic Values:</strong> Inputs should reflect practical treatment plant dimensions.</li>
+            <li><strong>Unit Consistency:</strong> Calculator handles unit conversions automatically.</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>🔎 Output Validations</h3>
+        <ul class="note-list">
+            <li><strong>q₀ must be finite:</strong> If result is NaN or Infinity → ❌ Invalid result, check inputs.</li>
+            <li><strong>q₀ &lt; 20 m³/m²·day:</strong> ⚠️ Too low → Risk of underutilized basin capacity.</li>
+            <li><strong>20-40 m³/m²·day:</strong> ✅ Optimal → Typical range for wastewater treatment.</li>
+            <li><strong>40-60 m³/m²·day:</strong> ⚠️ Moderate → Acceptable for high-efficiency systems.</li>
+            <li><strong>q₀ &gt; 60 m³/m²·day:</strong> ❌ Too high → Particles may not settle effectively.</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>📏Standards & Compliance </h3>
+        <ul class="note-list">
+            <li>✔️ Design parameters follow <strong>EPA and WHO guidelines</strong> for water treatment facilities.</li>
+            <li>✔️ Overflow rate ranges align with <strong>ASCE standards</strong> for sedimentation processes.</li>
+            <li>✔️ Multiple unit options support <strong>international engineering standards</strong>.</li>
+            <li>✔️ Calculations support <strong>environmental compliance</strong> for effluent quality standards.</li>
+            <li>✔️ Validations based on <strong>industry best practices</strong> for sedimentation basin design.</li>
+        </ul>
+    </div>
+
+
+    <div class="note-card">
+    <h3>📌 Conclusion</h3>
+    <p>
+        The <b>Settling Overflow Rate (q₀)</b> helps in checking the performance of a sedimentation basin. 
+        It is calculated as <b>q₀ = Q / Aₛ</b>, where Q is the flow rate and Aₛ is the surface area. 
+        Input validations ensure realistic design values, and results are automatically checked against 
+        industry standards:
+    </p>
+    <p>
+        ✅ Use this calculator to design or evaluate sedimentation basins while staying compliant with 
+        <b>EPA, WHO, and ASCE guidelines</b>.
+    </p>
+</div>
+
+
+</div>
+<script>
+function showErrors(errors) {
+    const errorBox = document.getElementById("resultError");
+    const errorMessage = document.getElementById("errorMessage");
+    const placeholder = document.getElementById("placeholder");
+    const resultValue = document.getElementById("resultValue");
+
+    errorMessage.innerHTML = errors.join("<br>");
+    errorBox.classList.remove("hidden");
+    placeholder.classList.add("hidden");
+    resultValue.classList.add("hidden");
+}
+
+function calculateOverflowRate() {
+    // Read values
+    const Q = parseFloat(document.getElementById("flow_rate").value);
+    const Q_unit = document.getElementById("flow_rate_unit").value;
+    const As = parseFloat(document.getElementById("surface_area").value);
+    const As_unit = document.getElementById("surface_area_unit").value;
+    const result_unit = document.getElementById("result_unit").value;
+
+    const overflowRateValueEl = document.getElementById("overflowRateValue");
+    const overflowRateUnitEl = document.getElementById("overflowRateUnit");
+    const feedbackEl = document.getElementById("feedbackContent");
+    document.getElementById("resultError").classList.add("hidden");
+    feedbackEl.innerHTML = "";
+
+    const errors = [];
+    const warnings = [];
+
+    // Validation
+    if (![Q, As].every(Number.isFinite)) {
+        return showErrors(["👉 Please enter all values (numeric)."]);
+    }
+    
+    if (Q <= 0) errors.push("👉 Flow rate (Q) must be > 0.");
+    if (As <= 0) errors.push("👉 Surface area (Aₛ) must be > 0.");
+    
+    // Warning for unusual values
+    if (Q > 100 && Q_unit === "m3_s") warnings.push("⚠️ Flow rate unusually high (>100 m³/s).");
+    if (Q < 0.01 && Q_unit === "m3_s") warnings.push("⚠️ Flow rate unusually low (<0.01 m³/s).");
+    if (As > 10000 && As_unit === "m2") warnings.push("⚠️ Surface area unusually large (>10,000 m²).");
+    if (As < 10 && As_unit === "m2") warnings.push("⚠️ Surface area unusually small (<10 m²).");
+
+    if (errors.length) return showErrors(errors);
+
+    // Convert all inputs to base SI units (m³/s and m²)
+    let Q_m3s, As_m2;
+    
+    // Convert Q to m³/s
+    switch(Q_unit) {
+        case "m3_day": 
+            Q_m3s = Q / 86400; // Convert m³/day to m³/s
+            break;
+        case "gpm": 
+            Q_m3s = Q * 0.00006309; // Convert gpm to m³/s
+            break;
+        default: 
+            Q_m3s = Q; // Already in m³/s
+    }
+    
+    // Convert As to m²
+    As_m2 = (As_unit === "ft2") ? As * 0.092903 : As;
+
+    // Check for division by zero
+    if (As_m2 === 0) {
+        return showErrors(["❌ Surface area cannot be zero."]);
+    }
+
+    // Formula: q₀ = Q / Aₛ (in base SI units: m³/m²·s)
+    const q0_base = Q_m3s / As_m2;
+
+    if (!Number.isFinite(q0_base)) {
+        return showErrors(["⚠️ Computed overflow rate is invalid (possible calculation error)."]);
+    }
+
+    // Convert to desired output unit
+    let q0, unitLabel;
+    switch(result_unit) {
+        case "m3_m2_day":
+            q0 = q0_base * 86400; // Convert m³/m²·s to m³/m²·day
+            unitLabel = "m³/m²·day";
+            break;
+        case "gpm_ft2":
+            q0 = q0_base * 15850.3; // Convert m³/m²·s to gpm/ft²
+            unitLabel = "gpm/ft²";
+            break;
+        default:
+            q0 = q0_base;
+            unitLabel = "m³/m²·s";
+    }
+
+    // Classification based on m³/m²·day (industry standard)
+    const q0_m3_m2day = q0_base * 86400;
+    let classification, suggestion, color;
+    
+    if (q0_m3_m2day < 20) {
+        classification = "Too Low";
+        suggestion = "⚠️ Risk of underutilized basin capacity.";
+        color = "#e65100";
+    } else if (q0_m3_m2day <= 40) {
+        classification = "Optimal";
+        suggestion = "✅ Typical range for wastewater treatment.";
+        color = "#2e7d32";
+    } else if (q0_m3_m2day <= 60) {
+        classification = "Moderate";
+        suggestion = "⚠️ Acceptable for high-efficiency systems.";
+        color = "#f9a825";
+    } else {
+        classification = "Too High";
+        suggestion = "❌ Particles may not settle effectively.";
+        color = "#c62828";
+    }
+
+    // Display result
+    overflowRateValueEl.textContent = q0.toFixed(6);
+    overflowRateUnitEl.textContent = unitLabel;
+    
+    feedbackEl.innerHTML = `
+        <div>q₀ = <b>${q0.toFixed(6)}</b> ${unitLabel}</div>
+        <div>Classification: <b style="color:${color};">${classification}</b></div>
+        <div style="margin-top:6px;">${suggestion}</div>
+        ${warnings.length ? `<div style="margin-top:8px; color:#b35d00;">${warnings.join(" | ")}</div>` : ""}
+    `;
+
+    document.getElementById("placeholder").classList.add("hidden");
+    document.getElementById("resultValue").classList.remove("hidden");
+}
+
+function printReport() {
+    const el = document.getElementById('printDate');
+    if (el) el.textContent = new Date().toLocaleDateString();
+    window.print();
+}
+</script>
+<script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+
+Input Validations:
+
+Flow Rate (Q) must be > 0 (typical range: 0.01-100 m³/s or equivalent)
+
+Surface Area (Aₛ) must be > 0 (typical range: 10-10,000 m² or equivalent)
+
+Division prevention: Surface area cannot be zero
+
+Realistic value checks with appropriate warnings
+-------------------------------------------------------
+Output Validations:
+
+q₀ < 20 m³/m²·day: Too low (warning)
+
+20-40 m³/m²·day: Optimal range
+
+40-60 m³/m²·day: Moderate (warning)
+
+q₀ > 60 m³/m²·day: Too high (error)
+
+Results must be finite and positive
+-----------------------------------------------------------------------
+Overflow Rate (q₀) = Flow Rate (Q) / Surface Area (Aₛ)
+
+Where:
+
+Q is the flow rate (in various units)
+
+Aₛ is the surface area of the basin (in various units)
+
+
+-->
