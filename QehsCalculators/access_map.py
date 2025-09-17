@@ -1089,7 +1089,25 @@ CALCULATORS = [
 # {"name": "Road Safety - Time Headway (TH) Calculator", "url_name":"safety_road_safety_time_headway_th_calculator", "plan_type": "corporate", "category": "safety"},
 # {"name": "Road Safety & Speed-Flow Relationship Calculator", "url_name":"safety_road_safety_and_speed_flow_relationship_calculator", "plan_type": "corporate", "category": "safety"},
 
+# {"name": "Road Safety - Stopping Sight Distance Calculator", "url_name":"safety_road_safety_stopping_sight_distance_ssd_calculator", "plan_type": "corporate", "category": "safety"},
 
+# {"name": "Recommended Weight Limit (RWL) Calculator", "url_name":"safety_recommended_weight_limit_rwl_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Risk Matrix Calculator", "url_name":"safety_risk_matrix_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Reel and Paddle Power Calculator", "url_name":"safety_reel_and_paddle_power_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Risk Index Calculator", "url_name":"safety_risk_index_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Radial Heat Flow Through Cylinder Calculator", "url_name":"safety_radial_heat_flow_cylinder_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Safe Overtaking Sight Distance (OSD) Calculator", "url_name":"safety_safe_overtaking_sight_distance_osd_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Severity Rate Calculator", "url_name":"safety_severity_rate_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "SWL of Wire Rope Calculator", "url_name":"safety_swl_of_wire_rope_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Stack Height Calculator", "url_name":"safety_stack_height_calculator", "plan_type": "corporate", "category": "safety"},
 
 
 # {"name": "Total Intended Load (TIL) Calculator", "url_name":"safety_total_intend_load_calculator", "plan_type": "corporate", "category": "safety"},
