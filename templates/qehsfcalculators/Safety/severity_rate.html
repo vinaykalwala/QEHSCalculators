@@ -1,0 +1,680 @@
+{% extends 'base.html' %}
+{% block title %}Severity Rate Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Severity Rate Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            height: 420px;
+            overflow-y: auto;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+      
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Severity Rate Calculator</h1>
+            <p>Calculate the severity rate of workplace injuries based on lost workdays and hours worked</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="lostWorkdays">Number of Lost Workdays</label>
+                    <input type="number" id="lostWorkdays" class="form-input" min="0" placeholder="e.g., 15">
+                </div>
+                <div class="form-group">
+                    <label for="totalHours">Total Number of Hours Worked</label>
+                    <input type="number" id="totalHours" class="form-input" min="1" placeholder="e.g., 200000">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateSeverityRate()">Calculate Severity Rate</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Safety illustration">
+                    <p>This tool will calculate the <strong>Severity Rate</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd; margin-top:50px;">
+                        <h2>Severity Rate</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">Lost days per 100,000 hours worked</div>
+                    </div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low</span><span>Moderate</span><span>High</span><span>Very High</span><span>Extreme</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Severity Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+ <!-- About -->
+    <div class="note-card">
+        <h3>📘 About This Calculator</h3>
+        <p>
+            The <strong>Severity Rate Calculator</strong> measures the seriousness of workplace injuries 
+            by comparing <b>lost workdays</b> to <b>total hours worked</b>. It standardizes results using 
+            OSHA/ANSI methodology for benchmarking and compliance.
+        </p>
+    </div>
+
+    <!-- Parameters Used -->
+    <div class="note-card">
+        <h3>⚙ Parameters Used</h3>
+        <ul class="note-list">
+            <li><strong>Lost Workdays:</strong> Total number of days employees could not work due to occupational injuries/illnesses.</li>
+            <li><strong>Total Hours Worked:</strong> All hours worked by all employees during the reporting period.</li>
+        </ul>
+    </div>
+
+    <!-- Input Validation Rules -->
+    <div class="note-card">
+        <h3>✅ Input Validation Rules</h3>
+        <ul class="note-list">
+            <li><b>Lost Workdays:</b> Integer, 0–10,000 (no decimals, cannot be negative).</li>
+            <li><b>Total Hours Worked:</b> Integer, 1–100,000,000 (must be greater than 0).</li>
+            <li><b>Logical Consistency:</b> Lost workdays × 8 hours ≤ Total Hours Worked.</li>
+            <li><b>Units:</b> Whole counts only (days and hours, no fractions).</li>
+        </ul>
+    </div>
+
+    <!-- Output Validations -->
+    <div class="note-card">
+        <h3>📊 Output Validations</h3>
+        <ul class="note-list">
+            <li><strong>SR &lt; 100:</strong> ✅ Low Severity Rate - indicates fewer lost workdays relative to hours worked.</li>
+            <li><strong>100 ≤ SR &lt; 300:</strong> 🔵 Moderate Severity Rate - suggests an average level of lost workdays.</li>
+            <li><strong>SR ≥ 300:</strong> ⚠️ High Severity Rate - indicates a higher number of lost workdays, which may suggest safety or operational issues.</li>
+        </ul>
+        <p>The rate is expressed as <b>lost days per 200,000 hours worked</b> for standardized OSHA comparison.</p>
+    </div>
+
+    <!-- Standards -->
+    <div class="note-card">
+        <h3>📋 Standards</h3>
+        <p>
+            Severity Rate methodology and thresholds are based on:  
+            • <strong>OSHA</strong> Recordkeeping Requirements  
+            • <strong>ANSI Z16.1</strong> Safety Performance Measurement  
+            • <strong>ISO 45001</strong> Occupational Health & Safety Management  
+            • <strong>Bureau of Labor Statistics (BLS)</strong> benchmarking data
+        </p>
+    </div>
+        <!-- Conclusion -->
+    <div class="note-card">
+        <h3>📝 Conclusion</h3>
+        <p>
+            The <strong>Severity Rate Calculator</strong> provides a standardized way to measure the 
+            seriousness of occupational injuries by relating <b>lost workdays</b> to <b>total hours worked</b>.  
+            This KPI helps organizations identify the impact of workplace incidents on productivity and safety performance. 
+        </p>
+        <p>
+            While the calculator follows <b>OSHA, ANSI Z16.1, ISO 45001,</b> and <b>BLS</b> guidelines, results should always 
+            be interpreted alongside other safety metrics (e.g., <i>Total Recordable Incident Rate</i>, <i>Near-Miss Frequency</i>) 
+            for a holistic view of workplace health and safety.  
+        </p>
+        <p>
+            Final assessments should be validated by <b>qualified safety professionals</b> and compared with industry benchmarks 
+            to ensure compliance and drive continuous improvement in occupational health and safety programs.
+        </p>
+    </div>
+
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateSeverityRate() {
+    const lostWorkdays = document.getElementById('lostWorkdays').value.trim();
+    const totalHours = document.getElementById('totalHours').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+
+    // --- Validation Rules ---
+    // Lost Workdays
+    if (lostWorkdays === "" || isNaN(lostWorkdays)) {
+        errors.push("👉 Please enter the number of lost workdays.");
+    } else if (!Number.isInteger(parseFloat(lostWorkdays))) {
+        errors.push("👉 Lost workdays must be a whole number (no decimals).");
+    } else if (parseInt(lostWorkdays) < 0) {
+        errors.push("👉 Lost workdays cannot be negative.");
+    } else if (parseInt(lostWorkdays) > 10000) {
+        errors.push("👉 Lost workdays cannot exceed 10,000.");
+    }
+
+    // Total Hours Worked
+    if (totalHours === "" || isNaN(totalHours)) {
+        errors.push("👉 Please enter the total hours worked.");
+    } else if (!Number.isInteger(parseFloat(totalHours))) {
+        errors.push("👉 Total hours worked must be a whole number (no decimals).");
+    } else if (parseInt(totalHours) <= 0) {
+        errors.push("👉 Total hours worked must be greater than 0.");
+    } else if (parseInt(totalHours) > 100000000) {
+        errors.push("👉 Total hours worked cannot exceed 100,000,000.");
+    }
+
+    // Logical consistency check
+    if (parseInt(totalHours) > 0 && parseInt(lostWorkdays) * 8 > parseInt(totalHours)) {
+        errors.push("👉 Lost workdays exceed available work hours (unrealistic input).");
+    }
+
+    // --- Error Handling ---
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // --- Safe Calculations ---
+    const numLostWorkdays = parseInt(lostWorkdays);
+    const numTotalHours = parseInt(totalHours);
+    const constant = 200000; // Standard OSHA/ANSI constant
+
+    const severityRate = (numLostWorkdays * constant) / numTotalHours;
+
+    document.getElementById('rateValue').textContent = severityRate.toFixed(2);
+
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+
+    // --- Output thresholds ---
+    if (severityRate < 100) {
+        meterWidth = '20%';
+        meterColor = '#27ae60';
+        feedback = '✅ Low Severity Rate - indicates fewer lost workdays relative to hours worked.';
+    } else if (severityRate < 300) {
+        meterWidth = '50%';
+        meterColor = '#f1c40f';
+        feedback = '🔵 Moderate Severity Rate - suggests an average level of lost workdays.';
+    } else {
+        meterWidth = '90%';
+        meterColor = '#e74c3c';
+        feedback = '⚠️ High Severity Rate - indicates a higher number of lost workdays, which may suggest safety or operational issues.';
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+
+    // Add contextual info
+    feedback += `<br><br>This represents ${severityRate.toFixed(2)} lost days per 200,000 hours worked.`;
+    document.getElementById('feedbackContent').innerHTML = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+{% comment %} 
+1. Formula (with compliance reference)
+/* 
+📌 Severity Rate (SR) Formula (ANSI Z16.1 / OSHA Methodology)
+-------------------------------------------------------------
+SR = (Lost Workdays × 200,000) ÷ Total Hours Worked
+
+👉 200,000 is a standard base, representing 100 employees working 
+   40 hours per week, 50 weeks per year.
+
+📊 Interpretation (Industry Guidance):
+- SR < 100   → ✅ Low (Good control over severity of cases)
+- 100 ≤ SR < 300 → 🔵 Moderate (average performance, room for improvement)
+- SR ≥ 300   → ⚠️ High (serious issues, requires urgent review)
+*/
+
+
+⚠️ In your current code you used 100,000 constant.
+🔹 The recognized OSHA/ANSI formula uses 200,000 for standardization.
+I recommend correcting it unless you intentionally benchmark against 100,000.
+
+2. Input Validation Rules
+
+Lost Workdays (LW):
+
+Must be an integer (whole days, no decimals).
+
+Range: 0 – 10,000 (beyond that is unrealistic even for global corporations).
+
+Cannot exceed total workdays available (e.g., cannot have 5,000 lost days if only 100 employees × 250 days worked).
+
+Compliance: OSHA logs require accurate whole days only.
+
+Total Hours Worked (TH):
+
+Must be an integer.
+
+Range: 1 – 100,000,000 (10M+ covers very large companies).
+
+Must be greater than lost workdays × 8 (basic logical consistency: if 100 days lost → at least 800 hours exist).
+
+Compliance: OSHA 300 log requires denominator to be all employee hours worked.
+
+3. Edge Case Validations
+
+Division by zero → if TH = 0 → block with error.
+
+Lost workdays > total possible hours → unrealistic → block.
+
+Extreme outliers (e.g., 10 lost days vs 10 hours worked → SR skyrockets) → warn user with “⚠️ Extreme ratio, please review input data.”
+
+4. Output Validation Logic (with feedback text included)
+/* 
+📊 Output Severity Rate Classification (Aligned to OSHA/ANSI Z16.1):
+------------------------------------------------------------------
+- SR < 100   → ✅ Low Severity Rate
+   Feedback: "Indicates fewer lost workdays relative to hours worked."
+
+- 100 ≤ SR < 300 → 🔵 Moderate Severity Rate
+   Feedback: "Suggests an average level of lost workdays."
+
+- SR ≥ 300   → ⚠️ High Severity Rate
+   Feedback: "Indicates a higher number of lost workdays, which may 
+   suggest safety or operational issues."
+*/ {% endcomment %}

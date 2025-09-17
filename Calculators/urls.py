@@ -612,11 +612,14 @@ urlpatterns = [
     path('safety/road_safety_braking_distance_calculator/', safety_road_safety_braking_distance_calculator, name='safety_road_safety_braking_distance_calculator'),
     path('safety/road_safety_time_headway_th_calculator/', safety_road_safety_time_headway_th_calculator, name='safety_road_safety_time_headway_th_calculator'),
     path('safety/road_safety_and_speed_flow_relationship_calculator/', safety_road_safety_and_speed_flow_relationship_calculator, name='safety_road_safety_and_speed_flow_relationship_calculator'),
+   
     path('safety/road_safety_stopping_sight_distance_ssd_calculator/', safety_road_safety_stopping_sight_distance_ssd_calculator, name='safety_road_safety_stopping_sight_distance_ssd_calculator'),
     path('safety/recommended_weight_limit_rwl_calculator/', safety_recommended_weight_limit_rwl_calculator, name='safety_recommended_weight_limit_rwl_calculator'),
     path('safety/risk_matrix_calculator/', safety_risk_matrix_calculator, name='safety_risk_matrix_calculator'),
     path('safety/reel_and_paddle_power_calculator/', safety_reel_and_paddle_power_calculator, name='safety_reel_and_paddle_power_calculator'),
     path('safety/risk_index_calculator/', safety_risk_index_calculator, name='safety_risk_index_calculator'),
+    path('safety/radial_heat_flow_cylinder_calculator/', safety_radial_heat_flow_cylinder_calculator, name='safety_radial_heat_flow_cylinder_calculator'),
+
     path('safety/safe_overtaking_sight_distance_osd_calculator/', safety_safe_overtaking_sight_distance_osd_calculator, name='safety_safe_overtaking_sight_distance_osd_calculator'),
     path('safety/severity_rate_calculator/', safety_severity_rate_calculator, name='safety_severity_rate_calculator'),
     path('safety/swl_of_wire_rope_calculator/', safety_swl_of_wire_rope_calculator, name='safety_swl_of_wire_rope_calculator'),

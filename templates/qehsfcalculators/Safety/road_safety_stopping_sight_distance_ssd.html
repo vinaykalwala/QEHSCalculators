@@ -1,0 +1,723 @@
+{% extends 'base.html' %}
+{% block title %}Road Safety - Stopping Sight Distance Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Road Safety - Stopping Sight Distance Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            height: 420px;
+            overflow-y: auto;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .ssd-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .ssd-label { 
+            color: #7f8c8d; 
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .ssd-breakdown {
+            text-align: left;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            margin-bottom: 20px;
+        }
+        
+        .breakdown-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .breakdown-content { 
+            color: #34495e; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+      
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Road Safety - Stopping Sight Distance Calculator</h1>
+            <p>Calculate the minimum distance required for a vehicle to stop safely under specified conditions</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="speed">Speed (m/s)</label>
+                    <input type="number" id="speed" class="form-input" min="0" step="0.1" placeholder="e.g., 20">
+                </div>
+                <div class="form-group">
+                    <label for="reactionTime">Perception-Reaction Time (s)</label>
+                    <input type="number" id="reactionTime" class="form-input" min="0" step="0.1" placeholder="e.g., 2.5">
+                </div>
+                <div class="form-group">
+                    <label for="friction">Coefficient of Friction (f)</label>
+                    <input type="number" id="friction" class="form-input" min="0" step="0.01" placeholder="e.g., 0.7">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateSSD()">Calculate SSD</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png" alt="Road visibility illustration">
+                    <p>This tool will calculate the <strong>Stopping Sight Distance (SSD)</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd; margin-top:30px;">
+                        <h2>Stopping Sight Distance (SSD)</h2>
+                    </div>
+                    <div class='rate-display'>
+                    <div class="ssd-value" id="ssdValue">0.00</div>
+                    <div class="ssd-label" style="color:#2980b9; font-size:20px; font-weight:bold;">meters</div></div>
+
+                    <div class="ssd-breakdown">
+                        <div class="breakdown-title">Distance Breakdown</div>
+                        <div class="breakdown-content" id="breakdownContent"></div>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Safety Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<div class="note-section">
+
+    <!-- About -->
+    <div class="note-card">
+        <h3>📘 About This Calculator</h3>
+        <p>
+            The <strong>Stopping Sight Distance (SSD) Calculator</strong> determines the minimum distance required 
+            for a vehicle to stop safely, considering driver perception–reaction time and braking capability.
+            It is essential for road design, traffic safety audits, and accident prevention.
+        </p>
+    </div>
+
+    <!-- Parameters Used -->
+    <div class="note-card">
+        <h3>⚙ Parameters Used</h3>
+        <ul class="note-list">
+            <li><strong>Speed (v):</strong> Vehicle speed in meters per second (m/s).</li>
+            <li><strong>Perception–Reaction Time (t):</strong> Driver response time in seconds.</li>
+            <li><strong>Coefficient of Friction (f):</strong> Resistance between tires and road surface (dimensionless).</li>
+        </ul>
+    </div>
+
+    <!-- Input Validation Rules -->
+    <div class="note-card">
+        <h3>✅ Input Validation Rules</h3>
+        <ul class="note-list">
+            <li><b>Speed:</b> 0 &lt; v ≤ 55.6 m/s (200 km/h), decimals ≤1.</li>
+            <li><b>Reaction Time:</b> 0.5 ≤ t ≤ 5.0 seconds, decimals ≤1.</li>
+            <li><b>Friction Coefficient:</b> 0.1 ≤ f ≤ 1.0, decimals ≤2.</li>
+            <li>No blanks, negatives, or unrealistic combinations allowed.</li>
+            <li>Division by zero (f = 0) is prevented.</li>
+        </ul>
+    </div>
+
+    <!-- Output Validations -->
+    <div class="note-card">
+        <h3>📊 Output Validations</h3>
+        <ul class="note-list">
+            <li>SSD &lt; 50 m → ✅ Good stopping distance - suitable for urban roads with lower speed limits.</li>
+            <li>50 ≤ SSD &lt; 100 m → 🔵 Moderate stopping distance - typical for suburban roads and highways.</li>
+            <li>100 ≤ SSD &lt; 200 m → ⚠️ High stopping distance - requires careful road design and signage.</li>
+            <li>SSD ≥ 200 m → ❌ Very high stopping distance - may require special safety measures like warning signs or reduced speed limits.</li>
+        </ul>
+        <p><i>Note: SSD results above 2000 m are flagged as unrealistic for compliance review.</i></p>
+    </div>
+
+    <!-- Standards -->
+    <div class="note-card">
+        <h3>📏 Standards</h3>
+        <p>
+            Calculations and thresholds align with:  
+            • <strong>AASHTO</strong> (American Association of State Highway and Transportation Officials)  
+            • <strong>IRC</strong> (Indian Roads Congress)  
+            • <strong>International Road Assessment Programme</strong> (iRAP)  
+            • <strong>ISO 45001</strong> safety management requirements for traffic systems.  
+        </p>
+    </div>
+    <!-- Conclusion -->
+<div class="note-card">
+    <h3>📝 Conclusion</h3>
+    <p>
+        The <strong>Stopping Sight Distance (SSD) Calculator</strong> is a reliable tool to 
+        evaluate whether a driver has <strong>sufficient distance to stop safely</strong> 
+        under given road and vehicle conditions. By combining 
+        <strong>perception–reaction distance</strong> and <strong>braking distance</strong>, 
+        it reflects real-world stopping behavior based on 
+        <span style="color:#1560bd; font-weight:bold;">AASHTO</span>, 
+        <span style="color:#1560bd; font-weight:bold;">IRC</span>, and 
+        <span style="color:#1560bd; font-weight:bold;">iRAP</span> standards.
+    </p>
+</div>
+
+
+</div>
+
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateSSD() {
+    const speed = document.getElementById('speed').value.trim();
+    const reactionTime = document.getElementById('reactionTime').value.trim();
+    const friction = document.getElementById('friction').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+
+    // --- Speed Validation ---
+    if (speed === "" || isNaN(speed)) {
+        errors.push("👉 Please enter the vehicle speed.");
+    } else if (parseFloat(speed) <= 0) {
+        errors.push("👉 Speed must be greater than 0.");
+    } else if (parseFloat(speed) > 55.6) {
+        errors.push("👉 Speed cannot exceed 55.6 m/s (200 km/h).");
+    }
+
+    // --- Reaction Time Validation ---
+    if (reactionTime === "" || isNaN(reactionTime)) {
+        errors.push("👉 Please enter the perception-reaction time.");
+    } else if (parseFloat(reactionTime) < 0.5) {
+        errors.push("👉 Reaction time must be at least 0.5 seconds.");
+    } else if (parseFloat(reactionTime) > 5) {
+        errors.push("👉 Reaction time cannot exceed 5 seconds.");
+    }
+
+    // --- Friction Validation ---
+    if (friction === "" || isNaN(friction)) {
+        errors.push("👉 Please enter the coefficient of friction.");
+    } else if (parseFloat(friction) < 0.1) {
+        errors.push("👉 Friction coefficient must be at least 0.1.");
+    } else if (parseFloat(friction) > 1.0) {
+        errors.push("👉 Friction coefficient cannot exceed 1.0.");
+    }
+
+    // --- Error Handling ---
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // --- Safe Calculations ---
+    const v = parseFloat(speed);
+    const t = parseFloat(reactionTime);
+    const f = parseFloat(friction);
+    const g = 9.81;
+
+    // Prevent division by zero
+    if (f === 0) {
+        errorMessage.innerHTML = "👉 Friction coefficient cannot be zero.";
+        errorBox.classList.remove("hidden");
+        return;
+    }
+
+    const reactionDistance = v * t;
+    const brakingDistance = (v * v) / (2 * g * f);
+    const ssd = reactionDistance + brakingDistance;
+
+    // --- Output Validation ---
+    if (ssd > 2000) {
+        errorMessage.innerHTML = "👉 SSD exceeds 2000 m, check inputs for realism.";
+        errorBox.classList.remove("hidden");
+        return;
+    }
+
+    // Display results
+    document.getElementById('ssdValue').textContent = ssd.toFixed(2);
+    document.getElementById('breakdownContent').innerHTML = `
+        Perception-Reaction Distance: ${reactionDistance.toFixed(2)} m<br>
+        Braking Distance: ${brakingDistance.toFixed(2)} m<br>
+        Total SSD: ${ssd.toFixed(2)} m
+    `;
+
+    // Feedback
+    let feedback = '';
+    if (ssd < 50) {
+        feedback = '✅ Good stopping distance - suitable for urban roads with lower speed limits.';
+    } else if (ssd < 100) {
+        feedback = '🔵 Moderate stopping distance - typical for suburban roads and highways.';
+    } else if (ssd < 200) {
+        feedback = '⚠️ High stopping distance - requires careful road design and signage.';
+    } else {
+        feedback = '❌ Very high stopping distance - may require special safety measures like warning signs or reduced speed limits.';
+    }
+
+    feedback += `<br><br>For reference, this SSD value corresponds to approximately ${(ssd * 3.28084).toFixed(2)} feet.`;
+    document.getElementById('feedbackContent').innerHTML = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+{% comment %} 
+
+
+Formula Reference:
+SSD = v * t + (v^2 / (2 * g * f))
+where:
+ v = vehicle speed (m/s)
+ t = reaction time (s)
+ f = coefficient of friction (0.1 – 1.0)
+ g = 9.81 m/s^2
+
+Validation Rules:
+ - Speed: >0 and ≤55.6 m/s (200 km/h), decimals ≤1
+ - Reaction Time: 0.5–5.0 s, decimals ≤1
+ - Friction: 0.1–1.0, decimals ≤2
+ - No division by zero
+ - No negative or blank inputs
+ - Outputs must be realistic (SSD ≤ 2000 m typical)
+*/
+
+🔎 Step 1. Formula Reference
+
+The Stopping Sight Distance (SSD) formula (per AASHTO, IRC, and iRAP standards):
+
+𝑆
+𝑆
+𝐷
+=
+𝑣
+⋅
+𝑡
++
+𝑣
+2
+2
+⋅
+𝑔
+⋅
+𝑓
+SSD=v⋅t+
+2⋅g⋅f
+v
+2
+	​
+
+
+Where:
+
+𝑣
+v = vehicle speed (m/s)
+
+𝑡
+t = perception–reaction time (s)
+
+𝑓
+f = coefficient of friction (dimensionless)
+
+𝑔
+=
+9.81
+ 
+𝑚
+/
+𝑠
+2
+g=9.81 m/s
+2
+
+🔎 Step 2. Input Validation Rules (Real-World)
+
+✅ Speed (m/s)
+
+Must be > 0 and ≤ 55.6 (200 km/h).
+
+Allowed decimals: up to 1 place.
+
+Units: m/s only.
+
+Logical dependency: At least 5 m/s (18 km/h) typical for urban driving scenarios.
+
+✅ Perception–Reaction Time (s)
+
+Must be ≥ 0.5 and ≤ 5.0 (per AASHTO driver response studies).
+
+Allowed decimals: up to 1 place.
+
+Values < 0.5 = unrealistic human response.
+
+Values > 5.0 = medically impaired or extreme conditions.
+
+✅ Coefficient of Friction (f)
+
+Must be ≥ 0.1 and ≤ 1.0.
+
+< 0.1 → unsafe (icy/oily road).
+
+1.0 → unrealistic for normal pavement.
+
+Typical: 0.3–0.8 depending on road condition.
+
+🔎 Step 3. Output Validations (Assessment Logic)
+
+SSD interpretation:
+
+SSD < 50 m → ✅ Good stopping distance – suitable for urban roads with low speeds.
+
+50 ≤ SSD < 100 m → 🔵 Moderate stopping distance – typical for suburban roads and highways.
+
+100 ≤ SSD < 200 m → ⚠️ High stopping distance – requires careful design, signage, guardrails.
+
+SSD ≥ 200 m → ❌ Very high stopping distance – requires special safety measures, warning signs, speed reduction. {% endcomment %}

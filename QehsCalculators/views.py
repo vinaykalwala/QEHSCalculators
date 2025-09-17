@@ -3977,6 +3977,11 @@ def safety_risk_index_calculator(request):
 
 @login_required
 @subscription_required(plan_type="corporate")
+def safety_radial_heat_flow_cylinder_calculator(request):
+    return render(request, 'qehsfcalculators/safety/radial_heat_flow_cylinder.html', {'title': 'Radial Heat Flow Through Cylinder Calculator'})
+
+@login_required
+@subscription_required(plan_type="corporate")
 def safety_safe_overtaking_sight_distance_osd_calculator(request):
     return render(request, 'qehsfcalculators/safety/safe_overtaking_sight_distance_osd.html', {'title': 'Safe Overtaking Sight Distance (OSD) Calculator'})
 

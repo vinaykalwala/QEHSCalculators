@@ -1,0 +1,718 @@
+{% extends 'base.html' %}
+{% block title %}Risk Matrix Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk Matrix Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            height: 420px;
+            overflow-y: auto;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .risk-score {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .risk-level {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .risk-action {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        /* Risk level colors */
+        .low-risk { color: #27ae60; }
+        .medium-risk { color: #f39c12; }
+        .high-risk { color: #e74c3c; }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        .custom-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        .custom-table th, .custom-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .custom-table th {
+            background-color: #1560bd;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .custom-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+        .select-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.form-select {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: #f9fbfd;
+    font-size: 16px;
+    transition: all 0.3s;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+}
+
+.select-wrapper::after {
+    content: "▼";
+    font-size: 0.9rem;
+    color: #1560bd;
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+/* 🔹 Responsive adjustments for small screens */
+@media screen and (max-width: 425px) {
+    .form-select {
+        padding: 10px 12px;
+        font-size: 14px;
+        border-radius: 8px;
+    }
+
+    .select-wrapper::after {
+        font-size: 0.75rem;
+        right: 10px;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Risk Matrix Calculator</h1>
+            <p>Evaluate risk levels based on probability and consequence using a standardized risk matrix</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="probability">Probability (P) - 1 to 5 Scale:</label>
+                    <div class="select-wrapper">
+                    <select id="probability" class="form-select">
+                        <option value="">Select probability level</option>
+                        <option value="1">1 - Very Unlikely</option>
+                        <option value="2">2 - Unlikely</option>
+                        <option value="3">3 - Possible</option>
+                        <option value="4">4 - Likely</option>
+                        <option value="5">5 - Very Likely</option>
+                    </select></div>
+                </div>
+                <div class="form-group">
+                    <label for="consequence">Consequence (C) - 1 to 5 Scale:</label>
+                    <div class="select-wrapper">
+                    <select id="consequence" class="form-select">
+                        <option value="">Select consequence level</option>
+                        <option value="1">1 - Negligible</option>
+                        <option value="2">2 - Minor</option>
+                        <option value="3">3 - Moderate</option>
+                        <option value="4">4 - Major</option>
+                        <option value="5">5 - Catastrophic</option>
+                    </select></div>
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateRisk()">Calculate Risk Level</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                   <img src="https://cdn-icons-png.flaticon.com/512/564/564619.png" alt="Risk warning matrix">
+                    <p>This tool will calculate the <strong>Risk Level</strong> based on probability and consequence. Select your values to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd; margin-top:30px;">
+                        <h2>Risk Assessment Result</h2>
+                    </div>
+                    
+                    <div class="risk-score" id="riskScore"></div>
+                    <div class="risk-level" id="riskLevel"></div>
+                    <div class="risk-action" id="riskAction"></div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Risk Evaluation</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <!-- About -->
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Risk Matrix Calculator</strong> evaluates risk levels based on probability and consequence using a standardized 5x5 matrix. This tool helps organizations prioritize risks and implement appropriate control measures according to established safety standards.
+                </p>
+            </div>
+
+            <!-- Parameters Used -->
+            <div class="note-card">
+                <h3>⚙ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Probability (P):</strong> Likelihood of a hazard occurring (scale 1-5).</li>
+                    <li><strong>Consequence (C):</strong> Severity of impact if the hazard occurs (scale 1-5).</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+      <h3>✅ Input Validation Rules</h3>
+      <ul class="note-list">
+          <li><b>Probability:</b> Must be selected from dropdown (integer 1–5)</li>
+          <li><b>Consequence:</b> Must be selected from dropdown (integer 1–5)</li>
+          <li><b>Both values required</b> before calculation</li>
+          <li><b>No decimals, negatives, or blanks</b> allowed</li>
+      </ul>
+  </div>
+ <!-- Output Validations -->
+<div class="note-card">
+    <h3>📊 Output Validations</h3>
+    <ul class="note-list">
+        <li><strong>1–4:</strong> <span style="color:#2ecc71; font-weight:bold;">Low Risk</span> → Acceptable, monitor as needed</li>
+        <li><strong>5–10:</strong> <span style="color:#f39c12; font-weight:bold;">Medium Risk</span> → Mitigation required</li>
+        <li><strong>11–25:</strong> <span style="color:#e74c3c; font-weight:bold;">High Risk</span> → Immediate control measures needed</li>
+    </ul>
+</div>
+
+
+
+            <!-- Risk Matrix Interpretation -->
+            <div class="note-card">
+                <h3>📊 Risk Matrix Interpretation</h3>
+                <div class="table-container">
+                    <table class="custom-table">
+                        <tr>
+                            <th>Risk Score</th>
+                            <th>Risk Level</th>
+                            <th>Action Required</th>
+                        </tr>
+                        <tr>
+                            <td>1-4</td>
+                            <td>Low Risk</td>
+                            <td>Acceptable, monitor as needed</td>
+                        </tr>
+                        <tr>
+                            <td>5-10</td>
+                            <td>Medium Risk</td>
+                            <td>Mitigation required</td>
+                        </tr>
+                        <tr>
+                            <td>11-25</td>
+                            <td>High Risk</td>
+                            <td>Immediate control measures needed</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+             <div class="note-card">
+      <h3>📋 Standards</h3>
+      <p>
+          This risk matrix methodology aligns with:  
+          • <strong>ISO 31000</strong> (Risk Management)  
+          • <strong>OSHA</strong> Risk Assessment Guidelines  
+          • <strong>ANSI/ASSE Z690.3</strong> (Risk Assessment Techniques)  
+          • Industry-standard 5x5 risk matrix practices
+      </p>
+  </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateRisk() {
+    const probability = document.getElementById('probability').value;
+    const consequence = document.getElementById('consequence').value;
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+
+    // --- Input Validations ---
+    if (!probability) {
+        errors.push("👉 Please select a probability level (1–5).");
+    } else if (isNaN(probability) || probability < 1 || probability > 5 || probability % 1 !== 0) {
+        errors.push("👉 Probability must be an integer between 1 and 5.");
+    }
+
+    if (!consequence) {
+        errors.push("👉 Please select a consequence level (1–5).");
+    } else if (isNaN(consequence) || consequence < 1 || consequence > 5 || consequence % 1 !== 0) {
+        errors.push("👉 Consequence must be an integer between 1 and 5.");
+    }
+
+    // Error Handling
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // --- Safe Calculation ---
+    const P = parseInt(probability);
+    const C = parseInt(consequence);
+    const riskScore = P * C;
+
+    // Validate output range
+    if (riskScore < 1 || riskScore > 25) {
+        errorMessage.innerHTML = "⚠️ Invalid risk score calculation. Please re-check inputs.";
+        errorBox.classList.remove("hidden");
+        return;
+    }
+
+    // --- Output Logic ---
+    let riskLevel, riskAction, riskColor, feedback;
+
+    if (riskScore <= 4) {
+        riskLevel = "Low Risk";
+        riskAction = "Acceptable, monitor as needed";
+        riskColor = "low-risk";
+        feedback = "This risk level is generally acceptable. Continue with routine monitoring and review periodically.";
+    } else if (riskScore <= 10) {
+        riskLevel = "Medium Risk";
+        riskAction = "Mitigation required";
+        riskColor = "medium-risk";
+        feedback = "This risk requires mitigation measures. Develop and implement control strategies to reduce the risk level.";
+    } else {
+        riskLevel = "High Risk";
+        riskAction = "Immediate control measures needed";
+        riskColor = "high-risk";
+        feedback = "This risk requires immediate attention. Implement control measures before proceeding. Consider eliminating the hazard if possible.";
+    }
+
+    // --- Update Result Display ---
+    document.getElementById('riskScore').textContent = `Risk Score: ${riskScore}`;
+    document.getElementById('riskScore').className = `risk-score ${riskColor}`;
+    
+    document.getElementById('riskLevel').textContent = riskLevel;
+    document.getElementById('riskLevel').className = `risk-level ${riskColor}`;
+    
+    document.getElementById('riskAction').textContent = riskAction;
+    document.getElementById('feedbackContent').textContent = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+{% comment %} 
+🔹 1. Formula & Real-World Context
+
+Formula:
+
+Risk Score (R) = Probability (P) × Consequence (C)
+
+
+Probability (P): Likelihood of occurrence (1–5, per ISO 31000 & OSHA)
+
+Consequence (C): Severity of impact (1–5, per ANSI/ASSE Z690.3)
+
+Risk Score (R): Integer between 1 and 25.
+
+🔹 2. Input Validation Rules (QEHS / Fire Safety Standards)
+
+Probability (P):
+
+Must be selected (not empty).
+
+Must be an integer 1–5 only (aligned with 5x5 risk matrix standard).
+
+Consequence (C):
+
+Must be selected (not empty).
+
+Must be an integer 1–5 only.
+
+Cross-field validation:
+
+Both must be selected; if either is missing → error.
+
+No decimals, negative numbers, or >5 allowed.
+
+Edge case prevention:
+
+Prevent defaulting to “0” or empty, since that would produce an invalid risk score.
+
+🔹 3. Output Validation Logic & Thresholds
+
+Based on R = P × C (range 1–25):
+
+Risk Score	Risk Level	Action Required	Feedback
+1–4	Low Risk	Acceptable, monitor as needed	"This risk level is generally acceptable. Continue with routine monitoring and review periodically."
+5–10	Medium Risk	Mitigation required	"This risk requires mitigation measures. Develop and implement control strategies to reduce the risk level."
+11–25	High Risk	Immediate control measures needed	"This risk requires immediate attention. Implement control measures before proceeding. Consider eliminating the hazard if possible."
+
+👉 These match ISO 31000 risk tolerance thresholds and OSHA risk prioritization guidelines.
+
+🔹 4. Corrected JavaScript Code (with comments for audit trail)
+/*
+===========================================
+ Risk Matrix Calculator – QEHS Validations
+ Formula: Risk Score (R) = Probability (P) × Consequence (C)
+ Standards: ISO 31000, OSHA, ANSI/ASSE Z690.3
+ Validation Rules:
+ - Probability (P): must be integer 1–5
+ - Consequence (C): must be integer 1–5
+ - Both required (no blanks)
+ - No decimals, negatives, or values >5
+ - Risk Score (R): must be between 1 and 25
+===========================================
+*/ {% endcomment %}
