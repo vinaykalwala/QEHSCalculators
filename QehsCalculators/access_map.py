@@ -560,7 +560,25 @@ CALCULATORS = [
 
 
 
+#{"name": "Settling Drag Force Calculator", "url_name": "environment_settling_drag_force_calculator", "plan_type": "corporate", "category": "environment"},
 
+#{"name": "Salt Flux Through the Membrane Calculator", "url_name": "environment_salt_flux_through_the_membrane_calculator", "plan_type": "corporate", "category": "environment"},
+
+#{"name": "Settling Terminal Velocity Calculator", "url_name": "environment_settling_terminal_velocity_calculator", "plan_type": "corporate", "category": "environment"},
+
+#{"name": "Settling Spherical Particle Volume Calculator", "url_name": "environment_settling_spherical_particle_volume_calculator", "plan_type": "corporate", "category": "environment"},
+
+#{"name": "Settling Projected Area of a Spherical Particle Calculator", "url_name": "environment_settling_projected_area_of_a_spherical_particle_calculator", "plan_type": "corporate", "category": "environment"},
+
+#{"name": "Settling Reynolds Number Calculator", "url_name": "environment_settling_reynolds_number_calculator", "plan_type": "corporate", "category": "environment"},
+
+#{"name": "Soak Pit Volume Calculator", "url_name": "environment_soak_pit_volume_calculator", "plan_type": "corporate", "category": "environment"},
+
+#{"name": "Sludge Retention Time (SRT) And Specific Substrate Utilization Rate Calculator", "url_name": "environment_sludge_retention_time_srt_and_specific_substrate_utilization_rate_calculator", "plan_type": "corporate", "category": "environment"},
+
+#{"name": "Settling Overflow Rate (q₀) Calculator", "url_name": "environment_settling_overflow_rate_q_calculator", "plan_type": "corporate", "category": "environment"},
+
+#{"name": "Sedimentation Tank Volume (V) Calculator", "url_name": "environment_sedimentation_tank_volume_v_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 #{"name": "Sedimentation Tank Surface Area (A) Calculator", "url_name": "environment_sedimentation_tank_surface_area_a_calculator", "plan_type": "corporate", "category": "environment"},
