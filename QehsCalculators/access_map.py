@@ -468,65 +468,65 @@ CALCULATORS = [
 
 {"name": "Oxygen Requirement O2 Calculator - Activated Sludge Process", "url_name": "environment_oxygen_requirement_o2_activated_sludge_process_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Oxygen Transfer Under Field Conditions Calculator", "url_name": "environment_oxygen_transfer_under_field_conditions_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Oxygen Transfer Under Field Conditions Calculator", "url_name": "environment_oxygen_transfer_under_field_conditions_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Pressure Drop Across a Valve In A Liquid Calculator", "url_name": "environment_pressure_drop_across_a_valve_in_a_liquid_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Pressure Drop Across a Valve In A Liquid Calculator", "url_name": "environment_pressure_drop_across_a_valve_in_a_liquid_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Population Projection Calculator", "url_name": "environment_population_projection_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Population Projection Calculator", "url_name": "environment_population_projection_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Percent Growth Calculator", "url_name": "environment_percent_growth_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Percent Growth Calculator", "url_name": "environment_percent_growth_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Psychrometric Mixed Air Temperature Calculator", "url_name": "environment_psychrometric_mixed_air_temperature_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Psychrometric Mixed Air Temperature Calculator", "url_name": "environment_psychrometric_mixed_air_temperature_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Pressure Drop Calculator (Darcy-Weisbach)", "url_name": "environment_pressure_drop_darcy_weisbach_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Pressure Drop Calculator (Darcy-Weisbach)", "url_name": "environment_pressure_drop_darcy_weisbach_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Pipe Flow Velocity Calculator", "url_name": "environment_pipe_flow_velocity_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Pipe Flow Velocity Calculator", "url_name": "environment_pipe_flow_velocity_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Pipe Friction Factor Calculator", "url_name": "environment_pipe_friction_factor_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Pipe Friction Factor Calculator", "url_name": "environment_pipe_friction_factor_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Pipe Diameter Sizing Calculator", "url_name": "environment_pipe_diameter_sizing_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Pipe Diameter Sizing Calculator", "url_name": "environment_pipe_diameter_sizing_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Power Required (kW) Calculator", "url_name": "environment_power_required_kw_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Power Required (kW) Calculator", "url_name": "environment_power_required_kw_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Plug Flow Biochemical Oxygen Demand (BOD) Removal (Effluent BOD) Calculator", "url_name": "environment_plug_flow_biochemical_oxygen_demand_bod_removal_effluent_bod_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Plug Flow Biochemical Oxygen Demand (BOD) Removal (Effluent BOD) Calculator", "url_name": "environment_plug_flow_biochemical_oxygen_demand_bod_removal_effluent_bod_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "PPM to mg/m³ Conversion Calculator (Air Pollution)", "url_name": "environment_ppm_to_mg_m_conversion_air_pollution_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "PPM to mg/m³ Conversion Calculator (Air Pollution)", "url_name": "environment_ppm_to_mg_m_conversion_air_pollution_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Plume Rise Estimation Calculator (Holland’s Equation)", "url_name": "environment_plume_rise_estimation_hollands_equation_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Plume Rise Estimation Calculator (Holland’s Equation)", "url_name": "environment_plume_rise_estimation_hollands_equation_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Percentage of Saturation (Humidity Ratio) Calculator", "url_name": "environment_percentage_of_saturation_humidity_ratio_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Percentage of Saturation (Humidity Ratio) Calculator", "url_name": "environment_percentage_of_saturation_humidity_ratio_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Plume Rise Height (ΔH) Calculator Under Stable & Calm Conditions", "url_name": "environment_plume_rise_height_under_stable_and_calm_conditions", "plan_type": "corporate", "category": "environment"},
+{"name": "Plume Rise Height (ΔH) Calculator Under Stable & Calm Conditions", "url_name": "environment_plume_rise_height_under_stable_and_calm_conditions", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Plume Rise Height (ΔH) Calculator In Large Flow Rate", "url_name": "environment_plume_rise_height_large_flow_rate_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Plume Rise Height (ΔH) Calculator In Large Flow Rate", "url_name": "environment_plume_rise_height_large_flow_rate_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Plume Rise Height (ΔH) Calculator for Non-Buoyant Plumes", "url_name": "environment_plume_rise_height_non_buoyant_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Plume Rise Height (ΔH) Calculator for Non-Buoyant Plumes", "url_name": "environment_plume_rise_height_non_buoyant_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Pitot Tube Velocity Calculator", "url_name": "pitot_tube_velocity_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Pitot Tube Velocity Calculator", "url_name": "pitot_tube_velocity_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Recycling Carbon Footprint Savings Calculator", "url_name": "environment_recycling_carbon_footprint_savings_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Recycling Carbon Footprint Savings Calculator", "url_name": "environment_recycling_carbon_footprint_savings_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Recycling impact calculator", "url_name": "environment_recycling_impact_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Recycling impact calculator", "url_name": "environment_recycling_impact_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Rankine Efficiency Calculator", "url_name": "environment_rankine_efficiency_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Rankine Efficiency Calculator", "url_name": "environment_rankine_efficiency_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Relative Pipe Roughness Calculator", "url_name": "environment_relative_pipe_roughness_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Relative Pipe Roughness Calculator", "url_name": "environment_relative_pipe_roughness_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Ratio and Correlation Growth Calculator", "url_name": "environment_ratio_and_correlation_growth_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Ratio and Correlation Growth Calculator", "url_name": "environment_ratio_and_correlation_growth_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Rapid Mix & Flocculator Design Calculator", "url_name": "environment_rapid_mix_and_flocculator_design_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Rapid Mix & Flocculator Design Calculator", "url_name": "environment_rapid_mix_and_flocculator_design_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Reverse Osmosis (Osmotic Pressure Calculator)", "url_name": "environment_reverse_osmosis_osmotic_pressure_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Reverse Osmosis (Osmotic Pressure Calculator)", "url_name": "environment_reverse_osmosis_osmotic_pressure_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Required Ventilation Rate Calculator For Indoor Air Quality", "url_name": "environment_required_ventilation_rate_for_indoor_air_quality_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Required Ventilation Rate Calculator For Indoor Air Quality", "url_name": "environment_required_ventilation_rate_for_indoor_air_quality_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Reynolds Flow Predictor Calculator", "url_name": "environment_reynolds_flow_predictor_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Reynolds Flow Predictor Calculator", "url_name": "environment_reynolds_flow_predictor_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Retention Time in Settling Zone (t) Calculator", "url_name": "environment_retention_time_in_settling_zone_t_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Retention Time in Settling Zone (t) Calculator", "url_name": "environment_retention_time_in_settling_zone_t_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Rankins Equation - Filter Efficiency Calculator", "url_name": "environment_rankins_equation_filter_efficiency_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Rankins Equation - Filter Efficiency Calculator", "url_name": "environment_rankins_equation_filter_efficiency_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Relative Saturation (Humidity) Calculator", "url_name": "environment_relative_saturation_humidity_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Relative Saturation (Humidity) Calculator", "url_name": "environment_relative_saturation_humidity_calculator", "plan_type": "corporate", "category": "environment"},
 
 # {"name": "Steam Flow Rate For A Steam Injection Process Calculator", "url_name": "environment_steam_flow_rate_for_a_steam_injection_process_calculator", "plan_type": "corporate", "category": "environment"},
 
@@ -1108,6 +1108,17 @@ CALCULATORS = [
 # {"name": "SWL of Wire Rope Calculator", "url_name":"safety_swl_of_wire_rope_calculator", "plan_type": "corporate", "category": "safety"},
 
 # {"name": "Stack Height Calculator", "url_name":"safety_stack_height_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Specifi Gravity Calculator", "url_name":"safety_specifi_gravity_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "Safety Factor Calculator", "url_name":"safety_safety_factor_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "Steam Consumption To Provide Tank Heat Losses Calculator", "url_name":"safety_steam_consumption_to_provide_tank_heat_losses_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "Steam Consumption By Injection Into A Tank Caluculator", "url_name":"safety_steam_consumption_by_injection_into_a_tank_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "Steam Start-Up Load To Bring Steam Pipework Calculator", "url_name":"safety_steam_start_up_load_to_bring_steam_pipework_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "Stress In A Boiler Shell Resulting From Boiler Pressure Calculator", "url_name":"safety_stress_in_a_boiler_shell_resulting_from_boiler_pressure_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "Sizing A Control Valve For Liquid Calculator", "url_name":"safety_sizing_a_control_valve_for_liquid_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "Sizing A Control Valve For Saturated Steam Calculator", "url_name":"safety_sizing_a_control_valve_for_saturated_steam_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "Steam Flow Through Valve Under Critical Condition Calculator", "url_name":"safety_steam_flow_through_valve_under_critical_condition_calculator", "plan_type": "corporate", "category": "safety"},
+# {"name": "Steam Valve Flow Coefficient (Cv) For Sub-Sonic Flow Calculator", "url_name":"safety_steam_valve_flow_coefficient_cv_for_sub_sonic_flow_calculator", "plan_type": "corporate", "category": "safety"},
 
 
 # {"name": "Total Intended Load (TIL) Calculator", "url_name":"safety_total_intend_load_calculator", "plan_type": "corporate", "category": "safety"},
