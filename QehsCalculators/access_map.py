@@ -528,6 +528,25 @@ CALCULATORS = [
 
 # {"name": "Relative Saturation (Humidity) Calculator", "url_name": "environment_relative_saturation_humidity_calculator", "plan_type": "corporate", "category": "environment"},
 
+# {"name": "Steam Flow Rate For A Steam Injection Process Calculator", "url_name": "environment_steam_flow_rate_for_a_steam_injection_process_calculator", "plan_type": "corporate", "category": "environment"},
+
+# {"name": "Specific volume of wet steam calculator", "url_name": "environment_specific_volume_of_wet_steam_calculator", "plan_type": "corporate", "category": "environment"},
+
+# {"name": "steam condensing rate for horizontal pipes in still air calculator", "url_name": "environment_steam_condensing_rate_for_horizontal_pipes_in_still_air_calculator", "plan_type": "corporate", "category": "environment"},
+
+# {"name": "Steam Condensing Rate for Air Heating Equipment caluculator", "url_name": "environment_steam_condensing_rate_for_air_heating_equipment_calculator", "plan_type": "corporate", "category": "environment"},
+
+# {"name": "Steam Running Load to keep a steam maintain Calculator", "url_name": "environment_steam_running_load_to_keep_a_steam_maintain_calculator", "plan_type": "corporate", "category": "environment"},
+
+# {"name": "Steam injection required to power a steam deaerator  calculator", "url_name": "environment_steam_injection_required_to_power_a_steam_deaerator_calculator", "plan_type": "corporate", "category": "environment"},
+
+# {"name": "Steam storage capacity of an accumulator calculator", "url_name": "environment_steam_storage_capacity_of_an_accumulator_calculator", "plan_type": "corporate", "category": "environment"},
+
+# {"name": "Speed of sound in steamcalculator", "url_name": "environment_speed_of_sound_in_steam_calculator", "plan_type": "corporate", "category": "environment"},
+
+# {"name": "Sound Power Level At The Safety Valve Outlet Calculator", "url_name": "environment_sound_power_level_at_the_safety_valve_outlet_calculator", "plan_type": "corporate", "category": "environment"},
+
+# {"name": "Sound Pressure Level At The Safety Valve Outlet Calculator", "url_name": "environment_sound_pressure_level_at_the_safety_valve_outlet_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 
