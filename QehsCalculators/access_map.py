@@ -555,6 +555,34 @@ CALCULATORS = [
 
 #environment calculators from  bottom to top
 
+#{"name": "Short-Term Corrosion Rate (STCR) Calculator", "url_name": "environment_short_term_corrosion_rate_stcr_calculator", "plan_type": "corporate", "category": "environment"},
+
+#{"name": "Soil Landfill Cover Water Balance Calculator", "url_name": "environment_soil_landfill_cover_water_balance_calculator", "plan_type": "corporate", "category": "environment"},
+
+#{"name": "Shaded Wall Heat Conduction Calculator", "url_name": "environment_shaded_wall_heat_conduction_calculator", "plan_type": "corporate", "category": "environment"},
+
+#{"name": "Solar Heat Gain Through Glass Calculator", "url_name": "environment_solar_heat_gain_through_glass_calculator", "plan_type": "corporate", "category": "environment"},
+
+#{"name": "Sensible Heat Ratio (SHR) Calculator", "url_name": "environment_sensible_heat_ratio_shr_calculator", "plan_type": "corporate", "category": "environment"},
+
+#{"name": "Supply Airflow Calculator", "url_name": "environment_supply_airflow_calculator", "plan_type": "corporate", "category": "environment"},
+
+#{"name": "Settling Equation (General-Spherical) Calculator", "url_name": "environment_settling_equation_general_spherical_calculator", "plan_type": "corporate", "category": "environment"},
+
+#{"name": "Settling Velocity Calculator (Stokes' Law)", "url_name": "environment_settling_velocity_stokes_law_calculator", "plan_type": "corporate", "category": "environment"},
+
+#{"name": "Sensible Heat Gain from People Calculator", "url_name": "environment_sensible_heat_gain_from_people_calculator", "plan_type": "corporate", "category": "environment"},
+
+#{"name": "Settling Net Force Calculator", "url_name": "environment_settling_net_force_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+
+
+
+
+
+
+
 
 
 
