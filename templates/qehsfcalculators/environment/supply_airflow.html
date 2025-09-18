@@ -1,0 +1,690 @@
+{% extends 'base.html' %}
+{% block title %}Supply Airflow (CFM) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supply Airflow (CFM) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 38px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+        
+        /* Unit selector styles */
+        .unit-selector {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="btn-container">
+    <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+</div>
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+    <div class="calculator-header">
+        <h1>Supply Airflow (CFM) Calculator</h1>
+        <p>Calculate the required supply airflow for HVAC systems based on sensible heat gain and temperature difference.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Input Card -->
+        <div class="calc-card">
+            <h2>Enter Parameters</h2>
+
+            <div class="form-group">
+                <label for="sensible_heat">Sensible Heat Gain (W)</label>
+                <input type="number" id="sensible_heat" class="form-input" step="any" min="0" placeholder="e.g., 5000">
+            </div>
+            
+            <div class="form-group">
+                <label for="room_temp">Room DB Temperature (°F)</label>
+                <input type="number" id="room_temp" class="form-input" step="any" placeholder="e.g., 75">
+            </div>
+            
+            <div class="form-group">
+                <label for="supply_temp">Supply DB Temperature (°F)</label>
+                <input type="number" id="supply_temp" class="form-input" step="any" placeholder="e.g., 55">
+            </div>
+
+            <button class="calculate-btn" onclick="calculateSupplyAirflow()">Calculate Supply Airflow</button>
+        </div>
+
+        <!-- Result Card -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="/static/images/mlc_environment_result.png" alt="HVAC illustration">
+                <p>This tool calculates required supply airflow for proper HVAC system design.</p>
+            </div>
+
+            <div class="result-error hidden" id="resultError">
+                <div class="error-icon">❌</div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+
+            <div class="result-value hidden" id="resultValue">
+                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Supply Airflow (CFM)</h2>
+                </div>
+
+                <div class="rate-display">
+                    <div class="rate-value" id="airflowValue">0</div>
+                    <div class="rate-unit" id="airflowUnit">CFM</div>
+                </div>
+
+                <div class="result-feedback">
+                    <div class="feedback-title"> Assessment</div>
+                    <div class="feedback-content" id="feedbackContent"></div>
+                </div>
+
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="note-section">
+
+    <div class="note-card">
+        <h3>📘 About This Calculator</h3>
+        <p>
+            The <strong>Supply Airflow (CFM) Calculator</strong> determines the required airflow for HVAC systems based on sensible heat gain and temperature difference. This calculation is essential for proper HVAC system design to maintain comfortable indoor environments while ensuring energy efficiency.
+        </p>
+    </div>
+
+    <div class="note-card">
+        <h3>⚙ Parameters</h3>
+        <ul class="note-list">
+            <li><strong>Sensible Heat Gain (W):</strong> The amount of heat that must be removed from a space to maintain the desired temperature.</li>
+            <li><strong>Room DB Temperature (°F):</strong> The dry bulb temperature of the room or space being conditioned.</li>
+            <li><strong>Supply DB Temperature (°F):</strong> The temperature of the air being supplied to the space from the HVAC system.</li>
+        </ul>
+    </div>
+
+
+    <div class="note-card">
+        <h3>✅ Input Validation Rules</h3>
+        <ul class="note-list">
+            <li><strong>Sensible Heat Gain:</strong> Must be > 0 (typical range: 100-50,000 W for commercial spaces).</li>
+            <li><strong>Room Temperature:</strong> Must be between 50-90°F (typical comfort range: 68-78°F).</li>
+            <li><strong>Supply Temperature:</strong> Must be between 40-70°F (typical range: 50-65°F for cooling).</li>
+            <li><strong>Temperature Difference:</strong> Room temperature must be greater than supply temperature (ΔT > 0).</li>
+            <li><strong>Realistic Values:</strong> Inputs should reflect practical HVAC system design parameters.</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>🔎 Output Validations</h3>
+        <ul class="note-list">
+            <li><strong>CFM must be finite:</strong> If result is NaN or Infinity → ❌ Invalid result, check inputs.</li>
+            <li><strong>CFM &lt; 100:</strong> ⚠️ Very low airflow → May indicate insufficient cooling capacity.</li>
+            <li><strong>100-5000 CFM:</strong> ✅ Typical range → Appropriate for most commercial applications.</li>
+            <li><strong>5000-15000 CFM:</strong> ⚠️ Large system → Verify heat load calculations for accuracy.</li>
+            <li><strong>CFM &gt; 15000:</strong> ❌ Extremely high → Review input values for accuracy.</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>📏Standards & Compliance </h3>
+        <ul class="note-list">
+            <li>✔️ Design parameters follow <strong>ASHRAE standards</strong> for HVAC system design.</li>
+            <li>✔️ Temperature ranges align with <strong>comfort standards</strong> for indoor environments.</li>
+            <li>✔️ Calculations support <strong>energy efficiency compliance</strong> for building codes.</li>
+            <li>✔️ Validations based on <strong>industry best practices</strong> for HVAC design.</li>
+        </ul>
+    </div>
+
+<div class="note-card">
+    <h3>📝 Conclusion</h3>
+    <p>
+        The <strong>Supply Airflow (CFM) Calculator</strong> helps HVAC engineers and designers quickly estimate the required airflow 
+        based on sensible heat gain and temperature difference. By validating inputs and classifying results, the tool ensures 
+        that airflow requirements fall within practical and efficient ranges. This supports proper system sizing, energy-efficient 
+        operation, and compliance with <strong>ASHRAE standards</strong> for indoor comfort.
+    </p>
+</div>
+
+
+
+</div>
+<script>
+function showErrors(errors) {
+    const errorBox = document.getElementById("resultError");
+    const errorMessage = document.getElementById("errorMessage");
+    const placeholder = document.getElementById("placeholder");
+    const resultValue = document.getElementById("resultValue");
+
+    errorMessage.innerHTML = errors.join("<br>");
+    errorBox.classList.remove("hidden");
+    placeholder.classList.add("hidden");
+    resultValue.classList.add("hidden");
+}
+
+function calculateSupplyAirflow() {
+    // Read values
+    const sensibleHeat = parseFloat(document.getElementById("sensible_heat").value);
+    const roomTemp = parseFloat(document.getElementById("room_temp").value);
+    const supplyTemp = parseFloat(document.getElementById("supply_temp").value);
+
+    const airflowValueEl = document.getElementById("airflowValue");
+    const airflowUnitEl = document.getElementById("airflowUnit");
+    const feedbackEl = document.getElementById("feedbackContent");
+    document.getElementById("resultError").classList.add("hidden");
+    feedbackEl.innerHTML = "";
+
+    const errors = [];
+    const warnings = [];
+
+    // Validation
+    if (![sensibleHeat, roomTemp, supplyTemp].every(Number.isFinite)) {
+        return showErrors(["👉 Please enter all values (numeric)."]);
+    }
+    
+    if (sensibleHeat <= 0) errors.push("👉 Sensible heat gain must be > 0.");
+    if (sensibleHeat > 50000) warnings.push("⚠️ Sensible heat gain unusually high (>50,000 W).");
+    if (sensibleHeat < 100) warnings.push("⚠️ Sensible heat gain unusually low (<100 W).");
+    
+    if (roomTemp < 50 || roomTemp > 90) warnings.push("⚠️ Room temperature outside typical comfort range (50-90°F).");
+    if (supplyTemp < 40 || supplyTemp > 70) warnings.push("⚠️ Supply temperature outside typical HVAC range (40-70°F).");
+    
+    // Critical validation: temperature difference
+    if (roomTemp <= supplyTemp) {
+        errors.push("👉 Room temperature must be greater than supply temperature (ΔT > 0).");
+    }
+    
+    if (errors.length) return showErrors(errors);
+
+    // Formula: CFM = Sensible Heat Gain (W) / (1.08 × (Room DB Temperature (°F) - Supply DB Temperature (°F)))
+    const temperatureDifference = roomTemp - supplyTemp;
+    const cfm = sensibleHeat / (1.08 * temperatureDifference);
+
+    if (!Number.isFinite(cfm)) {
+        return showErrors(["⚠️ Computed airflow is invalid (possible calculation error)."]);
+    }
+
+    // Classification based on CFM (industry standard)
+    let classification, suggestion, color;
+    
+    if (cfm < 100) {
+        classification = "Very Low";
+        suggestion = "⚠️ May indicate insufficient cooling capacity for the space.";
+        color = "#e65100";
+    } else if (cfm <= 5000) {
+        classification = "Typical Range";
+        suggestion = "✅ Appropriate for most commercial applications.";
+        color = "#2e7d32";
+    } else if (cfm <= 15000) {
+        classification = "Large System";
+        suggestion = "⚠️ Verify heat load calculations for accuracy.";
+        color = "#f9a825";
+    } else {
+        classification = "Extremely High";
+        suggestion = "❌ Review input values for accuracy - may indicate calculation error.";
+        color = "#c62828";
+    }
+
+    // Display result
+    airflowValueEl.textContent = cfm.toFixed(2);
+    airflowUnitEl.textContent = "CFM";
+    
+    feedbackEl.innerHTML = `
+        <div>Supply Airflow = <b>${cfm.toFixed(2)}</b> CFM</div>
+        <div>Classification: <b style="color:${color};">${classification}</b></div>
+        <div style="margin-top:6px;">${suggestion}</div>
+        <div style="margin-top:8px;">Temperature Difference (ΔT) = ${temperatureDifference.toFixed(1)}°F</div>
+        ${warnings.length ? `<div style="margin-top:8px; color:#b35d00;">${warnings.join(" | ")}</div>` : ""}
+    `;
+
+    document.getElementById("placeholder").classList.add("hidden");
+    document.getElementById("resultValue").classList.remove("hidden");
+}
+
+function printReport() {
+    const el = document.getElementById('printDate');
+    if (el) el.textContent = new Date().toLocaleDateString();
+    window.print();
+}
+</script>
+<script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+Input Validations:
+Sensible Heat Gain: Must be > 0 (typical range: 100-50,000 W)
+
+Room Temperature: 50-90°F (typical comfort range)
+
+Supply Temperature: 40-70°F (typical HVAC range)
+
+Temperature Difference: Must be positive (Room Temp > Supply Temp)
+------------------------------------------------------------------------------------------------
+Output Validations:
+CFM < 100: Very low (warning)
+
+100-5000 CFM: Typical range (optimal)
+
+5000-15000 CFM: Large system (warning)
+
+CFM > 15000: Extremely high (error)
+
+
+-->
