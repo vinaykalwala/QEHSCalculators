@@ -162,6 +162,8 @@ urlpatterns = [
     path('environment/biomass_microbial_growth_calculator/', environment_biomass_microbial_growth_calculator, name='environment_biomass_microbial_growth_calculator'),
     path('environment/biomass_substrate_utilization_rate_calculator/', environment_biomass_substrate_utilization_rate_calculator, name='environment_biomass_substrate_utilization_rate_calculator'),
     path('environment/biomass_concentration_xr_calculator/', environment_biomass_concentration_xr_calculator, name='environment_biomass_concentration_xr_calculator'),
+    path('environment/buoyancy_flux_parameter_calculator/',environment_buoyancy_flux_parameter_calculator,name='environment_buoyancy_flux_parameter_calculator'),
+
     path('environment/carbnot_effiency_calculator/', environment_carbnot_effiency_calculator, name='environment_carbnot_effiency_calculator'),
     path('environment/carbon_footprint_effient_calculator/', environment_carbon_footprint_effient_calculator, name='environment_carbon_footprint_effient_calculator'),
     path('environment/cost_of_fuel_saved_by_returning_condensate_calculator/', environment_cost_of_fuel_saved_by_returning_condensate_calculator, name='environment_cost_of_fuel_saved_by_returning_condensate_calculator'),
@@ -178,6 +180,8 @@ urlpatterns = [
     path('environment/chicks_law_microbial_disinfection_calculator/', environment_chicks_law_microbial_disinfection_calculator, name='environment_chicks_law_microbial_disinfection_calculator'),
     path('environment/chemical_equilibrium_calculator/', environment_chemical_equilibrium_calculator, name='environment_chemical_equilibrium_calculator'),
     path('environment/cmfr_completely_mixed_flow_reactor_bod_biochemical_oxygen_demand_removal_calculator/', environment_cmfr_completely_mixed_flow_reactor_bod_biochemical_oxygen_demand_removal_calculator, name='environment_cmfr_completely_mixed_flow_reactor_bod_biochemical_oxygen_demand_removal_calculator'),
+    path('environment/combined_conduction_convection_calculator/',environment_combined_conduction_convection_calculator,name='environment_combined_conduction_convection_calculator'),
+
     path('environment/digester_capacity_v_calculator/', environment_digester_capacity_v_calculator, name='environment_digester_capacity_v_calculator'),
     path('environment/dynamic_viscosity_calculator/', environment_dynamic_viscosity_calculator, name='environment_dynamic_viscosity_calculator'),
     path('environment/dissolved_oxygen_do_deficit_streeter_phelps_model_calculator/', environment_dissolved_oxygen_do_deficit_streeter_phelps_model_calculator, name='environment_dissolved_oxygen_do_deficit_streeter_phelps_model_calculator'),

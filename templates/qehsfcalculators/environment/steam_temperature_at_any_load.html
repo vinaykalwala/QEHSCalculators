@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Equal Percentage Valve Lift Calculator Based on Relative Flow{% endblock %}
+{% block title %}Steam Temperature At Any Load Calculator{% endblock %}
 {% block content %}
 {% load static %}
 
@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Equal Percentage Valve Lift Calculator Based on Relative Flow</title>
+    <title>Steam Temperature At Any Load Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
@@ -419,48 +419,46 @@
 </head>
 <body>
 
-<div class="btn-container">
+    <div class="btn-container">
         <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
-</div>
+    </div>
+
 
 <div class="calculator-container printable" id="printArea">
     {% include "includes/print_header_footer.html" %}
 
+
 <div class="calculator-header">
-  <h1>Equal Percentage Valve Lift Calculator Based on Relative Flow</h1>
-  <p>
-     This helps assess valve performance and controllability in industrial systems.
-  </p>
+  <h1>Steam Temperature at Any Load Calculator</h1>
+  <p>Estimate the steam temperature (Ts) in a heat exchanger based on secondary fluid temperatures and the system design constant. All temperatures are in °C.</p>
 </div>
 
 <div class="calc-content">
-  <!-- Calculator -->
   <div class="calc-card">
-    <h2>Enter Data</h2>
+    <h2>Enter Parameters</h2>
 
     <div class="form-group">
-      <label for="flow">Flow (V) [m³/h]</label>
-      <input type="number" id="flow" class="form-input" min="0.001" step="0.001" placeholder="e.g., 50">
+      <label for="TDC">Temperature Design Constant (TDC)</label>
+      <input type="number" id="TDC" class="form-input" step="any" placeholder="e.g., 1.5">
     </div>
 
     <div class="form-group">
-      <label for="maxFlow">Max Flow (Vmax) [m³/h]</label>
-      <input type="number" id="maxFlow" class="form-input" min="0.01" step="0.001" placeholder="e.g., 500">
+      <label for="T1">Secondary Fluid Inlet Temperature (T1 in °C)</label>
+      <input type="number" id="T1" class="form-input" step="any" placeholder="e.g., 80">
     </div>
 
     <div class="form-group">
-      <label for="rangeability">Rangeability (τ)</label>
-      <input type="number" id="rangeability" class="form-input" min="1.01" step="0.01" placeholder="e.g., 50">
+      <label for="T2">Secondary Fluid Outlet Temperature (T2 in °C)</label>
+      <input type="number" id="T2" class="form-input" step="any" placeholder="e.g., 150">
     </div>
 
-    <button class="calculate-btn" onclick="calculateValveLift()">Calculate Lift</button>
+    <button class="calculate-btn" onclick="calculateSteamTemperature()">Calculate Steam Temperature</button>
   </div>
 
-  <!-- Result Section -->
   <div class="result-card">
     <div class="result-placeholder" id="placeholder">
-      <img src="/static/images/mlc_environment_result.png" alt="Valve illustration">
-      <p>This tool will calculate the <strong>Valve Lift Percentage (H%)</strong>.</p>
+      <img src="/static/images/mlc_environment_result.png" alt="Steam system illustration">
+      <p>This tool calculates the <strong>Steam Temperature (Ts)</strong> and provides safety assessment feedback.</p>
     </div>
 
     <div class="result-error hidden" id="resultError">
@@ -470,18 +468,19 @@
 
     <div class="result-value hidden" id="resultValue">
       <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
-        <h2>Calculated Valve Lift</h2>
+        <h2>Result</h2>
       </div>
 
       <div class="rate-display">
-        <div class="rate-value" id="rateValue">0.00</div>
-        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">%</div>
+        <div class="rate-value" id="steamTemp">0</div>
+        <div class="rate-label" style="color:#2980b9; font-size:16px; font-weight:bold;">°C (Ts)</div>
       </div>
 
       <div class="result-feedback">
         <div class="feedback-title">Assessment</div>
         <div class="feedback-content" id="feedbackContent"></div>
       </div>
+
       <div class="btn-wrapper">
         <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
       </div>
@@ -489,159 +488,128 @@
   </div>
 </div>
 
-<!-- Notes Section -->
 <div class="note-section">
+
+  <!-- About This Calculator -->
   <div class="note-card">
     <h3>📘 About This Calculator</h3>
-    <p>
-      The <strong>Equal Percentage Valve Lift Calculator</strong> determines the percentage lift (H%) required to achieve a given flow in valves with an equal-percentage characteristic. This ensures accurate control of fluids in industrial, HVAC, and water treatment applications.
-    </p>
+    <p>Estimate the steam temperature (Ts) in a heat exchanger based on secondary fluid temperatures and the temperature design constant. Useful for thermal system efficiency, boiler and heat exchanger monitoring, and fire safety management.</p>
   </div>
 
+  <!-- Parameters Used -->
   <div class="note-card">
-    <h3>📊 Interpretation</h3>
+    <h3>⚙ Parameters Used</h3>
     <ul class="note-list">
-      <li><span class="good">0% ≤ H% &lt; 5%</span> → Valve nearly shut (unstable control region).</li>
-      <li><span class="average">5% ≤ H% ≤ 90%</span> → Normal controllable operating range.</li>
-      <li><span class="bad">H% &gt; 90%</span> → Valve near wide-open, reduced controllability.</li>
+      <li><strong>TDC:</strong> Temperature Design Constant (dimensionless, >1)</li>
+      <li><strong>T1:</strong> Secondary fluid inlet temperature (°C)</li>
+      <li><strong>T2:</strong> Secondary fluid outlet temperature (°C)</li>
     </ul>
   </div>
 
+  <!-- Input Validation Rules -->
   <div class="note-card">
-    <h3>⚠️Input  Validations</h3>
-    <ul>
-      <li>✔️ Flow (V) must be 0.001 – 20,000 m³/h.</li>
-      <li>✔️ Max Flow (Vmax) must be 0.01 – 50,000 m³/h.</li>
-      <li>✔️ Rangeability (τ) must be 1.01 – 1000.</li>
-      <li>✔️ Flow must not exceed Max Flow.</li>
-      <li>✔️ Flow must be ≥ Vmax/τ (minimum controllable flow).</li>
-      <li>❌ Zeros, negatives, or τ ≤ 1 are invalid.</li>
-      <li>⚠️ Very low or very high values trigger warnings (may indicate poor valve sizing).</li>
-    </ul>
-  </div>
-
-  <div class="note-card">
-    <h3>🌍 Key Applications</h3>
+    <h3>✅ Input Validation Rules</h3>
     <ul class="note-list">
-      <li><strong>Process Control:</strong> Chemical, refinery, and manufacturing operations.</li>
-      <li><strong>HVAC Systems:</strong> Air and water flow regulation.</li>
-      <li><strong>Water Treatment:</strong> Flow control of water and chemicals.</li>
-      <li><strong>Energy Systems:</strong> Steam and fuel regulation in power plants.</li>
+      <li>All inputs must be numeric.</li>
+      <li>TDC must be >1 and ≤10 (prevent division by zero or negative denominator).</li>
+      <li>T1 & T2 must be >0°C (temperatures cannot be negative in real thermal systems).</li>
+      <li>Reasonable upper limits: T1 & T2 ≤ 500°C; TDC ≤ 10 for typical industrial systems.</li>
+      <li>Warnings shown if decimal inputs are provided (rounded to 2 decimals).</li>
     </ul>
   </div>
+
+  <!-- Output Validation / Assessment -->
+  <div class="note-card">
+    <h3>📊 Output Validation</h3>
+    <ul class="note-list">
+      <li>Steam temperature Ts displayed in °C with 2 decimals.</li>
+      <li>Assessment messages based on Ts value (feedback displayed along with result):</li>
+      <ul>
+        <li>Ts &lt; 50°C → ⚠️ Too low – may cause condensation and corrosion.</li>
+        <li>50°C ≤ Ts ≤ 300°C → ✅ Safe operating temperature.</li>
+        <li>Ts &gt; 300°C → ❌ High temperature – risk of overheating, fire, or system damage.</li>
+      </ul>
+    </ul>
+  </div>
+
+  <!-- Standards / Safety Reference -->
+<div class="note-card">
+  <h3>📏 Standards / Safety References</h3>
+  <p>This calculator follows relevant safety and quality standards including ASME Boiler and Pressure Vessel Code for thermal equipment, ISO 45001 for occupational health and safety, ISO 9001 for quality management of industrial heat exchangers, ISO 14001 for environmental compliance, ISO 4126-1 for pressure relief and safety devices, and TEMA guidelines for shell-and-tube heat exchanger design, alongside internal QEHS thermal safety protocols to ensure safe operation and monitoring of steam and fluid systems.</p>
 </div>
 
+
+  <!-- Conclusion -->
+  <div class="note-card">
+    <h3>✅ Conclusion</h3>
+    <ul>
+      <li>Ensures proper steam temperature for energy efficiency and safe operation.</li>
+      <li>Accurate inputs prevent equipment damage, overheating, or underperformance.</li>
+      <li>Assessment feedback provides guidance for operational and safety measures.</li>
+    </ul>
+  </div>
+
+</div>
+
+
 <script>
-/* Show error messages */
 function showErrors(errors) {
   const errorBox = document.getElementById("resultError");
   const errorMessage = document.getElementById("errorMessage");
   const placeholder = document.getElementById("placeholder");
   const resultValue = document.getElementById("resultValue");
-
   errorMessage.innerHTML = errors.join("<br>");
   errorBox.classList.remove("hidden");
   placeholder.classList.add("hidden");
   resultValue.classList.add("hidden");
 }
 
-function calculateValveLift() {
-  const flowRaw = (document.getElementById("flow").value || "").trim();
-  const maxFlowRaw = (document.getElementById("maxFlow").value || "").trim();
-  const tauRaw = (document.getElementById("rangeability").value || "").trim();
-
-  const errorBox = document.getElementById("resultError");
-  const errorMessage = document.getElementById("errorMessage");
-  const placeholder = document.getElementById("placeholder");
-  const resultValue = document.getElementById("resultValue");
-  const rateEl = document.getElementById("rateValue");
-  const feedbackEl = document.getElementById("feedbackContent");
-
-  errorBox.classList.add("hidden");
-  errorMessage.innerHTML = "";
-  feedbackEl.innerHTML = "";
+function calculateSteamTemperature() {
+  const TDC = parseFloat(document.getElementById("TDC").value);
+  const T1 = parseFloat(document.getElementById("T1").value);
+  const T2 = parseFloat(document.getElementById("T2").value);
 
   const errors = [];
   const warnings = [];
+  const steamEl = document.getElementById("steamTemp");
+  const feedbackEl = document.getElementById("feedbackContent");
 
-  // Required input validation
-  if (!flowRaw) errors.push("👉 Please enter Flow (V).");
-  if (!maxFlowRaw) errors.push("👉 Please enter Max Flow (Vmax).");
-  if (!tauRaw) errors.push("👉 Please enter Rangeability (τ).");
+  steamEl.textContent = "";
+  feedbackEl.innerHTML = "";
+
+  // Validations
+  if (isNaN(TDC) || TDC <= 1 || TDC > 10) errors.push("TDC must be >1 and ≤10.");
+  if (isNaN(T1) || T1 <= 0 || T1 > 500) errors.push("T1 must be >0°C and ≤500°C.");
+  if (isNaN(T2) || T2 <= 0 || T2 > 500) errors.push("T2 must be >0°C and ≤500°C.");
   if (errors.length) return showErrors(errors);
 
-  const V = parseFloat(flowRaw);
-  const Vmax = parseFloat(maxFlowRaw);
-  const tau = parseFloat(tauRaw);
+  // Compute Ts
+  const Ts = ((T2 * TDC) - T1) / (TDC - 1);
 
-  if (!Number.isFinite(V) || V < 0.001 || V > 20000)
-    errors.push("👉 Flow (V) must be between 0.001 and 20,000 m³/h.");
-  if (!Number.isFinite(Vmax) || Vmax < 0.01 || Vmax > 50000)
-    errors.push("👉 Max Flow (Vmax) must be between 0.01 and 50,000 m³/h.");
-  if (!Number.isFinite(tau) || tau <= 1.01 || tau > 1000)
-    errors.push("👉 Rangeability (τ) must be > 1.01 and ≤ 1000.");
+  // Assessment
+  let assessment = "";
+  if (Ts < 50) assessment = "⚠️ Too low – may cause condensation and corrosion.";
+  else if (Ts <= 300) assessment = "✅ Safe operating temperature.";
+  else assessment = "❌ High temperature – risk of overheating or system damage.";
 
-  if (errors.length) return showErrors(errors);
+  // Display results
+  steamEl.textContent = Ts.toFixed(2);
+  feedbackEl.innerHTML = `<div>${assessment}</div>${warnings.length ? `<div style="color:#b35d00;">${warnings.join(" | ")}</div>` : ""}`;
 
-  // Cross-field validations
-  if (V > Vmax) errors.push("👉 Flow (V) cannot exceed Max Flow (Vmax).");
-
-  const Vmin = Vmax / tau;
-  if (V < Vmin) {
-  errors.push(`👉 Flow (V) is too low. For proper valve control, it must be at least ${Vmin.toFixed(3)} m³/h (based on Vmax and rangeability).`);
-}
-
-
-  if (errors.length) return showErrors(errors);
-
-  // Compute Lift %
-  const Hpercent = 100 * (1 + (Math.log(V / Vmax) / Math.log(tau)));
-
-  if (!Number.isFinite(Hpercent) || Hpercent < 0 || Hpercent > 100) {
-    return showErrors(["⚠️ Computed valve lift is invalid. Check inputs."]);
-  }
-
-  // Warnings
-  if (tau < 10 || tau > 100) warnings.push("⚠️ Rangeability is outside typical range (10–100).");
-  if (V < Vmin * 1.05) warnings.push("⚠️ Flow is very close to minimum controllable limit.");
-  if (V > Vmax * 0.95) warnings.push("⚠️ Flow is very close to maximum capacity.");
-
-  // Status interpretation
-  let statusMsg = "";
-  if (Hpercent < 5) {
-    statusMsg = "⚠️ Valve nearly shut – control may be unstable.";
-  } else if (Hpercent <= 90) {
-    statusMsg = "✅ Normal controllable operating range.";
-  } else {
-    statusMsg = "⚠️ Valve near wide-open – reduced controllability.";
-  }
-
-  let details = `<div>Valve Lift: <b>${Hpercent.toFixed(2)}%</b></div>`;
-  details += `<div>Flow: <b>${V.toFixed(3)}</b> m³/h</div>`;
-  details += `<div>Max Flow: <b>${Vmax.toFixed(3)}</b> m³/h</div>`;
-  details += `<div>Rangeability: <b>${tau.toFixed(2)}</b></div>`;
-  details += `<div>Minimum Controllable Flow (Vmax/τ): <b>${Vmin.toFixed(3)}</b> m³/h</div>`;
-  if (warnings.length) {
-    details += `<div style="margin-top:6px; color:#b35d00; font-size:0.95em;">${warnings.join(" | ")}</div>`;
-  }
-
-  rateEl.textContent = Hpercent.toFixed(2);
-  feedbackEl.innerHTML = `<div>${statusMsg}</div>${details}`;
-
-  placeholder.classList.add("hidden");
-  resultValue.classList.remove("hidden");
-  errorBox.classList.add("hidden");
+  document.getElementById("placeholder").classList.add("hidden");
+  document.getElementById("resultValue").classList.remove("hidden");
+  document.getElementById("resultError").classList.add("hidden");
 }
 
 function printReport() {
   const el = document.getElementById('printDate');
   if (el) {
-    const now = new Date();
-    el.textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    el.textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   }
   window.print();
 }
 </script>
+
 
     <script src="{% static 'js/print.js' %}"></script>
 </body>
@@ -649,60 +617,35 @@ function printReport() {
 {% endblock %}
 
 
-<!-- /*
-==============================================
-📌 Equal Percentage Valve Lift Calculator
-==============================================
+<!-- 
+📌 Steam Temperature Calculator
 
-🔹 Formula:
-    Valve Lift % (H%) = 100 * (1 + log(V / Vmax) / log(τ))
+🔹 Formula (internal, not displayed):
+    • Ts = ((T2 × TDC) − T1) / (TDC − 1)
+      - Ts   = Calculated Steam Temperature [°C]
+      - TDC  = Temperature Difference Coefficient
+      - T1   = Lower temperature [°C]
+      - T2   = Higher temperature [°C]
 
-    where:
-      V     = Flow [m³/h]
-      Vmax  = Maximum Flow [m³/h]
-      τ     = Rangeability (dimensionless)
-      Vmin  = Vmax / τ (minimum controllable flow)
-
-----------------------------------------------
 🔹 Input Validations:
-1. Flow (V):
-   - Required
-   - Must be numeric
-   - Range: 0.001 ≤ V ≤ 20,000 m³/h
+    • TDC (Temperature Difference Coefficient):
+        - Required, numeric
+        - Range: >1 and ≤10
+    • T1 (Temperature 1):
+        - Required, numeric
+        - Range: >0°C and ≤500°C
+    • T2 (Temperature 2):
+        - Required, numeric
+        - Range: >0°C and ≤500°C
 
-2. Maximum Flow (Vmax):
-   - Required
-   - Must be numeric
-   - Range: 0.01 ≤ Vmax ≤ 50,000 m³/h
+🔹 Warnings / Edge Cases:
+    • None in this implementation (only assessment messages)
 
-3. Rangeability (τ):
-   - Required
-   - Must be numeric
-   - Range: 1.01 < τ ≤ 1000
-
-----------------------------------------------
-🔹 Cross-field Validations:
-1. Flow (V) ≤ Max Flow (Vmax)
-2. Flow (V) ≥ Vmin ( = Vmax / τ )
-   - Otherwise: "Flow is too low for proper control."
-
-----------------------------------------------
-🔹 Output Validation:
-- Computed Valve Lift (H%) must be finite.
-- Must fall within 0% ≤ H% ≤ 100%.
-- If invalid → show error.
-
-----------------------------------------------
-🔹 Warnings:
-- τ outside typical range (10–100).
-- V close to Vmin (≤ 5% above limit).
-- V close to Vmax (≥ 95% of capacity).
-
-----------------------------------------------
-🔹 Status Interpretation:
-- H% < 5%   → ⚠️ Valve nearly shut (unstable control).
-- 5% ≤ H% ≤ 90% → ✅ Normal controllable operating range.
-- H% > 90%  → ⚠️ Valve near wide open (reduced controllability).
-
-==============================================
-*/ -->
+🔹 Output & Feedback:
+    • Ts displayed with 2 decimals
+    • Status / Assessment:
+        - Ts < 50 → ⚠️ Too low – may cause condensation and corrosion
+        - Ts 50–300 → ✅ Safe operating temperature
+        - Ts > 300 → ❌ High temperature – risk of overheating or system damage
+    • Warnings displayed inline if triggered
+-->
