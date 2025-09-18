@@ -547,6 +547,11 @@ def upgrade_required(request):
 def accident_rate_calculator(request):
     return render(request, 'qehsfcalculators/Safety/accident_rate_calculator.html')
 
+@login_required
+@subscription_required(plan_type="corporate")
+def oee_calculator(request):
+    return render(request, 'oee_calculator.html')
+
 
 from .forms import CustomUserCreationForm, CustomAuthenticationForm
 from django.contrib.auth import login, logout, authenticate

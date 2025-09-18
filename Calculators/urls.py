@@ -42,6 +42,8 @@ urlpatterns = [
     path('approvalsubscriptions/approve/<int:subscription_id>/', approve_subscription, name='approve_subscription'),
     path('approvalsubscriptions/reject/<int:subscription_id>/', reject_subscription, name='reject_subscription'),
     path('accident_rate_calculator/', accident_rate_calculator, name='accident_rate_calculator'),
+    path('oee_calculator/', oee_calculator, name='oee_calculator'),
+
 
     path('dashboard/', dashboard, name='dashboard'),
     path('subscribe/<int:plan_id>/', subscribe_plan, name='subscribe_plan'),
