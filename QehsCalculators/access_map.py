@@ -200,6 +200,7 @@ CALCULATORS = [
 
 {"name": "Biomass Substrate Utilization Rate Calculator", "url_name": "environment_biomass_substrate_utilization_rate_calculator", "plan_type": "corporate", "category": "environment"},
 
+{"name": "Buoyancy Flux Parameter (F) Calculator", "url_name": "environment_buoyancy_flux_parameter_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 {"name": "Biomass Concentration (Xr) Calculator", "url_name": "environment_biomass_concentration_xr_calculator", "plan_type": "corporate", "category": "environment"},
@@ -230,6 +231,8 @@ CALCULATORS = [
 
 {"name": "Cooling Load Temperature Difference (CLTD) Calculator", "url_name": "environment_cooling_load_temperature_difference_cltd_calculator", "plan_type": "corporate", "category": "environment"},
 
+{"name": "Combined Conduction and Convection Calculator", "url_name": "environment_combined_conduction_convection_calculator", "plan_type": "corporate", "category": "environment"},
+
 
 {"name": "Chlorine Contact Time Calculator", "url_name": "environment_chlorine_contact_time_calculator", "plan_type": "corporate", "category": "environment"},
 
@@ -239,6 +242,7 @@ CALCULATORS = [
 
 {"name": "Chemical Equilibrium Calculator", "url_name": "environment_chemical_equilibrium_calculator", "plan_type": "corporate", "category": "environment"},
         
+{"name": "Chick’s Law: Microbial Disinfection Calculator", "url_name": "environment_chicks_law_microbial_disinfection_calculator", "plan_type": "corporate", "category": "environment"},
 
        
 {"name": "CMFR (Completely Mixed Flow Reactor) BOD (Biochemical Oxygen Demand) Removal Calculator", "url_name": "environment_cmfr_completely_mixed_flow_reactor_bod_biochemical_oxygen_demand_removal_calculator", "plan_type": "corporate", "category": "environment"},
@@ -268,8 +272,11 @@ CALCULATORS = [
 {"name": "Energy Balance between Steam and Fluid of a Flow-Type Application Calculator", "url_name": "environment_energy_balance_between_steam_and_fluid_of_a_flow_type_application_calculator", "plan_type": "corporate", "category": "environment"},
 
 
+
 {"name": "Equal percentage valve lift calculator based on kv", "url_name": "environment_equal_percentage_valve_lift_based_on_kv_calculator", "plan_type": "corporate", "category": "environment"},
 
+
+{"name": "Equal Percentage Valve Lift Calculator Based on Relative Flow", "url_name": "environment_equal_percentage_valve_lift_based_on_relative_flow_calculator", "plan_type": "corporate", "category": "environment"},
 
 {"name": "Environmental Damage Frequency (ENDF) Calculator", "url_name": "environment_environmental_damage_frequency_endf_calculator", "plan_type": "corporate", "category": "environment"},
 
@@ -292,6 +299,9 @@ CALCULATORS = [
 {"name": "Elevation Head Loss Calculator", "url_name": "environment_elevation_head_loss_calculator", "plan_type": "corporate", "category": "environment"},
 
 {"name": "Energy Consumption per Person per Year Calculator", "url_name": "environment_energy_consumption_per_person_per_year_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Energy requirement for a non-flow application (e.g. batch or tank)", "url_name": "environment_energy_requirement_for_a_non_flow_application_eg_batch_or_tank_calculator", "plan_type": "corporate", "category": "environment"},
+
 
 {"name": "Flash Steam Calculator", "url_name": "environment_flash_steam_calculator", "plan_type": "corporate", "category": "environment"},
 
@@ -320,6 +330,8 @@ CALCULATORS = [
 
 {"name": "Fluid Flow Mass Velocity Calculator", "url_name": "environment_fluid_flow_mass_velocity_calculator", "plan_type": "corporate", "category": "environment"},
 
+
+{"name": "Gaussian Air Pollutant Dispersion Calculator", "url_name": "environment_gaussian_air_pollutant_dispersion_calculator", "plan_type": "corporate", "category": "environment"},
 
 {"name": "Gas Flux Calculator", "url_name": "environment_gas_flux_calculator", "plan_type": "corporate", "category": "environment"},
 {"name": "Gas Phase Analyte Concentration Calculator", "url_name": "environment_gas_phase_analyte_concentration_calculator", "plan_type": "corporate", "category": "environment"},
@@ -548,6 +560,14 @@ CALCULATORS = [
 
 # {"name": "Sound Pressure Level At The Safety Valve Outlet Calculator", "url_name": "environment_sound_pressure_level_at_the_safety_valve_outlet_calculator", "plan_type": "corporate", "category": "environment"},
 
+# {"name": "Steam Temperature At Any Load Calculator", "url_name": "environment_steam_temperature_at_any_load_calculator", "plan_type": "corporate", "category": "environment"},
+
+# {"name": "Secondary Fluid Inlet Temperature At Any Load Calculator", "url_name": "environment_secondary_fluid_inlet_temperature_at_any_load_calculator", "plan_type": "corporate", "category": "environment"},
+
+# {"name": "Secondary Inlet Temperature At Any Load Calculator", "url_name": "environment_secondary_inlet_temperature_at_any_load_calculator", "plan_type": "corporate", "category": "environment"},
+
+# {"name": "Stall Load For A Variable Flow Secondary Calculator", "url_name": "environment_stall_load_for_a_variable_flow_secondary_calculator", "plan_type": "corporate", "category": "environment"},
+
 
 
 
@@ -710,6 +730,7 @@ CALCULATORS = [
 {"name": "Bedridden Patient Weight Estimator", "url_name": "health_bedridden_patient_weight_estimator_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Baby Milk Intake Calculator", "url_name": "health_baby_milk_intake_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Cardiac Index Calculator", "url_name": "health_cardiac_index_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Cholesterol Units Converter", "url_name": "health_cholesterolunitsconverter", "plan_type": "corporate", "category": "health"},
 {"name": "Daily Drinking Water Intake Calculator", "url_name": "health_daily_drinking_water_intake_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Dietary Reference Intake (DRI) Calculator", "url_name": "health_dietary_reference_intake_dri_calculator", "plan_type": "corporate", "category": "health"},
 
@@ -722,8 +743,10 @@ CALCULATORS = [
 {"name": "Fat-Free Mass Index (FFMI) Calculator", "url_name": "health_fat_free_mass_index_ffmi_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Fiber Intake Calculator", "url_name": "health_fiber_intake_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "GAD-7 Anxiety Assessment Calculator", "url_name": "health_generalized_anxiety_disorder_assessment_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Gout Diagnosis Calculator", "url_name": "health_gout_diagnosis_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Gupta Perioperative Risk Calculator", "url_name": "health_gupta_perioperative_risk_calculator", "plan_type": "corporate", "category": "health"},
 
+{"name": "HAS-BLED Score Calculator", "url_name": "health_has_bledcalculator", "plan_type": "corporate", "category": "health"},
 {"name": "Heat Stress Index (HSI) Calculator", "url_name": "health_heat_stress_index_hsi_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Healthy Weight Calculator", "url_name": "health_healthy_weight_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Heaviness of Smoking Index (HSI) Calculator", "url_name": "health_heaviness_of_smoking_index_hsi_calculator", "plan_type": "corporate", "category": "health"},
@@ -744,6 +767,7 @@ CALCULATORS = [
 {"name": "Noise Exposure Level Calculator", "url_name": "health_noise_exposure_level_leq_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Ponderal Index (PI) Calculator", "url_name": "health_ponderal_index_pi_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Protein Intake Calculator", "url_name": "health_protein_intake_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Probit Percentage Effect Calculator", "url_name": "health_probitpercentageeffect", "plan_type": "corporate", "category": "health"},
 
 
 {"name": "Plasma Volume Calculator", "url_name": "health_plasma_volume_calculator", "plan_type": "corporate", "category": "health"},
@@ -1119,6 +1143,26 @@ CALCULATORS = [
 # {"name": "Sizing A Control Valve For Saturated Steam Calculator", "url_name":"safety_sizing_a_control_valve_for_saturated_steam_calculator", "plan_type": "corporate", "category": "safety"},
 # {"name": "Steam Flow Through Valve Under Critical Condition Calculator", "url_name":"safety_steam_flow_through_valve_under_critical_condition_calculator", "plan_type": "corporate", "category": "safety"},
 # {"name": "Steam Valve Flow Coefficient (Cv) For Sub-Sonic Flow Calculator", "url_name":"safety_steam_valve_flow_coefficient_cv_for_sub_sonic_flow_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Stem Force Required To Close a Control Valve Calculator", "url_name":"safety_stem_force_required_to_close_a_control_valve_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Safety Valve Opening Force with the spring housing Calculator", "url_name":"safety_safety_valve_opening_force_with_the_spring_housing_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Safety Valve Opening Force Calculator - Spring Housing Vented to Atmosphere", "url_name":"safety_safety_valve_opening_force_with_the_spring_housing_vented_atmosphere_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Safety Valve Opening Force with Spring Housing Build-up Pressure", "url_name":"safety_safety_valve_opening_force_with_the_spring_housing_build_up_pressure_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Safety Valve Vent Pipe Diameter Calculator", "url_name":"safety_safety_valve_vent_pipe_diameter_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "SI-based D'Arcy Equation For Determining Pressure Drop", "url_name":"safety_si_based_darcy_equation_for_determining_pressure_drop_due_to_frictional_resistance_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Steam Pipeline Pressure Drop Calculator", "url_name":"safety_steam_pipeline_pressure_drop_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Stall Load For A Constant Flow Secondary Calculator", "url_name":"safety_stall_load_for_a_constant_flow_secondary_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Spherical Portion Calculator", "url_name":"safety_spherical_portion_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Spread Angle Factor Calculator", "url_name":"safety_spread_angle_factor_calculator", "plan_type": "corporate", "category": "safety"},
 
 
 {"name": "Total Intended Load (TIL) Calculator", "url_name":"safety_total_intend_load_calculator", "plan_type": "corporate", "category": "safety"},

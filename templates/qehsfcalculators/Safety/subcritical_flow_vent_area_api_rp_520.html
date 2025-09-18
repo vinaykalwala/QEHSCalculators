@@ -1,0 +1,593 @@
+{% extends 'base.html' %}
+{% block title %}Subcritical Flow Vent Area Calculator (API RP 520){% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subcritical Flow Vent Area Calculator (API RP 520)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px; /* Fixed Height */
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+            justify-content: center;
+            align-items: center;
+            min-height: 420px; /* Fixed Height */
+            text-align: center;
+        }
+        
+        .input-pair {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+        }
+
+        @media (max-width: 500px) {
+            .input-pair {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+            width: 100%;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+            font-size: 0.9rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background:linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        
+        /* Result Card */
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+        
+        .sub-results {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eaeaea;
+        }
+
+        .sub-result-item {
+            text-align: center;
+        }
+        
+        .sub-result-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        .sub-result-label {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        /* Feedback & Warnings */
+        .result-feedback, .result-warning {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: left;
+            margin-top: 15px;
+        }
+        .result-feedback {
+             border-left: 4px solid #3498db;
+        }
+        .result-warning {
+            border-left: 4px solid #f1c40f;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        /* Note Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .info-table {
+            width: 100%;
+            margin-top: 15px;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .info-table thead {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+            font-weight: 600;
+        }
+        .info-table th, .info-table td {
+            padding: 10px 12px;
+            border: 1px solid #bbdefb;
+            text-align: left;
+        }
+        .info-table tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        /* Error Box */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Subcritical Flow Vent Area Calculator (API RP 520)</h1>
+            <p>Calculate the required relief area for gas or vapor service under subcritical flow conditions as per API RP 520.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Enter Relief Parameters</h2>
+                 <div class="input-pair">
+                    <div class="form-group">
+                        <label for="massFlow">Mass Flow Rate (W) [kg/hr]</label>
+                        <input type="number" id="massFlow" class="form-input" placeholder="e.g., 5000">
+                    </div>
+                    <div class="form-group">
+                        <label for="upstreamPressure">Upstream Pressure ($P_1$) [kPa abs]</label>
+                        <input type="number" id="upstreamPressure" class="form-input" placeholder="e.g., 1500">
+                    </div>
+                </div>
+                <div class="input-pair">
+                    <div class="form-group">
+                        <label for="backPressure">Back Pressure ($P_2$) [kPa abs]</label>
+                        <input type="number" id="backPressure" class="form-input" placeholder="e.g., 900">
+                    </div>
+                     <div class="form-group">
+                        <label for="temperature">Temperature (T) [K]</label>
+                        <input type="number" id="temperature" class="form-input" placeholder="e.g., 473.15">
+                    </div>
+                </div>
+                <div class="input-pair">
+                    <div class="form-group">
+                        <label for="molecularWeight">Molecular Weight (M) [kg/kmol]</label>
+                        <input type="number" id="molecularWeight" class="form-input" placeholder="e.g., 29">
+                    </div>
+                     <div class="form-group">
+                        <label for="kRatio">Specific Heat Ratio (k)</label>
+                        <input type="number" id="kRatio" class="form-input" placeholder="e.g., 1.4">
+                    </div>
+                </div>
+                <div class="input-pair">
+                    <div class="form-group">
+                        <label for="kd">Discharge Coeff. ($K_d$)</label>
+                        <input type="number" id="kd" class="form-input" value="0.975">
+                    </div>
+                    <div class="form-group">
+                        <label for="zFactor">Compressibility (Z)</label>
+                        <input type="number" id="zFactor" class="form-input" value="1.0">
+                    </div>
+                </div>
+                <button class="calculate-btn" onclick="calculateVentArea()">Calculate Vent Area</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Pressure relief valve icon">
+                    <p>Enter your system's parameters to calculate the necessary relief valve orifice area for subcritical flow conditions.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                    
+                <div class="result-value hidden" id="resultValue">
+                    <div class="rate-value" id="rateValue">0.00</div>
+                    <div class="rate-label" id="rateLabel">Required Orifice Area (mm²)</div>
+                    
+                    <div class="sub-results">
+                        <div class="sub-result-item">
+                            <div class="sub-result-value" id="areaM2">0</div>
+                            <div class="sub-result-label">Area (m²)</div>
+                        </div>
+                        <div class="sub-result-item">
+                            <div class="sub-result-value" id="f2Factor">0</div>
+                            <div class="sub-result-label">F2 Factor</div>
+                        </div>
+                    </div>
+
+                    <div class="result-warning hidden" id="resultWarning">
+                        <div class="feedback-title">⚠️ Input Warning</div>
+                        <div class="feedback-content" id="warningMessage"></div>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Orifice Size Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About Subcritical Flow Sizing</h3>
+                <p>
+                    This calculation determines the required orifice area of a pressure relief device for gas or vapor in **subcritical flow**. Subcritical flow occurs when the downstream pressure ($P_2$) is high enough to affect the flow rate through the valve (specifically, when $P_2 > P_{critical}$). This is common in systems with high backpressure. Sizing for these conditions is crucial to ensure the valve can still pass the required flow rate to prevent overpressure.
+                </p>
+            </div>
+            <div class="note-card">
+                <h3>⚙️ Formula Used (API RP 520)</h3>
+                <p>The required orifice area (A) for subcritical flow is given by:</p>
+                <p>$$ A = \frac{W \cdot \sqrt{T \cdot Z / M}}{735 \cdot F_2 \cdot K_d \cdot \sqrt{P_1 \cdot (P_1 - P_2)}} $$</p>
+                <p>Where the flow factor $F_2$ is:</p>
+                <p>$$ F_2 = \sqrt{\frac{\frac{k}{k-1} \left( \frac{P_2}{P_1} \right)^{\frac{2}{k}} \left( 1 - \left( \frac{P_2}{P_1} \right)^{\frac{k-1}{k}} \right)}{1 - \frac{P_2}{P_1}}} $$</p>
+            </div>
+             <div class="note-card">
+                <h3>📊 Key Parameters</h3>
+                 <ul class="note-list">
+                    <li><strong>$W$</strong>: Mass Flow Rate (kg/hr)</li>
+                    <li><strong>$P_1$</strong>: Upstream absolute pressure (kPa abs)</li>
+                    <li><strong>$P_2$</strong>: Back pressure (absolute) at the outlet (kPa abs)</li>
+                    <li><strong>$T$</strong>: Absolute temperature at inlet (K)</li>
+                    <li><strong>$M$</strong>: Molecular weight of the gas (kg/kmol)</li>
+                    <li><strong>$k$</strong>: Specific heat ratio ($C_p/C_v$)</li>
+                     <li><strong>$K_d$</strong>: Discharge coefficient (typically 0.65-0.85 for subcritical flow)</li>
+                     <li><strong>$Z$</strong>: Compressibility factor (1 for ideal gas)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateVentArea() {
+            const W_val = document.getElementById('massFlow').value.trim();
+            const P1_val = document.getElementById('upstreamPressure').value.trim();
+            const P2_val = document.getElementById('backPressure').value.trim();
+            const T_val = document.getElementById('temperature').value.trim();
+            const M_val = document.getElementById('molecularWeight').value.trim();
+            const k_val = document.getElementById('kRatio').value.trim();
+            const Kd_val = document.getElementById('kd').value.trim();
+            const Z_val = document.getElementById('zFactor').value.trim();
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const warningBox = document.getElementById('resultWarning');
+            const warningMessage = document.getElementById('warningMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+            
+            let errors = [];
+            let warnings = [];
+
+            // --- VALIDATION RULES ---
+            if (W_val === '' || isNaN(W_val) || parseFloat(W_val) <= 0) errors.push("👉 Mass Flow Rate (W) must be > 0.");
+            if (P1_val === '' || isNaN(P1_val) || parseFloat(P1_val) <= 0) errors.push("👉 Upstream Pressure (P1) must be > 0.");
+            if (P2_val === '' || isNaN(P2_val) || parseFloat(P2_val) <= 0) errors.push("👉 Back Pressure (P2) must be > 0.");
+            if (T_val === '' || isNaN(T_val) || parseFloat(T_val) <= 0) errors.push("👉 Temperature (T) must be > 0 K.");
+            if (M_val === '' || isNaN(M_val) || parseFloat(M_val) <= 0) errors.push("👉 Molecular Weight (M) must be > 0.");
+            if (k_val === '' || isNaN(k_val) || parseFloat(k_val) <= 1) errors.push("👉 Specific Heat Ratio (k) must be > 1.");
+            if (Kd_val === '' || isNaN(Kd_val) || parseFloat(Kd_val) <= 0 || parseFloat(Kd_val) > 1) errors.push("👉 Discharge Coeff. (Kd) must be between 0 and 1.");
+            if (Z_val === '' || isNaN(Z_val) || parseFloat(Z_val) <= 0) errors.push("👉 Compressibility (Z) must be > 0.");
+            
+            if (parseFloat(P2_val) >= parseFloat(P1_val)) errors.push("👉 Back pressure cannot be greater than or equal to upstream pressure.");
+
+            // --- ERROR HANDLING ---
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden");
+            }
+
+            // --- CALCULATION ---
+            const W = parseFloat(W_val) / 3600; // kg/hr to kg/s
+            const P1 = parseFloat(P1_val);
+            const P2 = parseFloat(P2_val);
+            const T = parseFloat(T_val);
+            const M = parseFloat(M_val);
+            const k = parseFloat(k_val);
+            const Kd = parseFloat(Kd_val);
+            const Z = parseFloat(Z_val);
+
+            const r = P2 / P1;
+            const F2 = Math.sqrt(((k / (k - 1)) * Math.pow(r, 2 / k) * (1 - Math.pow(r, (k - 1) / k))) / (1 - r));
+            
+            const numerator = W * Math.sqrt((T * Z) / M);
+            const denominator = 735 * F2 * Kd * Math.sqrt(P1 * (P1 - P2));
+            const areaM2 = numerator / denominator;
+            const areaMM2 = areaM2 * 1e6;
+
+            if (!isFinite(areaMM2) || F2 <= 0) {
+                errorMessage.innerHTML = "❌ Calculation resulted in an invalid number. Check that P2 is less than P1 and all inputs are valid.";
+                errorBox.classList.remove("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            }
+            
+            // --- WARNINGS ---
+            const criticalPressure = P1 * Math.pow(2 / (k + 1), k / (k - 1));
+            if (P2 < criticalPressure) {
+                warnings.push(`Back pressure ($P_2$) is below the critical flow pressure (${criticalPressure.toFixed(2)} kPa). Flow is likely critical, not subcritical. Use the critical flow formula instead.`);
+            }
+
+            if (warnings.length > 0) {
+                warningMessage.innerHTML = warnings.join("<br>");
+                warningBox.classList.remove("hidden");
+            } else {
+                warningBox.classList.add("hidden");
+            }
+
+
+            // --- DISPLAY RESULTS ---
+            document.getElementById('rateValue').textContent = areaMM2.toFixed(2);
+            document.getElementById('areaM2').textContent = areaM2.toExponential(4) + ' m²';
+            document.getElementById('f2Factor').textContent = F2.toFixed(4);
+            
+            let feedback = 'Standard orifice size. Select the next largest standard orifice from your valve manufacturer.';
+            document.getElementById('feedbackContent').textContent = feedback;
+
+            placeholder.classList.add("hidden");
+            resultValue.classList.remove("hidden");
+        }
+
+        function printReport() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Equal Percentage Valve Lift Calculator Based on Relative Flow{% endblock %}
+{% block title %}Combined Conduction and Convection Calculator{% endblock %}
 {% block content %}
 {% load static %}
 
@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Equal Percentage Valve Lift Calculator Based on Relative Flow</title>
+    <title>Combined Conduction and Convection Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
@@ -419,48 +419,48 @@
 </head>
 <body>
 
-<div class="btn-container">
+    <div class="btn-container">
         <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
-</div>
+    </div>
+
 
 <div class="calculator-container printable" id="printArea">
     {% include "includes/print_header_footer.html" %}
 
+
+<!-- Combined Conduction & Convection Calculator (updated) -->
 <div class="calculator-header">
-  <h1>Equal Percentage Valve Lift Calculator Based on Relative Flow</h1>
-  <p>
-     This helps assess valve performance and controllability in industrial systems.
-  </p>
+  <h1>Combined Conduction and Convection Calculator</h1>
+  <p>Estimate the rate at which heat is transferred across a surface, helping to evaluate thermal performance and efficiency in engineering systems. Provide realistic and consistent input values to ensure accurate results.</p>
 </div>
 
 <div class="calc-content">
-  <!-- Calculator -->
   <div class="calc-card">
-    <h2>Enter Data</h2>
+    <h2>Enter Parameters</h2>
 
     <div class="form-group">
-      <label for="flow">Flow (V) [m³/h]</label>
-      <input type="number" id="flow" class="form-input" min="0.001" step="0.001" placeholder="e.g., 50">
+      <label for="U">Overall Heat Transfer Coefficient (U) [W/m²K]</label>
+      <input type="number" id="U" class="form-input" step="any" min="0" placeholder="e.g., 1.25">
     </div>
 
     <div class="form-group">
-      <label for="maxFlow">Max Flow (Vmax) [m³/h]</label>
-      <input type="number" id="maxFlow" class="form-input" min="0.01" step="0.001" placeholder="e.g., 500">
+      <label for="A">Average Surface Area (A_avg) [m²]</label>
+      <input type="number" id="A" class="form-input" step="any" min="0" placeholder="e.g., 12.5">
     </div>
 
     <div class="form-group">
-      <label for="rangeability">Rangeability (τ)</label>
-      <input type="number" id="rangeability" class="form-input" min="1.01" step="0.01" placeholder="e.g., 50">
+      <label for="dT">Temperature Difference (ΔT) [K or °C]</label>
+      <input type="number" id="dT" class="form-input" step="any" placeholder="e.g., 20">
     </div>
 
-    <button class="calculate-btn" onclick="calculateValveLift()">Calculate Lift</button>
+    <button class="calculate-btn" onclick="calculateHeatTransfer()">Calculate Heat Transfer</button>
   </div>
 
   <!-- Result Section -->
   <div class="result-card">
     <div class="result-placeholder" id="placeholder">
-      <img src="/static/images/mlc_environment_result.png" alt="Valve illustration">
-      <p>This tool will calculate the <strong>Valve Lift Percentage (H%)</strong>.</p>
+      <img src="/static/images/mlc_environment_result.png" alt="Heat transfer illustration">
+      <p>This tool calculates heat transfer rate and heat flux per area.</p>
     </div>
 
     <div class="result-error hidden" id="resultError">
@@ -470,69 +470,109 @@
 
     <div class="result-value hidden" id="resultValue">
       <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
-        <h2>Calculated Valve Lift</h2>
+        <h2>Heat Transfer Rate</h2>
       </div>
 
-      <div class="rate-display">
-        <div class="rate-value" id="rateValue">0.00</div>
-        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">%</div>
+      <div class="rate-display" style="display:flex; align-items:center; gap:12px;">
+        <div style="text-align:center;">
+          <div class="rate-value" id="qValue">0</div>
+          <div class="rate-label" style="font-size:14px; color:#2980b9;">Watts (W)</div>
+        </div>
+        <div style="text-align:center;">
+          <div class="rate-value" id="qkWValue">0</div>
+          <div class="rate-label" style="font-size:14px; color:#2980b9;">kW</div>
+        </div>
       </div>
 
-      <div class="result-feedback">
+      <div style="margin-top:8px;">
+        <div><strong>Heat flux (per area):</strong> <span id="fluxPerArea">0</span> W/m²</div>
+      </div>
+
+      <div class="result-feedback" style="margin-top:10px;">
         <div class="feedback-title">Assessment</div>
         <div class="feedback-content" id="feedbackContent"></div>
       </div>
-      <div class="btn-wrapper">
+
+      <div class="btn-wrapper" style="margin-top:10px;">
         <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Notes Section -->
+<!-- Notes: exactly six cards -->
 <div class="note-section">
+
   <div class="note-card">
     <h3>📘 About This Calculator</h3>
     <p>
-      The <strong>Equal Percentage Valve Lift Calculator</strong> determines the percentage lift (H%) required to achieve a given flow in valves with an equal-percentage characteristic. This ensures accurate control of fluids in industrial, HVAC, and water treatment applications.
+      Estimates the heat transfer rate through a surface where both conduction and convection contribute.
+      Use outputs to assess thermal performance, design or size equipment, and support QEHS and fire safety evaluations.
     </p>
   </div>
 
   <div class="note-card">
-    <h3>📊 Interpretation</h3>
+    <h3>⚙ Parameters Used</h3>
     <ul class="note-list">
-      <li><span class="good">0% ≤ H% &lt; 5%</span> → Valve nearly shut (unstable control region).</li>
-      <li><span class="average">5% ≤ H% ≤ 90%</span> → Normal controllable operating range.</li>
-      <li><span class="bad">H% &gt; 90%</span> → Valve near wide-open, reduced controllability.</li>
+      <li><strong>U</strong>: Overall heat transfer coefficient [W/m²K]</li>
+      <li><strong>A_avg</strong>: Average surface area through which heat flows [m²]</li>
+      <li><strong>ΔT</strong>: Temperature difference across the surface [K or °C]</li>
     </ul>
   </div>
 
   <div class="note-card">
-    <h3>⚠️Input  Validations</h3>
-    <ul>
-      <li>✔️ Flow (V) must be 0.001 – 20,000 m³/h.</li>
-      <li>✔️ Max Flow (Vmax) must be 0.01 – 50,000 m³/h.</li>
-      <li>✔️ Rangeability (τ) must be 1.01 – 1000.</li>
-      <li>✔️ Flow must not exceed Max Flow.</li>
-      <li>✔️ Flow must be ≥ Vmax/τ (minimum controllable flow).</li>
-      <li>❌ Zeros, negatives, or τ ≤ 1 are invalid.</li>
-      <li>⚠️ Very low or very high values trigger warnings (may indicate poor valve sizing).</li>
+    <h3>✅ Input Validation Rules</h3>
+    <ul class="note-list">
+      <li><strong>U:</strong> Required, numeric, > 0. Typical range: 0.01 — 10,000 W/m²K. Warn if decimals >4 or outside typical range.</li>
+      <li><strong>A_avg:</strong> Required, numeric, > 0. Reasonable range: 1e-6 — 1,000,000 m². Warn if extremely large or decimals >4.</li>
+      <li><strong>ΔT:</strong> Required, numeric (can be negative). Warn if ΔT = 0 (heat transfer will be zero) or |ΔT| > 500 K.</li>
+      <li><strong>Units:</strong> Ensure U, A_avg, ΔT are in consistent units.</li>
+      <li><strong>Cross-checks:</strong> Extremely large or tiny combinations trigger warnings to verify source data and units.</li>
     </ul>
   </div>
 
   <div class="note-card">
-    <h3>🌍 Key Applications</h3>
+    <h3>🔎 Output Validations / Assessment</h3>
     <ul class="note-list">
-      <li><strong>Process Control:</strong> Chemical, refinery, and manufacturing operations.</li>
-      <li><strong>HVAC Systems:</strong> Air and water flow regulation.</li>
-      <li><strong>Water Treatment:</strong> Flow control of water and chemicals.</li>
-      <li><strong>Energy Systems:</strong> Steam and fuel regulation in power plants.</li>
+      <li>Primary outputs: <strong>Heat transfer rate (q)</strong> in W (and kW) and <strong>Heat flux</strong> in W/m².</li>
+      <li>Values are rounded for readability; scientific notation used for extremes.</li>
+      <li>Feedback and classification (displayed with results):</li>
+      <ul>
+        <li><strong>Zero heat transfer:</strong> q = 0 — check ΔT or input correctness.</li>
+        <li><strong>Low heat transfer:</strong> small q — minimal energy transfer; typical for well-insulated systems.</li>
+        <li><strong>Moderate heat transfer:</strong> expected thermal flow — check equipment capacity and insulation.</li>
+        <li><strong>High heat transfer:</strong> large q — verify system design, insulation, or cooling capacity.</li>
+      </ul>
+      <li>Warnings are shown for unrealistic values, extreme heat flux, or suspected unit mismatch.</li>
     </ul>
   </div>
+
+  <div class="note-card">
+    <h3>🏭 Standards</h3>
+    <p>
+      Input and output validations align with industrial, energy, and fire-safety standards including <strong>ASHRAE</strong>, <strong>IECC</strong>, and quality management guidance such as <strong>ISO 9001</strong>.
+    </p>
+  </div>
+
+  <div class="note-card">
+    <h3>🔚 Conclusion</h3>
+    <p>
+      Use the heat transfer rate and heat flux alongside system design data, operational limits, and QEHS reviews. 
+      This calculator provides screening-level estimates and preliminary assessment. All classifications, warnings, and feedback displayed with results should guide engineering decisions and safety considerations.
+    </p>
+  </div>
+
 </div>
 
+
 <script>
-/* Show error messages */
+/* Helper: count decimals */
+function countDecimalsStr(s) {
+  if (!s || s.indexOf('.') === -1) return 0;
+  return s.split('.')[1].length;
+}
+
+/* Show errors */
 function showErrors(errors) {
   const errorBox = document.getElementById("resultError");
   const errorMessage = document.getElementById("errorMessage");
@@ -545,103 +585,112 @@ function showErrors(errors) {
   resultValue.classList.add("hidden");
 }
 
-function calculateValveLift() {
-  const flowRaw = (document.getElementById("flow").value || "").trim();
-  const maxFlowRaw = (document.getElementById("maxFlow").value || "").trim();
-  const tauRaw = (document.getElementById("rangeability").value || "").trim();
-
-  const errorBox = document.getElementById("resultError");
-  const errorMessage = document.getElementById("errorMessage");
-  const placeholder = document.getElementById("placeholder");
-  const resultValue = document.getElementById("resultValue");
-  const rateEl = document.getElementById("rateValue");
-  const feedbackEl = document.getElementById("feedbackContent");
-
-  errorBox.classList.add("hidden");
-  errorMessage.innerHTML = "";
-  feedbackEl.innerHTML = "";
+/* Main calculation + validations */
+function calculateHeatTransfer() {
+  const URaw = document.getElementById("U")?.value.trim();
+  const ARaw = document.getElementById("A")?.value.trim();
+  const dTRaw = document.getElementById("dT")?.value.trim();
 
   const errors = [];
   const warnings = [];
 
-  // Required input validation
-  if (!flowRaw) errors.push("👉 Please enter Flow (V).");
-  if (!maxFlowRaw) errors.push("👉 Please enter Max Flow (Vmax).");
-  if (!tauRaw) errors.push("👉 Please enter Rangeability (τ).");
+  // Presence checks
+  if (URaw === '') errors.push("👉 Enter Overall Heat Transfer Coefficient (U).");
+  if (ARaw === '') errors.push("👉 Enter Average Surface Area (A_avg).");
+  if (dTRaw === '') errors.push("👉 Enter Temperature Difference (ΔT).");
   if (errors.length) return showErrors(errors);
 
-  const V = parseFloat(flowRaw);
-  const Vmax = parseFloat(maxFlowRaw);
-  const tau = parseFloat(tauRaw);
+  // Parse
+  const U = parseFloat(URaw);
+  const A = parseFloat(ARaw);
+  const dT = parseFloat(dTRaw);
 
-  if (!Number.isFinite(V) || V < 0.001 || V > 20000)
-    errors.push("👉 Flow (V) must be between 0.001 and 20,000 m³/h.");
-  if (!Number.isFinite(Vmax) || Vmax < 0.01 || Vmax > 50000)
-    errors.push("👉 Max Flow (Vmax) must be between 0.01 and 50,000 m³/h.");
-  if (!Number.isFinite(tau) || tau <= 1.01 || tau > 1000)
-    errors.push("👉 Rangeability (τ) must be > 1.01 and ≤ 1000.");
-
-  if (errors.length) return showErrors(errors);
-
-  // Cross-field validations
-  if (V > Vmax) errors.push("👉 Flow (V) cannot exceed Max Flow (Vmax).");
-
-  const Vmin = Vmax / tau;
-  if (V < Vmin) {
-  errors.push(`👉 Flow (V) is too low. For proper valve control, it must be at least ${Vmin.toFixed(3)} m³/h (based on Vmax and rangeability).`);
-}
-
+  // Numeric checks
+  if (!Number.isFinite(U) || U <= 0) errors.push("👉 U must be numeric and > 0 (W/m²K).");
+  if (!Number.isFinite(A) || A <= 0) errors.push("👉 A_avg must be numeric and > 0 (m²).");
+  if (!Number.isFinite(dT)) errors.push("👉 ΔT must be numeric (K or °C difference).");
 
   if (errors.length) return showErrors(errors);
 
-  // Compute Lift %
-  const Hpercent = 100 * (1 + (Math.log(V / Vmax) / Math.log(tau)));
+  // Precision & range warnings
+  if (countDecimalsStr(URaw) > 4) warnings.push("⚠️ U has >4 decimal places — consider rounding for reporting.");
+  if (countDecimalsStr(ARaw) > 4) warnings.push("⚠️ A_avg has >4 decimal places — consider rounding.");
+  if (countDecimalsStr(dTRaw) > 3) warnings.push("⚠️ ΔT has >3 decimals — consider rounding.");
 
-  if (!Number.isFinite(Hpercent) || Hpercent < 0 || Hpercent > 100) {
-    return showErrors(["⚠️ Computed valve lift is invalid. Check inputs."]);
-  }
+  if (U < 0.01) warnings.push("⚠️ U is very small (<0.01) — verify units or if this is a highly insulated system.");
+  if (U > 10000) warnings.push("⚠️ U is unusually large (>10,000). Verify units or input source.");
+  if (A > 1e6) warnings.push("⚠️ A_avg is very large (>1,000,000 m²). Verify units/source.");
+  if (Math.abs(dT) > 500) warnings.push("⚠️ |ΔT| > 500 K — uncommon; verify that temperature difference units are correct.");
 
-  // Warnings
-  if (tau < 10 || tau > 100) warnings.push("⚠️ Rangeability is outside typical range (10–100).");
-  if (V < Vmin * 1.05) warnings.push("⚠️ Flow is very close to minimum controllable limit.");
-  if (V > Vmax * 0.95) warnings.push("⚠️ Flow is very close to maximum capacity.");
+  // ΔT = 0 check (valid but informative)
+  if (dT === 0) warnings.push("⚠️ ΔT = 0 → heat transfer rate will be zero.");
 
-  // Status interpretation
-  let statusMsg = "";
-  if (Hpercent < 5) {
-    statusMsg = "⚠️ Valve nearly shut – control may be unstable.";
-  } else if (Hpercent <= 90) {
-    statusMsg = "✅ Normal controllable operating range.";
+  // Compute (internal)
+  const q = U * A * dT; // W
+  if (!Number.isFinite(q)) return showErrors(["⚠️ Computed result invalid. Check inputs."]);
+
+  const qAbs = Math.abs(q);
+  const qkW = q / 1000;
+  const fluxPerArea = U * dT; // W/m², can be negative to indicate direction
+
+  // Result magnitude checks
+  if (qAbs < 1e-6) warnings.push("⚠️ Computed heat transfer is negligible (<1e-6 W).");
+  if (qAbs > 1e9) warnings.push("⚠️ Computed heat transfer very large (>1e9 W). Verify inputs/units.");
+  if (Math.abs(fluxPerArea) > 1e5) warnings.push("⚠️ Heat flux per area is very large (>100,000 W/m²). Verify inputs.");
+
+  // Classification & recommendations (will match Output Validations)
+  let classification = "";
+  let suggestion = "";
+
+  if (qAbs === 0) {
+    classification = "Zero heat transfer";
+    suggestion = "q = 0 — check if ΔT = 0 or verify inputs.";
+  } else if (qAbs <= 100) {
+    classification = "Low heat transfer";
+    suggestion = "Small thermal flow — typical for well-insulated systems; check if performance meets design.";
+  } else if (qAbs <= 5000) {
+    classification = "Moderate heat transfer";
+    suggestion = "Expected thermal flow — verify equipment and insulation for normal operation.";
   } else {
-    statusMsg = "⚠️ Valve near wide-open – reduced controllability.";
+    classification = "High heat transfer";
+    suggestion = "Large thermal load — verify system capacity, insulation, and QEHS implications; consider mitigation.";
   }
 
-  let details = `<div>Valve Lift: <b>${Hpercent.toFixed(2)}%</b></div>`;
-  details += `<div>Flow: <b>${V.toFixed(3)}</b> m³/h</div>`;
-  details += `<div>Max Flow: <b>${Vmax.toFixed(3)}</b> m³/h</div>`;
-  details += `<div>Rangeability: <b>${tau.toFixed(2)}</b></div>`;
-  details += `<div>Minimum Controllable Flow (Vmax/τ): <b>${Vmin.toFixed(3)}</b> m³/h</div>`;
-  if (warnings.length) {
-    details += `<div style="margin-top:6px; color:#b35d00; font-size:0.95em;">${warnings.join(" | ")}</div>`;
-  }
+  // Format outputs
+  const formattedQ = (qAbs > 1e6 || qAbs < 0.001) ? q.toExponential(3) : q.toFixed(2);
+  const formattedkW = (Math.abs(qkW) >= 1000 || Math.abs(qkW) < 0.001) ? qkW.toExponential(3) : qkW.toFixed(3);
+  const formattedFlux = (Math.abs(fluxPerArea) >= 1e6 || Math.abs(fluxPerArea) < 0.001) ? fluxPerArea.toExponential(3) : fluxPerArea.toFixed(2);
 
-  rateEl.textContent = Hpercent.toFixed(2);
-  feedbackEl.innerHTML = `<div>${statusMsg}</div>${details}`;
+  // Build feedback details
+  let details = `<div><strong>Heat transfer (q):</strong> ${formattedQ} W</div>`;
+  details += `<div><strong>Heat transfer:</strong> ${formattedkW} kW</div>`;
+  details += `<div><strong>Heat flux (per area):</strong> ${formattedFlux} W/m²</div>`;
+  details += `<div style="margin-top:6px;"><strong>Classification:</strong> ${classification}</div>`;
+  details += `<div style="margin-top:4px;">${suggestion}</div>`;
+  if (warnings.length) details += `<div style="margin-top:8px; color:#b35d00;">${warnings.join(' | ')}</div>`;
 
-  placeholder.classList.add("hidden");
-  resultValue.classList.remove("hidden");
-  errorBox.classList.add("hidden");
+  // Update UI
+  document.getElementById("qValue").textContent = formattedQ;
+  document.getElementById("qkWValue").textContent = formattedkW;
+  document.getElementById("fluxPerArea").textContent = formattedFlux;
+  document.getElementById("feedbackContent").innerHTML = details;
+
+  // Show/hide elements
+  document.getElementById("placeholder").classList.add("hidden");
+  document.getElementById("resultValue").classList.remove("hidden");
+  document.getElementById("resultError").classList.add("hidden");
 }
 
+/* Print helper */
 function printReport() {
   const el = document.getElementById('printDate');
   if (el) {
-    const now = new Date();
-    el.textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    el.textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   }
   window.print();
 }
 </script>
+
 
     <script src="{% static 'js/print.js' %}"></script>
 </body>
@@ -649,60 +698,49 @@ function printReport() {
 {% endblock %}
 
 
-<!-- /*
-==============================================
-📌 Equal Percentage Valve Lift Calculator
-==============================================
+<!-- 
+📌 Heat Transfer Calculator (Essentials)
 
-🔹 Formula:
-    Valve Lift % (H%) = 100 * (1 + log(V / Vmax) / log(τ))
+🔹 Formula (internal, not displayed to user):
+    • q = U × A × ΔT
+      - q  = Heat transfer rate [W]
+      - U  = Overall heat transfer coefficient [W/m²K]
+      - A  = Average surface area [m²]
+      - ΔT = Temperature difference [K or °C difference]
+    • Heat flux per area = U × ΔT [W/m²]
 
-    where:
-      V     = Flow [m³/h]
-      Vmax  = Maximum Flow [m³/h]
-      τ     = Rangeability (dimensionless)
-      Vmin  = Vmax / τ (minimum controllable flow)
-
-----------------------------------------------
 🔹 Input Validations:
-1. Flow (V):
-   - Required
-   - Must be numeric
-   - Range: 0.001 ≤ V ≤ 20,000 m³/h
+    • U (Overall heat transfer coefficient):
+        - Required, numeric, >0
+        - Typical W/m²K
+    • A (Average surface area):
+        - Required, numeric, >0
+        - Typical m²
+    • ΔT (Temperature difference):
+        - Required, numeric
+        - Can be positive or negative, check units
 
-2. Maximum Flow (Vmax):
-   - Required
-   - Must be numeric
-   - Range: 0.01 ≤ Vmax ≤ 50,000 m³/h
-
-3. Rangeability (τ):
-   - Required
-   - Must be numeric
-   - Range: 1.01 < τ ≤ 1000
-
-----------------------------------------------
-🔹 Cross-field Validations:
-1. Flow (V) ≤ Max Flow (Vmax)
-2. Flow (V) ≥ Vmin ( = Vmax / τ )
-   - Otherwise: "Flow is too low for proper control."
-
-----------------------------------------------
-🔹 Output Validation:
-- Computed Valve Lift (H%) must be finite.
-- Must fall within 0% ≤ H% ≤ 100%.
-- If invalid → show error.
-
-----------------------------------------------
 🔹 Warnings:
-- τ outside typical range (10–100).
-- V close to Vmin (≤ 5% above limit).
-- V close to Vmax (≥ 95% of capacity).
+    • U > 10,000 → ⚠️ Unusually large — verify units
+    • U < 0.01 → ⚠️ Very small — highly insulated system?
+    • U decimals >4 → ⚠️ Consider rounding
+    • A > 1,000,000 → ⚠️ Very large — verify units/source
+    • A decimals >4 → ⚠️ Consider rounding
+    • |ΔT| > 500 → ⚠️ Uncommon; verify units
+    • ΔT decimals >3 → ⚠️ Consider rounding
+    • ΔT = 0 → ⚠️ Heat transfer will be zero
+    • Computed q <1e-6 → ⚠️ Negligible heat transfer
+    • Computed q >1e9 → ⚠️ Very large — verify inputs/units
+    • Heat flux >1e5 W/m² → ⚠️ Unusually high — verify inputs
 
-----------------------------------------------
-🔹 Status Interpretation:
-- H% < 5%   → ⚠️ Valve nearly shut (unstable control).
-- 5% ≤ H% ≤ 90% → ✅ Normal controllable operating range.
-- H% > 90%  → ⚠️ Valve near wide open (reduced controllability).
-
-==============================================
-*/ -->
+🔹 Output Validations & Feedback:
+    • Heat transfer (q) displayed in W, scientific notation for extremes
+    • Heat flux per area displayed in W/m²
+    • Classification:
+        - Zero heat transfer → q=0
+        - Low heat transfer → q ≤ 100 W
+        - Moderate heat transfer → q ≤ 5000 W
+        - High heat transfer → q > 5000 W
+    • Suggestion text provided based on classification
+    • Warnings displayed inline if triggered
+-->
