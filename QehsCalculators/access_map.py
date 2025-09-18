@@ -1144,6 +1144,26 @@ CALCULATORS = [
 # {"name": "Steam Flow Through Valve Under Critical Condition Calculator", "url_name":"safety_steam_flow_through_valve_under_critical_condition_calculator", "plan_type": "corporate", "category": "safety"},
 # {"name": "Steam Valve Flow Coefficient (Cv) For Sub-Sonic Flow Calculator", "url_name":"safety_steam_valve_flow_coefficient_cv_for_sub_sonic_flow_calculator", "plan_type": "corporate", "category": "safety"},
 
+# {"name": "Stem Force Required To Close a Control Valve Calculator", "url_name":"safety_stem_force_required_to_close_a_control_valve_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Safety Valve Opening Force with the spring housing Calculator", "url_name":"safety_safety_valve_opening_force_with_the_spring_housing_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Safety Valve Opening Force Calculator - Spring Housing Vented to Atmosphere", "url_name":"safety_safety_valve_opening_force_with_the_spring_housing_vented_atmosphere_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Safety Valve Opening Force with Spring Housing Build-up Pressure", "url_name":"safety_safety_valve_opening_force_with_the_spring_housing_build_up_pressure_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Safety Valve Vent Pipe Diameter Calculator", "url_name":"safety_safety_valve_vent_pipe_diameter_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "SI-based D'Arcy Equation For Determining Pressure Drop", "url_name":"safety_si_based_darcy_equation_for_determining_pressure_drop_due_to_frictional_resistance_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Steam Pipeline Pressure Drop Calculator", "url_name":"safety_steam_pipeline_pressure_drop_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Stall Load For A Constant Flow Secondary Calculator", "url_name":"safety_stall_load_for_a_constant_flow_secondary_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Spherical Portion Calculator", "url_name":"safety_spherical_portion_calculator", "plan_type": "corporate", "category": "safety"},
+
+# {"name": "Spread Angle Factor Calculator", "url_name":"safety_spread_angle_factor_calculator", "plan_type": "corporate", "category": "safety"},
+
 
 {"name": "Total Intended Load (TIL) Calculator", "url_name":"safety_total_intend_load_calculator", "plan_type": "corporate", "category": "safety"},
 
