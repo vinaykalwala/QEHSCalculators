@@ -1,0 +1,710 @@
+{% extends 'base.html' %}
+{% block title %}Short-Term Corrosion Rate (STCR) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Short-Term Corrosion Rate (STCR) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width : auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity : 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 38px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+<div class="btn-container">
+    <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+</div>
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+    <div class="calculator-header">
+        <h1>Short-Term Corrosion Rate (STCR) Calculator</h1>
+        <p>Calculate the short-term corrosion rate for material degradation assessment and predictive maintenance.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Input Card -->
+        <div class="calc-card">
+            <h2>Enter Parameters</h2>
+
+            <div class="form-group">
+                <label for="previous_thickness">Previous Thickness</label>
+                <input type="number" id="previous_thickness" class="form-input" step="any" min="0" placeholder="Enter Previous Thickness">
+            </div>
+            
+            <div class="form-group">
+                <label for="current_thickness">Current Thickness</label>
+                <input type="number" id="current_thickness" class="form-input" step="any" min="0" placeholder="Enter Current Thickness">
+            </div>
+            
+            <div class="form-group">
+                <label for="time_interval">Time Interval</label>
+                <input type="number" id="time_interval" class="form-input" step="any" min="0" placeholder="Enter Time Interval">
+            </div>
+
+            <div class="form-group">
+                <label for="thickness_unit">Thickness Unit:</label>
+                <select id="thickness_unit" class="form-input">
+                    <option value="inches">inches</option>
+                    <option value="mm">millimeters (mm)</option>
+                </select>
+            </div>
+
+            <button class="calculate-btn" onclick="calculateSTCR()">Calculate STCR</button>
+        </div>
+
+        <!-- Result Card -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="/static/images/mlc_environment_result.png" alt="Corrosion analysis illustration">
+                <p>This tool calculates short-term corrosion rate for material degradation assessment.</p>
+            </div>
+
+            <div class="result-error hidden" id="resultError">
+                <div class="error-icon">❌</div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+
+            <div class="result-value hidden" id="resultValue">
+                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Short-Term Corrosion Rate (STCR)</h2>
+                </div>
+
+                <div class="rate-display">
+                    <div class="rate-value" id="stcrValue">0.0000</div>
+                    <div class="rate-unit" id="stcrUnit">inches/year</div>
+                </div>
+
+                <div class="result-feedback">
+                    <div class="feedback-title"> Assessment</div>
+                    <div class="feedback-content" id="feedbackContent"></div>
+                </div>
+
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="note-section">
+
+    <div class="note-card">
+        <h3>📘 About This Calculator</h3>
+        <p>
+            The <strong>Short-Term Corrosion Rate (STCR) Calculator</strong> determines the rate of material degradation due to corrosion. This critical parameter helps assess structural integrity, predict equipment lifespan, and plan maintenance activities in industrial applications.
+        </p>
+    </div>
+
+
+    <div class="note-card">
+        <h3>⚙ Parameters</h3>
+        <ul class="note-list">
+            <li><strong>Previous Thickness:</strong> Initial thickness before corrosion exposure.</li>
+            <li><strong>Current Thickness:</strong> Thickness after exposure to corrosive conditions.</li>
+            <li><strong>Time Interval:</strong> Duration between measurements in years.</li>
+            <li><strong>STCR:</strong> Corrosion rate expressed as thickness loss per year.</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>✅ Input Validation Rules</h3>
+        <ul class="note-list">
+            <li><strong>Previous Thickness:</strong> Must be > 0 (typical range: 0.01-12 inches).</li>
+            <li><strong>Current Thickness:</strong> Must be > 0 and ≤ Previous Thickness.</li>
+            <li><strong>Time Interval:</strong> Must be > 0 (typical range: 0.1-10 years).</li>
+            <li><strong>Thickness Loss:</strong> Current thickness cannot exceed previous thickness.</li>
+            <li><strong>Realistic Values:</strong> Inputs should reflect practical corrosion monitoring scenarios.</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>🔎 Output Validations</h3>
+        <ul class="note-list">
+            <li><strong>STCR must be finite:</strong> If result is NaN or Infinity → ❌ Invalid result.</li>
+            <li><strong>STCR = 0:</strong> ✅ No corrosion → No thickness loss detected. Excellent condition.</li>
+            <li><strong>STCR &lt; 0.005 inches/year:</strong> ✅ Low → Minimal corrosion.Excellent corrosion resistance.</li>
+            <li><strong>STCR 0.005-0.02 inches/year:</strong> ⚠️ Moderate → Acceptable corrosion rate. Monitor regularly.</li>
+            <li><strong>STCR &gt; 0.02 inches/year:</strong> ❌ High → Significant corrosion.Immediate  action required.</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>📏Standards & Compliance </h3>
+        <ul class="note-list">
+            <li>✔️ Calculation methods align with <strong>ASTM G31</strong> standard guide for laboratory immersion corrosion testing.</li>
+            <li>✔️ Supports <strong>NACE International</strong> standards for corrosion monitoring.</li>
+            <li>✔️ Complies with <strong>API 570</strong> for piping inspection code.</li>
+            <li>✔️ Validations based on <strong>industry best practices</strong> for corrosion rate calculations.</li>
+            <li>✔️ Follows <strong>OSHA guidelines</strong> for equipment integrity and workplace safety.</li>
+        </ul>
+    </div>
+
+
+    <div class="note-card">
+        <h3>📝 Conclusion</h3>
+        <p>
+            The <strong>Short-Term Corrosion Rate (STCR) Calculator</strong> provides accurate assessment of material degradation
+            rates in corrosive environments. Using thickness measurements over time, this tool helps engineers and maintenance
+            professionals predict equipment lifespan, plan maintenance activities, and ensure structural integrity in accordance
+            with <strong>ASTM, NACE, and API standards</strong> for corrosion monitoring and prevention.
+        </p>
+    </div>
+</div>
+<script>
+function showErrors(errors) {
+    const errorBox = document.getElementById("resultError");
+    const errorMessage = document.getElementById("errorMessage");
+    const placeholder = document.getElementById("placeholder");
+    const resultValue = document.getElementById("resultValue");
+
+    errorMessage.innerHTML = errors.join("<br>");
+    errorBox.classList.remove("hidden");
+    placeholder.classList.add("hidden");
+    resultValue.classList.add("hidden");
+}
+
+function calculateSTCR() {
+    // Read values
+    const prevThick = parseFloat(document.getElementById("previous_thickness").value);
+    const currThick = parseFloat(document.getElementById("current_thickness").value);
+    const timeInt = parseFloat(document.getElementById("time_interval").value);
+    const thicknessUnit = document.getElementById("thickness_unit").value;
+
+    const stcrValueEl = document.getElementById("stcrValue");
+    const stcrUnitEl = document.getElementById("stcrUnit");
+    const feedbackEl = document.getElementById("feedbackContent");
+    document.getElementById("resultError").classList.add("hidden");
+    feedbackEl.innerHTML = "";
+
+    const errors = [];
+    const warnings = [];
+
+    // Validation
+    if (![prevThick, currThick, timeInt].every(Number.isFinite)) {
+        return showErrors(["👉 Please enter all values (numeric)."]);
+    }
+    
+    if (prevThick <= 0) errors.push("👉 Previous thickness must be > 0.");
+    if (currThick <= 0) errors.push("👉 Current thickness must be > 0.");
+    if (timeInt <= 0) errors.push("👉 Time interval must be > 0.");
+    if (currThick > prevThick) errors.push("👉 Current thickness cannot be greater than previous thickness.");
+    
+    // Warning for unusual values
+    if (prevThick > 12 && thicknessUnit === "inches") warnings.push("⚠️ Previous thickness unusually large (>12 inches).");
+    if (prevThick < 0.01 && thicknessUnit === "inches") warnings.push("⚠️ Previous thickness unusually small (<0.01 inches).");
+    if (timeInt > 10) warnings.push("⚠️ Time interval unusually long (>10 years).");
+    if (timeInt < 0.1) warnings.push("⚠️ Time interval unusually short (<0.1 years).");
+
+    if (errors.length) return showErrors(errors);
+
+    // Formula: STCR = (Previous Thickness - Current Thickness) / Time Interval
+    const thicknessLoss = prevThick - currThick;
+    const STCR = thicknessLoss / timeInt;
+
+    if (!Number.isFinite(STCR)) {
+        return showErrors(["⚠️ Computed corrosion rate is invalid (possible calculation error)."]);
+    }
+
+    // Set unit label
+    const unitLabel = thicknessUnit === "mm" ? "mm/year" : "inches/year";
+    stcrUnitEl.textContent = unitLabel;
+
+    // Classification based on corrosion rate (industry standard)
+    let classification, suggestion, color;
+    
+    if (STCR === 0) {
+        classification = "No Corrosion";
+        suggestion = "✅ No thickness loss detected. Excellent condition.";
+        color = "#2e7d32";
+    } else if (STCR < 0.005) {
+        classification = "Low";
+        suggestion = "✅ Minimal corrosion. Excellent corrosion resistance.";
+        color = "#2e7d32";
+    } else if (STCR <= 0.02) {
+        classification = "Moderate";
+        suggestion = "⚠️ Acceptable corrosion rate. Monitor regularly.";
+        color = "#f9a825";
+    } else {
+        classification = "High";
+        suggestion = "❌ Significant corrosion. Immediate action required.";
+        color = "#c62828";
+    }
+
+    // Display result
+    stcrValueEl.textContent = STCR.toFixed(6);
+    
+    feedbackEl.innerHTML = `
+        <div>STCR = <b>${STCR.toFixed(6)}</b> ${unitLabel}</div>
+        <div>Classification: <b style="color:${color};">${classification}</b></div>
+        <div style="margin-top:6px;">${suggestion}</div>
+        ${warnings.length ? `<div style="margin-top:8px; color:#b35d00;">${warnings.join(" | ")}</div>` : ""}
+    `;
+
+    document.getElementById("placeholder").classList.add("hidden");
+    document.getElementById("resultValue").classList.remove("hidden");
+}
+
+function printReport() {
+    const el = document.getElementById('printDate');
+    if (el) el.textContent = new Date().toLocaleDateString();
+    window.print();
+}
+</script>
+<script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+Input Validations:
+Previous Thickness: Must be > 0 (typical range: 0.01-12 inches)
+
+Current Thickness: Must be > 0 and ≤ Previous Thickness
+
+Time Interval: Must be > 0 (typical range: 0.1-10 years)
+
+All inputs must be numeric and finite numbers
+
+Current thickness cannot exceed previous thickness
+------------------------------------------------------------------------------------------
+Output Validations:
+STCR = 0: No corrosion detected (excellent)
+
+STCR < 0.005 inches/year: Low corrosion rate (good)
+
+STCR 0.005-0.02 inches/year: Moderate corrosion rate (acceptable)
+
+STCR > 0.02 inches/year: High corrosion rate (critical)
+
+Result must be finite: No NaN or Infinity values
+-------------------------------------------------------------------------------------------------
+Edge Cases:
+Zero values: Any input = 0 → Error (values must be > 0)
+
+Negative values: Any input negative → Error
+
+Current > Previous: Current thickness greater than previous → Error
+
+Extremely small time interval: Time=0.001 → Warning
+
+Extremely large thickness: Previous=100 → Warning
+
+Non-numeric inputs: Text instead of numbers → Error
+
+
+
+-->
