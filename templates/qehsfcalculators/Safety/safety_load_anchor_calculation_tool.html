@@ -1,0 +1,526 @@
+{% extends 'base.html' %}
+{% block title %}Safety Load Anchor Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safety Load Anchor Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px; /* Fixed Height */
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+            justify-content: center;
+            align-items: center;
+            min-height: 420px; /* Fixed Height */
+            text-align: center;
+        }
+        
+        .input-pair {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+        }
+
+        @media (max-width: 500px) {
+            .input-pair {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+            width: 100%;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+            font-size: 0.9rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background:linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        
+        /* Result Card */
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+        
+        .sub-results {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eaeaea;
+        }
+
+        .sub-result-item {
+            text-align: center;
+        }
+        
+        .sub-result-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        .sub-result-label {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        /* Note Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        /* Error Box */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Safety Load Anchor Calculator</h1>
+            <p>Determine the required load capacity for each anchor in a lifting system to ensure the safe handling of precast structures.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Enter Lifting Parameters</h2>
+                <div class="input-pair">
+                    <div class="form-group">
+                        <label for="totalWeight">Total Weight (G) [kg]</label>
+                        <input type="number" id="totalWeight" class="form-input" placeholder="e.g., 20000">
+                    </div>
+                    <div class="form-group">
+                        <label for="horizontalLoad">Horizontal / Adhesion Load (Ha) [kg]</label>
+                        <input type="number" id="horizontalLoad" class="form-input" placeholder="e.g., 500">
+                    </div>
+                </div>
+                 <div class="input-pair">
+                    <div class="form-group">
+                        <label for="loadFactor">Load Factor (x)</label>
+                        <input type="number" id="loadFactor" class="form-input" placeholder="e.g., 1.5">
+                    </div>
+                    <div class="form-group">
+                        <label for="loadDistribution">Load Distribution (z)</label>
+                        <input type="number" id="loadDistribution" class="form-input" placeholder="e.g., 1.2">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="numAnchors">Number of Anchors (n)</label>
+                    <input type="number" id="numAnchors" class="form-input" placeholder="e.g., 4">
+                </div>
+                <button class="calculate-btn" onclick="calculateAnchorLoad()">Calculate Anchor Load</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Lifting anchor icon">
+                    <p>Enter the weight and load factors to determine the required capacity for each lifting anchor.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                    
+                <div class="result-value hidden" id="resultValue">
+                    <div class="rate-value" id="rateValue">0.00</div>
+                    <div class="rate-label" id="rateLabel">Required Load per Anchor (kg)</div>
+                    
+                    <div class="sub-results">
+                        <div class="sub-result-item">
+                            <div class="sub-result-value" id="totalDynamicLoad">0 kg</div>
+                            <div class="sub-result-label">Total Factored Load</div>
+                        </div>
+                        <div class="sub-result-item">
+                            <div class="sub-result-value" id="numAnchorsDisplay">0</div>
+                            <div class="sub-result-label">Anchors</div>
+                        </div>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Safety Requirement</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About Anchor Load Calculation</h3>
+                <p>
+                   This calculation determines the force that each anchor in a lifting set must withstand when handling heavy components like precast concrete panels. It accounts not only for the object's weight but also for dynamic forces during lifting, adhesion to molds, and uneven load distribution. A correct calculation is essential for selecting anchors with the proper load capacity, preventing catastrophic failure.
+                </p>
+            </div>
+            <div class="note-card">
+                <h3>⚙️ Formula Used</h3>
+                <p>The final load per anchor (F) is calculated by finding the total dynamic load and distributing it among the anchors.</p>
+                <p>$$ F = \frac{ \left( \frac{G + H_a}{2} \right) \cdot x \cdot z }{n} $$</p>
+                 <ul class="note-list">
+                    <li>$G$ = Total Weight</li>
+                    <li>$H_a$ = Horizontal / Adhesion Load</li>
+                    <li>$x$ = Load Factor (for dynamic forces)</li>
+                    <li>$z$ = Load Distribution Factor (for uneven loading)</li>
+                    <li>$n$ = Number of load-bearing Anchors</li>
+                </ul>
+            </div>
+             <div class="note-card">
+                <h3>💡 Key Parameters Explained</h3>
+                 <ul class="note-list">
+                    <li><strong>Total Weight (G):</strong> The static weight of the object being lifted.</li>
+                    <li><strong>Horizontal Load (Ha):</strong> Accounts for forces like wind or adhesion to a mold (formwork), which can add significant load.</li>
+                    <li><strong>Load Factor (x):</strong> A safety multiplier that accounts for dynamic forces created by the movement of the crane and load during lifting.</li>
+                    <li><strong>Load Distribution (z):</strong> A factor that accounts for uneven loading on the anchors, which can occur due to sling angles or rigging imperfections.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateAnchorLoad() {
+            const G_val = document.getElementById('totalWeight').value.trim();
+            const Ha_val = document.getElementById('horizontalLoad').value.trim();
+            const x_val = document.getElementById('loadFactor').value.trim();
+            const z_val = document.getElementById('loadDistribution').value.trim();
+            const n_val = document.getElementById('numAnchors').value.trim();
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+
+            let errors = [];
+
+            // --- VALIDATION RULES ---
+            if (G_val === '' || isNaN(G_val) || parseFloat(G_val) <= 0) errors.push("👉 Total Weight (G) must be a number > 0.");
+            if (Ha_val === '' || isNaN(Ha_val) || parseFloat(Ha_val) < 0) errors.push("👉 Horizontal Load (Ha) must be a number ≥ 0.");
+            if (x_val === '' || isNaN(x_val) || parseFloat(x_val) <= 0) errors.push("👉 Load Factor (x) must be a number > 0.");
+            if (z_val === '' || isNaN(z_val) || parseFloat(z_val) <= 0) errors.push("👉 Load Distribution (z) must be a number > 0.");
+            
+            const n = parseFloat(n_val);
+            if (n_val === '' || isNaN(n) || n <= 0) {
+                errors.push("👉 Number of Anchors (n) must be a number > 0.");
+            } else if (!Number.isInteger(n)) {
+                errors.push("👉 Number of Anchors must be a whole number.");
+            }
+
+            // --- ERROR HANDLING ---
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden");
+            }
+
+            // --- CALCULATION ---
+            const G = parseFloat(G_val);
+            const Ha = parseFloat(Ha_val);
+            const x = parseFloat(x_val);
+            const z = parseFloat(z_val);
+
+            const F_tot = (G + Ha) / 2;
+            const totalDynamicLoad = F_tot * x * z;
+            const loadPerAnchor = totalDynamicLoad / n;
+
+            if (!isFinite(loadPerAnchor)) {
+                errorMessage.innerHTML = "❌ Calculation resulted in an invalid number. Please check your inputs.";
+                errorBox.classList.remove("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            }
+
+            // --- DISPLAY RESULTS ---
+            document.getElementById('rateValue').textContent = loadPerAnchor.toFixed(2);
+            document.getElementById('totalDynamicLoad').textContent = totalDynamicLoad.toFixed(2) + ' kg';
+            document.getElementById('numAnchorsDisplay').textContent = n;
+            
+            // --- FEEDBACK ---
+            const requiredCapacity = Math.ceil(loadPerAnchor);
+            document.getElementById('feedbackContent').innerHTML = `Each of the <strong>${n}</strong> anchors must have a rated capacity of at least <strong>${requiredCapacity.toLocaleString()} kg</strong> to ensure a safe lift under the specified dynamic conditions.`;
+
+            placeholder.classList.add("hidden");
+            resultValue.classList.remove("hidden");
+        }
+
+        function printReport() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}

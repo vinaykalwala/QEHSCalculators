@@ -3136,6 +3136,25 @@ def health_waist_to_height_ratio_calculator(request):
 @subscription_required(plan_type="corporate")
 def health_winters_formula_calculator(request):
     return render(request, 'qehsfcalculators/health/winters_formula.html')
+@login_required
+@subscription_required(plan_type="corporate")
+def cholesterolunitsconverter(request):
+    return render(request, 'qehsfcalculators/health/cholesterolunitsconverter.html', {'title': 'Cholesterol Units Converter'})
+
+@login_required
+@subscription_required(plan_type="corporate")
+def gout_diagnosis_calculator(request):
+    return render(request, 'qehsfcalculators/health/gout.html', {'title': 'Gout Diagnosis Calculator'})
+
+@login_required
+@subscription_required(plan_type="corporate")
+def has_bledcalculator(request):
+    return render(request, 'qehsfcalculators/health/has-bledcalculator.html', {'title': 'HAS-BLED Calculator'})
+
+@login_required
+@subscription_required(plan_type="corporate")
+def probitpercentageeffect(request):
+    return render(request, 'qehsfcalculators/health/probitpercentageeffect.html', {'title': 'Probit Percentage Effect'})   
 
 @login_required
 @subscription_required(plan_type="corporate")

@@ -710,6 +710,7 @@ CALCULATORS = [
 {"name": "Bedridden Patient Weight Estimator", "url_name": "health_bedridden_patient_weight_estimator_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Baby Milk Intake Calculator", "url_name": "health_baby_milk_intake_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Cardiac Index Calculator", "url_name": "health_cardiac_index_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Cholesterol Units Converter", "url_name": "health_cholesterolunitsconverter", "plan_type": "corporate", "category": "health"},
 {"name": "Daily Drinking Water Intake Calculator", "url_name": "health_daily_drinking_water_intake_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Dietary Reference Intake (DRI) Calculator", "url_name": "health_dietary_reference_intake_dri_calculator", "plan_type": "corporate", "category": "health"},
 
@@ -722,8 +723,10 @@ CALCULATORS = [
 {"name": "Fat-Free Mass Index (FFMI) Calculator", "url_name": "health_fat_free_mass_index_ffmi_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Fiber Intake Calculator", "url_name": "health_fiber_intake_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "GAD-7 Anxiety Assessment Calculator", "url_name": "health_generalized_anxiety_disorder_assessment_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Gout Diagnosis Calculator", "url_name": "health_gout_diagnosis_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Gupta Perioperative Risk Calculator", "url_name": "health_gupta_perioperative_risk_calculator", "plan_type": "corporate", "category": "health"},
 
+{"name": "HAS-BLED Score Calculator", "url_name": "health_has_bledcalculator", "plan_type": "corporate", "category": "health"},
 {"name": "Heat Stress Index (HSI) Calculator", "url_name": "health_heat_stress_index_hsi_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Healthy Weight Calculator", "url_name": "health_healthy_weight_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Heaviness of Smoking Index (HSI) Calculator", "url_name": "health_heaviness_of_smoking_index_hsi_calculator", "plan_type": "corporate", "category": "health"},
@@ -744,6 +747,7 @@ CALCULATORS = [
 {"name": "Noise Exposure Level Calculator", "url_name": "health_noise_exposure_level_leq_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Ponderal Index (PI) Calculator", "url_name": "health_ponderal_index_pi_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Protein Intake Calculator", "url_name": "health_protein_intake_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Probit Percentage Effect Calculator", "url_name": "health_probitpercentageeffect", "plan_type": "corporate", "category": "health"},
 
 
 {"name": "Plasma Volume Calculator", "url_name": "health_plasma_volume_calculator", "plan_type": "corporate", "category": "health"},
