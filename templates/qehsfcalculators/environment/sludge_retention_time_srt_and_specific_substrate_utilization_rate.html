@@ -1,0 +1,690 @@
+{% extends 'base.html' %}
+{% block title %}Sludge Retention Time (SRT) And Specific Substrate Utilization Rate Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sludge Retention Time (SRT) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 38px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+<div class="btn-container">
+    <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+</div>
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+    <div class="calculator-header">
+        <h1>Sludge Retention Time (SRT) And Specific Substrate Utilization Rate Calculator</h1>
+        <p>Calculate the sludge retention time for biological wastewater treatment systems.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Input Card -->
+        <div class="calc-card">
+            <h2>Enter Parameters</h2>
+
+            <div class="form-group">
+                <label for="yield_coeff">Maximum Yield Coefficient (Y, dimensionless)</label>
+                <input type="number" id="yield_coeff" class="form-input" step="any" min="0" placeholder="e.g., 0.5">
+            </div>
+            
+            <div class="form-group">
+                <label for="substrate_rate">Specific Substrate Utilization Rate (q, day⁻¹)</label>
+                <input type="number" id="substrate_rate" class="form-input" step="any" min="0" placeholder="e.g., 5.0">
+            </div>
+            
+            <div class="form-group">
+                <label for="decay_rate">Endogenous Decay Rate (kₑ, day⁻¹)</label>
+                <input type="number" id="decay_rate" class="form-input" step="any" min="0" placeholder="e.g., 0.05">
+            </div>
+
+            <button class="calculate-btn" onclick="calculateSRT()">Calculate SRT</button>
+        </div>
+
+        <!-- Result Card -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="/static/images/mlc_environment_result.png" alt="Wastewater treatment illustration">
+                <p>This tool calculates sludge retention time for wastewater treatment optimization.</p>
+            </div>
+
+            <div class="result-error hidden" id="resultError">
+                <div class="error-icon">❌</div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+
+            <div class="result-value hidden" id="resultValue">
+                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Sludge Retention Time (SRT)</h2>
+                </div>
+
+                <div class="rate-display">
+                    <div class="rate-value" id="srtValue">0.000</div>
+                    <div class="rate-unit">days</div>
+                </div>
+
+                <div class="result-feedback">
+                    <div class="feedback-title"> Assessment</div>
+                    <div class="feedback-content" id="feedbackContent"></div>
+                </div>
+
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="note-section">
+
+    <div class="note-card">
+        <h3>📘 About This Calculator</h3>
+        <p>
+            The <strong>Sludge Retention Time (SRT) Calculator</strong> determines the average time that biomass remains in a biological wastewater treatment system. SRT is a critical operational parameter that affects treatment efficiency, sludge production, and microbial population dynamics. Proper SRT control is essential for maintaining stable biological processes and achieving regulatory compliance for effluent quality.
+        </p>
+    </div>
+
+    <div class="note-card">
+        <h3>⚙ Parameters Used</h3>
+        <ul class="note-list">
+            <li><strong>Y (Maximum Yield Coefficient):</strong> Represents the efficiency of microbial biomass production from substrate consumption (dimensionless).</li>
+            <li><strong>q (Specific Substrate Utilization Rate):</strong> The rate at which microorganisms consume substrate per unit biomass (day⁻¹).</li>
+            <li><strong>kₑ (Endogenous Decay Rate):</strong> The rate at which microorganisms decay due to endogenous respiration (day⁻¹).</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>✅ Input Validation Rules</h3>
+        <ul class="note-list">
+            <li><strong>Yield Coefficient (Y):</strong> Must be > 0 (typical range: 0.3-0.7 for aerobic systems).</li>
+            <li><strong>Substrate Utilization Rate (q):</strong> Must be > 0 (typical range: 1-15 day⁻¹).</li>
+            <li><strong>Decay Rate (kₑ):</strong> Must be ≥ 0 (typical range: 0.02-0.1 day⁻¹ for aerobic systems).</li>
+            <li><strong>Denominator Check:</strong> (Y × q) must be > kₑ to avoid negative or infinite SRT.</li>
+            <li><strong>Unit Consistency:</strong> All rates must be in consistent time units (day⁻¹).</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>🔎 Output Validations</h3>
+        <ul class="note-list">
+            <li><strong>SRT must be finite and positive:</strong> If result is NaN, Infinity, or negative → ❌ Invalid result.</li>
+            <li><strong>SRT > 20 days:</strong> ⚠️ Long retention → May indicate slow microbial growth or low substrate availability.</li>
+            <li><strong>5 days ≤ SRT ≤ 20 days:</strong> ✅ Optimal range → Typical for most municipal wastewater treatment.</li>
+            <li><strong>SRT < 5 days:</strong> ⚠️ Short retention → Risk of biomass washout and poor treatment efficiency.</li>
+            <li><strong>SRT < 1 day:</strong> ❌ Very short Retention → System instability likely.</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>📏Standards & Compliance </h3>
+        <ul class="note-list">
+            <li>✔️ Design parameters follow <strong>WEF MOP 8</strong> standards for wastewater treatment.</li>
+            <li>✔️ Kinetic coefficients align with <strong>EPA guidelines</strong> for biological processes.</li>
+            <li>✔️ SRT ranges comply with <strong>industry best practices</strong> for activated sludge systems.</li>
+            <li>✔️ Calculations support <strong>environmental compliance</strong> for nutrient removal standards.</li>
+            <li>✔️ Validations based on <strong>operational experience</strong> from full-scale treatment plants.</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>📌 Conclusion</h3>
+        <p>
+            The Sludge Retention Time (SRT) Calculator provides a critical tool for optimizing biological wastewater treatment systems. By validating inputs against industry standards, applying the correct kinetic formula, and classifying results according to operational best practices, this calculator helps engineers maintain proper biomass retention for efficient treatment. Understanding and controlling SRT is essential for achieving stable process performance, meeting effluent quality standards, and optimizing sludge management in environmental engineering applications.
+        </p>
+    </div>
+
+</div>
+<script>
+function showErrors(errors) {
+    const errorBox = document.getElementById("resultError");
+    const errorMessage = document.getElementById("errorMessage");
+    const placeholder = document.getElementById("placeholder");
+    const resultValue = document.getElementById("resultValue");
+
+    errorMessage.innerHTML = errors.join("<br>");
+    errorBox.classList.remove("hidden");
+    placeholder.classList.add("hidden");
+    resultValue.classList.add("hidden");
+}
+
+function calculateSRT() {
+    // Read values
+    const Y = parseFloat(document.getElementById("yield_coeff").value);
+    const q = parseFloat(document.getElementById("substrate_rate").value);
+    const kₑ = parseFloat(document.getElementById("decay_rate").value);
+
+    const srtValueEl = document.getElementById("srtValue");
+    const feedbackEl = document.getElementById("feedbackContent");
+    document.getElementById("resultError").classList.add("hidden");
+    feedbackEl.innerHTML = "";
+
+    const errors = [];
+    const warnings = [];
+
+    // Validation
+    if (![Y, q, kₑ].every(Number.isFinite)) {
+        return showErrors(["👉 Please enter all values (numeric)."]);
+    }
+    
+    if (Y <= 0) errors.push("👉 Yield coefficient (Y) must be > 0.");
+    if (q <= 0) errors.push("👉 Substrate utilization rate (q) must be > 0.");
+    if (kₑ < 0) errors.push("👉 Decay rate (kₑ) must be ≥ 0.");
+    
+    // Check for valid denominator
+    const denominator = (Y * q) - kₑ;
+    if (denominator <= 0) {
+        errors.push("❌ (Y × q) must be greater than kₑ to calculate a valid SRT.");
+    }
+    
+    // Warning for unusual values
+    if (Y < 0.3 || Y > 0.7) warnings.push("⚠️ Yield coefficient outside typical range (0.3-0.7).");
+    if (q < 1 || q > 15) warnings.push("⚠️ Substrate utilization rate outside typical range (1-15 day⁻¹).");
+    if (kₑ < 0.02 || kₑ > 0.1) warnings.push("⚠️ Decay rate outside typical range (0.02-0.1 day⁻¹).");
+
+    if (errors.length) return showErrors(errors);
+
+    // Formula: SRT = 1 / [(Y × q) - kₑ]
+    const SRT = 1 / denominator;
+
+    if (!Number.isFinite(SRT)) {
+        return showErrors(["⚠️ Computed SRT is invalid (possible calculation error)."]);
+    }
+
+    if (SRT <= 0) {
+        return showErrors(["❌ SRT must be greater than zero."]);
+    }
+
+    // Classification
+    let classification, suggestion, color;
+    if (SRT > 20) {
+        classification = "Long Retention";
+        suggestion = "⚠️ May indicate slow microbial growth or low substrate availability.";
+        color = "#e65100";
+    } else if (SRT >= 5) {
+        classification = "Optimal Range";
+        suggestion = "✅ Typical for most municipal wastewater treatment systems.";
+        color = "#2e7d32";
+    } else if (SRT >= 1) {
+        classification = "Short Retention";
+        suggestion = "⚠️ Risk of biomass washout and poor treatment efficiency.";
+        color = "#f9a825";
+    } else {
+        classification = "Very Short Retention";
+        suggestion = "❌ System instability likely. Review inputs and process conditions.";
+        color = "#c62828";
+    }
+
+    // Display result
+    srtValueEl.textContent = SRT.toFixed(2);
+    feedbackEl.innerHTML = `
+        <div>SRT = <b>${SRT.toFixed(2)}</b> days</div>
+        <div>Classification: <b style="color:${color};">${classification}</b></div>
+        <div style="margin-top:6px;">${suggestion}</div>
+        ${warnings.length ? `<div style="margin-top:8px; color:#b35d00;">${warnings.join(" | ")}</div>` : ""}
+    `;
+
+    document.getElementById("placeholder").classList.add("hidden");
+    document.getElementById("resultValue").classList.remove("hidden");
+}
+
+function printReport() {
+    const el = document.getElementById('printDate');
+    if (el) el.textContent = new Date().toLocaleDateString();
+    window.print();
+}
+</script>
+<script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+
+Input Validations:
+
+Yield Coefficient (Y) must be > 0 (typical range: 0.3-0.7)
+
+Substrate Utilization Rate (q) must be > 0 (typical range: 1-15 day⁻¹)
+
+Decay Rate (kₑ) must be ≥ 0 (typical range: 0.02-0.1 day⁻¹)
+
+Denominator check: (Y × q) must be > kₑ
+-------------------------------------------------------------------------------
+Output Validations:
+
+SRT > 20 days: Long retention (warning)
+
+5-20 days: Optimal range
+
+1-5 days: Short retention (warning)
+
+SRT < 1 day: Very short retention (error)
+
+Results must be finite and positive
+-------------------------------------------------------------------------------------------
+Sludge Retention Time (SRT) = 1 / [(Y × q) - kₑ]
+
+Where:
+
+Y = Maximum Yield Coefficient (dimensionless)
+
+q = Specific Substrate Utilization Rate (mass substrate/mass biomass·time)
+
+kₑ = Endogenous Decay Rate (time⁻¹)
+
+-->

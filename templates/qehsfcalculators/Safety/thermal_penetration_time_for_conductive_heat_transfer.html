@@ -1,0 +1,666 @@
+{% extends 'base.html' %}
+{% block title %}Thermal Penetration Time for Conductive Heat Transfer Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thermal Penetration Time for Conductive Heat Transfer Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: transform 0.3s ease;
+            height: 420px;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background:linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        
+        /* Result Card */
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+        
+        .sub-results {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eaeaea;
+        }
+
+        .sub-result-item {
+            text-align: center;
+        }
+        
+        .sub-result-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        .sub-result-label {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        /* Note Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        /* Error Box */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    <div class="calculator-container printable" id="printArea">
+
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Thermal Penetration Time for Conductive Heat Transfer Calculator</h1>
+            <p>Estimate the time required for a thermal change to propagate through a material via conductive heat transfer.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Enter Material Properties</h2>
+                <div class="form-group">
+                    <label for="distance">Distance / Thickness (x) [meters]</label>
+                    <input type="number" id="distance" class="form-input" placeholder="e.g., 0.05">
+                </div>
+                <div class="form-group">
+                    <label for="diffusivity">Thermal Diffusivity (α) [m²/s]</label>
+                    <input type="number" id="diffusivity" class="form-input" placeholder="e.g., 1.4e-7 for Concrete">
+                </div>
+                <button class="calculate-btn" onclick="calculatePenetrationTime()">Calculate Time</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Heat transfer illustration">
+                    <p>Enter a material's thickness and thermal diffusivity to calculate how long it takes for heat to penetrate it.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                    
+                <div class="result-value hidden" id="resultValue">
+                    <div class="rate-value" id="rateValue">0.00</div>
+                    <div class="rate-label" id="rateLabel">Penetration Time [seconds]</div>
+                    
+                    <div class="sub-results">
+                        <div class="sub-result-item">
+                            <div class="sub-result-value" id="distanceDisplay">0 m</div>
+                            <div class="sub-result-label">Distance (x)</div>
+                        </div>
+                        <div class="sub-result-item">
+                            <div class="sub-result-value" id="diffusivityDisplay">0 m²/s</div>
+                            <div class="sub-result-label">Diffusivity (α)</div>
+                        </div>
+                    </div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Very Fast</span><span>Fast</span><span>Moderate</span><span>Slow</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Insulation Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <!-- About This Calculator -->
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    Thermal penetration time estimates how long it takes for a significant temperature change on one side of a
+                    material to be felt on the other side.
+                    It’s crucial for designing fireproofing, insulation, and heat shields, where delaying heat transfer is
+                    important for safety and efficiency.
+                </p>
+            </div>
+        
+            <!-- Parameters Explanation -->
+            <div class="note-card">
+                <h3>❓ Parameters Explained</h3>
+                <ul class="note-list">
+                    <li><strong>Distance/Thickness (x):</strong> The physical distance heat must travel through the material
+                        (m). Thicker materials take longer for heat to penetrate.</li>
+                    <li><strong>Thermal Diffusivity (α):</strong> A material property indicating how quickly heat spreads
+                        through the material (m²/s). Higher α means faster heat transfer. If α = 0, heat cannot spread, and
+                        penetration time is infinite.</li>
+                </ul>
+            </div>
+        
+            <div class="note-card">
+                <h3>📥 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Distance / Thickness (x) [meters]:</strong> Must be a number between 0.01 m and 10 m. Very small
+                        values (<0.01 m) are negligible; extremely large values (>10 m) are unrealistic for typical insulation or
+                            walls.</li>
+                    <li><strong>Thermal Diffusivity (α) [m²/s]:</strong> Must be a number between 1e-8 and 1e-4. Typical materials:
+                        concrete ≈ 1.4e-7, steel ≈ 1.16e-5. Values outside this range are likely input errors.</li>
+                    <li>Blank, non-numeric, or negative values → flagged as invalid.</li>
+                    <li>Logical consistency: Extremely small thickness with very high diffusivity or extremely large thickness with
+                        very low diffusivity → ⚠️ Warning: Check input realism.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📤 Output Validations</h3>
+                <ul class="note-list">
+                    <li>If input is invalid → <strong>👉 Distance / Thickness and Thermal Diffusivity must be within acceptable
+                            ranges.</strong></li>
+                    <li>Penetration Time (t) is displayed in <strong>seconds</strong> using scientific notation with 4 decimal
+                        places.</li>
+                    <li>Distance and diffusivity values are displayed in scientific notation for clarity.</li>
+                    <li>If calculation produces NaN or infinite →
+                        <strong>❌ Calculation resulted in an invalid number. Please check for extremely small diffusivity
+                            values.</strong>
+                    </li>
+                    <li>Feedback assessment (as per script):
+                        <ul>
+                            <li>❌ <strong>Poor Insulator.</strong> Heat penetrates almost instantly. This material offers negligible
+                                thermal resistance for this thickness.</li>
+                            <li>⚠️ <strong>Weak Insulator.</strong> Heat penetrates quickly. Not suitable for applications requiring
+                                significant thermal delay.</li>
+                            <li>🟡 <strong>Moderate Insulator.</strong> The material provides a noticeable delay to heat transfer.
+                                Suitable for general insulation purposes.</li>
+                            <li>✅ <strong>Good Insulator.</strong> Heat penetrates slowly, indicating effective thermal resistance.
+                                Ideal for fireproofing or high-temperature insulation.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Example -->
+            <div class="note-card">
+                <h3>💡 Example</h3>
+                <p>
+                    For a material with a thickness of 0.05 m and a thermal diffusivity of <strong>1.2 x 10⁻⁶ m²/s</strong>, the
+                    penetration time is approximately 174 seconds.
+                    This shows how heat diffusion slows with thicker materials and low diffusivity.
+                </p>
+            </div>
+        
+            <!-- Common Thermal Diffusivity Values -->
+            <div class="note-card">
+                <h3>💡 Common Thermal Diffusivity (α) Values</h3>
+                <ul class="note-list">
+                    <li><strong>Silver:</strong> 1.71 x 10⁻⁴</li>
+                    <li><strong>Steel (Carbon 1%):</strong> 1.172 x 10⁻⁵</li>
+                    <li><strong>Concrete:</strong> 1.4 x 10⁻⁷</li>
+                    <li><strong>Glass:</strong> 3.4 x 10⁻⁷</li>
+                    <li><strong>Wood (Oak):</strong> 1.28 x 10⁻⁷</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            if (document.getElementById('printDate')) {
+                document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
+        });
+
+        function calculatePenetrationTime() {
+            const distance_val = document.getElementById('distance').value.trim();
+            const diffusivity_val = document.getElementById('diffusivity').value.trim();
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+
+            let errors = [];
+
+            // --- VALIDATION RULES ---
+            const distance = parseFloat(distance_val);
+            const diffusivity = parseFloat(diffusivity_val);
+
+            if (distance_val === '' || isNaN(distance) || distance < 0.01 || distance > 10)
+                errors.push("👉 Distance / Thickness must be between 0.01 m and 10 m.");
+            if (diffusivity_val === '' || isNaN(diffusivity) || diffusivity <= 1e-8 || diffusivity > 1e-4)
+                errors.push("👉 Thermal Diffusivity must be a number between 1e-8 and 1e-4 m²/s.");
+
+            // --- ERROR HANDLING ---
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden");
+            }
+
+            // --- CALCULATION ---
+            const time = (distance === 0) ? 0 : (distance * distance) / (12 * diffusivity);
+
+            if (!isFinite(time)) {
+                errorMessage.innerHTML = "❌ Calculation resulted in an invalid number. Please check for extremely small diffusivity values.";
+                errorBox.classList.remove("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            }
+
+            // --- DISPLAY RESULTS ---
+            document.getElementById('rateValue').textContent = time.toExponential(4);
+            document.getElementById('rateLabel').textContent = "Penetration Time [seconds]";
+            document.getElementById('distanceDisplay').textContent = distance.toExponential(2) + ' m';
+            document.getElementById('diffusivityDisplay').textContent = diffusivity.toExponential(2) + ' m²/s';
+
+            // --- INSULATION ASSESSMENT ---
+            const meterFill = document.getElementById('meterFill');
+            let meterWidth, meterColor, feedback;
+
+            if (time < 10) { // Very Fast
+                meterWidth = '20%';
+                meterColor = '#e74c3c';
+                feedback = '❌ <strong>Poor Insulator.</strong> Heat penetrates almost instantly. This material offers negligible thermal resistance for this thickness.';
+            } else if (time < 60) { // Fast
+                meterWidth = '45%';
+                meterColor = '#e67e22';
+                feedback = '⚠️ <strong>Weak Insulator.</strong> Heat penetrates quickly. Not suitable for applications requiring significant thermal delay.';
+            } else if (time < 300) { // Moderate
+                meterWidth = '70%';
+                meterColor = '#f1c40f';
+                feedback = '🟡 <strong>Moderate Insulator.</strong> The material provides a noticeable delay to heat transfer. Suitable for general insulation purposes.';
+            } else { // Slow
+                meterWidth = '95%';
+                meterColor = '#2ecc71';
+                feedback = '✅ <strong>Good Insulator.</strong> Heat penetrates slowly, indicating effective thermal resistance. Ideal for fireproofing or high-temperature insulation.';
+            }
+
+            meterFill.style.width = meterWidth;
+            meterFill.style.backgroundColor = meterColor;
+            document.getElementById('feedbackContent').innerHTML = feedback;
+
+            placeholder.classList.add("hidden");
+            resultValue.classList.remove("hidden");
+        }
+
+        function printReport() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            window.print();
+        }
+    </script>
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+<!-- 
+1. Analysis from QEHS & Fire Safety Perspective
+
+Formula used in your code:
+
+𝑡
+=
+𝑥
+2
+12
+⋅
+𝛼
+t=
+12⋅α
+x
+2
+	​
+
+
+Where:
+
+x = Thickness / Distance of material [m]
+
+α = Thermal diffusivity [m²/s]
+
+Safety Context:
+
+Thermal penetration time is critical in fire safety, insulation, and protective coating design.
+
+Short penetration times indicate fast heat transfer, increasing fire risk for personnel and structural materials.
+
+Long penetration times indicate good insulation, reducing risk of burns, structural damage, or fire propagation.
+
+OSHA, NFPA, and ISO 45001 standards require assessing heat transfer through barriers for worker safety and process protection.
+
+2. Input Validation Rules (Industry-Compliant)
+Input	Units	Valid Range	Decimals	Notes / Rationale
+Distance / Thickness (x)	m	0.01 – 10	3	Typical walls, insulation, or barriers; below 0.01 m negligible; above 10 m unrealistic for standard applications.
+Thermal Diffusivity (α)	m²/s	1e-8 – 1e-4	scientific notation allowed	Materials: concrete ≈ 1.4e-7, steel ≈ 1.16e-5; values outside range are likely input errors.
+
+Additional rules:
+
+Both inputs mandatory.
+
+Non-numeric, negative, or zero values → invalid.
+
+Inputs must be logically consistent; e.g., extremely thick wall with extremely high α → unrealistic.
+
+3. Edge Case Validations
+
+Zero or negative thickness (x ≤ 0) → invalid.
+
+Zero or negative α (α ≤ 0) → division by zero; invalid.
+
+Extremely small x or α → very small times, may not be meaningful for design.
+
+Extremely large x with very small α → extremely long times, warn for impractical results.
+
+Non-numeric inputs → NaN outputs, must prevent.
+
+4. Output Validation / Assessment
+
+The calculator can provide feedback based on penetration time, using the same style as your previous script (meter and feedback):
+
+Penetration Time (t)	Assessment	Feedback
+< 30 s	Very Fast	✅ Very fast heat transfer. Minimal protection; high fire/heat risk.
+30 – 120 s	Fast	🟡 Fast heat transfer. Consider insulation improvements.
+120 – 600 s	Moderate	⚠️ Moderate penetration. Standard insulation provides reasonable protection.
+> 600 s	Slow	❌ Slow heat penetration. Excellent insulation; low risk.
+-->

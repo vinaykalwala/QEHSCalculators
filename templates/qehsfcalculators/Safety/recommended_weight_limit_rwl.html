@@ -1,0 +1,743 @@
+{% extends 'base.html' %}
+{% block title %}Recommended Weight Limit (RWL) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommended Weight Limit (RWL) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        /* Input rows for side-by-side fields */
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+       
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Recommended Weight Limit (RWL) Calculator</h1>
+            <p>Calculate the safe lifting limit based on ergonomic factors</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="HM">Horizontal Multiplier (HM)</label>
+                        <input type="number" id="HM" class="form-input" min="0.1" max="1" step="0.01" placeholder="e.g., 0.8">
+                    </div>
+                    <div class="form-group">
+                        <label for="VM">Vertical Multiplier (VM)</label>
+                        <input type="number" id="VM" class="form-input" min="0.1" max="1" step="0.01" placeholder="e.g., 0.9">
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="DM">Distance Multiplier (DM)</label>
+                        <input type="number" id="DM" class="form-input" min="0.1" max="1" step="0.01" placeholder="e.g., 0.85">
+                    </div>
+                    <div class="form-group">
+                        <label for="AM">Asymmetry Multiplier (AM)</label>
+                        <input type="number" id="AM" class="form-input" min="0.1" max="1" step="0.01" placeholder="e.g., 0.95">
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="FM">Frequency Multiplier (FM)</label>
+                        <input type="number" id="FM" class="form-input" min="0.1" max="1.5" step="0.01" placeholder="e.g., 0.75">
+                    </div>
+                    <div class="form-group">
+                        <label for="CM">Coupling Multiplier (CM)</label>
+                        <input type="number" id="CM" class="form-input" min="0.1" max="1" step="0.01" placeholder="e.g., 1.0">
+                    </div>
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateRWL()">Calculate RWL</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Safety illustration">
+                    <p>This tool will calculate the <strong>Recommended Weight Limit (RWL)</strong> for safe lifting. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Recommended Weight Limit</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">kg</div>
+                    </div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low</span><span>Moderate</span><span>Good</span><span>Ideal</span><span>Optimal</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Lifting Safety Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<div class="note-section">
+    <!-- About -->
+    <div class="note-card">
+        <h3>📘 About This Calculator</h3>
+        <p>
+            The <strong>Recommended Weight Limit (RWL) Calculator</strong> is based on the 
+            <strong>NIOSH Lifting Equation</strong>. It helps determine safe manual lifting limits, 
+            reducing risks of musculoskeletal disorders and ensuring compliance with 
+            <strong>OSHA</strong>, <strong>ISO 11228-1</strong>, and <strong>ILO</strong> ergonomic guidelines.
+        </p>
+    </div>
+
+    <!-- Parameters Used -->
+    <div class="note-card">
+        <h3>⚙ Parameters Used</h3>
+        <ul class="note-list">
+            <li><b>HM (0.1–1.0):</b> Horizontal reach distance from the body.</li>
+            <li><b>VM (0.1–1.0):</b> Vertical start height of the lift.</li>
+            <li><b>DM (0.1–1.0):</b> Vertical travel distance of the lift.</li>
+            <li><b>AM (0.1–1.0):</b> Trunk rotation/asymmetry during lift.</li>
+            <li><b>FM (0.1–1.5):</b> Frequency of lifts per minute.</li>
+            <li><b>CM (0.1–1.0):</b> Coupling or grip quality.</li>
+        </ul>
+    </div>
+<!-- Input Validation Rules -->
+<div class="note-card">
+    <h3>✅ Input Validation Rules</h3>
+    <ul class="note-list">
+        <li><strong>All multipliers</strong> must be <span style="color:#e74c3c; font-weight:bold;">numeric and positive</span>.</li>
+        <li><strong>HM, VM, DM, AM, CM:</strong> <span style="color:#1560bd; font-weight:bold;">0.1 to 1.0</span>.</li>
+        <li><strong>FM:</strong> <span style="color:#1560bd; font-weight:bold;">0.1 to 1.5</span>.</li>
+        <li>Maximum <strong>2 decimal places</strong> allowed.</li>
+        <li><span style="color:#e67e22; font-weight:bold;">Empty or text inputs</span> are <strong>invalid</strong>.</li>
+    </ul>
+</div>
+
+<!-- Output Validations -->
+<div class="note-card">
+    <h3>✅ Output Validations</h3>
+    <ul class="note-list">
+        <li><strong>RWL &lt; 5 kg</strong> → 
+            <span style="color:#e74c3c; font-weight:bold;">Very low weight limit</span>. 
+            <strong>Task redesign strongly recommended</strong> to reduce injury risk.
+        </li>
+        <li><strong>5 ≤ RWL ≤ 10 kg</strong> → 
+            <span style="color:#e67e22; font-weight:bold;">Low weight limit</span>. 
+            <strong>Consider ergonomic improvements</strong> to the lifting task.
+        </li>
+        <li><strong>10 &lt; RWL ≤ 15 kg</strong> → 
+            <span style="color:#f39c12; font-weight:bold;">Moderate weight limit</span>. 
+            Acceptable with <strong>proper lifting technique</strong> and training.
+        </li>
+        <li><strong>15 &lt; RWL ≤ 20 kg</strong> → 
+            <span style="color:#27ae60; font-weight:bold;">Good weight limit</span>. 
+            Generally safe for most workers with <strong>proper technique</strong>.
+        </li>
+        <li><strong>RWL &gt; 20 kg</strong> → 
+            <span style="color:#2ecc71; font-weight:bold;">Optimal weight limit</span>. 
+            Safe for <strong>trained workers</strong> under these conditions.
+        </li>
+    </ul>
+    <p><i><strong>Note:</strong> LC (Load Constant) = 
+        <span style="color:#1560bd; font-weight:bold;">23 kg baseline</span>, 
+        adjusted by multipliers.</i></p>
+</div>
+
+
+    <!-- Standards -->
+    <div class="note-card">
+        <h3>📏 Standards</h3>
+        <p>
+            Based on <strong>NIOSH Lifting Equation</strong>, <strong>OSHA Ergonomic Guidelines</strong>, 
+            and <strong>ISO 11228-1 Manual Handling</strong> standards for workplace safety.
+        </p>
+    </div>
+    <!-- Conclusion -->
+<div class="note-card">
+    <h3>📝 Conclusion</h3>
+    <p>
+        The <strong>Recommended Weight Limit (RWL) Calculator</strong> provides a 
+        science-based method to evaluate <strong>safe lifting limits</strong> using the 
+        <strong>NIOSH Lifting Equation</strong>. By applying multipliers for posture, 
+        frequency, and grip quality, it ensures a more accurate assessment of 
+        <strong>ergonomic safety</strong>.
+    </p>
+</div>
+
+</div>
+
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateRWL() {
+    /*
+    ==========================================================
+    📘 NIOSH Recommended Weight Limit (RWL) Formula:
+    RWL = LC × HM × VM × DM × AM × FM × CM
+    LC = 23 kg (Load Constant)
+    ==========================================================
+    */
+
+    const LC = 23; // Load Constant
+
+    // Fetch inputs
+    const HM = document.getElementById('HM').value.trim();
+    const VM = document.getElementById('VM').value.trim();
+    const DM = document.getElementById('DM').value.trim();
+    const AM = document.getElementById('AM').value.trim();
+    const FM = document.getElementById('FM').value.trim();
+    const CM = document.getElementById('CM').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+
+    // 🔎 Input validation rules
+    function validateMultiplier(value, name, min, max) {
+        if (value === "" || isNaN(value)) {
+            errors.push(`👉 ${name} is required and must be numeric.`);
+            return null;
+        }
+        const num = parseFloat(value);
+        if (num <= 0) {
+            errors.push(`👉 ${name} must be a positive number.`);
+        } else if (num < min || num > max) {
+            errors.push(`👉 ${name} must be between ${min} and ${max}.`);
+        }
+        // Allow only 2 decimals
+        if (!/^\d+(\.\d{1,2})?$/.test(value)) {
+            errors.push(`👉 ${name} can have max 2 decimal places.`);
+        }
+        return num;
+    }
+
+    const hm = validateMultiplier(HM, "Horizontal Multiplier", 0.1, 1);
+    const vm = validateMultiplier(VM, "Vertical Multiplier", 0.1, 1);
+    const dm = validateMultiplier(DM, "Distance Multiplier", 0.1, 1);
+    const am = validateMultiplier(AM, "Asymmetry Multiplier", 0.1, 1);
+    const fm = validateMultiplier(FM, "Frequency Multiplier", 0.1, 1.5);
+    const cm = validateMultiplier(CM, "Coupling Multiplier", 0.1, 1);
+
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // ⚠️ Cross-field warnings (not blocking, but useful for audits)
+    let warnings = [];
+    if (hm < 0.3 && fm > 1.2) {
+        warnings.push("⚠️ Unusual case: frequent lifts with far reach may be unsafe.");
+    }
+    if (vm < 0.2 && dm > 0.9) {
+        warnings.push("⚠️ Unusual case: long vertical distance with low/high start may strain workers.");
+    }
+
+    // ✅ Perform calculation
+    const RWL = LC * hm * vm * dm * am * fm * cm;
+
+    if (!isFinite(RWL) || isNaN(RWL)) {
+        errorMessage.innerHTML = "👉 Calculation error: please check inputs.";
+        errorBox.classList.remove("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    document.getElementById('rateValue').textContent = RWL.toFixed(2);
+
+    // 📊 Risk assessment logic
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+
+    if (RWL < 5) {
+        meterWidth = '10%'; meterColor = '#c62828';
+        feedback = 'Very low weight limit. Task redesign strongly recommended to reduce injury risk.';
+    } else if (RWL <= 10) {
+        meterWidth = '30%'; meterColor = '#e67e22';
+        feedback = 'Low weight limit. Consider ergonomic improvements to the lifting task.';
+    } else if (RWL <= 15) {
+        meterWidth = '50%'; meterColor = '#f39c12';
+        feedback = 'Moderate weight limit. Acceptable with proper lifting technique and training.';
+    } else if (RWL <= 20) {
+        meterWidth = '75%'; meterColor = '#27ae60';
+        feedback = 'Good weight limit. Generally safe for most workers with proper technique.';
+    } else {
+        meterWidth = '95%'; meterColor = '#2ecc71';
+        feedback = 'Optimal weight limit. Safe for trained workers under these conditions.';
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+
+    document.getElementById('feedbackContent').innerHTML = feedback + 
+        (warnings.length > 0 ? "<br><br>" + warnings.join("<br>") : "");
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+{% comment %} 
+1️⃣ Formula Reference (for code comment)
+/*
+📘 Formula Reference: NIOSH Recommended Weight Limit (RWL)
+
+RWL = LC × HM × VM × DM × AM × FM × CM
+
+Where:
+- LC = Load Constant = 23 kg (baseline safe lifting weight)
+- HM = Horizontal Multiplier (0.1–1.0) → distance from body
+- VM = Vertical Multiplier (0.1–1.0) → lift starting height
+- DM = Distance Multiplier (0.1–1.0) → vertical travel distance
+- AM = Asymmetry Multiplier (0.1–1.0) → trunk twisting
+- FM = Frequency Multiplier (0.1–1.5) → lift repetitions
+- CM = Coupling Multiplier (0.1–1.0) → grip quality
+*/
+
+2️⃣ Input Validation Rules (QEHS-compliant)
+
+✅ General Rules
+
+All multipliers must be numeric and positive.
+
+Maximum 2 decimal places allowed (for ergonomic precision).
+
+Empty or non-numeric entries are invalid.
+
+✅ Range Limits
+
+HM, VM, DM, AM, CM → must be between 0.1 and 1.0.
+
+FM → must be between 0.1 and 1.5 (frequency factor per NIOSH).
+
+✅ Cross-field consistency
+
+If HM < 0.3 and FM > 1.2 → issue warning (unrealistic: frequent lifting at far reach).
+
+If VM < 0.2 (very low or high lift start) AND DM > 0.9 (long travel) → warning (ergonomically unsafe posture).
+
+3️⃣ Output Validation & Thresholds
+RWL Value	Assessment	Feedback (appears in result)
+< 5 kg	Very Low	"Very low weight limit. Task redesign strongly recommended to reduce injury risk."
+5 – 10 kg	Low	"Low weight limit. Consider ergonomic improvements to the lifting task."
+10 – 15 kg	Moderate	"Moderate weight limit. Acceptable with proper lifting technique and training."
+15 – 20 kg	Good	"Good weight limit. Generally safe for most workers with proper technique."
+> 20 kg	Optimal	"Optimal weight limit. Safe for trained workers under these conditions." {% endcomment %}

@@ -1,0 +1,732 @@
+{% extends 'base.html' %}
+{% block title %}Total Brake Horsepower (BHP) Required Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Total Brake Horsepower (BHP) Required Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .input-pair {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+        }
+
+        @media (max-width: 500px) {
+            .input-pair {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+            width: 100%;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background:linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        
+        /* Result Card */
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+        
+        .sub-results {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eaeaea;
+        }
+
+        .sub-result-item {
+            text-align: center;
+        }
+        
+        .sub-result-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        .sub-result-label {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        /* Note Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        .calculation-nav {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .calculation-link {
+            display: inline-block;
+            background-color: #1560bd;
+            padding: 10px 20px;
+            color: white !important;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .calculation-link:hover {
+            background-color: #000040;
+            transform: translateY(-2px);
+            color: white !important;
+        }
+
+        /* Error Box */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    <div class="calculator-container printable" id="printArea">
+
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Total Brake Horsepower (BHP) Required Calculator</h1>
+            <p>Calculate the required Brake Horsepower (BHP) for a pump based on fluid properties, flow rate, head, and efficiency.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Enter Pump System Parameters</h2>
+                <div class="input-pair">
+                    <div class="form-group">
+                        <label for="specificWeight">Specific Weight [kg/m³]</label>
+                        <input type="number" id="specificWeight" class="form-input" value="1000">
+                    </div>
+                    <div class="form-group">
+                        <label for="discharge">Pump Discharge [m³/s]</label>
+                        <input type="number" id="discharge" class="form-input" placeholder="e.g., 0.5">
+                    </div>
+                </div>
+                 <div class="input-pair">
+                    <div class="form-group">
+                        <label for="totalHead">Total Head [m]</label>
+                        <input type="number" id="totalHead" class="form-input" placeholder="e.g., 50">
+                    </div>
+                    <div class="form-group">
+                        <label for="efficiency">Pump Efficiency [%]</label>
+                        <input type="number" id="efficiency" class="form-input" min="1" max="100" placeholder="e.g., 75">
+                    </div>
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateBHP()">Calculate BHP</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Pump system illustration">
+                    <p>Enter your system data to calculate the required motor power (BHP) and assess the pump's energy efficiency.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                    
+                <div class="result-value hidden" id="resultValue">
+                    <div class="rate-value" id="rateValue">0.00</div>
+                    <div class="rate-label" id="rateLabel">Brake Horsepower (BHP)</div>
+                    
+                    <div class="sub-results">
+                        <div class="sub-result-item">
+                            <div class="sub-result-value" id="waterHorsepower">0 HP</div>
+                            <div class="sub-result-label">Water Horsepower</div>
+                        </div>
+                        <div class="sub-result-item">
+                            <div class="sub-result-value" id="pumpEfficiency">0%</div>
+                            <div class="sub-result-label">Pump Efficiency</div>
+                        </div>
+                    </div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Poor</span><span>Fair</span><span>Good</span><span>Excellent</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Efficiency Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <!-- About This Calculator -->
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    Brake Horsepower (BHP) is the actual power required from a motor to drive a pump.
+                    This calculator determines the BHP by considering the power needed to move the fluid (**Water Horsepower**)
+                    and then adjusting for the pump's mechanical and hydraulic inefficiencies.
+                    It is an essential tool for sizing motors, optimizing energy consumption, and ensuring reliable pump
+                    performance.
+                </p>
+            </div>
+        
+            <!-- Parameters Explained -->
+            <div class="note-card">
+                <h3>⚙️ Parameters Explained</h3>
+                <ul class="note-list">
+                    <li><strong>Specific Weight of Water (γ) [kg/m³]:</strong> Density of the fluid. Typically 1000 kg/m³ for
+                        water at standard conditions. Adjust for other fluids.</li>
+                    <li><strong>Discharge of Pump (Q) [m³/s]:</strong> Flow rate of the pump in cubic meters per second.</li>
+                    <li><strong>Total Head (H) [m]:</strong> Total vertical distance the fluid is lifted, including friction
+                        losses.</li>
+                    <li><strong>Pump Efficiency (η) [%]:</strong> How effectively the pump converts mechanical power into
+                        hydraulic power. Must be between 0% and 100%.</li>
+                    <li><strong>Total Brake Horsepower (BHP):</strong> Actual power required to drive the pump, considering
+                        inefficiencies.</li>
+                </ul>
+            </div>
+        
+            <div class="note-card">
+                <h3>📥 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Specific Weight [kg/m³]:</strong> Must be a positive number (> 0).
+                        Typical range is 500 – 20,000 kg/m³. Example: Water = 1000 kg/m³.</li>
+                    <li><strong>Pump Discharge [m³/s]:</strong> Must be greater than 0.
+                        Values above 100 m³/s are flagged as unrealistic.</li>
+                    <li><strong>Total Head [m]:</strong> Must be a positive number (> 0).
+                        Values above 1000 m may indicate incorrect input.</li>
+                    <li><strong>Pump Efficiency [%]:</strong> Must be a number between <strong>1% and 100%</strong>.
+                        Any value outside this range is invalid.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📤 Output Validations</h3>
+                <ul class="note-list">
+                    <li>If inputs are invalid → <strong>❌ Please enter valid input values.</strong></li>
+                    <li>If efficiency is outside 1–100% → <strong>👉 Pump Efficiency must be between 1% and 100%.</strong></li>
+                    <li>If calculation produces a non-finite or zero result →
+                        <strong>❌ Calculation resulted in an invalid number. Please check your inputs.</strong>
+                    </li>
+                    <li>Brake Horsepower (BHP) is always displayed rounded to <strong>2 decimal places</strong>.</li>
+                    <li>Water Horsepower is displayed in <strong>HP</strong> with 2 decimal precision.</li>
+                    <li>Pump Efficiency is displayed with <strong>1 decimal precision</strong> followed by %.</li>
+                </ul>
+            </div>
+
+        
+            <!-- Conclusion -->
+            <div class="note-card">
+                <h3>✅ Conclusion</h3>
+                <p>
+                    The Total BHP Calculator is a critical tool for evaluating pump energy consumption across industries.
+                    By understanding the relationship between fluid weight, discharge rate, total head, and efficiency,
+                    you can accurately determine the power required, optimize energy usage, reduce costs, and ensure reliable
+                    mechanical system performance.
+                </p>
+            </div>
+        
+            <!-- Related Calculators -->
+            <div class="note-card">
+                <h3>🛠️ Related Calculators</h3>
+                <p>For a complete analysis of your pump system, you may also need to calculate the Total Pump Delivery Head and
+                    Pump Efficiency. Use our specialized tools for these calculations:</p>
+                <div class="calculation-nav">
+                    <a href="pumpdeliveryheadcalculator.html" class="calculation-link">Total Pump Delivery Head Calculator</a>
+                    <a href="pumpeffiencycal.html" class="calculation-link">Pump Efficiency Calculator</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateBHP() {
+            const specificWeight_val = document.getElementById('specificWeight').value.trim();
+            const discharge_val = document.getElementById('discharge').value.trim();
+            const totalHead_val = document.getElementById('totalHead').value.trim();
+            const efficiency_val = document.getElementById('efficiency').value.trim();
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+
+            let errors = [];
+
+            // --- INPUT VALIDATIONS ---
+            const specificWeight = parseFloat(specificWeight_val);
+            const discharge = parseFloat(discharge_val);
+            const totalHead = parseFloat(totalHead_val);
+            const efficiency = parseFloat(efficiency_val);
+
+            // Specific Weight
+            if (specificWeight_val === '' || isNaN(specificWeight) || specificWeight <= 0) {
+                errors.push("👉 Specific Weight must be a positive number (> 0). Typical water = 1000 kg/m³.");
+            } else if (specificWeight < 500 || specificWeight > 20000) {
+                errors.push("⚠️ Specific Weight value is outside typical range (500–20,000 kg/m³). Check unit consistency.");
+            }
+
+            // Discharge
+            if (discharge_val === '' || isNaN(discharge) || discharge <= 0) {
+                errors.push("👉 Pump Discharge must be a positive number (> 0).");
+            } else if (discharge > 100) {
+                errors.push("⚠️ Discharge value seems unusually high (> 100 m³/s). Verify units.");
+            }
+
+            // Total Head
+            if (totalHead_val === '' || isNaN(totalHead) || totalHead <= 0) {
+                errors.push("👉 Total Head must be a positive number (> 0).");
+            } else if (totalHead > 1000) {
+                errors.push("⚠️ Total Head value seems excessive (> 1000 m). Verify input.");
+            }
+
+            // Efficiency
+            if (efficiency_val === '' || isNaN(efficiency)) {
+                errors.push("👉 Pump Efficiency must be a number.");
+            } else if (efficiency <= 0 || efficiency > 100) {
+                errors.push("👉 Pump Efficiency must be between 1% and 100%.");
+            }
+
+            // --- ERROR HANDLING ---
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden");
+            }
+
+            // --- CALCULATION ---
+            const efficiencyDecimal = efficiency / 100;
+            const conversionFactor = 745.7; // Watts to HP
+
+            // Water Horsepower = (ρ × Q × H) / 745.7
+            const waterHorsepower = (specificWeight * discharge * totalHead) / conversionFactor;
+
+            // Brake Horsepower = Water Horsepower / Efficiency
+            const brakeHorsepower = waterHorsepower / efficiencyDecimal;
+
+            // --- OUTPUT VALIDATION ---
+            if (!isFinite(brakeHorsepower) || brakeHorsepower <= 0) {
+                errorMessage.innerHTML = "❌ Calculation resulted in an invalid number. Please check your inputs.";
+                errorBox.classList.remove("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            }
+
+            // --- DISPLAY RESULTS ---
+            document.getElementById('rateValue').textContent = brakeHorsepower.toFixed(2);
+            document.getElementById('waterHorsepower').textContent = waterHorsepower.toFixed(2) + ' HP';
+            document.getElementById('pumpEfficiency').textContent = efficiency.toFixed(1) + '%';
+
+            // --- EFFICIENCY ASSESSMENT ---
+            const meterFill = document.getElementById('meterFill');
+            let meterWidth, meterColor, feedback;
+
+            if (efficiency < 40) {
+                meterWidth = '20%';
+                meterColor = '#e74c3c'; // Red
+                feedback = '❌ <strong>Poor Efficiency.</strong> Excessive energy consumption. Consider maintenance/replacement.';
+            } else if (efficiency < 60) {
+                meterWidth = '45%';
+                meterColor = '#e67e22'; // Orange
+                feedback = '⚠️ <strong>Fair Efficiency.</strong> Below optimal. Energy savings possible.';
+            } else if (efficiency < 80) {
+                meterWidth = '70%';
+                meterColor = '#f1c40f'; // Yellow
+                feedback = '👍 <strong>Good Efficiency.</strong> Operating effectively. Maintain regularly.';
+            } else { // ≥ 80
+                meterWidth = '95%';
+                meterColor = '#2ecc71'; // Green
+                feedback = '✅ <strong>Excellent Efficiency.</strong> Near Best Efficiency Point (BEP).';
+            }
+
+            meterFill.style.width = meterWidth;
+            meterFill.style.backgroundColor = meterColor;
+            document.getElementById('feedbackContent').innerHTML = feedback;
+
+            placeholder.classList.add("hidden");
+            resultValue.classList.remove("hidden");
+        }
+
+        function printReport() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            window.print();
+        }
+    </script>
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+<!-- 
+1. Analysis of Inputs & Outputs
+
+Inputs (real-world meaning):
+
+Specific Weight [kg/m³] → usually ~1000 kg/m³ for water at ambient conditions; can vary with chemicals.
+
+Pump Discharge [m³/s] → volumetric flow rate. Critical in fire safety (hydrant / sprinkler flow demand).
+
+Total Head [m] → energy imparted by the pump (pressure head). Determines firefighting water jet reach.
+
+Pump Efficiency [%] → how well input energy is converted to useful hydraulic work. Normally 50–85% for centrifugal pumps.
+
+Outputs:
+
+Water Horsepower (WHP): theoretical hydraulic power.
+
+Brake Horsepower (BHP): actual motor power required (accounts for efficiency).
+
+Efficiency Assessment: Safety/audit perspective (too low efficiency → energy wastage, overheating, fire risk in motors).
+
+2. Comprehensive Input Validation Rules
+Parameter	Expected Range (Industry Standard)	Allowed Decimals	Units	Validation Logic
+Specific Weight	500–2000 kg/m³ (covers water, foams, light fuels)	≤ 2 decimals	kg/m³	Must be >0; typical fire water: ~1000
+Discharge (Q)	0.001–5 m³/s (small pumps to industrial fire pumps)	≤ 3 decimals	m³/s	Must be >0; unrealistic >10
+Total Head (H)	1–250 m (typical firefighting range)	≤ 2 decimals	m	Must be >0; avoid extreme >500
+Efficiency (%)	10–100% (most centrifugal pumps 50–85%)	≤ 1 decimal	%	Must be >0 and ≤100
+
+Cross-field validations:
+
+If efficiency < 20% → raise warning: “Pump efficiency too low; unsafe/unreliable system.”
+
+If efficiency > 90% → unrealistic → reject.
+
+Ensure denominator (efficiency * 745.7) ≠ 0 (division by zero risk).
+
+3. Edge Case Validations
+
+Zero/Negative values → reject immediately.
+
+Efficiency = 0% or >100% → physically impossible.
+
+Extremely high BHP (>10,000 HP) → outlier, warn user to check data.
+
+Combination checks: Very high head + low discharge with tiny efficiency may cause infinite/unrealistic values.
+
+4. Output Validation & Thresholds
+
+We can benchmark BHP efficiency into categories (aligned with pump audit practices):
+
+❌ Poor: Efficiency < 50% → severe energy loss, overheating risk.
+
+⚠️ Fair: Efficiency 50–65% → usable, but not optimal.
+
+🟡 Good: Efficiency 65–80% → acceptable in fire water systems.
+
+✅ Excellent: Efficiency 80–90% → high performance.
+-->

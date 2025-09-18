@@ -1683,6 +1683,13 @@ def quality_wet_film_thickness_wft_calculator(request):
 def quality_water_ion_product_calculator(request):
     return render(request, 'qehsfcalculators/quality/water_ion_product.html', {'title': 'Water Ion Product Calculator'})
 
+
+@login_required
+@subscription_required(plan_type="corporate")
+def quality_orifice_meter_flow_calculator(request):
+    return render(request, 'qehsfcalculators/quality/orifice_meter_flow.html', {'title': 'Orifice Meter Flow Calculator'})
+
+
 @login_required
 @subscription_required(plan_type="corporate")
 def environment_main_calculator(request):
@@ -2340,6 +2347,31 @@ def environment_percentage_of_saturation_humidity_ratio_calculator(request):
 
 @login_required
 @subscription_required(plan_type="corporate")
+def environment_plume_rise_height_under_stable_and_calm_conditions(request):
+    return render(request, 'qehsfcalculators/environment/plume_rise_height_under_stable_and_calm_conditions.html',{'title': 'Plume Rise Height (ΔH) Calculator Under Stable & Calm Conditions'})
+
+
+@login_required
+@subscription_required(plan_type="corporate")
+def environment_plume_rise_height_large_flow_rate_calculator(request):
+    return render(request,'qehsfcalculators/environment/plume_rise_height_large_flow_rate.html',{'title': 'Plume Rise Height (ΔH) Calculator In Large Flow Rate'})
+
+
+@login_required
+@subscription_required(plan_type="corporate")
+def environment_plume_rise_height_non_buoyant_calculator(request):
+    return render(request,'qehsfcalculators/environment/plume_rise_height_non_buoyant.html',{'title': 'Plume Rise Height (ΔH) Calculator for Non-Buoyant Plumes'})
+
+
+@login_required
+@subscription_required(plan_type="corporate")
+def pitot_tube_velocity_calculator(request):
+    return render(request,'qehsfcalculators/environment/pitot_tube_velocity.html',{'title': 'Pitot Tube Velocity Calculator'})
+
+
+
+@login_required
+@subscription_required(plan_type="corporate")
 def environment_recycling_carbon_footprint_savings_calculator(request):
     return render(request, 'qehsfcalculators/environment/recycling_carbon_footprint_savings.html', {'title': 'Recycling Carbon Footprint Savings Calculator '})
 
@@ -2391,7 +2423,7 @@ def environment_retention_time_in_settling_zone_t_calculator(request):
 @login_required
 @subscription_required(plan_type="corporate")
 def environment_rankins_equation_filter_efficiency_calculator(request):
-    return render(request, 'qehsfcalculators/environment/rankins_equation_filter_efficiency.html')
+    return render(request, 'qehsfcalculators/environment/rankins_equation_filter_efficiency.html', {'title': 'Rankins Equation - Filter Efficiency Calculator'})
 
 @login_required
 @subscription_required(plan_type="corporate")
@@ -2597,6 +2629,13 @@ def environment_sludge_recirculation_rate_qr_calculator(request):
 @subscription_required(plan_type="corporate")
 def environment_solubility_product_ksp_calculator(request):
     return render(request, 'qehsfcalculators/environment/solubility_product_ksp.html', {'title': 'Solubility Product (Ksp) Calculator'})
+
+
+
+@login_required
+@subscription_required(plan_type="corporate")
+def environment_stability_parameter_calculator(request):
+    return render(request, 'qehsfcalculators/environment/stability_parameter.html', {'title': 'Stability Parameter(S) calculator'})
 
 @login_required
 @subscription_required(plan_type="corporate")
@@ -3912,6 +3951,10 @@ def safety_reaction_force_at_the_end_of_safety_valve_calculator(request):
 @subscription_required(plan_type="corporate")
 def safety_remaining_corrosion_life1_calculator(request):
     return render(request, 'qehsfcalculators/safety/remaining_corrosion_life1.html', {'title': 'Remaining Corrosion Life Calculator (1)'})
+@login_required
+@subscription_required(plan_type="corporate")
+def safety_remaining_corrosion_life2_calculator(request):
+    return render(request, 'qehsfcalculators/safety/remaining_corrosion_life2.html', {'title': 'Remaining Corrosion Life Calculator (2)'})
 
 @login_required
 @subscription_required(plan_type="corporate")
@@ -3967,6 +4010,11 @@ def safety_reel_and_paddle_power_calculator(request):
 @subscription_required(plan_type="corporate")
 def safety_risk_index_calculator(request):
     return render(request, 'qehsfcalculators/safety/risk_index.html', {'title': 'Risk Index Calculator'})
+
+@login_required
+@subscription_required(plan_type="corporate")
+def safety_radial_heat_flow_cylinder_calculator(request):
+    return render(request, 'qehsfcalculators/safety/radial_heat_flow_cylinder.html', {'title': 'Radial Heat Flow Through Cylinder Calculator'})
 
 @login_required
 @subscription_required(plan_type="corporate")

@@ -1,0 +1,595 @@
+{% extends 'base.html' %}
+{% block title %}Pit Area Calculation{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accident Rate Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+           justify-content: center;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+          @media (max-width: 768px) {
+    .rate-value {
+        font-size: 28px; /* smaller font for tablets/mobiles */
+    }
+}
+
+@media (max-width: 480px) {
+    .rate-value {
+        font-size: 24px; /* even smaller for phones */
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+   <div class="calculator-container printable" id="printArea">
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+
+    <!-- Header -->
+    <div class="calculator-header">
+        <h1>Pit Area Calculator</h1>
+        <p>Calculate the pit area (sq. in.) to assess corrosion severity and structural integrity of metal surfaces.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Calculator -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+            <div class="form-group">
+                <label for="diameter">Pit Diameter (D) [inches]</label>
+                <input type="number" id="diameter" class="form-input" min="0.01" step="any" placeholder="e.g., 2.5">
+            </div>
+
+            <button class="calculate-btn" onclick="calculatePitArea()">Calculate Pit Area</button>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="{% static 'images/resultimage.png' %}" alt="Pit illustration">
+                <p>This tool will calculate the <strong>Pit Area</strong>. Enter your data to see results and insights here.</p>
+            </div>
+
+            <div class="result-error hidden" id="resultError">
+                <div class="error-icon">❌</div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+
+            <div class="result-value hidden" id="resultValue">
+                <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                    <h2>Pit Area Result</h2>
+                </div>
+                <div class="rate-value" id="pitAreaValue">0.0000</div>
+                <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">sq. in.</div>
+
+                <div class="result-feedback">
+                    <div class="feedback-title">Corrosion Risk Assessment</div>
+                    <div class="feedback-content" id="feedbackContent"></div>
+                </div>
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="note-section">
+        <div class="note-card">
+            <h3>📘 About This Calculator</h3>
+            <p>
+                The <strong>Pit Area Calculator</strong> computes the surface area affected by a corrosion pit
+                using its diameter. This helps in <strong>monitoring corrosion severity, assessing structural integrity,
+                and planning maintenance strategies</strong> in industrial equipment.
+            </p>
+        </div>
+
+       <div class="note-card">
+    <h3>❓ What is Pit Area?</h3>
+    <p>
+        The <strong>Pit Area</strong> represents the total surface area affected by a localized corrosion pit.
+        It measures how much metal has been lost due to corrosion on the surface. 
+        By knowing the pit area, engineers can assess the severity of corrosion and its potential
+        impact on the structural integrity of pipelines, tanks, or other metal equipment.
+    </p>
+    <p>
+        Larger pit areas indicate more significant metal loss, which may compromise safety and
+        require maintenance or remedial actions.
+    </p>
+</div>
+
+
+        <div class="note-card">
+            <h3>⚙️ Parameters Used</h3>
+            <ul class="note-list">
+                <li><strong>Pit Diameter (D):</strong> The measured diameter of the corrosion pit on the surface.</li>
+        <li><strong>Pit Area:</strong> The total affected surface area due to corrosion, calculated using the given diameter.</li>
+     </ul>
+        </div>
+
+        <div class="note-card">
+            <h3>📊 Interpretation & Risk Assessment</h3>
+            <ul class="note-list">
+                <li><span class="good">Pit Area &lt; 1 sq. in.</span> → Minimal Risk. Small pit, routine monitoring sufficient.</li>
+                <li><span class="average">1 – 5 sq. in.</span> → Moderate Risk. Regular inspection and preventive measures recommended.</li>
+                <li><span class="bad">> 5 sq. in.</span> → High Risk. Structural integrity may be compromised; immediate corrective action advised.</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h3>✅ Input Validation Rules</h3>
+            <ul class="note-list">
+                <li><strong>Diameter:</strong> Must be positive (>0). Reject blank, negative, or non-numeric inputs.</li>
+                <li><strong>Logical Pit Area:</strong> Computed area should be realistic; unusually large diameters should trigger a warning.</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h3>🏭 Real-Life Applications</h3>
+            <ul>
+                <li><strong>Pipelines:</strong> Evaluate pitting corrosion on oil, gas, and water pipelines.</li>
+                <li><strong>Pressure Vessels & Boilers:</strong> Monitor internal corrosion to prevent failures.</li>
+                <li><strong>Storage Tanks:</strong> Assess structural reliability in chemical/fuel storage systems.</li>
+                <li><strong>Marine & Offshore:</strong> Inspect ships, offshore platforms, and marine equipment for corrosion.</li>
+                <li><strong>Industrial Machinery:</strong> Detect localized corrosion in critical components to avoid downtime.</li>
+            </ul>
+        </div>
+
+        <div class="note-card">
+            <h3>💡 Important Note</h3>
+            <p>
+                Regular pit area monitoring allows engineers to <strong>detect corrosion early, enhance safety, and implement proactive maintenance strategies</strong>.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+function calculatePitArea() {
+    const diameterInput = document.getElementById('diameter').value.trim();
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    // Reset error/results
+    errorBox.classList.add('hidden');
+    placeholder.classList.remove('hidden');
+    resultValue.classList.add('hidden');
+
+    let errors = [];
+
+    // --- Input Validation ---
+    if (diameterInput === "") {
+        errors.push("👉 Please enter pit diameter (inches).");
+    } else if (isNaN(diameterInput)) {
+        errors.push("👉 Pit diameter must be a number.");
+    } else {
+        const D = parseFloat(diameterInput);
+        if (D <= 0) errors.push("👉 Pit diameter must be greater than zero.");
+        if (!/^\d+(\.\d{1,2})?$/.test(diameterInput)) errors.push("👉 Pit diameter can have max 2 decimal places.");
+        if (D > 24) errors.push("⚠️ Pit diameter unusually high (>24 inches). Verify input.");
+    }
+
+    // Display errors if any
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        return;
+    }
+
+    // --- Pit Area Calculation ---
+    const D = parseFloat(diameterInput);
+    const pitArea = Math.PI * Math.pow(D / 2, 2);
+
+    // --- Output Validation ---
+    if (pitArea > 50) {
+        errorMessage.innerHTML = "❌ Calculated pit area exceeds realistic limits. Check diameter.";
+        errorBox.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        return;
+    }
+
+    // --- Risk Assessment Feedback ---
+    let feedback = "";
+    if (pitArea < 1) {
+        feedback = "✅ <strong>Minimal Risk:</strong> Pit is small; routine monitoring sufficient.";
+    } else if (pitArea >= 1 && pitArea < 5) {
+        feedback = "⚠️ <strong>Moderate Risk:</strong> Pit size significant; periodic monitoring recommended.";
+    } else {
+        feedback = "❌ <strong>High Risk:</strong> Large pit; immediate corrective action advised.";
+    }
+
+    // --- Display Result ---
+    document.getElementById('pitAreaValue').textContent = pitArea.toFixed(4);
+    document.getElementById('feedbackContent').innerHTML = feedback;
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+</script>
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+<!-- Absolutely! Let’s go through your Pit Area Calculator with a QEHS/Fire Safety audit lens, step by step. I will provide:
+
+Detailed Input Validation Rules
+
+Output Validation & Thresholds
+
+Corrected JS code with enhanced validation
+
+Edge case handling
+
+Rationale for each validation
+
+1️⃣ Input Validation Rules (QEHS/Fire Safety Perspective)
+Input	Unit	Valid Range	Decimal Precision	Notes / Cross-Field Checks
+Pit Diameter (D)	inches	0.01 – 24	Max 2 decimals	- Must be positive (>0) to represent a real pit.
+- Extreme diameters (>24 in) unlikely in industrial equipment; warn user.
+- Blank, zero, negative, or non-numeric inputs are invalid.
+- Prevent division by zero in calculation logic.
+
+Justification:
+
+Ensures that the inputs represent physically meaningful corrosion pits.
+
+Aligns with structural integrity assessment standards (API, ASME, NFPA).
+
+Avoids calculation errors or unrealistic risk reporting.
+
+2️⃣ Output Validation & Thresholds
+Pit Area (sq. in.)	Risk Level	QEHS Interpretation
+< 1	Minimal	Pit is small; no immediate structural concern; routine monitoring sufficient.
+1 – 5	Moderate	Pit is significant; implement periodic monitoring and preventive maintenance.
+> 5	High	Large pit; may compromise integrity; immediate corrective actions needed.
+> 50	Unrealistic	Likely input error; validate diameter entry before reporting.
+
+Notes:
+
+These thresholds are based on common industrial equipment inspection standards.
+
+Unrealistic high outputs signal potential data entry errors, maintaining audit compliance.
+
+3️⃣ Edge Case Handling
+Edge Case	Handling
+Blank input	Show error: "Pit diameter is required"
+Negative or zero	Show error: "Pit diameter must be greater than zero"
+Non-numeric	Show error: "Pit diameter must be a number"
+Excessive decimals (>2)	Show warning: "Pit diameter should have max 2 decimal places"
+Extreme diameter (>24 in)	Show warning: "Pit diameter unusually high. Verify input"
+Pit area >50 sq.in.	Show error: "Calculated pit area exceeds realistic limits"
+
+Compliance rationale:
+
+Prevents misleading KPI reports.
+
+Ensures audit-friendly input validation.
+
+Protects safety decision-making from extreme outliers or typos. -->

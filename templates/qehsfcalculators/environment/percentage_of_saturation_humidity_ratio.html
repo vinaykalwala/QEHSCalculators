@@ -1,0 +1,655 @@
+{% extends 'base.html' %}
+{% block title %}Percentage of Saturation (Humidity Ratio) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Percentage of Saturation (Humidity Ratio) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 38px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+
+
+<div class="calculator-container printable" id="printArea">
+    {% include "includes/print_header_footer.html" %}
+
+
+<div class="calculator-header">
+    <h1>Percentage of Saturation (Humidity Ratio) Calculator</h1>
+    <p>Calculate the <strong>Percentage Saturation (%)</strong> of air based on actual and saturation water vapor pressures using the humidity ratio formula.</p>
+</div>
+
+<div class="calc-content">
+    <div class="calc-card">
+        <h2>Enter Data</h2>
+
+        <div class="form-group">
+            <label for="pa">Partial Pressure of Water Vapor (pₐ in Pa)</label>
+            <input type="number" id="pa" class="form-input" min="0.01" step="any" placeholder="e.g., 1200">
+        </div>
+
+        <div class="form-group">
+            <label for="Pa">Saturation Pressure at Same Temp (Pₐ in Pa)</label>
+            <input type="number" id="Pa" class="form-input" min="0.01" step="any" placeholder="e.g., 2000">
+        </div>
+
+        <div class="form-group">
+            <label for="P">Total System Pressure (P in Pa)</label>
+            <input type="number" id="P" class="form-input" min="1" step="any" placeholder="e.g., 101325">
+        </div>
+
+        <button class="calculate-btn" onclick="calculateSaturation()">Calculate % Saturation</button>
+    </div>
+
+    <div class="result-card">
+        <div class="result-placeholder" id="placeholder">
+            <img src="/static/images/mlc_environment_result.png" alt="saturation humidity">
+            <p>This tool will calculate the <strong>Percentage Saturation (%)</strong> of air.</p>
+        </div>
+
+        <div class="result-error hidden" id="resultError">
+            <div class="error-icon">❌</div>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+
+        <div class="result-value hidden" id="resultValue">
+            <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                <h2>Calculated Percentage Saturation</h2>
+            </div>
+
+            <div class="rate-display">
+                <div class="rate-value" id="rateValue">0.00</div>
+                <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">%</div>
+            </div>
+
+            <div class="result-feedback">
+                <div class="feedback-title">Assessment</div>
+                <div class="feedback-content" id="feedbackContent"></div>
+            </div>
+            <div class="btn-wrapper">
+                <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notes Section -->
+<div class="note-section">
+    <div class="note-card">
+        <h3>📘 About This Calculator</h3>
+            <p>
+                This calculator estimates the <strong>Percentage Saturation (%)</strong> of air based on the
+                partial pressure of water vapor, the saturation pressure at the same temperature, and the
+                total system pressure. It helps determine how close the air is to being fully saturated
+                with water vapor, which is critical for HVAC design, industrial drying processes, and
+                environmental monitoring.
+            </p>
+
+    </div>
+
+    <div class="note-card">
+        <h3>⚠️ Input Validations</h3>
+        <ul>
+            <li>✔️ <strong>pₐ (Partial Pressure):</strong> Must be > 0 Pa and less than total system pressure P.</li>
+            <li>✔️ <strong>Pₐ (Saturation Pressure):</strong> Must be > 0 Pa and logically ≥ pₐ (cannot have saturation < actual).</li>
+            <li>✔️ <strong>P (Total Pressure):</strong> Must be > max(pₐ, Pₐ) and typically ~101325 Pa (1 atm) for standard air, but allow 10 kPa–500 kPa.</li>
+            <li>❌ Non-numeric or negative entries are invalid.</li>
+            <li>⚠️ Very high values (e.g., Pₐ > 50000 Pa) may indicate extreme humidity conditions; verify physically.</li>
+            <li>⚠️ pₐ ≥ P triggers division by zero or negative humidity ratio — blocked.</li>
+            <li>⚠️ Saturation >100% triggers condensation warning.</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h3>🌍 Key Applications</h3>
+        <ul class="note-list">
+            <li>HVAC system design and air quality control</li>
+            <li>Industrial drying processes and moisture-sensitive operations</li>
+            <li>Fire safety: high humidity may affect fire suppression systems</li>
+            <li>Environmental monitoring in laboratories and clean rooms</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+function showErrors(errors) {
+    const errorBox = document.getElementById("resultError");
+    const errorMessage = document.getElementById("errorMessage");
+    const placeholder = document.getElementById("placeholder");
+    const resultValue = document.getElementById("resultValue");
+
+    errorMessage.innerHTML = errors.join("<br>");
+    errorBox.classList.remove("hidden");
+    placeholder.classList.add("hidden");
+    resultValue.classList.add("hidden");
+}
+
+function calculateSaturation() {
+    const paRaw = document.getElementById('pa').value.trim();
+    const PaRaw = document.getElementById('Pa').value.trim();
+    const PRaw = document.getElementById('P').value.trim();
+
+    const errors = [];
+    const warnings = [];
+    const resultElement = document.getElementById('resultValue');
+    const rateEl = document.getElementById('rateValue');
+    const feedbackEl = document.getElementById('feedbackContent');
+    const placeholder = document.getElementById('placeholder');
+    const errorBox = document.getElementById('resultError');
+
+    // Reset UI
+    errorBox.classList.add("hidden");
+    feedbackEl.innerHTML = "";
+    placeholder.classList.remove("hidden");
+    resultElement.classList.add("hidden");
+
+    // Parse numbers
+    const pa = parseFloat(paRaw);
+    const Pa = parseFloat(PaRaw);
+    const P = parseFloat(PRaw);
+
+    // Input validations
+    if (isNaN(pa) || pa <= 0) errors.push("Partial Pressure pₐ must be > 0 Pa.");
+    if (isNaN(Pa) || Pa <= 0) errors.push("Saturation Pressure Pₐ must be > 0 Pa.");
+    if (isNaN(P) || P <= 0) errors.push("Total System Pressure P must be > 0 Pa.");
+
+    if (!errors.length) {
+        if (pa >= P) errors.push("pₐ must be less than total pressure P.");
+        if (Pa >= P) errors.push("Pₐ must be less than total pressure P.");
+        if (Pa < pa) errors.push("Saturation Pressure Pₐ cannot be less than actual pₐ.");
+    }
+
+    if (errors.length) return showErrors(errors);
+
+    // Calculate humidity ratios
+    const Y = pa / (P - pa);
+    const Ysat = Pa / (P - Pa);
+    const saturation = (Y / Ysat) * 100;
+
+    // Display
+    let statusMsg = "";
+    if (saturation > 100) {
+        statusMsg = "⚠️ Saturation exceeds 100% — condensation likely.";
+        feedbackEl.style.color = "red";
+    } else if (saturation >= 40 && saturation <= 60) {
+        statusMsg = "✅ Saturation within ideal range.";
+        feedbackEl.style.color = "green";
+    } else if (saturation < 30) {
+        statusMsg = "⚠️ Low saturation — air may feel dry.";
+        feedbackEl.style.color = "orange";
+    } else {
+        statusMsg = "ℹ️ Saturation is moderate.";
+        feedbackEl.style.color = "blue";
+    }
+
+    rateEl.textContent = saturation.toFixed(2);
+    feedbackEl.innerHTML = `<div>${statusMsg}</div>
+        <div>Actual Humidity Ratio Y: ${Y.toFixed(5)}</div>
+        <div>Saturation Humidity Ratio Ysat: ${Ysat.toFixed(5)}</div>
+        <div>pₐ: ${pa.toFixed(2)} Pa, Pₐ: ${Pa.toFixed(2)} Pa, Total Pressure P: ${P.toFixed(2)} Pa</div>`;
+
+    placeholder.classList.add("hidden");
+    resultElement.classList.remove("hidden");
+}
+
+function printReport() {
+  const el = document.getElementById('printDate');
+  if (el) {
+    el.textContent = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  }
+  window.print();
+}
+</script>
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+<!-- 
+📌 Saturation Calculation Notes
+
+🔹 Formula Used:
+    Y    = pa / (P - pa)      → Actual humidity ratio
+    Ysat = Pa / (P - Pa)      → Saturation humidity ratio
+    Saturation (%) = (Y / Ysat) × 100
+    where:
+      pa  = partial pressure of vapor (Pa)
+      Pa  = saturation vapor pressure (Pa)
+      P   = total system pressure (Pa)
+
+🔹 Input Validations:
+    • pa (partial pressure):
+        - Must be > 0 Pa
+        - Must be < P
+    • Pa (saturation pressure):
+        - Must be > 0 Pa
+        - Must be < P
+        - Must be ≥ pa
+    • P (total system pressure):
+        - Must be > 0 Pa
+    • All inputs must be numeric
+
+🔹 Output Validations / Classification:
+    • Saturation (%) = (Y / Ysat) × 100
+    • Classification:
+        - Saturation > 100% → ⚠️ Condensation likely
+        - 40% ≤ Saturation ≤ 60% → ✅ Ideal range
+        - Saturation < 30% → ⚠️ Air may feel dry
+        - Else → ℹ️ Moderate saturation
+    • Actual (Y) and Saturation (Ysat) humidity ratios displayed for reference
+-->

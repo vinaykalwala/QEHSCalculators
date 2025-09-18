@@ -1,0 +1,699 @@
+{% extends 'base.html' %}
+{% block title %}Total Integrated Dose at Ground Level Calculator (Puff Model){% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Total Integrated Dose at Ground Level Calculator (Puff Model)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px; /* Adjusted for more inputs */
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+            justify-content: center;
+            align-items: center;
+            min-height: 420px; /* Match calc-card */
+            text-align: center;
+        }
+        
+        .input-pair {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+        }
+
+        @media (max-width: 500px) {
+            .input-pair {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+            width: 100%;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+            font-size: 0.9rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background:linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        
+        /* Result Card */
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+        
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        /* Note Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        /* Error Box */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    <div class="calculator-container printable" id="printArea">
+
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Total Integrated Dose at Ground Level Calculator (Puff Model)</h1>
+            <p>Calculate the total integrated dose at ground level from an instantaneous chemical release using the Gaussian puff model.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Enter Dispersion Parameters</h2>
+                <div class="input-pair">
+                    <div class="form-group">
+                        <label for="q-release">Instantaneous Release (Q) [g]</label>
+                        <input type="number" id="q-release" class="form-input" placeholder="e.g., 1000">
+                    </div>
+                    <div class="form-group">
+                        <label for="wind-speed">Wind Speed (u) [m/s]</label>
+                        <input type="number" id="wind-speed" class="form-input" placeholder="e.g., 5">
+                    </div>
+                </div>
+                 <div class="input-pair">
+                    <div class="form-group">
+                        <label for="sigma-y">Horizontal Dispersion ($σ_y$) [m]</label>
+                        <input type="number" id="sigma-y" class="form-input" placeholder="e.g., 50">
+                    </div>
+                    <div class="form-group">
+                        <label for="sigma-z">Vertical Dispersion ($σ_z$) [m]</label>
+                        <input type="number" id="sigma-z" class="form-input" placeholder="e.g., 20">
+                    </div>
+                </div>
+                <div class="input-pair">
+                    <div class="form-group">
+                        <label for="y-distance">Crosswind Distance (y) [m]</label>
+                        <input type="number" id="y-distance" class="form-input" placeholder="e.g., 0">
+                    </div>
+                    <div class="form-group">
+                        <label for="release-height">Release Height (H) [m]</label>
+                        <input type="number" id="release-height" class="form-input" placeholder="e.g., 10">
+                    </div>
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateDose()">Calculate Dose</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Dispersion model illustration">
+                    <p>Enter the release parameters to calculate the potential exposure dose at a specific location downwind.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                    
+                <div class="result-value hidden" id="resultValue">
+                    <div class="rate-value" id="rateValue">0.00e+0</div>
+                    <div class="rate-label" id="rateLabel">Total Integrated Dose (g·s/m³)</div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low</span><span>Caution</span><span>Warning</span><span>Danger</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Exposure Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <!-- About This Calculator -->
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    <strong>Total Integrated Dose at Ground Level (Puff Model)</strong> calculates the cumulative exposure to a
+                    substance from an instantaneous release,
+                    accounting for atmospheric dispersion over time and space.
+                </p>
+                <p>
+                    This tool uses a standard Gaussian dispersion model, which is critical for
+                    <strong>emergency response planning</strong> and <strong>industrial safety assessments</strong>.
+                </p>
+            </div>
+        
+            <!-- Parameters Explained -->
+            <div class="note-card">
+                <h3>❓ Parameters Explained</h3>
+                <ul class="note-list">
+                    <li><strong>Q<sub>instantaneous</sub>:</strong> Total mass of pollutant released instantaneously (grams).
+                    </li>
+                    <li><strong>u:</strong> Average wind speed transporting the puff (m/s).</li>
+                    <li><strong>σ<sub>y</sub>, σ<sub>z</sub>:</strong> Horizontal & vertical dispersion coefficients (m),
+                        dependent on atmospheric stability and distance.</li>
+                    <li><strong>y:</strong> Crosswind distance from plume centerline (m).</li>
+                    <li><strong>H:</strong> Effective height of the release above ground (m).</li>
+                </ul>
+            </div>
+        
+            <!-- Applications -->
+            <div class="note-card">
+                <h3>⚠️ Applications & Importance</h3>
+                <ul class="note-list">
+                    <li><strong>Industrial Accidents:</strong> Assess potential exposure from chemical plant leaks or
+                        explosions.</li>
+                    <li><strong>Emergency Planning:</strong> Define evacuation zones and guide response teams during accidental
+                        releases.</li>
+                    <li><strong>Workplace Safety:</strong> Evaluate exposure risks for workers handling hazardous chemicals.
+                    </li>
+                    <li><strong>Environmental Impact:</strong> Model consequences of transportation accidents (e.g., train
+                        derailments).</li>
+                </ul>
+            </div>
+        
+            <!-- Health Importance -->
+            <div class="note-card">
+                <h3>❤️ Why This Matters for Health</h3>
+                <p>
+                    This model helps predict <strong>potential health impacts</strong> from accidental chemical releases,
+                    enabling
+                    better <strong>emergency response planning</strong> and <strong>exposure risk assessment</strong> for
+                    workers
+                    and surrounding communities.
+                </p>
+            </div>
+        
+            <!-- Historical Lessons -->
+            <div class="note-card">
+                <h3>📜 Lessons from History</h3>
+                <ul class="note-list">
+                    <li><strong>Bhopal Disaster (1984):</strong> Demonstrated catastrophic consequences of underestimating plume
+                        dispersion.</li>
+                    <li><strong>Texas City Refinery Explosion (2005):</strong> Highlighted the need for accurate puff models in
+                        safety planning.</li>
+                </ul>
+            </div>
+        
+            <!-- Industry Standards -->
+            <div class="note-card">
+                <h3>📑 Industry Standards & Guidelines</h3>
+                <p>
+                    This model aligns with <strong>EPA guidance</strong> for accidental release modeling and
+                    <strong>OSHA’s Process Safety Management</strong> standards for hazardous chemicals.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>✅ Input Validation Rules</h3>
+                <ul class="note-list">
+                    <li><strong>Instantaneous Release (Q):</strong> Must be between <code>0.1 g</code> and <code>1,000,000 g</code>.
+                    </li>
+                    <li><strong>Wind Speed (u):</strong> Must be between <code>0.1 m/s</code> and <code>30 m/s</code>.</li>
+                    <li><strong>Horizontal Dispersion (σ<sub>y</sub>):</strong> Must be between <code>1 m</code> and
+                        <code>5000 m</code>.</li>
+                    <li><strong>Vertical Dispersion (σ<sub>z</sub>):</strong> Must be between <code>1 m</code> and
+                        <code>3000 m</code>.</li>
+                    <li><strong>Crosswind Distance (y):</strong> Must be between <code>0 m</code> and <code>50,000 m</code>.</li>
+                    <li><strong>Release Height (H):</strong> Must be between <code>0 m</code> and <code>500 m</code>.</li>
+                    <li><strong>Cross-Field Check:</strong> Denominator in calculation must not be zero (avoids division errors).
+                    </li>
+                </ul>
+                <br>
+                <h3>💡 Allowed Decimals</h3>
+                <ul class="note-list">
+                    <li>All inputs (Q, u, σ<sub>y</sub>, σ<sub>z</sub>, y, H) → up to 2–3 decimal places for practical accuracy.
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Output Validations</h3>
+                <ul class="note-list">
+                    <li><strong>&gt; 1 × 10<sup>-3</sup>:</strong>
+                        <ul>
+                            <li>☢️ <strong>Danger:</strong> Extremely high dose. Immediate evacuation required.</li>
+                        </ul>
+                    </li>
+            
+                    <li><strong>1 × 10<sup>-6</sup> – 1 × 10<sup>-3</sup>:</strong>
+                        <ul>
+                            <li>⚠️ <strong>Warning:</strong> Significant dose. Implement protective measures.</li>
+                        </ul>
+                    </li>
+            
+                    <li><strong>1 × 10<sup>-9</sup> – 1 × 10<sup>-6</sup>:</strong>
+                        <ul>
+                            <li>🟡 <strong>Caution:</strong> Moderate dose. Compare with PEL/OEL limits.</li>
+                        </ul>
+                    </li>
+            
+                    <li><strong>&lt; 1 × 10<sup>-9</sup>:</strong>
+                        <ul>
+                            <li>✅ <strong>Low Dose:</strong> Minimal exposure. Continue monitoring.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Conclusion -->
+            <div class="note-card">
+                <h3>✅ Conclusion</h3>
+                <p>
+                    The <strong>Puff Model dose calculation</strong> is essential for health and safety professionals to
+                    anticipate and mitigate risks from chemical releases. Proper application of this formula can
+                    <strong>save lives</strong> by informing better emergency response plans and industrial safety measures.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            if (document.getElementById('printDate')) {
+                document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
+        });
+
+        function calculateDose() {
+            const Q_val = document.getElementById('q-release').value.trim();
+            const u_val = document.getElementById('wind-speed').value.trim();
+            const sigmaY_val = document.getElementById('sigma-y').value.trim();
+            const sigmaZ_val = document.getElementById('sigma-z').value.trim();
+            const y_val = document.getElementById('y-distance').value.trim();
+            const H_val = document.getElementById('release-height').value.trim();
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+
+            let errors = [];
+
+            // --- VALIDATION RULES (QEHS Standards) ---
+            if (Q_val === '' || isNaN(Q_val) || parseFloat(Q_val) <= 0 || parseFloat(Q_val) > 1e6)
+                errors.push("👉 Instantaneous release (Q) must be between 0.1 g and 1,000,000 g.");
+
+            if (u_val === '' || isNaN(u_val) || parseFloat(u_val) < 0.1 || parseFloat(u_val) > 30)
+                errors.push("👉 Wind speed (u) must be between 0.1 m/s and 30 m/s.");
+
+            if (sigmaY_val === '' || isNaN(sigmaY_val) || parseFloat(sigmaY_val) <= 0 || parseFloat(sigmaY_val) > 5000)
+                errors.push("👉 Horizontal dispersion (σy) must be between 1 m and 5000 m.");
+
+            if (sigmaZ_val === '' || isNaN(sigmaZ_val) || parseFloat(sigmaZ_val) <= 0 || parseFloat(sigmaZ_val) > 3000)
+                errors.push("👉 Vertical dispersion (σz) must be between 1 m and 3000 m.");
+
+            if (y_val === '' || isNaN(y_val) || parseFloat(y_val) < 0 || parseFloat(y_val) > 50000)
+                errors.push("👉 Crosswind distance (y) must be between 0 m and 50,000 m.");
+
+            if (H_val === '' || isNaN(H_val) || parseFloat(H_val) < 0 || parseFloat(H_val) > 500)
+                errors.push("👉 Release height (H) must be between 0 m and 500 m.");
+
+            // --- ERROR HANDLING ---
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden");
+            }
+
+            // --- CALCULATION ---
+            const Q = parseFloat(Q_val);
+            const u = parseFloat(u_val);
+            const sigmaY = parseFloat(sigmaY_val);
+            const sigmaZ = parseFloat(sigmaZ_val);
+            const y = parseFloat(y_val);
+            const H = parseFloat(H_val);
+
+            const denominator = Math.PI * sigmaY * sigmaZ * u;
+            if (denominator === 0) {
+                errorMessage.innerHTML = "❌ Invalid input: denominator is zero, cannot compute dose.";
+                errorBox.classList.remove("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            }
+
+            const yComponent = Math.exp(-0.5 * Math.pow(y / sigmaY, 2));
+            const zComponent = Math.exp(-0.5 * Math.pow(H / sigmaZ, 2));
+            const dose = (Q / denominator) * yComponent * zComponent;
+
+            if (!isFinite(dose)) {
+                errorMessage.innerHTML = "❌ Calculation resulted in an invalid number. Please check input values.";
+                errorBox.classList.remove("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            }
+
+            document.getElementById('rateValue').textContent = dose.toExponential(4);
+
+            // --- EXPOSURE ASSESSMENT (Compliance-Based) ---
+            const meterFill = document.getElementById('meterFill');
+            let meterWidth, meterColor, feedback;
+
+            if (dose > 1e-3) {
+                meterWidth = '95%';
+                meterColor = '#e74c3c'; // Red
+                feedback = '☢️ <strong>Danger:</strong> Extremely high dose. Immediate evacuation required.';
+            } else if (dose > 1e-6) {
+                meterWidth = '70%';
+                meterColor = '#e67e22'; // Orange
+                feedback = '⚠️ <strong>Warning:</strong> Significant dose. Implement protective measures.';
+            } else if (dose > 1e-9) {
+                meterWidth = '45%';
+                meterColor = '#f1c40f'; // Yellow
+                feedback = '🟡 <strong>Caution:</strong> Moderate dose. Compare with PEL/OEL limits.';
+            } else {
+                meterWidth = '20%';
+                meterColor = '#2ecc71'; // Green
+                feedback = '✅ <strong>Low Dose:</strong> Minimal exposure. Continue monitoring.';
+            }
+
+            meterFill.style.width = meterWidth;
+            meterFill.style.backgroundColor = meterColor;
+            document.getElementById('feedbackContent').innerHTML = feedback;
+
+            placeholder.classList.add("hidden");
+            resultValue.classList.remove("hidden");
+        }
+
+        function printReport() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            window.print();
+        }
+    </script>
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+<!-- 
+1. Detailed Input Validation Rules
+
+Here are the recommended input validation rules for your Integrated Dose Calculator (Puff Model):
+
+Input Parameter	Unit	Valid Range / Thresholds	Validation Rule	Rationale (QEHS/Fire Safety)
+Instantaneous Release (Q)	g	0.1 – 1,000,000 g (0.1 g = trace, 1e6 g = catastrophic release)	Must be > 0 and ≤ 1e6. Allow up to 3 decimal places.	Prevents negative/zero release. Real-world releases rarely exceed tons; ensures realistic input for dispersion modeling.
+Wind Speed (u)	m/s	0.1 – 30 m/s (0.1 = calm, 30 = storm conditions)	Must be > 0.1 and ≤ 30. Allow 1 decimal place.	0 m/s = no dispersion, >30 m/s = hurricane force (invalid for standard models). Aligns with NFPA 68 and meteorological datasets.
+Horizontal Dispersion (σy)	m	1 – 5,000 m	Must be > 0 and ≤ 5000.	Captures realistic lateral spread. σy = 0 breaks formula (division by zero). Upper bound ensures stability in Gaussian models.
+Vertical Dispersion (σz)	m	1 – 3,000 m	Must be > 0 and ≤ 3000.	Vertical plume spread must be nonzero. Excessive values imply unrealistic mixing height.
+Crosswind Distance (y)	m	0 – 50,000 m	Must be ≥ 0 and ≤ 50,000.	Negative distance is meaningless. Beyond 50 km, puff models become unreliable per EPA guidelines.
+Release Height (H)	m	0 – 500 m	Must be ≥ 0 and ≤ 500.	Negative = underground, invalid. Above 500 m = rare (e.g., aviation releases, excluded from ground safety models).
+2. Output Validation Logic and Threshold Explanations
+
+The Total Integrated Dose (g·s/m³) should be interpreted against health & safety benchmarks:
+
+Range (g·s/m³)	Category	Feedback	Rationale (Compliance)
+≤ 1e-9	Low	Safe, negligible dose. Continue monitoring.	Below typical detection limits.
+> 1e-9 to ≤ 1e-6	Caution	Moderate dose, compare with OEL/IDLH standards.	OSHA PEL or ACGIH TLV may be approached.
+> 1e-6 to ≤ 1e-3	Warning	Significant dose, implement engineering/administrative controls.	Crosses into NFPA/OSHA threshold zones.
+> 1e-3	Danger	Extremely high dose, immediate evacuation required.	Reflects life-threatening exposure zone per ILO emergency response.
+-->

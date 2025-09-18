@@ -1,0 +1,578 @@
+{% extends 'base.html' %}
+{% block title %}To Determine The Required Steam Flowrate From A kW Rating Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To Determine The Required Steam Flowrate From A kW Rating Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: transform 0.3s ease;
+            height: 420px;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background:linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        
+        /* Result Card */
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+        
+        /* Feedback & Warnings */
+        .result-feedback, .result-warning {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: left;
+            margin-top: 15px;
+        }
+        .result-feedback {
+             border-left: 4px solid #3498db;
+        }
+        .result-warning {
+            border-left: 4px solid #f1c40f; /* Yellow border for warnings */
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        /* Note Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        /* Error Box */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    <div class="calculator-container printable" id="printArea">
+
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>To Determine The Required Steam Flowrate From A kW Rating Calculator</h1>
+            <p>Determine the required steam flowrate (kg/h) from a known power load (kW) and the properties of the steam.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Enter System Parameters</h2>
+                <div class="form-group">
+                    <label for="load">Power Load (kW)</label>
+                    <input type="number" id="load" class="form-input" placeholder="e.g., 500">
+                </div>
+                <div class="form-group">
+                    <label for="hfg">Latent Heat of Vaporization ($h_{fg}$) [kJ/kg]</label>
+                    <input type="number" id="hfg" class="form-input" placeholder="e.g., 2047 at 10 bar.g">
+                </div>
+                <button class="calculate-btn" onclick="calculateSteamFlow()">Calculate Flowrate</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Steam boiler illustration">
+                    <p>Enter your system's load and steam properties to calculate the required steam flowrate for boiler sizing and energy audits.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                    
+                <div class="result-value hidden" id="resultValue">
+                    <div class="rate-value" id="rateValue">0.00</div>
+                    <div class="rate-label" id="rateLabel">Required Steam Flowrate (kg/h)</div>
+                    
+                    <div class="result-warning hidden" id="resultWarning">
+                        <div class="feedback-title">⚠️ Input Warning</div>
+                        <div class="feedback-content" id="warningMessage"></div>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Operational Scale</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <!-- About This Calculator -->
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    This tool calculates the mass flowrate of steam required to deliver a specific amount of power (heat
+                    energy).
+                    It's fundamental for sizing boilers, steam lines, and control valves in industrial processes, HVAC systems,
+                    and power generation.
+                    Accurate flowrate calculation ensures system efficiency, energy savings, and safe operation.
+                </p>
+            </div>
+        
+            <!-- Input & Output Validations -->
+            <div class="note-card">
+                <h3>📥 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Power Load (kW):</strong> Must be a positive number (> 0).
+                        Typical industrial range: 10 – 5000 kW.</li>
+                    <li>Blank, non-numeric, or negative values → flagged as invalid.</li>
+                    <li>Values outside 10–5000 kW → ⚠️ Warning: Check if this load is realistic for your system.</li>
+                    <li><strong>Latent Heat of Vaporization (h<sub>fg</sub>) [kJ/kg]:</strong> Must be a positive number (> 0).
+                        Typical range for saturated steam: 1800 – 2800 kJ/kg.</li>
+                    <li>Blank, non-numeric, or negative values → flagged as invalid.</li>
+                    <li>Values outside 1800–2800 kJ/kg → ⚠️ Warning: Verify using steam tables.</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📤 Output Validations</h3>
+                <ul class="note-list">
+                    <li>If input is invalid → <strong>👉 Power Load must be a positive number.</strong> or
+                        <strong>👉 Latent Heat ($h<sub>fg</sub>$) must be a positive number.</strong>
+                    </li>
+                    <li>Required Steam Flowrate (kg/h) = (Load × 3600) / h<sub>fg</sub>, displayed with <strong>2 decimal
+                            places</strong>.</li>
+                    <li>If calculation produces NaN or infinite →
+                        <strong>❌ Calculation resulted in an invalid number. Please check your inputs.</strong>
+                    </li>
+                    <li>Operational Scale Feedback based on Load:
+                        <ul>
+                            <li><strong>Small-scale:</strong> ✅ Small-scale application, such as for a laboratory, pilot plant, or
+                                small commercial use.</li>
+                            <li><strong>Medium-scale:</strong> 🟢 Medium-scale application, typical for small industrial processes
+                                or large commercial buildings.</li>
+                            <li><strong>Large-scale:</strong> 🟡 Large-scale application, significant industrial manufacturing or
+                                processing operations.</li>
+                            <li><strong>Very large-scale:</strong> 🔴 Very large industrial-scale application, such as power
+                                generation or a major chemical plant.</li>
+                        </ul>
+                    </li>
+                    <li>Warnings displayed if inputs are outside typical industrial ranges:
+                        <ul>
+                            <li>Load outside 10–5000 kW → ⚠️ Load (kW) is outside the typical industrial range of 10-5000 kW.</li>
+                            <li>h<sub>fg</sub> outside 1800–2800 kJ/kg → ⚠️ Latent Heat ($h<sub>fg</sub>$) is outside the typical
+                                range for saturated steam (1800-2800 kJ/kg). Please verify your value from a steam table.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateSteamFlow() {
+            const load_val = document.getElementById('load').value.trim();
+            const hfg_val = document.getElementById('hfg').value.trim();
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const warningBox = document.getElementById('resultWarning');
+            const warningMessage = document.getElementById('warningMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+
+            let errors = [];
+            let warnings = [];
+
+            // --- PARSE INPUTS ---
+            const load = parseFloat(load_val);
+            const hfg = parseFloat(hfg_val);
+
+            // --- VALIDATION RULES ---
+            if (load_val === '' || isNaN(load) || load <= 0) {
+                errors.push("👉 Power Load must be a positive number.");
+            }
+            if (hfg_val === '' || isNaN(hfg) || hfg <= 0) {
+                errors.push("👉 Latent Heat ($h_{fg}$) must be a positive number.");
+            }
+
+            // --- ERROR HANDLING ---
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                warningBox.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden");
+            }
+
+            // --- WARNING CHECKS (Recommended Industrial Ranges) ---
+            if (load < 10 || load > 5000) {
+                warnings.push("⚠️ Load (kW) is outside the typical industrial range of 10-5000 kW.");
+            }
+            if (hfg < 1800 || hfg > 2800) {
+                warnings.push("⚠️ Latent Heat ($h_{fg}$) is outside the typical range for saturated steam (1800-2800 kJ/kg). Verify your value from a steam table.");
+            }
+
+            if (warnings.length > 0) {
+                warningMessage.innerHTML = warnings.join("<br>");
+                warningBox.classList.remove("hidden");
+            } else {
+                warningBox.classList.add("hidden");
+            }
+
+            // --- CALCULATION ---
+            const steamFlowRate = (load * 3600) / hfg;
+
+            if (!isFinite(steamFlowRate)) {
+                errorMessage.innerHTML = "❌ Calculation resulted in an invalid number. Please check your inputs.";
+                errorBox.classList.remove("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            }
+
+            document.getElementById('rateValue').textContent = steamFlowRate.toFixed(2);
+
+            // --- OPERATIONAL SCALE FEEDBACK ---
+            let feedback;
+            if (load < 100) {
+                feedback = '✅ Small-scale application: laboratory, pilot plant, or small commercial use.';
+            } else if (load < 500) {
+                feedback = '🟢 Medium-scale application: small industrial process or large commercial building.';
+            } else if (load < 2000) {
+                feedback = '🟡 Large-scale application: significant industrial manufacturing or processing operations.';
+            } else {
+                feedback = '🔴 Very large industrial-scale application: power generation or major chemical plant.';
+            }
+            document.getElementById('feedbackContent').textContent = feedback;
+
+            placeholder.classList.add("hidden");
+            resultValue.classList.remove("hidden");
+        }
+
+        function printReport() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            window.print();
+        }
+    </script>
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+<!-- 
+1️⃣ Input Validation Rules (QEHS Perspective)
+Input	Rules	Rationale
+Power Load (kW)	- Must be a positive number > 0.
+- Recommended industrial range: 10 – 5000 kW.
+- Accept decimals (up to 2 places).	Prevents unrealistic or negative boiler loads; ensures safe boiler sizing.
+Latent Heat of Vaporization (h<sub>fg</sub>, kJ/kg)	- Must be positive > 0.
+- Recommended range: 1800 – 2800 kJ/kg for typical pressures 5–15 bar.g.
+- Accept decimals (up to 2 places).	Ensures the energy calculation aligns with real steam tables; avoids negative or zero energy inputs.
+Cross-field logic	- Steam flowrate should be physically feasible.
+- Load should not produce a flowrate > maximum boiler capacity (user-defined limits).	Prevents unrealistic combinations (e.g., small h<sub>fg</sub> with very high load).
+2️⃣ Edge Case Validations
+
+Division by zero: h<sub>fg</sub> = 0 → Must be prevented.
+
+Unrealistic extremes: Load <10 kW or >5000 kW → show warning.
+
+h<sub>fg</sub> extreme: <1800 or >2800 kJ/kg → show warning.
+
+Negative or blank inputs → show error.
+
+Decimal precision check → round to 2 decimal places for display.
+
+3️⃣ Output Validation & Thresholds
+
+Formula:
+
+Steam Flowrate (kg/h)
+=
+Load (kW)
+×
+3600
+ℎ
+𝑓
+𝑔
+ (kJ/kg)
+Steam Flowrate (kg/h)=
+h
+fg
+	​
+
+ (kJ/kg)
+Load (kW)×3600
+	​
+
+
+Display flowrate with 2 decimal places.
+
+Threshold/Operational Scale (for QEHS perspective):
+
+Steam Flowrate	Operational Scale	Feedback
+<50 kg/h	Very Low	Minimal boiler capacity; suitable for small lab setups.
+50 – 500 kg/h	Low	Small-scale industrial operations.
+500 – 2000 kg/h	Medium	Typical plant or process operation.
+>2000 kg/h	High	Large-scale operations; review boiler capacity and safety systems.
+
+If calculation is NaN or Infinity → display ❌ Calculation resulted in an invalid number. Please check your inputs.
+-->

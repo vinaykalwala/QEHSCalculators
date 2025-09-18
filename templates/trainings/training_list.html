@@ -1,51 +1,272 @@
 {% extends "login_base.html" %}
 {% block content %}
-<div class="container mt-4">
-  <h2>Trainings</h2>
+<style>
+  /* ===== Theme Colors ===== */
+  :root {
+    --primary-color: #1560bd;
+    --dark-color: #000040;
+    --light-text: #ffffff;
+    --muted-text: #cccccc;
+    --warning-color: #e6a800;
+    --danger-color: #d9534f;
+  }
 
-  {% if user.is_superuser %}
-    <a href="{% url 'training_create' %}" class="btn btn-primary mb-3">+ Add Training</a>
-  {% endif %}
+  .trainings-container {
+    padding: 0px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
 
-  <table class="table table-bordered">
-    <thead>
-      <tr>
-        <th>Title</th>
-        <th>Category</th>
-        <th>Media</th>
-        <th>External URL</th>
-        {% if user.is_superuser %}<th>Actions</th>{% endif %}
-      </tr>
-    </thead>
-    <tbody>
+  /* ===== Header ===== */
+  .trainings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .trainings-header h2 {
+    color: var(--primary-color);
+    font-size: 1.8rem;
+    font-weight: 600;
+  }
+
+  .btn-add-training {
+    background: linear-gradient(#000040, #1560bd);
+    color: var(--light-text);
+    border: none;
+    padding: 10px 18px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+  }
+  .btn-add-training:hover {
+    background: #104a94;
+  }
+
+  /* Responsive tweak for very small screens */
+  @media (max-width: 450px) {
+    .trainings-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .trainings-header h2 {
+      font-size: 1.5rem;
+    }
+    .btn-add-training {
+      width: 100%;
+      text-align: center;
+    }
+  }
+
+  /* ===== Grid Layout ===== */
+  .trainings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 20px;
+  }
+
+  /* ===== Card Design ===== */
+  .training-card {
+    background: linear-gradient(#000040);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .training-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 16px rgba(21, 96, 189, 0.4);
+  }
+
+  /* Media Section */
+  .training-media {
+    height: 200px;
+    background: #0a0a2a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .training-media video,
+  .training-media img,
+  .training-media iframe {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border: none;
+  }
+  .training-media span {
+    color: var(--muted-text);
+    font-size: 0.9rem;
+  }
+
+  /* Card Body */
+  .training-body {
+    flex: 1;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    color: var(--light-text);
+  }
+  .training-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .training-category {
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    color: var(--muted-text);
+  }
+
+  /* ===== Custom Buttons ===== */
+  .btn-watch {
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    margin-bottom: 8px;
+    background: transparent;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    transition: all 0.3s ease;
+  }
+  .btn-watch:hover {
+    background: var(--primary-color);
+    color: var(--light-text);
+  }
+
+  .btn-view-file {
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    margin-bottom: 8px;
+    background: transparent;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    transition: all 0.3s ease;
+  }
+  .btn-view-file:hover {
+    background: var(--primary-color);
+    color: var(--light-text);
+  }
+
+  .btn-edit-training {
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    background: var(--warning-color);
+    color: #000;
+    transition: all 0.3s ease;
+  }
+  .btn-edit-training:hover {
+    background: #cc9000;
+  }
+
+  .btn-delete-training {
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    background: var(--danger-color);
+    color: #fff;
+    transition: all 0.3s ease;
+  }
+  .btn-delete-training:hover {
+    background: #b52b27;
+  }
+
+  /* Actions aligned bottom */
+  .training-actions {
+    margin-top: auto;
+  }
+
+  /* Empty State */
+  .empty-message {
+    text-align: center;
+    color: var(--muted-text);
+    font-size: 1rem;
+    margin-top: 30px;
+  }
+</style>
+
+<div class="main-content">
+  <div class="trainings-container">
+    <div class="trainings-header">
+      <h2>📚 Training Videos</h2>
+      {% if user.is_superuser %}
+        <a href="{% url 'training_create' %}" class="btn-add-training">+ Add Training</a>
+      {% endif %}
+    </div>
+
+    <div class="trainings-grid">
       {% for training in trainings %}
-      <tr>
-        <td>{{ training.title }}</td>
-        <td>{{ training.get_category_display }}</td>
-        <td>
+      <div class="training-card">
+        
+        <!-- Media Section -->
+        <div class="training-media">
           {% if training.media %}
-            <a href="{{ training.media.url }}" target="_blank">View File</a>
+            {% if training.media.url|lower|slice:"-4:" == ".mp4" %}
+              <video controls>
+                <source src="{{ training.media.url }}" type="video/mp4">
+                Your browser does not support the video tag.
+              </video>
+            {% else %}
+              <a href="{{ training.media.url }}" target="_blank">
+                <img src="{{ training.media.url }}" alt="Training Media">
+              </a>
+            {% endif %}
+          {% elif training.external_video_url %}
+            <iframe src="{{ training.external_video_url }}" allowfullscreen></iframe>
           {% else %}
-            -
+            <span>No Media</span>
           {% endif %}
-        </td>
-        <td>
+        </div>
+
+        <!-- Body -->
+        <div class="training-body">
+          <div class="training-title">{{ training.title }}</div>
+          <div class="training-category">Category: {{ training.get_category_display }}</div>
+
           {% if training.external_video_url %}
-            <a href="{{ training.external_video_url }}" target="_blank">Watch Video</a>
-          {% else %}
-            -
+            <a href="{{ training.external_video_url }}" target="_blank" class="btn-watch">▶ Watch Video</a>
           {% endif %}
-        </td>
-        {% if user.is_superuser %}
-        <td>
-          <a href="{% url 'training_update' training.pk %}" class="btn btn-warning btn-sm">Edit</a>
-          <a href="{% url 'training_delete' training.pk %}" class="btn btn-danger btn-sm"
-             onclick="return confirm('Are you sure?');">Delete</a>
-        </td>
-        {% endif %}
-      </tr>
+
+          {% if training.media and not training.media.url|lower|slice:"-4:" == ".mp4" %}
+            <a href="{{ training.media.url }}" target="_blank" class="btn-view-file">📄 View File</a>
+          {% endif %}
+
+          <div class="training-actions">
+            {% if user.is_superuser %}
+              <a href="{% url 'training_update' training.pk %}" class="btn-edit-training">✏ Edit</a>
+              <a href="{% url 'training_delete' training.pk %}" class="btn-delete-training"
+                 onclick="return confirm('Are you sure?');">🗑 Delete</a>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+      {% empty %}
+        <p class="empty-message">No trainings available yet.</p>
       {% endfor %}
-    </tbody>
-  </table>
+    </div>
+  </div>
 </div>
 {% endblock %}

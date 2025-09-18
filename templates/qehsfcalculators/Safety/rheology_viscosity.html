@@ -1,0 +1,636 @@
+{% extends 'base.html' %}
+{% block title %}Rheology (Viscosity) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rheology (Viscosity) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+            justify-content: center;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            height: 420px;
+            overflow-y:auto;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+      
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Rheology (Viscosity) Calculator</h1>
+            <p>Calculate the apparent viscosity of drilling fluid using viscometer readings</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="viscometerReading">Viscometer Reading at 600 rpm (θ<sub>600</sub>)</label>
+                    <input type="number" id="viscometerReading" class="form-input" min="0" step="0.1" placeholder="e.g., 60">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateViscosity()">Calculate Apparent Viscosity</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Viscosity illustration">
+                    <p>This tool will calculate the <strong>Apparent Viscosity</strong> of drilling fluid. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Apparent Viscosity</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">Centipoise (cP)</div>
+                    </div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Extremely Low</span><span>Low</span><span>Moderate</span><span>High</span><span>Extremely High</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Viscosity Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<!-- Notes Section -->
+<div class="note-section">
+    <!-- About -->
+    <div class="note-card">
+        <h3>📘 About This Calculator</h3>
+        <p>
+            The <strong>Rheology (Viscosity) Calculator</strong> determines the 
+            <strong>Apparent Viscosity</strong> of drilling fluid using 
+            viscometer readings at 600 rpm. This helps assess drilling fluid flow properties, 
+            hole cleaning, and overall drilling efficiency.
+        </p>
+    </div>
+
+    <!-- Parameters -->
+    <div class="note-card">
+        <h3>⚙️ Parameters Used</h3>
+        <ul class="note-list">
+            <li><strong>Viscometer Reading at 600 rpm (θ<sub>600</sub>):</strong> 
+                Dial reading obtained when the fluid is sheared at 600 rpm.  
+                Apparent Viscosity (AV) = θ<sub>600</sub> ÷ 2 (in centipoise, cP).
+            </li>
+        </ul>
+    </div>
+
+    <!-- Input Validation Rules -->
+    <div class="note-card">
+        <h3>✅ Input Validation Rules</h3>
+        <ul class="note-list">
+            <li><strong>Range:</strong> 0–600 (instrument limit).</li>
+            <li><strong>Practical API Range:</strong> 10–200 (typical drilling fluids).</li>
+            <li><strong>Decimals:</strong> Up to 1 decimal allowed.</li>
+            <li><strong>No Negatives:</strong> Negative values not allowed.</li>
+            <li><strong>Warnings:</strong> Values &lt;10 or &gt;200 still calculate but show safety warnings.</li>
+        </ul>
+    </div>
+
+    <!-- Output Validations -->
+    <div class="note-card">
+        <h3>📊 Output Validations</h3>
+        <ul class="note-list">
+            <li><strong>&lt; 10 cP</strong> → ❌ Extremely low viscosity. Inadequate suspension, high risk of cuttings settling.</li>
+            <li><strong>10 – 30 cP</strong> → ⚠️ Low viscosity. May not ensure proper hole cleaning, especially in deeper wells.</li>
+            <li><strong>30 – 60 cP</strong> → ✅ Moderate viscosity. Suitable for most general drilling operations.</li>
+            <li><strong>60 – 100 cP</strong> → ⚠️ High viscosity. Risk of circulation issues and high pump pressures.</li>
+            <li><strong>&gt; 100 cP</strong> → ❌ Extremely high viscosity. Immediate action required to adjust mud properties.</li>
+        </ul>
+    </div>
+
+    <!-- Standards -->
+    <div class="note-card">
+        <h3>📏 Standards & Guidelines</h3>
+        <p>
+            This calculator follows <strong>API Recommended Practice 13D</strong> 
+            for drilling fluid rheology. Apparent viscosity is a key parameter 
+            in mud engineering and well control planning, ensuring safe and 
+            efficient drilling operations.
+        </p>
+    </div>
+</div>
+
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateViscosity() {
+    const viscometerReadingInput = document.getElementById('viscometerReading').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+
+    // -------------------------------
+    // Input Validations (API & QEHS)
+    // -------------------------------
+    // Rule 1: Must not be empty or non-numeric
+    if (viscometerReadingInput === "" || isNaN(viscometerReadingInput)) {
+        errors.push("👉 Please enter a valid numeric viscometer reading.");
+    }
+
+    const viscometerReading = parseFloat(viscometerReadingInput);
+
+    // Rule 2: Cannot be negative
+    if (viscometerReading < 0) {
+        errors.push("👉 Viscometer reading cannot be negative.");
+    }
+
+    // Rule 3: Cannot exceed instrument range (600 rpm dial reading)
+    if (viscometerReading > 600) {
+        errors.push("👉 Viscometer reading cannot exceed 600 (instrument limit).");
+    }
+
+    // Rule 4: Practical API working range
+    if (viscometerReading > 0 && (viscometerReading < 10 || viscometerReading > 200)) {
+        errors.push("⚠️ Warning: Reading is outside the typical API range (10–200). Check mud properties and viscometer calibration.");
+    }
+
+    // -------------------------------
+    // Error Handling
+    // -------------------------------
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // -------------------------------
+    // Formula Calculation
+    // Apparent Viscosity (AV) = θ600 / 2
+    // -------------------------------
+    const apparentViscosity = viscometerReading / 2;
+
+    document.getElementById('rateValue').textContent = apparentViscosity.toFixed(2);
+
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+
+    // -------------------------------
+    // Output Threshold Validation
+    // -------------------------------
+    if (apparentViscosity < 10) {
+        meterWidth = '10%';
+        meterColor = '#e74c3c';
+        feedback = '❌ Extremely low viscosity. Inadequate suspension, high risk of cuttings settling.';
+    } else if (apparentViscosity < 30) {
+        meterWidth = '30%';
+        meterColor = '#e67e22';
+        feedback = '⚠️ Low viscosity. May not ensure proper hole cleaning, especially in deeper wells.';
+    } else if (apparentViscosity <= 60) {
+        meterWidth = '50%';
+        meterColor = '#2ecc71';
+        feedback = '✅ Moderate viscosity. Suitable for most general drilling operations.';
+    } else if (apparentViscosity <= 100) {
+        meterWidth = '75%';
+        meterColor = '#f1c40f';
+        feedback = '⚠️ High viscosity. Risk of circulation issues and high pump pressures.';
+    } else {
+        meterWidth = '95%';
+        meterColor = '#9b59b6';
+        feedback = '❌ Extremely high viscosity. Immediate action required to adjust mud properties.';
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').innerHTML = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+{% comment %} 
+1. Formula Used
+// Formula for Apparent Viscosity (AV)
+// AV (cP) = θ600 / 2
+// where θ600 = Viscometer Reading at 600 rpm
+
+2. Detailed Input Validation Rules
+
+From real-world drilling fluid and API (American Petroleum Institute) practices:
+
+Viscometer Reading (θ600)
+
+Unit: Dial reading (dimensionless, correlates to torque at 600 rpm).
+
+Range: 0 – 600 (instrument limit).
+
+Practical Field Range: 10 – 200 (API 13D typical for drilling muds).
+
+Decimals: Up to 1 decimal allowed.
+
+Invalid Values: Negative numbers, >600, null, empty string, non-numeric.
+
+Cross-check: If θ600 < 10 → mud too thin for suspension (safety hazard).
+
+3. Output Validation Logic & Thresholds
+
+These thresholds reflect API 13D and mud engineering best practices:
+
+Apparent Viscosity (cP)	Category	Compliance & Safety Meaning
+< 10	❌ Extremely Low	Inadequate suspension, risk of stuck pipe/cuttings settling.
+10 – 30	⚠ Low	Flows easily, but weak hole cleaning. Needs gel strength checks.
+30 – 60	✅ Moderate	Optimal range for most drilling operations.
+60 – 100	⚠ High	Risk of circulation issues, higher pump pressures.
+> 100	❌ Extremely High	Poor flow, excessive ECD, pressure losses, stuck pipe risk. {% endcomment %}

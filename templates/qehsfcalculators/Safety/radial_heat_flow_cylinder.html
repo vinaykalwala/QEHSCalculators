@@ -1,0 +1,739 @@
+{% extends 'base.html' %}
+{% block title %}Radial Heat Flow Through Cylinder Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radial Heat Flow Through Cylinder Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        /* Input rows for side-by-side fields */
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+       
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Radial Heat Flow Through Cylinder Calculator</h1>
+            <p>Calculate heat transfer through cylindrical walls where temperature varies radially</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="conductivity">Thermal Conductivity (k) (W/m·K)</label>
+                        <input type="number" id="conductivity" class="form-input" min="0" step="0.01" placeholder="e.g., 50">
+                    </div>
+                    <div class="form-group">
+                        <label for="length">Cylinder Length (L) (m)</label>
+                        <input type="number" id="length" class="form-input" min="0" step="0.01" placeholder="e.g., 5">
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="innerRadius">Inner Radius (rᵢ) (m)</label>
+                        <input type="number" id="innerRadius" class="form-input" min="0" step="0.001" placeholder="e.g., 0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="outerRadius">Outer Radius (rₒ) (m)</label>
+                        <input type="number" id="outerRadius" class="form-input" min="0" step="0.001" placeholder="e.g., 0.15">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="tempDiff">Temperature Difference (ΔT) (K)</label>
+                    <input type="number" id="tempDiff" class="form-input" step="0.1" placeholder="e.g., 100">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateRadialHeatFlow()">Calculate Heat Flow</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2910/2910736.png" alt="Thermal flux cylinder illustration">
+
+                    <p>This tool will calculate the <strong>Heat Transfer Rate</strong> through cylindrical walls. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Heat Transfer Rate</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">Watts (W)</div>
+                    </div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Minimal</span><span>Low</span><span>Moderate</span><span>High</span><span>Very High</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Heat Transfer Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<div class="note-section">
+    <!-- About -->
+    <div class="note-card">
+        <h3>📘 About This Calculator</h3>
+        <p>
+            The <strong>Radial Heat Flow Through Cylinder Calculator</strong> determines the steady-state heat transfer rate through cylindrical walls. 
+            Essential for <strong>pipes, pressure vessels, and containment systems</strong> where temperature varies radially.
+        </p>
+    </div>
+
+    <!-- Parameters Used -->
+    <div class="note-card">
+        <h3>⚙ Parameters Used</h3>
+        <ul class="note-list">
+            <li><strong>Thermal Conductivity (k):</strong> Heat conduction property (W/m·K).</li>
+            <li><strong>Cylinder Length (L):</strong> Length of pipe/wall (m).</li>
+            <li><strong>Inner Radius (rᵢ):</strong> Distance to inside wall (m).</li>
+            <li><strong>Outer Radius (rₒ):</strong> Distance to outside wall (m).</li>
+            <li><strong>Temperature Difference (ΔT):</strong> Between inner & outer surfaces (K).</li>
+        </ul>
+    </div>
+
+    <!-- Input Validation Rules -->
+    <div class="note-card">
+        <h3>✅ Input Validation Rules</h3>
+        <ul class="note-list">
+            <li><strong>Thermal Conductivity (k):</strong> > 0, typical range <strong>0.01–500 W/m·K</strong>.</li>
+            <li><strong>Cylinder Length (L):</strong> > 0, practical <strong>0.1–100 m</strong>.</li>
+            <li><strong>Inner Radius (rᵢ):</strong> ≥ 0, recommended <strong>0.01–5 m</strong>.</li>
+            <li><strong>Outer Radius (rₒ):</strong> > rᵢ, with (rₒ - rᵢ) ≥ 0.001 m.</li>
+            <li><strong>Temperature Difference (ΔT):</strong> ≥ 0, typical <strong>0–1000 K</strong>.</li>
+            <li>Decimals: up to <strong>3 places</strong> for radii, <strong>2 places</strong> for k & L.</li>
+        </ul>
+    </div>
+
+    <!-- Output Validations -->
+    <div class="note-card">
+        <h3>✅ Output Validations</h3>
+        <ul class="note-list">
+            <li><strong>q = 0 W:</strong> No heat transfer.</li>
+            <li><strong>q < 10 W:</strong> Low heat transfer (Minimal effect).</li>
+            <li><strong>10 ≤ q ≤ 1000 W:</strong> Moderate (Typical systems).</li>
+            <li><strong>1000 < q ≤ 10000 W:</strong> High (Design check needed).</li>
+            <li><strong>q > 10000 W:</strong> Very High (Verify inputs/materials).</li>
+            <li><strong>q > 50000 W:</strong> Extreme → Engineering review required.</li>
+        </ul>
+    </div>
+
+    <!-- Standards -->
+    <div class="note-card">
+        <h3>📏 Standards</h3>
+        <p>
+            Based on <strong>ASME B31.3</strong> (Process Piping), 
+            <strong>ASTM C680</strong> (Insulation), 
+            <strong>ISO 12241</strong> (Thermal insulation), 
+            <strong>NFPA 80</strong> (Fire barriers).
+        </p>
+    </div>
+
+    <!-- Conclusion -->
+    <div class="note-card">
+        <h3>📝 Conclusion</h3>
+        <p>
+            This tool helps ensure <strong>thermal safety and compliance</strong>.  
+            Accurate validation prevents <strong>fire risks, material failures, and unsafe heat loads</strong>.
+        </p>
+    </div>
+</div>
+
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateRadialHeatFlow() {
+    const k = parseFloat(document.getElementById('conductivity').value.trim());
+    const L = parseFloat(document.getElementById('length').value.trim());
+    const ri = parseFloat(document.getElementById('innerRadius').value.trim());
+    const ro = parseFloat(document.getElementById('outerRadius').value.trim());
+    const deltaT = parseFloat(document.getElementById('tempDiff').value.trim());
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+    let warnings = [];
+
+    // ✅ Thermal Conductivity (0.01 – 500 W/m·K)
+    if (isNaN(k) || k <= 0) {
+        errors.push("👉 Thermal Conductivity (k) must be a positive number.");
+    } else if (k < 0.01 || k > 500) {
+        warnings.push("⚠️ Thermal Conductivity is outside normal engineering range (0.01–500 W/m·K).");
+    }
+
+    // ✅ Cylinder Length (0.1 – 100 m)
+    if (isNaN(L) || L <= 0) {
+        errors.push("👉 Cylinder Length (L) must be a positive number.");
+    } else if (L < 0.1 || L > 100) {
+        warnings.push("⚠️ Cylinder Length is outside normal range (0.1–100 m).");
+    }
+
+    // ✅ Inner Radius (≥ 0, practical 0.01 – 5 m)
+    if (isNaN(ri) || ri < 0) {
+        errors.push("👉 Inner Radius (ri) cannot be negative.");
+    } else if (ri < 0.01 || ri > 5) {
+        warnings.push("⚠️ Inner Radius is outside practical range (0.01–5 m).");
+    }
+
+    // ✅ Outer Radius (> ri, practical 0.02 – 10 m)
+    if (isNaN(ro) || ro <= 0) {
+        errors.push("👉 Outer Radius (ro) must be a positive number.");
+    } else if (ro <= ri) {
+        errors.push("👉 Outer Radius (ro) must be greater than Inner Radius (ri).");
+    } else if ((ro - ri) < 0.001) {
+        errors.push("👉 Difference between Outer and Inner Radius must be at least 0.001 m.");
+    } else if (ro > 10) {
+        warnings.push("⚠️ Outer Radius exceeds normal range (>10 m).");
+    }
+
+    // ✅ Temperature Difference (≥ 0, typical 0–1000 K)
+    if (isNaN(deltaT) || deltaT < 0) {
+        errors.push("👉 Temperature Difference (ΔT) must be a non-negative number.");
+    } else if (deltaT > 1000) {
+        warnings.push("⚠️ Temperature Difference is very high (>1000 K). Verify safety case.");
+    }
+
+    // ❌ Stop calculation if errors
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // 🔹 Heat Transfer Calculation
+    const q = (2 * Math.PI * k * L * deltaT) / Math.log(ro / ri);
+
+    if (!isFinite(q) || isNaN(q)) {
+        errorMessage.innerHTML = "👉 Calculation error: check inputs.";
+        errorBox.classList.remove("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    // 🔹 Output Validation (with feedback)
+    const abs_q = Math.abs(q);
+    let feedback, meterWidth, meterColor;
+
+    if (deltaT === 0) {
+        feedback = 'No temperature difference: No heat transfer will occur.';
+        meterWidth = '5%'; meterColor = '#95a5a6';
+    } else if (abs_q < 10) {
+        feedback = 'Low heat transfer: Minimal thermal effect.';
+        meterWidth = '20%'; meterColor = '#3498db';
+    } else if (abs_q <= 1000) {
+        feedback = 'Moderate heat transfer: Typical for many thermal systems.';
+        meterWidth = '40%'; meterColor = '#2ecc71';
+    } else if (abs_q <= 10000) {
+        feedback = 'High heat transfer: Ensure system design can handle it.';
+        meterWidth = '70%'; meterColor = '#f39c12';
+    } else {
+        feedback = 'Very high heat transfer: Check inputs and material limitations.';
+        meterWidth = '95%'; meterColor = '#e74c3c';
+    }
+
+    if (abs_q > 50000) {
+        warnings.push("⚠️ Heat transfer rate exceeds 50,000 W. Verify design safety.");
+    }
+
+    document.getElementById('rateValue').textContent = abs_q.toFixed(2);
+    const meterFill = document.getElementById('meterFill');
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+
+    document.getElementById('feedbackContent').textContent = feedback + (warnings.length ? " " + warnings.join(" ") : "");
+
+    placeholder.classList.add("hidden");
+    resultValue.classList.remove("hidden");
+}
+
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+{% comment %} 
+🔹 1. Formula (for comments in code)
+/*
+Formula for Radial Heat Flow through a Cylinder (steady-state conduction):
+
+    q = (2 * π * k * L * ΔT) / ln(ro / ri)
+
+Where:
+    q   = Heat Transfer Rate (W)
+    k   = Thermal Conductivity (W/m·K)
+    L   = Cylinder Length (m)
+    ΔT  = Temperature Difference (K)
+    ri  = Inner Radius (m)
+    ro  = Outer Radius (m)
+
+Key Notes:
+- Formula assumes 1D steady-state conduction through cylindrical wall.
+- Valid only if ro > ri and ΔT > 0.
+- Industry references: ASME B31.3 (piping), ASTM C680 (insulation), ISO 12241.
+*/
+
+🔹 2. Input Validation Rules (QEHS aligned)
+
+Thermal Conductivity (k):
+
+Must be > 0.
+
+Valid range: 0.01 – 500 W/m·K (typical metals, insulations, fire-resistant materials).
+
+Too high/low → warn user (material may not exist).
+
+Decimals: up to 2 places.
+
+Cylinder Length (L):
+
+Must be > 0.
+
+Practical range: 0.1 – 100 m (piping, ducts, vessels).
+
+Too long → impractical for plant safety.
+
+Decimals: up to 2 places.
+
+Inner Radius (ri):
+
+Must be ≥ 0.
+
+Range: 0.01 – 5 m.
+
+If = 0, treated as solid rod → warn user.
+
+Decimals: up to 3 places.
+
+Outer Radius (ro):
+
+Must be > ri.
+
+Range: 0.02 – 10 m.
+
+Safety check: (ro - ri) > 0.001 m (avoid division by zero).
+
+Decimals: up to 3 places.
+
+Temperature Difference (ΔT):
+
+Must be ≥ 0 K.
+
+Range: 0 – 1000 K (beyond → unrealistic in safety audits).
+
+If = 0 → q = 0 W (must display "No heat transfer").
+
+Decimals: up to 1 place. {% endcomment %}

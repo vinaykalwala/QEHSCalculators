@@ -1,0 +1,686 @@
+{% extends 'base.html' %}
+{% block title %}Orifice Meter Flow Velocity Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orifice Meter Flow Velocity Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+     <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .formula-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left: 6px solid #0d47a1;
+        }
+        
+        .formula-card code {
+            display: inline-block;
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #0d47a1;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+    </style>
+</head>
+<body>
+<div class="btn-container">
+    <a href="{% url 'qualitycategory_calculators' %}" class="back-btn">Back To Quality Calculators</a>
+</div>
+
+<div class="calculator-container printable" id="printArea">
+
+    <div class="calculator-header">
+        <h1>Orifice Meter Flow Velocity Calculator</h1>
+        <p>Calculates flow velocity (m/s) through an orifice plate using formula based on pressure drop, density, β ratio, and discharge coefficient.</p>
+    </div>
+
+    <div class="calc-content">
+        <!-- Input Card -->
+        <div class="calc-card">
+            <h2>Enter Data</h2>
+            <div class="form-group">
+                <label for="pressureDiff">Pressure Difference ΔP (Pa)</label>
+                <input type="number" id="pressureDiff" class="form-input" step="0.1" placeholder="Enter ΔP in Pa">
+            </div>
+            <div class="form-group">
+                <label for="density">Fluid Density ρ (kg/m³)</label>
+                <input type="number" id="density" class="form-input" step="0.1" placeholder="Enter density">
+            </div>
+            <div class="form-group">
+                <label for="beta">Diameter Ratio β (0.2–0.8)</label>
+                <input type="number" id="beta" class="form-input" step="0.01" placeholder="Enter β">
+            </div>
+            <div class="form-group">
+                <label for="dischargeCoeff">Discharge Coefficient (Cₒ 0.6–0.65)</label>
+                <input type="number" id="dischargeCoeff" class="form-input" step="0.01" value="0.61">
+            </div>
+                            <div class="form-group">
+                    <label for="gc">Conversion Factor g<sub>c</sub> (unit conversion, SI default = 1)</label>
+                    <input type="number" id="gc" class="form-input" step="0.0001" value="1" placeholder="Enter g_c (default 1 for SI)">
+                </div>
+
+            <button class="calculate-btn" onclick="calculateOrificeFlow()">Calculate Velocity</button>
+        </div>
+
+        <!-- Result Card -->
+        <div class="result-card">
+            <div class="result-placeholder" id="placeholder">
+                <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Orifice">
+                <p>Enter values above to calculate <strong>orifice flow velocity</strong> (m/s).</p>
+            </div>
+
+            <div class="result-error hidden" id="resultError">
+                <div class="error-icon">❌</div>
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+
+            <div class="result-value hidden" id="resultValue">
+                <div class="calculation-type">
+                    <h2>Flow Velocity</h2>
+                </div>
+                <div class="rate-value" id="velocityValue">0.00</div>
+                <div class="rate-label"><strong>m/s</strong></div>
+                <div class="result-feedback">
+                    <div class="feedback-title">Interpretation</div>
+                    <div class="feedback-content" id="velocityFeedback"></div>
+                </div>
+                <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="note-section">
+        
+
+<div class="note-card">
+    <h3>🔎 About This Calculator</h3>
+    <p>
+        The <strong>Orifice Meter Flow Velocity Calculator</strong> estimates fluid velocity through an orifice plate using 
+        ΔP, ρ, β, Cₒ, and g<sub>c</sub>. It is simple, cost-effective, and standardized under 
+        <strong>ISO 5167</strong> and <strong>ASME MFC-3M</strong>, widely used in process control and compliance.
+    </p>
+</div>
+
+<div class="note-card">
+    <h3>❓ Key Parameters</h3>
+    <ul class="note-list">
+        <li><strong>ΔP (Pa):</strong> Pressure drop, must be &gt; 0.</li>
+        <li><strong>ρ (kg/m³):</strong> Fluid density, &gt; 0.</li>
+        <li><strong>β:</strong> Diameter ratio (d/D), valid 0.2–0.8.</li>
+        <li><strong>Cₒ:</strong> Discharge coefficient, 0.6–0.65.</li>
+        <li><strong>g<sub>c</sub>:</strong> Conversion factor, usually 1 (SI).</li>
+        <li><strong>V̄ₒ (m/s):</strong> Calculated flow velocity.</li>
+    </ul>
+</div>
+
+        <div class="note-card">
+            <h3>🔎 Input Validations</h3>
+            <ul class="note-list">
+                <li>ΔP (Pa): >0 and ≤1,000,000 Pa</li>
+                <li>ρ (kg/m³): >0, typical 0.1–2000</li>
+                <li>β: 0.2–0.8 only</li>
+                <li>Cₒ: 0.6–0.65</li>
+            </ul>
+        </div>
+        <div class="note-card">
+            <h3>📊 Output Interpretation</h3>
+            <ul class="note-list">
+                <li><1 m/s → ⚠️ Too low, unreliable</li>
+                <li>1–50 m/s → ✅ Acceptable</li>
+                <li>>50 m/s → ⚠️ Too high, check inputs</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>function calculateOrificeFlow() {
+            // Read raw values (so we can test for empty string separately)
+            const rawDeltaP = document.getElementById('pressureDiff').value;
+            const rawRho = document.getElementById('density').value;
+            const rawBeta = document.getElementById('beta').value;
+            const rawCo = document.getElementById('dischargeCoeff').value;
+            const rawGc = document.getElementById('gc').value;
+
+            const deltaP = parseFloat(rawDeltaP);
+            const rho = parseFloat(rawRho);
+            const beta = parseFloat(rawBeta);
+            const Co = parseFloat(rawCo);
+            const gc = parseFloat(rawGc);
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+            const velocityOutput = document.getElementById('velocityValue');
+            const feedbackBox = document.getElementById('velocityFeedback');
+
+            // Reset UI
+            errorBox.classList.add('hidden');
+            resultValue.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+            errorMessage.innerHTML = '';
+            feedbackBox.textContent = '';
+
+            let errors = [];
+            let warnings = [];
+
+            // ---- Input validations ----
+            // ΔP
+            if (rawDeltaP.trim() === '' || isNaN(deltaP)) {
+                errors.push('👉 Pressure difference ΔP (Pa) is required and must be numeric.');
+            } else if (deltaP <= 0) {
+                errors.push('👉 ΔP must be greater than 0 Pa.');
+            } else if (deltaP > 1000000) {
+                warnings.push('⚠️ ΔP is very large (>1,000,000 Pa). Verify units (Pa) and measurement.');
+            }
+
+            // Density
+            if (rawRho.trim() === '' || isNaN(rho)) {
+                errors.push('👉 Fluid density ρ (kg/m³) is required and must be numeric.');
+            } else if (rho <= 0) {
+                errors.push('👉 Density must be greater than 0 kg/m³.');
+            } else if (rho < 0.1 || rho > 2000) {
+                warnings.push('⚠️ Density outside typical bounds (0.1–2000 kg/m³). Verify units and fluid.');
+            }
+
+            // Beta
+            if (rawBeta.trim() === '' || isNaN(beta)) {
+                errors.push('👉 Diameter ratio β is required and must be numeric.');
+            } else if (beta < 0.2 || beta > 0.8) {
+                errors.push('👉 β must be between 0.2 and 0.8 (inclusive). Values outside this range produce inaccurate/invalid measurements.');
+            }
+
+            // Co
+            if (rawCo.trim() === '' || isNaN(Co)) {
+                errors.push('👉 Discharge coefficient Cₒ is required and must be numeric.');
+            } else if (Co < 0.6 || Co > 0.65) {
+                errors.push('👉 Discharge coefficient Cₒ should be between 0.6 and 0.65 for typical orifice plates.');
+            }
+
+            // g_c
+            if (rawGc.trim() === '' || isNaN(gc)) {
+                errors.push('👉 Conversion factor g_c is required and must be numeric.');
+            } else if (gc <= 0) {
+                errors.push('👉 Conversion factor g_c must be greater than 0.');
+            } else if (Math.abs(gc - 1) > 0.001) {
+                // not fatal, but warn strongly — user may be using non-SI units
+                warnings.push('⚠️ g_c deviates from 1 (SI default). Ensure you intentionally changed the unit conversion factor.');
+            }
+
+            // If input-level errors → show and stop
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join('<br>');
+                errorBox.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                resultValue.classList.add('hidden');
+                return;
+            }
+
+            // ---- Prevent singularity in denominator ----
+            const denom = 1 - Math.pow(beta, 4);
+            if (denom <= 0) {
+                errorMessage.innerHTML = '❌ Invalid β: denominator (1 - β⁴) must be > 0. Check β value.';
+                errorBox.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                resultValue.classList.add('hidden');
+                return;
+            }
+
+            // ---- Term under square root must be non-negative ----
+            const term = (2 * gc * deltaP) / rho;
+            if (term < 0) {
+                errorMessage.innerHTML = '❌ Computation error: (2·g_c·ΔP / ρ) produced a negative value. Check ΔP, ρ and g_c.';
+                errorBox.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                resultValue.classList.add('hidden');
+                return;
+            }
+
+            // ---- Compute ----
+            const flowCoeff = Co / Math.sqrt(denom);
+            const velocity = flowCoeff * Math.sqrt(term); // in m/s (SI)
+
+            // ---- Cross-field validations (safety / realism checks) ----
+            // Extremely high velocities often indicate unit mismatch or invalid combination
+            if (!isFinite(velocity) || isNaN(velocity)) {
+                errorMessage.innerHTML = '❌ Calculation produced an invalid number. Check inputs for unit mismatches.';
+                errorBox.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                resultValue.classList.add('hidden');
+                return;
+            }
+
+            if (velocity > 100) {
+                // block — too unrealistic / unsafe
+                errorMessage.innerHTML = '❌ Calculated velocity > 100 m/s — beyond safe physical limits for typical process piping. Verify ΔP, ρ, β and g_c (units).';
+                errorBox.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                resultValue.classList.add('hidden');
+                return;
+            }
+
+            if (velocity < 0.1) {
+                // block — measurement not reliable
+                errorMessage.innerHTML = '❌ Calculated velocity < 0.1 m/s — too low to be reliably measured with an orifice meter in most setups.';
+                errorBox.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                resultValue.classList.add('hidden');
+                return;
+            }
+
+            // Additional cross-field warnings
+            if (deltaP > 500000 && beta > 0.75) {
+                warnings.push('⚠️ Large ΔP combined with high β may produce flow disturbances — evaluate piping and tap locations.');
+            }
+
+            if (deltaP > 100000 && rho < 1) {
+                warnings.push('⚠️ High ΔP with gas-like density may produce extremely high velocities — ensure gas-flow correlations and orifice sizing.');
+            }
+
+            // ---- Present results ----
+            velocityOutput.textContent = velocity.toFixed(4);
+
+            // Interpretation
+            let feedback = '';
+            if (velocity < 1) {
+                feedback = '⚠️ Low velocity (1 m/s threshold): measurement may be less accurate.';
+            } else if (velocity > 50) {
+                feedback = '⚠️ High velocity (>50 m/s): risk of erosion and measurement error — review piping and instrumentation.';
+            } else {
+                feedback = '✅ Velocity within typical measurement range.';
+            }
+
+            if (warnings.length > 0) {
+                feedback += ' | ' + warnings.join(' ');
+            }
+
+            feedbackBox.textContent = feedback;
+
+            // Toggle UI
+            placeholder.classList.add('hidden');
+            resultValue.classList.remove('hidden');
+            errorBox.classList.add('hidden');
+        }
+
+        // Lightweight print helper (safe fallback)
+        function printReport() {
+            // If a print.js exists with custom print logic, it will run; otherwise fallback to window.print()
+            if (typeof window.customPrint === 'function') {
+                window.customPrint('printArea');
+            } else {
+                window.print();
+            }
+        }
+</script>
+<script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+<!--
+
+Input Validations (QEHS / Safety Context)
+
+Pressure Difference (ΔP, Pa)
+
+Required, must be > 0
+
+Upper limit: ≤ 1,000,000 Pa (10 bar) for safe DP meters
+
+Decimals: allow up to 1
+
+Fluid Density (ρ, kg/m³)
+
+Required, must be > 0
+
+Normal range: 0.1–2000 (gas to heavy liquid)
+
+Warning if < 0.5 (too low, check units) or > 1500 (likely solids/slurries)
+
+Beta Ratio (β = d/D)
+
+Required, must be between 0.2 and 0.8 (ISO 5167 standard)
+
+Reject outside this range
+
+Discharge Coefficient (Cₒ)
+
+Must be between 0.6 and 0.65
+
+Reject outside
+-------------------------------------------------------------------------------------
+Output Validation
+
+Result must be > 0
+
+Typical velocity banding:
+
+< 1 m/s → ⚠️ Too low, unreliable measurement
+
+1 – 50 m/s → ✅ Acceptable
+
+50 m/s → ⚠️ Too high, check inputs
+------------------------------------------------------------------------
+🔹 Edge Cases
+
+Empty inputs → block calculation
+
+Non-numeric inputs → block
+
+Division by zero → prevent if ρ = 0 or β = 1
+
+Unrealistic outliers (ΔP huge + very low ρ → absurd velocities) → warn
+
+
+
+-->

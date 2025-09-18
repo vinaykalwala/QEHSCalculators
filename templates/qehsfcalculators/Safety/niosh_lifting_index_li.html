@@ -1,0 +1,693 @@
+{% extends 'base.html' %}
+{% block title %}NIOSH Lifting Index Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIOSH Lifting Index (LI) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            height: 420px;
+            overflow-y:auto;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .rate-display {
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+      
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+        
+        /* Responsive table wrapper */
+.responsive-table {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Optional: Keep styling for the table */
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 400px; /* Ensures horizontal scrolling on small devices */
+}
+
+.custom-table th, .custom-table td {
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.custom-table th {
+    background-color: #1560bd;
+    color:white;
+}
+
+        
+        .custom-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .custom-table tr:hover {
+            background-color: #e6f7ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>NIOSH Lifting Index (LI) Calculator</h1>
+            <p>Calculate the ergonomic risk of manual lifting tasks</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="loadWeight">Actual Load Weight (kg)</label>
+                    <input type="number" id="loadWeight" class="form-input" min="0" step="0.1" placeholder="e.g., 15.5">
+                </div>
+                <div class="form-group">
+                    <label for="rwl">Recommended Weight Limit (RWL) (kg)</label>
+                    <input type="number" id="rwl" class="form-input" min="0" step="0.1" placeholder="e.g., 12.3">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateLiftingIndex()">Calculate Lifting Index</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Safety illustration">
+                    <p>This tool will calculate the <strong>NIOSH Lifting Index (LI)</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd; margin-top:30px;">
+                        <h2>NIOSH Lifting Index (LI)</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">Lifting Index Value</div>
+                    </div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Safe (≤1)</span><span>Increased Risk (1-3)</span><span>High Risk (>3)</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Risk Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>NIOSH Lifting Index (LI)</strong> is a widely used ergonomic tool designed to assess manual lifting tasks and determine their potential risks. It helps employers and safety professionals analyze lifting conditions and identify areas where improvements are needed to minimize workplace injuries.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>❓ What is NIOSH?</h3>
+                <p>
+                    The <strong>National Institute for Occupational Safety and Health (NIOSH)</strong> is a U.S. federal agency dedicated to researching and providing recommendations for occupational safety and health. NIOSH conducts studies to reduce workplace hazards and establish guidelines for safer working conditions, including ergonomic lifting standards.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Actual Load Weight:</strong> The weight of the object being lifted (in kilograms)</li>
+                    <li><strong>Recommended Weight Limit (RWL):</strong> The maximum recommended weight for safe lifting under specific conditions</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Risk Level Interpretation</h3>
+                <div class="responsive-table">
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>LI Value</th>
+                <th>Risk Level</th>
+                <th>Action Required</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>≤ 1</td>
+                <td><span class="good">Safe</span></td>
+                <td>Acceptable</td>
+            </tr>
+            <tr>
+                <td>1 - 3</td>
+                <td><span class="average">Increased Risk</span></td>
+                <td>Redesign Task</td>
+            </tr>
+            <tr>
+                <td>> 3</td>
+                <td><span class="bad">High Risk</span></td>
+                <td>Immediate Change Needed</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+            </div>
+
+            <div class="note-card">
+                <h3>🌍 Importance of Lifting Index</h3>
+                <ul class="note-list">
+                    <li>Identifies risky manual lifting tasks that could lead to injuries</li>
+                    <li>Helps prevent work-related musculoskeletal disorders, such as back pain and muscle strains</li>
+                    <li>Guides ergonomic improvements in material handling to reduce worker fatigue and improve efficiency</li>
+                    <li>Ensures compliance with NIOSH safety recommendations, minimizing workplace injuries</li>
+                    <li>Reduces medical costs and absenteeism related to lifting injuries</li>
+                    <li>Creates a safer and more productive work environment</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>🔧 How to Reduce LI</h3>
+                <ul class="note-list">
+                    <li><strong>Reduce the weight of loads:</strong> If possible, decrease the load weight or divide it into smaller, manageable parts</li>
+                    <li><strong>Improve lifting posture and technique:</strong> Train workers to use proper lifting mechanics, keeping the back straight and bending the knees</li>
+                    <li><strong>Use mechanical assistance:</strong> Implement tools like forklifts, hoists, and conveyor belts to reduce strain</li>
+                    <li><strong>Modify workplace layout:</strong> Adjust storage heights, minimize the need for bending or reaching, and optimize workflows to improve efficiency</li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+    <h3>✅ Input Validation Rules</h3>
+    <ul class="note-list">
+        <li><strong>Actual Load Weight (kg):</strong> Must be a number between <b>0.1</b> and <b>1000</b> kg.</li>
+        <li><strong>Recommended Weight Limit (RWL) (kg):</strong> Must also be between <b>0.1</b> and <b>1000</b> kg.</li>
+        <li><strong>No zero or negative values</strong> are allowed for either input.</li>
+        <li><strong>Decimal input</strong> is supported up to <b>1 decimal point</b> for precision.</li>
+        <li>If the <strong>Load Weight exceeds RWL by 5x or more</strong>, a high-risk warning is shown.</li>
+        <li><strong>All values</strong> are in metric units (<b>kilograms</b>), per international safety standards.</li>
+    </ul>
+</div>
+
+        </div>
+    </div>
+
+    <script>
+         document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+        function calculateLiftingIndex() {
+    var loadWeight = parseFloat(document.getElementById("loadWeight").value);
+    var rwl = parseFloat(document.getElementById("rwl").value);
+
+    // === FORMULA USED ===
+    // Lifting Index (LI) = Actual Load Weight (kg) / Recommended Weight Limit (RWL) (kg)
+
+    // === INPUT VALIDATIONS BASED ON NIOSH / OSHA / ISO 45001 ===
+    if (isNaN(loadWeight) || isNaN(rwl)) {
+        showError("Both fields are required. Please enter valid numbers.");
+        return;
+    }
+
+    if (loadWeight <= 0 || rwl <= 0) {
+        showError("Both Load Weight and RWL must be greater than 0 kg.");
+        return;
+    }
+
+    if (loadWeight > 1000 || rwl > 1000) {
+        showError("Values must not exceed 1000 kg. Use mechanical assistance for heavier loads.");
+        return;
+    }
+
+    // Optional warning: Load weight should not exceed RWL drastically
+    if (loadWeight > 5 * rwl) {
+        showError("The load greatly exceeds the recommended limit. This is extremely hazardous.");
+        return;
+    }
+
+    // === CALCULATION ===
+    var liftingIndex = loadWeight / rwl;
+    var riskLevel = "", actionRequired = "", color = "", meterWidth = 0;
+
+    if (liftingIndex <= 1) {
+        riskLevel = "Safe";
+        actionRequired = "The lifting task is within safe ergonomic limits. No changes are required.";
+        color = "#2ecc71"; // Green
+        meterWidth = (liftingIndex / 1) * 33;
+    } else if (liftingIndex <= 3) {
+        riskLevel = "Increased Risk";
+        actionRequired = "The lifting task poses a moderate risk. Consider redesigning the task.";
+        color = "#f39c12"; // Orange
+        meterWidth = 33 + ((liftingIndex - 1) / 2) * 33;
+    } else {
+        riskLevel = "High Risk";
+        actionRequired = "The lifting task is highly hazardous. Immediate changes are necessary.";
+        color = "#e74c3c"; // Red
+        meterWidth = 66 + ((Math.min(liftingIndex, 10) - 3) / 7) * 34; // Cap meter at LI=10
+    }
+
+    // === OUTPUT DISPLAY ===
+    document.getElementById("placeholder").classList.add("hidden");
+    document.getElementById("resultError").classList.add("hidden");
+    document.getElementById("resultValue").classList.remove("hidden");
+
+    document.getElementById("rateValue").textContent = liftingIndex.toFixed(2);
+    document.getElementById("rateValue").style.color = color;
+    document.getElementById("feedbackContent").innerHTML = 
+        "<strong>Risk Level:</strong> <span style='color: " + color + "; font-weight: bold;'>" + riskLevel + "</span><br>" +
+        "<strong>Action Required:</strong> " + actionRequired;
+
+    // === METER ===
+    document.getElementById("meterFill").style.width = Math.min(meterWidth, 100) + "%";
+    document.getElementById("meterFill").style.background = color;
+}
+
+
+        function showError(message) {
+            document.getElementById("placeholder").classList.add("hidden");
+            document.getElementById("resultValue").classList.add("hidden");
+            document.getElementById("resultError").classList.remove("hidden");
+            document.getElementById("errorMessage").textContent = message;
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        // Add input validation on the fly
+        document.getElementById("loadWeight").addEventListener("input", function() {
+            if (this.value < 0) this.value = Math.abs(this.value);
+        });
+
+        document.getElementById("rwl").addEventListener("input", function() {
+            if (this.value < 0) this.value = Math.abs(this.value);
+        });
+    </script>
+</body>
+</html>
+{% endblock %}
+
+{% comment %} 
+✅ 1. Real-World Analysis of Inputs, Outputs & Formula
+➤ Formula Used:
+Lifting Index (LI) = Actual Load Weight (kg) / Recommended Weight Limit (RWL) (kg)
+
+➤ Purpose:
+
+This tool assesses the ergonomic risk of lifting tasks. It is widely used for:
+
+Job hazard analysis
+
+Manual handling assessments
+
+Preventive ergonomics planning
+
+✅ 2. Validation Rules for Inputs (Based on NIOSH, ISO 45001, OSHA)
+Field	Validation Rule	Reasoning (Safety/Compliance)
+Actual Load Weight (kg)	Must be a number between 0.1 kg and 1000 kg	Lifting objects below 0.1 kg is negligible, and >1000 kg is beyond manual handling — requires machinery (per OSHA/NIOSH)
+	Must allow decimals (up to 1 decimal point)	Precision is required in ergonomic analysis
+	Must be greater than 0	Zero weight is invalid input
+	Units must be kilograms (kg)	Standardized metric used globally in safety regulations
+RWL (Recommended Weight Limit)	Must be number between 0.1 kg - 1000 kg	RWL is context-specific but should not exceed what is physiologically safe
+	Cannot be zero or negative	Division by zero is invalid; negative RWL is non-sensical
+	Should be less than or equal to load weight	Optional check: Validate if lifting more than recommended
+✅ 3. Edge Case Validations
+➤ Handle the following:
+Edge Case	Action
+RWL = 0	Show error: “RWL must be greater than zero to avoid division error.”
+LoadWeight = 0	Show error: “Load weight must be greater than zero.”
+LI = ∞ or NaN	Show fallback error
+Negative values	Auto-correct or block input (already partially handled)
+Excessively high LI (>10)	Cap meter width; show message: “Task is critically unsafe”
+Empty fields	Show error: “Both fields are required.”
+✅ 4. Output Validation Logic
+LI Value	Interpretation	Action Required
+≤ 1	Safe	Acceptable; no redesign needed
+>1 to ≤3	Increased Risk	Redesign or improvement needed
+>3	High Risk	Immediate corrective actions required
+>10	Critical	Display as max on meter (optional visual cap) {% endcomment %}

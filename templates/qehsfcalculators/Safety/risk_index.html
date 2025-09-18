@@ -1,0 +1,681 @@
+{% extends 'base.html' %}
+{% block title %}Risk Index Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk Index Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            height: 420px;
+            overflow-y: auto;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .risk-value {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .risk-label { 
+            color: #7f8c8d; 
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .calculation-nav {
+            display: flex;
+            gap: 23px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .calculation-item {
+            list-style: none;
+        }
+        
+        .calculation-link {
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .calculation-link:hover {
+            background: #1560bd;
+            transform: translateY(-2px);
+        }
+
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Risk Index Calculator</h1>
+            <p>Calculate net risk by offsetting hazards against existing controls</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="form-group">
+                    <label for="controlScore">Control Score</label>
+                    <input type="number" id="controlScore" class="form-input" step="0.1" placeholder="From control score calculator">
+                </div>
+                <div class="form-group">
+                    <label for="hazardScore">Hazard Score</label>
+                    <input type="number" id="hazardScore" class="form-input" step="0.1" placeholder="From hazard score calculator">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateRiskIndex()">Calculate Risk Index</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/564/564619.png" alt="Risk warning triangle">
+                    <p>This tool will calculate the <strong>Risk Index</strong>. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd; margin-top:20px;">
+                        <h2>Risk Index</h2>
+                    </div>
+                    
+                    <div class="risk-value" id="riskValue">0.0</div>
+                    <div class="risk-label" id="riskLabel">Risk Index Score</div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Risk Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+     <!-- About -->
+    <div class="note-card">
+        <h3>📘 About This Calculator</h3>
+        <p>
+            The <strong>Risk Index Calculator</strong> computes net risk by comparing hazards 
+            against existing controls. A positive result means adequate controls, while 
+            a negative result indicates residual risk requiring attention.
+        </p>
+    </div>
+
+    <!-- Parameters Used -->
+    <div class="note-card">
+        <h3>⚙ Parameters Used</h3>
+        <ul class="note-list">
+            <li><strong>Control Score:</strong> Effectiveness of existing controls (higher = safer)</li>
+            <li><strong>Hazard Score:</strong> Severity × Probability of hazard (higher = riskier)</li>
+        </ul>
+    </div>
+
+    <!-- Input Validation Rules -->
+    <div class="note-card">
+        <h3>✅ Input Validation Rules</h3>
+        <ul class="note-list">
+            <li>Control Score: 0–100, decimals allowed (step 0.1), no negatives</li>
+            <li>Hazard Score: 0–100, decimals allowed (step 0.1), no negatives</li>
+            <li>Both must use the same scoring scale (0–10 or 0–100)</li>
+            <li>Blank or non-numeric entries are invalid</li>
+            <li>Cross-check: Control = 0 & Hazard > 0 → always dangerous</li>
+        </ul>
+    </div>
+
+    <!-- Output Validations -->
+    <div class="note-card">
+        <h3>📊 Output Validations</h3>
+        <p><b>Formula:</b> Risk Index = Control Score – Hazard Score</p>
+        <ul class="note-list">
+            <li>RI > 0 → ✅ SAFE: Controls adequately address hazards.</li>
+            <li>RI = 0 → ⚠️ BORDERLINE: Controls just match hazards – consider improvements.</li>
+            <li>-10 < RI < 0 → ⚠️ UNSAFE: Hazards exceed controls – needs attention.</li>
+            <li>RI ≤ -10 → ❌ DANGEROUS: Significant uncontrolled hazards – immediate action required!</li>
+        </ul>
+    </div>
+
+    <!-- Standards -->
+    <div class="note-card">
+        <h3>📏 Standards</h3>
+        <p>
+            This approach aligns with <strong>ISO 31000</strong> (Risk Management), 
+            <strong>OSHA Hazard Ranking</strong>, and <strong>NFPA Fire Safety Risk Methods</strong>. 
+            It provides a transparent metric for safety audits, incident prevention, and compliance reporting.
+        </p>
+    </div>
+                <!-- Conclusion -->
+<div class="note-card">
+    <h3>📝 Conclusion</h3>
+    <p>
+        The <strong>Risk Index Calculator</strong> provides a clear and transparent way to 
+        measure whether <strong>existing controls adequately offset hazards</strong>. 
+    </p>
+    <p>
+        This approach aligns with <strong>ISO 31000</strong>, <strong>OSHA</strong>, and 
+        <strong>NFPA risk assessment principles</strong>, making it a practical 
+        decision-support tool for <strong>incident prevention, compliance reporting, 
+        and continuous improvement</strong> in workplace safety.
+    </p>
+</div>
+
+            <!-- How to calculate -->
+            <div class="note-card">
+                <h3>🔗 How to calculate Control Score and Hazard Score?</h3>
+                <p>
+                    If you need more information on how to calculate the Control Score and Hazard Score, 
+                    you can refer to the following resources:
+                </p>
+                <ul class="calculation-nav">
+                    <li class="calculation-item">
+                       <a href="{% url 'quality_control_score_calculator' %}" class="calculation-link">Control Score Calculator</a>
+                    </li>
+                    <li class="calculation-item">
+                        <a href="{% url 'safety_hazard_score_calculator' %}" class="calculation-link">Hazard Score Calculator</a>
+                    </li>
+                </ul>
+            </div>
+
+
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateRiskIndex() {
+    const controlScoreInput = document.getElementById('controlScore').value.trim();
+    const hazardScoreInput = document.getElementById('hazardScore').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const riskValue = document.getElementById('riskValue');
+    const feedbackContent = document.getElementById('feedbackContent');
+
+    let errors = [];
+
+    // --- Input Validation Rules ---
+    /*
+    Control Score & Hazard Score
+    - Must be numeric
+    - Range: 0–100 (based on OSHA/NFPA/ISO scoring)
+    - Decimals allowed: 1 place (step = 0.1)
+    - Cannot be negative or blank
+    - Must be on the same scale (0–10 or 0–100, not mixed)
+    */
+
+    if (controlScoreInput === "" || isNaN(controlScoreInput)) {
+        errors.push("👉 Please enter the Control Score.");
+    } else {
+        const control = parseFloat(controlScoreInput);
+        if (control < 0) errors.push("👉 Control Score cannot be negative.");
+        if (control > 100) errors.push("👉 Control Score cannot exceed 100.");
+    }
+
+    if (hazardScoreInput === "" || isNaN(hazardScoreInput)) {
+        errors.push("👉 Please enter the Hazard Score.");
+    } else {
+        const hazard = parseFloat(hazardScoreInput);
+        if (hazard < 0) errors.push("👉 Hazard Score cannot be negative.");
+        if (hazard > 100) errors.push("👉 Hazard Score cannot exceed 100.");
+    }
+
+    // --- Error Handling ---
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // --- Calculate Risk Index ---
+    const control = parseFloat(controlScoreInput);
+    const hazard = parseFloat(hazardScoreInput);
+    const riskIndex = control - hazard;
+
+    // --- Output ---
+    riskValue.textContent = riskIndex.toFixed(1);
+
+    // Color coding
+    if (riskIndex > 0) {
+        riskValue.style.color = '#2e7d32'; // Green
+    } else if (riskIndex === 0) {
+        riskValue.style.color = '#f9a825'; // Yellow
+    } else if (riskIndex > -10) {
+        riskValue.style.color = '#fb8c00'; // Orange
+    } else {
+        riskValue.style.color = '#c62828'; // Red
+    }
+
+    // Feedback interpretation
+    let feedback = '';
+    if (riskIndex > 0) {
+        feedback = '✅ SAFE: Controls adequately address hazards.';
+    } else if (riskIndex === 0) {
+        feedback = '⚠️ BORDERLINE: Controls just match hazards – consider improvements.';
+    } else if (riskIndex > -10) {
+        feedback = '⚠️ UNSAFE: Hazards exceed controls – needs attention.';
+    } else {
+        feedback = '❌ DANGEROUS: Significant uncontrolled hazards – immediate action required!';
+    }
+
+    feedbackContent.innerHTML = feedback;
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+{% comment %} 
+1️⃣ Formula Used (for comments in code)
+/*
+📘 Formula:
+Risk Index (RI) = Control Score – Hazard Score
+
+Where:
+- Control Score = Effectiveness of implemented controls (higher = safer)
+- Hazard Score = Severity × Probability (higher = riskier)
+
+Interpretation:
+- RI > 0 → ✅ Safe: Controls exceed hazards
+- RI = 0 → ⚠️ Borderline: Controls just match hazards
+- -10 < RI < 0 → ⚠️ Unsafe: Hazards exceed controls
+- RI ≤ -10 → ❌ Dangerous: Immediate action required
+*/
+
+2️⃣ Detailed Input Validation Rules (QEHS + Fire Safety)
+
+Control Score
+
+Range: 0 – 100 (typical audit scoring)
+
+Allowed: Decimals up to 1 place (step = 0.1)
+
+No negatives
+
+Optional: must not exceed 100
+
+Cross-check: Should be consistent with same scale as Hazard Score.
+
+Hazard Score
+
+Range: 0 – 100 (severity × probability model, OSHA/NFPA style)
+
+Allowed: Decimals up to 1 place
+
+No negatives
+
+Optional: must not exceed 100
+
+Cross-Field Dependencies
+
+Both scores must be on the same scale (if one is 0–10, both must be 0–10).
+
+If Hazard Score = 0 → Risk Index = Control Score (edge case: trivial hazard).
+
+If Control Score = 0 & Hazard Score > 0 → always dangerous.
+
+3️⃣ Output Validation Logic
+
+Risk Index > 0: ✅ SAFE → “Controls adequately address hazards.”
+
+Risk Index = 0: ⚠️ BORDERLINE → “Controls just match hazards – consider improvements.”
+
+-10 < Risk Index < 0: ⚠️ UNSAFE → “Hazards exceed controls – needs attention.”
+
+Risk Index ≤ -10: ❌ DANGEROUS → “Significant uncontrolled hazards – immediate action required!” {% endcomment %}
