@@ -42,6 +42,8 @@ urlpatterns = [
     path('approvalsubscriptions/approve/<int:subscription_id>/', approve_subscription, name='approve_subscription'),
     path('approvalsubscriptions/reject/<int:subscription_id>/', reject_subscription, name='reject_subscription'),
     path('accident_rate_calculator/', accident_rate_calculator, name='accident_rate_calculator'),
+    path('oee_calculator/', oee_calculator, name='oee_calculator'),
+
 
     path('dashboard/', dashboard, name='dashboard'),
     path('subscribe/<int:plan_id>/', subscribe_plan, name='subscribe_plan'),
@@ -162,6 +164,8 @@ urlpatterns = [
     path('environment/biomass_microbial_growth_calculator/', environment_biomass_microbial_growth_calculator, name='environment_biomass_microbial_growth_calculator'),
     path('environment/biomass_substrate_utilization_rate_calculator/', environment_biomass_substrate_utilization_rate_calculator, name='environment_biomass_substrate_utilization_rate_calculator'),
     path('environment/biomass_concentration_xr_calculator/', environment_biomass_concentration_xr_calculator, name='environment_biomass_concentration_xr_calculator'),
+    path('environment/buoyancy_flux_parameter_calculator/',environment_buoyancy_flux_parameter_calculator,name='environment_buoyancy_flux_parameter_calculator'),
+
     path('environment/carbnot_effiency_calculator/', environment_carbnot_effiency_calculator, name='environment_carbnot_effiency_calculator'),
     path('environment/carbon_footprint_effient_calculator/', environment_carbon_footprint_effient_calculator, name='environment_carbon_footprint_effient_calculator'),
     path('environment/cost_of_fuel_saved_by_returning_condensate_calculator/', environment_cost_of_fuel_saved_by_returning_condensate_calculator, name='environment_cost_of_fuel_saved_by_returning_condensate_calculator'),
@@ -178,6 +182,8 @@ urlpatterns = [
     path('environment/chicks_law_microbial_disinfection_calculator/', environment_chicks_law_microbial_disinfection_calculator, name='environment_chicks_law_microbial_disinfection_calculator'),
     path('environment/chemical_equilibrium_calculator/', environment_chemical_equilibrium_calculator, name='environment_chemical_equilibrium_calculator'),
     path('environment/cmfr_completely_mixed_flow_reactor_bod_biochemical_oxygen_demand_removal_calculator/', environment_cmfr_completely_mixed_flow_reactor_bod_biochemical_oxygen_demand_removal_calculator, name='environment_cmfr_completely_mixed_flow_reactor_bod_biochemical_oxygen_demand_removal_calculator'),
+    path('environment/combined_conduction_convection_calculator/',environment_combined_conduction_convection_calculator,name='environment_combined_conduction_convection_calculator'),
+
     path('environment/digester_capacity_v_calculator/', environment_digester_capacity_v_calculator, name='environment_digester_capacity_v_calculator'),
     path('environment/dynamic_viscosity_calculator/', environment_dynamic_viscosity_calculator, name='environment_dynamic_viscosity_calculator'),
     path('environment/dissolved_oxygen_do_deficit_streeter_phelps_model_calculator/', environment_dissolved_oxygen_do_deficit_streeter_phelps_model_calculator, name='environment_dissolved_oxygen_do_deficit_streeter_phelps_model_calculator'),
@@ -432,7 +438,10 @@ urlpatterns = [
     path('health/weight_gain_calculator/', health_weight_gain_calculator, name='health_weight_gain_calculator'),
     path('health/waist_to_hip_ratio_calculator/', health_waist_to_hip_ratio_calculator, name='health_waist_to_hip_ratio_calculator'),
     path('health/waist_to_height_ratio_calculator/', health_waist_to_height_ratio_calculator, name='health_waist_to_height_ratio_calculator'),
-    path('health/winters_formula_calculator/', health_winters_formula_calculator, name='health_winters_formula_calculator'),
+    path('health/cholesterolunitsconverter/', cholesterolunitsconverter, name='health_cholesterolunitsconverter'),
+    path('health/gout_diagnosis_calculator/', gout_diagnosis_calculator, name='health_gout_diagnosis_calculator'),
+    path('health/has_bledcalculator/', has_bledcalculator, name='health_has_bledcalculator'),
+    path('health/probitpercentageeffect/', probitpercentageeffect, name='health_probitpercentageeffect'),
     path('safety/main_calculator/', safety_main_calculator, name='safety_main_calculator'),
     path('safety/accident_rate_calculator/', safety_accident_rate_calculator, name='safety_accident_rate_calculator'),
     path('safety/average_resolution_time_art_calculator/', safety_average_resolution_time_art_calculator, name='safety_average_resolution_time_art_calculator'),

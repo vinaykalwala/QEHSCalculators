@@ -1,0 +1,609 @@
+{% extends 'base.html' %}
+{% block title %}Steam Sizing Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steam Sizing Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px; /* Fixed Height */
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+            justify-content: center;
+            align-items: center;
+            min-height: 420px; /* Fixed Height */
+            text-align: center;
+        }
+        
+        .input-pair {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+        }
+
+        @media (max-width: 500px) {
+            .input-pair {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+            width: 100%;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background:linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        
+        /* Result Card */
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+        
+        .sub-results {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eaeaea;
+        }
+
+        .sub-result-item {
+            text-align: center;
+        }
+        
+        .sub-result-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        .sub-result-label {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback & Warnings */
+        .result-feedback, .result-warning {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: left;
+            margin-top: 15px;
+        }
+        .result-feedback {
+             border-left: 4px solid #3498db;
+        }
+        .result-warning {
+            border-left: 4px solid #f1c40f;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        /* Note Section */
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .info-table {
+            width: 100%;
+            margin-top: 15px;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .info-table thead {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+            font-weight: 600;
+        }
+        .info-table th, .info-table td {
+            padding: 10px 12px;
+            border: 1px solid #bbdefb;
+            text-align: left;
+        }
+        .info-table tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        /* Error Box */
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Steam Sizing Calculator</h1>
+            <p>Calculate the required orifice area for a steam pressure relief valve according to ASME-approved methods to ensure system safety.</p>
+        </div>
+
+        <div class="calc-content">
+            <div class="calc-card">
+                <h2>Enter Relief Parameters</h2>
+                <div class="input-pair">
+                    <div class="form-group">
+                        <label for="massFlow">Mass Flow Rate (W) [kg/hr]</label>
+                        <input type="number" id="massFlow" class="form-input" placeholder="e.g., 5000">
+                    </div>
+                    <div class="form-group">
+                        <label for="pressure">Relief Pressure (P) [kPa]</label>
+                        <input type="number" id="pressure" class="form-input" placeholder="e.g., 1100">
+                    </div>
+                </div>
+                 <div class="input-pair">
+                    <div class="form-group">
+                        <label for="kd">Discharge Coefficient (Kd)</label>
+                        <input type="number" id="kd" class="form-input" placeholder="e.g., 0.975">
+                    </div>
+                    <div class="form-group">
+                        <label for="kn">Napier Correction (Kn)</label>
+                        <input type="number" id="kn" class="form-input" value="1.0">
+                    </div>
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateSteamSizing()">Calculate Area</button>
+            </div>
+
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Pressure relief valve icon">
+                    <p>Enter your system's relief requirements to calculate the necessary valve orifice area for overpressure protection.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                    
+                <div class="result-value hidden" id="resultValue">
+                    <div class="rate-value" id="rateValue">0.00</div>
+                    <div class="rate-label" id="rateLabel">Required Orifice Area (mm²)</div>
+                    
+                    <div class="sub-results">
+                        <div class="sub-result-item">
+                            <div class="sub-result-value" id="areaM2">0</div>
+                            <div class="sub-result-label">Area (m²)</div>
+                        </div>
+                        <div class="sub-result-item">
+                            <div class="sub-result-value" id="massFlowDisplay">0 kg/hr</div>
+                            <div class="sub-result-label">Mass Flow Rate</div>
+                        </div>
+                    </div>
+
+                     <div class="result-warning hidden" id="resultWarning">
+                        <div class="feedback-title">⚠️ Input Warning</div>
+                        <div class="feedback-content" id="warningMessage"></div>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Orifice Size Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About Steam Relief Sizing</h3>
+                <p>
+                    Properly sizing a steam safety relief valve is critical for preventing catastrophic overpressure events in boilers and pressure vessels. This calculation determines the minimum required orifice area of the valve to safely discharge a specific mass flow rate of steam at a given pressure. Undersizing can lead to vessel rupture, while significant oversizing can cause valve instability (chatter). This tool uses an ASME-approved formula for steam service.
+                </p>
+            </div>
+            <div class="note-card">
+                <h3>⚙️ Formula Used</h3>
+                <p>The required orifice area (A) is calculated as:</p>
+                <p>$$ A = \frac{W}{51.5 \times P \times K_d \times K_n} $$</p>
+                <ul class="note-list">
+                    <li>$A$ = Required Orifice Area (m²)</li>
+                    <li>$W$ = Mass Flow Rate (kg/hr)</li>
+                    <li>$P$ = Relief Pressure (Set Pressure + Overpressure) (kPa)</li>
+                    <li>$K_d$ = Discharge Coefficient (typically 0.975 for steam)</li>
+                    <li>$K_n$ = Napier Correction Factor for superheated steam (1.0 for saturated steam)</li>
+                </ul>
+            </div>
+             <div class="note-card">
+                <h3>📊 Key Parameter Guide</h3>
+                <table class="info-table">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Description</th>
+                            <th>Typical Values</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Mass Flow Rate (W)</strong></td>
+                            <td>The relief capacity required for the worst-case scenario.</td>
+                            <td>100 - 100,000 kg/hr</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Pressure (P)</strong></td>
+                            <td>Absolute pressure at the valve inlet during relief (Set Pressure × 1.03 for 3% overpressure).</td>
+                            <td>> 101.3 kPa</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Discharge Coeff. (Kd)</strong></td>
+                            <td>Valve flow efficiency ( dimensionless). Provided by the valve manufacturer.</td>
+                            <td>0.85 - 0.975</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Napier Correction (Kn)</strong></td>
+                            <td>Correction factor for superheated steam.</td>
+                            <td>1.0 for saturated steam.<br>0.9 - 1.1 for superheated.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateSteamSizing() {
+            const W_val = document.getElementById('massFlow').value.trim();
+            const P_val = document.getElementById('pressure').value.trim();
+            const Kd_val = document.getElementById('kd').value.trim();
+            const Kn_val = document.getElementById('kn').value.trim();
+
+            const errorBox = document.getElementById('resultError');
+            const errorMessage = document.getElementById('errorMessage');
+            const warningBox = document.getElementById('resultWarning');
+            const warningMessage = document.getElementById('warningMessage');
+            const placeholder = document.getElementById('placeholder');
+            const resultValue = document.getElementById('resultValue');
+
+            let errors = [];
+            let warnings = [];
+
+            // --- VALIDATION RULES ---
+            const W = parseFloat(W_val);
+            const P = parseFloat(P_val);
+            const Kd = parseFloat(Kd_val);
+            const Kn = parseFloat(Kn_val);
+
+            if (W_val === '' || isNaN(W) || W <= 0) errors.push("👉 Mass Flow Rate must be a positive number.");
+            if (P_val === '' || isNaN(P) || P <= 0) errors.push("👉 Pressure must be a positive number.");
+            if (Kd_val === '' || isNaN(Kd) || Kd <= 0 || Kd > 1) errors.push("👉 Discharge Coefficient (Kd) must be between 0 and 1.");
+            if (Kn_val === '' || isNaN(Kn) || Kn <= 0) errors.push("👉 Napier Correction (Kn) must be a positive number.");
+            
+            // --- ERROR HANDLING ---
+            if (errors.length > 0) {
+                errorMessage.innerHTML = errors.join("<br>");
+                errorBox.classList.remove("hidden");
+                placeholder.classList.add("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            } else {
+                errorBox.classList.add("hidden");
+            }
+
+            // --- WARNING CHECKS ---
+            if (Kd < 0.85) warnings.push("Discharge Coefficient (Kd) is unusually low. Please verify the valve data.");
+            if (Kn < 0.9 || Kn > 1.1) warnings.push("Napier Correction (Kn) is outside the typical range of 0.9-1.1. Please confirm if your steam is significantly superheated.");
+
+            if (warnings.length > 0) {
+                warningMessage.innerHTML = warnings.join("<br>");
+                warningBox.classList.remove("hidden");
+            } else {
+                warningBox.classList.add("hidden");
+            }
+
+            // --- CALCULATION ---
+            const areaM2 = W / (51.5 * P * Kd * Kn);
+            const areaMM2 = areaM2 * 1000000;
+
+            if (!isFinite(areaMM2)) {
+                errorMessage.innerHTML = "❌ Calculation resulted in an invalid number. Please check your inputs.";
+                errorBox.classList.remove("hidden");
+                resultValue.classList.add("hidden");
+                return;
+            }
+
+            // --- DISPLAY RESULTS ---
+            document.getElementById('rateValue').textContent = areaMM2.toFixed(2);
+            document.getElementById('areaM2').textContent = areaM2.toExponential(4) + ' m²';
+            document.getElementById('massFlowDisplay').textContent = W.toLocaleString() + ' kg/hr';
+            
+            // --- ASSESSMENT ---
+            let feedback;
+            if (areaMM2 < 50) {
+                feedback = 'This requires a very small orifice. Ensure the selected valve is stable at low flows and check manufacturer minimum size limits.';
+            } else if (areaMM2 > 5000) {
+                feedback = 'This requires a large orifice. It may be more practical and economical to use multiple, smaller relief valves in parallel.';
+            } else {
+                feedback = 'This orifice size is within a standard range. Select the next largest standard orifice size available from your valve manufacturer.';
+            }
+            document.getElementById('feedbackContent').textContent = feedback;
+
+            placeholder.classList.add("hidden");
+            resultValue.classList.remove("hidden");
+        }
+
+        function printReport() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}

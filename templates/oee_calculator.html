@@ -1,0 +1,729 @@
+{% extends 'login_base.html' %}
+{% block title %}OEE Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Body Styles */
+body {
+  font-family: "Segoe UI", Roboto, sans-serif;
+  background: #f4f6f9;
+  color: #1a1a1a;
+  line-height: 1.6;
+}
+ .print-btn {
+    display: inline-block;
+    background: linear-gradient(#1560bd, #000040);
+    color: white;
+    padding: 8px 18px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    width: auto !important;
+}
+
+.print-btn:hover {
+    background: #1560bd;
+}
+
+.btn-wrapper {
+    margin-top: 20px;
+    text-align: center;
+}
+
+/* ✅ Media Query for mobile and tablets */
+@media (max-width: 768px) {
+    .btn-wrapper {
+        margin-left: 0;              /* remove left margin */
+        display: flex;               /* use flexbox */
+        justify-content: center;     /* center horizontally */
+    }
+}
+
+
+/* Main Content */
+
+/* Grid Layout */
+.wrap {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 24px;
+  margin: 0 auto;
+  max-width: 1400px;
+  align-items: start;
+}
+
+/* Panels */
+.panel {
+  background: #fff;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.08);
+  transition: transform 0.2s;
+  border: 1px solid #1560bd;
+  
+}
+
+.panel:hover {
+  transform: translateY(-2px);
+}
+
+.panel h4 {
+  margin-bottom: 23px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1560bd;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 8px;
+}
+
+/* Form Rows */
+.row {
+  position: relative;
+  margin: 25px 0;
+}
+
+.row label {
+  position: absolute;
+  top: -10px;
+  left: 14px;
+  display: inline-block;
+  white-space: nowrap;
+  width: auto;
+  background:#fff;
+  color: #1560bd;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0 6px;
+  border-radius: 3px;
+}
+
+.row input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d0d7de;
+  border-radius: 10px;
+  font-size: 1rem;
+  background:#f0f4ff;
+  transition: all .25s;
+}
+
+.row input:focus {
+  border-color: #2563eb;
+  outline: none;
+  background: #fff;
+  box-shadow: 0 0 8px rgba(37,99,235,0.2);
+}
+
+.row input.invalid {
+  border-color: #dc2626;
+}
+
+/* Error Messages */
+.error-msg {
+  font-size: 0.75rem;
+  color: red;
+  margin-top: 2px;
+  line-height: normal;
+  display: block;
+}
+
+/* Muted text */
+.muted {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 8px;
+  word-break: break-word;
+}
+
+/* Results Panel */
+.results-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Cards Grid */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 0; /* touch each other */
+}
+
+.card, .kpi {
+  padding: 24px;
+  text-align: center;
+  border: 1px solid #ccc;
+  margin: 0;
+  border-radius: 0; /* touch edges */
+  box-shadow: none;
+  transition: transform 0.2s;
+}
+
+.card:hover, .kpi:hover {
+  transform: translateY(-2px);
+}
+
+.card .title, .kpi .label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.card .big, .kpi .value {
+  font-size: 1.6rem;
+  margin-top: 4px;
+  word-wrap: break-word;
+  max-width: 100%;
+}
+
+/* Card Colors */
+.kpi.good, .card.good { background: linear-gradient(135deg,#4ade80,#16a34a); color:#fff; }
+.kpi.warn, .card.warn { background: linear-gradient(135deg,#facc15,#eab308); color:#1a1a1a; }
+.kpi.bad, .card.bad { background: linear-gradient(135deg,#f87171,#dc2626); color:#fff; }
+.kpi.neutral, .card.neutral { background: linear-gradient(135deg,#9ca3af,#6b7280); color:#fff; }
+
+/* Canvas */
+canvas {
+  background: #fff;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,.06);
+  width: 100% !important;
+  height: 220px !important;
+}
+
+/* Panel Strong Text */
+.panel strong {
+  font-size: 1rem;
+}
+
+/* Feedback / Interpretation Card */
+.feedback-panel {
+  background: linear-gradient(120deg,#1560bd,#1e3a8a);
+  color: #fff;
+  border-radius: 18px;
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+  text-align: center;
+}
+
+.feedback-panel h5 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.feedback-text {
+  font-size: 1rem;
+  line-height: 1.4;
+  font-weight: 500;
+  background: rgba(255,255,255,0.1);
+  padding: 12px 16px;
+  border-radius: 12px;
+  min-height: 60px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .wrap { grid-template-columns: 1fr; }
+  .cards-grid { grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); }
+}
+/* Unique Intro Panel */
+.intro-section-panel {
+  background: linear-gradient(135deg, #e0f0ff, #f4f6f9);
+  border-radius: 14px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  border-left: 5px solid #1560bd;
+}
+
+.intro-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1560bd;
+  margin-bottom: 12px;
+}
+
+.intro-text {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #1a1a1a;
+  text-align: justify;
+}
+
+.intro-text strong {
+  color: #1560bd;
+}
+/* Section container */
+.howto-section {
+  padding: 30px 30px;
+  border-radius: 20px;
+}
+
+/* Title */
+.howto-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #1560bd;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+/* Grid layout */
+.howto-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* always max 3 */
+  gap: 10px;
+}
+
+/* Tablet screens */
+@media (max-width: 992px) {
+  .howto-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile screens */
+@media (max-width: 600px) {
+  .howto-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* Card style */
+.howto-card {
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(12px);
+  border-radius: 18px;
+  padding: 24px 22px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(21,96,189,0.1);
+  text-align: center;
+  border: 1px solid #62a9ff;
+}
+
+.howto-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 28px rgba(21,96,189,0.15);
+}
+
+/* Icon badge */
+.howto-icon {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  border-radius: 50%;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Different colors per step */
+.step1 { background: linear-gradient(135deg,#1560bd,#1e3a8a); }
+.step2 { background: linear-gradient(135deg,#2563eb,#1e40af); }
+.step3 { background: linear-gradient(135deg,#0ea5e9,#0284c7); }
+.step4 { background: linear-gradient(135deg,#10b981,#059669); }
+.step5 { background: linear-gradient(135deg,#f59e0b,#d97706); }
+.step6 { background: linear-gradient(135deg,#ef4444,#b91c1c); }
+
+/* Text */
+.step-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1560bd;
+  margin-bottom: 10px;
+}
+
+.step-text {
+  font-size: 0.95rem;
+  color: #333;
+  line-height: 1.55;
+  text-align: justify;
+}
+strong{
+    color: #1560bd;
+}
+@media (max-width: 768px) {
+  .howto-title { font-size: 1.3rem; margin-bottom: 28px; }
+  .step-title { font-size: 1rem; }
+  .step-text { font-size: 0.9rem; }
+}
+
+</style>
+
+<div class="main-content">
+    <div class="calculator-container printable" id="printArea">
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+    <!-- Intro Section -->
+<div class="intro-section-panel">
+  <h4 class="intro-title">Optimize Your Production Efficiency with the OEE Calculator</h4>
+  <p class="intro-text">
+    The <strong>Overall Equipment Effectiveness (OEE) Calculator</strong> is a powerful tool designed to help you analyze and improve your manufacturing operations. 
+    By evaluating <strong>Availability</strong>, <strong>Performance</strong>, and <strong>Quality</strong>, this calculator gives a clear snapshot of how efficiently your production line is running. 
+    Simply enter your shift timings, planned and unplanned downtimes, total parts produced, ideal cycle time, and scrap. 
+    Instantly receive actionable insights, color-coded KPIs, dynamic charts, and feedback to guide improvement decisions. 
+    <strong>Use the OEE Calculator below to assess and optimize your production today!</strong>
+  </p>
+</div>
+
+
+  <div class="wrap">
+    <!-- Inputs Panel -->
+    <div class="panel inputs-panel">
+      <h4>Inputs</h4>
+      <div class="row">
+        <label>Shift Start Time</label>
+        <input id="shiftStart" type="time" value="08:00">
+        <div class="error-msg" id="shiftStartError"></div>
+      </div>
+      <div class="row">
+        <label>Shift End Time</label>
+        <input id="shiftEnd" type="time" value="16:00">
+        <div class="error-msg" id="shiftEndError"></div>
+      </div>
+      <div class="row">
+        <label>Planned Downtime (min)</label>
+        <input id="plannedDowntime" type="number" min="0" max="1440" value="40">
+        <div class="error-msg" id="plannedError"></div>
+      </div>
+      <div class="row">
+        <label>Unplanned Downtime (min)</label>
+        <input id="unplannedDowntime" type="number" min="0" max="1440" value="30">
+        <div class="error-msg" id="unplannedError"></div>
+      </div>
+      <div class="row">
+        <label>Total Parts Produced</label>
+        <input id="partsProduced" type="number" min="0" max="1000000" value="20">
+        <div class="error-msg" id="producedError"></div>
+      </div>
+      <div class="row">
+        <label>Ideal Cycle Time (min)</label>
+        <input id="idealCycle" type="number" min="0.01" max="1440" step="0.01" value="20">
+        <div class="error-msg" id="idealError"></div>
+      </div>
+      
+      <div class="row">
+        <label>Total Scrap</label>
+        <input id="scrap" type="number" min="0" max="1000000" value="1">
+        <div class="error-msg" id="scrapError"></div>
+      </div>
+      <div class="btn-wrapper">
+                    <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                </div>
+    </div>
+
+    <!-- Results Panel -->
+    <div class="results-panel">
+
+      <!-- All 6 Cards Touching -->
+      <div class="cards-grid">
+        <div id="availabilityCard" class="kpi neutral"><div class="label">Availability</div><div id="availability" class="value">0%</div></div>
+        <div id="performanceCard" class="kpi neutral"><div class="label">Performance</div><div id="performance" class="value">0%</div></div>
+        <div id="qualityCard" class="kpi neutral"><div class="label">Quality</div><div id="quality" class="value">0%</div></div>
+        <div id="capacityCard" class="card" style="background:#1560bd; color:#fff;">
+          <div class="title">Capacity</div>
+          <div id="capacity" class="big">0</div>
+        </div>
+        <div id="producedCard" class="card" style="background:#1560bd; color:#fff;">
+          <div class="title">Total Parts</div>
+          <div id="produced" class="big">0</div>
+        </div>
+        <div id="oeeCard" class="card neutral"><div class="title">OEE</div><div id="oee" class="big">0%</div></div>
+      </div>
+
+      <canvas id="oeeChart" height="180"></canvas>
+
+      <!-- Feedback / Interpretation Panel -->
+      <div class="feedback-panel">
+        <h5>OEE Feedback / Interpretation</h5>
+        <div class="feedback-text" id="feedback"></div>
+      </div>
+
+    </div>
+  </div>
+    
+                <!-- How to Use Section -->
+<div class="howto-section">
+  <h4 class="howto-title">How to Use the OEE Calculator</h4>
+  <div class="howto-grid">
+
+    <div class="howto-card">
+      <div class="howto-icon step1">1</div>
+      <h5 class="step-title">Fill in Production Details</h5>
+      <p class="step-text">
+        Enter your shift times, downtime, part counts, and cycle time. These inputs set the foundation for your OEE analysis.
+      </p>
+    </div>
+
+    <div class="howto-card">
+      <div class="howto-icon step2">2</div>
+      <h5 class="step-title">Check Availability</h5>
+      <p class="step-text">
+        Instantly see how much of your scheduled production time was truly productive.
+      </p>
+    </div>
+
+    <div class="howto-card">
+      <div class="howto-icon step3">3</div>
+      <h5 class="step-title">Review Performance</h5>
+      <p class="step-text">
+        Compare your actual running speed against the machine’s ideal speed to detect slowdowns.
+      </p>
+    </div>
+
+    <div class="howto-card">
+      <div class="howto-icon step4">4</div>
+      <h5 class="step-title">Check Quality</h5>
+      <p class="step-text">
+        Track how many units meet standards versus rejects to understand production quality.
+      </p>
+    </div>
+
+    <div class="howto-card">
+      <div class="howto-icon step5">5</div>
+      <h5 class="step-title">Get Your OEE Score</h5>
+      <p class="step-text">
+        Availability × Performance × Quality combine into a single OEE score.
+      </p>
+    </div>
+
+    <div class="howto-card">
+      <div class="howto-icon step6">6</div>
+      <h5 class="step-title">Explore Insights</h5>
+      <p class="step-text">
+        Use the charts and breakdowns to identify strengths and pinpoint improvement opportunities.
+      </p>
+    </div>
+
+  </div>
+</div>
+<!-- ✅ Validation & Compliance Section -->
+<div class="intro-section-panel">
+  <h4 class="intro-title">Input & Output Standards, Validation, and Compliance</h4>
+  
+  <!-- Input Validation -->
+  <p class="intro-text">
+    <strong>Input Validation:</strong> All user inputs are validated to ensure accurate OEE calculations. 
+    <ul>
+      <li><strong>Shift Start/End:</strong> Must be valid times in HH:MM format. Shift end can be past midnight.</li>
+      <li><strong>Planned/Unplanned Downtime:</strong> Must be between 0 and 1440 minutes (24 hours).</li>
+      <li><strong>Total Parts Produced:</strong> Must be a non-negative number, max 1,000,000.</li>
+      <li><strong>Ideal Cycle Time:</strong> Must be >0 and ≤1440 minutes.</li>
+      <li><strong>Scrap:</strong> Must be between 0 and total parts produced.</li>
+    </ul>
+  </p>
+
+  <!-- Output Validation & Interpretation -->
+ <p class="intro-text">
+  <strong>Output Validation & Interpretation:</strong> The calculator provides KPIs (Key Performance Indicator) with color-coded interpretation for quick insight:
+  <ul>
+    <li><strong>OEE ≥ 90%:</strong> Excellent! Your production is running efficiently. Keep maintaining your high standards.</li>
+    <li><strong>OEE 80–89%:</strong> Good performance, but there is room for improvement in downtime or quality.</li>
+    <li><strong>OEE 50–79%:</strong> Warning! Consider addressing bottlenecks and scrap reduction to improve OEE.</li>
+    <li><strong>OEE &lt; 50%:</strong> Critical! Immediate action required to optimize operations and reduce losses.</li>
+  </ul>
+  These values are applied to <em>Availability, Performance, Quality</em>, and overall <strong>OEE</strong>. Feedback is generated to guide actions.
+</p>
+
+  <!-- Standards & Compliance -->
+  <p class="intro-text">
+    <strong>Standards & Compliance:</strong>
+    <ul>
+      <li>OEE calculation follows the <strong>international OEE standard (Availability × Performance × Quality)</strong>.</li>
+      <li>Color codes and thresholds comply with common industry practices for manufacturing efficiency monitoring.</li>
+      <li>Ensures that all calculations are mathematically validated before output display.</li>
+    </ul>
+  </p>
+</div>
+
+    </div>
+     
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Same JS as before (validation, calculation, chart update)
+const refs = {
+    shiftStart: document.getElementById('shiftStart'),
+    shiftEnd: document.getElementById('shiftEnd'),
+    plannedDowntime: document.getElementById('plannedDowntime'),
+    unplannedDowntime: document.getElementById('unplannedDowntime'),
+    partsProduced: document.getElementById('partsProduced'),
+    idealCycle: document.getElementById('idealCycle'),
+    scrap: document.getElementById('scrap'),
+
+    availability: document.getElementById('availability'),
+    performance: document.getElementById('performance'),
+    quality: document.getElementById('quality'),
+    availabilityCard: document.getElementById('availabilityCard'),
+    performanceCard: document.getElementById('performanceCard'),
+    qualityCard: document.getElementById('qualityCard'),
+
+    capacity: document.getElementById('capacity'),
+    produced: document.getElementById('produced'),
+    oee: document.getElementById('oee'),
+    capacityCard: document.getElementById('capacityCard'),
+    producedCard: document.getElementById('producedCard'),
+    oeeCard: document.getElementById('oeeCard'),
+
+    feedback: document.getElementById('feedback'),
+
+    shiftStartError: document.getElementById('shiftStartError'),
+    shiftEndError: document.getElementById('shiftEndError'),
+    plannedError: document.getElementById('plannedError'),
+    unplannedError: document.getElementById('unplannedError'),
+    producedError: document.getElementById('producedError'),
+    idealError: document.getElementById('idealError'),
+    scrapError: document.getElementById('scrapError')
+};
+
+// Initialize Chart.js
+const ctx = document.getElementById('oeeChart').getContext('2d');
+const chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Availability','Performance','Quality'],
+        datasets: [{ data:[0,0,0], backgroundColor:['#9ca3af','#9ca3af','#9ca3af'], borderRadius:6 }]
+    },
+    options: {
+        responsive:true,
+        plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: ctx => ctx.parsed.y.toFixed(2) + '%' } } },
+        scales:{ y:{ min:0,max:120, ticks:{ callback: v => v + '%' }} }
+    }
+});
+
+const fmt = (n, d = 2) => Number.isFinite(n) ? n.toFixed(d) : '0.00';
+function timeDiffMinutes(start, end){
+    const [sh, sm] = start.split(':').map(Number);
+    const [eh, em] = end.split(':').map(Number);
+    let s = sh*60 + sm, e = eh*60 + em;
+    let diff = e - s;
+    if(diff < 0) diff += 24*60;
+    return diff;
+}
+function colorizeCard(card, value, type='percent'){
+    card.className = card.className.includes('card') ? 'card' : 'kpi';
+    if(type==='percent'){
+        if(value >= 90) card.classList.add('good');
+        else if(value >= 80) card.classList.add('warn');
+        else card.classList.add('bad');
+    } else {
+        if(value > 0) card.classList.add('good');
+        else card.classList.add('bad');
+    }
+}
+function clamp(value, min, max){ if(isNaN(value)) return min; return Math.max(min, Math.min(max, value)); }
+
+function calculate() {
+    const shiftStart = refs.shiftStart.value;
+    const shiftEnd = refs.shiftEnd.value;
+    const planned = Number(refs.plannedDowntime.value);
+    const unplanned = Number(refs.unplannedDowntime.value);
+    const producedManual = Number(refs.partsProduced.value);
+    const idealCycleMin = Number(refs.idealCycle.value);
+    const scrap = Number(refs.scrap.value);
+
+    Object.values(refs).forEach(r => { if(r.classList) r.classList.remove('invalid'); });
+    Object.keys(refs).forEach(k => { if(k.endsWith('Error')) refs[k].innerText = ''; });
+
+    let valid = true;
+    if(planned < 0 || planned > 1440){ refs.plannedDowntime.classList.add('invalid'); refs.plannedError.innerText='0-1440'; valid=false; }
+    if(unplanned < 0 || unplanned > 1440){ refs.unplannedDowntime.classList.add('invalid'); refs.unplannedError.innerText='0-1440'; valid=false; }
+    if(producedManual < 0 || producedManual > 1000000){ refs.partsProduced.classList.add('invalid'); refs.producedError.innerText='0-1,000,000'; valid=false; }
+    if(idealCycleMin <= 0 || idealCycleMin > 1440){ refs.idealCycle.classList.add('invalid'); refs.idealError.innerText='>0 & ≤1440'; valid=false; }
+    if(scrap < 0 || scrap > producedManual){ refs.scrap.classList.add('invalid'); refs.scrapError.innerText='0 - total parts'; valid=false; }
+
+    if(!valid){
+        refs.availability.innerText = '0%';
+        refs.performance.innerText = '0%';
+        refs.quality.innerText = '0%';
+        refs.capacity.innerText = '0';
+        refs.produced.innerText = '0';
+        refs.oee.innerText = '0%';
+        refs.feedback.innerHTML = '';
+        chart.data.datasets[0].data = [0,0,0];
+        chart.data.datasets[0].backgroundColor = ['#9ca3af','#9ca3af','#9ca3af'];
+        chart.update();
+        return;
+    }
+
+    const shiftMinutes = timeDiffMinutes(shiftStart, shiftEnd);
+    const plannedProduction = Math.max(shiftMinutes - planned, 0);
+    const runTime = Math.max(plannedProduction - unplanned, 0);
+    const goodParts = Math.max(producedManual - scrap, 0);
+    const theoreticalParts = runTime / idealCycleMin;
+
+    const availability = plannedProduction > 0 ? (runTime / plannedProduction) * 100 : 0;
+    const performance = runTime > 0 ? ((producedManual * idealCycleMin) / runTime) * 100 : 0;
+    const quality = producedManual > 0 ? (goodParts / producedManual) * 100 : 0;
+    const oee = (availability/100)*(performance/100)*(quality/100)*100;
+
+    refs.availability.innerText = fmt(availability) + '%';
+    refs.performance.innerText = fmt(performance) + '%';
+    refs.quality.innerText = fmt(quality) + '%';
+    refs.capacity.innerText = fmt(theoreticalParts,2);
+    refs.produced.innerText = producedManual;
+    refs.oee.innerText = fmt(oee) + '%';
+
+    colorizeCard(refs.availabilityCard, availability);
+    colorizeCard(refs.performanceCard, performance);
+    colorizeCard(refs.qualityCard, quality);
+    colorizeCard(refs.capacityCard, theoreticalParts,'number');
+    colorizeCard(refs.producedCard, producedManual,'number');
+    colorizeCard(refs.oeeCard, oee);
+
+    // Feedback / Interpretation logic
+    let feedbackMsg = '';
+    if(oee >= 90){
+        feedbackMsg = 'Excellent! Your production is running efficiently. Keep maintaining your high standards.';
+    } else if(oee >= 80){
+        feedbackMsg = 'Good performance, but there is room for improvement in downtime or quality.';
+    } else if(oee >= 50){
+        feedbackMsg = 'Warning! Consider addressing bottlenecks and scrap reduction to improve OEE.';
+    } else {
+        feedbackMsg = 'Critical! Immediate action required to optimize operations and reduce losses.';
+    }
+    refs.feedback.innerHTML = feedbackMsg;
+
+    chart.data.datasets[0].data = [availability, performance, quality];
+    chart.data.datasets[0].backgroundColor = [
+        availability >= 90 ? '#16a34a' : (availability >= 80 ? '#facc15' : '#f87171'),
+        performance >= 90 ? '#16a34a' : (performance >= 80 ? '#facc15' : '#f87171'),
+        quality >= 90 ? '#16a34a' : (quality >= 80 ? '#facc15' : '#f87171')
+    ];
+
+    chart.data.datasets[0].barThickness = 260;
+    chart.data.datasets[0].maxBarThickness = 60;
+    chart.options.scales.y.max = Math.max(120, Math.ceil(Math.max(availability, performance, quality)/10)*10);
+    chart.update();
+}
+
+document.querySelectorAll('input').forEach(el => el.addEventListener('input', calculate));
+window.addEventListener('load', calculate);
+</script>
+    <script src="{% static 'js/print.js' %}"></script>
+
+{% endblock %}

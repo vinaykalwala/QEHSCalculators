@@ -547,6 +547,11 @@ def upgrade_required(request):
 def accident_rate_calculator(request):
     return render(request, 'qehsfcalculators/Safety/accident_rate_calculator.html')
 
+@login_required
+@subscription_required(plan_type="corporate")
+def oee_calculator(request):
+    return render(request, 'oee_calculator.html')
+
 
 from .forms import CustomUserCreationForm, CustomAuthenticationForm
 from django.contrib.auth import login, logout, authenticate
@@ -1151,8 +1156,9 @@ def profile_view(request):
     })
 
 from django.shortcuts import render
-from django.db.models import Count, Sum, Avg, Q
-from datetime import datetime
+from django.db.models import Count, Sum, Avg, Q, Max
+from datetime import datetime, timedelta
+from django.utils import timezone
 
 from .models import CustomUser, UserSubscription, SubscriptionPlan, Transaction, UserDevice, Training, BlogPost, Contact
 
@@ -1166,21 +1172,31 @@ def admin_analytics(request):
     to_date = request.GET.get("to_date")
 
     start_date, end_date = None, None
+    current_year = timezone.now().year
+    current_month = timezone.now().month
 
+    # Set default year and month if not provided
+    if not selected_year:
+        selected_year = str(current_year)
+    
     if filter_type == "year" and selected_year:
         start_date = datetime(int(selected_year), 1, 1)
-        end_date = datetime(int(selected_year), 12, 31)
+        end_date = datetime(int(selected_year), 12, 31, 23, 59, 59)
 
     elif filter_type == "month" and selected_year and selected_month:
+        if not selected_month:
+            selected_month = str(current_month)
+            
         start_date = datetime(int(selected_year), int(selected_month), 1)
         if int(selected_month) == 12:
-            end_date = datetime(int(selected_year), 12, 31)
+            end_date = datetime(int(selected_year), 12, 31, 23, 59, 59)
         else:
-            end_date = datetime(int(selected_year), int(selected_month) + 1, 1) - timedelta(days=1)
+            end_date = datetime(int(selected_year), int(selected_month) + 1, 1) - timedelta(seconds=1)
 
     elif filter_type == "custom" and from_date and to_date:
         start_date = datetime.strptime(from_date, "%Y-%m-%d")
         end_date = datetime.strptime(to_date, "%Y-%m-%d")
+        end_date = end_date.replace(hour=23, minute=59, second=59)
 
     # ---------------- Filters for all models ----------------
     user_filter = Q()
@@ -1250,12 +1266,30 @@ def admin_analytics(request):
     total_inquiries = Contact.objects.filter(contact_filter).count()
     inquiries_by_subject = Contact.objects.filter(contact_filter).values('subject').annotate(count=Count('id'))
 
+    # Calculate max values for bar graphs
+    max_industry_count = max([i['count'] for i in users_by_industry], default=1) if users_by_industry else 1
+    max_plan_count = max([p['count'] for p in subscriptions_by_plan], default=1) if subscriptions_by_plan else 1
+    max_payment = max([u['total'] for u in top_paying_users], default=1) if top_paying_users else 1
+    max_training_count = max([t['count'] for t in trainings_by_category], default=1) if trainings_by_category else 1
+    max_blog_count = max([b['count'] for b in blogs_by_category], default=1) if blogs_by_category else 1
+    max_inquiry_count = max([c['count'] for c in inquiries_by_subject], default=1) if inquiries_by_subject else 1
+
+    # Generate year and month options for the filter dropdowns
+    years = range(2023, current_year + 1)  # Adjust the starting year as needed
+    months = [
+        (1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'),
+        (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'),
+        (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')
+    ]
+
     context = {
         "filter_type": filter_type,
         "selected_year": selected_year,
         "selected_month": selected_month,
         "from_date": from_date,
         "to_date": to_date,
+        "years": years,
+        "months": months,
 
         "total_users": total_users,
         "active_users": active_users,
@@ -1291,10 +1325,17 @@ def admin_analytics(request):
 
         "total_inquiries": total_inquiries,
         "inquiries_by_subject": inquiries_by_subject,
+        
+        # Max values for graphs
+        "max_industry_count": max_industry_count,
+        "max_plan_count": max_plan_count,
+        "max_payment": max_payment,
+        "max_training_count": max_training_count,
+        "max_blog_count": max_blog_count,
+        "max_inquiry_count": max_inquiry_count,
     }
 
     return render(request, "analytics_dashboard.html", context)
-
 
 from .models import SubscriptionPlan
 from .forms import SubscriptionPlanForm
@@ -1706,6 +1747,11 @@ def environment_boiler_blowdown_rate_calculator(request):
 
 @login_required
 @subscription_required(plan_type="corporate")
+def environment_buoyancy_flux_parameter_calculator(request):
+    return render(request,'qehsfcalculators/environment/buoyancy_flux_parameter.html',{'title': 'Buoyancy Flux Parameter (F) Calculator'})
+
+@login_required
+@subscription_required(plan_type="corporate")
 def environment_boiler_efficiency_calculator(request):
     return render(request, 'qehsfcalculators/environment/boiler_efficiency.html', {'title': 'Boiler efficiency Calculator'})
 
@@ -1808,6 +1854,12 @@ def environment_carman_kozen_head_loss_and_friction_factor_calculator(request):
 @subscription_required(plan_type="corporate")
 def environment_chicks_law_microbial_disinfection_calculator(request):
     return render(request, 'qehsfcalculators/environment/chicks_law_microbial_disinfection.html', {'title': 'Chick’s Law: Microbial Disinfection Calculator'})
+
+@login_required
+@subscription_required(plan_type="corporate")
+def environment_combined_conduction_convection_calculator(request):
+    return render(request,'qehsfcalculators/environment/combined_conduction_convection.html',{'title': 'Combined Conduction and Convection Calculator'})
+
 
 @login_required
 @subscription_required(plan_type="corporate")
@@ -3100,6 +3152,25 @@ def health_waist_to_height_ratio_calculator(request):
 @subscription_required(plan_type="corporate")
 def health_winters_formula_calculator(request):
     return render(request, 'qehsfcalculators/health/winters_formula.html')
+@login_required
+@subscription_required(plan_type="corporate")
+def cholesterolunitsconverter(request):
+    return render(request, 'qehsfcalculators/health/cholesterolunitsconverter.html', {'title': 'Cholesterol Units Converter'})
+
+@login_required
+@subscription_required(plan_type="corporate")
+def gout_diagnosis_calculator(request):
+    return render(request, 'qehsfcalculators/health/gout.html', {'title': 'Gout Diagnosis Calculator'})
+
+@login_required
+@subscription_required(plan_type="corporate")
+def has_bledcalculator(request):
+    return render(request, 'qehsfcalculators/health/has-bledcalculator.html', {'title': 'HAS-BLED Calculator'})
+
+@login_required
+@subscription_required(plan_type="corporate")
+def probitpercentageeffect(request):
+    return render(request, 'qehsfcalculators/health/probitpercentageeffect.html', {'title': 'Probit Percentage Effect'})   
 
 @login_required
 @subscription_required(plan_type="corporate")

@@ -1,137 +1,359 @@
-{% extends "base.html" %}
+{% extends "login_base.html" %}
 {% block content %}
 
 <style>
   .kpi { display: inline-block; width: 22%; margin: 1%; padding: 20px; background: #f4f4f4; border-radius: 8px; text-align: center; }
   .bar { height: 20px; background: #4CAF50; border-radius: 5px; }
-  .chart-container { margin: 20px 0; }
-  .pie { width: 150px; height: 150px; border-radius: 50%; background: conic-gradient(#4CAF50 0% {{subscriptions_by_plan.0.count|default:0}}%, #2196F3 {{subscriptions_by_plan.0.count|default:0}}% 100%); margin: auto; }
+  .chart-container { margin: 20px 0; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  .pie { width: 150px; height: 150px; border-radius: 50%; margin: auto; }
   table { width: 100%; border-collapse: collapse; margin-top: 15px; }
   th, td { border: 1px solid #ddd; padding: 8px; }
   th { background: #f2f2f2; }
+  .filter-section { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+  .filter-section select, .filter-section input { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; }
+  .filter-section button { padding: 8px 15px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
+  .filter-section button:hover { background: #45a049; }
+  .filter-option { display: none; margin: 10px 0; }
+  
+  /* Graph Styles */
+  .bar-graph { display: flex; height: 200px; align-items: flex-end; gap: 10px; padding: 20px; border: 1px solid #eee; }
+  .bar-item { flex: 1; background: linear-gradient(to top, #4CAF50, #8BC34A); position: relative; border-radius: 5px 5px 0 0; }
+  .bar-label { position: absolute; bottom: -25px; width: 100%; text-align: center; font-size: 12px; }
+  .bar-value { position: absolute; top: -25px; width: 100%; text-align: center; font-weight: bold; }
+  
+  .pie-chart { width: 200px; height: 200px; border-radius: 50%; margin: 20px auto; position: relative; overflow: hidden; }
+  .pie-segment { position: absolute; width: 100%; height: 100%; clip-path: polygon(50% 50%, 50% 0%, 100% 0%, 100% 100%, 50% 100%); }
+  .pie-legend { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px; }
+  .legend-item { display: flex; align-items: center; margin: 5px; }
+  .legend-color { width: 15px; height: 15px; margin-right: 5px; border-radius: 3px; }
+  
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 20px 0; }
+  .stat-card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 </style>
-
+<div class="main-content">
 <h2>📊 Admin Analytics Dashboard</h2>
-<!-- <form method="get">
-  <label>Filter Type:</label>
-  <select name="filter_type" onchange="this.form.submit()">
-    <option value="all" {% if filter_type == "all" %}selected{% endif %}>All Time</option>
-    <option value="year" {% if filter_type == "year" %}selected{% endif %}>By Year</option>
-    <option value="month" {% if filter_type == "month" %}selected{% endif %}>By Month</option>
-    <option value="custom" {% if filter_type == "custom" %}selected{% endif %}>Custom</option>
-  </select>
 
-  <div>
-    <label>Year:</label>
-    <input type="number" name="year" value="{{ selected_year }}">
+<!-- Filter Form -->
+<div class="filter-section">
+  <form method="get" id="filterForm">
+    <label><strong>Filter Type:</strong></label>
+    <select name="filter_type" id="filter_type">
+      <option value="all" {% if filter_type == "all" %}selected{% endif %}>All Time</option>
+      <option value="year" {% if filter_type == "year" %}selected{% endif %}>By Year</option>
+      <option value="month" {% if filter_type == "month" %}selected{% endif %}>By Month</option>
+      <option value="custom" {% if filter_type == "custom" %}selected{% endif %}>Custom Range</option>
+    </select>
+
+    <!-- Year Filter -->
+    <div id="year_filter" class="filter-option">
+      <label>Year:</label>
+      <select name="year">
+        {% for year in years %}
+          <option value="{{ year }}" {% if selected_year == year|stringformat:"s" %}selected{% endif %}>{{ year }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Month Filter -->
+    <div id="month_filter" class="filter-option">
+      <label>Month:</label>
+      <select name="month">
+        {% for value, name in months %}
+          <option value="{{ value }}" {% if selected_month == value|stringformat:"s" %}selected{% endif %}>{{ name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Custom Date Range Filter -->
+    <div id="custom_filter" class="filter-option">
+      <label>From:</label>
+      <input type="date" name="from_date" value="{{ from_date }}">
+      <label>To:</label>
+      <input type="date" name="to_date" value="{{ to_date }}">
+    </div>
+
+    <br>
+    <button type="submit">Apply Filter</button>
+  </form>
+</div>
+
+<!-- Display current filter info -->
+{% if filter_type != "all" %}
+  <div style="background: #e7f3ff; padding: 10px; border-radius: 5px; margin-bottom: 20px;">
+    <strong>Current Filter:</strong>
+    {% if filter_type == "year" %}
+      Year: {{ selected_year }}
+    {% elif filter_type == "month" %}
+      Month: 
+      {% for value, name in months %}
+        {% if value|stringformat:"s" == selected_month %}
+          {{ name }}
+        {% endif %}
+      {% endfor %}, 
+      Year: {{ selected_year }}
+    {% elif filter_type == "custom" %}
+      From: {{ from_date }} To: {{ to_date }}
+    {% endif %}
   </div>
-
-  <div>
-    <label>Month:</label>
-    <input type="number" name="month" min="1" max="12" value="{{ selected_month }}">
-  </div>
-
-  <div>
-    <label>From:</label>
-    <input type="date" name="from_date" value="{{ from_date }}">
-    <label>To:</label>
-    <input type="date" name="to_date" value="{{ to_date }}">
-  </div>
-
-  <button type="submit">Apply</button>
-</form> -->
-
+{% endif %}
 
 <!-- KPIs -->
-<div class="kpi">👥 Total Users<br><b>{{ total_users }}</b></div>
-<div class="kpi">✅ Active Users<br><b>{{ active_users }}</b></div>
-<div class="kpi">❌ Inactive Users<br><b>{{ inactive_users }}</b></div>
-<div class="kpi">💰 Total Revenue<br><b>₹{{ total_revenue }}</b></div>
+<div class="stats-grid">
+  <div class="stat-card">
+    <h3>👥 Total Users</h3>
+    <p style="font-size: 24px; font-weight: bold; color: #2196F3;">{{ total_users }}</p>
+  </div>
+  <div class="stat-card">
+    <h3>✅ Active Users</h3>
+    <p style="font-size: 24px; font-weight: bold; color: #4CAF50;">{{ active_users }}</p>
+  </div>
+  <div class="stat-card">
+    <h3>❌ Inactive Users</h3>
+    <p style="font-size: 24px; font-weight: bold; color: #F44336;">{{ inactive_users }}</p>
+  </div>
+  <div class="stat-card">
+    <h3>💰 Total Revenue</h3>
+    <p style="font-size: 24px; font-weight: bold; color: #FF9800;">₹{{ total_revenue }}</p>
+  </div>
+</div>
 
 <hr>
 
 <h3>👥 User Analytics</h3>
-<p>Superusers: {{ superusers }} | Regular: {{ regular_users }}</p>
-<p>Users with Profile Images: {{ users_with_profile_image }}</p>
+<div class="stats-grid">
+  <div class="stat-card">
+    <h4>User Types</h4>
+    <div style="display: flex; justify-content: space-around;">
+      <div style="text-align: center;">
+        <div style="font-size: 20px; font-weight: bold;">{{ superusers }}</div>
+        <div>Superusers</div>
+      </div>
+      <div style="text-align: center;">
+        <div style="font-size: 20px; font-weight: bold;">{{ regular_users }}</div>
+        <div>Regular Users</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="stat-card">
+    <h4>Profile Images</h4>
+    <div style="text-align: center;">
+      <div style="font-size: 20px; font-weight: bold;">{{ users_with_profile_image }}</div>
+      <div>Users with Profile Images</div>
+    </div>
+  </div>
+</div>
 
 <div class="chart-container">
   <h4>Users by Industry</h4>
-  <table>
-    <tr><th>Industry</th><th>Users</th></tr>
-    {% for i in users_by_industry %}
-    <tr><td>{{ i.industry }}</td><td>{{ i.count }}</td></tr>
-    {% endfor %}
-  </table>
+  {% if users_by_industry %}
+    <div class="bar-graph">
+      {% for i in users_by_industry %}
+        <div class="bar-item" style="height: {% widthratio i.count max_industry_count 100 %}%;">
+          <div class="bar-value">{{ i.count }}</div>
+          <div class="bar-label">{{ i.industry|default:"Not specified"|truncatechars:10 }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No data available</p>
+  {% endif %}
 </div>
 
 <hr>
 
 <h3>📦 Subscription Analytics</h3>
-<table>
-  <tr><th>Status</th><th>Count</th></tr>
-  {% for s in subscription_status %}
-  <tr><td>{{ s.status }}</td><td>{{ s.count }}</td></tr>
-  {% endfor %}
-</table>
+<div class="chart-container">
+  <h4>Subscriptions by Status</h4>
+  {% if subscription_status %}
+    <div class="pie-chart">
+      {% for s in subscription_status %}
+        <div class="pie-segment" style="transform: rotate({% widthratio forloop.counter0 1 360 %}deg); background: hsl({% widthratio forloop.counter0 1 360 %}, 70%, 60%);"></div>
+      {% endfor %}
+    </div>
+    <div class="pie-legend">
+      {% for s in subscription_status %}
+        <div class="legend-item">
+          <div class="legend-color" style="background: hsl({% widthratio forloop.counter0 1 360 %}, 70%, 60%);"></div>
+          <span>{{ s.status }}: {{ s.count }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No data available</p>
+  {% endif %}
+</div>
 
 <div class="chart-container">
   <h4>Subscriptions by Plan</h4>
-  <table>
-    <tr><th>Plan</th><th>Count</th></tr>
-    {% for p in subscriptions_by_plan %}
-    <tr><td>{{ p.plan__name }}</td><td>{{ p.count }}</td></tr>
-    {% endfor %}
-  </table>
+  {% if subscriptions_by_plan %}
+    <div class="bar-graph">
+      {% for p in subscriptions_by_plan %}
+        <div class="bar-item" style="height: {% widthratio p.count max_plan_count 100 %}%;">
+          <div class="bar-value">{{ p.count }}</div>
+          <div class="bar-label">{{ p.plan__name|default:"Unknown"|truncatechars:10 }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No data available</p>
+  {% endif %}
 </div>
 
 <hr>
 
 <h3>💰 Revenue Analytics</h3>
-<p>Average Payment: ₹{{ avg_payment|default:"0" }}</p>
-<h4>Top Paying Users</h4>
-<table>
-  <tr><th>User</th><th>Total Paid</th></tr>
-  {% for u in top_paying_users %}
-  <tr><td>{{ u.subscription__user__email }}</td><td>₹{{ u.total }}</td></tr>
-  {% endfor %}
-</table>
+<div class="stats-grid">
+  <div class="stat-card">
+    <h4>Average Payment</h4>
+    <p style="font-size: 20px; font-weight: bold; color: #4CAF50;">₹{{ avg_payment|default:"0"|floatformat:2 }}</p>
+  </div>
+</div>
+
+<div class="chart-container">
+  <h4>Top Paying Users</h4>
+  {% if top_paying_users %}
+    <div class="bar-graph">
+      {% for u in top_paying_users %}
+        <div class="bar-item" style="height: {% widthratio u.total max_payment 50 %}%;">
+          <div class="bar-value">₹{{ u.total|floatformat:2 }}</div>
+          <div class="bar-label">{{ u.subscription__user__email|default:"Unknown"|truncatechars:10 }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No data available</p>
+  {% endif %}
+</div>
 
 <hr>
 
 <h3>📱 Device Analytics</h3>
-<p>Total Devices: {{ total_devices }} | Avg Devices/User: {{ avg_devices_per_user|floatformat:2 }}</p>
+<div class="stats-grid">
+  <div class="stat-card">
+    <h4>Total Devices</h4>
+    <p style="font-size: 24px; font-weight: bold; color: #2196F3;">{{ total_devices }}</p>
+  </div>
+  <div class="stat-card">
+    <h4>Avg Devices/User</h4>
+    <p style="font-size: 24px; font-weight: bold; color: #FF9800;">{{ avg_devices_per_user|floatformat:2 }}</p>
+  </div>
+</div>
 
 <hr>
 
 <h3>🎓 Training Analytics</h3>
-<p>Total Trainings: {{ total_trainings }} | Active: {{ active_trainings }}</p>
-<table>
-  <tr><th>Category</th><th>Count</th></tr>
-  {% for t in trainings_by_category %}
-  <tr><td>{{ t.category }}</td><td>{{ t.count }}</td></tr>
-  {% endfor %}
-</table>
+<div class="stats-grid">
+  <div class="stat-card">
+    <h4>Total Trainings</h4>
+    <p style="font-size: 24px; font-weight: bold; color: #2196F3;">{{ total_trainings }}</p>
+  </div>
+  <div class="stat-card">
+    <h4>Active Trainings</h4>
+    <p style="font-size: 24px; font-weight: bold; color: #4CAF50;">{{ active_trainings }}</p>
+  </div>
+</div>
+
+<div class="chart-container">
+  <h4>Trainings by Category</h4>
+  {% if trainings_by_category %}
+    <div class="bar-graph">
+      {% for t in trainings_by_category %}
+        <div class="bar-item" style="height: {% widthratio t.count max_training_count 100 %}%;">
+          <div class="bar-value">{{ t.count }}</div>
+          <div class="bar-label">{{ t.category|truncatechars:10 }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No data available</p>
+  {% endif %}
+</div>
 
 <hr>
 
 <h3>📝 Blog Analytics</h3>
-<p>Total Blogs: {{ total_blogs }} | Published: {{ published_blogs }}</p>
-<table>
-  <tr><th>Category</th><th>Count</th></tr>
-  {% for b in blogs_by_category %}
-  <tr><td>{{ b.category }}</td><td>{{ b.count }}</td></tr>
-  {% endfor %}
-</table>
+<div class="stats-grid">
+  <div class="stat-card">
+    <h4>Total Blogs</h4>
+    <p style="font-size: 24px; font-weight: bold; color: #2196F3;">{{ total_blogs }}</p>
+  </div>
+  <div class="stat-card">
+    <h4>Published Blogs</h4>
+    <p style="font-size: 24px; font-weight: bold; color: #4CAF50;">{{ published_blogs }}</p>
+  </div>
+</div>
+
+<div class="chart-container">
+  <h4>Blogs by Category</h4>
+  {% if blogs_by_category %}
+    <div class="bar-graph">
+      {% for b in blogs_by_category %}
+        <div class="bar-item" style="height: {% widthratio b.count max_blog_count 100 %}%;">
+          <div class="bar-value">{{ b.count }}</div>
+          <div class="bar-label">{{ b.category|truncatechars:10 }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No data available</p>
+  {% endif %}
+</div>
 
 <hr>
 
 <h3>📩 Contact Analytics</h3>
-<p>Total Inquiries: {{ total_inquiries }}</p>
-<table>
-  <tr><th>Subject</th><th>Count</th></tr>
-  {% for c in inquiries_by_subject %}
-  <tr><td>{{ c.subject }}</td><td>{{ c.count }}</td></tr>
-  {% endfor %}
-</table>
+<div class="stats-grid">
+  <div class="stat-card">
+    <h4>Total Inquiries</h4>
+    <p style="font-size: 24px; font-weight: bold; color: #2196F3;">{{ total_inquiries }}</p>
+  </div>
+</div>
+
+<div class="chart-container">
+  <h4>Inquiries by Subject</h4>
+  {% if inquiries_by_subject %}
+    <div class="bar-graph">
+      {% for c in inquiries_by_subject %}
+        <div class="bar-item" style="height: {% widthratio c.count max_inquiry_count 100 %}%;">
+          <div class="bar-value">{{ c.count }}</div>
+          <div class="bar-label">{{ c.subject|truncatechars:10 }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No data available</p>
+  {% endif %}
+</div>
+</div>
+<script>
+  // Function to show/hide filter options based on selection
+  function toggleFilterOptions() {
+    var filterType = document.getElementById('filter_type').value;
+    
+    // Hide all filter options first
+    document.getElementById('year_filter').style.display = 'none';
+    document.getElementById('month_filter').style.display = 'none';
+    document.getElementById('custom_filter').style.display = 'none';
+    
+    // Show relevant filter options
+    if (filterType === 'year') {
+      document.getElementById('year_filter').style.display = 'block';
+    } else if (filterType === 'month') {
+      document.getElementById('year_filter').style.display = 'block';
+      document.getElementById('month_filter').style.display = 'block';
+    } else if (filterType === 'custom') {
+      document.getElementById('custom_filter').style.display = 'block';
+    }
+  }
+  
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    toggleFilterOptions();
+    
+    // Add event listener for filter type changes
+    document.getElementById('filter_type').addEventListener('change', toggleFilterOptions);
+  });
+</script>
 
 {% endblock %}
