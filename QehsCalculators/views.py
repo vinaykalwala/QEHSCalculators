@@ -1706,6 +1706,11 @@ def environment_boiler_blowdown_rate_calculator(request):
 
 @login_required
 @subscription_required(plan_type="corporate")
+def environment_buoyancy_flux_parameter_calculator(request):
+    return render(request,'qehsfcalculators/environment/buoyancy_flux_parameter.html',{'title': 'Buoyancy Flux Parameter (F) Calculator'})
+
+@login_required
+@subscription_required(plan_type="corporate")
 def environment_boiler_efficiency_calculator(request):
     return render(request, 'qehsfcalculators/environment/boiler_efficiency.html', {'title': 'Boiler efficiency Calculator'})
 
@@ -1808,6 +1813,12 @@ def environment_carman_kozen_head_loss_and_friction_factor_calculator(request):
 @subscription_required(plan_type="corporate")
 def environment_chicks_law_microbial_disinfection_calculator(request):
     return render(request, 'qehsfcalculators/environment/chicks_law_microbial_disinfection.html', {'title': 'Chick’s Law: Microbial Disinfection Calculator'})
+
+@login_required
+@subscription_required(plan_type="corporate")
+def environment_combined_conduction_convection_calculator(request):
+    return render(request,'qehsfcalculators/environment/combined_conduction_convection.html',{'title': 'Combined Conduction and Convection Calculator'})
+
 
 @login_required
 @subscription_required(plan_type="corporate")

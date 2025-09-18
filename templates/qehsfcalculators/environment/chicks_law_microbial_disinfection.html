@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Equal percentage valve lift calculator based on kv{% endblock %}
+{% block title %}Chick’s Law: Microbial Disinfection Calculator{% endblock %}
 {% block content %}
 {% load static %}
 
@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Equal percentage valve lift calculator based on kv</title>
+    <title>Chick’s Law: Microbial Disinfection Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
@@ -419,68 +419,69 @@
 </head>
 <body>
 
-<div class="btn-container">
+    <div class="btn-container">
         <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
-</div>
+    </div>
+
 
 <div class="calculator-container printable" id="printArea">
     {% include "includes/print_header_footer.html" %}
 
+
+<!-- Chick's Law: Microbial Disinfection Calculator (single-file snippet) -->
 <div class="calculator-header">
-  <h1>Equal percentage valve lift calculator based on kv</h1>
-  <p>
-     Calculates valve lift percentage (H%) for equal-percentage valves to ensure safe and controllable operation.
-  </p>
+  <h1>Chick’s Law: Microbial Disinfection Calculator</h1>
+  <p>Estimate remaining microorganisms after disinfection. Inputs are counts and rate/time values (units for k and t must match).</p>
 </div>
 
 <div class="calc-content">
   <div class="calc-card">
-    <h2>Enter Data</h2>
+    <h2>Enter Parameters</h2>
 
     <div class="form-group">
-      <label for="kvr">Required Flow Coefficient (Kvr) [m³/h·bar]</label>
-      <input type="number" id="kvr" class="form-input" min="0.001" step="0.001" placeholder="e.g., 50">
+      <label for="N0">Initial Microorganisms (N₀)</label>
+      <input type="number" id="N0" class="form-input" min="1" step="any" placeholder="e.g., 1e6">
     </div>
 
     <div class="form-group">
-      <label for="kvs">Full-Open Valve Coefficient (Kvs) [m³/h·bar]</label>
-      <input type="number" id="kvs" class="form-input" min="0.001" step="0.001" placeholder="e.g., 500">
+      <label for="k">Disinfection Constant (k) — per unit time</label>
+      <input type="number" id="k" class="form-input" min="0" step="any" placeholder="e.g., 0.23">
     </div>
 
     <div class="form-group">
-      <label for="rangeability">Valve Rangeability (τ)</label>
-      <input type="number" id="rangeability" class="form-input" min="1.01" step="0.01" placeholder="e.g., 50">
+      <label for="t">Contact Time (t) — same time unit as k</label>
+      <input type="number" id="t" class="form-input" min="0" step="any" placeholder="e.g., 10">
     </div>
 
-    <button class="calculate-btn" onclick="calculateValveLift()">Calculate Lift</button>
+    <button class="calculate-btn" onclick="calculateDisinfection()">Calculate</button>
   </div>
 
-  <!-- Result Section -->
   <div class="result-card">
     <div class="result-placeholder" id="placeholder">
-      <img src="/static/images/mlc_environment_result.png" alt="Valve illustration">
-      <p>This tool calculates the <strong>Valve Lift Percentage (H%)</strong>.</p>
+      <img src="/static/images/mlc_environment_result.png" alt="Disinfection illustration">
+      <p>This tool estimates remaining microorganisms after a disinfection step.</p>
     </div>
 
-    <div class="result-error hidden" id="resultError">
+    <div class="result-error hidden" id="resultError" role="alert" aria-live="polite">
       <div class="error-icon">❌</div>
       <div class="error-message" id="errorMessage"></div>
     </div>
 
-    <div class="result-value hidden" id="resultValue">
+    <div class="result-value hidden" id="resultValue" aria-live="polite">
       <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
-        <h2>Calculated Valve Lift</h2>
+        <h2>Disinfection Result</h2>
       </div>
 
-      <div class="rate-display">
-        <div class="rate-value" id="rateValue">0.00</div>
-        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">%</div>
+      <div class="rate-display" style="gap:12px; align-items:center; justify-content:center;">
+        <div class="rate-value" id="remainingN">0</div>
+        <div class="rate-label" style="font-size:16px; color: #2980b9;">organisms</div>
       </div>
 
       <div class="result-feedback">
         <div class="feedback-title">Assessment</div>
         <div class="feedback-content" id="feedbackContent"></div>
       </div>
+
       <div class="btn-wrapper">
         <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
       </div>
@@ -488,78 +489,87 @@
   </div>
 </div>
 
-<!-- Notes Section -->
+<!-- Notes: About / Parameters / Input validation / Output validation / Standards / Conclusion -->
 <div class="note-section">
-
   <!-- About -->
   <div class="note-card">
     <h3>📘 About This Calculator</h3>
     <p>
-      This calculator determines the valve lift percentage (H%) for an equal-percentage valve to achieve a desired flow coefficient (Kvr) relative to its full-open capacity (Kvs). It ensures safe, controllable, and efficient flow regulation in industrial processes, HVAC systems, water treatment, and energy applications.
+      Predicts the remaining number of viable microorganisms after a single first-order disinfection step.
+      Use results as part of risk assessments and compliance checks.
     </p>
   </div>
 
   <!-- Parameters -->
   <div class="note-card">
     <h3>⚙ Parameters Used</h3>
-    <ul>
-      <li><strong>Kvr:</strong> Flow coefficient required at a specific valve lift [m³/h·bar]</li>
-      <li><strong>Kvs:</strong> Maximum flow coefficient of the fully open valve [m³/h·bar]</li>
-      <li><strong>τ (Rangeability):</strong> Ratio of maximum to minimum controllable flow, unitless</li>
+    <ul class="note-list">
+      <li><strong>N₀</strong>: Initial microorganism count (organisms)</li>
+      <li><strong>k</strong>: Disinfection rate constant (per unit time) — user must ensure time unit consistency</li>
+      <li><strong>t</strong>: Contact time (same unit as k)</li>
     </ul>
   </div>
 
   <!-- Input Validations -->
   <div class="note-card">
     <h3>✅ Input Validation Rules</h3>
-    <ul>
-      <li>Kvr: numeric, 0.001 – 50,000 m³/h·bar, must be ≤ Kvs</li>
-      <li>Kvs: numeric, 0.001 – 50,000 m³/h·bar, must be ≥ Kvr</li>
-      <li>τ (Rangeability): numeric, >1 and ≤1000</li>
-      <li>All inputs must be positive, physically meaningful, and consistent</li>
-      <li>Cross-field check: Kvr ≤ Kvs prevents illogical results</li>
-      <li>Prevents division by zero or negative logarithms</li>
+    <ul class="note-list">
+      <li><strong>N₀:</strong> Required, integer ≥ 1 and ≤ 1×10¹². Fractional inputs will be rounded with a warning.</li>
+      <li><strong>k:</strong> Required, > 0. Recommended range: 1e-8 to 100 (per time unit). Precision ≤ 6 decimals.</li>
+      <li><strong>t:</strong> Required, ≥ 0. Reasonable upper bound: 1×10⁷ (user unit dependent).</li>
+      <li><strong>Units:</strong> Time units for k and t must match (example: k in min⁻¹ and t in minutes).</li>
+      <li><strong>Cross-checks:</strong> If k·t is extremely small → negligible inactivation (warning). If very large → result effectively zero (warning).</li>
     </ul>
   </div>
 
-  <!-- Output Validations & Assessment -->
+  <!-- Output Validations -->
   <div class="note-card">
-    <h3>🔎 Output Validation & Assessment</h3>
-    <ul>
-      <li>Valve lift (H%) is displayed as a percentage (0–100%)</li>
-      <li>Status feedback is provided alongside the result for QEHS and fire safety purposes:</li>
+    <h3>🔎 Output Validations</h3>
+    <ul class="note-list">
+      <li><strong>Remaining N</strong> is reported in <strong>organisms</strong> (rounded unless very small, then shown in scientific notation).</li>
+      <li>Metrics reported: <strong>Remaining microorganisms (N)</strong>, <strong>Percent reduction</strong>, and <strong>Log reduction</strong> — all are key KPIs for audits.</li>
+      <li>Feedback also includes warnings for extreme values or unit mismatches.</li>
+      <li>Classification levels (same as displayed with results):</li>
       <ul>
-        <li>H% < 5 → ⚠️ Valve nearly shut – unstable control region</li>
-        <li>H% 5–90 → ✅ Normal controllable operating range</li>
-        <li>H% > 90 → ⚠️ Valve near wide-open – reduced controllability</li>
+        <li><strong>Highly Effective (≥6-log):</strong> Excellent inactivation — acceptable for critical disinfection tasks.</li>
+        <li><strong>Effective (3–6 log):</strong> Strong inactivation; confirm with process control data.</li>
+        <li><strong>Moderately Effective (1–3 log):</strong> Partial inactivation; consider increasing contact time or dose.</li>
+        <li><strong>Ineffective (&lt;1 log):</strong> Insufficient — review disinfectant, dosage, and time.</li>
       </ul>
-      <li>Warnings triggered for extreme Kvr/Kvs ratios or unusual rangeability values (τ <10 or τ>100)</li>
-      <li>Input values (Kvr, Kvs, τ) are displayed alongside the H% for clarity</li>
     </ul>
   </div>
 
   <!-- Standards -->
   <div class="note-card">
-    <h3>🏭 Standards</h3>
-    <ul>
-      <li>Flow control calculations compliant with industrial valve sizing practices</li>
-      <li>Supports audit and QEHS reporting for safe fluid handling</li>
-      <li>Ensures alignment with best practices for process control and fire safety</li>
-    </ul>
+    <h3>🏥 Standards</h3>
+    <p>
+      Input and output validations follow public health and quality standards including
+      <strong>WHO Guidelines for Drinking-water Quality</strong>,
+      <strong>US EPA disinfection guidance</strong>, and
+      <strong>ISO 9001</strong>.
+    </p>
   </div>
 
   <!-- Conclusion -->
   <div class="note-card">
-    <h3>✅ Conclusion</h3>
+    <h3>🔚 Conclusion</h3>
     <p>
-      This calculator provides actionable insight into valve lift, ensuring the valve operates within a safe and controllable range. By following the input and output validations, operators can confidently maintain fluid control while meeting QEHS and industrial safety requirements.
+      Use the results together with process validation data, operational monitoring, and sample testing.
+      This tool provides screening-level estimates to guide QEHS decisions.
     </p>
   </div>
-
 </div>
 
 
 <script>
+/* Helper to count decimals (string input) */
+function countDecimalsFromStr(s) {
+  if (!s || s.indexOf('.') === -1) return 0;
+  const part = s.split('.')[1] || '';
+  return part.length;
+}
+
+/* Show errors in UI */
 function showErrors(errors) {
   const errorBox = document.getElementById("resultError");
   const errorMessage = document.getElementById("errorMessage");
@@ -572,89 +582,130 @@ function showErrors(errors) {
   resultValue.classList.add("hidden");
 }
 
-function calculateValveLift() {
-  const kvrRaw = (document.getElementById("kvr").value || "").trim();
-  const kvsRaw = (document.getElementById("kvs").value || "").trim();
-  const tauRaw = (document.getElementById("rangeability").value || "").trim();
-
-  const errorBox = document.getElementById("resultError");
-  const errorMessage = document.getElementById("errorMessage");
-  const placeholder = document.getElementById("placeholder");
-  const resultValue = document.getElementById("resultValue");
-  const rateEl = document.getElementById("rateValue");
-  const feedbackEl = document.getElementById("feedbackContent");
-
-  errorBox.classList.add("hidden");
-  errorMessage.innerHTML = "";
-  feedbackEl.innerHTML = "";
+/* Main calculation with validations */
+function calculateDisinfection() {
+  const N0Raw = document.getElementById("N0")?.value.trim();
+  const kRaw  = document.getElementById("k")?.value.trim();
+  const tRaw  = document.getElementById("t")?.value.trim();
 
   const errors = [];
   const warnings = [];
 
-  // Required input validation
-  if (!kvrRaw) errors.push("👉 Please enter Kvr.");
-  if (!kvsRaw) errors.push("👉 Please enter Kvs.");
-  if (!tauRaw) errors.push("👉 Please enter Rangeability (τ).");
+  // Basic presence
+  if (N0Raw === '') errors.push("👉 Enter Initial Microorganisms (N₀).");
+  if (kRaw === '')  errors.push("👉 Enter Disinfection constant (k).");
+  if (tRaw === '')  errors.push("👉 Enter Contact time (t).");
   if (errors.length) return showErrors(errors);
 
-  const Kvr = parseFloat(kvrRaw);
-  const Kvs = parseFloat(kvsRaw);
-  const tau = parseFloat(tauRaw);
+  // Parse values
+  const N0f = parseFloat(N0Raw);
+  const kf  = parseFloat(kRaw);
+  const tf  = parseFloat(tRaw);
 
-  // Numeric & range validations
-  if (!Number.isFinite(Kvr) || Kvr < 0.001 || Kvr > 50000)
-    errors.push("👉 Kvr must be between 0.001 and 50,000 m³/h·bar.");
-  if (!Number.isFinite(Kvs) || Kvs < 0.001 || Kvs > 50000)
-    errors.push("👉 Kvs must be between 0.001 and 50,000 m³/h·bar.");
-  if (Kvr > Kvs) errors.push("👉 Kvr cannot exceed Kvs.");
-  if (!Number.isFinite(tau) || tau <= 1 || tau > 1000)
-    errors.push("👉 Rangeability (τ) must be >1 and ≤1000.");
+  // Numeric checks
+  if (!Number.isFinite(N0f) || N0f < 1) errors.push("👉 N₀ must be a number ≥ 1 (organisms).");
+  if (!Number.isFinite(kf)  || kf <= 0)  errors.push("👉 k must be numeric and > 0 (per unit time).");
+  if (!Number.isFinite(tf)  || tf < 0)  errors.push("👉 t must be numeric and ≥ 0 (time unit matches k).");
 
   if (errors.length) return showErrors(errors);
 
-  // Compute H% using updated formula
-  const Hpercent = 100 * Math.log(tau * Kvr / Kvs) / Math.log(tau);
+  // Ranges & precision
+  if (N0f > 1e12) warnings.push("⚠️ N₀ is very large (>1×10¹²). Verify units/source.");
+  if (countDecimalsFromStr(N0Raw) > 0) warnings.push("⚠️ N₀ will be rounded to nearest whole organism.");
+  if (countDecimalsFromStr(kRaw) > 6) warnings.push("⚠️ k has >6 decimal places — round for practical reporting.");
+  if (kf < 1e-8) warnings.push("⚠️ k is very small — check units (k may be per second vs per minute mismatch).");
+  if (kf > 100) warnings.push("⚠️ k is unusually large (>100). Verify units/time.");
+  if (tf > 1e7) warnings.push("⚠️ t is very large (>1×10⁷). Verify units.");
 
-  // Output validations
-  if (!Number.isFinite(Hpercent) || Hpercent < 0 || Hpercent > 100) {
-    return showErrors(["⚠️ Computed valve lift is invalid. Check input values."]);
+  // Round initial organism to integer (counts)
+  const N0 = Math.round(N0f);
+
+  // Logical checks
+  if (!(kf > 0)) return showErrors(["👉 k must be greater than 0."]);
+  if (N0 <= 0) return showErrors(["👉 N₀ must be ≥ 1 organism."]);
+
+  // Check product k*t for practical under/over flow
+  const kt = kf * tf;
+  if (kt <= 1e-9) warnings.push("⚠️ k·t is very small — negligible inactivation expected.");
+  if (kt > 50) warnings.push("⚠️ k·t is large — result will be effectively zero (below detection); log reduction will be reported as '≥'. (This is expected for very strong disinfection.)");
+
+  // Compute remaining organisms (do not display formula anywhere)
+  const remainingRaw = N0 * Math.exp(-kf * tf); // internal computation
+  // If underflow to 0, JS will return 0
+  const threshold = 1e-12; // threshold below which we'll treat as 0 for reporting
+  let remaining = remainingRaw;
+  if (!Number.isFinite(remaining) || remaining < 0) {
+    return showErrors(["⚠️ Computed remaining organisms invalid. Check inputs."]);
   }
 
-  // Warnings / edge cases
-  if (tau < 10 || tau > 100) warnings.push("⚠️ Rangeability is outside typical industrial range (10–100).");
-  if (Hpercent < 5) warnings.push("⚠️ Valve nearly shut – control may be unstable.");
-  if (Hpercent > 90) warnings.push("⚠️ Valve near wide-open – controllability reduced.");
+  // Prepare display values
+  const remainingDisplay = (remaining === 0 || remaining < threshold) ? remaining : Math.round(remaining);
+  const reductionRatio = (N0 === 0) ? NaN : (1 - (remaining / N0));
+  const percentReduction = Number.isFinite(reductionRatio) ? (reductionRatio * 100) : NaN;
 
-  // Status message
-  let statusMsg = "";
-  if (Hpercent < 5) statusMsg = "⚠️ Valve nearly shut – unstable control region.";
-  else if (Hpercent <= 90) statusMsg = "✅ Normal controllable operating range.";
-  else statusMsg = "⚠️ Valve near wide-open – reduced controllability.";
-
-  // Display result
-  let details = `<div>Valve Lift: <b>${Hpercent.toFixed(2)}%</b></div>`;
-  if (warnings.length) {
-    details += `<div style="margin-top:6px; color:#b35d00; font-size:0.95em;">${warnings.join(" | ")}</div>`;
+  // Log-reduction handling
+  let logReductionDisplay = "";
+  if (remaining === 0 || remaining < threshold) {
+    // report as "≥ X-log" where X is approximated by -log10(threshold / N0)
+    const approx = -Math.log10(threshold / N0);
+    logReductionDisplay = `≥ ${approx.toFixed(2)} (approx)`;
+  } else {
+    const logR = -Math.log10(remaining / N0);
+    logReductionDisplay = `${logR.toFixed(2)} log₁₀`;
   }
 
-  rateEl.textContent = Hpercent.toFixed(2);
-  feedbackEl.innerHTML = `<div>${statusMsg}</div>${details}`;
+  // Classification (audit-friendly)
+  let classification = "";
+  let recommendation = "";
+  // derive numeric log reduction for thresholds (if computable)
+  let numericLog = null;
+  if (!(remaining === 0 || remaining < threshold)) numericLog = -Math.log10(remaining / N0);
 
-  placeholder.classList.add("hidden");
-  resultValue.classList.remove("hidden");
-  errorBox.classList.add("hidden");
+  if (numericLog !== null && numericLog >= 6) {
+    classification = "Highly Effective (≥6-log)";
+    recommendation = "Excellent inactivation — acceptable for critical disinfection tasks.";
+  } else if (numericLog !== null && numericLog >= 3) {
+    classification = "Effective (3–6 log)";
+    recommendation = "Strong inactivation; confirm with process control data.";
+  } else if (numericLog !== null && numericLog >= 1) {
+    classification = "Moderately Effective (1–3 log)";
+    recommendation = "Partial inactivation; consider increasing contact time or dose.";
+  } else if (numericLog !== null) {
+    classification = "Ineffective (<1 log)";
+    recommendation = "Insufficient inactivation — review disinfectant, dosage and contact time.";
+  } else {
+    // when remaining effectively 0, use 'Highly Effective'
+    classification = "Highly Effective";
+    recommendation = "Remaining organisms below detection threshold; report as 'no detectable organisms'.";
+  }
+
+  // Build details for feedback
+  let details = `<div><strong>Remaining microorganisms (N):</strong> ${ (remaining === 0 || remaining < threshold) ? remaining.toExponential(3) : remainingDisplay.toLocaleString() } organisms</div>`;
+  details += `<div><strong>Percent reduction:</strong> ${ Number.isFinite(percentReduction) ? percentReduction.toFixed(3) + '%' : 'N/A' }</div>`;
+  details += `<div><strong>Log reduction:</strong> ${ logReductionDisplay }</div>`;
+  details += `<div style="margin-top:6px;"><strong>Classification:</strong> ${ classification }</div>`;
+  details += `<div style="margin-top:4px;">${ recommendation }</div>`;
+  if (warnings.length) details += `<div style="margin-top:8px; color:#b35d00;">${warnings.join(' | ')}</div>`;
+
+  // Update UI
+  document.getElementById("remainingN").textContent = (remaining === 0 || remaining < threshold) ? remaining.toExponential(3) : remainingDisplay.toLocaleString();
+  document.getElementById("feedbackContent").innerHTML = details;
+
+  // Show result area
+  document.getElementById("placeholder").classList.add("hidden");
+  document.getElementById("resultValue").classList.remove("hidden");
+  document.getElementById("resultError").classList.add("hidden");
 }
 
+/* Print helper */
 function printReport() {
   const el = document.getElementById('printDate');
   if (el) {
-    const now = new Date();
-    el.textContent = now.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+    el.textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   }
   window.print();
 }
 </script>
-
 
     <script src="{% static 'js/print.js' %}"></script>
 </body>
@@ -663,39 +714,55 @@ function printReport() {
 
 
 <!-- 
-📌 Valve Lift Calculator (Essentials)
+📌 Microbial Disinfection Calculator (Essentials)
 
 🔹 Formula (internal, not displayed to user):
-    • H% = 100 × ln(τ × Kvr / Kvs) / ln(τ)
-      - H%     = Valve lift percentage
-      - Kvr    = Flow coefficient at rated valve position [m³/h·bar]
-      - Kvs    = Maximum flow coefficient [m³/h·bar]
-      - τ      = Rangeability (unitless)
+    • N = N₀ × e^(−k·t)
+      - N  = Remaining microorganisms [count]
+      - N₀ = Initial microorganisms [count]
+      - k  = Disinfection constant [per unit time]
+      - t  = Contact time [same unit as k]
+
+    • Log reduction = −log₁₀(N / N₀)
+    • Percent reduction = (1 − N / N₀) × 100%
 
 🔹 Input Validations:
-    • Kvr (Rated Flow Coefficient):
+    • N₀ (Initial microorganisms):
         - Required, numeric
-        - Range: 0.001 – 50,000 m³/h·bar
-        - Cannot exceed Kvs
-    • Kvs (Maximum Flow Coefficient):
+        - Must be ≥ 1
+        - Rounded to nearest whole number
+    • k (Disinfection constant):
         - Required, numeric
-        - Range: 0.001 – 50,000 m³/h·bar
-    • τ (Rangeability):
+        - Must be > 0
+    • t (Contact time):
         - Required, numeric
-        - Range: >1 and ≤1000
+        - Must be ≥ 0
+    • All inputs must be numeric and non-empty.
 
-🔹 Warnings / Edge Cases:
-    • τ < 10 or τ > 100 → ⚠️ Rangeability outside typical industrial range
-    • H% < 5 → ⚠️ Valve nearly shut – control may be unstable
-    • H% > 90 → ⚠️ Valve near wide-open – controllability reduced
+🔹 Warnings:
+    • N₀ > 1×10¹² → ⚠️ Very large population — verify units/source
+    • N₀ with decimals → ⚠️ Rounded to integer (organisms are counts)
+    • k with >6 decimals → ⚠️ Round for reporting
+    • k < 1e−8 → ⚠️ Very small constant — possible unit mismatch
+    • k > 100 → ⚠️ Very large constant — check units
+    • t > 1×10⁷ → ⚠️ Excessively large contact time — verify units
+    • k·t very small (≤ 1e−9) → ⚠️ Negligible inactivation
+    • k·t > 50 → ⚠️ Result effectively zero (below detection); log reduction reported as "≥"
 
 🔹 Output Validations & Feedback:
-    • Valve lift (H%) displayed as percentage
-    • Status messages:
-        - H% < 5 → ⚠️ Unstable control region
-        - H% 5–90 → ✅ Normal controllable operating range
-        - H% > 90 → ⚠️ Reduced controllability at wide-open
-    • Input values Kvr, Kvs, and τ displayed alongside H%
-    • Warnings displayed inline if triggered
+    • Remaining microorganisms (N):
+        - Rounded to integer if ≥ threshold
+        - Reported in scientific notation if below threshold (1e−12)
+    • Percent reduction (%) reported if valid
+    • Log reduction:
+        - If N > threshold → exact log reduction value
+        - If N ≤ threshold → reported as ≥ value (approximate)
+    • Classification:
+        - ≥6 log → Highly Effective
+        - 3–6 log → Effective
+        - 1–3 log → Moderately Effective
+        - <1 log → Ineffective
+        - Remaining < threshold → Highly Effective (below detection limit)
+    • Recommendation message provided for each classification
+    • Warnings shown inline if triggered
 -->
-
