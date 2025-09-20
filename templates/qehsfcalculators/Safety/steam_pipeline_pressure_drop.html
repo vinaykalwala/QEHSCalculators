@@ -1,0 +1,664 @@
+{% extends 'base.html' %}
+{% block title %}Steam Pipeline Pressure Drop Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steam Pipeline Pressure Drop Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+                .btn-container {
+    display: flex;
+    justify-content: center; /* Horizontally center */
+    margin: 30px 0;
+}
+
+.back-btn {
+    background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+    color: #ffffff; /* White text */
+    border: 2px solid #1560bd; /* Highlight border */
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none; /* Remove underline for link */
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    background-color: #1560bd; /* Highlight on hover */
+    color: #ffffff;
+    border-color: #000040;
+    transform: scale(1.05); /* Subtle hover effect */
+}
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            {% comment %} max-width: 700px; {% endcomment %}
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            {% comment %} display: flex; {% endcomment %}
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            {% comment %} overflow-y: auto; {% endcomment %}
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Input rows for side-by-side fields */
+         .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            {% comment %} margin-bottom: 15px; {% endcomment %}
+        }
+        
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+       
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+    <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+</div>
+   <div class="calculator-container printable" id="printArea">
+
+    <!-- Include header/footer for print -->
+    {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Steam Pipeline Pressure Drop Calculator</h1>
+            <p>Calculate the pressure drop in steam pipelines caused by frictional losses</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="length">Length of Pipe (L) (m)</label>
+                        <input type="number" id="length" class="form-input" min="0" placeholder="e.g., 100">
+                    </div>
+                    <div class="form-group">
+                        <label for="vg">Specific Volume of Steam (v<sub>g</sub>) (m³/kg)</label>
+                        <input type="number" id="vg" class="form-input" min="0" step="0.001" placeholder="e.g., 0.15">
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="massFlow">Mass Flowrate (ṁ) (kg/h)</label>
+                        <input type="number" id="massFlow" class="form-input" min="0" placeholder="e.g., 5000">
+                    </div>
+                    <div class="form-group">
+                        <label for="diameter">Pipe Diameter (D) (mm)</label>
+                        <input type="number" id="diameter" class="form-input" min="0" placeholder="e.g., 150">
+                    </div>
+                </div>
+                
+                <button class="calculate-btn" onclick="calculatePressureDrop()">Calculate Pressure Drop</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Steam pipeline illustration">
+                    <p>This tool will calculate the <strong>Pressure Drop</strong> in steam pipelines. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Pressure Drop</h2>
+                    </div>
+                    <div class="rate-display">
+                    <div class="rate-value" id="rateValue">0.00</div>
+                    <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">ΔP (bar)</div></div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low</span><span>Optimal</span><span>Moderate</span><span>High</span><span>Very High</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Pressure Drop Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+ <div class="note-section">
+
+    <!-- About -->
+    <div class="note-card">
+        <h3>📘 About This Calculator</h3>
+        <p>
+            The <strong>Steam Pipeline Pressure Drop Calculator</strong> determines the pressure loss 
+            in steam pipelines caused by frictional losses over a specific length. It is essential 
+            for designing efficient steam systems in industrial plants, power generation facilities, 
+            and process industries to ensure proper pressure levels are maintained throughout the system.
+        </p>
+    </div>
+
+    <!-- Parameters Used -->
+    <div class="note-card">
+        <h3>⚙ Parameters Used</h3>
+        <ul class="note-list">
+            <li><strong>L (Length of Pipe):</strong> The total length of the steam pipe in meters.</li>
+            <li><strong>v<sub>g</sub> (Specific Volume of Steam):</strong> The volume occupied by one kg of steam (m³/kg).</li>
+            <li><strong>ṁ (Mass Flowrate):</strong> The rate at which steam flows through the pipe (kg/h).</li>
+            <li><strong>D (Pipe Diameter):</strong> The internal diameter of the pipeline in millimeters.</li>
+            <li><strong>0.08 (Constant):</strong> A dimensionless coefficient that accounts for frictional losses and empirical adjustments in steam flow calculations.</li>
+        </ul>
+    </div>
+
+    <!-- Input Validation Rules -->
+    <div class="note-card">
+        <h3>✅ Input Validation Rules</h3>
+        <ul class="note-list">
+            <li><strong>Length of Pipe (L):</strong> Must be &gt; 0 (typical 1–1000 m).</li>
+        <li><strong>Specific Volume (v<sub>g</sub>):</strong> Must be &gt; 0 (typical 0.1–1.5 m³/kg).</li>
+        <li><strong>Mass Flowrate (ṁ):</strong> Must be &gt; 0 (typical 100–100,000 kg/h).</li>
+        <li><strong>Pipe Diameter (D):</strong> Must be &gt; 0 (typical 25–500 mm).</li>
+        <li><strong>Decimals:</strong> Up to 3 decimals for v<sub>g</sub>, 1 decimal for length, integers for others.</li>
+        <li><strong>Output ΔP:</strong> Normal design range is 0.05–5 bar. Results outside this require engineering review.</li>
+    </ul>
+    </div>
+
+    <!-- Output Validations -->
+    <div class="note-card">
+    <h3>✅ Output Validations</h3>
+    <ul class="note-list">
+        <li><strong>ΔP &lt; 0.1 bar</strong> → <span style="color:#27ae60; font-weight:bold;">Very Low</span>: Ensure that steam velocity is sufficient for transport.</li>
+        <li><strong>0.1 ≤ ΔP ≤ 1 bar</strong> → <span style="color:#2ecc71; font-weight:bold;">Optimal</span>: Suitable for most industrial steam systems.</li>
+        <li><strong>1 &lt; ΔP ≤ 3 bar</strong> → <span style="color:#f39c12; font-weight:bold;">Moderate</span>: Acceptable for many applications, but monitor efficiency.</li>
+        <li><strong>3 &lt; ΔP ≤ 5 bar</strong> → <span style="color:#e67e22; font-weight:bold;">High</span>: Consider system optimization.</li>
+        <li><strong>ΔP &gt; 5 bar</strong> → <span style="color:#e74c3c; font-weight:bold;">Very High</span>: Consider increasing pipe diameter or reducing steam flow rate.</li>
+    </ul>
+    <p><i><strong>Normal design range:</strong> <span style="color:#1560bd; font-weight:bold;">0.05 – 5 bar</span>. Results outside this range should trigger <u>engineering review</u>.</i></p>
+</div>
+
+
+    <!-- Standards -->
+    <div class="note-card">
+        <h3>📏 Standards</h3>
+        <p>
+            This calculator is based on industry-standard formulas for steam pipeline pressure drop calculations. 
+            It aligns with <strong>ASME B31.1</strong> (Power Piping) and <strong>ISO 14692</strong> standards 
+            for petroleum and natural gas industries. Proper pressure drop calculation ensures energy efficiency, 
+            system safety, and compliance with industrial regulations.
+        </p>
+    </div>
+
+    <!-- Conclusion -->
+    <div class="note-card">
+        <h3>🎯 Conclusion</h3>
+        <p>
+            Understanding pressure drop in steam pipes is <strong>critical for energy efficiency and safety</strong>. 
+            This calculator provides a <strong>reliable method to estimate pressure loss</strong> and design 
+            <strong>efficient steam transport systems</strong> for various industrial applications including 
+            power generation, food processing, pharmaceuticals, and manufacturing.
+        </p>
+    </div>
+
+</div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculatePressureDrop() {
+    const length = document.getElementById('length').value.trim();
+    const vg = document.getElementById('vg').value.trim();
+    const massFlow = document.getElementById('massFlow').value.trim();
+    const diameter = document.getElementById('diameter').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+    let warnings = [];
+
+    // --- INPUT VALIDATIONS ---
+
+    // Pipe Length
+    if (length === "" || isNaN(length) || parseFloat(length) <= 0) {
+        errors.push("👉 Pipe Length must be a positive number (m).");
+    } else if (parseFloat(length) < 1 || parseFloat(length) > 1000) {
+        warnings.push("⚠️ Pipe Length is outside typical range (1–1000 m).");
+    }
+
+    // Specific Volume
+    if (vg === "" || isNaN(vg) || parseFloat(vg) <= 0) {
+        errors.push("👉 Specific Volume of Steam must be a positive number (m³/kg).");
+    } else if (parseFloat(vg) < 0.05 || parseFloat(vg) > 2) {
+        warnings.push("⚠️ Specific Volume outside typical range (0.1–1.5 m³/kg).");
+    }
+
+    // Mass Flowrate
+    if (massFlow === "" || isNaN(massFlow) || parseFloat(massFlow) <= 0) {
+        errors.push("👉 Mass Flowrate must be a positive number (kg/h).");
+    } else if (parseFloat(massFlow) < 100 || parseFloat(massFlow) > 100000) {
+        warnings.push("⚠️ Mass Flowrate outside normal range (100–100,000 kg/h).");
+    }
+
+    // Pipe Diameter
+    if (diameter === "" || isNaN(diameter) || parseFloat(diameter) <= 0) {
+        errors.push("👉 Pipe Diameter must be a positive number (mm).");
+    } else if (parseFloat(diameter) < 25 || parseFloat(diameter) > 500) {
+        warnings.push("⚠️ Pipe Diameter outside typical range (25–500 mm).");
+    }
+
+    // Display errors if found
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // --- CALCULATION ---
+    const L = parseFloat(length);
+    const v_g = parseFloat(vg);
+    const m_dot = parseFloat(massFlow);
+    const D = parseFloat(diameter);
+
+    // Formula: ΔP = (L * v_g * ṁ²) / (0.08 * D⁵)
+    const deltaP = (L * v_g * Math.pow(m_dot, 2)) / (0.08 * Math.pow(D, 5));
+
+    if (!isFinite(deltaP) || isNaN(deltaP)) {
+        errorMessage.innerHTML = "👉 Calculation error: check inputs (possible division by zero).";
+        errorBox.classList.remove("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    // --- OUTPUT VALIDATION ---
+    if (deltaP < 0.05 || deltaP > 10) {
+        warnings.push("⚠️ Pressure drop is outside standard range (0.05–10 bar). Engineering review advised.");
+    }
+
+    document.getElementById('rateValue').textContent = deltaP.toFixed(4);
+
+    // --- FEEDBACK METER ---
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+
+    if (deltaP < 0.1) {
+        meterWidth = '20%'; meterColor = '#2ecc71';
+        feedback = 'Very low pressure drop. Risk of low velocity.';
+    } else if (deltaP <= 1) {
+        meterWidth = '40%'; meterColor = '#27ae60';
+        feedback = 'Optimal pressure drop. Good system balance.';
+    } else if (deltaP <= 3) {
+        meterWidth = '60%'; meterColor = '#f39c12';
+        feedback = 'Moderate pressure drop. Acceptable but check efficiency.';
+    } else if (deltaP <= 5) {
+        meterWidth = '80%'; meterColor = '#e67e22';
+        feedback = 'High pressure drop. Consider optimization.';
+    } else {
+        meterWidth = '95%'; meterColor = '#e74c3c';
+        feedback = 'Very high pressure drop. Review pipe sizing or flow rate.';
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').textContent = feedback + (warnings.length ? " " + warnings.join(" ") : "");
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+
+</body>
+</html>
+{% endblock %}
