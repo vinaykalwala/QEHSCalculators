@@ -10,7 +10,7 @@ CALCULATORS = [
 
     {"name": "Binomial Distribution Calculator", "url_name": "quality_binomial_distribution_calculator", "plan_type": "corporate", "category": "quality"},
 
-    {"name": "Broad Calculation of Garments Cost of Making (CM)", "url_name": "quality_broad_calculation_of_garments_cost_of_making_cm_calculator", "plan_type": "corporate", "category": "quality"},
+    # {"name": "Broad Calculation of Garments Cost of Making (CM)", "url_name": "quality_broad_calculation_of_garments_cost_of_making_cm_calculator", "plan_type": "corporate", "category": "quality"},
 
 
 
@@ -18,11 +18,11 @@ CALCULATORS = [
 
 
 
-{"name": "Correct the Conductivity of a Sample Calculator", "url_name": "quality_correct_the_conductivity_of_a_sample_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Correct The Conductivity Of A Sample Calculator", "url_name": "quality_correct_the_conductivity_of_a_sample_calculator", "plan_type": "corporate", "category": "quality"},
 
 
 
-{"name": "Cost of Poor Quality (COPQ) Calculator", "url_name": "quality_cost_of_poor_quality_copq_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Cost Of Poor Quality (COPQ) Calculator", "url_name": "quality_cost_of_poor_quality_copq_calculator", "plan_type": "corporate", "category": "quality"},
 
 
 {"name": "Customer Satisfaction (CSAT) Calculator", "url_name": "quality_customer_satisfaction_csat_calculator", "plan_type": "corporate", "category": "quality"},
@@ -31,7 +31,7 @@ CALCULATORS = [
 {"name": "Cost Per Minute (CPM) Calculator", "url_name": "quality_cost_per_minute_cpm_calculator", "plan_type": "corporate", "category": "quality"},
 
 
-{"name": "Cost of Making (CM) Calculator", "url_name": "quality_cost_of_making_cm_calculator", "plan_type": "corporate", "category": "quality"},
+# {"name": "Cost of Making (CM) Calculator", "url_name": "quality_cost_of_making_cm_calculator", "plan_type": "corporate", "category": "quality"},
 
 {"name": "Corrective Action Effectiveness (CAE) Calculator", "url_name": "quality_corrective_action_effectiveness_cae_calculator", "plan_type": "corporate", "category": "quality"},
 
@@ -40,11 +40,11 @@ CALCULATORS = [
 
 
 
-{"name": "Critical Number of Samples Calculator", "url_name": "quality_critical_number_of_samples_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Critical Number Of Samples Calculator", "url_name": "quality_critical_number_of_samples_calculator", "plan_type": "corporate", "category": "quality"},
 
 
 
-{"name": "Defects Per Million Opportunities (DPMO) and Six Sigma Calculator", "url_name": "quality_defects_per_million_opportunities_dpmo_and_six_sigma_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Defects Per Million Opportunities (DPMO) And Six Sigma Calculator", "url_name": "quality_defects_per_million_opportunities_dpmo_and_six_sigma_calculator", "plan_type": "corporate", "category": "quality"},
 
 
 
@@ -620,91 +620,91 @@ CALCULATORS = [
 
 {"name": "Settling Reynolds Number Calculator", "url_name": "environment_settling_reynolds_number_calculator", "plan_type": "corporate", "category": "environment"},
 
-#{"name": "Soak Pit Volume Calculator", "url_name": "environment_soak_pit_volume_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Soak Pit Volume Calculator", "url_name": "environment_soak_pit_volume_calculator", "plan_type": "corporate", "category": "environment"},
 
-#{"name": "Sludge Retention Time (SRT) And Specific Substrate Utilization Rate Calculator", "url_name": "environment_sludge_retention_time_srt_and_specific_substrate_utilization_rate_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Sludge Retention Time (SRT) And Specific Substrate Utilization Rate Calculator", "url_name": "environment_sludge_retention_time_srt_and_specific_substrate_utilization_rate_calculator", "plan_type": "corporate", "category": "environment"},
 
-#{"name": "Settling Overflow Rate (q₀) Calculator", "url_name": "environment_settling_overflow_rate_q_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Settling Overflow Rate (q₀) Calculator", "url_name": "environment_settling_overflow_rate_q_calculator", "plan_type": "corporate", "category": "environment"},
 
-#{"name": "Sedimentation Tank Volume (V) Calculator", "url_name": "environment_sedimentation_tank_volume_v_calculator", "plan_type": "corporate", "category": "environment"},
-
-
-#{"name": "Sedimentation Tank Surface Area (A) Calculator", "url_name": "environment_sedimentation_tank_surface_area_a_calculator", "plan_type": "corporate", "category": "environment"},
-
-#{"name": "Sedimentation Tank Dimensions Calculator", "url_name": "environment_sedimentation_tank_dimensions_calculator", "plan_type": "corporate", "category": "environment"},
-
-#{"name": "Sedimentation Overflow Rate Calculator", "url_name": "environment_sedimentation_overflow_rate_calculator", "plan_type": "corporate", "category": "environment"},
-
-#{"name": "Scouring Velocity (V) Calculator - Schield’s Formula", "url_name": "environment_scouring_velocity_v_schields_formula_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Sedimentation Tank Volume (V) Calculator", "url_name": "environment_sedimentation_tank_volume_v_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-#{"name": "Sludge Recirculation Rate (Qr) Calculator", "url_name": "environment_sludge_recirculation_rate_qr_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Sedimentation Tank Surface Area (A) Calculator", "url_name": "environment_sedimentation_tank_surface_area_a_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Sedimentation Tank Dimensions Calculator", "url_name": "environment_sedimentation_tank_dimensions_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Sedimentation Overflow Rate Calculator", "url_name": "environment_sedimentation_overflow_rate_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Scouring Velocity (V) Calculator - Schield’s Formula", "url_name": "environment_scouring_velocity_v_schields_formula_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-#{"name": "Solubility Product (Ksp) Calculator", "url_name": "environment_solubility_product_ksp_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Sludge Recirculation Rate (Qr) Calculator", "url_name": "environment_sludge_recirculation_rate_qr_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-#{"name": "Stability Parameter (S) Calculator", "url_name": "environment_stability_parameter_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Solubility Product (Ksp) Calculator", "url_name": "environment_solubility_product_ksp_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-#{"name": "Thermodynamic Temperature Calculator", "url_name": "environment_thermodynamic_temperature_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Stability Parameter (S) Calculator", "url_name": "environment_stability_parameter_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-
-#{"name": "Travel Carbon Footprint Calculator", "url_name": "environment_travel_carbpon_footprint_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Thermodynamic Temperature Calculator", "url_name": "environment_thermodynamic_temperature_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 
-#{"name": "Thermal Transmittance (U) Calculator (From Thickness & Conductivities)", "url_name": "environment_thermal_transmittance_u_from_the_individual_thicknesses_and_conductivities_calculator", "plan_type": "corporate", "category": "environment"},
-
-# {"name": "Thermal transmittance (U) from the individual thermal resistances Calculator", "url_name": "environment_thermal_transmittance_u_from_the_individual_thermal_resistances_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Travel Carbon Footprint Calculator", "url_name": "environment_travel_carbpon_footprint_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 
-# {"name": "Thermal Transmittance (U-Value) From Thermal Resistance Calculator", "url_name": "environment_thermal_transmittance_u_value_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Thermal Transmittance (U) Calculator (From Thickness & Conductivities)", "url_name": "environment_thermal_transmittance_u_from_the_individual_thicknesses_and_conductivities_calculator", "plan_type": "corporate", "category": "environment"},
 
-
-# {"name": "Thermal Resistivity From Conductivity Calculator", "url_name": "environment_thermal_resistivity_from_conductivity_calculator", "plan_type": "corporate", "category": "environment"},
-
-
-
-# {"name": "TDS Calculator (Density Method)", "url_name": "environment_tds_density_method_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Thermal transmittance (U) from the individual thermal resistances Calculator", "url_name": "environment_thermal_transmittance_u_from_the_individual_thermal_resistances_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 
-# {"name": "TDS (Total Dissolved Solids) Calculator", "url_name": "environment_tds_total_dissolved_solids_conductivity_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Thermal Transmittance (U-Value) From Thermal Resistance Calculator", "url_name": "environment_thermal_transmittance_u_value_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-# {"name": "Transient Mass Balance Calculator", "url_name": "environment_transient_mass_balance_calculator", "plan_type": "corporate", "category": "environment"},
-
-# {"name": "Transition Flow General Velocity Calculator", "url_name": "environment_transition_flow_general_velocity_calculator", "plan_type": "corporate", "category": "environment"},
-
-
-# {"name": "Total Height of Soak Pit Calculator", "url_name": "environment_total_height_of_soak_pit_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Thermal Resistivity From Conductivity Calculator", "url_name": "environment_thermal_resistivity_from_conductivity_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 
-# {"name": "Two-Phase Flow Parameter Calculator", "url_name": "environment_two_phase_flow_parameter_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "TDS Calculator (Density Method)", "url_name": "environment_tds_density_method_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 
-# {"name": "Threshold Limit Value (TLV) Calculator for Silica Dust", "url_name": "environment_threshold_limit_value_tlv_for_silica_dust_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "TDS (Total Dissolved Solids) Calculator", "url_name": "environment_tds_total_dissolved_solids_conductivity_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-# {"name": "Time to Settle (t₀) Calculator", "url_name": "environment_time_to_settle_t_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Transient Mass Balance Calculator", "url_name": "environment_transient_mass_balance_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Transition Flow General Velocity Calculator", "url_name": "environment_transition_flow_general_velocity_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-# {"name": "U-Factor Calculation for Walls", "url_name": "environment_u_factor_calculation_for_walls_calculator", "plan_type": "corporate", "category": "environment"},
-
-# {"name": "Vapor Pressure Calculator", "url_name": "environment_vapor_pressure_calculator", "plan_type": "corporate", "category": "environment"},
-
-# {"name": "Volumetric Flow Rate Calculator", "url_name": "environment_volumetric_flow_rate_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Total Height of Soak Pit Calculator", "url_name": "environment_total_height_of_soak_pit_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-# {"name": "Volumetric Flowrate From The Shedding Frequency Calculator", "url_name": "environment_volumetric_flowrate_from_the_shedding_frequency_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Two-Phase Flow Parameter Calculator", "url_name": "environment_two_phase_flow_parameter_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-# {"name": "Volumetric Flow Through An Equal Percentage Valve Calculator", "url_name": "environment_volumetric_flow_throw_an_equal_percentage_valve_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Threshold Limit Value (TLV) Calculator for Silica Dust", "url_name": "environment_threshold_limit_value_tlv_for_silica_dust_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Time to Settle (t₀) Calculator", "url_name": "environment_time_to_settle_t_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "U-Factor Calculation for Walls", "url_name": "environment_u_factor_calculation_for_walls_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Vapor Pressure Calculator", "url_name": "environment_vapor_pressure_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Volumetric Flow Rate Calculator", "url_name": "environment_volumetric_flow_rate_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Volumetric Flowrate From The Shedding Frequency Calculator", "url_name": "environment_volumetric_flowrate_from_the_shedding_frequency_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+{"name": "Volumetric Flow Through An Equal Percentage Valve Calculator", "url_name": "environment_volumetric_flow_throw_an_equal_percentage_valve_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 # {"name": "Vegan Footprint Calculator", "url_name": "environment_vegan_footprint_calculator", "plan_type": "corporate", "category": "environment"},
@@ -1235,7 +1235,7 @@ CALCULATORS = [
     {"name": "Bernoulli's Equation With Constant Potential Energy Terms And Frictional Losses Calculator", "url_name": "fire_bernoullis_equation_with_constant_potential_energy_terms_and_frictional_losses_calculator", "plan_type": "corporate", "category": "fire"},
     {"name": "Combustion Efficiency (CE) Calculator", "url_name": "fire_combustion_efficiency_ce_calculator", "plan_type": "corporate", "category": "fire"},\
     {"name": "Discharge Rate Calculator for CO₂", "url_name": "fire_discharge_rate_for_co2_calculator", "plan_type": "corporate", "category": "fire"},
-    {"name": "Discharge Rate of co2 Calculator for local applications", "url_name": "fire_discharge_rate_of_co2_for_local_applications_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Design Quantity of co2 Calculator for local applications", "url_name": "fire_discharge_rate_of_co2_for_local_applications_calculator", "plan_type": "corporate", "category": "fire"},
     {"name": "Equivalent Orifice Area Calculator for co2", "url_name": "fire_equivalent_orifice_area_for_co2_calculator", "plan_type": "corporate", "category": "fire"},
     {"name": "Equivalent Water Flowrate Through A Check Valve Calculator", "url_name": "fire_equivalent_water_flowrate_through_a_check_valve_calculator", "plan_type": "corporate", "category": "fire"},
     {"name": "Fire Load Calculator", "url_name": "fire_fire_load_calculator", "plan_type": "corporate", "category": "fire"},
@@ -1314,10 +1314,7 @@ CALCULATORS = [
 
 
 
-    # {"name": "Evacuation Time Calculator", "url_name": "evacuation_time", "plan_type": "employee", "category": "fire"},
-    # {"name": "Fire Safety Compliance", "url_name": "fire_safety", "plan_type": "corporate", "category": "fire"},
-    
-    
+  
 ]
 
 # Define category information
