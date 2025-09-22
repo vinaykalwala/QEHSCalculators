@@ -4434,7 +4434,7 @@ def fire_discharge_rate_for_co2_calculator(request):
 @login_required
 @subscription_required(plan_type="corporate")
 def fire_discharge_rate_of_co2_for_local_applications_calculator(request):
-    return render(request, 'qehsfcalculators/fire/discharge_rate_of_co2_for_local_applications.html', {'title': 'Design Quantity of co2 Calculator for local applications'})
+    return render(request, 'qehsfcalculators/fire/discharge_rate_of_co2_for_local_applications.html', {'title': 'Discharge Rate of co2 Calculator for local applications'})
 
 @login_required
 @subscription_required(plan_type="corporate")

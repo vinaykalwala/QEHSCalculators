@@ -436,7 +436,6 @@ urlpatterns = [
     path('health/workplace_exposure_limit_wel_calculator/', health_workplace_exposure_limit_wel_calculator, name='health_workplace_exposure_limit_wel_calculator'),
     path('health/weight_loss_calculator/', health_weight_loss_calculator, name='health_weight_loss_calculator'),
     path('health/weight_gain_calculator/', health_weight_gain_calculator, name='health_weight_gain_calculator'),
-    path('health/winters_formula_calculator/', health_winters_formula_calculator, name='health_winters_formula_calculator'),
     path('health/waist_to_hip_ratio_calculator/', health_waist_to_hip_ratio_calculator, name='health_waist_to_hip_ratio_calculator'),
     path('health/waist_to_height_ratio_calculator/', health_waist_to_height_ratio_calculator, name='health_waist_to_height_ratio_calculator'),
     path('health/cholesterolunitsconverter/', cholesterolunitsconverter, name='health_cholesterolunitsconverter'),
