@@ -36,12 +36,12 @@ CALCULATORS = [
 {"name": "Corrective Action Effectiveness (CAE) Calculator", "url_name": "quality_corrective_action_effectiveness_cae_calculator", "plan_type": "corporate", "category": "quality"},
 
 
-{"name": "Control Score Calculator", "url_name": "quality_control_score_calculator", "plan_type": "corporate", "category": "quality"},
 
 
 
 {"name": "Critical Number Of Samples Calculator", "url_name": "quality_critical_number_of_samples_calculator", "plan_type": "corporate", "category": "quality"},
 
+{"name": "Control Score Calculator", "url_name": "quality_control_score_calculator", "plan_type": "corporate", "category": "quality"},
 
 
 {"name": "Defects Per Million Opportunities (DPMO) And Six Sigma Calculator", "url_name": "quality_defects_per_million_opportunities_dpmo_and_six_sigma_calculator", "plan_type": "corporate", "category": "quality"},
@@ -1229,20 +1229,20 @@ CALCULATORS = [
 
 
     # Fire Calculators
-    {"name": "Burn Rate (chemical Exposure) Calculator", "url_name": "fire_burn_rate_chemical_exposure_calculator", "plan_type": "corporate", "category": "fire"},
-    {"name": "Base Design Quantity for CO₂ Calculator", "url_name": "fire_base_design_quantity_for_co_calculator", "plan_type": "corporate", "category": "fire"},
-    {"name": "Bernoulli's Equation for a Liquid Calculator", "url_name": "fire_bernoullis_equation_for_a_liquid_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Burn Rate (Chemical Exposure) Calculator", "url_name": "fire_burn_rate_chemical_exposure_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Base Design Quantity For CO₂ Calculator", "url_name": "fire_base_design_quantity_for_co_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Bernoulli's Equation For A Liquid Calculator", "url_name": "fire_bernoullis_equation_for_a_liquid_calculator", "plan_type": "corporate", "category": "fire"},
     {"name": "Bernoulli's Equation With Constant Potential Energy Terms And Frictional Losses Calculator", "url_name": "fire_bernoullis_equation_with_constant_potential_energy_terms_and_frictional_losses_calculator", "plan_type": "corporate", "category": "fire"},
     {"name": "Combustion Efficiency (CE) Calculator", "url_name": "fire_combustion_efficiency_ce_calculator", "plan_type": "corporate", "category": "fire"},\
-    {"name": "Discharge Rate Calculator for CO₂", "url_name": "fire_discharge_rate_for_co2_calculator", "plan_type": "corporate", "category": "fire"},
-    {"name": "Design Quantity of co2 Calculator for local applications", "url_name": "fire_discharge_rate_of_co2_for_local_applications_calculator", "plan_type": "corporate", "category": "fire"},
-    {"name": "Equivalent Orifice Area Calculator for co2", "url_name": "fire_equivalent_orifice_area_for_co2_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Discharge Rate Calculator For CO₂", "url_name": "fire_discharge_rate_for_co2_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Design Quantity Of Co2 Calculator For local applications", "url_name": "fire_discharge_rate_of_co2_for_local_applications_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Equivalent Orifice Area Calculator For Co2", "url_name": "fire_equivalent_orifice_area_for_co2_calculator", "plan_type": "corporate", "category": "fire"},
     {"name": "Equivalent Water Flowrate Through A Check Valve Calculator", "url_name": "fire_equivalent_water_flowrate_through_a_check_valve_calculator", "plan_type": "corporate", "category": "fire"},
     {"name": "Fire Load Calculator", "url_name": "fire_fire_load_calculator", "plan_type": "corporate", "category": "fire"},
     
      {"name": "Fire Extinguisher Placement Calculator", "url_name": "fire_fire_extinguisher_placement_calculator", "plan_type": "corporate", "category": "fire"},
-    {"name": "Fire extinguisher weight inspection", "url_name": "fire_fire_extinguisher_weight_inspection_calculator", "plan_type": "corporate", "category": "fire"},
-    {"name": "fire load density calculator", "url_name": "fire_fire_load_density_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Fire Extinguisher Weight Inspection Calculator", "url_name": "fire_fire_extinguisher_weight_inspection_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "fire Load Density Calculator", "url_name": "fire_fire_load_density_calculator", "plan_type": "corporate", "category": "fire"},
     {"name": "Fire Flow calcualtor", "url_name": "fire_fire_flow_calculator", "plan_type": "corporate", "category": "fire"},
     {"name": "FM-200 / NOVEC 1230 - Net Hazard Volume Calculator", "url_name": "fire_fm_200_novec_1230_net_hazard_volume_calculator", "plan_type": "corporate", "category": "fire"},\
     {"name": "FM-200 / NOVEC 1230 - agent quantity calculator", "url_name": "fire_fm_200_novec_1230_agent_quantity_calculator", "plan_type": "corporate", "category": "fire"},
