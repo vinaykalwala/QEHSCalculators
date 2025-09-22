@@ -1164,34 +1164,45 @@ CALCULATORS = [
 {"name": "Specifi Gravity Calculator", "url_name":"safety_specifi_gravity_calculator", "plan_type": "corporate", "category": "safety"},
 {"name": "Safety Factor Calculator", "url_name":"safety_safety_factor_calculator", "plan_type": "corporate", "category": "safety"},
 {"name": "Steam Consumption To Provide Tank Heat Losses Calculator", "url_name":"safety_steam_consumption_to_provide_tank_heat_losses_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Steam Consumption By Injection Into A Tank Caluculator", "url_name":"safety_steam_consumption_by_injection_into_a_tank_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Steam Start-Up Load To Bring Steam Pipework Calculator", "url_name":"safety_steam_start_up_load_to_bring_steam_pipework_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Stress In A Boiler Shell Resulting From Boiler Pressure Calculator", "url_name":"safety_stress_in_a_boiler_shell_resulting_from_boiler_pressure_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Sizing A Control Valve For Liquid Calculator", "url_name":"safety_sizing_a_control_valve_for_liquid_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Sizing A Control Valve For Saturated Steam Calculator", "url_name":"safety_sizing_a_control_valve_for_saturated_steam_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Steam Flow Through Valve Under Critical Condition Calculator", "url_name":"safety_steam_flow_through_valve_under_critical_condition_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Steam Valve Flow Coefficient (Cv) For Sub-Sonic Flow Calculator", "url_name":"safety_steam_valve_flow_coefficient_cv_for_sub_sonic_flow_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Steam Consumption By Injection Into A Tank Caluculator", "url_name":"safety_steam_consumption_by_injection_into_a_tank_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Steam Start-Up Load To Bring Steam Pipework Calculator", "url_name":"safety_steam_start_up_load_to_bring_steam_pipework_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Stress In A Boiler Shell Resulting From Boiler Pressure Calculator", "url_name":"safety_stress_in_a_boiler_shell_resulting_from_boiler_pressure_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Sizing A Control Valve For Liquid Calculator", "url_name":"safety_sizing_a_control_valve_for_liquid_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Sizing A Control Valve For Saturated Steam Calculator", "url_name":"safety_sizing_a_control_valve_for_saturated_steam_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Steam Flow Through Valve Under Critical Condition Calculator", "url_name":"safety_steam_flow_through_valve_under_critical_condition_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Steam Valve Flow Coefficient (Cv) For Sub-Sonic Flow Calculator", "url_name":"safety_steam_valve_flow_coefficient_cv_for_sub_sonic_flow_calculator", "plan_type": "corporate", "category": "safety"},
 
-# {"name": "Stem Force Required To Close a Control Valve Calculator", "url_name":"safety_stem_force_required_to_close_a_control_valve_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Stem Force Required To Close a Control Valve Calculator", "url_name":"safety_stem_force_required_to_close_a_control_valve_calculator", "plan_type": "corporate", "category": "safety"},
 
-# {"name": "Safety Valve Opening Force with the spring housing Calculator", "url_name":"safety_safety_valve_opening_force_with_the_spring_housing_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Safety Valve Opening Force with the spring housing Calculator", "url_name":"safety_safety_valve_opening_force_with_the_spring_housing_calculator", "plan_type": "corporate", "category": "safety"},
 
-# {"name": "Safety Valve Opening Force Calculator - Spring Housing Vented to Atmosphere", "url_name":"safety_safety_valve_opening_force_with_the_spring_housing_vented_atmosphere_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Safety Valve Opening Force Calculator - Spring Housing Vented to Atmosphere", "url_name":"safety_safety_valve_opening_force_with_the_spring_housing_vented_atmosphere_calculator", "plan_type": "corporate", "category": "safety"},
 
-# {"name": "Safety Valve Opening Force with Spring Housing Build-up Pressure", "url_name":"safety_safety_valve_opening_force_with_the_spring_housing_build_up_pressure_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Safety Valve Opening Force with Spring Housing Build-up Pressure", "url_name":"safety_safety_valve_opening_force_with_the_spring_housing_build_up_pressure_calculator", "plan_type": "corporate", "category": "safety"},
 
-# {"name": "Safety Valve Vent Pipe Diameter Calculator", "url_name":"safety_safety_valve_vent_pipe_diameter_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Safety Valve Vent Pipe Diameter Calculator", "url_name":"safety_safety_valve_vent_pipe_diameter_calculator", "plan_type": "corporate", "category": "safety"},
 
-# {"name": "SI-based D'Arcy Equation For Determining Pressure Drop", "url_name":"safety_si_based_darcy_equation_for_determining_pressure_drop_due_to_frictional_resistance_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "SI-based D'Arcy Equation For Determining Pressure Drop", "url_name":"safety_si_based_darcy_equation_for_determining_pressure_drop_due_to_frictional_resistance_calculator", "plan_type": "corporate", "category": "safety"},
 
-# {"name": "Steam Pipeline Pressure Drop Calculator", "url_name":"safety_steam_pipeline_pressure_drop_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Steam Pipeline Pressure Drop Calculator", "url_name":"safety_steam_pipeline_pressure_drop_calculator", "plan_type": "corporate", "category": "safety"},
 
-# {"name": "Stall Load For A Constant Flow Secondary Calculator", "url_name":"safety_stall_load_for_a_constant_flow_secondary_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Stall Load For A Constant Flow Secondary Calculator", "url_name":"safety_stall_load_for_a_constant_flow_secondary_calculator", "plan_type": "corporate", "category": "safety"},
 
-# {"name": "Spherical Portion Calculator", "url_name":"safety_spherical_portion_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Spherical Portion Calculator", "url_name":"safety_spherical_portion_calculator", "plan_type": "corporate", "category": "safety"},
 
-# {"name": "Spread Angle Factor Calculator", "url_name":"safety_spread_angle_factor_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Spread Angle Factor Calculator", "url_name":"safety_spread_angle_factor_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Safety Load Anchor Calculator", "url_name":"safety_safety_load_anchor_calculation_tool_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Safety Performance Function (SPF) Calculator", "url_name":"safety_safety_performance_function_spf_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Safety Training Completion Rate Calculator", "url_name":"safety_safety_training_completion_rate_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Safety Audit Compliance Score Calculator", "url_name":"safety_safety_audit_compliance_score_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Settling Force of Gravity Calculator", "url_name":"safety_settling_force_of_gravity_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Subcritical Flow Vent Area Calculator (API RP 520)", "url_name":"safety_subcritical_flow_vent_area_api_rp_520_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Steam Sizing Calculator", "url_name":"safety_steam_sizing_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Safety Stock Calculator", "url_name":"safety_safety_stock_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Safety Index (SI) Calculator", "url_name":"safety_safety_index_si_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Safety Risk Assessment Calculator", "url_name":"safety_safety_risk_assessment_calculator", "plan_type": "corporate", "category": "safety"},
 
+{"name": "Training Hours Calculator", "url_name":"safety_training_hour_calculation_calculator", "plan_type": "corporate", "category": "safety"},
 
 {"name": "Total Intended Load (TIL) Calculator", "url_name":"safety_total_intend_load_calculator", "plan_type": "corporate", "category": "safety"},
 
@@ -1199,21 +1210,10 @@ CALCULATORS = [
 
 
 # safety calculators from  bottom to top
-# {"name": "Safety Load Anchor Calculator", "url_name":"safety_safety_load_anchor_calculation_tool_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Safety Performance Function (SPF) Calculator", "url_name":"safety_safety_performance_function_spf_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Safety Training Completion Rate Calculator", "url_name":"safety_safety_training_completion_rate_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Safety Audit Compliance Score Calculator", "url_name":"safety_safety_audit_compliance_score_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Settling Force of Gravity Calculator", "url_name":"safety_settling_force_of_gravity_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Subcritical Flow Vent Area Calculator (API RP 520)", "url_name":"safety_subcritical_flow_vent_area_api_rp_520_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Steam Sizing Calculator", "url_name":"safety_steam_sizing_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Safety Stock Calculator", "url_name":"safety_safety_stock_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Safety Index (SI) Calculator", "url_name":"safety_safety_index_si_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Safety Risk Assessment Calculator", "url_name":"safety_safety_risk_assessment_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Training Hours Calculator", "url_name":"safety_training_hour_calculation_calculator", "plan_type": "corporate", "category": "safety"},
 # {"name": "Total Dead Load Calculator", "url_name":"safety_total_dead_load_dl_calculator", "plan_type": "corporate", "category": "safety"},
 # {"name": "Total Intended Load (TIL) Calculator", "url_name":"safety_total_intend_load_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Total Enthalpy of Steam Calculator", "url_name":"safety_total_enthalpy_of_steam_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Total Fall Distance Calculator", "url_name":"safety_total_fall_distance_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Total Enthalpy of Steam Calculator", "url_name":"safety_total_enthalpy_of_steam_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Total Fall Distance Calculator", "url_name":"safety_total_fall_distance_calculator", "plan_type": "corporate", "category": "safety"},
 # {"name": "Tension Per Leg Calculator", "url_name":"safety_tension_per_leg_calculator", "plan_type": "corporate", "category": "safety"},
 # {"name": "Total Recordable Incident Frequency Rate (TRIFR) Calculator", "url_name":"safety_total_recordable_incident_frequency_rate_trifr_calculator", "plan_type": "corporate", "category": "safety"},
 # {"name": "Total Loss Hours Calculator", "url_name":"safety_total_loss_hours_calculator", "plan_type": "corporate", "category": "safety"},
