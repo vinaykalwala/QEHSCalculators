@@ -2,95 +2,742 @@
 {% block content %}
 
 <style>
-  .kpi { display: inline-block; width: 22%; margin: 1%; padding: 20px; background: #f4f4f4; border-radius: 8px; text-align: center; }
-  .bar { height: 20px; background: #4CAF50; border-radius: 5px; }
-  .chart-container { margin: 20px 0; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-  .pie { width: 150px; height: 150px; border-radius: 50%; margin: auto; }
-  table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-  th, td { border: 1px solid #ddd; padding: 8px; }
-  th { background: #f2f2f2; }
-  .filter-section { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-  .filter-section select, .filter-section input { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; }
-  .filter-section button { padding: 8px 15px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
-  .filter-section button:hover { background: #45a049; }
-  .filter-option { display: none; margin: 10px 0; }
-  
-  /* Graph Styles */
-  .bar-graph { display: flex; height: 200px; align-items: flex-end; gap: 10px; padding: 20px; border: 1px solid #eee; }
-  .bar-item { flex: 1; background: linear-gradient(to top, #4CAF50, #8BC34A); position: relative; border-radius: 5px 5px 0 0; }
-  .bar-label { position: absolute; bottom: -25px; width: 100%; text-align: center; font-size: 12px; }
-  .bar-value { position: absolute; top: -25px; width: 100%; text-align: center; font-weight: bold; }
-  
-  .pie-chart { width: 200px; height: 200px; border-radius: 50%; margin: 20px auto; position: relative; overflow: hidden; }
-  .pie-segment { position: absolute; width: 100%; height: 100%; clip-path: polygon(50% 50%, 50% 0%, 100% 0%, 100% 100%, 50% 100%); }
-  .pie-legend { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px; }
-  .legend-item { display: flex; align-items: center; margin: 5px; }
-  .legend-color { width: 15px; height: 15px; margin-right: 5px; border-radius: 3px; }
-  
-  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 20px 0; }
-  .stat-card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-</style>
+   /* Dashboard Header */
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    background: linear-gradient(135deg, #eef2ff, #f9fafb);
+    padding: 15px 20px;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+    margin-bottom: 20px;
+    gap: 15px;
+  }
+
+  .dashboard-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1560bd;
+    margin: 0;
+  }
+
+  /* Filter Section */
+  .filter-section {
+    background: #fff;
+    padding: 8px 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  }
+
+  .filter-section form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .filter-section label {
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  .filter-section select,
+  .filter-section input[type="date"] {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+    outline: none;
+    transition: border 0.3s;
+  }
+
+  .filter-section select:focus,
+  .filter-section input[type="date"]:focus {
+    border-color: #6366f1;
+  }
+
+  .btn-apply {
+    background:linear-gradient(#1560bd,#000040);
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s;
+    font-size: 14px;
+  }
+  .btn-apply:hover {
+    background: #4f46e5;
+  }
+
+  /* Filter Info */
+  .filter-info {
+    background: #eef4ff;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+  }
+
+  /* KPI Cards */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+  }
+
+  .stat-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  box-shadow: 0 8px 20px rgba(56, 82, 231, 0.2); /* soft blue */
+  transition: transform 0.2s ease-in-out, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 25px rgba(56, 82, 231, 0.15); /* stronger on hover */
+}
+
+
+  .stat-card .icon {
+  width: 55px;
+  height: 55px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: #fff;
+  box-shadow: inset 0 2px 5px rgba(255,255,255,0.3),
+              inset 0 -2px 5px rgba(0,0,0,0.15),
+              0 4px 8px rgba(0,0,0,0.08);
+}
+
+/* Different icon colors */
+.stat-card.blue .icon {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.stat-card.green .icon {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+.stat-card.red .icon {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.stat-card.orange .icon {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+
+ /* Card Title */
+.stat-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 4px;
+  color: #444; /* same for all */
+}
+
+/* Card Value */
+.stat-card p {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* Blue Card Value */
+.stat-card.blue p {
+  color: #2563eb;
+}
+
+/* Green Card Value */
+.stat-card.green p {
+  color: #16a34a;
+}
+
+/* Red Card Value */
+.stat-card.red p {
+  color: #dc2626;
+}
+
+/* Orange Card Value */
+.stat-card.orange p {
+  color: #d97706;
+}
+
+
+  .stat-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+  }
+
+  /* Colors */
+.stat-card.blue { background: #ffffff; }
+.stat-card.green { background: #ffffff; }
+.stat-card.red { background: #ffffff; }
+.stat-card.orange { background: #ffffff; }
+
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .dashboard-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .filter-section {
+      width: 100%;
+    }
+  }
+  .section-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1560bd;
+  margin: 30px 0;
+  text-align: center;
+
+}
+
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+/* Mobile / small screens */
+@media (max-width: 768px) {
+  .analytics-grid {
+    grid-template-columns: 1fr; /* stack all cards vertically */
+  }
+
+  .chart-card,
+  .chart-card.large {
+    grid-column: 1 / -1;  /* make all cards full width */
+    width: 100% !important;
+    margin-left: 10px;
+  }
+
+  /* Center charts inside cards */
+  .chart-card canvas {
+    width: 90% !important; /* adjust width on mobile */
+    height: 260px !important;
+    display: block;
+    margin: 20px auto;
+  }
+}
+
+/* Center charts on all screens */
+.chart-card canvas {
+  display: block;
+  margin: 30px auto;
+}
+
+.chart-card {
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;  /* header bar fits nicely */
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+  transition: transform 0.2s ease;
+}
+.chart-card:hover { transform: translateY(-4px); }
+.chart-card.large { grid-column: span 2; }
+
+/* Header Bar */
+.card-header-bar {
+  background: #1560bd;
+  color: #fff;
+  padding: 15px 20px;
+}
+.card-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 5px 0;
+}
+.card-info {
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Chart canvas */
+.chart-card canvas {
+  width: 70% !important;       /* chart width */
+  height: auto !important;    /* chart height */
+  display: block;              /* make margin auto work */
+  margin: 30px auto;           /* vertical 30px, horizontal auto = center */
+}
+/* Section Title */
+.analytics-section-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1560bd;
+  margin: 30px;
+}
+
+/* Wrapper */
+.blog-analytics-wrapper {
+  display: flex;
+  gap: 10px;
+  max-width: 1100px;
+  margin: 0 auto 50px;
+  align-items: stretch; /* ensures both cards same height */
+  flex-wrap: wrap;
+}
+
+/* Left Column */
+.blog-info-column {
+  flex: 1;
+  min-width: 300px;
+  display: flex;
+}
+
+.blog-info-card {
+  background: #ffff;
+  border-radius: 14px;
+  padding: 30px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+  border: 1px solid #1560bd;
+}
+
+/* Info */
+.info-title { font-size: 22px; font-weight: 700; color: #1560bd; margin-bottom: 15px; }
+.info-description { font-size: 15px; color: #64748b; line-height: 1.6; margin-bottom: 20px; }
+.blog-key-stats p { font-size: 16px; font-weight: 600; color: #334155; margin: 5px 0; }
+
+/* Right Column */
+.blog-graph-column {
+  flex: 2;
+  min-width: 400px;
+  display: flex;
+}
+
+.blog-graph-card {
+  background: #fff;
+  padding: 30px;
+  border-radius: 14px;
+  width: 100%;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%; /* same height as left card */
+    border: 1px solid #1560bd;
+
+}
+
+/* Chart */
+#blogsCategoryChart { width: 100% !important; height: 300px !important; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .blog-analytics-wrapper {
+    flex-direction: column;
+    align-items: center;
+  }
+  .blog-info-column, .blog-graph-column {
+    width: 100%;
+    min-width: unset;
+  }
+  .blog-graph-card { margin-top: 20px; }
+  #blogsCategoryChart { height: 260px !important; }
+}
+/* Heading */
+.contact-analytics-heading {
+  font-size: 30px;
+  font-weight: 700;
+  color: #1560bd;
+  margin: 30px;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Card */
+.contact-card {
+  width: 100%;
+  background: linear-gradient(#1560bd,#000040);
+  padding: 15px 40px;
+  border-radius: 15px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Poppins', sans-serif;
+  box-sizing: border-box;
+}
+
+/* Info section */
+.contact-info {
+  max-width: 70%;
+}
+
+.contact-title {
+  margin: 5px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.contact-desc {
+  font-size: 14px;
+  color: #fff;
+}
+
+/* Number box */
+.contact-number-box {
+  background: #ffffff;
+  padding: 15px 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  min-width: 80px;
+  text-align: center;
+}
+
+.contact-number {
+  font-size: 36px;
+  font-weight: 700;
+  color: #1560bd;
+  margin: 0;
+}
+
+/* Responsive Media Queries */
+@media (max-width: 992px) {
+  .contact-card {
+    padding: 20px 25px;
+  }
+  .contact-info {
+    max-width: 65%;
+  }
+}
+
+@media (max-width: 768px) {
+  .contact-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+  }
+  .contact-info {
+    max-width: 100%;
+    margin-bottom: 15px;
+  }
+  .contact-number-box {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .contact-analytics-heading {
+    font-size: 24px;
+    margin: 20px 10px;
+  }
+  .contact-title {
+    font-size: 18px;
+  }
+  .contact-desc {
+    font-size: 13px;
+  }
+  .contact-number {
+    font-size: 28px;
+  }
+}
+/* Section Title */
+.subrev-section-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1560bd;
+  margin: 30px 0;
+  text-align: center;
+}
+
+/* Grid */
+.subrev-analytics-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Row */
+.subrev-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+/* Chart/Card */
+.subrev-chart-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  transition: transform 0.2s ease;
+}
+
+.subrev-chart-card:hover { transform: translateY(-4px); }
+
+/* KPI Card smaller */
+.subrev-kpi-card {
+  justify-content: center;
+  padding: 30px 20px;
+}
+.large-kpi-card {
+  padding: 30px;
+  flex: 1 1 100%;
+}
+
+.large-value {
+  font-size: 36px;
+  font-weight: 800;
+  color: #4CAF50;
+  margin: 20px 0 10px 0;
+  text-align: center;
+}
+
+.large-para {
+  font-size: 16px;
+  color: #334155;
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* Header */
+.subrev-card-header {
+  background: #1560bd;
+  color: #fff;
+  width: 100%;
+  padding: 12px 15px;
+  border-radius: 10px 10px 0 0;
+  text-align: center;
+}
+
+.subrev-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 5px 0;
+}
+
+.subrev-card-info {
+  font-size: 14px;
+  margin: 0;
+}
+
+/* KPI Value */
+.subrev-kpi-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #4CAF50;
+  margin: 20px 0 0 0;
+  text-align: center;
+}
+
+/* Canvas */
+.subrev-chart-card canvas {
+  width: 70% !important;
+  height: 290px  !important;
+  display: block;
+  margin: 20px auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .subrev-row {
+    grid-template-columns: 1fr;
+  }
+}
+/* ===== Device Analytics Table ===== */
+.device-analytics-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  margin: 15px 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+}
+.da-th {
+  background: #1560bd;
+  color: #fff;
+  font-weight: 600;
+  padding: 12px;
+  text-align: left;
+}
+.da-td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.da-value {
+  font-weight: 700;
+  font-size: 18px;
+  text-align: center;
+}
+.da-blue { color: #2196F3; }
+.da-orange { color: #FF9800; }
+
+/* ===== Training Analytics Table ===== */
+.training-analytics-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  margin: 15px 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+}
+.ta-th {
+  background: #1560bd;
+  color: #fff;
+  font-weight: 600;
+  padding: 12px;
+  text-align: left;
+}
+.ta-td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.ta-value {
+  font-weight: 700;
+  font-size: 18px;
+  text-align: center;
+}
+.ta-blue { color: #2196F3; }
+.ta-green { color: #4CAF50; }
+
+/* ===== Trainings by Category Table ===== */
+.training-category-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  margin: 20px 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+}
+.tc-th {
+  background: #1560bd;
+  color: #fff;
+  font-weight: 600;
+  padding: 10px;
+  text-align: left;
+}
+.tc-td {
+  padding: 10px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.tc-value {
+  font-weight: 700;
+  color: #2563eb;
+  text-align: center;
+}
+.training-category-flex {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.training-category-table {
+  flex: 1;
+  min-width: 300px;
+  border-collapse: collapse;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+}
+.tc-th { background: #1560bd; color: #fff; font-weight: 600; padding: 10px; text-align: left; }
+.tc-td { padding: 10px; border-bottom: 1px solid #e5e7eb; }
+.tc-value { font-weight: 700; color: #2563eb; text-align: center; }
+
+.training-category-graph {
+  flex: 1;
+  min-width: 300px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .training-category-flex {
+    flex-direction: column;
+  }
+  .training-category-graph { margin-top: 20px; }
+}
+ </style>
 <div class="main-content">
-<h2>📊 Admin Analytics Dashboard</h2>
+<div class="dashboard-header">
+  <h2 class="dashboard-title">📊 Admin Analytics Dashboard</h2>
 
-<!-- Filter Form -->
-<div class="filter-section">
-  <form method="get" id="filterForm">
-    <label><strong>Filter Type:</strong></label>
-    <select name="filter_type" id="filter_type">
-      <option value="all" {% if filter_type == "all" %}selected{% endif %}>All Time</option>
-      <option value="year" {% if filter_type == "year" %}selected{% endif %}>By Year</option>
-      <option value="month" {% if filter_type == "month" %}selected{% endif %}>By Month</option>
-      <option value="custom" {% if filter_type == "custom" %}selected{% endif %}>Custom Range</option>
-    </select>
-
-    <!-- Year Filter -->
-    <div id="year_filter" class="filter-option">
-      <label>Year:</label>
-      <select name="year">
-        {% for year in years %}
-          <option value="{{ year }}" {% if selected_year == year|stringformat:"s" %}selected{% endif %}>{{ year }}</option>
-        {% endfor %}
+  <!-- Filter Form -->
+  <div class="filter-section">
+    <form method="get" id="filterForm">
+      <label for="filter_type"><strong>Filter:</strong></label>
+      <select name="filter_type" id="filter_type">
+        <option value="all" {% if filter_type == "all" %}selected{% endif %}>All Time</option>
+        <option value="year" {% if filter_type == "year" %}selected{% endif %}>By Year</option>
+        <option value="month" {% if filter_type == "month" %}selected{% endif %}>By Month</option>
+        <option value="custom" {% if filter_type == "custom" %}selected{% endif %}>Custom Range</option>
       </select>
-    </div>
 
-    <!-- Month Filter -->
-    <div id="month_filter" class="filter-option">
-      <label>Month:</label>
-      <select name="month">
-        {% for value, name in months %}
-          <option value="{{ value }}" {% if selected_month == value|stringformat:"s" %}selected{% endif %}>{{ name }}</option>
-        {% endfor %}
-      </select>
-    </div>
+      <!-- Year Filter -->
+      <div id="year_filter" class="filter-option">
+        <label>Year:</label>
+        <select name="year">
+          {% for year in years %}
+            <option value="{{ year }}" {% if selected_year == year|stringformat:"s" %}selected{% endif %}>{{ year }}</option>
+          {% endfor %}
+        </select>
+      </div>
 
-    <!-- Custom Date Range Filter -->
-    <div id="custom_filter" class="filter-option">
-      <label>From:</label>
-      <input type="date" name="from_date" value="{{ from_date }}">
-      <label>To:</label>
-      <input type="date" name="to_date" value="{{ to_date }}">
-    </div>
+      <!-- Month Filter -->
+      <div id="month_filter" class="filter-option">
+        <label>Month:</label>
+        <select name="month">
+          {% for value, name in months %}
+            <option value="{{ value }}" {% if selected_month == value|stringformat:"s" %}selected{% endif %}>{{ name }}</option>
+          {% endfor %}
+        </select>
+      </div>
 
-    <br>
-    <button type="submit">Apply Filter</button>
-  </form>
+      <!-- Custom Date Range Filter -->
+      <div id="custom_filter" class="filter-option">
+        <label>From:</label>
+        <input type="date" name="from_date" value="{{ from_date }}">
+        <label>To:</label>
+        <input type="date" name="to_date" value="{{ to_date }}">
+      </div>
+
+      <button type="submit" class="btn-apply">Apply</button>
+    </form>
+  </div>
 </div>
 
-<!-- Display current filter info -->
+<!-- Current Filter Info -->
 {% if filter_type != "all" %}
-  <div style="background: #e7f3ff; padding: 10px; border-radius: 5px; margin-bottom: 20px;">
+  <div class="filter-info">
     <strong>Current Filter:</strong>
     {% if filter_type == "year" %}
       Year: {{ selected_year }}
     {% elif filter_type == "month" %}
       Month: 
       {% for value, name in months %}
-        {% if value|stringformat:"s" == selected_month %}
-          {{ name }}
-        {% endif %}
-      {% endfor %}, 
-      Year: {{ selected_year }}
+        {% if value|stringformat:"s" == selected_month %} {{ name }} {% endif %}
+      {% endfor %}, Year: {{ selected_year }}
     {% elif filter_type == "custom" %}
       From: {{ from_date }} To: {{ to_date }}
     {% endif %}
@@ -99,232 +746,291 @@
 
 <!-- KPIs -->
 <div class="stats-grid">
-  <div class="stat-card">
-    <h3>👥 Total Users</h3>
-    <p style="font-size: 24px; font-weight: bold; color: #2196F3;">{{ total_users }}</p>
+  <div class="stat-card blue">
+    <div class="icon"><i class="fas fa-users"></i></div>
+    <div>
+      <h3>Total Users</h3>
+      <p>{{ total_users }}</p>
+    </div>
   </div>
-  <div class="stat-card">
-    <h3>✅ Active Users</h3>
-    <p style="font-size: 24px; font-weight: bold; color: #4CAF50;">{{ active_users }}</p>
+  <div class="stat-card green">
+    <div class="icon"><i class="fas fa-user-check"></i></div>
+    <div>
+      <h3>Active Users</h3>
+      <p>{{ active_users }}</p>
+    </div>
   </div>
-  <div class="stat-card">
-    <h3>❌ Inactive Users</h3>
-    <p style="font-size: 24px; font-weight: bold; color: #F44336;">{{ inactive_users }}</p>
+  <div class="stat-card red">
+    <div class="icon"><i class="fas fa-user-times"></i></div>
+    <div>
+      <h3>Inactive Users</h3>
+      <p>{{ inactive_users }}</p>
+    </div>
   </div>
-  <div class="stat-card">
-    <h3>💰 Total Revenue</h3>
-    <p style="font-size: 24px; font-weight: bold; color: #FF9800;">₹{{ total_revenue }}</p>
+  <div class="stat-card orange">
+    <div class="icon"><i class="fas fa-coins"></i></div>
+    <div>
+      <h3>Total Revenue</h3>
+      <p>₹{{ total_revenue }}</p>
+    </div>
   </div>
+</div>
+
+<!-- CSS -->
+
+
+<hr>
+
+<h3 class="section-title">📊 User Analytics</h3>
+
+<div class="analytics-grid">
+
+  <!-- User Types -->
+  <div class="chart-card">
+    <div class="card-header-bar">
+      <h4 class="card-title">User Types</h4>
+      <p class="card-info">Superusers: <strong>{{ superusers }}</strong> | Regular: <strong>{{ regular_users }}</strong> | Total: <strong>{{ superusers|add:regular_users }}</strong></p>
+    </div>
+    <canvas id="userTypesChart"></canvas>
+  </div>
+
+  <!-- Profile Images -->
+  <div class="chart-card">
+    <div class="card-header-bar">
+      <h4 class="card-title">Profile Images</h4>
+      <p class="card-info">With Image: <strong>{{ users_with_profile_image }}</strong> | Without: <strong>{{ total_users|add:"-users_with_profile_image" }}</strong> | Total: <strong>{{ total_users }}</strong></p>
+    </div>
+    <canvas id="profileImagesChart"></canvas>
+  </div>
+
+  <!-- Users by Industry -->
+  <div class="chart-card large">
+    <div class="card-header-bar">
+      <h4 class="card-title">Users by Industry</h4>
+      <p class="card-info">Industries Count: <strong>{{ users_by_industry|length }}</strong> | Max in one industry: <strong>{{ max_industry_count }}</strong></p>
+    </div>
+    <canvas id="industryBarChart"></canvas>
+  </div>
+
+</div>
+
+
+
+
+<hr>
+
+<h3 class="subrev-section-title">📦 Subscription & 💰 Revenue Analytics</h3>
+
+<div class="subrev-analytics-grid">
+
+  <!-- Row 1: Subscriptions by Status & Subscriptions by Plan -->
+  <div class="subrev-row">
+    <!-- Subscriptions by Status Pie -->
+    <div class="subrev-chart-card">
+      <div class="subrev-card-header">
+        <h4 class="subrev-card-title">Subscriptions by Status</h4>
+        <p class="subrev-card-info">
+          {% for s in subscription_status %}{{ s.status }}: <strong>{{ s.count }}</strong>{% if not forloop.last %} | {% endif %}{% endfor %}
+        </p>
+      </div>
+      <canvas id="subscriptionsStatusChart"></canvas>
+    </div>
+
+    <!-- Subscriptions by Plan Bar -->
+    <div class="subrev-chart-card">
+      <div class="subrev-card-header">
+        <h4 class="subrev-card-title">Subscriptions by Plan</h4>
+        <p class="subrev-card-info">
+          Total Plans: <strong>{{ subscriptions_by_plan|length }}</strong>
+        </p>
+      </div>
+      <canvas id="subscriptionsPlanChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Row 2: Top Paying Users Bar & Average Payment KPI -->
+  <div class="subrev-row">
+    <!-- Top Paying Users Bar -->
+    <div class="subrev-chart-card">
+      <div class="subrev-card-header">
+        <h4 class="subrev-card-title">Top Paying Users</h4>
+      </div>
+      <canvas id="topPayingUsersChart"></canvas>
+    </div>
+
+    <!-- Average Payment KPI -->
+    <div class="subrev-chart-card subrev-kpi-card">
+      <div class="subrev-card-header">
+        <h4 class="subrev-card-title">Average Payment</h4>
+      </div>
+      <p class="subrev-kpi-value">₹{{ avg_payment|default:"0"|floatformat:2 }}</p>
+       <p class="subrev-kpi-para large-para">
+    This represents the average amount paid by users across all subscriptions. It helps track revenue trends and monitor user spending behavior over time.
+  </p>
+    </div>
+  </div>
+
+</div>
+
+
+
+
+
+<hr>
+
+<!-- 📱 Device Analytics -->
+<h3 style="font-size: 28px;
+  font-weight: 700;
+  color: #1560bd;
+  margin: 30px 0;
+  ">📱 Device Analytics</h3>
+<div class="device-analytics-wrapper">
+  <table class="device-analytics-table">
+    <thead>
+      <tr>
+        <th class="da-th">Metric</th>
+        <th class="da-th">Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="da-td">Total Devices</td>
+        <td class="da-td da-value da-blue">{{ total_devices }}</td>
+      </tr>
+      <tr>
+        <td class="da-td">Avg Devices/User</td>
+        <td class="da-td da-value da-orange">{{ avg_devices_per_user|floatformat:2 }}</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 
 <hr>
 
-<h3>👥 User Analytics</h3>
-<div class="stats-grid">
-  <div class="stat-card">
-    <h4>User Types</h4>
-    <div style="display: flex; justify-content: space-around;">
-      <div style="text-align: center;">
-        <div style="font-size: 20px; font-weight: bold;">{{ superusers }}</div>
-        <div>Superusers</div>
-      </div>
-      <div style="text-align: center;">
-        <div style="font-size: 20px; font-weight: bold;">{{ regular_users }}</div>
-        <div>Regular Users</div>
+<!-- 🎓 Training Analytics -->
+<h3 style="font-size: 28px;
+  font-weight: 700;
+  color: #1560bd;
+  margin: 30px 0;
+  ">🎓 Training Analytics</h3>
+<div class="training-analytics-wrapper">
+  <table class="training-analytics-table">
+    <thead>
+      <tr>
+        <th class="ta-th">Metric</th>
+        <th class="ta-th">Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="ta-td">Total Trainings</td>
+        <td class="ta-td ta-value ta-blue">{{ total_trainings }}</td>
+      </tr>
+      <tr>
+        <td class="ta-td">Active Trainings</td>
+        <td class="ta-td ta-value ta-green">{{ active_trainings }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<hr>
+
+<!-- 📊 Trainings by Category -->
+<div class="training-category-wrapper">
+  <h4 style="font-size: 28px;
+  font-weight: 700;
+  color: #1560bd;
+  margin: 30px 0;
+  ">Trainings by Category</h4>
+  {% if trainings_by_category %}
+  <div class="training-category-flex">
+    <!-- Left: Table -->
+    <table class="training-category-table" id="trainingCategoryTable">
+      <thead>
+        <tr>
+          <th class="tc-th">Category</th>
+          <th class="tc-th">Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in trainings_by_category %}
+        <tr>
+          <td class="tc-td">{{ t.category|truncatechars:15 }}</td>
+          <td class="tc-td tc-value">{{ t.count }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Right: Graph -->
+    <div class="training-category-graph" id="trainingCategoryGraphWrapper">
+      <canvas id="trainingsCategoryChart"></canvas>
+    </div>
+  </div>
+  {% else %}
+  <p>No data available</p>
+  {% endif %}
+</div>
+
+
+
+
+
+
+
+
+<hr>
+
+<h3 class="analytics-section-title">📝 Blog Analytics</h3>
+
+<div class="blog-analytics-wrapper">
+
+  <!-- Left Column: Info -->
+  <div class="blog-info-column">
+    <div class="blog-info-card">
+      <h4 class="info-title">Blog Overview</h4>
+      <p class="info-description">
+        Monitor your blog activity, track total and published blogs, and see category-wise distribution. This helps you identify which categories are most popular and plan future content accordingly.
+      </p>
+      <div class="blog-key-stats">
+        <p><strong>Total Blogs:</strong> {{ total_blogs }}</p>
+        <p><strong>Published Blogs:</strong> {{ published_blogs }}</p>
       </div>
     </div>
+  </div>
+
+  <!-- Right Column: Graph -->
+  <div class="blog-graph-column">
+    <div class="blog-graph-card">
+      <h4 class="chart-title" style="font-size: 22px; font-weight: 700; color: #1560bd; margin-bottom: 15px;">Blogs by Category</h4>
+      <canvas id="blogsCategoryChart"></canvas>
+    </div>
+  </div>
+
+</div>
+
+
+<hr>
+
+<h3 class="contact-analytics-heading">📩 Contact Analytics</h3>
+
+<div class="contact-card">
+  <div class="contact-info">
+    <h4 class="contact-title">Total Inquiries</h4>
+    <span class="contact-desc">
+      This number represents all the inquiries submitted by visitors through the Contact page.
+    </span>
   </div>
   
-  <div class="stat-card">
-    <h4>Profile Images</h4>
-    <div style="text-align: center;">
-      <div style="font-size: 20px; font-weight: bold;">{{ users_with_profile_image }}</div>
-      <div>Users with Profile Images</div>
-    </div>
+  <div class="contact-number-box">
+    <p class="contact-number">{{ total_inquiries }}</p>
   </div>
 </div>
 
-<div class="chart-container">
-  <h4>Users by Industry</h4>
-  {% if users_by_industry %}
-    <div class="bar-graph">
-      {% for i in users_by_industry %}
-        <div class="bar-item" style="height: {% widthratio i.count max_industry_count 100 %}%;">
-          <div class="bar-value">{{ i.count }}</div>
-          <div class="bar-label">{{ i.industry|default:"Not specified"|truncatechars:10 }}</div>
-        </div>
-      {% endfor %}
-    </div>
-  {% else %}
-    <p>No data available</p>
-  {% endif %}
-</div>
 
-<hr>
 
-<h3>📦 Subscription Analytics</h3>
-<div class="chart-container">
-  <h4>Subscriptions by Status</h4>
-  {% if subscription_status %}
-    <div class="pie-chart">
-      {% for s in subscription_status %}
-        <div class="pie-segment" style="transform: rotate({% widthratio forloop.counter0 1 360 %}deg); background: hsl({% widthratio forloop.counter0 1 360 %}, 70%, 60%);"></div>
-      {% endfor %}
-    </div>
-    <div class="pie-legend">
-      {% for s in subscription_status %}
-        <div class="legend-item">
-          <div class="legend-color" style="background: hsl({% widthratio forloop.counter0 1 360 %}, 70%, 60%);"></div>
-          <span>{{ s.status }}: {{ s.count }}</span>
-        </div>
-      {% endfor %}
-    </div>
-  {% else %}
-    <p>No data available</p>
-  {% endif %}
-</div>
 
-<div class="chart-container">
-  <h4>Subscriptions by Plan</h4>
-  {% if subscriptions_by_plan %}
-    <div class="bar-graph">
-      {% for p in subscriptions_by_plan %}
-        <div class="bar-item" style="height: {% widthratio p.count max_plan_count 100 %}%;">
-          <div class="bar-value">{{ p.count }}</div>
-          <div class="bar-label">{{ p.plan__name|default:"Unknown"|truncatechars:10 }}</div>
-        </div>
-      {% endfor %}
-    </div>
-  {% else %}
-    <p>No data available</p>
-  {% endif %}
-</div>
-
-<hr>
-
-<h3>💰 Revenue Analytics</h3>
-<div class="stats-grid">
-  <div class="stat-card">
-    <h4>Average Payment</h4>
-    <p style="font-size: 20px; font-weight: bold; color: #4CAF50;">₹{{ avg_payment|default:"0"|floatformat:2 }}</p>
-  </div>
-</div>
-
-<div class="chart-container">
-  <h4>Top Paying Users</h4>
-  {% if top_paying_users %}
-    <div class="bar-graph">
-      {% for u in top_paying_users %}
-        <div class="bar-item" style="height: {% widthratio u.total max_payment 50 %}%;">
-          <div class="bar-value">₹{{ u.total|floatformat:2 }}</div>
-          <div class="bar-label">{{ u.subscription__user__email|default:"Unknown"|truncatechars:10 }}</div>
-        </div>
-      {% endfor %}
-    </div>
-  {% else %}
-    <p>No data available</p>
-  {% endif %}
-</div>
-
-<hr>
-
-<h3>📱 Device Analytics</h3>
-<div class="stats-grid">
-  <div class="stat-card">
-    <h4>Total Devices</h4>
-    <p style="font-size: 24px; font-weight: bold; color: #2196F3;">{{ total_devices }}</p>
-  </div>
-  <div class="stat-card">
-    <h4>Avg Devices/User</h4>
-    <p style="font-size: 24px; font-weight: bold; color: #FF9800;">{{ avg_devices_per_user|floatformat:2 }}</p>
-  </div>
-</div>
-
-<hr>
-
-<h3>🎓 Training Analytics</h3>
-<div class="stats-grid">
-  <div class="stat-card">
-    <h4>Total Trainings</h4>
-    <p style="font-size: 24px; font-weight: bold; color: #2196F3;">{{ total_trainings }}</p>
-  </div>
-  <div class="stat-card">
-    <h4>Active Trainings</h4>
-    <p style="font-size: 24px; font-weight: bold; color: #4CAF50;">{{ active_trainings }}</p>
-  </div>
-</div>
-
-<div class="chart-container">
-  <h4>Trainings by Category</h4>
-  {% if trainings_by_category %}
-    <div class="bar-graph">
-      {% for t in trainings_by_category %}
-        <div class="bar-item" style="height: {% widthratio t.count max_training_count 100 %}%;">
-          <div class="bar-value">{{ t.count }}</div>
-          <div class="bar-label">{{ t.category|truncatechars:10 }}</div>
-        </div>
-      {% endfor %}
-    </div>
-  {% else %}
-    <p>No data available</p>
-  {% endif %}
-</div>
-
-<hr>
-
-<h3>📝 Blog Analytics</h3>
-<div class="stats-grid">
-  <div class="stat-card">
-    <h4>Total Blogs</h4>
-    <p style="font-size: 24px; font-weight: bold; color: #2196F3;">{{ total_blogs }}</p>
-  </div>
-  <div class="stat-card">
-    <h4>Published Blogs</h4>
-    <p style="font-size: 24px; font-weight: bold; color: #4CAF50;">{{ published_blogs }}</p>
-  </div>
-</div>
-
-<div class="chart-container">
-  <h4>Blogs by Category</h4>
-  {% if blogs_by_category %}
-    <div class="bar-graph">
-      {% for b in blogs_by_category %}
-        <div class="bar-item" style="height: {% widthratio b.count max_blog_count 100 %}%;">
-          <div class="bar-value">{{ b.count }}</div>
-          <div class="bar-label">{{ b.category|truncatechars:10 }}</div>
-        </div>
-      {% endfor %}
-    </div>
-  {% else %}
-    <p>No data available</p>
-  {% endif %}
-</div>
-
-<hr>
-
-<h3>📩 Contact Analytics</h3>
-<div class="stats-grid">
-  <div class="stat-card">
-    <h4>Total Inquiries</h4>
-    <p style="font-size: 24px; font-weight: bold; color: #2196F3;">{{ total_inquiries }}</p>
-  </div>
-</div>
-
-<div class="chart-container">
-  <h4>Inquiries by Subject</h4>
-  {% if inquiries_by_subject %}
-    <div class="bar-graph">
-      {% for c in inquiries_by_subject %}
-        <div class="bar-item" style="height: {% widthratio c.count max_inquiry_count 100 %}%;">
-          <div class="bar-value">{{ c.count }}</div>
-          <div class="bar-label">{{ c.subject|truncatechars:10 }}</div>
-        </div>
-      {% endfor %}
-    </div>
-  {% else %}
-    <p>No data available</p>
-  {% endif %}
-</div>
 </div>
 <script>
   // Function to show/hide filter options based on selection
@@ -355,5 +1061,269 @@
     document.getElementById('filter_type').addEventListener('change', toggleFilterOptions);
   });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<script>
+  // Common options for pie and doughnut (percentages)
+  const commonPieOptions = {
+    responsive: true,
+    plugins: {
+      legend: { position: 'bottom' },
+      tooltip: { enabled: true },
+      datalabels: {
+        color: '#fff',
+        formatter: (value, ctx) => {
+          let total = ctx.chart.data.datasets[0].data.reduce((a,b) => a+b, 0);
+          return ((value / total) * 100).toFixed(1) + '%';
+        },
+        font: { weight: 'bold', size: 14 }
+      }
+    }
+  };
+
+  // User Types Pie
+  new Chart(document.getElementById('userTypesChart').getContext('2d'), {
+    type: 'pie',
+    data: {
+      labels: ['Superusers', 'Regular Users'],
+      datasets: [{
+        data: [{{ superusers|default:0 }}, {{ regular_users|default:0 }}],
+        backgroundColor: ['#3b82f6', '#22c55e'],
+        borderWidth: 2,
+        borderColor: '#fff'
+      }]
+    },
+    options: commonPieOptions,
+    plugins: [ChartDataLabels]
+  });
+
+  // Profile Images Doughnut
+  new Chart(document.getElementById('profileImagesChart').getContext('2d'), {
+    type: 'doughnut',
+    data: {
+      labels: ['With Image', 'Without Image'],
+      datasets: [{
+        data: [{{ users_with_profile_image|default:0 }}, {{ total_users|default:0 }} - {{ users_with_profile_image|default:0 }}],
+        backgroundColor: ['#f59e0b', '#ef4444'],
+        borderWidth: 2,
+        borderColor: '#fff'
+      }]
+    },
+    options: commonPieOptions,
+    plugins: [ChartDataLabels]
+  });
+
+  // Users by Industry Bar (no numbers on bars)
+  new Chart(document.getElementById('industryBarChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: [{% for i in users_by_industry %}'{{ i.industry|default:"Not specified"|truncatechars:12 }}',{% endfor %}],
+      datasets: [{
+        label: 'Users',
+        data: [{% for i in users_by_industry %}{{ i.count }},{% endfor %}],
+        backgroundColor: [
+          '#3b82f6','#22c55e','#ef4444','#f59e0b','#8b5cf6',
+          '#14b8a6','#eab308','#ec4899','#0ea5e9','#6366f1'
+        ],
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: true } // only tooltip shows values
+      },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+</script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('blogsCategoryChart').getContext('2d');
+const data = {
+    labels: [{% for b in blogs_by_category %}'{{ b.category|truncatechars:12 }}',{% endfor %}],
+    datasets: [{
+        label: 'Number of Blogs',
+        data: [{% for b in blogs_by_category %}{{ b.count }},{% endfor %}],
+        backgroundColor: [
+          '#3b82f6','#22c55e','#ef4444','#f59e0b','#8b5cf6',
+          '#14b8a6','#eab308','#ec4899','#0ea5e9','#6366f1'
+        ],
+        borderRadius: 6,
+    }]
+};
+
+const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: { display: false },
+        tooltip: {
+            callbacks: {
+                label: function(context) {
+                    return context.dataset.data[context.dataIndex] + " Blogs";
+                }
+            }
+        }
+    },
+    scales: {
+        y: {
+            beginAtZero: true,
+            ticks: { stepSize: 1 },
+            grid: { drawTicks: false, color: '#f0f0f0' }
+        },
+        x: {
+            grid: { drawTicks: false, color: '#f0f0f0' }
+        }
+    }
+};
+
+new Chart(ctx, {
+    type: 'bar',
+    data: data,
+    options: options
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+  const statusColors = ['#3b82f6','#22c55e','#ef4444','#f59e0b','#8b5cf6','#14b8a6','#eab308','#ec4899','#0ea5e9','#6366f1'];
+  const planColors = ['#3b82f6','#22c55e','#ef4444','#f59e0b','#8b5cf6','#14b8a6','#eab308','#ec4899','#0ea5e9','#6366f1'];
+  const topUserColors = ['#22c55e','#3b82f6','#f59e0b','#ef4444','#8b5cf6','#14b8a6','#eab308','#ec4899','#0ea5e9','#6366f1'];
+
+  // Subscriptions by Status Pie
+  new Chart(document.getElementById('subscriptionsStatusChart').getContext('2d'), {
+    type: 'pie',
+    data: {
+      labels: [{% for s in subscription_status %}'{{ s.status }}',{% endfor %}],
+      datasets: [{
+        data: [{% for s in subscription_status %}{{ s.count }},{% endfor %}],
+        backgroundColor: statusColors,
+        borderWidth: 2,
+        borderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'bottom' } }
+    }
+  });
+
+  // Subscriptions by Plan Bar
+  new Chart(document.getElementById('subscriptionsPlanChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: [{% for p in subscriptions_by_plan %}'{{ p.plan__name|default:"Unknown"|truncatechars:10 }}',{% endfor %}],
+      datasets: [{
+        label: 'Subscriptions',
+        data: [{% for p in subscriptions_by_plan %}{{ p.count }},{% endfor %}],
+        backgroundColor: planColors,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true }, x: { grid: { drawTicks: false } } }
+    }
+  });
+
+  // Top Paying Users Bar
+  new Chart(document.getElementById('topPayingUsersChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: [{% for u in top_paying_users %}'{{ u.subscription__user__email|default:"Unknown"|truncatechars:10 }}',{% endfor %}],
+      datasets: [{
+        label: 'Payment',
+        data: [{% for u in top_paying_users %}{{ u.total }},{% endfor %}],
+        backgroundColor: topUserColors,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true }, x: { grid: { drawTicks: false } } }
+    }
+  });
+
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Wait until DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+
+  const table = document.getElementById('trainingCategoryTable');
+  const graphWrapper = document.getElementById('trainingCategoryGraphWrapper');
+  const ctxTrainings = document.getElementById('trainingsCategoryChart').getContext('2d');
+
+  // Set chart height equal to table height
+function setChartHeight() {
+    const table = document.getElementById('trainingCategoryTable');
+    const graphWrapper = document.getElementById('trainingCategoryGraphWrapper');
+    const canvas = document.getElementById('trainingsCategoryChart');
+
+    // Ensure flex container stretches both table and graph
+    const flexContainer = document.querySelector('.training-category-flex');
+    flexContainer.style.alignItems = 'stretch';
+
+    // Remove fixed height, let flex handle it
+    graphWrapper.style.height = 'auto';
+
+    // Force canvas to fill wrapper
+    canvas.style.height = '100%';
+    canvas.style.width = '100%';
+}
+
+
+  setChartHeight();
+  window.addEventListener('resize', setChartHeight);
+
+  // Chart.js data
+  const trainingData = {
+    labels: [{% for t in trainings_by_category %}'{{ t.category|truncatechars:12 }}',{% endfor %}],
+    datasets: [{
+      label: 'Number of Trainings',
+      data: [{% for t in trainings_by_category %}{{ t.count }},{% endfor %}],
+      backgroundColor: [
+        '#3b82f6','#22c55e','#ef4444','#f59e0b','#8b5cf6',
+        '#14b8a6','#eab308','#ec4899','#0ea5e9','#6366f1'
+      ],
+      borderRadius: 6
+    }]
+  };
+
+  const trainingOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            return context.dataset.data[context.dataIndex] + " Trainings";
+          }
+        }
+      }
+    },
+    scales: {
+      y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { drawTicks: false, color: '#f0f0f0' } },
+      x: { grid: { drawTicks: false, color: '#f0f0f0' } }
+    }
+  };
+
+  new Chart(ctxTrainings, {
+    type: 'bar',
+    data: trainingData,
+    options: trainingOptions
+  });
+
+});
+</script>
+
 
 {% endblock %}
