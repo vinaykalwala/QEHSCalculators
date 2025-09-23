@@ -540,33 +540,33 @@ CALCULATORS = [
 
 {"name": "Relative Saturation (Humidity) Calculator", "url_name": "environment_relative_saturation_humidity_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Steam Flow Rate For A Steam Injection Process Calculator", "url_name": "environment_steam_flow_rate_for_a_steam_injection_process_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Steam Flow Rate For A Steam Injection Process Calculator", "url_name": "environment_steam_flow_rate_for_a_steam_injection_process_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Specific volume of wet steam calculator", "url_name": "environment_specific_volume_of_wet_steam_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Specific volume of wet steam calculator", "url_name": "environment_specific_volume_of_wet_steam_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "steam condensing rate for horizontal pipes in still air calculator", "url_name": "environment_steam_condensing_rate_for_horizontal_pipes_in_still_air_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "steam condensing rate for horizontal pipes in still air calculator", "url_name": "environment_steam_condensing_rate_for_horizontal_pipes_in_still_air_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Steam Condensing Rate for Air Heating Equipment caluculator", "url_name": "environment_steam_condensing_rate_for_air_heating_equipment_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Steam Condensing Rate for Air Heating Equipment caluculator", "url_name": "environment_steam_condensing_rate_for_air_heating_equipment_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Steam Running Load to keep a steam maintain Calculator", "url_name": "environment_steam_running_load_to_keep_a_steam_maintain_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Steam Running Load to keep a steam maintain Calculator", "url_name": "environment_steam_running_load_to_keep_a_steam_maintain_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Steam injection required to power a steam deaerator  calculator", "url_name": "environment_steam_injection_required_to_power_a_steam_deaerator_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Steam injection required to power a steam deaerator  calculator", "url_name": "environment_steam_injection_required_to_power_a_steam_deaerator_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Steam storage capacity of an accumulator calculator", "url_name": "environment_steam_storage_capacity_of_an_accumulator_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Steam storage capacity of an accumulator calculator", "url_name": "environment_steam_storage_capacity_of_an_accumulator_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Speed of sound in steamcalculator", "url_name": "environment_speed_of_sound_in_steam_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Speed of sound in steamcalculator", "url_name": "environment_speed_of_sound_in_steam_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Sound Power Level At The Safety Valve Outlet Calculator", "url_name": "environment_sound_power_level_at_the_safety_valve_outlet_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Sound Power Level At The Safety Valve Outlet Calculator", "url_name": "environment_sound_power_level_at_the_safety_valve_outlet_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Sound Pressure Level At The Safety Valve Outlet Calculator", "url_name": "environment_sound_pressure_level_at_the_safety_valve_outlet_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Sound Pressure Level At The Safety Valve Outlet Calculator", "url_name": "environment_sound_pressure_level_at_the_safety_valve_outlet_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Steam Temperature At Any Load Calculator", "url_name": "environment_steam_temperature_at_any_load_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Steam Temperature At Any Load Calculator", "url_name": "environment_steam_temperature_at_any_load_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Secondary Fluid Inlet Temperature At Any Load Calculator", "url_name": "environment_secondary_fluid_inlet_temperature_at_any_load_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Secondary Fluid Inlet Temperature At Any Load Calculator", "url_name": "environment_secondary_fluid_inlet_temperature_at_any_load_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Secondary Inlet Temperature At Any Load Calculator", "url_name": "environment_secondary_inlet_temperature_at_any_load_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Secondary Inlet Temperature At Any Load Calculator", "url_name": "environment_secondary_inlet_temperature_at_any_load_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Stall Load For A Variable Flow Secondary Calculator", "url_name": "environment_stall_load_for_a_variable_flow_secondary_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Stall Load For A Variable Flow Secondary Calculator", "url_name": "environment_stall_load_for_a_variable_flow_secondary_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 
@@ -575,25 +575,25 @@ CALCULATORS = [
 
 #environment calculators from  bottom to top
 
-#{"name": "Short-Term Corrosion Rate (STCR) Calculator", "url_name": "environment_short_term_corrosion_rate_stcr_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Short-Term Corrosion Rate (STCR) Calculator", "url_name": "environment_short_term_corrosion_rate_stcr_calculator", "plan_type": "corporate", "category": "environment"},
 
-#{"name": "Soil Landfill Cover Water Balance Calculator", "url_name": "environment_soil_landfill_cover_water_balance_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Soil Landfill Cover Water Balance Calculator", "url_name": "environment_soil_landfill_cover_water_balance_calculator", "plan_type": "corporate", "category": "environment"},
 
-#{"name": "Shaded Wall Heat Conduction Calculator", "url_name": "environment_shaded_wall_heat_conduction_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Shaded Wall Heat Conduction Calculator", "url_name": "environment_shaded_wall_heat_conduction_calculator", "plan_type": "corporate", "category": "environment"},
 
-#{"name": "Solar Heat Gain Through Glass Calculator", "url_name": "environment_solar_heat_gain_through_glass_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Solar Heat Gain Through Glass Calculator", "url_name": "environment_solar_heat_gain_through_glass_calculator", "plan_type": "corporate", "category": "environment"},
 
-#{"name": "Sensible Heat Ratio (SHR) Calculator", "url_name": "environment_sensible_heat_ratio_shr_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Sensible Heat Ratio (SHR) Calculator", "url_name": "environment_sensible_heat_ratio_shr_calculator", "plan_type": "corporate", "category": "environment"},
 
-#{"name": "Supply Airflow Calculator", "url_name": "environment_supply_airflow_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Supply Airflow Calculator", "url_name": "environment_supply_airflow_calculator", "plan_type": "corporate", "category": "environment"},
 
-#{"name": "Settling Equation (General-Spherical) Calculator", "url_name": "environment_settling_equation_general_spherical_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Settling Equation (General-Spherical) Calculator", "url_name": "environment_settling_equation_general_spherical_calculator", "plan_type": "corporate", "category": "environment"},
 
-#{"name": "Settling Velocity Calculator (Stokes' Law)", "url_name": "environment_settling_velocity_stokes_law_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Settling Velocity Calculator (Stokes' Law)", "url_name": "environment_settling_velocity_stokes_law_calculator", "plan_type": "corporate", "category": "environment"},
 
-#{"name": "Sensible Heat Gain from People Calculator", "url_name": "environment_sensible_heat_gain_from_people_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Sensible Heat Gain from People Calculator", "url_name": "environment_sensible_heat_gain_from_people_calculator", "plan_type": "corporate", "category": "environment"},
 
-#{"name": "Settling Net Force Calculator", "url_name": "environment_settling_net_force_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Settling Net Force Calculator", "url_name": "environment_settling_net_force_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 
@@ -608,106 +608,106 @@ CALCULATORS = [
 
 
 
-#{"name": "Settling Drag Force Calculator", "url_name": "environment_settling_drag_force_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Settling Drag Force Calculator", "url_name": "environment_settling_drag_force_calculator", "plan_type": "corporate", "category": "environment"},
 
-#{"name": "Salt Flux Through the Membrane Calculator", "url_name": "environment_salt_flux_through_the_membrane_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Salt Flux Through the Membrane Calculator", "url_name": "environment_salt_flux_through_the_membrane_calculator", "plan_type": "corporate", "category": "environment"},
 
-#{"name": "Settling Terminal Velocity Calculator", "url_name": "environment_settling_terminal_velocity_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Settling Terminal Velocity Calculator", "url_name": "environment_settling_terminal_velocity_calculator", "plan_type": "corporate", "category": "environment"},
 
-#{"name": "Settling Spherical Particle Volume Calculator", "url_name": "environment_settling_spherical_particle_volume_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Settling Spherical Particle Volume Calculator", "url_name": "environment_settling_spherical_particle_volume_calculator", "plan_type": "corporate", "category": "environment"},
 
-#{"name": "Settling Projected Area of a Spherical Particle Calculator", "url_name": "environment_settling_projected_area_of_a_spherical_particle_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Settling Projected Area of a Spherical Particle Calculator", "url_name": "environment_settling_projected_area_of_a_spherical_particle_calculator", "plan_type": "corporate", "category": "environment"},
 
-#{"name": "Settling Reynolds Number Calculator", "url_name": "environment_settling_reynolds_number_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Settling Reynolds Number Calculator", "url_name": "environment_settling_reynolds_number_calculator", "plan_type": "corporate", "category": "environment"},
 
-#{"name": "Soak Pit Volume Calculator", "url_name": "environment_soak_pit_volume_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Soak Pit Volume Calculator", "url_name": "environment_soak_pit_volume_calculator", "plan_type": "corporate", "category": "environment"},
 
-#{"name": "Sludge Retention Time (SRT) And Specific Substrate Utilization Rate Calculator", "url_name": "environment_sludge_retention_time_srt_and_specific_substrate_utilization_rate_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Sludge Retention Time (SRT) And Specific Substrate Utilization Rate Calculator", "url_name": "environment_sludge_retention_time_srt_and_specific_substrate_utilization_rate_calculator", "plan_type": "corporate", "category": "environment"},
 
-#{"name": "Settling Overflow Rate (q₀) Calculator", "url_name": "environment_settling_overflow_rate_q_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Settling Overflow Rate (q₀) Calculator", "url_name": "environment_settling_overflow_rate_q_calculator", "plan_type": "corporate", "category": "environment"},
 
-#{"name": "Sedimentation Tank Volume (V) Calculator", "url_name": "environment_sedimentation_tank_volume_v_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Sedimentation Tank Volume (V) Calculator", "url_name": "environment_sedimentation_tank_volume_v_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-#{"name": "Sedimentation Tank Surface Area (A) Calculator", "url_name": "environment_sedimentation_tank_surface_area_a_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Sedimentation Tank Surface Area (A) Calculator", "url_name": "environment_sedimentation_tank_surface_area_a_calculator", "plan_type": "corporate", "category": "environment"},
 
-#{"name": "Sedimentation Tank Dimensions Calculator", "url_name": "environment_sedimentation_tank_dimensions_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Sedimentation Tank Dimensions Calculator", "url_name": "environment_sedimentation_tank_dimensions_calculator", "plan_type": "corporate", "category": "environment"},
 
-#{"name": "Sedimentation Overflow Rate Calculator", "url_name": "environment_sedimentation_overflow_rate_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Sedimentation Overflow Rate Calculator", "url_name": "environment_sedimentation_overflow_rate_calculator", "plan_type": "corporate", "category": "environment"},
 
-#{"name": "Scouring Velocity (V) Calculator - Schield’s Formula", "url_name": "environment_scouring_velocity_v_schields_formula_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Scouring Velocity (V) Calculator - Schield’s Formula", "url_name": "environment_scouring_velocity_v_schields_formula_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-#{"name": "Sludge Recirculation Rate (Qr) Calculator", "url_name": "environment_sludge_recirculation_rate_qr_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Sludge Recirculation Rate (Qr) Calculator", "url_name": "environment_sludge_recirculation_rate_qr_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-#{"name": "Solubility Product (Ksp) Calculator", "url_name": "environment_solubility_product_ksp_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Solubility Product (Ksp) Calculator", "url_name": "environment_solubility_product_ksp_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-#{"name": "Stability Parameter (S) Calculator", "url_name": "environment_stability_parameter_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Stability Parameter (S) Calculator", "url_name": "environment_stability_parameter_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-#{"name": "Thermodynamic Temperature Calculator", "url_name": "environment_thermodynamic_temperature_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Thermodynamic Temperature Calculator", "url_name": "environment_thermodynamic_temperature_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 
-#{"name": "Travel Carbon Footprint Calculator", "url_name": "environment_travel_carbpon_footprint_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Travel Carbon Footprint Calculator", "url_name": "environment_travel_carbpon_footprint_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 
-#{"name": "Thermal Transmittance (U) Calculator (From Thickness & Conductivities)", "url_name": "environment_thermal_transmittance_u_from_the_individual_thicknesses_and_conductivities_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Thermal Transmittance (U) Calculator (From Thickness & Conductivities)", "url_name": "environment_thermal_transmittance_u_from_the_individual_thicknesses_and_conductivities_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Thermal transmittance (U) from the individual thermal resistances Calculator", "url_name": "environment_thermal_transmittance_u_from_the_individual_thermal_resistances_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Thermal transmittance (U) from the individual thermal resistances Calculator", "url_name": "environment_thermal_transmittance_u_from_the_individual_thermal_resistances_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 
-# {"name": "Thermal Transmittance (U-Value) From Thermal Resistance Calculator", "url_name": "environment_thermal_transmittance_u_value_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Thermal Transmittance (U-Value) From Thermal Resistance Calculator", "url_name": "environment_thermal_transmittance_u_value_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-# {"name": "Thermal Resistivity From Conductivity Calculator", "url_name": "environment_thermal_resistivity_from_conductivity_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Thermal Resistivity From Conductivity Calculator", "url_name": "environment_thermal_resistivity_from_conductivity_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 
-# {"name": "TDS Calculator (Density Method)", "url_name": "environment_tds_density_method_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "TDS Calculator (Density Method)", "url_name": "environment_tds_density_method_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 
-# {"name": "TDS (Total Dissolved Solids) Calculator", "url_name": "environment_tds_total_dissolved_solids_conductivity_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "TDS (Total Dissolved Solids) Calculator", "url_name": "environment_tds_total_dissolved_solids_conductivity_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-# {"name": "Transient Mass Balance Calculator", "url_name": "environment_transient_mass_balance_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Transient Mass Balance Calculator", "url_name": "environment_transient_mass_balance_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Transition Flow General Velocity Calculator", "url_name": "environment_transition_flow_general_velocity_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Transition Flow General Velocity Calculator", "url_name": "environment_transition_flow_general_velocity_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-# {"name": "Total Height of Soak Pit Calculator", "url_name": "environment_total_height_of_soak_pit_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Total Height of Soak Pit Calculator", "url_name": "environment_total_height_of_soak_pit_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 
-# {"name": "Two-Phase Flow Parameter Calculator", "url_name": "environment_two_phase_flow_parameter_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Two-Phase Flow Parameter Calculator", "url_name": "environment_two_phase_flow_parameter_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 
-# {"name": "Threshold Limit Value (TLV) Calculator for Silica Dust", "url_name": "environment_threshold_limit_value_tlv_for_silica_dust_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Threshold Limit Value (TLV) Calculator for Silica Dust", "url_name": "environment_threshold_limit_value_tlv_for_silica_dust_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-# {"name": "Time to Settle (t₀) Calculator", "url_name": "environment_time_to_settle_t_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Time to Settle (t₀) Calculator", "url_name": "environment_time_to_settle_t_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-# {"name": "U-Factor Calculation for Walls", "url_name": "environment_u_factor_calculation_for_walls_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "U-Factor Calculation for Walls", "url_name": "environment_u_factor_calculation_for_walls_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Vapor Pressure Calculator", "url_name": "environment_vapor_pressure_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Vapor Pressure Calculator", "url_name": "environment_vapor_pressure_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Volumetric Flow Rate Calculator", "url_name": "environment_volumetric_flow_rate_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Volumetric Flow Rate Calculator", "url_name": "environment_volumetric_flow_rate_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-# {"name": "Volumetric Flowrate From The Shedding Frequency Calculator", "url_name": "environment_volumetric_flowrate_from_the_shedding_frequency_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Volumetric Flowrate From The Shedding Frequency Calculator", "url_name": "environment_volumetric_flowrate_from_the_shedding_frequency_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-# {"name": "Volumetric Flow Through An Equal Percentage Valve Calculator", "url_name": "environment_volumetric_flow_throw_an_equal_percentage_valve_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Volumetric Flow Through An Equal Percentage Valve Calculator", "url_name": "environment_volumetric_flow_throw_an_equal_percentage_valve_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-# {"name": "Vegan Footprint Calculator", "url_name": "environment_vegan_footprint_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Vegan Footprint Calculator", "url_name": "environment_vegan_footprint_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 # {"name": "Vertical Settling Velocity Calculator", "url_name": "environment_vertical_settling_velocity_vt_calculator", "plan_type": "corporate", "category": "environment"},
@@ -1214,35 +1214,35 @@ CALCULATORS = [
 # {"name": "Total Intended Load (TIL) Calculator", "url_name":"safety_total_intend_load_calculator", "plan_type": "corporate", "category": "safety"},
 {"name": "Total Enthalpy of Steam Calculator", "url_name":"safety_total_enthalpy_of_steam_calculator", "plan_type": "corporate", "category": "safety"},
 {"name": "Total Fall Distance Calculator", "url_name":"safety_total_fall_distance_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Tension Per Leg Calculator", "url_name":"safety_tension_per_leg_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Total Recordable Incident Frequency Rate (TRIFR) Calculator", "url_name":"safety_total_recordable_incident_frequency_rate_trifr_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Total Loss Hours Calculator", "url_name":"safety_total_loss_hours_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Total Pump Delivery Head Calculator", "url_name":"safety_total_pump_delivery_head_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "To Determine The Required Steam Flowrate From A kW Rating Calculator", "url_name":"safety_to_determine_the_required_steam_flowrate_from_a_kw_rating_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Total Recordable Case Frequency (TRCF) Calculator", "url_name":"safety_total_recordable_case_frequency_trcf_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Thermal Penetration Time for Conductive Heat Transfer Calculator", "url_name":"safety_thermal_penetration_time_for_conductive_heat_transfer_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Thermal Expansion Of Pipe Calculator", "url_name":"safety_thermal_expansion_of_pipe_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Tori-Spherical Head Radius Calculator", "url_name":"safety_tori_spherical_head_radius_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Total Brake Horsepower (BHP) Required Calculator", "url_name":"safety_total_brake_horsepower_bhp_required_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Turnaround Time Formula (External Heating) Calculator", "url_name":"safety_turnaround_time_formula_external_heating_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Tension Factor Calculator for Safe Lifting", "url_name":"safety_tension_factor_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Total Integrated Dose at Ground Level Calculator (Puff Model)", "url_name":"safety_total_integrated_dose_at_ground_level_puff_model_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Velocity of Steam Passing Through an Orifice Calculator", "url_name":"safety_velocity_of_steam_passing_through_an_orifice1_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Velocity of Steam Passing Through an Orifice Calculator(2)", "url_name":"safety_velocity_of_steam_passing_through_an_orifice2_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Velocity Energy Conversion Calculator", "url_name":"safety_velocity_energy_conversion_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Velocity of Liquid through orifice calculator", "url_name":"safety_velocity_of_liquid_through_orifice_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Volumetric Flowrate of a liquid through orifice Calculator", "url_name":"safety_volumetric_flowrate_of_a_liquid_through_orifice_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Valve Closing Force Calculator", "url_name":"safety_valve_closing_force_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Volumetric Flow Rate of Water Through a Valve", "url_name":"safety_volumetric_flow_of_water_through_a_valve_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Valve Authority Calculator", "url_name":"safety_valve_authority_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Venting Time Calculator", "url_name":"safety_venting_time_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Vent Area Reduction Calculator", "url_name":"safety_vent_area_reduction_formula_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Vent Area Calculator (ASME Section VIII)", "url_name":"safety_vent_area_asme_section_viii_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Vent Sizing Calculator (API RP520)", "url_name":"safety_vent_sizing_api_rp520_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Wire Rope Grip (Bulldog Grip) Calculator", "url_name":"safety_wire_rope_grips_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Well Control Kill Mud Weight Calculator", "url_name":"safety_well_control_kill_mud_weight_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "Work Done By A Pump In Horsepower Hp", "url_name":"safety_work_done_by_a_pump_in_horsepower_hp_calculator", "plan_type": "corporate", "category": "safety"},
-# {"name": "2:1 Ellipsoidal Head Radius Calculator", "url_name":"safety_21_ellipsoidal_head_radius_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Tension Per Leg Calculator", "url_name":"safety_tension_per_leg_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Total Recordable Incident Frequency Rate (TRIFR) Calculator", "url_name":"safety_total_recordable_incident_frequency_rate_trifr_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Total Loss Hours Calculator", "url_name":"safety_total_loss_hours_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Total Pump Delivery Head Calculator", "url_name":"safety_total_pump_delivery_head_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "To Determine The Required Steam Flowrate From A kW Rating Calculator", "url_name":"safety_to_determine_the_required_steam_flowrate_from_a_kw_rating_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Total Recordable Case Frequency (TRCF) Calculator", "url_name":"safety_total_recordable_case_frequency_trcf_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Thermal Penetration Time for Conductive Heat Transfer Calculator", "url_name":"safety_thermal_penetration_time_for_conductive_heat_transfer_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Thermal Expansion Of Pipe Calculator", "url_name":"safety_thermal_expansion_of_pipe_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Tori-Spherical Head Radius Calculator", "url_name":"safety_tori_spherical_head_radius_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Total Brake Horsepower (BHP) Required Calculator", "url_name":"safety_total_brake_horsepower_bhp_required_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Turnaround Time Formula (External Heating) Calculator", "url_name":"safety_turnaround_time_formula_external_heating_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Tension Factor Calculator for Safe Lifting", "url_name":"safety_tension_factor_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Total Integrated Dose at Ground Level Calculator (Puff Model)", "url_name":"safety_total_integrated_dose_at_ground_level_puff_model_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Velocity of Steam Passing Through an Orifice Calculator", "url_name":"safety_velocity_of_steam_passing_through_an_orifice1_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Velocity of Steam Passing Through an Orifice Calculator(2)", "url_name":"safety_velocity_of_steam_passing_through_an_orifice2_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Velocity Energy Conversion Calculator", "url_name":"safety_velocity_energy_conversion_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Velocity of Liquid through orifice calculator", "url_name":"safety_velocity_of_liquid_through_orifice_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Volumetric Flowrate of a liquid through orifice Calculator", "url_name":"safety_volumetric_flowrate_of_a_liquid_through_orifice_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Valve Closing Force Calculator", "url_name":"safety_valve_closing_force_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Volumetric Flow Rate of Water Through a Valve", "url_name":"safety_volumetric_flow_of_water_through_a_valve_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Valve Authority Calculator", "url_name":"safety_valve_authority_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Venting Time Calculator", "url_name":"safety_venting_time_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Vent Area Reduction Calculator", "url_name":"safety_vent_area_reduction_formula_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Vent Area Calculator (ASME Section VIII)", "url_name":"safety_vent_area_asme_section_viii_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Vent Sizing Calculator (API RP520)", "url_name":"safety_vent_sizing_api_rp520_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Wire Rope Grip (Bulldog Grip) Calculator", "url_name":"safety_wire_rope_grips_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Well Control Kill Mud Weight Calculator", "url_name":"safety_well_control_kill_mud_weight_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Work Done By A Pump In Horsepower Hp", "url_name":"safety_work_done_by_a_pump_in_horsepower_hp_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "2:1 Ellipsoidal Head Radius Calculator", "url_name":"safety_21_ellipsoidal_head_radius_calculator", "plan_type": "corporate", "category": "safety"},
 
 
 
