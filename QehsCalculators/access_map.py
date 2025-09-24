@@ -10,7 +10,7 @@ CALCULATORS = [
 
     {"name": "Binomial Distribution Calculator", "url_name": "quality_binomial_distribution_calculator", "plan_type": "corporate", "category": "quality"},
 
-    {"name": "Broad Calculation of Garments Cost of Making (CM)", "url_name": "quality_broad_calculation_of_garments_cost_of_making_cm_calculator", "plan_type": "corporate", "category": "quality"},
+    # {"name": "Broad Calculation of Garments Cost of Making (CM)", "url_name": "quality_broad_calculation_of_garments_cost_of_making_cm_calculator", "plan_type": "corporate", "category": "quality"},
 
 
 
@@ -31,7 +31,7 @@ CALCULATORS = [
 {"name": "Cost Per Minute (CPM) Calculator", "url_name": "quality_cost_per_minute_cpm_calculator", "plan_type": "corporate", "category": "quality"},
 
 
-{"name": "Cost of Making (CM) Calculator", "url_name": "quality_cost_of_making_cm_calculator", "plan_type": "corporate", "category": "quality"},
+# {"name": "Cost of Making (CM) Calculator", "url_name": "quality_cost_of_making_cm_calculator", "plan_type": "corporate", "category": "quality"},
 
 {"name": "Corrective Action Effectiveness (CAE) Calculator", "url_name": "quality_corrective_action_effectiveness_cae_calculator", "plan_type": "corporate", "category": "quality"},
 
@@ -39,7 +39,7 @@ CALCULATORS = [
 
 {"name": "Continuous Distillation (Stripping Section) Calculator", "url_name": "quality_continuous_distillation_stripping_section_calculator", "plan_type": "corporate", "category": "quality"},
 
-{"name": "Continuous Stirred-Tank Reactor (Back-Mix Reactor) Design Calculator", "url_name": " quality_continuous_stirred_tank_reactor_back_mix_reactor_design_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Continuous Stirred-Tank Reactor (Back-Mix Reactor) Design Calculator", "url_name": "quality_continuous_stirred_tank_reactor_back_mix_reactor_design_calculator", "plan_type": "corporate", "category": "quality"},
 
 {"name": "Critical Number of Samples Calculator", "url_name": "quality_critical_number_of_samples_calculator", "plan_type": "corporate", "category": "quality"},
 
@@ -64,7 +64,7 @@ CALCULATORS = [
 {"name": "Dry Film Thickness (DFT) Calculator", "url_name": "quality_dry_film_thickness_dft_calculator", "plan_type": "corporate", "category": "quality"},
 
 
-{"name": " The Evaporation Factor Of A Boiler From Its 'From & At' Rating Calculator", "url_name": "quality_evaporation_factor_of_a_boiler_from_its_from_and_at_rating_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Evaporation Factor Of A Boiler From Its 'From & At' Rating Calculator", "url_name": "quality_evaporation_factor_of_a_boiler_from_its_from_and_at_rating_calculator", "plan_type": "corporate", "category": "quality"},
 
 
 {"name": "Electrical Resistance Calculator for Conductivity Probe", "url_name": "quality_electrical_resistance_for_conductivity_probe_calculator", "plan_type": "corporate", "category": "quality"},
@@ -98,31 +98,7 @@ CALCULATORS = [
 {"name": "Overall Equipment Effectiveness (OEE) Calculator", "url_name": "quality_overall_equipment_effectiveness_oee_calculator", "plan_type": "corporate", "category": "quality"},
 {"name": "Orifice Meter Flow Calculator", "url_name": "quality_orifice_meter_flow_calculator", "plan_type": "corporate", "category": "quality"},
 
-
 {"name": "Percentage Error when using velocity Calculator", "url_name": "quality_percentage_error_when_using_velocity_calculator", "plan_type": "corporate", "category": "quality"},
-{"name": "Relation Between Indicated and Actual Flowrate Calculator", "url_name": "quality_relation_between_indicate_and_actual_flowrate_calculator", "plan_type": "corporate", "category": "quality"},
-
-
-{"name": "Rolled Throughput Yield (RTY) Calculator", "url_name": "quality_rolled_throughput_yield_rty_calculator", "plan_type": "corporate", "category": "quality"},
-
-
-{"name": "Steam Consumption of Drying Cylinders Calculator", "url_name": "quality_steam_consumption_of_drying_cylinders_calculator", "plan_type": "corporate", "category": "quality"},
-
-
-{"name": "Steam Velocity through an Orifice Calculator", "url_name": "quality_steam_velocity_through_an_orifice_calculator", "plan_type": "corporate", "category": "quality"},
-
-
-{"name": "Steam Density Calculator (Using Dryness Fraction)", "url_name": "quality_steam_density_usin_b44_b38_calculator", "plan_type": "corporate", "category": "quality"},
-
-
-{"name": "Statistical Process Control (SPC) Chart Calculator", "url_name": "quality_statistical_process_control_spc_chart_calculator", "plan_type": "corporate", "category": "quality"},
-
-
-{"name": "Secondary Fluid Outlet Temperature At Any Load Calculator", "url_name": "quality_secondary_fluid_outlet_temperature_at_any_load_calculator", "plan_type": "corporate", "category": "quality"},
-
-
-
-{"name": "Standard Minute Value (SMV) Calculator", "url_name": "quality_standard_minute_value_smv_calculator", "plan_type": "corporate", "category": "quality"},
 
 {"name": "Percentage Error When Using Pressure Calculator", "url_name": "quality_percentage_error_when_using_pressure_calculator", "plan_type": "corporate", "category": "quality"},
 
@@ -150,10 +126,34 @@ CALCULATORS = [
 
 
 {"name": "Reynolds Number Calculator", "url_name": "quality_reynolds_number_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Relation Between Indicated and Actual Flowrate Calculator", "url_name": "quality_relation_between_indicate_and_actual_flowrate_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Rolled Throughput Yield (RTY) Calculator", "url_name": "quality_rolled_throughput_yield_rty_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Steam Consumption of Drying Cylinders Calculator", "url_name": "quality_steam_consumption_of_drying_cylinders_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Steam Velocity through an Orifice Calculator", "url_name": "quality_steam_velocity_through_an_orifice_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Steam Density Calculator (Using Dryness Fraction)", "url_name": "quality_steam_density_usin_b44_b38_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Statistical Process Control (SPC) Chart Calculator", "url_name": "quality_statistical_process_control_spc_chart_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+{"name": "Secondary Fluid Outlet Temperature At Any Load Calculator", "url_name": "quality_secondary_fluid_outlet_temperature_at_any_load_calculator", "plan_type": "corporate", "category": "quality"},
+
+
+
+{"name": "Standard Minute Value (SMV) Calculator", "url_name": "quality_standard_minute_value_smv_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Sensible Heat Gain from Infiltration Calculator", "url_name": "quality_sensible_heat_gain_from_infiltration_calculator", "plan_type": "corporate", "category": "quality"},
+
 {"name": "Sample Size Calculator", "url_name": "quality_sample_size_calculator", "plan_type": "corporate", "category": "quality"},
 
 
-{"name": "Sensible Heat Gain from Infiltration Calculator", "url_name": "quality_sensible_heat_gain_from_infiltration_calculator", "plan_type": "corporate", "category": "quality"},
 
 {"name": "The Turndown Ratio Of A Steam Flowmeter Calculator", "url_name": "quality_turndown_ratio_of_a_steam_flowmeter_calculator", "plan_type": "corporate", "category": "quality"},
 
@@ -164,7 +164,6 @@ CALCULATORS = [
 {"name": "Two-Pack Mix Density Calculator", "url_name": "quality_two_pack_mix_density_calculator", "plan_type": "corporate", "category": "quality"},
 
 
-{"name": "Venturi Meter Flow Calculator", "url_name": "quality_venturi_meter_flow_calculator", "plan_type": "corporate", "category": "quality"},
 {"name": "Vortex Shedding Frequency Calculator", "url_name": "quality_vortex_shedding_frequency_calculator", "plan_type": "corporate", "category": "quality"},
 
 
@@ -172,6 +171,7 @@ CALCULATORS = [
 
 
 {"name": "Volume of Paint Required Calculator", "url_name": "quality_volume_of_paint_required_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Venturi Meter Flow Calculator", "url_name": "quality_venturi_meter_flow_calculator", "plan_type": "corporate", "category": "quality"},
 
 {"name": "Wet Film Thickness (WFT) Calculator", "url_name": "quality_wet_film_thickness_wft_calculator", "plan_type": "corporate", "category": "quality"},
 {"name": "Water Ion Product Calculator", "url_name": "quality_water_ion_product_calculator", "plan_type": "corporate", "category": "quality"},
@@ -214,10 +214,10 @@ CALCULATORS = [
 
 {"name": "Biomass Concentration (Xr) Calculator", "url_name": "environment_biomass_concentration_xr_calculator", "plan_type": "corporate", "category": "environment"},
 
-{"name": "Carbnot effiency calculator", "url_name": "environment_carbnot_effiency_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Carnot Efficiency calculator", "url_name": "environment_carbnot_effiency_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-{"name": "Carbon Footprint Effient Calculator", "url_name": "environment_carbon_footprint_effient_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Carbon Footprint Efficient Calculator", "url_name": "environment_carbon_footprint_effient_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 {"name": "Cost of Fuel Saved by Returning Condensate Calculator", "url_name": "environment_cost_of_fuel_saved_by_returning_condensate_calculator", "plan_type": "corporate", "category": "environment"},
@@ -278,7 +278,7 @@ CALCULATORS = [
 
 {"name": "Exposure Level (Concentration) Calculator", "url_name": "environment_exposure_level_concentration_calculator", "plan_type": "corporate", "category": "environment"},
 
-{"name": "Energy Balance between Steam and Secondary Fluid of a Non-Flow Process caluculator", "url_name": "environment_energy_balance_between_steam_and_secondary_fluid_of_a_non_flow_process_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Energy Balance between Steam and Secondary Fluid of a Non-Flow Process calculator", "url_name": "environment_energy_balance_between_steam_and_secondary_fluid_of_a_non_flow_process_calculator", "plan_type": "corporate", "category": "environment"},
 
 {"name": "Energy Balance between Steam and Fluid of a Flow-Type Application Calculator", "url_name": "environment_energy_balance_between_steam_and_fluid_of_a_flow_type_application_calculator", "plan_type": "corporate", "category": "environment"},
 
@@ -286,10 +286,10 @@ CALCULATORS = [
 
 {"name": "Equal percentage valve lift calculator based on kv", "url_name": "environment_equal_percentage_valve_lift_based_on_kv_calculator", "plan_type": "corporate", "category": "environment"},
 
-{"name": "Equimolar Countercurrent Diffusion Calculator", "url_name": "environment_equimolar_countercurrent_diffusion_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 {"name": "Equal Percentage Valve Lift Calculator Based on Relative Flow", "url_name": "environment_equal_percentage_valve_lift_based_on_relative_flow_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Equimolar Countercurrent Diffusion Calculator", "url_name": "environment_equimolar_countercurrent_diffusion_calculator", "plan_type": "corporate", "category": "environment"},
 
 {"name": "Environmental Damage Frequency (ENDF) Calculator", "url_name": "environment_environmental_damage_frequency_endf_calculator", "plan_type": "corporate", "category": "environment"},
 
@@ -443,7 +443,7 @@ CALCULATORS = [
 {"name": "Mean steam consumption rate for  a flow type application(1)", "url_name": "environment_mean_steam_consumption_rate_for_a_flow_type_application1_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-{"name": "Mean Steam Consumption  Of a Flow-Type Application caluculator (2)", "url_name": "environment_mean_steam_consumption_of_a_flow_type_application2_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Mean Steam Consumption  Of a Flow-Type Application calculator (2)", "url_name": "environment_mean_steam_consumption_of_a_flow_type_application2_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 {"name": "mean steam flowrate to a storage calorifier calculator", "url_name": "environment_mean_steam_flowrate_to_a_storage_calorifier_calculator", "plan_type": "corporate", "category": "environment"},
@@ -563,7 +563,7 @@ CALCULATORS = [
 
 {"name": "steam condensing rate for horizontal pipes in still air calculator", "url_name": "environment_steam_condensing_rate_for_horizontal_pipes_in_still_air_calculator", "plan_type": "corporate", "category": "environment"},
 
-{"name": "Steam Condensing Rate for Air Heating Equipment caluculator", "url_name": "environment_steam_condensing_rate_for_air_heating_equipment_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Steam Condensing Rate for Air Heating Equipment calculator", "url_name": "environment_steam_condensing_rate_for_air_heating_equipment_calculator", "plan_type": "corporate", "category": "environment"},
 
 {"name": "Steam Running Load to keep a steam maintain Calculator", "url_name": "environment_steam_running_load_to_keep_a_steam_maintain_calculator", "plan_type": "corporate", "category": "environment"},
 
@@ -641,7 +641,6 @@ CALCULATORS = [
 
 {"name": "Stefan's Law of Molecular Diffusion Calculator", "url_name": "environment_stefans_law_of_molecular_diffusion_calculator", "plan_type": "corporate", "category": "environment"},
 
-{"name": "Soak Pit Volume Calculator", "url_name": "environment_soak_pit_volume_calculator", "plan_type": "corporate", "category": "environment"},
 {"name": "Soak Pit Volume Calculator", "url_name": "environment_soak_pit_volume_calculator", "plan_type": "corporate", "category": "environment"},
 
 {"name": "Sludge Retention Time (SRT) And Specific Substrate Utilization Rate Calculator", "url_name": "environment_sludge_retention_time_srt_and_specific_substrate_utilization_rate_calculator", "plan_type": "corporate", "category": "environment"},
@@ -722,7 +721,6 @@ CALCULATORS = [
 {"name": "Unidirectional Diffusion Calculator", "url_name": "environment_unidirectional_diffusion_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-{"name": "Vapor Pressure Calculator", "url_name": "environment_vapor_pressure_calculator", "plan_type": "corporate", "category": "environment"},
 {"name": "Vapor Pressure Calculator", "url_name": "environment_vapor_pressure_calculator", "plan_type": "corporate", "category": "environment"},
 
 {"name": "Volumetric Flow Rate Calculator", "url_name": "environment_volumetric_flow_rate_calculator", "plan_type": "corporate", "category": "environment"},
@@ -1191,7 +1189,7 @@ CALCULATORS = [
 {"name": "Specifi Gravity Calculator", "url_name":"safety_specifi_gravity_calculator", "plan_type": "corporate", "category": "safety"},
 {"name": "Safety Factor Calculator", "url_name":"safety_safety_factor_calculator", "plan_type": "corporate", "category": "safety"},
 {"name": "Steam Consumption To Provide Tank Heat Losses Calculator", "url_name":"safety_steam_consumption_to_provide_tank_heat_losses_calculator", "plan_type": "corporate", "category": "safety"},
-{"name": "Steam Consumption By Injection Into A Tank Caluculator", "url_name":"safety_steam_consumption_by_injection_into_a_tank_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Steam Consumption By Injection Into A Tank Calculator", "url_name":"safety_steam_consumption_by_injection_into_a_tank_calculator", "plan_type": "corporate", "category": "safety"},
 {"name": "Steam Start-Up Load To Bring Steam Pipework Calculator", "url_name":"safety_steam_start_up_load_to_bring_steam_pipework_calculator", "plan_type": "corporate", "category": "safety"},
 {"name": "Stress In A Boiler Shell Resulting From Boiler Pressure Calculator", "url_name":"safety_stress_in_a_boiler_shell_resulting_from_boiler_pressure_calculator", "plan_type": "corporate", "category": "safety"},
 {"name": "Sizing A Control Valve For Liquid Calculator", "url_name":"safety_sizing_a_control_valve_for_liquid_calculator", "plan_type": "corporate", "category": "safety"},
