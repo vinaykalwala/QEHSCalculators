@@ -1,0 +1,678 @@
+{% extends 'base.html' %}
+{% block title %}Plug Flow Reactor (PFR) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plug Flow Reactor (PFR) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        /* Input rows for side-by-side fields */
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+       
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Plug Flow Reactor (PFR) Calculator</h1>
+            <p>Calculate the required space time (τ) for a given conversion in an ideal tubular reactor</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="initialConc">Initial Concentration (C<sub>A0</sub>) [mol/m³]</label>
+                        <input type="number" id="initialConc" class="form-input" min="0.0001" step="any" placeholder="e.g., 10">
+                    </div>
+                    <div class="form-group">
+                        <label for="conversion">Desired Conversion (X<sub>A</sub>)</label>
+                        <input type="number" id="conversion" class="form-input" min="0" max="1" step="0.01" placeholder="e.g., 0.8">
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="rateConstant">Rate Constant (k) [appropriate units]</label>
+                        <input type="number" id="rateConstant" class="form-input" min="0.0001" step="any" placeholder="e.g., 0.05">
+                    </div>
+                    <div class="form-group">
+                        <label for="reactionOrder">Reaction Order (n)</label>
+                        <input type="number" id="reactionOrder" class="form-input" min="0" step="0.1" placeholder="e.g., 1">
+                    </div>
+                </div>
+                
+                <button class="calculate-btn" onclick="calculatePFR()">Calculate Space Time</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Reactor illustration">
+                    <p>This tool will calculate the <strong>Space Time (τ)</strong> for a plug flow reactor. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Space Time Calculation</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">Space Time (s)</div>
+                    </div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Short</span><span>Optimal</span><span>Moderate</span><span>Long</span><span>Very Long</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Conversion Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <!-- About -->
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Plug Flow Reactor (PFR) Calculator</strong> determines the required space time (τ) 
+                    for a given conversion in an ideal tubular reactor where fluid flows like a plug with no axial mixing. 
+                    This calculation is essential for chemical engineers designing continuous reaction systems to ensure 
+                    optimal reactor sizing, efficient conversion, and consistent product quality.
+                </p>
+            </div>
+
+            <!-- Parameters Used -->
+            <div class="note-card">
+                <h3>⚙ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>C<sub>A0</sub> (Initial Concentration):</strong> Inlet concentration of reactant [mol/m³]. Higher concentrations typically require less space time.</li>
+                    <li><strong>X<sub>A</sub> (Conversion):</strong> Fraction of reactant converted (0-1). Higher conversions require more space time.</li>
+                    <li><strong>k (Rate Constant):</strong> Reaction rate constant [units depend on reaction order].</li>
+                    <li><strong>n (Reaction Order):</strong> Order of the reaction with respect to the reactant.</li>
+                    <li><strong>τ (Space Time):</strong> Theoretical residence time [s]. Equal to reactor volume/volumetric flow rate.</li>
+                </ul>
+            </div>
+
+            <!-- Input Validation Rules -->
+            <div class="note-card">
+    <h3>✅ Input Validation Rules</h3>
+    <ul class="note-list">
+        <li><b>Initial Concentration (Cₐ₀):</b> Must be > 0 and ≤ 10⁶ mol/m³. (Ensures realistic input).</li>
+        <li><b>Conversion (X):</b> Must be between 0 and 1. For n=1, X ≠ 1 (infinite τ).</li>
+        <li><b>Rate Constant (k):</b> Must be > 0, typically between 10⁻¹² and 10⁶ in SI units.</li>
+        <li><b>Reaction Order (n):</b> Must be ≥ 0 and normally ≤ 3.</li>
+    </ul>
+</div>
+
+<div class="note-card">
+    <h3>✅ Output Validation Rules</h3>
+    <ul class="note-list">
+        <li>τ < 10 s → ⚠️ Short space time: may indicate undersized reactor or high reaction rate.</li>
+        <li>10 ≤ τ ≤ 100 s → ✅ Optimal space time: suitable for many industrial applications.</li>
+        <li>100 < τ ≤ 1000 s → ℹ️ Moderate space time: common in process industries.</li>
+        <li>1000 < τ ≤ 5000 s → ⚠️ Long space time: verify reactor sizing.</li>
+        <li>τ > 5000 s → ⚠️ Very long space time: may indicate slow kinetics or design issue</li>
+    </ul>
+</div>
+
+
+            <!-- Standards -->
+            <div class="note-card">
+                <h3>📏 Standards</h3>
+                <p>
+                    PFR design principles are incorporated in API standards for petroleum refining, 
+                    FDA guidelines for pharmaceutical production, and ISO 9001 quality management systems. 
+                    Proper calculation of space time ensures optimal reactor sizing, efficient conversion, 
+                    and consistent product quality in industrial processes.
+                </p>
+            </div>
+
+            <!-- Conclusion -->
+            <div class="note-card">
+                <h3>📋 Conclusion</h3>
+                <p>
+                    The plug flow reactor equation is fundamental for chemical engineers designing continuous 
+                    reaction systems. Precise control of residence time directly impacts conversion efficiency, 
+                    selectivity, and ultimately product purity and yield, making these calculations essential 
+                    for ensuring consistent product quality in continuous chemical processes.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculatePFR() {
+    const CA0 = document.getElementById('initialConc').value.trim();
+    const XA = document.getElementById('conversion').value.trim();
+    const k = document.getElementById('rateConstant').value.trim();
+    const n = document.getElementById('reactionOrder').value.trim();
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+    let warnings = [];
+
+    // 🔹 Validate Initial Concentration
+    if (CA0 === "" || isNaN(CA0) || parseFloat(CA0) <= 0) {
+        errors.push("❌ Please enter a valid Initial Concentration (Cₐ₀ > 0).");
+    } else if (parseFloat(CA0) > 1e6) {
+        warnings.push("⚠️ Initial Concentration is very high (>10⁶ mol/m³). Verify input.");
+    }
+
+    // 🔹 Validate Conversion
+    if (XA === "" || isNaN(XA)) {
+        errors.push("❌ Please enter a valid Conversion (0 < X ≤ 1).");
+    } else if (parseFloat(XA) <= 0 || parseFloat(XA) > 1) {
+        errors.push("❌ Conversion must be between 0 and 1.");
+    } else if (parseFloat(XA) === 1 && parseFloat(n) === 1) {
+        errors.push("❌ For first-order reactions (n=1), Conversion cannot be exactly 1.");
+    }
+
+    // 🔹 Validate Rate Constant
+    if (k === "" || isNaN(k) || parseFloat(k) <= 0) {
+        errors.push("❌ Please enter a valid Rate Constant (k > 0).");
+    } else if (parseFloat(k) < 1e-12 || parseFloat(k) > 1e6) {
+        warnings.push("⚠️ Rate Constant is outside typical industrial range (10⁻¹²–10⁶). Verify input.");
+    }
+
+    // 🔹 Validate Reaction Order
+    if (n === "" || isNaN(n) || parseFloat(n) < 0) {
+        errors.push("❌ Please enter a valid Reaction Order (n ≥ 0).");
+    } else if (parseFloat(n) > 3) {
+        warnings.push("⚠️ Reaction Order is unusually high (>3). Verify input.");
+    }
+
+    // Show errors if any
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // Perform calculation
+    const CA0_val = parseFloat(CA0);
+    const XA_val = parseFloat(XA);
+    const k_val = parseFloat(k);
+    const n_val = parseFloat(n);
+
+    let tau;
+    try {
+        if (n_val === 1) {
+            tau = (1 / k_val) * Math.log(1 / (1 - XA_val));
+        } else if (n_val === 2) {
+            tau = (1 / (k_val * CA0_val)) * (XA_val / (1 - XA_val));
+        } else if (n_val === 0) {
+            tau = (CA0_val * XA_val) / k_val;
+        } else {
+            tau = (Math.pow(CA0_val, 1 - n_val) / k_val) * 
+                  ((Math.pow(1 / (1 - XA_val), n_val - 1) - 1) / (n_val - 1));
+        }
+    } catch (err) {
+        errorMessage.innerHTML = "❌ Calculation error: check inputs.";
+        errorBox.classList.remove("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    if (!isFinite(tau) || isNaN(tau)) {
+        errorMessage.innerHTML = "❌ Calculation error: invalid result. Please check inputs.";
+        errorBox.classList.remove("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    // Output validation thresholds
+    if (tau < 0.1 || tau > 10000) {
+        warnings.push("⚠️ Calculated Space Time (τ) is outside typical industry range (0.1–10,000 s).");
+    }
+
+    // Display result
+    document.getElementById('rateValue').textContent = tau.toFixed(4);
+
+    // Meter & Feedback aligned with validation
+    const meterFill = document.getElementById('meterFill');
+    let feedback = "";
+
+    if (tau < 10) {
+        meterFill.style.width = '20%';
+        meterFill.style.backgroundColor = '#e74c3c';
+        feedback = '⚠️ Short space time: may indicate undersized reactor or high reaction rate.';
+    } else if (tau <= 100) {
+        meterFill.style.width = '40%';
+        meterFill.style.backgroundColor = '#27ae60';
+        feedback = '✅ Optimal space time: suitable for many industrial applications.';
+    } else if (tau <= 1000) {
+        meterFill.style.width = '60%';
+        meterFill.style.backgroundColor = '#2980b9';
+        feedback = 'ℹ️ Moderate space time: common in process industries.';
+    } else if (tau <= 5000) {
+        meterFill.style.width = '80%';
+        meterFill.style.backgroundColor = '#f39c12';
+        feedback = '⚠️ Long space time: verify reactor sizing.';
+    } else {
+        meterFill.style.width = '95%';
+        meterFill.style.backgroundColor = '#8e44ad';
+        feedback = '⚠️ Very long space time: may indicate slow kinetics or design issue.';
+    }
+
+    document.getElementById('feedbackContent').textContent = feedback + 
+        (warnings.length ? " " + warnings.join(" ") : "");
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}

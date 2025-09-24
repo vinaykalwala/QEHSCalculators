@@ -35,9 +35,11 @@ CALCULATORS = [
 
 {"name": "Corrective Action Effectiveness (CAE) Calculator", "url_name": "quality_corrective_action_effectiveness_cae_calculator", "plan_type": "corporate", "category": "quality"},
 
+{"name": "Continuous Distillation (Rectifying Section) Calculator", "url_name": "quality_continuous_distillation_rectifying_section_calculator", "plan_type": "corporate", "category": "quality"},
 
+{"name": "Continuous Distillation (Stripping Section) Calculator", "url_name": "quality_continuous_distillation_stripping_section_calculator", "plan_type": "corporate", "category": "quality"},
 
-
+{"name": "Continuous Stirred-Tank Reactor (Back-Mix Reactor) Design Calculator", "url_name": " quality_continuous_stirred_tank_reactor_back_mix_reactor_design_calculator", "plan_type": "corporate", "category": "quality"},
 
 {"name": "Critical Number of Samples Calculator", "url_name": "quality_critical_number_of_samples_calculator", "plan_type": "corporate", "category": "quality"},
 
@@ -81,6 +83,7 @@ CALCULATORS = [
 
 {"name": "Heat Exchanger Heating Area Calculator", "url_name": "quality_heat_exchanger_heating_area_calculator", "plan_type": "corporate", "category": "quality"},
 
+{"name": "Integrating Factor Calculator", "url_name": "quality_integrating_factor_calculator", "plan_type": "corporate", "category": "quality"},
 
 {"name": "Largest Particle Size Through a Strainer Screen Calculator", "url_name": "quality_largest_particle_size_through_a_strainer_screen_calculator", "plan_type": "corporate", "category": "quality"},
 
@@ -90,6 +93,7 @@ CALCULATORS = [
 
 {"name": "Mass Flow Rate of Steam Through an Orifice Calculator", "url_name": "quality_mass_flow_rate_of_steam_through_an_orifice_calculator", "plan_type": "corporate", "category": "quality"},
 
+{"name": "Murphree Plate Efficiency Calculator", "url_name": "quality_murphree_plate_efficiency_calculator", "plan_type": "corporate", "category": "quality"},
 
 {"name": "Overall Equipment Effectiveness (OEE) Calculator", "url_name": "quality_overall_equipment_effectiveness_oee_calculator", "plan_type": "corporate", "category": "quality"},
 {"name": "Orifice Meter Flow Calculator", "url_name": "quality_orifice_meter_flow_calculator", "plan_type": "corporate", "category": "quality"},
@@ -122,6 +126,7 @@ CALCULATORS = [
 
 {"name": "Percentage Error When Using Pressure Calculator", "url_name": "quality_percentage_error_when_using_pressure_calculator", "plan_type": "corporate", "category": "quality"},
 
+{"name": "Plug Flow Reactor (PFR) Calculator", "url_name": "quality_plug_flow_reactor_pfr_calculator", "plan_type": "corporate", "category": "quality"},
 
 {"name": "Pressure Drop & Friction Loss Calculator", "url_name": "quality_pressure_drop_and_friction_loss_calculator", "plan_type": "corporate", "category": "quality"},
 
@@ -131,13 +136,17 @@ CALCULATORS = [
 
 {"name": "Production Efficiency Calculator", "url_name": "quality_production_efficiency_calculator", "plan_type": "corporate", "category": "quality"},
 
+{"name": "Quadratic Equation Calculator", "url_name": "quality_quadratic_equation_calculator", "plan_type": "corporate", "category": "quality"},
+
 
 {"name": "Quality Loss Function Calculator (Taguchi Method)", "url_name": "quality_quality_loss_function_taguchi_method_calculator", "plan_type": "corporate", "category": "quality"},
 
+{"name": "Rayleigh Differential Distillation Calculator", "url_name": "quality_rayleigh_differential_distillation_calculator", "plan_type": "corporate", "category": "quality"},
 
 
 {"name": "Relating Boiler Pressure To Heat Transfer Rate Calculator", "url_name": "quality_relating_boiler_pressure_to_heat_transfer_rate_calculator", "plan_type": "corporate", "category": "quality"},
 
+{"name": "Reversible First-Order Reaction Calculator", "url_name": "quality_reversible_first_order_reaction_calculator", "plan_type": "corporate", "category": "quality"},
 
 
 {"name": "Reynolds Number Calculator", "url_name": "quality_reynolds_number_calculator", "plan_type": "corporate", "category": "quality"},
@@ -255,6 +264,8 @@ CALCULATORS = [
 
 {"name": "Dissolved Oxygen (DO) Deficit (Streeter-Phelps Model) Calculator", "url_name": "environment_dissolved_oxygen_do_deficit_streeter_phelps_model_calculator", "plan_type": "corporate", "category": "environment"},
 
+{"name": "Dittus-Boelter Equation for Turbulent Flow Heat Transfer Calculator", "url_name": "environment_dittus_boelter_equation_for_turbulent_flow_heat_transfer_calculator", "plan_type": "corporate", "category": "environment"},
+
 {"name": "Decreasing-Rate-of-Increase Growth Calculator", "url_name": "environment_decreasing_rate_of_increase_growth_calculator", "plan_type": "corporate", "category": "environment"},
 
 {"name": "Darcy-Weisbach Head Loss Calculator", "url_name": "environment_darcy_weisbach_head_loss_calculator", "plan_type": "corporate", "category": "environment"},
@@ -274,6 +285,8 @@ CALCULATORS = [
 
 
 {"name": "Equal percentage valve lift calculator based on kv", "url_name": "environment_equal_percentage_valve_lift_based_on_kv_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Equimolar Countercurrent Diffusion Calculator", "url_name": "environment_equimolar_countercurrent_diffusion_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 {"name": "Equal Percentage Valve Lift Calculator Based on Relative Flow", "url_name": "environment_equal_percentage_valve_lift_based_on_relative_flow_calculator", "plan_type": "corporate", "category": "environment"},
@@ -398,6 +411,8 @@ CALCULATORS = [
 
 {"name": "Kirschmer’s Head Loss (h) Calculator", "url_name": "environment_kirschmers_head_loss_h_calculator", "plan_type": "corporate", "category": "environment"},
 
+{"name": "Logarithmic Mean Calculator", "url_name": "environment_logarithmic_mean_calculator", "plan_type": "corporate", "category": "environment"},
+
 
 {"name": "Log Mean Temperature Difference (LMTD) Calculator", "url_name": "environment_log_mean_temperature_difference_lmtd_calculator", "plan_type": "corporate", "category": "environment"},
 
@@ -473,6 +488,8 @@ CALCULATORS = [
 
 
 {"name": "Net Microbial Growth Rate Calculator", "url_name": "environment_net_microbial_growth_rate_calculator", "plan_type": "corporate", "category": "environment"},
+
+{"name": "Overall Mass Transfer Coefficients Calculator", "url_name": "environment_overall_mass_transfer_coefficients_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 {"name": "Overburden Pressure Calculator", "url_name": "environment_overburden_pressure_calculator", "plan_type": "corporate", "category": "environment"},
@@ -620,7 +637,15 @@ CALCULATORS = [
 
 {"name": "Settling Reynolds Number Calculator", "url_name": "environment_settling_reynolds_number_calculator", "plan_type": "corporate", "category": "environment"},
 
+<<<<<<< HEAD
+# {"name": "Sieder-Tate Correlation for Laminar Flow Heat Transfer Calculator", "url_name": "environment_sieder_tate_correlation_for_laminar_flow_heat_transfer_calculator", "plan_type": "corporate", "category": "environment"},
+
+# {"name": "Stefan's Law of Molecular Diffusion Calculator", "url_name": "environment_stefans_law_of_molecular_diffusion_calculator", "plan_type": "corporate", "category": "environment"},
+
+#{"name": "Soak Pit Volume Calculator", "url_name": "environment_soak_pit_volume_calculator", "plan_type": "corporate", "category": "environment"},
+=======
 {"name": "Soak Pit Volume Calculator", "url_name": "environment_soak_pit_volume_calculator", "plan_type": "corporate", "category": "environment"},
+>>>>>>> a9eb87c58dcc6e91af3906e1664339ae4206a173
 
 {"name": "Sludge Retention Time (SRT) And Specific Substrate Utilization Rate Calculator", "url_name": "environment_sludge_retention_time_srt_and_specific_substrate_utilization_rate_calculator", "plan_type": "corporate", "category": "environment"},
 
@@ -682,6 +707,7 @@ CALCULATORS = [
 
 {"name": "Total Height of Soak Pit Calculator", "url_name": "environment_total_height_of_soak_pit_calculator", "plan_type": "corporate", "category": "environment"},
 
+# {"name": "Two-Film Theory Calculator", "url_name": "environment_two_film_theory_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 {"name": "Two-Phase Flow Parameter Calculator", "url_name": "environment_two_phase_flow_parameter_calculator", "plan_type": "corporate", "category": "environment"},
@@ -696,7 +722,14 @@ CALCULATORS = [
 
 {"name": "U-Factor Calculation for Walls", "url_name": "environment_u_factor_calculation_for_walls_calculator", "plan_type": "corporate", "category": "environment"},
 
+<<<<<<< HEAD
+# {"name": "Unidirectional Diffusion Calculator", "url_name": "environment_unidirectional_diffusion_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+# {"name": "Vapor Pressure Calculator", "url_name": "environment_vapor_pressure_calculator", "plan_type": "corporate", "category": "environment"},
+=======
 {"name": "Vapor Pressure Calculator", "url_name": "environment_vapor_pressure_calculator", "plan_type": "corporate", "category": "environment"},
+>>>>>>> a9eb87c58dcc6e91af3906e1664339ae4206a173
 
 {"name": "Volumetric Flow Rate Calculator", "url_name": "environment_volumetric_flow_rate_calculator", "plan_type": "corporate", "category": "environment"},
 
@@ -1287,6 +1320,7 @@ CALCULATORS = [
     {"name": "Nitrogen Equivalency (Kik) Calculator", "url_name": "fire_nitrogen_equivalency_kik_calculator", "plan_type": "corporate", "category": "fire"},
     {"name": "Normalized Mass Flux Formula (High-Quality Region) Calculator", "url_name": "fire_normalized_mass_flux_formula_high_quality_region_calculator", "plan_type": "corporate", "category": "fire"},
     {"name": "Pressure Factor Calculator", "url_name": "fire_pressure_factor_calculator", "plan_type": "corporate", "category": "fire"},
+    {"name": "Radiation Heat Transfer Calculator", "url_name": "fire_radiation_heat_transfer_calculator", "plan_type": "corporate", "category": "fire"},
     {"name": "Reached Concentration Calculator", "url_name": "fire_reached_concentration_calculator", "plan_type": "corporate", "category": "fire"},
     {"name": "Relief Vent Rate (Homogeneous-Vessel Venting) Calculator", "url_name": "fire_relief_vent_rate_homogeneous_vessel_venting_calculator", "plan_type": "corporate", "category": "fire"},
     {"name": "Relief Vent Rate Formula (External Heating) Calculator", "url_name": "fire_relief_vent_rate_formula_external_heating_calculator", "plan_type": "corporate", "category": "fire"},

@@ -1,0 +1,935 @@
+{% extends 'base.html' %}
+{% block title %}Equimolar Countercurrent Diffusion Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equimolar Countercurrent Diffusion Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        /* Input rows for side-by-side fields */
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+       
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Equimolar Countercurrent Diffusion Calculator</h1>
+            <p>Calculate the molar flux for equimolar countercurrent diffusion in binary systems</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="diffusivity">Diffusion Coefficient (D) [m²/s]</label>
+                        <input type="number" id="diffusivity" class="form-input" min="0.00000001" step="any" placeholder="e.g., 0.000025">
+                    </div>
+                    <div class="form-group">
+                        <label for="temperature">Temperature (T) [K]</label>
+                        <input type="number" id="temperature" class="form-input" min="0.1" step="any" placeholder="e.g., 298">
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="pressure1">Partial Pressure at Point 1 (p<sub>A₁</sub>) [Pa]</label>
+                        <input type="number" id="pressure1" class="form-input" step="any" placeholder="e.g., 101325">
+                    </div>
+                    <div class="form-group">
+                        <label for="pressure2">Partial Pressure at Point 2 (p<sub>A₂</sub>) [Pa]</label>
+                        <input type="number" id="pressure2" class="form-input" step="any" placeholder="e.g., 50662.5">
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="position1">Position 1 (z₁) [m]</label>
+                        <input type="number" id="position1" class="form-input" step="any" placeholder="e.g., 0">
+                    </div>
+                    <div class="form-group">
+                        <label for="position2">Position 2 (z₂) [m]</label>
+                        <input type="number" id="position2" class="form-input" step="any" placeholder="e.g., 0.01">
+                    </div>
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateDiffusion()">Calculate Diffusion Flux</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Diffusion illustration">
+                    <p>This tool will calculate the <strong>Molar Flux</strong> for equimolar countercurrent diffusion. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Molar Flux</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">mol/m²·s</div>
+                    </div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Very Slow</span><span>Slow</span><span>Moderate</span><span>Fast</span><span>Very Fast</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Diffusion Rate Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <!-- About -->
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Equimolar Countercurrent Diffusion Calculator</strong> determines the molar flux in binary systems where two components diffuse in opposite directions with equal molar fluxes. This phenomenon is fundamental in environmental systems, chemical processes, and gas exchange applications where no net bulk flow occurs.
+                </p>
+            </div>
+
+            <!-- Parameters Used -->
+            <div class="note-card">
+                <h3>⚙ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>D (Diffusion Coefficient):</strong> Measure of molecular mobility [m²/s]. Depends on temperature, pressure, and molecular properties.</li>
+                    <li><strong>T (Temperature):</strong> Absolute temperature [K]. Higher temperatures increase molecular motion.</li>
+                    <li><strong>p<sub>A₁</sub>, p<sub>A₂</sub> (Partial Pressures):</strong> Component pressures at two positions [Pa]. Drive the diffusion process.</li>
+                    <li><strong>z₁, z₂ (Positions):</strong> Distance points [m]. Defines the diffusion path length.</li>
+                    <li><strong>R (Gas Constant):</strong> Universal constant (8.314 J/mol·K).</li>
+                </ul>
+            </div>
+
+   <!-- Input Validation Rules -->
+<div class="note-card">
+    <h3>✅ Input Validation Rules</h3>
+    <ul class="note-list">
+        <li>Diffusion Coefficient (D) must be &gt; 0 (typical range: 0.0000000001 – 0.0001 m²/s).</li>
+        <li>Temperature (T) must be &gt; 0 K (typical range: 273 – 1000 K).</li>
+        <li>Partial Pressures (p<sub>A₁</sub>, p<sub>A₂</sub>) must be ≥ 0 Pa and generally below 10,000,000 Pa (100 bar).</li>
+        <li>Both partial pressures cannot be zero simultaneously.</li>
+        <li>Positions (z₁, z₂) must be valid numbers with z₂ ≠ z₁ and |z₂ – z₁| ≥ 0.0001 m.</li>
+        <li>Path lengths &gt; 10 m are unusual and should be verified.</li>
+        <li>Decimals up to 8 places allowed for accuracy.</li>
+    </ul>
+</div>
+
+<!-- Output Validations -->
+<div class="note-card">
+    <h3>✅ Output Validations</h3>
+    <ul class="note-list">
+        <li>|N<sub>A</sub>| &lt; 0.000001 mol/m²·s → <b>Very slow diffusion</b>: Likely negligible in most environmental systems.</li>
+        <li>0.000001 ≤ |N<sub>A</sub>| &lt; 0.0001 mol/m²·s → <b>Slow diffusion</b>: Can be relevant in specific environmental contexts.</li>
+        <li>0.0001 ≤ |N<sub>A</sub>| &lt; 0.01 mol/m²·s → <b>Moderate diffusion rate</b>: Common in many industrial and environmental applications.</li>
+        <li>0.01 ≤ |N<sub>A</sub>| &lt; 1 mol/m²·s → <b>Fast diffusion</b>: Significant environmental impact possible.</li>
+        <li>|N<sub>A</sub>| ≥ 1 mol/m²·s → <b>Very fast diffusion</b>: Potentially high environmental impact; verify inputs.</li>
+    </ul>
+    <p><i>Typical diffusion fluxes range from 0.00000001 to 0.01 mol/m²·s. Results outside this range should be verified.</i></p>
+</div>
+
+
+            <!-- Standards -->
+            <div class="note-card">
+                <h3>📏 Standards</h3>
+                <p>
+                    This calculator is based on Fick's Law of Diffusion and standard equations for equimolar countercurrent diffusion. It aligns with <strong>ASTM E741</strong> (Standard Test Method for Determining Air Change in a Single Zone), <strong>ISO 12219-3</strong> (Interior air of road vehicles), and <strong>EPA methods</strong> for gas exchange rate measurements in environmental applications.
+                </p>
+            </div>
+
+            <!-- Conclusion -->
+            <div class="note-card">
+                <h3>📝 Conclusion</h3>
+                <p>
+                    Equimolar countercurrent diffusion is fundamental for understanding balanced gas transport in environmental systems. These calculations help engineers design efficient aeration systems, analyze natural gas exchange processes, and predict contaminant transport in environmental applications. Understanding these diffusion processes is essential for environmental protection and industrial process design.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateDiffusion() {
+    const D = parseFloat(document.getElementById('diffusivity').value.trim());
+    const T = parseFloat(document.getElementById('temperature').value.trim());
+    const pA1 = parseFloat(document.getElementById('pressure1').value.trim());
+    const pA2 = parseFloat(document.getElementById('pressure2').value.trim());
+    const z1 = parseFloat(document.getElementById('position1').value.trim());
+    const z2 = parseFloat(document.getElementById('position2').value.trim());
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+    let warnings = [];
+
+    // Validate Diffusion Coefficient
+    if (isNaN(D) || D <= 0) {
+        errors.push("Diffusion Coefficient must be > 0.");
+    } else if (D < 1e-10) {
+        warnings.push("Very low diffusion coefficient. Verify value.");
+    } else if (D > 1e-3) {
+        warnings.push("Unusually high diffusion coefficient. Verify value.");
+    }
+
+    // Validate Temperature
+    if (isNaN(T) || T <= 0) {
+        errors.push("Temperature must be greater than 0 K.");
+    } else if (T < 273) {
+        warnings.push("Temperature below freezing. Verify suitability.");
+    } else if (T > 1000) {
+        warnings.push("Temperature extremely high. Verify if realistic.");
+    }
+
+    // Validate Partial Pressures
+    if (isNaN(pA1) || pA1 < 0) {
+        errors.push("Partial Pressure at Point 1 must be ≥ 0.");
+    }
+    if (isNaN(pA2) || pA2 < 0) {
+        errors.push("Partial Pressure at Point 2 must be ≥ 0.");
+    }
+    if (pA1 === 0 && pA2 === 0) {
+        errors.push("Both partial pressures cannot be zero.");
+    }
+    if (pA1 > 1e7 || pA2 > 1e7) {
+        warnings.push("Partial pressures exceed typical limits (>100 bar).");
+    }
+
+    // Validate Positions
+    if (isNaN(z1)) {
+        errors.push("Position 1 must be a valid number.");
+    }
+    if (isNaN(z2)) {
+        errors.push("Position 2 must be a valid number.");
+    } else if (z1 === z2) {
+        errors.push("Position 2 must be different from Position 1.");
+    } else if (Math.abs(z2 - z1) < 1e-4) {
+        errors.push("Path length too small. Must be ≥ 0.0001 m.");
+    } else if (Math.abs(z2 - z1) > 10) {
+        warnings.push("Very large diffusion path length. Verify inputs.");
+    }
+
+    // Stop if errors
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // Perform Calculation
+    const R = 8.314;
+    const deltaZ = z2 - z1;
+    const deltaPA = pA2 - pA1;
+    let NA = (-D / (R * T)) * (deltaPA / deltaZ);
+
+    if (!isFinite(NA) || isNaN(NA)) {
+        errorMessage.innerHTML = "Calculation error: check inputs.";
+        errorBox.classList.remove("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    // Format output as fixed (not exponential)
+    document.getElementById('rateValue').textContent = NA.toFixed(8);
+
+    // Meter & Feedback
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+    const absNA = Math.abs(NA);
+
+    if (absNA < 1e-6) {
+        meterWidth = '20%'; meterColor = '#2ecc71';
+        feedback = 'Very slow diffusion: Likely negligible in most environmental systems.';
+    } else if (absNA < 1e-4) {
+        meterWidth = '40%'; meterColor = '#27ae60';
+        feedback = 'Slow diffusion: Can be relevant in specific environmental contexts.';
+    } else if (absNA < 1e-2) {
+        meterWidth = '60%'; meterColor = '#f39c12';
+        feedback = 'Moderate diffusion rate: Common in many industrial and environmental applications.';
+    } else if (absNA < 1) {
+        meterWidth = '80%'; meterColor = '#e67e22';
+        feedback = 'Fast diffusion: Significant environmental impact possible.';
+    } else {
+        meterWidth = '95%'; meterColor = '#e74c3c';
+        feedback = 'Very fast diffusion: Potentially high environmental impact; verify inputs.';
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').textContent = feedback + (warnings.length ? " " + warnings.join(" ") : "");
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+
+{% comment %} 
+
+
+/*
+Formula Used:
+N_A = -(D / (R * T)) * ((pA2 - pA1) / (z2 - z1))
+
+Validation Rules:
+- D: >0, typical range 1e-10 – 1e-4 m²/s, up to 8 decimals.
+- T: >0, typical 273–1000 K.
+- pA1, pA2: ≥0, must not exceed 1e7 Pa.
+- z1, z2: valid numbers, z2 ≠ z1, |z2-z1| > 1e-4 m.
+*/
+1. Formula Used
+
+For Equimolar Countercurrent Diffusion in binary gas systems:
+
+𝑁
+𝐴
+=
+−
+𝐷
+𝑅
+𝑇
+⋅
+(
+𝑝
+𝐴
+2
+−
+𝑝
+𝐴
+1
+)
+(
+𝑧
+2
+−
+𝑧
+1
+)
+N
+A
+	​
+
+=−
+RT
+D
+	​
+
+⋅
+(z
+2
+	​
+
+−z
+1
+	​
+
+)
+(p
+A2
+	​
+
+−p
+A1
+	​
+
+)
+	​
+
+
+Where:
+
+𝑁
+𝐴
+N
+A
+	​
+
+ = molar flux of component A [mol/m²·s]
+
+𝐷
+D = diffusion coefficient [m²/s]
+
+𝑅
+R = universal gas constant = 8.314 J/mol·K
+
+𝑇
+T = absolute temperature [K]
+
+𝑝
+𝐴
+1
+,
+𝑝
+𝐴
+2
+p
+A1
+	​
+
+,p
+A2
+	​
+
+ = partial pressures of A at positions 
+𝑧
+1
+,
+𝑧
+2
+z
+1
+	​
+
+,z
+2
+	​
+
+ [Pa]
+
+𝑧
+1
+,
+𝑧
+2
+z
+1
+	​
+
+,z
+2
+	​
+
+ = positions [m]
+
+2. Input Validation Rules (QEHS-Compliant)
+
+These rules should go both in your note-card div and JavaScript validation function.
+
+✅ Diffusion Coefficient (D) [m²/s]
+
+Must be > 0.
+
+Acceptable range: 
+1
+×
+10
+−
+10
+1×10
+−10
+ to 
+1
+×
+10
+−
+4
+1×10
+−4
+.
+
+Decimal precision: up to 8 places.
+
+Warning if < 
+1
+×
+10
+−
+10
+1×10
+−10
+ (too small → negligible diffusion).
+
+Warning if > 
+1
+×
+10
+−
+3
+1×10
+−3
+ (unrealistically high in gases → check input).
+
+✅ Temperature (T) [K]
+
+Must be > 0 K.
+
+Acceptable range: 273–1000 K (room temperature to industrial furnaces).
+
+Warning if < 273 K (below freezing).
+
+Warning if > 1000 K (extreme → check if realistic).
+
+✅ Partial Pressures (pA1, pA2) [Pa]
+
+Must be ≥ 0.
+
+Cannot exceed system total pressure (normally < 1e7 Pa = 100 bar).
+
+Both values cannot be zero simultaneously → implies no diffusion.
+
+Decimal precision: up to 2 places acceptable.
+
+✅ Positions (z1, z2) [m]
+
+Must be valid numbers.
+
+𝑧
+1
+≠
+𝑧
+2
+z
+1
+	​
+
+
+=z
+2
+	​
+
+.
+
+Path length 
+∣
+𝑧
+2
+−
+𝑧
+1
+∣
+∣z
+2
+	​
+
+−z
+1
+	​
+
+∣ must be > 0.0001 m (to avoid division by zero or unrealistic distances).
+
+Warning if > 10 m (diffusion path too large for typical lab/industrial setups).
+
+3. Output Validation Logic & Thresholds
+
+| Flux (|Nᴀ|) [mol/m²·s] | Category | QEHS Meaning |
+|---------------------------------|-----------|---------------------------------------------|
+| < 1e-6 | Very Slow | Negligible risk, insignificant process impact |
+| 1e-6 – 1e-4 | Slow | May affect environmental air quality slowly |
+| 1e-4 – 1e-2 | Moderate | Normal in industrial/environmental diffusion |
+| 1e-2 – 1 | Fast | Significant effect → requires monitoring |
+| ≥ 1 | Very Fast | High hazard potential, verify inputs |
+
+Note: Typical fluxes are 1e-8 – 1e-2 mol/m²·s. Results outside should be flagged for review. {% endcomment %}

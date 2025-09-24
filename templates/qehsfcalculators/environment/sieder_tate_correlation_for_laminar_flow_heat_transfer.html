@@ -1,0 +1,879 @@
+{% extends 'base.html' %}
+{% block title %}Sieder-Tate Correlation for Laminar Flow Heat Transfer{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sieder-Tate Correlation for Laminar Flow Heat Transfer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            {% comment %} max-width: 700px; {% endcomment %}
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            {% comment %} display: flex; {% endcomment %}
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+            {% comment %} overflow-y: auto; {% endcomment %}
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Input rows for side-by-side fields */
+         .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            {% comment %} margin-bottom: 15px; {% endcomment %}
+        }
+        
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+       
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Sieder-Tate Correlation for Laminar Flow Heat Transfer</h1>
+            <p>Calculate the convective heat transfer coefficient for fully developed laminar flow in pipes</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="diameter">Pipe Diameter (D) [m]</label>
+                        <input type="number" id="diameter" class="form-input" min="0.0001" step="any" placeholder="e.g., 0.05">
+                    </div>
+                    <div class="form-group">
+                        <label for="length">Pipe Length (L) [m]</label>
+                        <input type="number" id="length" class="form-input" min="0.01" step="any" placeholder="e.g., 2.0">
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="reynolds">Reynolds Number (N<sub>Re</sub>)</label>
+                        <input type="number" id="reynolds" class="form-input" max="2300" step="any" placeholder="e.g., 1500">
+                    </div>
+                    <div class="form-group">
+                        <label for="prandtl">Prandtl Number (N<sub>Pr</sub>)</label>
+                        <input type="number" id="prandtl" class="form-input" min="0.1" step="any" placeholder="e.g., 7" value="7">
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="viscosity">Bulk Viscosity (μ) [Pa·s]</label>
+                        <input type="number" id="viscosity" class="form-input" min="0.000001" step="any" placeholder="e.g., 0.001" value="0.001">
+                    </div>
+                    <div class="form-group">
+                        <label for="wallViscosity">Wall Viscosity (μ<sub>w</sub>) [Pa·s]</label>
+                        <input type="number" id="wallViscosity" class="form-input" min="0.000001" step="any" placeholder="e.g., 0.001" value="0.001">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="conductivity">Thermal Conductivity (k) [W/m·K]</label>
+                    <input type="number" id="conductivity" class="form-input" min="0.01" step="any" placeholder="e.g., 0.6" value="0.6">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateHeatTransfer()">Calculate Heat Transfer Coefficient</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Heat Transfer illustration">
+                    <p>This tool will calculate the <strong>Heat Transfer Coefficient</strong> for laminar flow. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Heat Transfer Coefficient</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">h (W/m²·K)</div>
+                    </div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Very Low</span><span>Low</span><span>Moderate</span><span>High</span><span>Very High</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Heat Transfer Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <!-- About -->
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Sieder-Tate Correlation for Laminar Flow Heat Transfer Calculator</strong> 
+                    determines the convective heat transfer coefficient for fully developed laminar flow in pipes. 
+                    This correlation is essential for low-velocity systems where viscous forces dominate, 
+                    enabling precise thermal management in applications ranging from medical devices to food processing.
+                </p>
+            </div>
+
+            <!-- Parameters Used -->
+            <div class="note-card">
+                <h3>⚙ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>D (Pipe Diameter):</strong> Inner diameter of the pipe [m]. Smaller diameters are common in laminar flow systems.</li>
+                    <li><strong>L (Pipe Length):</strong> Length over which heat transfer occurs [m]. Laminar flow is strongly length-dependent.</li>
+                    <li><strong>N<sub>Re</sub> (Reynolds Number):</strong> Must be <2300 for laminar flow. Lower values mean more viscous-dominated flow.</li>
+                    <li><strong>N<sub>Pr</sub> (Prandtl Number):</strong> Typically higher for laminar flow applications (oils, syrups).</li>
+                    <li><strong>μ (Bulk Viscosity):</strong> Fluid viscosity at bulk temperature [Pa·s].</li>
+                    <li><strong>μ<sub>w</sub> (Wall Viscosity):</strong> Fluid viscosity at wall temperature [Pa·s].</li>
+                    <li><strong>k (Thermal Conductivity):</strong> Fluid's ability to conduct heat [W/m·K].</li>
+                </ul>
+            </div>
+
+            <!-- Input Validation Rules -->
+<div class="note-card">
+    <h3>✅ <strong>Input Validation Rules</strong></h3>
+    <ul class="note-list">
+        <li><strong>Pipe Diameter (D):</strong> must be <span style="color:#c0392b;">&gt; 0.0001 m</span> 
+            <span style="color:#2980b9;">(typical: 0.001–0.1 m)</span>.
+        </li>
+        <li><strong>Pipe Length (L):</strong> must be <span style="color:#c0392b;">&gt; 0.01 m</span> 
+            <span style="color:#2980b9;">(typical: 0.1–10 m)</span>.
+        </li>
+        <li><strong>Reynolds Number (N<sub>Re</sub>):</strong> must be <span style="color:#c0392b;">&lt; 2300</span> 
+            <span style="color:#2980b9;">(laminar flow limit)</span>.
+        </li>
+        <li><strong>Prandtl Number (N<sub>Pr</sub>):</strong> must be <span style="color:#c0392b;">&gt; 0.1</span> 
+            <span style="color:#2980b9;">(typical: 0.7–100)</span>.
+        </li>
+        <li><strong>Bulk Viscosity (μ):</strong> must be <span style="color:#c0392b;">&gt; 0.000001 Pa·s</span>.</li>
+        <li><strong>Wall Viscosity (μ<sub>w</sub>):</strong> must be <span style="color:#c0392b;">&gt; 0.000001 Pa·s</span>.</li>
+        <li><strong>Thermal Conductivity (k):</strong> must be <span style="color:#c0392b;">&gt; 0.01 W/m·K</span>.</li>
+        <li><strong>Viscosity Ratio (μ/μ<sub>w</sub>):</strong> should be within 
+            <span style="color:#c0392b;">0.1 – 10</span> 
+            <span style="color:#2980b9;">for valid results</span>.
+        </li>
+    </ul>
+</div>
+
+<!-- Output Validations -->
+<div class="note-card">
+    <h3>✅ <strong>Output Validations</strong></h3>
+    <ul class="note-list">
+        <li><span style="color:#8e44ad;">h &lt; 5 W/m²·K</span> → <strong>Very Low Heat Transfer:</strong> Usually seen with gases or viscous fluids.</li>
+        <li><span style="color:#2980b9;">5 ≤ h &lt; 100 W/m²·K</span> → <strong>Low Heat Transfer:</strong> Common for oils in laminar flow.</li>
+        <li><span style="color:#f39c12;">100 ≤ h &lt; 500 W/m²·K</span> → <strong>Moderate Heat Transfer:</strong> Ensure laminar assumptions still apply.</li>
+        <li><span style="color:#e67e22;">500 ≤ h &lt; 1000 W/m²·K</span> → <strong>High Heat Transfer:</strong> Verify input parameters.</li>
+        <li><span style="color:#e74c3c;">h ≥ 1000 W/m²·K</span> → <strong>Very High Heat Transfer:</strong> Likely outside laminar flow regime.</li>
+    </ul>
+    <p><i><strong>Normal design range:</strong> <span style="color:#16a085;">1 – 1000 W/m²·K</span>. 
+        Results outside this range should trigger <strong>engineering review</strong>.</i></p>
+</div>
+
+            <!-- Standards -->
+            <div class="note-card">
+                <h3>📏 Standards</h3>
+                <p>
+                    This calculator is based on the <strong>Sieder-Tate correlation</strong> for laminar flow heat transfer. 
+                    It aligns with <strong>ASHRAE Handbook Fundamentals</strong> and <strong>ISO 7278</strong> standards 
+                    for laminar flow applications in thermal systems, ensuring proper heat exchanger design 
+                    and energy-efficient system performance.
+                </p>
+            </div>
+
+            <!-- Conclusion -->
+            <div class="note-card">
+                <h3>📝 Conclusion</h3>
+                <p>
+                    The Sieder-Tate correlation is essential for engineers designing systems involving laminar fluid flow and heat transfer. 
+                    These calculations are particularly important for precision applications where turbulent flow would be undesirable or impractical, 
+                    enabling energy-efficient designs with precise thermal control in medical devices, food processing, and microfluidic systems.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateHeatTransfer() {
+    const D = parseFloat(document.getElementById('diameter').value.trim());
+    const L = parseFloat(document.getElementById('length').value.trim());
+    const NRe = parseFloat(document.getElementById('reynolds').value.trim());
+    const NPr = parseFloat(document.getElementById('prandtl').value.trim());
+    const mu = parseFloat(document.getElementById('viscosity').value.trim());
+    const muw = parseFloat(document.getElementById('wallViscosity').value.trim());
+    const k = parseFloat(document.getElementById('conductivity').value.trim());
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+    let warnings = [];
+
+    // --- Input Validations ---
+    if (isNaN(D) || D <= 0.0001) errors.push("👉 Pipe Diameter must be > 0.0001 m.");
+    if (isNaN(L) || L <= 0.01) errors.push("👉 Pipe Length must be > 0.01 m.");
+    if (isNaN(NRe) || NRe <= 0) errors.push("👉 Reynolds Number must be > 0.");
+    else if (NRe >= 2300) errors.push("👉 Reynolds Number must be < 2300 (laminar only).");
+    if (isNaN(NPr) || NPr < 0.1) errors.push("👉 Prandtl Number must be ≥ 0.1.");
+    if (isNaN(mu) || mu <= 0.000001) errors.push("👉 Bulk Viscosity must be > 1e-6 Pa·s.");
+    if (isNaN(muw) || muw <= 0.000001) errors.push("👉 Wall Viscosity must be > 1e-6 Pa·s.");
+    if (isNaN(k) || k <= 0.01) errors.push("👉 Thermal Conductivity must be > 0.01 W/m·K.");
+
+    // Cross-field: viscosity ratio
+    if (!isNaN(mu) && !isNaN(muw) && muw > 0) {
+        const ratio = mu / muw;
+        if (ratio < 0.1 || ratio > 10) {
+            warnings.push("⚠️ Viscosity ratio (μ/μw) is outside typical range (0.1–10).");
+        }
+    }
+
+    // --- Error Handling ---
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // --- Calculation ---
+    const Nu = 1.86 * Math.pow(NRe * NPr * (D / L), 1/3) * Math.pow(mu / muw, 0.14);
+    const h = (Nu * k) / D;
+
+    if (!isFinite(h) || isNaN(h)) {
+        errorMessage.innerHTML = "👉 Calculation error: check inputs.";
+        errorBox.classList.remove("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    // --- Output Validation ---
+    if (h < 1 || h > 5000) {
+        warnings.push("⚠️ h value outside typical industry range (1–5000 W/m²·K). Verify inputs.");
+    }
+
+    document.getElementById('rateValue').textContent = h.toFixed(2);
+
+    const meterFill = document.getElementById('meterFill');
+    let feedback, meterWidth, meterColor;
+
+    if (h < 5) {
+        feedback = "Very low heat transfer: gases or viscous fluids.";
+        meterWidth = "15%"; meterColor = "#2ecc71";
+    } else if (h < 100) {
+        feedback = "Low heat transfer: common for oils in laminar flow.";
+        meterWidth = "35%"; meterColor = "#27ae60";
+    } else if (h < 500) {
+        feedback = "Moderate heat transfer: check laminar assumptions.";
+        meterWidth = "55%"; meterColor = "#f39c12";
+    } else if (h < 1000) {
+        feedback = "High heat transfer: verify input parameters.";
+        meterWidth = "75%"; meterColor = "#e67e22";
+    } else {
+        feedback = "Very high heat transfer: likely outside laminar regime.";
+        meterWidth = "95%"; meterColor = "#e74c3c";
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').textContent = feedback + (warnings.length ? " " + warnings.join(" ") : "");
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+{% comment %} 
+1. Formula Used (Sieder–Tate Correlation)
+
+The Nusselt number (Nu) for fully developed laminar flow in a pipe with constant wall temperature is:
+
+𝑁
+𝑢
+=
+1.86
+⋅
+(
+𝑅
+𝑒
+⋅
+𝑃
+𝑟
+⋅
+𝐷
+𝐿
+)
+1
+/
+3
+⋅
+(
+𝜇
+𝜇
+𝑤
+)
+0.14
+Nu=1.86⋅(Re⋅Pr⋅
+L
+D
+	​
+
+)
+1/3
+⋅(
+μ
+w
+	​
+
+μ
+	​
+
+)
+0.14
+
+Then, the convective heat transfer coefficient (h) is:
+
+ℎ
+=
+𝑁
+𝑢
+⋅
+𝑘
+𝐷
+h=
+D
+Nu⋅k
+	​
+
+
+Where:
+
+𝑅
+𝑒
+Re = Reynolds number (laminar: < 2300)
+
+𝑃
+𝑟
+Pr = Prandtl number (> 0.1, typically 0.7–100)
+
+𝐷
+D = Pipe diameter (m)
+
+𝐿
+L = Pipe length (m)
+
+𝜇
+μ = Bulk viscosity (Pa·s)
+
+𝜇
+𝑤
+μ
+w
+	​
+
+ = Wall viscosity (Pa·s)
+
+𝑘
+k = Thermal conductivity (W/m·K)
+
+2. Detailed Input Validation Rules (QEHS/Fire Safety Perspective)
+
+✅ Pipe Diameter (D):
+
+Must be > 0.0001 m (100 µm, minimum physically possible for lab-scale pipes).
+
+Typical: 0.001 – 0.1 m.
+
+Why? Too small/large diameters may indicate wrong units (e.g., mm entered instead of m).
+
+✅ Pipe Length (L):
+
+Must be > 0.01 m.
+
+Recommended range: 0.1 – 10 m.
+
+Why? Very short lengths invalidate laminar development assumptions.
+
+✅ Reynolds Number (Re):
+
+Must be > 0 and < 2300 (laminar).
+
+Typical: 10 – 2000.
+
+Why? Above 2300 → turbulent regime, formula invalid.
+
+✅ Prandtl Number (Pr):
+
+Must be ≥ 0.1.
+
+Typical: 0.7 (air) to 100 (oils).
+
+Why? Very low Pr means conduction dominates → formula not applicable.
+
+✅ Viscosities (μ, μw):
+
+Must be > 0.000001 Pa·s (1 µPa·s).
+
+Viscosity ratio μ/μw should be 0.1 – 10.
+
+Why? Extreme ratios mean wall temperature is unrealistic, or phase change conditions exist.
+
+✅ Thermal Conductivity (k):
+
+Must be > 0.01 W/m·K.
+
+Typical: 0.1–1.0 (liquids), up to 5 for special fluids.
+
+Why? Too low or high values suggest unit mismatch.
+
+3. Output Validation & Thresholds
+
+After calculating 
+ℎ
+h:
+
+h < 5 W/m²·K → Very low, typical for gases or viscous fluids.
+
+5 ≤ h < 100 → Low, common for oils.
+
+100 ≤ h < 500 → Moderate, design range for liquids in laminar flow.
+
+500 ≤ h < 1000 → High, check inputs carefully.
+
+h ≥ 1000 → Likely invalid for laminar regime → suggest reviewing Re input.
+
+h < 0 or NaN → Invalid → must reject.
+
+4. Edge Cases & Handling
+
+Division by zero: L = 0 or D = 0 must be rejected.
+
+Re ≥ 2300 → block with error.
+
+μ/μw ratio outside 0.1–10 → warning (calculation continues but flagged).
+
+h < 1 or h > 5000 → warning: “outside industry norms.”
+
+Negative or blank input → reject.
+
+Unit mix-ups (mm instead of m, W/cm·K instead of W/m·K) → flagged by extreme values.
+
+5. Corrected JavaScript Code (with inline documentation)
+/*
+------------------------------------------------------------
+ Sieder–Tate Correlation Formula:
+ Nu = 1.86 * (Re * Pr * D/L)^(1/3) * (μ/μw)^0.14
+ h = (Nu * k) / D
+
+ Validation Rules:
+ - D > 0.0001 m (typical 0.001–0.1 m)
+ - L > 0.01 m (typical 0.1–10 m)
+ - Re > 0 and < 2300 (laminar range)
+ - Pr ≥ 0.1 (typical 0.7–100)
+ - μ, μw > 0.000001 Pa·s
+ - μ/μw ratio between 0.1 and 10
+ - k > 0.01 W/m·K
+ Output Validation:
+ - h < 5 → Very Low
+ - 5 ≤ h < 100 → Low
+ - 100 ≤ h < 500 → Moderate
+ - 500 ≤ h < 1000 → High
+ - h ≥ 1000 → Likely invalid for laminar
+------------------------------------------------------------
+*/ {% endcomment %}
