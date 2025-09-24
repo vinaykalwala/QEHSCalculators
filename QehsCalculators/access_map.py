@@ -637,15 +637,12 @@ CALCULATORS = [
 
 {"name": "Settling Reynolds Number Calculator", "url_name": "environment_settling_reynolds_number_calculator", "plan_type": "corporate", "category": "environment"},
 
-<<<<<<< HEAD
-# {"name": "Sieder-Tate Correlation for Laminar Flow Heat Transfer Calculator", "url_name": "environment_sieder_tate_correlation_for_laminar_flow_heat_transfer_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Sieder-Tate Correlation for Laminar Flow Heat Transfer Calculator", "url_name": "environment_sieder_tate_correlation_for_laminar_flow_heat_transfer_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Stefan's Law of Molecular Diffusion Calculator", "url_name": "environment_stefans_law_of_molecular_diffusion_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Stefan's Law of Molecular Diffusion Calculator", "url_name": "environment_stefans_law_of_molecular_diffusion_calculator", "plan_type": "corporate", "category": "environment"},
 
-#{"name": "Soak Pit Volume Calculator", "url_name": "environment_soak_pit_volume_calculator", "plan_type": "corporate", "category": "environment"},
-=======
 {"name": "Soak Pit Volume Calculator", "url_name": "environment_soak_pit_volume_calculator", "plan_type": "corporate", "category": "environment"},
->>>>>>> a9eb87c58dcc6e91af3906e1664339ae4206a173
+{"name": "Soak Pit Volume Calculator", "url_name": "environment_soak_pit_volume_calculator", "plan_type": "corporate", "category": "environment"},
 
 {"name": "Sludge Retention Time (SRT) And Specific Substrate Utilization Rate Calculator", "url_name": "environment_sludge_retention_time_srt_and_specific_substrate_utilization_rate_calculator", "plan_type": "corporate", "category": "environment"},
 
@@ -707,7 +704,7 @@ CALCULATORS = [
 
 {"name": "Total Height of Soak Pit Calculator", "url_name": "environment_total_height_of_soak_pit_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Two-Film Theory Calculator", "url_name": "environment_two_film_theory_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Two-Film Theory Calculator", "url_name": "environment_two_film_theory_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 {"name": "Two-Phase Flow Parameter Calculator", "url_name": "environment_two_phase_flow_parameter_calculator", "plan_type": "corporate", "category": "environment"},
@@ -722,14 +719,11 @@ CALCULATORS = [
 
 {"name": "U-Factor Calculation for Walls", "url_name": "environment_u_factor_calculation_for_walls_calculator", "plan_type": "corporate", "category": "environment"},
 
-<<<<<<< HEAD
-# {"name": "Unidirectional Diffusion Calculator", "url_name": "environment_unidirectional_diffusion_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Unidirectional Diffusion Calculator", "url_name": "environment_unidirectional_diffusion_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-# {"name": "Vapor Pressure Calculator", "url_name": "environment_vapor_pressure_calculator", "plan_type": "corporate", "category": "environment"},
-=======
 {"name": "Vapor Pressure Calculator", "url_name": "environment_vapor_pressure_calculator", "plan_type": "corporate", "category": "environment"},
->>>>>>> a9eb87c58dcc6e91af3906e1664339ae4206a173
+{"name": "Vapor Pressure Calculator", "url_name": "environment_vapor_pressure_calculator", "plan_type": "corporate", "category": "environment"},
 
 {"name": "Volumetric Flow Rate Calculator", "url_name": "environment_volumetric_flow_rate_calculator", "plan_type": "corporate", "category": "environment"},
 
@@ -743,20 +737,20 @@ CALCULATORS = [
 {"name": "Vegan Footprint Calculator", "url_name": "environment_vegan_footprint_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-# {"name": "Vertical Settling Velocity Calculator", "url_name": "environment_vertical_settling_velocity_vt_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Vertical Settling Velocity Calculator", "url_name": "environment_vertical_settling_velocity_vt_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-# {"name": "Van't Hoff Reaction Isochore Calculator", "url_name": "environment_vant_hoff_reaction_isochore_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Van't Hoff Reaction Isochore Calculator", "url_name": "environment_vant_hoff_reaction_isochore_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-# {"name": "Wet Steam Enthalpy Calculator", "url_name": "environment_wet_steam_enthalpy_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Wet Steam Enthalpy Calculator", "url_name": "environment_wet_steam_enthalpy_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-# {"name": "Waste Segregation Efficiency Calculator", "url_name": "environment_waste_segregation_efficiency_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Waste Segregation Efficiency Calculator", "url_name": "environment_waste_segregation_efficiency_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Water Mass to Volumetric Flowrate Calculator", "url_name": "environment_water_mass_to_volumetric_flowrate_converter_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Water Mass to Volumetric Flowrate Calculator", "url_name": "environment_water_mass_to_volumetric_flowrate_converter_calculator", "plan_type": "corporate", "category": "environment"},
 
-# {"name": "Water Demand Fluctuation Calculator", "url_name": "environment_water_demand_fluctuation_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Water Demand Fluctuation Calculator", "url_name": "environment_water_demand_fluctuation_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 {"name": "Water Pollutant Load Calculator", "url_name": "environment_water_pollutant_load_calculator", "plan_type": "corporate", "category": "environment"},
