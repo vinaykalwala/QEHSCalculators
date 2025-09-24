@@ -1385,6 +1385,10 @@ def subscription_delete(request, pk):
 def co2_calculator(request):
     return render(request, 'calculators/co2_emission.html', {'title': 'CO2 Emission Calculator'})
 
+@login_required
+@subscription_required(plan_type="employee")
+def conversion_calculator(request):
+    return render(request, 'calculators/conversion_calculator.html', {'title': 'Conversion Calculator'})
 
 @login_required
 @subscription_required(plan_type="corporate")

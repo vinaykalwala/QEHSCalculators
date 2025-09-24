@@ -84,6 +84,8 @@ urlpatterns = [
     path('calculators/health_basic_calculator/', health_basic_calculator, name='health_basic_calculator'),
     path('calculators/safety_basic_calculator/', safety_basic_calculator, name='safety_basic_calculator'),
     path('calculators/fire_basic_calculator/', fire_basic_calculator, name='fire_basic_calculator'),
+    path('calculators/conversion_calculator/', conversion_calculator, name='conversion_calculator'),
+
    
 
     path('quality/main_calculator/', quality_main_calculator, name='quality_main_calculator'),
