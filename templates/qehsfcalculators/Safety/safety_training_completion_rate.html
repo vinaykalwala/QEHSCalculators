@@ -332,13 +332,39 @@
         .hidden { 
             display: none; 
         }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
     </style>
 </head>
 <body>
     <div class="btn-container">
         <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
     </div>
-    
+
     <div class="calculator-container printable" id="printArea">
 
         {% include "includes/print_header_footer.html" %}
@@ -408,29 +434,86 @@
 
         <div class="note-section">
             <div class="note-card">
-                <h3>📘 About the Training Completion Rate</h3>
+                <h3>📘 About This Calculator</h3>
                 <p>
-                    The **Safety Training Completion Rate** is a key performance indicator (KPI) that measures the percentage of the workforce that has successfully completed required safety training. It is a leading indicator of a company's commitment to safety, as it reflects proactive efforts to educate employees and prevent incidents before they happen.
+                    The **Safety Training Completion Rate** quantifies the percentage of employees who have completed required
+                    safety training programs. This metric helps organizations monitor compliance, track progress, and ensure
+                    that employees are adequately prepared to maintain a safe working environment.
                 </p>
             </div>
             <div class="note-card">
-                <h3>⚙️ Formula Used</h3>
-                <p>The rate is calculated as a simple percentage:</p>
-                <p>$$ \text{Completion Rate (\%)} = \left( \frac{\text{Number of Employees Trained}}{\text{Total Employees Required to be Trained}} \right) \times 100 $$</p>
-            </div>
-             <div class="note-card">
-                <h3>💡 Why This Metric Matters</h3>
-                 <ul class="note-list">
-                    <li><strong>Compliance:</strong> A high completion rate is essential for meeting regulatory and legal requirements (e.g., OSHA standards).</li>
-                    <li><strong>Risk Reduction:</strong> It demonstrates that employees are equipped with the knowledge to perform their jobs safely, reducing the likelihood of accidents.</li>
-                    <li><strong>Safety Culture:</strong> Tracking and aiming for a high rate reinforces the importance of safety throughout the organization and strengthens the overall safety culture.</li>
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Number of Employees Trained:</strong> Total employees who successfully completed training.</li>
+                    <li><strong>Total Employees:</strong> Total workforce required to undergo training.</li>
                 </ul>
             </div>
+            <div class="note-card">
+                <h3>📝 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Number of Employees Trained:</strong> Must be a whole number ≥ 0.
+                        <br>Examples of invalid input: negative numbers, decimals, empty fields.
+                    </li>
+                    <li><strong>Total Number of Employees:</strong> Must be a whole number > 0.
+                        <br>Examples of invalid input: zero, negative numbers, decimals, empty fields.
+                    </li>
+                    <li><strong>Logical Consistency:</strong> Number of trained employees cannot exceed total employees.
+                        <br>This ensures the calculation is physically and administratively meaningful.
+                    </li>
+                    <li><strong>Edge Cases:</strong> Division by zero is prevented by ensuring total employees > 0.</li>
+                </ul>
+            </div>
+            <div class="note-card">
+                <h3>📝 Output Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Urgent Action (Red, &lt; 70%): </strong>
+                                <br>🚨 <strong>Urgent Action Required.</strong> A completion rate below 70% indicates a significant
+                                compliance gap and potential safety risk.</li>
+                    <li><strong>Needs Improvement (Orange, 70–89%):</strong>
+                        <br>⚠️ <strong>Needs Improvement.</strong> While many employees are trained, a rate below 90% leaves a
+                        notable portion of the workforce uncovered.
+                    </li>
+                    <li><strong>Good Compliance (Yellow, 90–99%):</strong>
+                        <br>👍 <strong>Good Compliance.</strong> A rate of 90% or higher is a strong indicator of a healthy safety
+                        program. Aim for 100%.
+                    </li>
+                    <li><strong>Excellent Compliance (Green, 100%):</strong>
+                        <br>✅ <strong>Excellent Compliance.</strong> 100% completion demonstrates an outstanding commitment to
+                        safety and is the gold standard.
+                    </li>
+                </ul>
+            
+                <h3>💡 Key Notes</h3>
+                <ul class="note-list">
+                    <li>All input values are validated to prevent errors or unrealistic values.</li>
+                    <li>Outputs are designed to reflect real-world safety compliance and allow management to take corrective
+                        actions.</li>
+                    <li>Feedback is color-coded and descriptive for easy interpretation.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📏 Standards & Compliance</h3>
+                <p>
+                    This metric aligns with workplace safety regulations and standards. Organizations are encouraged to achieve
+                    at least 90% training completion to maintain a compliant and safe work environment. Regular tracking ensures
+                    gaps in training are identified and addressed promptly.
+                </p>
+            </div>
+            <div class="note-card">
+                <h3>Conclusion</h3>
+                <p>
+                    A higher Safety Training Completion Rate reflects a well-informed workforce and a strong safety culture. It
+                    reduces risks of accidents, ensures regulatory compliance, and supports continuous improvement in workplace
+                    safety.
+                </p>
+            </div>
         </div>
+
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const now = new Date();
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
             document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
@@ -447,10 +530,11 @@
 
             let errors = [];
 
-            // --- VALIDATION RULES ---
+            // --- PARSE INPUTS ---
             const trained = parseFloat(trained_val);
             const total = parseFloat(total_val);
 
+            // --- INPUT VALIDATION ---
             if (trained_val === '' || isNaN(trained) || trained < 0) {
                 errors.push("👉 Number of Employees Trained must be a number ≥ 0.");
             } else if (!Number.isInteger(trained)) {
@@ -460,13 +544,13 @@
             if (total_val === '' || isNaN(total) || total <= 0) {
                 errors.push("👉 Total Employees must be a number > 0.");
             } else if (!Number.isInteger(total)) {
-                 errors.push("👉 Total Employees must be a whole number.");
+                errors.push("👉 Total Employees must be a whole number.");
             }
 
             if (!isNaN(trained) && !isNaN(total) && trained > total) {
                 errors.push("👉 Number of trained employees cannot exceed the total number of employees.");
             }
-            
+
             // --- ERROR HANDLING ---
             if (errors.length > 0) {
                 errorMessage.innerHTML = errors.join("<br>");
@@ -492,7 +576,7 @@
             document.getElementById('rateValue').textContent = trainingRate.toFixed(1) + '%';
             document.getElementById('trainedCount').textContent = trained;
             document.getElementById('totalCount').textContent = total;
-            
+
             // --- ASSESSMENT ---
             const meterFill = document.getElementById('meterFill');
             let meterWidth, meterColor, feedback;
@@ -529,8 +613,41 @@
             document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
             window.print();
         }
+
     </script>
     <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
 {% endblock %}
+
+<!-- 
+1️⃣ Input Validation Rules (QEHS Perspective)
+Input Field	Validation	Acceptable Range / Rules	Why It's Essential
+Employees Trained	Must be a number	≥ 0, whole number	Negative or decimal numbers are not meaningful; ensures realistic workforce count.
+Total Employees	Must be a number	> 0, whole number	Cannot have zero or negative employees; required to calculate % correctly.
+Logical Consistency	Employees Trained ≤ Total Employees	N/A	Prevents impossible scenarios, e.g., more trained than total employees.
+Allowed Decimals	None (integers only)	Whole numbers only	Employee count must be discrete; fractions of a person are invalid.
+Cross-field Dependencies	Trained cannot exceed total	N/A	Ensures KPI calculations are correct and audit-ready.
+
+Edge Case Validations:
+
+Division by zero → Total Employees = 0.
+
+Unrealistic numbers → e.g., 1,000,000 employees in a small facility.
+
+Negative inputs → e.g., -5 trained employees.
+
+Trained > total → ensures compliance logic consistency.
+
+2️⃣ Output Validation Logic & Thresholds
+Training Rate (%)	Compliance Level	Feedback Message (as per script)	Color / Meter Indicator
+0–69	Urgent Action	🚨 Low compliance, urgent training needed.	Red (critical)
+70–89	Needs Improvement	⚠️ Moderate compliance, needs improvement.	Orange (caution)
+90–100	Good / Excellent	✅ Excellent compliance and safety awareness.	Green (safe/high)
+
+Notes:
+
+The output must always be finite and valid (no NaN or Infinity).
+
+The color-coded meter reinforces the level visually for audits and management dashboards. 
+-->

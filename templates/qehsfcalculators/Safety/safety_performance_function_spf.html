@@ -66,9 +66,9 @@
             box-shadow: 0 6px 16px rgba(0,0,0,0.15);
             display: flex;
             flex-direction: column;
-            justify-content: center;
             transition: transform 0.3s ease;
             height: 420px; /* Fixed Height */
+            overflow-y: auto;
         }
         
         .calc-card:hover { 
@@ -329,13 +329,39 @@
         .hidden { 
             display: none; 
         }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
     </style>
 </head>
 <body>
     <div class="btn-container">
         <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
     </div>
-    
+
     <div class="calculator-container printable" id="printArea">
 
         {% include "includes/print_header_footer.html" %}
@@ -398,44 +424,87 @@
 
         <div class="note-section">
             <div class="note-card">
-                <h3>📘 About Safety Performance Functions</h3>
+                <h3>📘 About This Calculator</h3>
                 <p>
-                    A **Safety Performance Function (SPF)** is a statistical regression model used by transportation safety engineers to predict the average number of crashes per year at a specific location. SPFs are a core component of the Highway Safety Manual (HSM) and allow for a proactive approach to safety by identifying sites that may have a higher-than-expected crash risk, even before a long history of crashes accumulates.
+                    This **Safety Performance Function (SPF) Calculator** predicts the expected number of crashes per year on a
+                    roadway segment based on traffic volume (AADT) and site-specific calibration factors. It is designed to
+                    support proactive road safety management by identifying locations with higher-than-expected crash risks.
                 </p>
             </div>
             <div class="note-card">
-                <h3>⚙️ Formula Used</h3>
-                <p>The SPF is typically represented by a power function:</p>
-                <p>$$ N_{spf} = a \times (AADT)^b $$</p>
+                <h3>⚙️ Parameters Used</h3>
                 <ul class="note-list">
-                    <li>$N_{spf}$ = Predicted average crash frequency for a base condition.</li>
-                    <li>$AADT$ = Annual Average Daily Traffic.</li>
-                    <li>$a, b$ = Regression coefficients (calibration factors) specific to a certain road type (e.g., rural two-lane, urban arterial).</li>
+                    <li><strong>AADT:</strong> Annual Average Daily Traffic – the average number of vehicles per day.</li>
+                    <li><strong>Calibration Factor (a):</strong> Adjusts the model for local roadway and traffic conditions.
+                    </li>
+                    <li><strong>Exponent (b):</strong> Determines how crash frequency scales with traffic volume.</li>
                 </ul>
             </div>
-             <div class="note-card">
-                <h3>📊 Example HSM Reference Values</h3>
-                <p>The `a` and `b` factors are highly specific to the road type, geometry, and region. The values below are illustrative examples based on HSM principles.</p>
-                <table class="info-table">
-                    <thead>
-                        <tr>
-                            <th>Road Type</th>
-                            <th>Calibration (a)</th>
-                            <th>Exponent (b)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>Rural 2-Lane Highway</td><td>~0.01 – 0.02</td><td>~0.8 – 0.9</td></tr>
-                        <tr><td>Urban 4-Lane Arterial</td><td>~0.03 – 0.05</td><td>~1.0 – 1.1</td></tr>
-                        <tr><td>Freeway Segment</td><td>~0.005 – 0.01</td><td>~0.9 – 1.0</td></tr>
-                    </tbody>
-                </table>
+            <div class="note-card">
+                <h3>📝 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>AADT (Annual Average Daily Traffic):</strong>
+                        Must be a <em>positive whole number</em>. Represents the average traffic volume per day. Invalid if left
+                        empty, zero, negative, non-numeric, or a decimal.</li>
+                    <li><strong>Calibration Factor (a):</strong>
+                        Must be a <em>positive number</em>. Used in the SPF formula to scale predicted crashes. Cannot be zero,
+                        negative, or non-numeric.</li>
+                    <li><strong>Exponent (b):</strong>
+                        Must be a <em>positive number between 0 and 3</em>. Determines how crash frequency grows with traffic
+                        volume. Cannot be zero, negative, non-numeric, or unreasonably high.</li>
+                    <li><strong>Logical consistency:</strong>
+                        All inputs must be numbers. Extreme values may produce unrealistic results and should be double-checked.
+                    </li>
+                </ul>
+                <p>💡 These validations prevent calculation errors and ensure the predicted crash output is meaningful for road
+                    safety analysis.</p>
+            </div>
+            
+            <div class="note-card">
+                <h3>📝 Output Validations</h3>
+            
+                <ul class="note-list">
+                    <li>Predicted crashes calculation is based on: <code>Predicted Crashes = a * AADT^b</code>.</li>
+                    <li>Output is displayed with <strong>two decimals</strong> and AADT is formatted for readability.</li>
+                    <li>Feedback based on predicted crash range:</li>
+                    <ul class="note-list">
+                        <li>Predicted Crashes < 1 → <strong>✅ Very low risk segment; current safety measures sufficient.</strong>
+                        </li>
+                        <li>Predicted Crashes 1–5 → <strong>⚠️ Moderate risk; review potential safety improvements.</strong></li>
+                        <li>Predicted Crashes 6–20 → <strong>⚠️ High risk; consider engineering or enforcement
+                                countermeasures.</strong></li>
+                        <li>Predicted Crashes ≥ 21 → <strong>🚨 Very high risk; immediate safety interventions required.</strong>
+                        </li>
+                    </ul>
+                    <li>Invalid calculation (NaN, Infinite) → <strong>❌ Calculation resulted in an invalid number. Please check your
+                            inputs.</strong></li>
+                </ul>
+                <p>💡 These outputs provide clear interpretation for road safety decision-making and are aligned with SPF best
+                    practices.</p>
+            </div>
+
+            <div class="note-card">
+                <h3>📏 Standards & Compliance</h3>
+                <p>
+                    The calculator aligns with the **Highway Safety Manual (HSM)** methodologies for SPF modeling. Calibration
+                    factors and exponents should be chosen based on local crash data or HSM default values to ensure accuracy
+                    and compliance with transportation safety standards.
+                </p>
+            </div>
+            <div class="note-card">
+                <h3>Conclusion</h3>
+                <p>
+                    Using SPFs allows engineers and policymakers to estimate crash frequency and prioritize safety
+                    interventions. This proactive approach helps optimize safety resources, prevent accidents, and improve
+                    roadway safety performance.
+                </p>
             </div>
         </div>
+
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const now = new Date();
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
             document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
@@ -453,12 +522,21 @@
 
             let errors = [];
 
-            // --- VALIDATION RULES ---
-            if (aadt_val === '' || isNaN(aadt_val) || parseFloat(aadt_val) <= 0) errors.push("👉 AADT must be a positive number.");
-            if (a_val === '' || isNaN(a_val) || parseFloat(a_val) <= 0) errors.push("👉 Calibration Factor (a) must be a positive number.");
-            if (b_val === '' || isNaN(b_val)) errors.push("👉 Exponent (b) must be a valid number.");
-            
-            // --- ERROR HANDLING ---
+            // --- INPUT VALIDATION ---
+            const aadt = parseFloat(aadt_val);
+            const aFactor = parseFloat(a_val);
+            const bExponent = parseFloat(b_val);
+
+            if (aadt_val === '' || isNaN(aadt) || aadt <= 0 || !Number.isFinite(aadt) || !Number.isInteger(aadt)) {
+                errors.push("👉 AADT must be a positive whole number.");
+            }
+            if (a_val === '' || isNaN(aFactor) || aFactor <= 0) {
+                errors.push("👉 Calibration Factor (a) must be a positive number.");
+            }
+            if (b_val === '' || isNaN(bExponent) || bExponent <= 0 || bExponent > 3) {
+                errors.push("👉 Exponent (b) must be a positive number between 0 and 3.");
+            }
+
             if (errors.length > 0) {
                 errorMessage.innerHTML = errors.join("<br>");
                 errorBox.classList.remove("hidden");
@@ -470,10 +548,6 @@
             }
 
             // --- CALCULATION ---
-            const aadt = parseFloat(aadt_val);
-            const aFactor = parseFloat(a_val);
-            const bExponent = parseFloat(b_val);
-
             const predictedCrashes = aFactor * Math.pow(aadt, bExponent);
 
             if (!isFinite(predictedCrashes)) {
@@ -486,9 +560,20 @@
             // --- DISPLAY RESULTS ---
             document.getElementById('rateValue').textContent = predictedCrashes.toFixed(2);
             document.getElementById('aadtDisplay').textContent = aadt.toLocaleString();
-            
-            // --- FEEDBACK ---
-            document.getElementById('feedbackContent').innerHTML = `For a roadway with an AADT of <strong>${aadt.toLocaleString()}</strong>, the model predicts approximately <strong>${predictedCrashes.toFixed(2)}</strong> crashes per year. This predicted value should be compared to the site's observed crash history to identify potential safety issues.`;
+
+            // --- FEEDBACK BASED ON RISK LEVEL ---
+            let feedback;
+            if (predictedCrashes < 1) {
+                feedback = "✅ Very low risk segment; current safety measures sufficient.";
+            } else if (predictedCrashes < 6) {
+                feedback = "⚠️ Moderate risk; review potential safety improvements.";
+            } else if (predictedCrashes < 21) {
+                feedback = "⚠️ High risk; consider engineering or enforcement countermeasures.";
+            } else {
+                feedback = "🚨 Very high risk; immediate safety interventions required.";
+            }
+
+            document.getElementById('feedbackContent').innerHTML = `For a roadway with an AADT of <strong>${aadt.toLocaleString()}</strong>, the model predicts approximately <strong>${predictedCrashes.toFixed(2)}</strong> crashes per year.<br>${feedback}`;
 
             placeholder.classList.add("hidden");
             resultValue.classList.remove("hidden");
@@ -501,7 +586,46 @@
             window.print();
         }
     </script>
+
     <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
 {% endblock %}
+
+<!-- 
+1. Input Validation Rules (QEHS Perspective)
+Input	Unit / Type	Acceptable Range	Validation Rules	Notes / Rationale
+AADT (Annual Average Daily Traffic)	vehicles/day	> 0, realistic upper limit e.g., 1–500,000	Must be a positive number. Must be an integer (vehicles cannot be fractional).	Ensures physically meaningful traffic counts; prevents division by zero and negative predictions.
+Calibration Factor (a)	dimensionless	> 0, < 10 (typical engineering range)	Must be positive. Can be decimal.	Ensures realistic scaling of predicted crashes.
+Exponent (b)	dimensionless	0 < b < 3 (engineering typical range)	Must be positive. Can be decimal.	Controls the sensitivity of crash predictions to traffic volume. Extremely high or negative exponents are unrealistic.
+
+Additional logical consistency checks:
+
+All fields required: No empty values allowed.
+
+Cross-field: None directly, but all must be positive to avoid negative or invalid predictions.
+
+Edge cases to handle:
+
+Zero or negative AADT → not physically meaningful.
+
+Negative or zero a → would produce invalid predictions.
+
+Extreme b values → may produce unrealistic predictions (e.g., b=10).
+
+Non-numeric input → must be flagged.
+
+Very large traffic numbers → check for potential overflow in calculation.
+
+2. Output Validation / Interpretation Logic
+
+The SPF output represents predicted annual crashes. For real-world audit use:
+
+Predicted Crashes	Color / Feedback	Interpretation
+< 1 crash/year	Green	Very low risk segment; current safety measures sufficient.
+1–5 crashes/year	Yellow	Moderate risk; review potential safety improvements.
+6–20 crashes/year	Orange	High risk; consider engineering or enforcement countermeasures.
+> 20 crashes/year	Red	Very high risk; immediate safety interventions required.
+
+Important: Feedback text should always match your script when displayed.
+-->

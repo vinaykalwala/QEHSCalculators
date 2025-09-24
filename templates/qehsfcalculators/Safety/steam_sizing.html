@@ -367,13 +367,39 @@
         .hidden { 
             display: none; 
         }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
     </style>
 </head>
 <body>
     <div class="btn-container">
         <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
     </div>
-    
+
     <div class="calculator-container printable" id="printArea">
 
         {% include "includes/print_header_footer.html" %}
@@ -455,108 +481,139 @@
 
         <div class="note-section">
             <div class="note-card">
-                <h3>📘 About Steam Relief Sizing</h3>
+                <h3>📘 About This Calculator</h3>
                 <p>
-                    Properly sizing a steam safety relief valve is critical for preventing catastrophic overpressure events in boilers and pressure vessels. This calculation determines the minimum required orifice area of the valve to safely discharge a specific mass flow rate of steam at a given pressure. Undersizing can lead to vessel rupture, while significant oversizing can cause valve instability (chatter). This tool uses an ASME-approved formula for steam service.
+                    This calculator determines the required **steam relief area or flow capacity** for industrial systems.
+                    Proper sizing prevents overpressure, ensures safe boiler operation, and avoids instability due to
+                    oversizing. It is based on ASME-approved formulas for steam service.
                 </p>
             </div>
             <div class="note-card">
-                <h3>⚙️ Formula Used</h3>
-                <p>The required orifice area (A) is calculated as:</p>
-                <p>$$ A = \frac{W}{51.5 \times P \times K_d \times K_n} $$</p>
+                <h3>⚙️ Parameters Used</h3>
                 <ul class="note-list">
-                    <li>$A$ = Required Orifice Area (m²)</li>
-                    <li>$W$ = Mass Flow Rate (kg/hr)</li>
-                    <li>$P$ = Relief Pressure (Set Pressure + Overpressure) (kPa)</li>
-                    <li>$K_d$ = Discharge Coefficient (typically 0.975 for steam)</li>
-                    <li>$K_n$ = Napier Correction Factor for superheated steam (1.0 for saturated steam)</li>
+                    <li><strong>Mass Flow Rate (W):</strong> Relief capacity required (kg/hr)</li>
+                    <li><strong>Pressure (P):</strong> Set pressure plus overpressure (kPa)</li>
+                    <li><strong>Discharge Coefficient (Kd):</strong> Valve efficiency (0.85–0.975)</li>
+                    <li><strong>Napier Correction (Kn):</strong> Accounts for superheat (1.0 for saturated steam)</li>
+                    <li><strong>Constant (51.5):</strong> Derived from gas flow equations to normalize units</li>
                 </ul>
             </div>
-             <div class="note-card">
-                <h3>📊 Key Parameter Guide</h3>
-                <table class="info-table">
-                    <thead>
-                        <tr>
-                            <th>Parameter</th>
-                            <th>Description</th>
-                            <th>Typical Values</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>Mass Flow Rate (W)</strong></td>
-                            <td>The relief capacity required for the worst-case scenario.</td>
-                            <td>100 - 100,000 kg/hr</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Pressure (P)</strong></td>
-                            <td>Absolute pressure at the valve inlet during relief (Set Pressure × 1.03 for 3% overpressure).</td>
-                            <td>> 101.3 kPa</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Discharge Coeff. (Kd)</strong></td>
-                            <td>Valve flow efficiency ( dimensionless). Provided by the valve manufacturer.</td>
-                            <td>0.85 - 0.975</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Napier Correction (Kn)</strong></td>
-                            <td>Correction factor for superheated steam.</td>
-                            <td>1.0 for saturated steam.<br>0.9 - 1.1 for superheated.</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="note-card">
+                <h3>Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Mass Flow Rate (W) [kg/hr]:</strong> Must be a positive number. Typical range: 100 – 100,000 kg/hr.
+                    </li>
+                    <li><strong>Relief Pressure (P) [kPa]:</strong> Must be a positive number (absolute pressure).</li>
+                    <li><strong>Discharge Coefficient (Kd):</strong> Must be between 0 and 1. Typical valves have Kd ≈ 0.85 – 0.97.
+                    </li>
+                    <li><strong>Napier Correction (Kn):</strong> Must be positive. Typical range: 0.9 – 1.1 (1.0 for saturated
+                        steam).</li>
+                    <li>Empty fields, negative numbers, or non-numeric values will trigger an error message and prevent calculation.
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>Output Validations & Assessment</h3>
+                <ul class="note-list">
+                    <li>If the calculated orifice area < 50 mm²: <br>
+                            <em>"This requires a very small orifice. Ensure the selected valve is stable at low flows and check
+                                manufacturer minimum size limits."</em>
+                    </li>
+                    <li>If the calculated orifice area > 5000 mm²: <br>
+                        <em>"This requires a large orifice. It may be more practical and economical to use multiple, smaller relief
+                            valves in parallel."</em>
+                    </li>
+                    <li>If the calculated orifice area is within 50 – 5000 mm²: <br>
+                        <em>"This orifice size is within a standard range. Select the next largest standard orifice size available
+                            from your valve manufacturer."</em>
+                    </li>
+                    <li>If the calculation produces an invalid number (NaN or infinite): <br>
+                        <em>"❌ Calculation resulted in an invalid number. Please check your inputs."</em>
+                    </li>
+                </ul>
+                <h3>Tips & Recommendations</h3>
+                    <ul class="note-list">
+                        <li>Check valve manufacturer datasheets to match the calculated orifice area to standard sizes.</li>
+                        <li>Use the warning messages to verify unusual Kd or Kn values.</li>
+                        <li>Always confirm that the selected valve can handle your system’s mass flow and pressure conditions.</li>
+                        <li>Follow safety standards (OSHA, NFPA, ISO) when designing relief systems.</li>
+                    </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📏 Standards & Compliance</h3>
+                <p>
+                    This calculation follows ASME BPVC Section I (power boilers) and Section VIII (pressure vessels) guidelines.
+                    API RP 520 recommends a 3% overpressure allowance. Using these standards ensures both safety and regulatory
+                    compliance in steam systems.
+                </p>
+            </div>
+            <div class="note-card">
+                <h3>Conclusion</h3>
+                <p>
+                    Accurate steam relief sizing is essential for industrial safety. This calculator helps ensure valves
+                    function correctly under overpressure conditions, preventing catastrophic failures while optimizing system
+                    design.
+                </p>
             </div>
         </div>
+
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const now = new Date();
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
             document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
         });
 
         function calculateSteamSizing() {
+            // --- Get input values ---
             const W_val = document.getElementById('massFlow').value.trim();
             const P_val = document.getElementById('pressure').value.trim();
             const Kd_val = document.getElementById('kd').value.trim();
             const Kn_val = document.getElementById('kn').value.trim();
 
+            // --- Get UI elements ---
             const errorBox = document.getElementById('resultError');
             const errorMessage = document.getElementById('errorMessage');
             const warningBox = document.getElementById('resultWarning');
             const warningMessage = document.getElementById('warningMessage');
             const placeholder = document.getElementById('placeholder');
             const resultValue = document.getElementById('resultValue');
+            const feedbackContent = document.getElementById('feedbackContent');
 
             let errors = [];
             let warnings = [];
 
-            // --- VALIDATION RULES ---
+            // --- Parse input values ---
             const W = parseFloat(W_val);
             const P = parseFloat(P_val);
             const Kd = parseFloat(Kd_val);
             const Kn = parseFloat(Kn_val);
 
-            if (W_val === '' || isNaN(W) || W <= 0) errors.push("👉 Mass Flow Rate must be a positive number.");
-            if (P_val === '' || isNaN(P) || P <= 0) errors.push("👉 Pressure must be a positive number.");
-            if (Kd_val === '' || isNaN(Kd) || Kd <= 0 || Kd > 1) errors.push("👉 Discharge Coefficient (Kd) must be between 0 and 1.");
-            if (Kn_val === '' || isNaN(Kn) || Kn <= 0) errors.push("👉 Napier Correction (Kn) must be a positive number.");
-            
-            // --- ERROR HANDLING ---
+            // --- Input Validations ---
+            if (W_val === '' || isNaN(W) || W <= 0) errors.push("👉 Mass Flow Rate must be a positive number (typical 100–100,000 kg/hr).");
+            if (P_val === '' || isNaN(P) || P <= 0) errors.push("👉 Relief Pressure must be a positive number (kPa).");
+            if (Kd_val === '' || isNaN(Kd) || Kd <= 0 || Kd > 1) errors.push("👉 Discharge Coefficient (Kd) must be between 0 and 1 (typical 0.85–0.97).");
+            if (Kn_val === '' || isNaN(Kn) || Kn <= 0) errors.push("👉 Napier Correction (Kn) must be a positive number (typical 0.9–1.1).");
+
+            // --- Error Handling ---
             if (errors.length > 0) {
                 errorMessage.innerHTML = errors.join("<br>");
                 errorBox.classList.remove("hidden");
                 placeholder.classList.add("hidden");
                 resultValue.classList.add("hidden");
+                warningBox.classList.add("hidden");
                 return;
             } else {
                 errorBox.classList.add("hidden");
             }
 
-            // --- WARNING CHECKS ---
-            if (Kd < 0.85) warnings.push("Discharge Coefficient (Kd) is unusually low. Please verify the valve data.");
-            if (Kn < 0.9 || Kn > 1.1) warnings.push("Napier Correction (Kn) is outside the typical range of 0.9-1.1. Please confirm if your steam is significantly superheated.");
+            // --- Warnings (non-critical but informative) ---
+            if (Kd < 0.85) warnings.push("⚠️ Discharge Coefficient (Kd) is unusually low. Verify valve specifications.");
+            if (Kn < 0.9 || Kn > 1.1) warnings.push("⚠️ Napier Correction (Kn) is outside typical range 0.9–1.1. Confirm steam condition.");
 
             if (warnings.length > 0) {
                 warningMessage.innerHTML = warnings.join("<br>");
@@ -565,37 +622,38 @@
                 warningBox.classList.add("hidden");
             }
 
-            // --- CALCULATION ---
+            // --- Calculation ---
             const areaM2 = W / (51.5 * P * Kd * Kn);
-            const areaMM2 = areaM2 * 1000000;
+            const areaMM2 = areaM2 * 1e6;
 
-            if (!isFinite(areaMM2)) {
+            if (!isFinite(areaMM2) || areaMM2 <= 0) {
                 errorMessage.innerHTML = "❌ Calculation resulted in an invalid number. Please check your inputs.";
                 errorBox.classList.remove("hidden");
                 resultValue.classList.add("hidden");
                 return;
             }
 
-            // --- DISPLAY RESULTS ---
+            // --- Display Results ---
             document.getElementById('rateValue').textContent = areaMM2.toFixed(2);
             document.getElementById('areaM2').textContent = areaM2.toExponential(4) + ' m²';
             document.getElementById('massFlowDisplay').textContent = W.toLocaleString() + ' kg/hr';
-            
-            // --- ASSESSMENT ---
+
+            // --- Orifice Assessment ---
             let feedback;
             if (areaMM2 < 50) {
-                feedback = 'This requires a very small orifice. Ensure the selected valve is stable at low flows and check manufacturer minimum size limits.';
+                feedback = '🔴 Very small orifice. Ensure valve stability at low flows and check manufacturer minimum size limits.';
             } else if (areaMM2 > 5000) {
-                feedback = 'This requires a large orifice. It may be more practical and economical to use multiple, smaller relief valves in parallel.';
+                feedback = '🟠 Large orifice required. Consider using multiple smaller relief valves in parallel.';
             } else {
-                feedback = 'This orifice size is within a standard range. Select the next largest standard orifice size available from your valve manufacturer.';
+                feedback = '✅ Orifice size is standard. Choose next largest standard valve size available from manufacturer charts.';
             }
-            document.getElementById('feedbackContent').textContent = feedback;
+            feedbackContent.textContent = feedback;
 
             placeholder.classList.add("hidden");
             resultValue.classList.remove("hidden");
         }
 
+        // --- Print report ---
         function printReport() {
             const now = new Date();
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -603,7 +661,36 @@
             window.print();
         }
     </script>
+
     <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
 {% endblock %}
+
+<!-- 
+1️⃣ Input Validation Rules (QEHS & Safety Perspective)
+Input	Units	Acceptable Range	Validation Rationale	Notes / Edge Cases
+Mass Flow Rate (W)	kg/hr	> 0, typical 100–100,000	Steam mass flow must be positive. Extremely low flows (<10 kg/hr) may indicate instrumentation errors or impractical relief sizing.	Reject zero, negative, NaN, or unrealistic extreme values (>1,000,000)
+Relief Pressure (P)	kPa (absolute)	> 0, typical 100–3000 kPa	Pressure must be positive. Low pressure (<50 kPa) may not be feasible, high pressure (>5000 kPa) could exceed design limits.	Prevent division by zero or negative values
+Discharge Coefficient (Kd)	dimensionless	0 < Kd ≤ 1 (recommended 0.85–0.97)	Represents valve efficiency. Kd >1 invalid. Kd ≤0 impossible physically.	Warn for unusual values outside typical range
+Napier Correction (Kn)	dimensionless	0.9 ≤ Kn ≤ 1.1 (1.0 typical for saturated steam)	Accounts for compressibility. Values outside range indicate wrong fluid state or calculation error	Warn if outside range
+
+Edge Case Validations:
+
+Mass flow = 0 → division by zero / invalid area
+
+Pressure = 0 → division by zero
+
+Kd ≤0 or >1 → non-physical coefficient
+
+Kn <0.9 or >1.1 → unrealistic steam conditions
+
+Extremely high flows → may require multiple relief valves
+
+2️⃣ Output Validation Logic & Thresholds
+Output	Thresholds / Logic	QEHS Interpretation
+Orifice Area (A)	<50 mm² → small orifice warning	Practically too small; risk of high velocity / choked flow. May require minimum recommended size.
+50–5000 mm² → standard	Manufacturer chart validation recommended	Typical operational sizing; acceptable for single valve installation
+>5000 mm² → large orifice warning	Consider multiple valves; ensures safety margin	Avoid oversized single valve causing turbulence / installation issues
+Feedback messages	✅ Standard, ⚠️ Warning	Provides operator with actionable insight aligned with regulatory requirements
+-->

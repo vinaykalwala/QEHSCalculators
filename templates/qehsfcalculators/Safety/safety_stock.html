@@ -66,9 +66,9 @@
             box-shadow: 0 6px 16px rgba(0,0,0,0.15);
             display: flex;
             flex-direction: column;
-            justify-content: center;
             transition: transform 0.3s ease;
             height: 420px; /* Fixed Height */
+            overflow-y: auto;
         }
         
         .calc-card:hover { 
@@ -352,13 +352,39 @@
         .hidden { 
             display: none; 
         }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
     </style>
 </head>
 <body>
     <div class="btn-container">
         <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
     </div>
-    
+
     <div class="calculator-container printable" id="printArea">
 
         {% include "includes/print_header_footer.html" %}
@@ -432,48 +458,104 @@
 
         <div class="note-section">
             <div class="note-card">
-                <h3>📘 About Safety Stock</h3>
+                <h3>📘 About This Calculator</h3>
                 <p>
-                    **Safety Stock** is the extra inventory held by a company to prevent stockouts caused by unpredictable fluctuations in customer demand and supplier lead times. Calculating the optimal safety stock is a critical balancing act: too little risks lost sales and customer dissatisfaction, while too much ties up capital in unnecessary inventory.
+                    This calculator determines the optimal **safety stock** required to mitigate stockout risks caused by
+                    fluctuations in demand and supply lead times. It helps businesses maintain service levels without
+                    overstocking inventory.
                 </p>
             </div>
             <div class="note-card">
-                <h3>⚙️ Formula Used</h3>
-                <p>The standard formula for safety stock is:</p>
-                <p>$$ \text{Safety Stock} = Z \times \sigma_d \times \sqrt{LT} $$</p>
+                <h3>⚙️ Parameters Used</h3>
                 <ul class="note-list">
-                    <li>$Z$ = The Z-score corresponding to your desired service level.</li>
-                    <li>$\sigma_d$ = The standard deviation of daily demand.</li>
-                    <li>$LT$ = The lead time in days.</li>
+                    <li><strong>Service Level Factor (Z):</strong> Probability of meeting demand during lead time.</li>
+                    <li><strong>Standard Deviation of Daily Demand (σd):</strong> Variability in daily consumption.</li>
+                    <li><strong>Lead Time (LT):</strong> Time between placing an order and receiving inventory.</li>
                 </ul>
             </div>
-             <div class="note-card">
-                <h3>📊 Common Service Level Z-Factors</h3>
-                <p>The Z-factor is a statistical value that corresponds to your desired service level (the probability of not having a stockout). If you don't know your Z-factor, you can find it using your target service level percentage below.</p>
-                <table class="info-table">
-                    <thead>
-                        <tr>
-                            <th>Service Level</th>
-                            <th>Z-Factor</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>90%</td><td>1.28</td></tr>
-                        <tr><td>95%</td><td>1.65</td></tr>
-                        <tr><td>97.5%</td><td>1.96</td></tr>
-                        <tr><td>99%</td><td>2.33</td></tr>
-                        <tr><td>99.9%</td><td>3.09</td></tr>
-                    </tbody>
-                </table>
+            <div class="note-card">
+                <h3>📝 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Service Level Factor (Z-score):</strong> Must be a <strong>number between 0 and 3.09</strong>.
+                        Example: 1.65 ✅, 0 ❌, 3.5 ❌, -0.5 ❌</li>
+                    <li><strong>Standard Deviation of Daily Demand (σ<sub>d</sub>):</strong> Must be a <strong>non-negative
+                            number</strong>.
+                        Example: 50 ✅, 0 ✅, -10 ❌</li>
+                    <li><strong>Lead Time (Days):</strong> Must be a <strong>number greater than 0</strong>.
+                        Example: 10 ✅, 0 ❌, -5 ❌</li>
+                    <li><strong>General Checks:</strong> All fields must be filled with valid numeric values.</li>
+                    <li><strong>Edge Cases:</strong>
+                        <ul class="note-list">
+                            <li>Z-score extremely high (>3.09) → unrealistic service level, warning feedback.</li>
+                            <li>Zero or negative demand standard deviation → triggers error.</li>
+                            <li>Zero or negative lead time → triggers error.</li>
+                            <li>Non-numeric input → error message.</li>
+                            <li>Any calculation resulting in NaN or Infinite → triggers error message.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Output Validations</h3>
+                <ul>
+                    <li><strong>Safety Stock:</strong> Calculated as <code>Z × σ<sub>d</sub> × √Lead Time</code>.
+                        Example: 1.65 × 50 × √10 → 260.77 units</li>
+                    <li><strong>Z-Factor Display:</strong> Shown with 3 decimal places.
+                        Example: 1.650</li>
+                    <li><strong>Lead Time Display:</strong> Shown as whole days.
+                        Example: 10 days</li>
+                    <li><strong>Inventory Strategy Meter:</strong> Visual indicator with color coding:
+                        <ul class="note-list">
+                            <li>Z < 1.28 → 🔴 Cost-Focused Strategy (Red, 20%)</li>
+                            <li>1.28 ≤ Z < 1.65 → 🟠 Balanced Strategy (Orange, 45%)</li>
+                            <li>1.65 ≤ Z < 2.33 → 🟡 Service-Focused Strategy (Yellow, 70%)</li>
+                            <li>Z ≥ 2.33 → ✅ High Service Strategy (Green, 95%)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Feedback Messages:</strong>
+                        <ul class="note-list">
+                            <li>Cost-Focused: 🔴 "A Z-factor of X corresponds to a low service level (<90%). Minimizes inventory
+                                    costs but high risk of stockouts."</li>
+                            <li>Balanced: 🟠 "A Z-factor of X reflects 90–95% service level, balancing inventory cost and customer
+                                satisfaction."</li>
+                            <li>Service-Focused: 🟡 "A Z-factor of X targets high service level (95–99%), increasing inventory to
+                                prevent stockouts."</li>
+                            <li>High Service: ✅ "A Z-factor of X targets >99% service level. Maximum protection against stockouts,
+                                ideal for critical items."</li>
+                        </ul>
+                    </li>
+                    <li><strong>Invalid Calculations:</strong> If safety stock is <em>not finite</em>, show:
+                        ❌ Calculation resulted in an invalid number. Please check your inputs.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📏 Standards & Compliance</h3>
+                <p>
+                    Safety stock calculations follow standard inventory management principles and are aligned with best
+                    practices in supply chain and operations management, ensuring optimal stock levels while minimizing holding
+                    costs.
+                </p>
+            </div>
+            <div class="note-card">
+                <h3>Conclusion</h3>
+                <p>
+                    Calculating safety stock using these parameters allows companies to reduce the risk of stockouts, improve
+                    customer satisfaction, and optimize inventory investment.
+                </p>
             </div>
         </div>
+
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const now = new Date();
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            if (document.getElementById('printDate')) {
+                document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
         });
 
         function calculateSafetyStock() {
@@ -489,10 +571,19 @@
             let errors = [];
 
             // --- VALIDATION RULES ---
-            if (z_val === '' || isNaN(z_val)) errors.push("👉 Service Level Factor (Z) must be a number.");
-            if (stdDev_val === '' || isNaN(stdDev_val) || parseFloat(stdDev_val) < 0) errors.push("👉 Standard Deviation of Demand must be a number ≥ 0.");
-            if (leadTime_val === '' || isNaN(leadTime_val) || parseFloat(leadTime_val) < 0) errors.push("👉 Lead Time must be a number ≥ 0.");
-            
+            const z = parseFloat(z_val);
+            const stdDev = parseFloat(stdDev_val);
+            const leadTime = parseFloat(leadTime_val);
+
+            if (z_val === '' || isNaN(z) || z < 0 || z > 3.09)
+                errors.push("👉 Service Level Factor (Z) must be a number between 0 and 3.09 (Z-score, realistic 50-99.9% service level).");
+
+            if (stdDev_val === '' || isNaN(stdDev) || stdDev < 0)
+                errors.push("👉 Standard Deviation of Demand must be a non-negative number (≥0).");
+
+            if (leadTime_val === '' || isNaN(leadTime) || leadTime <= 0)
+                errors.push("👉 Lead Time must be a number greater than 0 (days).");
+
             // --- ERROR HANDLING ---
             if (errors.length > 0) {
                 errorMessage.innerHTML = errors.join("<br>");
@@ -505,11 +596,7 @@
             }
 
             // --- CALCULATION ---
-            const zValue = parseFloat(z_val);
-            const stdDevDemand = parseFloat(stdDev_val);
-            const leadTime = parseFloat(leadTime_val);
-
-            const safetyStock = zValue * stdDevDemand * Math.sqrt(leadTime);
+            const safetyStock = z * stdDev * Math.sqrt(leadTime);
 
             if (!isFinite(safetyStock)) {
                 errorMessage.innerHTML = "❌ Calculation resulted in an invalid number. Please check your inputs.";
@@ -520,29 +607,29 @@
 
             // --- DISPLAY RESULTS ---
             document.getElementById('rateValue').textContent = safetyStock.toFixed(2);
-            document.getElementById('zFactorDisplay').textContent = zValue.toFixed(2);
+            document.getElementById('zFactorDisplay').textContent = z.toFixed(3);
             document.getElementById('leadTimeDisplay').textContent = leadTime.toFixed(0) + ' days';
-            
+
             // --- ASSESSMENT ---
             const meterFill = document.getElementById('meterFill');
             let meterWidth, meterColor, feedback;
 
-            if (zValue < 1.28) { // < 90%
+            if (z < 1.28) { // < 90%
                 meterWidth = '20%';
                 meterColor = '#e74c3c'; // Red
-                feedback = `🔴 <strong>Cost-Focused Strategy.</strong> A Z-factor of ${zValue.toFixed(2)} corresponds to a low service level (<90%). This minimizes inventory costs but carries a high risk of stockouts.`;
-            } else if (zValue < 1.65) { // 90% - 95%
+                feedback = `🔴 <strong>Cost-Focused Strategy.</strong> A Z-factor of ${z.toFixed(2)} corresponds to a low service level (<90%). This minimizes inventory costs but carries a high risk of stockouts.`;
+            } else if (z < 1.65) { // 90% - 95%
                 meterWidth = '45%';
                 meterColor = '#e67e22'; // Orange
-                feedback = `🟠 <strong>Balanced Strategy.</strong> A Z-factor of ${zValue.toFixed(2)} reflects a standard service level (90-95%), offering a good balance between inventory cost and customer satisfaction.`;
-            } else if (zValue < 2.33) { // 95% - 99%
+                feedback = `🟠 <strong>Balanced Strategy.</strong> A Z-factor of ${z.toFixed(2)} reflects a standard service level (90-95%), offering a good balance between inventory cost and customer satisfaction.`;
+            } else if (z < 2.33) { // 95% - 99%
                 meterWidth = '70%';
                 meterColor = '#f1c40f'; // Yellow
-                feedback = `🟡 <strong>Service-Focused Strategy.</strong> A Z-factor of ${zValue.toFixed(2)} targets a high service level (95-99%), increasing inventory costs to provide excellent protection against stockouts.`;
+                feedback = `🟡 <strong>Service-Focused Strategy.</strong> A Z-factor of ${z.toFixed(2)} targets a high service level (95-99%), increasing inventory costs to provide excellent protection against stockouts.`;
             } else { // >= 99%
                 meterWidth = '95%';
                 meterColor = '#2ecc71'; // Green
-                feedback = `✅ <strong>High Service Strategy.</strong> A Z-factor of ${zValue.toFixed(2)} targets a very high service level (>99%). This offers maximum protection against stockouts, typically for critical items where availability is paramount.`;
+                feedback = `✅ <strong>High Service Strategy.</strong> A Z-factor of ${z.toFixed(2)} targets a very high service level (>99%). This offers maximum protection against stockouts, typically for critical items where availability is paramount.`;
             }
 
             meterFill.style.width = meterWidth;
@@ -559,8 +646,78 @@
             document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
             window.print();
         }
+
     </script>
     <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
 {% endblock %}
+
+<!-- 
+1. Detailed Input Validation Rules (Industry Standards)
+Input	Acceptable Range	Unit	Notes / Rationale
+Service Level Factor (Z-score)	0 – 3.09	Z-score (unitless)	Corresponds to service levels 50% – 99.9%. Prevent unrealistic overstocking or negative safety stock.
+Std. Deviation of Daily Demand (σₐ)	≥ 0	Units/day	Negative demand deviation is illogical. Zero allowed (no variability).
+Lead Time (LT)	≥ 1	Days	Lead time must be at least 1 day. Cannot be zero or negative. Fractional days allowed (partial days).
+
+General Rules:
+
+All fields must be numeric.
+
+Empty inputs are invalid.
+
+Allowed decimals: up to 3 places for Z-score and daily demand std. dev.
+
+Logical consistency: Safety Stock = Z × σ × √LT. All components must be non-negative.
+
+2. Edge Case Validations
+
+Zero Standard Deviation: SS = 0, feedback shows “No additional safety stock required.”
+
+Zero Lead Time: Invalid, triggers error.
+
+Negative Inputs: Invalid, triggers error.
+
+Extremely High Z-score (>3.09): Warn user; unlikely in practice (>99.9% service level).
+
+Non-numeric input: Error message.
+
+Division by zero: Not directly applicable here, but square root of negative lead time must be prevented.
+
+3. Output Validation Logic
+
+Safety Stock (SS):
+
+𝑆
+𝑆
+=
+𝑍
+×
+𝜎
+𝑑
+×
+𝐿
+𝑇
+SS=Z×σ
+d
+	​
+
+×
+LT
+	​
+
+
+Display format: 2 decimal places, units.
+
+Meter Assessment (inventory strategy):
+
+Low SS / Cost-Focused: 0 ≤ SS < 50 → emphasizes cost savings, may risk stockouts.
+
+Balanced: 50 ≤ SS < 150 → moderate safety stock, balanced cost-service.
+
+Service-Focused: 150 ≤ SS < 300 → high service level, moderate cost.
+
+High Service: SS ≥ 300 → ensures almost no stockouts, higher carrying cost.
+
+Feedback message: Explains strategy implications and trade-offs.
+-->

@@ -346,13 +346,39 @@
         .hidden { 
             display: none; 
         }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
     </style>
 </head>
 <body>
     <div class="btn-container">
         <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
     </div>
-    
+
     <div class="calculator-container printable" id="printArea">
 
         {% include "includes/print_header_footer.html" %}
@@ -435,43 +461,111 @@
 
         <div class="note-section">
             <div class="note-card">
-                <h3>📘 About the Safety Index</h3>
+                <h3>📘 About This Calculator</h3>
                 <p>
-                    The **Safety Index (SI)** is a type of benefit-cost ratio used to evaluate the economic viability of a safety project. It quantifies the financial return on an investment by comparing the projected monetary savings from prevented accidents to the total cost of implementing the safety measure. A higher SI value indicates a more cost-effective project.
+                    The **Safety Index (SI)** measures the cost-benefit ratio of safety improvements by comparing accident cost
+                    savings to project implementation costs. It helps prioritize investments, ensuring maximum safety impact per
+                    dollar spent.
                 </p>
             </div>
             <div class="note-card">
-                <h3>⚙️ Formula Used</h3>
-                <p>First, the total projected savings (G) are calculated:</p>
-                <p>$$ G = D \times E \times \left(\frac{F}{100}\right) $$</p>
-                <p>Then, the Safety Index (SI) is calculated as the ratio of savings to cost:</p>
-                <p>$$ \text{SI} = \frac{\text{Total Savings (G)}}{\text{Total Project Cost (C)}} $$</p>
-                 <ul class="note-list">
-                    <li>$D$ = Number of Accidents Prevented</li>
-                    <li>$E$ = Cost per Accident</li>
-                    <li>$F$ = Effectiveness Factor (%)</li>
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Reduced Accidents (D):</strong> Expected number of accidents prevented</li>
+                    <li><strong>Cost Per Accident (E):</strong> Comprehensive crash costs (property damage, injuries, etc.)</li>
+                    <li><strong>Effectiveness Factor (F):</strong> Expected percentage of maximum possible reduction</li>
+                    <li><strong>Total Project Cost:</strong> Implementation cost in thousands of dollars</li>
                 </ul>
             </div>
-             <div class="note-card">
-                <h3>💡 Interpreting the SI</h3>
-                <p>The SI value provides a clear directive for decision-making:</p>
-                 <ul class="note-list">
-                    <li><strong>SI > 1.0:</strong> The project's financial benefits (savings from prevented accidents) outweigh its costs. It is considered economically justifiable.</li>
-                    <li><strong>SI = 1.0:</strong> The benefits are equal to the costs. The project breaks even.</li>
-                    <li><strong>SI < 1.0:</strong> The project's costs are greater than its financial benefits. While it may still have non-monetary value, it is not considered economically efficient.</li>
+            <div class="note-card">
+                <h3>📝 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Reduced Accidents (D):</strong> Must be a number ≥ 0.
+                        Example: 5 ✅, 0 ✅, -2 ❌</li>
+                    <li><strong>Cost Per Accident ($) (E):</strong> Must be a number > 0.
+                        Example: 90000 ✅, 0 ❌, -5000 ❌</li>
+                    <li><strong>Effectiveness Factor (%) (F):</strong> Must be a number between 1 and 100.
+                        Example: 75 ✅, 0 ❌, 105 ❌</li>
+                    <li><strong>Total Project Cost ($1000s) (C):</strong> Must be a number > 0.
+                        Example: 150 ✅, 0 ❌, -50 ❌</li>
+                    <li><strong>General Checks:</strong> All fields must be filled with numeric values only.</li>
+                    <li><strong>Edge Cases:</strong>
+                        <ul class="note-list">
+                            <li>Zero Reduced Accidents → total savings = 0, Safety Index may be 0.</li>
+                            <li>Extremely high Cost per Accident → triggers a warning in feedback.</li>
+                            <li>Non-numeric input → error message.</li>
+                            <li>Division by zero prevented automatically.</li>
+                        </ul>
+                    </li>
                 </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Output Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Safety Index (SI):</strong> Computed as <code>Total Savings ÷ Project Cost</code> and displayed to 2
+                        decimal places.
+                        Example: 2.45</li>
+                    <li><strong>Project Cost:</strong> Displayed in USD currency format.
+                        Example: $150,000.00</li>
+                    <li><strong>Total Savings:</strong> Displayed in USD currency format.
+                        Example: $337,500.00</li>
+                    <li><strong>Risk Assessment Meter:</strong> Color-coded based on Safety Index:
+                        <ul class="note-list">
+                            <li>SI &lt; 1 → ❌ Low Return (Red)</li>
+                            <li>1 ≤ SI &lt; 3 → 🟡 Marginal Return (Orange)</li>
+                            <li>3 ≤ SI &lt; 10 → 👍 Good Return (Yellow)</li>
+                            <li>SI ≥ 10 → ✅ Excellent Return (Green)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Feedback Messages:</strong>
+                        <ul class="note-list">
+                            <li>Low Return: “❌ Low Return. This project is not economically viable, as its costs ($PROJECT_COST)
+                                exceed the projected savings ($TOTAL_SAVINGS).”</li>
+                            <li>Marginal Return: “🟡 Marginal Return. The project is economically justifiable but offers a modest
+                                return. For every $1 spent, you save $SI.”</li>
+                            <li>Good Return: “👍 Good Return. This project shows a strong return on investment. For every $1 spent,
+                                you save $SI.”</li>
+                            <li>Excellent Return: “✅ Excellent Return. This project is highly cost-effective and should be a high
+                                priority. For every $1 spent, you save $SI.”</li>
+                            <li>High Accident Cost Warning: “⚠️ (High accident cost used)” appears when E &gt; 500,000</li>
+                        </ul>
+                    </li>
+                    <li><strong>Invalid Calculations:</strong> If Safety Index is not finite →
+                        ❌ Calculation resulted in an invalid number. Please check your inputs.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📏 Standards & Compliance</h3>
+                <p>
+                    FHWA's <em>Benefit-Cost Analysis Guide</em> provides standard accident costs. AASHTO's <em>Roadway Safety
+                        Design Guide</em> includes effectiveness factors, ensuring internationally recognized compliance in
+                    safety project evaluation.
+                </p>
+            </div>
+            <div class="note-card">
+                <h3>Conclusion</h3>
+                <p>
+                    The Safety Index converts safety engineering into quantifiable economics, enabling transparent
+                    decision-making and highlighting projects that deliver the greatest life-saving value per dollar invested.
+                </p>
             </div>
         </div>
+
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const now = new Date();
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            if (document.getElementById('printDate')) {
+                document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            }
         });
 
         function calculateSI() {
+            // --- GET INPUTS ---
             const D_val = document.getElementById('reducedAccidents').value.trim();
             const E_val = document.getElementById('costPerAccident').value.trim();
             const F_val = document.getElementById('effectivenessFactor').value.trim();
@@ -484,16 +578,20 @@
 
             let errors = [];
 
-            // --- VALIDATION RULES ---
-            if (D_val === '' || isNaN(D_val) || parseFloat(D_val) <= 0) errors.push("👉 Reduced Accidents must be a number > 0.");
-            if (E_val === '' || isNaN(E_val) || parseFloat(E_val) <= 0) errors.push("👉 Cost Per Accident must be a number > 0.");
-            if (C_val === '' || isNaN(C_val) || parseFloat(C_val) <= 0) errors.push("👉 Total Project Cost must be a number > 0.");
+            // --- INPUT VALIDATIONS ---
+            const D = parseFloat(D_val);
+            if (D_val === '' || isNaN(D) || D < 0) errors.push("👉 Reduced Accidents must be a number ≥ 0.");
+
+            const E = parseFloat(E_val);
+            if (E_val === '' || isNaN(E) || E <= 0) errors.push("👉 Cost Per Accident must be a number > 0.");
+
             const F = parseFloat(F_val);
-            if (F_val === '' || isNaN(F) || F <= 0 || F > 100) {
-                errors.push("👉 Effectiveness Factor must be a number between 1 and 100.");
-            }
-            
-            // --- ERROR HANDLING ---
+            if (F_val === '' || isNaN(F) || F <= 0 || F > 100) errors.push("👉 Effectiveness Factor must be between 1 and 100.");
+
+            const C = parseFloat(C_val);
+            if (C_val === '' || isNaN(C) || C <= 0) errors.push("👉 Total Project Cost must be a number > 0.");
+
+            // --- HANDLE ERRORS ---
             if (errors.length > 0) {
                 errorMessage.innerHTML = errors.join("<br>");
                 errorBox.classList.remove("hidden");
@@ -505,14 +603,11 @@
             }
 
             // --- CALCULATION ---
-            const D = parseFloat(D_val);
-            const E = parseFloat(E_val);
-            const C = parseFloat(C_val);
-
             const totalSavings = D * E * (F / 100);
-            const projectCost = C * 1000;
+            const projectCost = C * 1000; // convert from $1000s
             const safetyIndex = totalSavings / projectCost;
 
+            // --- CHECK INVALID CALCULATION ---
             if (!isFinite(safetyIndex)) {
                 errorMessage.innerHTML = "❌ Calculation resulted in an invalid number. Please check your inputs.";
                 errorBox.classList.remove("hidden");
@@ -525,28 +620,31 @@
             document.getElementById('rateValue').textContent = safetyIndex.toFixed(2);
             document.getElementById('projectCost').textContent = formatter.format(projectCost);
             document.getElementById('totalSavings').textContent = formatter.format(totalSavings);
-            
-            // --- ASSESSMENT ---
+
+            // --- ASSESSMENT & METER ---
             const meterFill = document.getElementById('meterFill');
             let meterWidth, meterColor, feedback;
 
             if (safetyIndex < 1) {
                 meterWidth = '20%';
                 meterColor = '#e74c3c'; // Red
-                feedback = `❌ <strong>Low Return.</strong> This project is not economically viable, as its costs ($${projectCost.toLocaleString()}) exceed the projected savings ($${totalSavings.toLocaleString()}).`;
+                feedback = `❌ <strong>Low Return.</strong> Costs ($${projectCost.toLocaleString()}) exceed projected savings ($${totalSavings.toLocaleString()}).`;
             } else if (safetyIndex < 3) {
                 meterWidth = '45%';
                 meterColor = '#e67e22'; // Orange
-                feedback = `🟡 <strong>Marginal Return.</strong> The project is economically justifiable but offers a modest return. For every $1 spent, you save $${safetyIndex.toFixed(2)}.`;
+                feedback = `🟡 <strong>Marginal Return.</strong> Every $1 spent saves $${safetyIndex.toFixed(2)}. Consider optimizing project design.`;
             } else if (safetyIndex < 10) {
                 meterWidth = '70%';
                 meterColor = '#f1c40f'; // Yellow
-                feedback = `👍 <strong>Good Return.</strong> This project shows a strong return on investment. For every $1 spent, you save $${safetyIndex.toFixed(2)}.`;
-            } else { // >= 10
+                feedback = `👍 <strong>Good Return.</strong> Every $1 spent saves $${safetyIndex.toFixed(2)}. Strong ROI.`;
+            } else {
                 meterWidth = '95%';
                 meterColor = '#2ecc71'; // Green
-                feedback = `✅ <strong>Excellent Return.</strong> This project is highly cost-effective and should be a high priority. For every $1 spent, you save $${safetyIndex.toFixed(2)}.`;
+                feedback = `✅ <strong>Excellent Return.</strong> Highly cost-effective. Every $1 spent saves $${safetyIndex.toFixed(2)}.`;
             }
+
+            // Special warning for extremely high accident costs
+            if (E > 500000) feedback += ' ⚠️ (High accident cost used)';
 
             meterFill.style.width = meterWidth;
             meterFill.style.backgroundColor = meterColor;
@@ -563,7 +661,43 @@
             window.print();
         }
     </script>
+
     <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
 {% endblock %}
+
+<!-- 
+1️⃣ Input Validation Rules (QEHS Perspective)
+Field	Validation Rules	Example	Rationale
+Accidents Prevented (D)	Must be numeric, ≥ 0. Whole numbers recommended.	5 ✅, 0 ✅, -3 ❌, 3.5 ⚠️	Cannot have negative reduction. Zero means no improvement. Fractions are unusual but may occur in aggregated statistics.
+Avg. Cost Per Accident ($) (E)	Numeric, ≥ 0, reasonable maximum depending on company context.	90,000 ✅, 0 ❌, -5,000 ❌	Negative or zero cost is meaningless. Extreme outliers should trigger a warning.
+Effectiveness Factor (%) (F)	Numeric, 0 < F ≤ 100	75 ✅, 0 ❌, 120 ❌	QEHS projects rarely reach >100% effectiveness; 0 means no safety improvement.
+Total Project Cost ($1000s) (C)	Numeric, > 0	150 ✅, 0 ❌, -50 ❌	Zero cost implies no investment. Negative cost is invalid.
+General Checks	All fields must be filled. Non-numeric inputs trigger errors.	Empty or letters ❌	Ensures calculations are meaningful.
+
+Edge Cases:
+
+D = 0 → SI = 0, project has no safety return.
+
+E = 0 → SI = 0, no financial benefit.
+
+F = 0 → SI = 0, zero effectiveness.
+
+Extremely high values for E or D → may result in SI > 10 → flagged as “excellent” or warn of unrealistic assumptions.
+
+Non-numeric or blank inputs → error message.
+
+Total project cost = 0 → division by zero error → must trigger validation error.
+
+2️⃣ Output Validation Logic & Thresholds
+Output	Validation & Thresholds	Feedback
+Safety Index (SI)	Computed as SI = (D × E × F/100) ÷ (C × 1000)	Ensures ratio represents $ return per $ invested.
+Total Savings (G)	G = D × E × F/100	Displayed in USD currency format.
+SI Interpretation	SI > 10 → Excellent
+SI 3–10 → Good
+SI 1–3 → Marginal
+SI < 1 → Low	Matches real-world ROI assessment standards in QEHS projects.
+Risk Meter	Optional visual bar: Low → Red, Marginal → Orange, Good → Blue, Excellent → Green	Intuitive safety ROI visualization.
+Edge Warnings	Extremely high E → “⚠️ Using high-value accident costs”	Prevents misinterpretation of inflated SI values.
+-->

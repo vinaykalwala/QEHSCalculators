@@ -332,13 +332,39 @@
         .hidden { 
             display: none; 
         }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
     </style>
 </head>
 <body>
     <div class="btn-container">
         <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
     </div>
-    
+
     <div class="calculator-container printable" id="printArea">
 
         {% include "includes/print_header_footer.html" %}
@@ -364,7 +390,7 @@
 
             <div class="result-card">
                 <div class="result-placeholder" id="placeholder">
-                    <img src="https://cdn-icons-png.flaticon.com/528/1078/1078513.png" alt="Risk assessment icon">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Risk assessment icon">
                     <p>Enter the probability and potential cost of an incident to calculate the quantifiable financial risk.</p>
                 </div>
                 
@@ -408,33 +434,101 @@
 
         <div class="note-section">
             <div class="note-card">
-                <h3>📘 About Risk Calculation</h3>
+                <h3>📘 About This Calculator</h3>
                 <p>
-                    This calculator uses the fundamental risk formula to quantify potential losses. By multiplying the likelihood of an event by its potential impact, organizations can move from a qualitative sense of danger to a quantitative value. This allows for data-driven prioritization, helping to focus resources on mitigating the most significant threats first, in alignment with standards like ISO 31000.
+                    <strong>ISO 2002 Risk Formula</strong> is a key tool in safety management for quantifying potential losses
+                    by considering both the likelihood and impact of adverse events. It helps organizations prioritize risks,
+                    allocate resources effectively, and align with international best practices for proactive risk mitigation.
                 </p>
             </div>
             <div class="note-card">
-                <h3>⚙️ Formula Used</h3>
-                <p>The formula provides a clear, quantitative measure of risk:</p>
-                <p>$$ \text{Risk} = \text{Probability of Occurrence} \times \text{Consequence of Occurrence} $$</p>
-            </div>
-             <div class="note-card">
-                <h3>💡 Applications in Safety</h3>
-                <p>This calculation is a cornerstone of modern safety management:</p>
-                 <ul class="note-list">
-                    <li><strong>Prioritization:</strong> A low-probability, high-consequence event (e.g., a plant explosion) can be compared directly against a high-probability, low-consequence event (e.g., a minor slip-and-fall).</li>
-                    <li><strong>Resource Allocation:</strong> Justifies spending on safety measures by demonstrating a clear Return on Investment (ROI) through risk reduction.</li>
-                    <li><strong>Decision Making:</strong> Helps answer questions like, "Is this risk acceptable, or do we need to implement further controls?"</li>
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Probability (p):</strong> Likelihood of an accident occurring (0 = impossible, 1 = certain)</li>
+                    <li><strong>Consequence (C):</strong> Severity of impact if the accident occurs, measured in monetary terms,
+                        injuries, or other quantifiable units</li>
                 </ul>
             </div>
+            <div class="note-card">
+                <h3>📝 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Probability of Incident:</strong> Must be a <strong>number between 0.0 and 1.0</strong>.
+                        Example: 0.05 ✅, 0 ❌, 1.2 ❌, -0.1 ❌</li>
+                    <li><strong>Consequence Severity ($):</strong> Must be a <strong>non-negative number</strong>.
+                        Example: 5000 ✅, 0 ✅, -1000 ❌</li>
+                    <li><strong>General Checks:</strong> All fields must be filled with valid numeric values.</li>
+                    <li><strong>Edge Cases:</strong>
+                        <ul class="note-list">
+                            <li>Probability = 0 or Consequence = 0 → risk is zero, feedback shows <em>No Risk</em>.</li>
+                            <li>Non-numeric input → error message.</li>
+                            <li>Extremely high consequence → may trigger Extreme Risk feedback.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="note-card">
+                <h3>📊 Output Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Calculated Risk:</strong> Computed as <code>Probability × Consequence</code> and displayed in
+                        <strong>USD currency format</strong>.
+                        Example: Probability 0.05 × Consequence 5000 → $250.00
+                    </li>
+                    <li><strong>Probability Display:</strong> Shown with three decimal places.
+                        Example: 0.050</li>
+                    <li><strong>Consequence Display:</strong> Shown as formatted currency.
+                        Example: $5000.00</li>
+                    <li><strong>Risk Assessment Meter:</strong> Visual indicator with color coding:
+                        <ul class="note-list">
+                            <li>Risk = 0 → ℹ️ No Risk (Green)</li>
+                            <li>Risk &lt; $100 → ✅ Low Risk (Green)</li>
+                            <li>$100 ≤ Risk &lt; $1,000 → 🟡 Moderate Risk (Yellow)</li>
+                            <li>$1,000 ≤ Risk &lt; $10,000 → ⚠️ High Risk (Orange)</li>
+                            <li>Risk ≥ $10,000 → 🚨 Extreme Risk (Red)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Feedback Messages:</strong>
+                        <ul class="note-list">
+                            <li>Low Risk: “✅ Low Risk. The calculated financial risk is relatively low. This is generally
+                                considered acceptable but should be monitored periodically.”</li>
+                            <li>Moderate Risk: “🟡 Moderate Risk. This level of risk may be acceptable but warrants a review of
+                                existing control measures to see if they can be improved.”</li>
+                            <li>High Risk: “⚠️ High Risk. This level of risk is typically not acceptable. It is strongly
+                                recommended to implement additional risk reduction measures.”</li>
+                            <li>Extreme Risk: “🚨 Extreme Risk. This risk level is unacceptable and requires immediate action to
+                                mitigate the hazard and reduce potential losses.”</li>
+                            <li>No Risk: “ℹ️ No Risk. Because either the probability or the consequence is zero, the calculated
+                                risk is zero.”</li>
+                        </ul>
+                    </li>
+                    <li><strong>Invalid Calculations:</strong> If risk is <em>not finite</em>, show:
+                        ❌ Calculation resulted in an invalid number. Please check your inputs.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📏 Standards & Compliance</h3>
+                <p>
+                    This formula aligns with ISO 31000 (Risk Management), OSHA guidelines, and Process Safety Management (PSM)
+                    standards in high-risk industries.
+                </p>
+            </div>
+            <div class="note-card">
+                <h3>Conclusion</h3>
+                <p>
+                    The ISO 2002 risk formula provides a simple yet powerful quantitative tool to assess potential hazards,
+                    prioritize safety risks, and ensure focused allocation of resources for effective risk mitigation,
+                    ultimately enhancing workplace safety and reducing financial losses.
+                </p>
+            </div>
         </div>
+
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const now = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
         });
 
         function calculateRisk() {
@@ -445,19 +539,22 @@
             const errorMessage = document.getElementById('errorMessage');
             const placeholder = document.getElementById('placeholder');
             const resultValue = document.getElementById('resultValue');
+            const meterFill = document.getElementById('meterFill');
+            const feedbackContent = document.getElementById('feedbackContent');
 
             let errors = [];
 
-            // --- VALIDATION RULES ---
+            // --- INPUT VALIDATION ---
             const probability = parseFloat(prob_val);
             if (prob_val === '' || isNaN(probability) || probability < 0 || probability > 1) {
                 errors.push("👉 Probability must be a number between 0.0 and 1.0.");
             }
+
             const consequence = parseFloat(cons_val);
             if (cons_val === '' || isNaN(consequence) || consequence < 0) {
                 errors.push("👉 Consequence must be a non-negative number.");
             }
-            
+
             // --- ERROR HANDLING ---
             if (errors.length > 0) {
                 errorMessage.innerHTML = errors.join("<br>");
@@ -479,57 +576,94 @@
                 return;
             }
 
-            // --- DISPLAY RESULTS ---
+            // --- DISPLAY FORMATTED OUTPUT ---
             const formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
             document.getElementById('rateValue').textContent = formatter.format(risk);
             document.getElementById('probabilityDisplay').textContent = probability.toFixed(3);
             document.getElementById('consequenceDisplay').textContent = formatter.format(consequence);
 
-            
-            // --- ASSESSMENT ---
-            const meterFill = document.getElementById('meterFill');
+            // --- RISK ASSESSMENT AND FEEDBACK ---
             let meterWidth, meterColor, feedback;
 
-            if (risk < 100) {
+            if (probability === 0 || consequence === 0) {
+                meterWidth = '0%';
+                meterColor = '#2ecc71'; // Green
+                feedback = `ℹ️ <strong>No Risk.</strong> Because either the probability or the consequence is zero, the calculated risk is zero.`;
+            } else if (risk < 100) {
                 meterWidth = '20%';
                 meterColor = '#2ecc71'; // Green
                 feedback = `✅ <strong>Low Risk.</strong> The calculated financial risk is relatively low. This is generally considered acceptable but should be monitored periodically.`;
             } else if (risk < 1000) {
                 meterWidth = '45%';
                 meterColor = '#f1c40f'; // Yellow
-                feedback = `🟡 <strong>Moderate Risk.</strong> This level of risk may be acceptable but warrants a review of existing control measures to see if they can be improved.`;
+                feedback = `🟡 <strong>Moderate Risk.</strong> This level of risk may be acceptable but warrants review of control measures.`;
             } else if (risk < 10000) {
                 meterWidth = '70%';
                 meterColor = '#e67e22'; // Orange
-                feedback = `⚠️ <strong>High Risk.</strong> This level of risk is typically not acceptable. It is strongly recommended to implement additional risk reduction measures.`;
+                feedback = `⚠️ <strong>High Risk.</strong> This level of risk is typically not acceptable. Additional risk reduction measures are recommended.`;
             } else { // >= 10000
                 meterWidth = '95%';
                 meterColor = '#e74c3c'; // Red
-                feedback = `🚨 <strong>Extreme Risk.</strong> This risk level is unacceptable and requires immediate action to mitigate the hazard and reduce potential losses.`;
+                feedback = `🚨 <strong>Extreme Risk.</strong> This risk level is unacceptable and requires immediate mitigation.`;
             }
-
-            // Handle zero cases specifically
-            if (probability === 0 || consequence === 0) {
-                 feedback = `ℹ️ <strong>No Risk.</strong> Because either the probability or the consequence is zero, the calculated risk is zero.`;
-            }
-
 
             meterFill.style.width = meterWidth;
             meterFill.style.backgroundColor = meterColor;
-            document.getElementById('feedbackContent').innerHTML = feedback;
+            feedbackContent.innerHTML = feedback;
 
             placeholder.classList.add("hidden");
             resultValue.classList.remove("hidden");
         }
 
+        // --- PRINT FUNCTION ---
         function printReport() {
             const now = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
             window.print();
         }
     </script>
+
     <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
 {% endblock %}
+
+<!-- 
+1️⃣ Input Validation Rules (QEHS Perspective)
+Input	Valid Range	Unit	Decimal Allowed	QEHS Justification / Notes
+Probability of Incident	0.0 – 1.0	None (fraction)	Up to 2–4 decimals	Represents likelihood. Must be ≤1. Cannot be negative. Probabilities >1 are meaningless in risk calculations.
+Consequence Severity	0 – any positive number	$ / ₹ / €	Yes, decimals allowed	Represents potential financial or impact cost. Negative values are non-physical. Extremely high values should be flagged for review.
+
+Additional Validation Rules:
+
+All fields are required. Empty inputs → error.
+
+Ensure numeric type only. Text, symbols → error.
+
+Cross-field check: If either probability or consequence = 0 → risk = 0 → feedback explains this.
+
+Decimal precision: 2 decimal places recommended for output; inputs can allow up to 4 decimals.
+
+Extreme outliers (>1,000,000) may require a warning for unusual data entry.
+
+2️⃣ Edge Case Validations
+Edge Case	Handling / Feedback
+Probability <0 or >1	Show error: "Probability must be between 0 and 1."
+Consequence <0	Show error: "Consequence must be zero or positive."
+Probability = 0	Risk = 0 → feedback: "Risk is zero regardless of consequence."
+Consequence = 0	Risk = 0 → feedback: "Risk is zero regardless of probability."
+Risk > 10,000	Highlight in red → “Extreme Risk: Requires immediate attention.”
+Non-numeric input	Show error message and stop calculation.
+3️⃣ Output Validation Logic
+Output	Thresholds	Color / Feedback	QEHS Explanation
+Risk ($)	0 – 100	Low	✅ Green – generally acceptable; monitor periodically.
+Risk ($)	100 – 1,000	Moderate	⚠️ Orange – control measures recommended.
+Risk ($)	1,000 – 10,000	High	⚠️ Orange – review and implement control promptly.
+Risk ($)	>10,000	Extreme	🚨 Red – immediate mitigation required.
+
+Risk = Probability × Consequence.
+
+Feedback is both quantitative (dollar risk) and qualitative (color-coded for severity).
+
+Ensures risk assessment aligns with standard QEHS risk matrix principles.
+-->
