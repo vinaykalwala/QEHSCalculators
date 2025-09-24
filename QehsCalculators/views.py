@@ -1458,6 +1458,21 @@ def quality_corrective_action_effectiveness_cae_calculator(request):
 
 @login_required
 @subscription_required(plan_type="corporate")
+def quality_continuous_distillation_rectifying_section_calculator(request):
+    return render(request, 'qehsfcalculators/quality/continuous_distillation_rectifying_section.html', {'title': "Continuous Distillation (Rectifying Section) Calculator"})
+
+@login_required
+@subscription_required(plan_type="corporate")
+def quality_continuous_distillation_stripping_section_calculator(request):
+    return render(request, 'qehsfcalculators/quality/continuous_distillation_stripping_section.html', {'title': "Continuous Distillation (Stripping Section) Calculator"})
+
+@login_required
+@subscription_required(plan_type="corporate")
+def quality_continuous_stirred_tank_reactor_back_mix_reactor_design_calculator(request):
+    return render(request, 'qehsfcalculators/quality/continuous_stirred_tank_reactor_back_mix_reactor_design.html', {'title': "Continuous Stirred-Tank Reactor (Back-Mix Reactor) Design Calculator"})
+    
+@login_required
+@subscription_required(plan_type="corporate")
 def quality_critical_number_of_samples_calculator(request):
     return render(request, 'qehsfcalculators/quality/critical_number_of_samples.html', {'title': 'Critical Number of Samples Calculator'})
 
@@ -1526,6 +1541,11 @@ def quality_heat_exchanger_heating_area_calculator(request):
 
 @login_required
 @subscription_required(plan_type="corporate")
+def quality_integrating_factor_calculator(request):
+    return render(request, 'qehsfcalculators/quality/integrating_factor.html', {'title': "Integrating Factor Calculator"})
+    
+@login_required
+@subscription_required(plan_type="corporate")
 def quality_largest_particle_size_through_a_strainer_screen_calculator(request):
     return render(request, 'qehsfcalculators/quality/largest_particle_size_through_a_strainer_screen.html', {'title': 'Largest Particle Size Through a Strainer Screen Calculator'})
 
@@ -1538,6 +1558,11 @@ def quality_line_target_calculator(request):
 @subscription_required(plan_type="corporate")
 def quality_mass_flow_rate_of_steam_through_an_orifice_calculator(request):
     return render(request, 'qehsfcalculators/quality/mass_flow_rate_of_steam_through_an_orifice.html', {'title': 'Mass Flow Rate of Steam Through an Orifice calculator'})
+
+@login_required
+@subscription_required(plan_type="corporate")
+def quality_murphree_plate_efficiency_calculator(request):
+    return render(request, 'qehsfcalculators/quality/murphree_plate_efficiency.html', {'title': "Murphree Plate Efficiency Calculator"})
 
 @login_required
 @subscription_required(plan_type="corporate")
@@ -1556,10 +1581,13 @@ def quality_percentage_error_when_using_pressure_calculator(request):
 
 @login_required
 @subscription_required(plan_type="corporate")
+def quality_plug_flow_reactor_pfr_calculator(request):
+    return render(request, 'qehsfcalculators/quality/plug_flow_reactor_pfr.html', {'title': "Plug Flow Reactor (PFR) Calculator"})
+    
+@login_required
+@subscription_required(plan_type="corporate")
 def quality_pressure_drop_and_friction_loss_calculator(request):
     return render(request, 'qehsfcalculators/quality/pressure_drop_and_friction_loss.html', {'title': 'Pressure Drop & Friction Loss Calculator'})
-
-
 
 @login_required
 @subscription_required(plan_type="corporate")
@@ -1585,14 +1613,29 @@ def quality_production_efficiency_calculator(request):
 
 @login_required
 @subscription_required(plan_type="corporate")
+def quality_quadratic_equation_calculator(request):
+    return render(request, 'qehsfcalculators/quality/quadratic_equation.html', {'title': "Quadratic Equation Calculator"})
+
+@login_required
+@subscription_required(plan_type="corporate")
 def quality_quality_loss_function_taguchi_method_calculator(request):
     return render(request, 'qehsfcalculators/quality/quality_loss_function_taguchi_method.html', {'title': 'Quality Loss Function Calculator (Taguchi Method)'})
+
+@login_required
+@subscription_required(plan_type="corporate")
+def quality_rayleigh_differential_distillation_calculator(request):
+    return render(request, 'qehsfcalculators/quality/rayleigh_differential_distillation.html', {'title': "Rayleigh Differential Distillation Calculator"})
 
 @login_required
 @subscription_required(plan_type="corporate")
 def quality_relating_boiler_pressure_to_heat_transfer_rate_calculator(request):
     return render(request, 'qehsfcalculators/quality/relating_boiler_pressure_to_heat_transfer_rate.html', {'title': 'Relating boiler pressure to heat transfer rate'})
 
+@login_required
+@subscription_required(plan_type="corporate")
+def quality_reversible_first_order_reaction_calculator(request):
+    return render(request, 'qehsfcalculators/quality/reversible_first_order_reaction.html', {'title': "Reversible First-Order Reaction Calculator"})
+    
 @login_required
 @subscription_required(plan_type="corporate")
 def quality_reynolds_number_calculator(request):
@@ -1693,7 +1736,6 @@ def quality_water_ion_product_calculator(request):
 @subscription_required(plan_type="corporate")
 def quality_orifice_meter_flow_calculator(request):
     return render(request, 'qehsfcalculators/quality/orifice_meter_flow.html', {'title': 'Orifice Meter Flow Calculator'})
-
 
 @login_required
 @subscription_required(plan_type="corporate")
@@ -1888,6 +1930,11 @@ def environment_dissolved_oxygen_do_deficit_streeter_phelps_model_calculator(req
 
 @login_required
 @subscription_required(plan_type="corporate")
+def environment_dittus_boelter_equation_for_turbulent_flow_heat_transfer_calculator(request):
+    return render(request, 'qehsfcalculators/environment/dittus_boelter_equation_for_turbulent_flow_heat_transfer.html', {'title': "Dittus-Boelter Equation for Turbulent Flow Heat Transfer Calculator"})
+
+@login_required
+@subscription_required(plan_type="corporate")
 def environment_decreasing_rate_of_increase_growth_calculator(request):
     return render(request, 'qehsfcalculators/environment/decreasing_rate_of_increase_growth.html', {'title': 'Decreasing-Rate-of-Increase Growth Calculator'})
 
@@ -1940,6 +1987,11 @@ def environment_equal_percentage_valve_lift_based_on_relative_flow_calculator(re
 @subscription_required(plan_type="corporate")
 def environment_equal_percentage_valve_lift_based_on_kv_calculator(request):
     return render(request, 'qehsfcalculators/environment/equal_percentage_valve_lift_based_on_kv.html', {'title': 'Equal percentage valve lift calculator based on kv'})
+
+@login_required
+@subscription_required(plan_type="corporate")
+def environment_equimolar_countercurrent_diffusion_calculator(request):
+    return render(request, 'qehsfcalculators/environment/equimolar_countercurrent_diffusion.html', {'title': "Equimolar Countercurrent Diffusion Calculator"})
 
 @login_required
 @subscription_required(plan_type="corporate")
@@ -2153,6 +2205,11 @@ def environment_kirschmers_head_loss_h_calculator(request):
 
 @login_required
 @subscription_required(plan_type="corporate")
+def environment_logarithmic_mean_calculator(request):
+    return render(request, 'qehsfcalculators/environment/logarithmic_mean.html', {'title': "Logarithmic Mean Calculator"})
+    
+@login_required
+@subscription_required(plan_type="corporate")
 def environment_log_mean_temperature_difference_lmtd_calculator(request):
     return render(request, 'qehsfcalculators/environment/log_mean_temperature_difference_lmtd.html', {'title': 'Log Mean Temperature Difference (LMTD) Calculator'})
 
@@ -2281,6 +2338,11 @@ def environment_molar_humidity_calculator(request):
 def environment_net_microbial_growth_rate_calculator(request):
     return render(request, 'qehsfcalculators/environment/net_microbial_growth_rate.html', {'title': 'Net Microbial Growth Rate Calculator'})
 
+@login_required
+@subscription_required(plan_type="corporate")
+def environment_overall_mass_transfer_coefficients_calculator(request):
+    return render(request, 'qehsfcalculators/environment/overall_mass_transfer_coefficients.html', {'title': "Overall Mass Transfer Coefficients Calculator"})
+    
 @login_required
 @subscription_required(plan_type="corporate")
 def environment_overburden_pressure_calculator(request):
@@ -2598,6 +2660,16 @@ def environment_settling_reynolds_number_calculator(request):
 
 @login_required
 @subscription_required(plan_type="corporate")
+def environment_sieder_tate_correlation_for_laminar_flow_heat_transfer_calculator(request):
+    return render(request, 'qehsfcalculators/environment/sieder_tate_correlation_for_laminar_flow_heat_transfer.html', {'title': "Sieder-Tate Correlation for Laminar Flow Heat Transfer Calculator"})
+
+@login_required
+@subscription_required(plan_type="corporate")
+def environment_stefans_law_of_molecular_diffusion_calculator(request):
+    return render(request, 'qehsfcalculators/environment/stefans_law_of_molecular_diffusion.html', {'title': "Stefan's Law of Molecular Diffusion Calculator"})
+
+@login_required
+@subscription_required(plan_type="corporate")
 def environment_soak_pit_volume_calculator(request):
     return render(request, 'qehsfcalculators/environment/soak_pit_volume.html', {'title': 'Soak Pit Volume Calculator'})
 
@@ -2710,6 +2782,11 @@ def environment_total_height_of_soak_pit_calculator(request):
 
 @login_required
 @subscription_required(plan_type="corporate")
+def environment_two_film_theory_calculator(request):
+    return render(request, 'qehsfcalculators/environment/two_film_theory.html', {'title': "Two-Film Theory Calculator"})
+
+@login_required
+@subscription_required(plan_type="corporate")
 def environment_two_phase_flow_parameter_calculator(request):
     return render(request, 'qehsfcalculators/environment/two_phase_flow_parameter.html', {'title': 'Two-Phase Flow Parameter Calculator'})
 
@@ -2727,6 +2804,11 @@ def environment_time_to_settle_t_calculator(request):
 @subscription_required(plan_type="corporate")
 def environment_u_factor_calculation_for_walls_calculator(request):
     return render(request, 'qehsfcalculators/environment/u_factor_calculation_for_walls.html', {'title': 'U-Factor Calculation for Walls'})
+
+@login_required
+@subscription_required(plan_type="corporate")
+def environment_unidirectional_diffusion_calculator(request):
+    return render(request, 'qehsfcalculators/environment/unidirectional_diffusion.html', {'title': "Unidirectional Diffusion Calculator"})
 
 @login_required
 @subscription_required(plan_type="corporate")
@@ -4585,6 +4667,11 @@ def fire_normalized_mass_flux_formula_high_quality_region_calculator(request):
 @subscription_required(plan_type="corporate")
 def fire_pressure_factor_calculator(request):
     return render(request, 'qehsfcalculators/fire/pressure_factor.html', {'title': 'Pressure Factor Calculator'})
+
+@login_required
+@subscription_required(plan_type="corporate")
+def fire_radiation_heat_transfer_calculator(request):
+    return render(request, 'qehsfcalculators/fire/radiation_heat_transfer.html', {'title': "Radiation Heat Transfer Calculator"})
 
 @login_required
 @subscription_required(plan_type="corporate")

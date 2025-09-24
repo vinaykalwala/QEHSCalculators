@@ -1,0 +1,776 @@
+{% extends 'base.html' %}
+{% block title %}Dittus-Boelter Equation for Turbulent Flow Heat Transfer{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dittus-Boelter Equation for Turbulent Flow Heat Transfer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding:0 20px;
+            border-radius: 12px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            margin: 0 auto;
+        }
+        /* Layout */
+        .calc-content {
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: auto;
+        }
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+        /* Input rows for side-by-side fields */
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        @media (min-width: 480px) {
+            .input-row {
+                flex-direction: row;
+            }
+        }
+        .input-row .form-group {
+            flex: 1;
+        }
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd,#000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+        .print-btn:hover {
+            background: #1560bd;
+        }
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: auto;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center; 
+        }
+        .result-value { 
+            width: 100%; 
+        }
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        .rate-label { 
+            color: #7f8c8d; 
+        }
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        .feedback-content { 
+            color: #34495e; 
+        }
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
+    </div>
+    <div class="calculator-container printable" id="printArea">
+        <!-- Include header/footer for print -->
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Dittus-Boelter Equation for Turbulent Flow Heat Transfer</h1>
+            <p>Calculate the convective heat transfer coefficient for fully developed turbulent flow in pipes</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="diameter">Pipe Diameter (D) [m]</label>
+                        <input type="number" id="diameter" class="form-input" min="0.001" step="any" placeholder="e.g., 0.05">
+                    </div>
+                    <div class="form-group">
+                        <label for="length">Pipe Length (L) [m]</label>
+                        <input type="number" id="length" class="form-input" min="0.1" step="any" placeholder="e.g., 10">
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="reynolds">Reynolds Number (N<sub>Re</sub>)</label>
+                        <input type="number" id="reynolds" class="form-input" min="4000" step="any" placeholder="e.g., 10000">
+                    </div>
+                    <div class="form-group">
+                        <label for="prandtl">Prandtl Number (N<sub>Pr</sub>)</label>
+                        <input type="number" id="prandtl" class="form-input" min="0.1" step="any" value="0.7" placeholder="e.g., 0.7">
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="form-group">
+                        <label for="viscosity">Bulk Viscosity (μ) [Pa·s]</label>
+                        <input type="number" id="viscosity" class="form-input" min="0.000001" step="any" value="0.001" placeholder="e.g., 0.001">
+                    </div>
+                    <div class="form-group">
+                        <label for="wallViscosity">Wall Viscosity (μ<sub>w</sub>) [Pa·s]</label>
+                        <input type="number" id="wallViscosity" class="form-input" min="0.000001" step="any" value="0.001" placeholder="e.g., 0.001">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="conductivity">Thermal Conductivity (k) [W/m·K]</label>
+                    <input type="number" id="conductivity" class="form-input" min="0.01" step="any" value="0.6" placeholder="e.g., 0.6">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateHeatTransfer()">Calculate Heat Transfer Coefficient</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Heat transfer illustration">
+                    <p>This tool will calculate the <strong>Heat Transfer Coefficient</strong> for turbulent flow. Enter your data to see results and insights here.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" id="calculationType" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Heat Transfer Coefficient</h2>
+                    </div>
+                    <div class="rate-display">
+                        <div class="rate-value" id="rateValue">0.00</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">h (W/m²·K)</div>
+                    </div>
+
+                    <div class="safety-meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                    <div class="meter-labels">
+                        <span>Low</span><span>Moderate</span><span>High</span><span>Very High</span>
+                    </div>
+
+                    <div class="result-feedback">
+                        <div class="feedback-title">Heat Transfer Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <!-- About -->
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Dittus-Boelter Equation Calculator</strong> determines the convective heat transfer coefficient for fully developed turbulent flow in pipes. 
+                    This equation is widely used in engineering systems involving fluid flow and heat transfer, such as heat exchangers, HVAC systems, and industrial piping.
+                </p>
+            </div>
+
+            <!-- Parameters Used -->
+            <div class="note-card">
+                <h3>⚙ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>D (Pipe Diameter):</strong> Inner diameter of the pipe [m]. Smaller diameters increase velocity and heat transfer.</li>
+                    <li><strong>L (Pipe Length):</strong> Length over which heat transfer occurs [m]. Longer pipes have developing flow effects.</li>
+                    <li><strong>N<sub>Re</sub> (Reynolds Number):</strong> Dimensionless ratio of inertial to viscous forces. Must be >4000 for turbulent flow.</li>
+                    <li><strong>N<sub>Pr</sub> (Prandtl Number):</strong> Ratio of momentum diffusivity to thermal diffusivity. Characterizes fluid properties.</li>
+                    <li><strong>μ/μ<sub>w</sub> (Viscosity Ratio):</strong> Accounts for temperature-dependent viscosity changes near pipe walls.</li>
+                    <li><strong>k (Thermal Conductivity):</strong> Fluid's ability to conduct heat [W/m·K].</li>
+                </ul>
+            </div>
+
+            <!-- Input Validation Rules -->
+            <div class="note-card">
+                <h3>✅ Input Validation Rules</h3>
+                <ul class="note-list">
+                     <li><strong>Pipe Diameter (D):</strong> 0.001 – 5 m (typical: 0.01–1 m).</li>
+        <li><strong>Pipe Length (L):</strong> 0.1 – 1000 m (typical: 1–100 m).</li>
+        <li><strong>Reynolds Number (Re):</strong> ≥ 4000 (turbulent) and ≤ 1×10⁷.</li>
+        <li><strong>Prandtl Number (Pr):</strong> 0.1 – 1000 (normal: 0.7–100).</li>
+        <li><strong>Viscosity (μ, μw):</strong> 1e-6 – 10 Pa·s (must be >0; ratio μ/μw ≈ 0.1–10).</li>
+        <li><strong>Thermal Conductivity (k):</strong> 0.01 – 500 W/m·K.</li>
+        <li><strong>Heat Transfer Coefficient (h):</strong> 1–10,000 W/m²·K (outside → review required).</li>
+        <li>⚠️ Results outside these ranges should be treated as <strong>engineering red flags</strong>.</li>
+    </ul>
+            </div>
+
+            <!-- Output Validations -->
+<div class="note-card">
+    <h3>✅ Output Validations</h3>
+    <ul class="note-list">
+        <li><strong style="color:#2ecc71;">h &lt; 10 W/m²·K → Low heat transfer:</strong> Typical of gases or highly viscous fluids.</li>
+        <li><strong style="color:#f39c12;">10 ≤ h ≤ 1000 W/m²·K → Moderate heat transfer:</strong> Typical for water or regular liquids.</li>
+        <li><strong style="color:#e67e22;">1000 &lt; h ≤ 5000 W/m²·K → High heat transfer:</strong> Common in process industries.</li>
+        <li><strong style="color:#e74c3c;">h &gt; 5000 W/m²·K → Very high heat transfer:</strong> Typical of boiling/condensation or liquid metals.</li>
+    </ul>
+    <p><i>💡 <strong>Normal design range:</strong> <span style="color:#1560bd;">1 – 10,000 W/m²·K</span>. Results outside this range should trigger <strong>engineering review</strong>.</i></p>
+</div>
+
+
+            <!-- Standards -->
+            <div class="note-card">
+                <h3>📏 Standards</h3>
+                <p>
+                    This calculator is based on the <strong>Dittus-Boelter equation</strong> for turbulent flow heat transfer. 
+                    It aligns with <strong>ASHRAE</strong>, <strong>API</strong>, and <strong>ASME</strong> standards for heat exchanger design 
+                    and is widely used in HVAC, power generation, and chemical processing industries.
+                </p>
+            </div>
+
+            <!-- Conclusion -->
+            <div class="note-card">
+                <h3>📝 Conclusion</h3>
+                <p>
+                    The Dittus-Boelter equation is fundamental for engineers designing systems involving turbulent fluid flow and heat transfer. 
+                    Accurate calculations lead to more energy-efficient designs, reduced environmental impact, and optimized system performance 
+                    across numerous applications including HVAC systems, industrial heat exchangers, power plants, and chemical processing.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set current date for print header
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+        });
+
+        function calculateHeatTransfer() {
+    // --- INPUTS ---
+    const D = parseFloat(document.getElementById('diameter').value.trim());
+    const L = parseFloat(document.getElementById('length').value.trim());
+    const NRe = parseFloat(document.getElementById('reynolds').value.trim());
+    const NPr = parseFloat(document.getElementById('prandtl').value.trim());
+    const mu = parseFloat(document.getElementById('viscosity').value.trim());
+    const muw = parseFloat(document.getElementById('wallViscosity').value.trim());
+    const k = parseFloat(document.getElementById('conductivity').value.trim());
+
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    let errors = [];
+    let warnings = [];
+
+    /* -------------------------
+       VALIDATION RULES
+       Based on ASHRAE / API / ASME and safety design practices
+    ------------------------- */
+
+    // Pipe Diameter
+    if (isNaN(D) || D < 0.001 || D > 5) {
+        errors.push("👉 Pipe Diameter must be between 0.001 and 5 m (typical: 0.01–1 m).");
+    }
+
+    // Pipe Length
+    if (isNaN(L) || L < 0.1 || L > 1000) {
+        errors.push("👉 Pipe Length must be between 0.1 and 1000 m (typical: 1–100 m).");
+    }
+
+    // Reynolds Number
+    if (isNaN(NRe) || NRe < 4000) {
+        errors.push("👉 Reynolds Number must be ≥ 4000 for turbulent flow.");
+    } else if (NRe > 1e7) {
+        warnings.push("⚠️ Reynolds Number unusually high. Check if realistic for your system.");
+    }
+
+    // Prandtl Number
+    if (isNaN(NPr) || NPr < 0.1) {
+        errors.push("👉 Prandtl Number must be ≥ 0.1.");
+    } else if (NPr > 1000) {
+        warnings.push("⚠️ Prandtl Number unusually high. Verify fluid properties.");
+    }
+
+    // Bulk Viscosity
+    if (isNaN(mu) || mu < 1e-6 || mu > 10) {
+        errors.push("👉 Bulk Viscosity must be between 1e-6 and 10 Pa·s.");
+    }
+
+    // Wall Viscosity
+    if (isNaN(muw) || muw < 1e-6 || muw > 10) {
+        errors.push("👉 Wall Viscosity must be between 1e-6 and 10 Pa·s.");
+    }
+
+    // Avoid division by zero
+    if (muw === 0) {
+        errors.push("👉 Wall Viscosity cannot be zero (division error).");
+    }
+
+    // Viscosity ratio
+    if (mu / muw < 0.1 || mu / muw > 10) {
+        warnings.push("⚠️ Viscosity ratio (μ/μw) outside normal range (0.1–10). Check fluid temperature assumptions.");
+    }
+
+    // Thermal Conductivity
+    if (isNaN(k) || k < 0.01 || k > 500) {
+        errors.push("👉 Thermal Conductivity must be between 0.01 and 500 W/m·K.");
+    }
+
+    // Show errors
+    if (errors.length > 0) {
+        errorMessage.innerHTML = errors.join("<br>");
+        errorBox.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    } else {
+        errorBox.classList.add("hidden");
+    }
+
+    // --- CALCULATION ---
+    const viscosityRatio = Math.pow(mu / muw, 0.14);
+    const lengthCorrection = 1 + Math.pow(D / L, 0.7);
+    const Nu = 0.023 * Math.pow(NRe, 0.8) * Math.pow(NPr, 0.33) * viscosityRatio * lengthCorrection;
+    const h = Nu * k / D;
+
+    if (!isFinite(h) || isNaN(h)) {
+        errorMessage.innerHTML = "👉 Calculation error: check inputs.";
+        errorBox.classList.remove("hidden");
+        resultValue.classList.add("hidden");
+        return;
+    }
+
+    // --- OUTPUT VALIDATION ---
+    if (h < 1 || h > 10000) {
+        warnings.push("⚠️ Heat transfer coefficient outside normal design range (1–10,000 W/m²·K). Engineering review required.");
+    }
+
+    document.getElementById('rateValue').textContent = h.toFixed(2);
+
+    // Meter & Feedback
+    const meterFill = document.getElementById('meterFill');
+    let meterWidth, meterColor, feedback;
+
+    if (h < 10) {
+        meterWidth = '20%'; meterColor = '#2ecc71';
+        feedback = 'Low heat transfer: typical of gases or viscous fluids.';
+    } else if (h <= 1000) {
+        meterWidth = '50%'; meterColor = '#27ae60';
+        feedback = 'Moderate heat transfer: typical for water/liquids.';
+    } else if (h <= 5000) {
+        meterWidth = '75%'; meterColor = '#f39c12';
+        feedback = 'High heat transfer: common in industrial systems.';
+    } else {
+        meterWidth = '95%'; meterColor = '#e74c3c';
+        feedback = 'Very high heat transfer: possible boiling/condensation or metals.';
+    }
+
+    meterFill.style.width = meterWidth;
+    meterFill.style.backgroundColor = meterColor;
+    document.getElementById('feedbackContent').textContent = feedback + (warnings.length ? " " + warnings.join(" ") : "");
+
+    placeholder.classList.add('hidden');
+    resultValue.classList.remove('hidden');
+}
+
+
+        function printReport() {
+            // Update date just before printing
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            window.print();
+        }
+    </script>
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}
+
+{% comment %} 
+
+🔹 1. Formula Used
+
+The Dittus–Boelter equation for turbulent flow (Re > 4000) is:
+
+𝑁
+𝑢
+=
+0.023
+⋅
+𝑅
+𝑒
+0.8
+⋅
+𝑃
+𝑟
+𝑛
+⋅
+(
+𝜇
+𝜇
+𝑤
+)
+0.14
+⋅
+(
+1
++
+(
+𝐷
+𝐿
+)
+0.7
+)
+Nu=0.023⋅Re
+0.8
+⋅Pr
+n
+⋅(
+μ
+w
+	​
+
+μ
+	​
+
+)
+0.14
+⋅(1+(
+L
+D
+	​
+
+)
+0.7
+)
+ℎ
+=
+𝑁
+𝑢
+⋅
+𝑘
+𝐷
+h=
+D
+Nu⋅k
+	​
+
+
+𝑁
+𝑢
+Nu = Nusselt number (dimensionless)
+
+ℎ
+h = heat transfer coefficient [W/m²·K]
+
+𝑅
+𝑒
+Re = Reynolds number (≥ 4000 for turbulent flow)
+
+𝑃
+𝑟
+Pr = Prandtl number (0.1 – 1000)
+
+𝜇
+,
+𝜇
+𝑤
+μ,μ
+w
+	​
+
+ = bulk and wall viscosity [Pa·s]
+
+𝐷
+D = pipe diameter [m]
+
+𝐿
+L = pipe length [m]
+
+𝑘
+k = thermal conductivity [W/m·K]
+
+🔹 2. Input Validation Rules (QEHS & Fire Safety Perspective)
+
+These ensure that inputs are realistic, safe, and compliant with engineering & safety standards:
+
+Parameter	Validation Rule	Reason / Standard
+Pipe Diameter (D) [m]	0.001 ≤ D ≤ 5 (typical 0.01–1 m)	Too small → impractical (clogging/fire suppression issues); too large → industrial pipelines only.
+Pipe Length (L) [m]	0.1 ≤ L ≤ 1000	Extremely short = developing flow, invalid. Extremely long = unrealistic for HVAC/fire systems.
+Reynolds Number (Re)	4000 ≤ Re ≤ 1e7	<4000 = laminar → invalid. >1e7 is rare in safety systems (API/ASHRAE limits).
+Prandtl Number (Pr)	0.1 ≤ Pr ≤ 1000	<0.1 = liquid metals (special cases); >1000 = extreme oils/polymers, unusual in fire/HVAC.
+Bulk Viscosity (μ) [Pa·s]	1e-6 ≤ μ ≤ 10 (typical: 0.0001–1)	<1e-6 → gas-like; >10 → tar/paste, invalid for pipe flow.
+Wall Viscosity (μw) [Pa·s]	1e-6 ≤ μw ≤ 10	Same as above. Ensure μw ≠ 0 to avoid division by zero.
+Thermal Conductivity (k) [W/m·K]	0.01 ≤ k ≤ 500 (typical: 0.6 for water)	Below → invalid; >500 → metals, not fluids.
+Cross-check	μ/μw ratio reasonable (0.1–10)	Avoid extreme ratios (unreal physical results).
+Decimals	Allow up to 6 decimal places	Needed for precision in audits & reports.
+🔹 3. Output Validation Logic
+
+The heat transfer coefficient (h) is validated against engineering ranges:
+
+h < 10 W/m²·K → Low transfer → gases, viscous oils → may need review in fire suppression (slow heat removal).
+
+10 ≤ h ≤ 1000 W/m²·K → Moderate → typical water/liquids.
+
+1000 < h ≤ 5000 W/m²·K → High → process cooling, industrial fire systems.
+
+h > 5000 W/m²·K → Very high → boiling/condensation, liquid metals.
+
+Normal Design Range: 1 – 10,000 W/m²·K → Outside this → flag warning for engineering/safety review. {% endcomment %}
