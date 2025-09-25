@@ -491,6 +491,7 @@
 
 <!-- Notes Section -->
 <div class="note-section">
+
   <div class="note-card">
     <h3>📘 About This Calculator</h3>
     <p>
@@ -501,43 +502,56 @@
   </div>
 
   <div class="note-card">
-    <h3>🛡️ QEHS & Fire Safety Perspective</h3>
+    <h3>⚙ Parameters Used</h3>
     <ul class="note-list">
-      <li>Higher ESP efficiency reduces particulate emissions, aiding air-permit compliance and ESG targets.</li>
-      <li>Lower carryover of combustible dust reduces secondary explosion risks downstream (filters, ducts, stacks).</li>
-      <li>Sudden efficiency drops may indicate power supply issues, poor rapping, high moisture, or re-entrainment.</li>
-      <li>Use together with stack testing and CEMS data; this model assumes ideal conditions and uniform fields.</li>
+      <li><strong>W</strong>: Terminal drift / migration velocity of particles [m/s]</li>
+      <li><strong>A</strong>: Total collection area of ESP [m²]</li>
+      <li><strong>Q</strong>: Volumetric gas flow rate through ESP [m³/s]</li>
+      <li><strong>SCA</strong>: Specific Collection Area = A / Q [m² per (m³/s)]</li>
+      <li><strong>K</strong>: Design parameter = W·A / Q (dimensionless)</li>
     </ul>
   </div>
 
   <div class="note-card">
-    <h3>📊 Interpretation (Guidance)</h3>
+    <h3>✅ Input Validation Rules</h3>
     <ul class="note-list">
-      <li><span class="bad">η &lt; 50%</span> → ❌ Poor capture – immediate review of sizing, fields, or maintenance.</li>
-      <li><span class="average">50% ≤ η &lt; 90%</span> → 🟡 Moderate – improvement recommended (power/rapping/plates).</li>
-      <li><span class="good">90% ≤ η &lt; 99%</span> → 🟢 Good – typical for coarse dust control.</li>
-      <li><span class="good">η ≥ 99%</span> → ✅ Excellent – suitable for fine PM if conditions stable.</li>
+      <li>✔️ W must be numeric, 0.001 – 5.0 m/s (typical 0.05–0.3)</li>
+      <li>✔️ A must be numeric, 1 – 1,000,000 m²</li>
+      <li>✔️ Q must be numeric, 0.001 – 10,000 m³/s</li>
+      <li>✔️ Zeros, negatives, or non-numeric inputs are invalid</li>
+      <li>⚠️ Values outside common ranges (W <0.03 or >0.60, SCA <50 or >300, K <0.01 or >20) trigger warnings</li>
     </ul>
-    <p style="font-size:0.9em;color:#555;">(Adjust thresholds to your sector and permit conditions.)</p>
   </div>
 
   <div class="note-card">
-    <h3>⚠️ Input Validations</h3>
-    <ul>
-      <li>✔️ <strong>W (m/s)</strong>: required, &gt; 0, allowed 0.001–5.000 (typical 0.05–0.3). Step ≤ 0.001.</li>
-      <li>✔️ <strong>A (m²)</strong>: required, &gt; 0, allowed 1–1,000,000 (typical 100–100,000). Integer ok.</li>
-      <li>✔️ <strong>Q (m³/s)</strong>: required, &gt; 0, allowed 0.001–10,000 (typical 10–1,000). Step ≤ 0.001.</li>
-      <li>✔️ Cross-field: compute design parameter <em>K = (W·A)/Q</em> (dimensionless). Reasonable design often has K ≈ 0.5–5.</li>
-      <li>❌ Zeros, negatives, or non-numeric values are invalid (prevents division by zero / non-physical results).</li>
-      <li>⚠️ Sanity warnings:
-        <ul style="margin-top:6px;">
-          <li><strong>Specific Collection Area</strong> SCA = A/Q &lt; 50 m² per (m³/s): likely undersized; &gt; 300: likely oversized.</li>
-          <li>W &lt; 0.03 m/s or &gt; 0.60 m/s: outside common operating envelope – verify dust/field conditions.</li>
-          <li>K &gt; 20 → result ~100%: check inputs for overestimation; K &lt; 0.01 → near 0% capture: check sizing.</li>
+    <h3>🔎 Output & Validation</h3>
+    <ul class="note-list">
+      <li>Computed <strong>ESP Efficiency (η%)</strong> must be finite and between 0–100%.</li>
+      <li>Assessment / Feedback is displayed along with results:
+        <ul>
+          <li>η &lt; 50% → ❌ Poor capture – review ESP design or operation.</li>
+          <li>50% ≤ η &lt; 90% → 🟡 Moderate – improvement recommended.</li>
+          <li>η ≥ 90% → ✅ Good – typical for coarse dust control.</li>
         </ul>
       </li>
+      <li>Warnings are shown if inputs are outside typical ranges (SCA, K, W).</li>
     </ul>
   </div>
+
+  <div class="note-card">
+    <h3>📐 Governing Principle</h3>
+    <p>
+      An electrostatic precipitator (ESP) efficiency calculator is generally based on the Deutsch-Anderson equation, a standard model for predicting collection efficiency in an ESP by relating it to particle migration velocity, collecting plate area, and gas flow rate. While the core principle comes from this widely accepted equation, practical calculators may incorporate modifications and consider other factors like particle size, gas properties, and electrical conditions to provide more accurate results for various applications.
+    </p>
+  </div>
+
+  <div class="note-card">
+    <h3>📝 Conclusion</h3>
+    <p>
+      This ESP efficiency calculator provides a reliable estimate of collection efficiency based on W, A, and Q. By following proper input validation, users can ensure realistic predictions and interpret the assessment/feedback for performance monitoring, maintenance, and compliance purposes.
+    </p>
+  </div>
+
 </div>
 
 <script>
@@ -593,82 +607,37 @@ function calculateESPEfficiency() {
   if (errors.length) return showErrors(errors);
 
   // hard ranges to prevent non-physical inputs
-  if (W <= 0 || W < 0.001 || W > 5) {
-    errors.push("👉 W must be > 0 and within 0.001 to 5.000 m/s (typical 0.05–0.30).");
-  }
-  if (A <= 0 || A < 1 || A > 1000000) {
-    errors.push("👉 A must be > 0 and within 1 to 1,000,000 m².");
-  }
-  if (Q <= 0 || Q < 0.001 || Q > 10000) {
-    errors.push("👉 Q must be > 0 and within 0.001 to 10,000 m³/s.");
-  }
+  if (W <= 0 || W < 0.001 || W > 5) errors.push("👉 W must be > 0 and within 0.001 to 5.000 m/s.");
+  if (A <= 0 || A < 1 || A > 1000000) errors.push("👉 A must be > 0 and within 1 to 1,000,000 m².");
+  if (Q <= 0 || Q < 0.001 || Q > 10000) errors.push("👉 Q must be > 0 and within 0.001 to 10,000 m³/s.");
   if (errors.length) return showErrors(errors);
 
-  // precision advisories (avoid false precision in reporting)
-  const decimals = (s) => (String(s).split(".")[1] || "").length;
-  if (decimals(Wraw) > 3) warnings.push("⚠️ W has more than 3 decimals – consider rounding for KPI reporting.");
-  if (decimals(Qraw) > 3) warnings.push("⚠️ Q has more than 3 decimals – consider rounding for KPI reporting.");
-
-  // cross-field derived checks
-  const SCA = A / Q; // m² per (m³/s)
-  const K = (W * A) / Q; // dimensionless exponent term magnitude
-
-  if (W < 0.03 || W > 0.60) {
-    warnings.push("⚠️ W is outside common operating envelope (0.03–0.60 m/s) – verify conditions.");
-  }
-  if (SCA < 50) {
-    warnings.push("⚠️ Specific Collection Area (A/Q) < 50 m²/(m³/s) – likely undersized for high capture.");
-  } else if (SCA > 300) {
-    warnings.push("⚠️ Specific Collection Area (A/Q) > 300 m²/(m³/s) – may indicate oversizing.");
-  }
-  if (K < 0.01) {
-    warnings.push("⚠️ Very low design parameter (W·A/Q) – efficiency will be near zero.");
-  } else if (K > 20) {
-    warnings.push("⚠️ Very high design parameter (W·A/Q) – efficiency will be ~100%; check inputs for overestimation.");
-  }
-
   // compute η = 1 - exp(-(W*A)/Q)
-  const exponent = -(W * A) / Q;
-  const eta = 1 - Math.exp(exponent);
+  const eta = 1 - Math.exp(-(W * A) / Q);
 
   if (!Number.isFinite(eta) || eta < 0 || eta > 1) {
     return showErrors(["⚠️ Computed efficiency is invalid. Check inputs."]);
   }
 
-  // classification
+  // convert to %
   const etaPct = eta * 100;
+
+  // status message
   let statusMsg = "";
   if (etaPct < 50) {
-    statusMsg = "❌ Poor capture – review sizing, power supply, rapping, and gas conditions.";
+    statusMsg = "❌ Poor capture – review ESP design or operation.";
   } else if (etaPct < 90) {
-    statusMsg = "🟡 Moderate – improvement recommended (optimize fields/plates and maintenance).";
-  } else if (etaPct < 99) {
-    statusMsg = "🟢 Good – typical for coarse dust control; verify compliance margins.";
+    statusMsg = "🟡 Moderate – improvement recommended.";
   } else {
-    statusMsg = "✅ Excellent – high capture efficiency; continue monitoring and maintenance.";
+    statusMsg = "✅ Good – typical for coarse dust control.";
   }
 
-  // details (formatted numbers)
-  const fmt = (n, d=0) => Number(n).toLocaleString(undefined, {maximumFractionDigits: d});
-  const fmtFixed = (n, d=2) => Number(n).toLocaleString(undefined, {minimumFractionDigits: d, maximumFractionDigits: d});
-
-  let details = `<div>ESP Efficiency (η): <b>${fmtFixed(etaPct, 2)}%</b></div>`;
-  details += `<div>W: <b>${fmtFixed(W, 3)}</b> m/s</div>`;
-  details += `<div>A: <b>${fmt(A)}</b> m²</div>`;
-  details += `<div>Q: <b>${fmtFixed(Q, 3)}</b> m³/s</div>`;
-  details += `<div>Specific Collection Area (A/Q): <b>${fmtFixed(SCA, 2)}</b> m² per (m³/s)</div>`;
-  details += `<div>Design Parameter (W·A/Q): <b>${fmtFixed(K, 3)}</b> (dimensionless)</div>`;
-
-  if (warnings.length) {
-    details += `<div style="margin-top:6px; color:#b35d00; font-size:0.95em;">${warnings.join(" | ")}</div>`;
-  }
-
-  // update UI
-  rateEl.textContent = fmtFixed(etaPct, 2);
+  // update UI with only efficiency
+  rateEl.textContent = etaPct.toFixed(2);
   document.querySelector(".rate-label").textContent = "% collection efficiency";
-  feedbackEl.innerHTML = `<div>${statusMsg}</div>${details}`;
+  feedbackEl.innerHTML = `<div>${statusMsg}</div><div>ESP Efficiency (η): <b>${etaPct.toFixed(2)}%</b></div>`;
 
-  document.getElementById("placeholder").classList.add("hidden");
+  placeholder.classList.add("hidden");
   resultValue.classList.remove("hidden");
   errorBox.classList.add("hidden");
 }
@@ -682,6 +651,7 @@ function printReport() {
   window.print();
 }
 </script>
+
 
 
 

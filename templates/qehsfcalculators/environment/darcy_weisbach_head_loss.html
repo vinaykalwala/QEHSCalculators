@@ -637,16 +637,17 @@
 
 
 <script>
+/* Consistent error UI */
 function showErrors(errors) {
   const errorBox = document.getElementById("resultError");
   const errorMessage = document.getElementById("errorMessage");
   const placeholder = document.getElementById("placeholder");
   const resultValue = document.getElementById("resultValue");
 
-  errorMessage.innerHTML = errors.join("<br>");
-  errorBox.classList.remove("hidden");
-  placeholder.classList.add("hidden");
-  resultValue.classList.add("hidden");
+  if (errorMessage) errorMessage.innerHTML = errors.join("<br>");
+  if (errorBox) errorBox.classList.remove("hidden");
+  if (placeholder) placeholder.classList.add("hidden");
+  if (resultValue) resultValue.classList.add("hidden");
 }
 
 function calculateHeadLoss() {
@@ -693,11 +694,12 @@ function calculateHeadLoss() {
   if (Re < 2300) warnings.push("⚠️ Flow may be laminar (Re < 2300).");
   if (Re > 1e6) warnings.push("⚠️ Very high Reynolds number – ensure assumptions valid.");
 
-  // Head loss calc
+  // Head loss calculation
   const headLoss = (f * L * U * U) / (2 * g * d);
   if (!Number.isFinite(headLoss) || headLoss < 0) {
     return showErrors(["⚠️ Computed head loss is invalid. Check inputs."]);
   }
+  if (headLoss > 30) warnings.push("⚠️ Extreme head loss – verify pipe design.");
 
   // Classification
   let classification, suggestion;
@@ -714,21 +716,21 @@ function calculateHeadLoss() {
     classification = "Very High Head Loss";
     suggestion = "❌ Excessive loss; urgent system review required.";
   }
-  if (headLoss > 30) warnings.push("⚠️ Extreme head loss – verify pipe design.");
 
-  // Feedback
-  let details = `<div>Head Loss = <b>${headLoss.toFixed(4)}</b> m</div>`;
-  details += `<div>Classification: <b>${classification}</b></div>`;
+  // Feedback (without numeric head loss)
+  let details = `<div>Classification: <b>${classification}</b></div>`;
   details += `<div style="margin-top:6px;">${suggestion}</div>`;
-  details += `<div style="margin-top:8px; font-size:14px;">Reynolds Number: ~${Re.toExponential(2)}</div>`;
-  details += `<div style="font-size:14px;">Velocity Head: ${(U*U/(2*g)).toFixed(4)} m</div>`;
   if (warnings.length) details += `<div style="margin-top:8px; color:#b35d00;">${warnings.join(" | ")}</div>`;
 
-  headLossEl.textContent = headLoss.toFixed(4);
   feedbackEl.innerHTML = details;
-  document.getElementById("placeholder").classList.add("hidden");
-  document.getElementById("resultValue").classList.remove("hidden");
-  document.getElementById("resultError").classList.add("hidden");
+
+  // Display only numeric result in the result box (optional)
+  if (headLossEl) headLossEl.textContent = headLoss.toFixed(4);
+
+  // Toggle UI
+  document.getElementById("placeholder")?.classList.add("hidden");
+  document.getElementById("resultValue")?.classList.remove("hidden");
+  document.getElementById("resultError")?.classList.add("hidden");
 }
 
 function printReport() {
@@ -739,6 +741,7 @@ function printReport() {
   window.print();
 }
 </script>
+
 <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>

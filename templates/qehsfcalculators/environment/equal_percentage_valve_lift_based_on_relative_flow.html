@@ -623,16 +623,15 @@ function calculateValveLift() {
 
   const Vmin = Vmax / tau;
   if (V < Vmin) {
-  errors.push(`👉 Flow (V) is too low. For proper valve control, it must be at least ${Vmin.toFixed(3)} m³/h (based on Vmax and rangeability).`);
-}
-
+    warnings.push(`⚠️ Flow is below minimum controllable limit (${Vmin.toFixed(3)} m³/h). Valve is effectively closed.`);
+  }
 
   if (errors.length) return showErrors(errors);
 
-  // Compute Lift %
-  const Hpercent = 100 * (1 + (Math.log(V / Vmax) / Math.log(tau)));
+  // Compute Lift % using extracted formula
+  const Hpercent = 100 * (Math.log(V / Vmax) / Math.log(tau));
 
-  if (!Number.isFinite(Hpercent) || Hpercent < 0 || Hpercent > 100) {
+  if (!Number.isFinite(Hpercent)) {
     return showErrors(["⚠️ Computed valve lift is invalid. Check inputs."]);
   }
 
@@ -643,7 +642,9 @@ function calculateValveLift() {
 
   // Status interpretation
   let statusMsg = "";
-  if (Hpercent < 5) {
+  if (Hpercent < 0) {
+    statusMsg = "⚠️ Valve effectively closed – flow below controllable limit.";
+  } else if (Hpercent < 5) {
     statusMsg = "⚠️ Valve nearly shut – control may be unstable.";
   } else if (Hpercent <= 90) {
     statusMsg = "✅ Normal controllable operating range.";
@@ -652,10 +653,6 @@ function calculateValveLift() {
   }
 
   let details = `<div>Valve Lift: <b>${Hpercent.toFixed(2)}%</b></div>`;
-  details += `<div>Flow: <b>${V.toFixed(3)}</b> m³/h</div>`;
-  details += `<div>Max Flow: <b>${Vmax.toFixed(3)}</b> m³/h</div>`;
-  details += `<div>Rangeability: <b>${tau.toFixed(2)}</b></div>`;
-  details += `<div>Minimum Controllable Flow (Vmax/τ): <b>${Vmin.toFixed(3)}</b> m³/h</div>`;
   if (warnings.length) {
     details += `<div style="margin-top:6px; color:#b35d00; font-size:0.95em;">${warnings.join(" | ")}</div>`;
   }
@@ -677,6 +674,7 @@ function printReport() {
   window.print();
 }
 </script>
+
 
     <script src="{% static 'js/print.js' %}"></script>
 </body>

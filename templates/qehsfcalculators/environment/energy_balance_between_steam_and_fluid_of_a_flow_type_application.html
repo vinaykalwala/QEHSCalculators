@@ -624,7 +624,7 @@
 
 
 <script>
-/* Reuse your error UI */
+/* ===== Helpers ===== */
 function showErrors(errors) {
   const errorBox = document.getElementById("resultError");
   const errorMessage = document.getElementById("errorMessage");
@@ -637,16 +637,10 @@ function showErrors(errors) {
   resultValue.classList.add("hidden");
 }
 
-/* Drop-in replacement:
-   - Computes Q_steam = ms * x * hfg (kW)
-   - Optional Q_fluid = m_dot * cp * dT (kW)
-   - Strong validations + warnings
-   - Reuses #headLoss for numeric result and #feedbackContent for details
-*/
+/* ===== Main Steam/Fluid Duty Assessment ===== */
 function calculateHeadLoss() {
   const get = id => document.getElementById(id)?.value?.trim();
 
-  const headLossEl = document.getElementById("headLoss");      // shows kW
   const feedbackEl  = document.getElementById("feedbackContent");
   const placeholder = document.getElementById("placeholder");
   const resultBox   = document.getElementById("resultValue");
@@ -673,40 +667,16 @@ function calculateHeadLoss() {
   const warnings = [];
 
   const isNum = v => Number.isFinite(v);
-  const decimals = v => {
-    const s = String(v);
-    return s.includes(".") ? (s.length - s.indexOf(".") - 1) : 0;
-  };
 
   // -------- Required steam-side validation --------
   if (!isNum(ms) || !isNum(hfg) || !isNum(x)) {
     errors.push("👉 Steam inputs (ṁₛ, h_fg, x) must be numeric. x defaults to 1.00 if left blank.");
   }
-  if (isNum(ms) && (ms < 0.0001 || ms > 200)) {
-    errors.push("👉 Steam rate ṁₛ must be within 0.0001–200 kg/s.");
-  } else if (isNum(ms)) {
-    if (ms > 50) warnings.push("⚠️ Very large steam rate — verify line sizing, trap capacity, relief/LOPA.");
-    else if (ms > 10) warnings.push("⚠️ High steam rate — check trap and condensate return capacity.");
-  }
+  if (isNum(ms) && (ms < 0.0001 || ms > 200)) errors.push("👉 Steam rate ṁₛ must be within 0.0001–200 kg/s.");
+  if (isNum(hfg) && (hfg < 1000 || hfg > 2600)) errors.push("👉 Latent heat h_fg must be within 1000–2600 kJ/kg.");
+  if (isNum(x) && (x <= 0 || x > 1)) errors.push("👉 Dryness fraction x must be in (0, 1].");
 
-  if (isNum(hfg) && (hfg < 1000 || hfg > 2600)) {
-    errors.push("👉 Latent heat h_fg must be within 1000–2600 kJ/kg.");
-  } else if (isNum(hfg)) {
-    if (hfg < 2000 || hfg > 2400) warnings.push("⚠️ h_fg outside typical 1–10 bar range — confirm steam tables.");
-  }
-
-  if (isNum(x) && (x <= 0 || x > 1)) {
-    errors.push("👉 Dryness fraction x must be in (0, 1].");
-  } else if (isNum(x) && x < 0.9) {
-    warnings.push("⚠️ Wet steam (x < 0.9) — increased water hammer/erosion risk.");
-  }
-
-  // Precision hints (non-blocking)
-  if (isNum(ms) && decimals(ms) > 4) warnings.push("ℹ️ ṁₛ reported with >4 decimals — may exceed instrument precision.");
-  if (isNum(hfg) && decimals(hfg) > 1) warnings.push("ℹ️ h_fg reported with >1 decimal — consider rounding to nearest 0.1.");
-  if (isNum(x) && decimals(x) > 2) warnings.push("ℹ️ x reported with >2 decimals — consider rounding.");
-
-  // -------- Optional fluid-side validation (all-or-none) --------
+  // Optional fluid-side validation
   let m_dot, cp, dT;
   if (anyFluid && !allFluid) {
     errors.push("👉 Provide all fluid-side fields together (ṁ, c_p, ΔT) or leave all blank.");
@@ -718,110 +688,46 @@ function calculateHeadLoss() {
     if (!isNum(m_dot) || !isNum(cp) || !isNum(dT)) {
       errors.push("👉 Fluid-side inputs must be numeric.");
     }
-    if (isNum(m_dot) && (m_dot < 0.0001 || m_dot > 200)) {
-      errors.push("👉 Fluid mass flow ṁ must be within 0.0001–200 kg/s.");
-    } else if (isNum(m_dot) && m_dot > 50) {
-      warnings.push("⚠️ Very large fluid flow — check pump and line sizing.");
-    }
-
-    if (isNum(cp) && (cp < 0.1 || cp > 8)) {
-      errors.push("👉 Specific heat c_p must be within 0.1–8 kJ/kg·°C.");
-    } else if (isNum(cp) && (cp < 1 || cp > 5)) {
-      warnings.push("⚠️ c_p is unusual for common liquids — confirm fluid properties.");
-    }
-
-    if (isNum(dT) && (dT <= 0 || dT < 0.1 || dT > 200)) {
-      errors.push("👉 ΔT must be >0 and within 0.1–200 °C for steam heating.");
-    }
   }
 
-  // If any blocking error -> show and return
   if (errors.length) return showErrors(errors);
 
-  // -------- Calculations --------
-  // Q_steam in kW (kJ/s)
+  // -------- Calculations (used only for assessment) --------
   const Qsteam = ms * x * hfg;
-
-  // sanity checks
-  if (!isNum(Qsteam) || Qsteam <= 0 || !isFinite(Qsteam)) {
-    return showErrors(["⚠️ Computed heat duty is invalid. Check inputs."]);
-  }
-  if (Qsteam > 1e5) {
-    warnings.push("⚠️ Extremely high heat duty (>100 MW) — verify plausibility.");
-  } else if (Qsteam > 1e4) {
-    warnings.push("⚠️ Very high heat duty (>10 MW) — ensure relief, condensate capacity, and insulation are adequate.");
-  }
-
-  // Optional fluid side comparison
-  let details = "";
   let classification = "";
   let suggestion = "";
 
-  // Classification by magnitude
-  if (Qsteam < 50) {
-    classification = "Small Duty";
-    suggestion = "✅ Suitable for small coils/labs; verify control valve turndown.";
-  } else if (Qsteam < 500) {
-    classification = "Moderate Duty";
-    suggestion = "ℹ️ Typical unit operation; check trap sizing and condensate return.";
-  } else if (Qsteam < 5000) {
-    classification = "High Duty";
-    suggestion = "⚠️ Review exchanger sizing, insulation, and condensate backpressure.";
-  } else {
-    classification = "Very High Duty";
-    suggestion = "❗ Plant-scale load; conduct relief/LOPA review and thermal stress checks.";
-  }
+  if (Qsteam < 50) classification = "Small Duty: ✅ Suitable for small coils/labs.";
+  else if (Qsteam < 500) classification = "Moderate Duty: ℹ️ Typical unit operation; check trap sizing.";
+  else if (Qsteam < 5000) classification = "High Duty: ⚠️ Review exchanger sizing, insulation, condensate backpressure.";
+  else classification = "Very High Duty: ❗ Plant-scale load; conduct relief/LOPA & thermal stress checks.";
 
-  // Build details
-  details += `<div>Q̇<sub>steam</sub> = <b>${Qsteam.toFixed(2)}</b> kW</div>`;
-  details += `<div>Classification: <b>${classification}</b></div>`;
-  details += `<div style="margin-top:6px;">${suggestion}</div>`;
-
+  // Optional fluid-side assessment
   if (allFluid) {
     const Qfluid = m_dot * cp * dT;
-    if (!isNum(Qfluid) || !isFinite(Qfluid) || Qfluid <= 0) {
-      return showErrors(["⚠️ Computed fluid-side duty is invalid. Check ṁ, c_p, and ΔT."]);
-    }
-
-    const larger = Math.max(Qsteam, Qfluid);
-    const tol = Math.max(5, 0.05 * larger); // kW
     const diff = Math.abs(Qsteam - Qfluid);
-    const pct = (diff / larger) * 100;
-
-    let balanceMsg = "";
-    if (diff <= tol) {
-      balanceMsg = "✔ Energy balance achieved (within tolerance).";
-    } else if (Qsteam > Qfluid) {
-      balanceMsg = "⚠ Imbalance: steam duty exceeds fluid absorption — check insulation & losses.";
-    } else {
-      balanceMsg = "⚠ Imbalance: fluid absorption exceeds steam duty — verify inputs & assumptions.";
+    const larger = Math.max(Qsteam, Qfluid);
+    const tol = Math.max(5, 0.05 * larger); // tolerance
+    if (diff > tol) {
+      warnings.push(Qsteam > Qfluid 
+        ? "⚠ Fluid-side duty less than steam duty — check insulation & losses." 
+        : "⚠ Fluid-side duty exceeds steam duty — verify inputs & assumptions.");
     }
-
-    details += `<div style="margin-top:8px;">Q̇<sub>fluid</sub> = <b>${Qfluid.toFixed(2)}</b> kW</div>`;
-    details += `<div>Δ = ${diff.toFixed(2)} kW (${pct.toFixed(1)}%) | Tolerance ≈ ${tol.toFixed(2)} kW</div>`;
-    details += `<div style="margin-top:6px;">${balanceMsg}</div>`;
-
-    // Additional plausibility warnings
-    if (Qfluid > 1.2 * Qsteam) {
-      warnings.push("⚠️ Fluid-side duty substantially exceeds steam-side duty — reevaluate ΔT/c_p/ṁ.");
-    }
-    if (dT > 120) {
-      warnings.push("⚠️ Large ΔT — validate material limits and scaling/coking risks.");
-    }
+    if (dT > 120) warnings.push("⚠ Large ΔT — validate material limits and scaling/coking risks.");
   }
 
-  // Append warnings
+  // Build feedback (assessment only, no numeric values)
+  let details = `<div>${classification}</div>`;
   if (warnings.length) {
-    details += `<div style="margin-top:8px; color:#b35d00;">${warnings.join(" | ")}</div>`;
+    details += `<div style="margin-top:6px; color:#b35d00; font-size:0.95em;">${warnings.join(" | ")}</div>`;
   }
 
-  // Push to UI
-  document.getElementById("placeholder").classList.add("hidden");
-  document.getElementById("resultError").classList.add("hidden");
-  document.getElementById("resultValue").classList.remove("hidden");
-
-  headLossEl.textContent = Qsteam.toFixed(2); // numeric display
   feedbackEl.innerHTML = details;
+
+  // Toggle display
+  document.getElementById("placeholder").classList.add("hidden");
+  document.getElementById("resultValue").classList.remove("hidden");
+  document.getElementById("resultError").classList.add("hidden");
 }
 
 function printReport() {
@@ -832,6 +738,7 @@ function printReport() {
   window.print();
 }
 </script>
+
 
 <script src="{% static 'js/print.js' %}"></script>
 </body>

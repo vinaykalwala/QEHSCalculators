@@ -491,38 +491,89 @@
 
 <!-- Notes (modified to reflect PCD × Population formula and validations) -->
 <div class="note-section">
-    <div class="note-card">
-        <h3>📘 About</h3>
-        <p>
-            This estimator computes total daily water demand by multiplying the per-capita water demand (liters per person per day)
-            by the population served. Use consistent SI units: <strong>PCD in liters/day/person</strong>, <strong>population in persons</strong>.
-        </p>
-    </div>
 
-    <div class="note-card">
-        <h3>⚠️ Input validations</h3>
-        <ul class="note-list">
-            <li><strong>Per-capita demand (PCD)</strong> — required, numeric, &gt; 0. Typical urban ranges: <em>20–500 L/day/person</em>. Hard-limit error if ≤ 0.1 or &gt; 10,000 (likely units error).</li>
-            <li><strong>Population</strong> — required, numeric, &ge; 1. Should be an integer (fractions will be rounded with a warning). Hard-limit error if &gt; 1,000,000,000.</li>
-            <li><strong>Precision</strong> — avoid excessive decimals; inputs with &gt; 3 decimal places will produce a precision warning.</li>
-            <li><strong>Cross-checks</strong> — Extremely large totals (≫ 1×10⁶ L/day) will trigger warnings; totals &gt; 1×10⁹ L/day produce an error asking you to check units and inputs.</li>
-        </ul>
-    </div>
+  <div class="note-card">
+    <h3>📘 About This Calculator</h3>
+    <p>
+      The <strong>Municipal Water Quantity Estimator</strong> computes total daily water demand 
+      by multiplying the per-capita water demand (liters per person per day) by the population served.
+      Use consistent SI units: <strong>PCD in liters/day/person</strong>, <strong>population in persons</strong>.
+    </p>
+  </div>
 
-    <div class="note-card">
-        <h3>🏭 Applications</h3>
-        <ul class="note-list">
-            <li>Urban water supply & distribution planning</li>
-            <li>Booster pump and storage sizing</li>
-            <li>Fire flow / emergency water availability checks</li>
-            <li>Environmental and wastewater load estimations</li>
+  <div class="note-card">
+    <h3>⚙ Parameters Used</h3>
+    <ul class="note-list">
+      <li><strong>Per-Capita Demand (PCD)</strong> — daily water requirement per person (liters/day/person).</li>
+      <li><strong>Population</strong> — total number of people served.</li>
+      <li><strong>Total Water Demand</strong> = PCD × Population (liters/day).</li>
+      <li><strong>Conversions:</strong> m³/day = Total Liters ÷ 1000, L/s = Total Liters ÷ 86,400</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>✅ Input Validation Rules</h3>
+    <ul class="note-list">
+      <li>PCD: required, numeric, >0, typical 65–300 L/day/person. Warning if &lt;20 or &gt;500. High precision (>3 decimals) → warning.</li>
+      <li>Population: required, numeric, ≥1, integer preferred. Hard-limit ≤1,000,000,000. Fractional → rounded with warning. &gt;10 million → system-level warning.</li>
+      <li>Cross-check: extremely large totals &gt;1×10⁹ L/day → error; totals &gt;1×10⁶ L/day → warning.</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>📊 Output Validations</h3>
+    <ul class="note-list">
+      <li>Total Water Demand displayed in liters/day, m³/day, and L/s.</li>
+      <li>Output must be finite and >0; >1×10⁹ L/day → error, &gt;1×10⁶ → warning, &lt;100 → warning.</li>
+      <li>Per-capita assessment:
+        <ul>
+          <li>&lt;65 → Low consumption (possible rationing/water-saving)</li>
+          <li>65–300 → Typical domestic/urban range</li>
+          <li>&gt;300 → High consumption (possible industrial/process loads)</li>
         </ul>
-    </div>
+      </li>
+      <li>System scale:
+        <ul>
+          <li>&lt;10,000 L/day → Small (neighbourhood/small community)</li>
+          <li>10,000–1,000,000 → Medium (town / small city)</li>
+          <li>&gt;1,000,000 → Large (city / regional system) - verify planning & capacity</li>
+        </ul>
+      </li>
+      <li>All assessment/feedback messages are displayed along with the results in the UI.</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>📐 Governing Principle</h3>
+    <p>
+      A <strong>Municipal Water Quantity Estimator</strong> relies on national and international standards 
+      for per-capita water consumption, such as the <strong>National Building Code (NBC) of India</strong> 
+      and recommendations from <strong>CPHEEO</strong>, which specify a standard of 135–150 liters/person/day 
+      for estimating total water demand.
+    </p>
+    <ul class="note-list">
+      <li><strong>National Standards:</strong> NBC and CPHEEO guidelines provide baseline per-capita water requirements.</li>
+      <li><strong>Calculation Method:</strong> Total water demand = Rate of consumption per capita per day × Design population.</li>
+      <li><strong>Variations:</strong> PCD can be adjusted for living standards, economic conditions, industrial/commercial loads (e.g., 135 L/day for lower-income groups).</li>
+      <li><strong>Other Standards:</strong> IAPMO or local municipal regulations may also be referenced, but Indian standards are primary.</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>🔎 Conclusion</h3>
+    <p>
+      This estimator integrates input validation, water demand computation, and standardized assessment.
+      Feedback on per-capita usage and system scale is displayed along with results, assisting planners
+      in ensuring adequate supply and complying with national/international water consumption standards.
+    </p>
+  </div>
+
 </div>
 
 
+
 <script>
-/* Keep showErrors signature so UI behaviour stays consistent */
+/* Show error messages consistently */
 function showErrors(errors) {
   const errorBox = document.getElementById("resultError");
   const errorMessage = document.getElementById("errorMessage");
@@ -562,92 +613,83 @@ function calculateWaterQuantity() {
   if (popRaw === "") errors.push("👉 Please enter Population (persons).");
   if (errors.length) return showErrors(errors);
 
-  // Parse
+  // Parse inputs
   const pcd = parseFloat(pcdRaw);
   let population = parseFloat(popRaw);
 
-  // Numeric checks with helpful examples
-  if (!Number.isFinite(pcd)) errors.push("👉 Per-Capita Demand must be a valid number in liters/day (e.g. 160).");
+  if (!Number.isFinite(pcd)) errors.push("👉 Per-Capita Demand must be a valid number (e.g. 160).");
   if (!Number.isFinite(population)) errors.push("👉 Population must be a valid number (e.g. 12500).");
   if (errors.length) return showErrors(errors);
 
-  // Basic value checks
-  if (pcd <= 0) errors.push("👉 Per-Capita Demand must be greater than zero (liters/day/person).");
+  // Value checks
+  if (pcd <= 0) errors.push("👉 Per-Capita Demand must be greater than zero.");
   if (population < 1) errors.push("👉 Population must be at least 1 person.");
   if (errors.length) return showErrors(errors);
 
-  // Hard limits / plausibility
+  // Plausibility checks
   if (pcd < 0.1 || pcd > 10000) {
     return showErrors([
-      "⚠️ Per-Capita Demand appears outside engineering bounds (possible units error).",
-      "👉 Enter PCD in liters/day/person. Typical examples: 65–300 L/day/person for many cities."
+      "⚠️ Per-Capita Demand appears outside expected range.",
+      "👉 Enter PCD in liters/day/person. Typical: 65–300 L/day/person."
     ]);
   }
   if (population > 1000000000) {
     return showErrors([
-      "⚠️ Population is implausibly large (>1,000,000,000).",
-      "👉 Check population units (should be number of persons)."
+      "⚠️ Population is implausibly large (>1 billion).",
+      "👉 Check population units (number of persons)."
     ]);
   }
 
-  // Precision checks
+  // Precision warnings
   const decimals = s => ((String(s).split('.')[1] || '').length);
-  if (decimals(pcdRaw) > 3) warnings.push("⚠️ High precision for PCD — consider rounding to ≤ 3 decimals for reporting clarity.");
+  if (decimals(pcdRaw) > 3) warnings.push("⚠️ High precision for PCD — consider rounding to ≤ 3 decimals.");
   if (decimals(popRaw) > 0) {
-    // population fractional: round and warn
-    warnings.push("⚠️ Population is not an integer — rounding to nearest whole person for calculation.");
+    warnings.push("⚠️ Population is not an integer — rounding to nearest whole person.");
     population = Math.round(population);
   }
 
-  // Recommended range warnings (non-fatal)
-  if (pcd < 20) warnings.push("⚠️ Per-capita demand is low (<20 L/day) — could indicate restricted supply or units error.");
-  if (pcd > 500) warnings.push("⚠️ Per-capita demand is high (>500 L/day) — verify if this includes process/industrial uses.");
+  // Recommended range warnings
+  if (pcd < 20) warnings.push("⚠️ PCD is low (<20 L/day) — check for restricted supply or units.");
+  if (pcd > 500) warnings.push("⚠️ PCD is high (>500 L/day) — may include industrial use.");
+  if (population > 10000000) warnings.push("⚠️ Large population (>10 million) — ensure system-level planning.");
 
-  if (population > 10000000) warnings.push("⚠️ Very large population (>10 million) — ensure system-level planning and safety margins.");
-
-  // Compute total
+  // Compute total demand
   const totalLiters = pcd * population; // liters/day
   const totalM3 = totalLiters / 1000.0; // m³/day
   const litersPerSec = totalLiters / 86400.0; // L/s
 
-  // Output plausibility checks
+  // Output plausibility
   if (!Number.isFinite(totalLiters) || totalLiters <= 0) {
-    return showErrors(["⚠️ Computed total water is invalid. Re-check inputs and units."]);
+    return showErrors(["⚠️ Computed total water demand is invalid. Re-check inputs."]);
   }
-
-  if (totalLiters > 1e9) { // 1 billion liters/day is huge => likely unit error
+  if (totalLiters > 1e9) {
     return showErrors([
       "⚠️ Computed total water demand is extremely large (>1×10⁹ L/day).",
-      "👉 Likely unit or input error — check Per-Capita Demand (should be L/day/person) and Population."
+      "👉 Likely units or input error — check PCD and Population."
     ]);
   }
 
-  if (totalLiters > 1e6) {
-    warnings.push("⚠️ Very large total water demand (>1,000,000 L/day) — this indicates city-scale demand; verify system design and safety margins.");
-  }
-  if (totalLiters < 100) {
-    warnings.push("⚠️ Very small total water demand (<100 L/day) — verify units and inputs (may be a household-level number).");
-  }
+  if (totalLiters > 1e6) warnings.push("⚠️ Very large total water demand (>1,000,000 L/day) — city-scale.");
+  if (totalLiters < 100) warnings.push("⚠️ Very small total water demand (<100 L/day) — may be household-level.");
 
-  // Prepare classification
+  // Classification
   let perCapitaClass = "";
   if (pcd < 65) perCapitaClass = "Low per-capita consumption (possible rationing or water-saving measures).";
   else if (pcd <= 300) perCapitaClass = "Typical per-capita consumption (urban/domestic range).";
-  else perCapitaClass = "High per-capita consumption (check industrial/process loads or measurement units).";
+  else perCapitaClass = "High per-capita consumption (check industrial/process loads).";
 
   let systemScale = "";
-  if (totalLiters < 10000) systemScale = "Small (neighbourhood/small community).";
+  if (totalLiters < 10000) systemScale = "Small (neighborhood/small community).";
   else if (totalLiters < 1e6) systemScale = "Medium (town / small city).";
   else systemScale = "Large (city / regional system) - verify planning and capacity.";
 
-  // Display results (keep UI element class/IDs the same)
+  // Display results
   rateEl.textContent = totalLiters.toLocaleString(undefined, {maximumFractionDigits: 2});
   m3El.textContent = totalM3.toLocaleString(undefined, {maximumFractionDigits: 3});
   lpsEl.textContent = litersPerSec.toFixed(4);
 
-  let details = `<div><strong>Total water demand:</strong> ${totalLiters.toLocaleString(undefined, {maximumFractionDigits:2})} liters/day</div>`;
+  let details = `<div><strong>Total water demand:</strong> ${totalLiters.toLocaleString(undefined, {maximumFractionDigits:2})} L/day</div>`;
   details += `<div><strong>Equivalent:</strong> ${totalM3.toLocaleString(undefined, {maximumFractionDigits:3})} m³/day — ${litersPerSec.toFixed(4)} L/s</div>`;
-  details += `<div style="margin-top:6px;">Inputs — PCD: <b>${pcd}</b> L/day/person; Population: <b>${population}</b> persons</div>`;
   details += `<div style="margin-top:6px;">Per-capita assessment: <b>${perCapitaClass}</b></div>`;
   details += `<div>System scale: <b>${systemScale}</b></div>`;
   if (warnings.length) details += `<div style="margin-top:8px; color:#b35d00;">${warnings.join(" | ")}</div>`;
@@ -655,20 +697,21 @@ function calculateWaterQuantity() {
   feedbackEl.innerHTML = details;
 
   // Show result UI
-  document.getElementById("placeholder").classList.add("hidden");
-  document.getElementById("resultValue").classList.remove("hidden");
-  document.getElementById("resultError").classList.add("hidden");
+  placeholder.classList.add("hidden");
+  resultValue.classList.remove("hidden");
+  errorBox.classList.add("hidden");
 }
 
+/* Print helper */
 function printReport() {
   const el = document.getElementById('printDate');
   if (el) {
-    const now = new Date();
-    el.textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    el.textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   }
   window.print();
 }
 </script>
+
 
     <script src="{% static 'js/print.js' %}"></script>
 </body>
