@@ -82,19 +82,47 @@
             }
         }
 
-        /* Cards */
         .result-card {
-            flex: 1;
-            background: #fff;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.3s ease;
-            border: 2px solid #1560bd;
-        }
-        
+    flex: 1;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease;
+    border: 2px solid #1560bd;
+    /* Add these lines for scrolling */
+    max-height: 420px;
+    overflow: hidden;
+}
+
+.result-value {
+    width: 100%;
+    /* Add these lines for scrolling */
+    overflow-y: auto;
+    max-height: 100%;
+    padding-right: 5px; /* Space for scrollbar */
+}
+
+/* Custom scrollbar styling */
+.result-value::-webkit-scrollbar {
+    width: 8px;
+}
+
+.result-value::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.result-value::-webkit-scrollbar-thumb {
+    background: #1560bd;
+    border-radius: 4px;
+}
+
+.result-value::-webkit-scrollbar-thumb:hover {
+    background: #000040;
+}
         .calc-card {
             flex: 1;
             background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
@@ -429,7 +457,7 @@
 
 
 <div class="calculator-header">
-    <h1>Liquid Flow Rate Calculator (V₂ from V₁ & pressures)</h1>
+    <h1>Liquid Flow rate vs pressure drop calculator</h1>
     <p>
         Calculate <strong>V₂ (m³/h)</strong> from a known flow V₁ and the measured pressures P₁ and P₂. 
         Assumes incompressible fluid and consistent units for both pressure inputs.
@@ -500,168 +528,260 @@
       Make sure P₁ and P₂ are measured in the same unit (bar here) and represent comparable pressure-loss measurements.
     </p>
   </div>
+  <div class="note-card">
+    <h3>⚙️ Parameters</h3>
+    <ul class="note-list">
+      <li><strong>V₁ (m³/h):</strong> Known flowrate at reference condition (must be &gt; 0).</li>
+      <li><strong>P₁ (bar):</strong> Reference pressure drop (must be &gt; 0).</li>
+      <li><strong>P₂ (bar):</strong> New pressure drop value (must be ≥ 0).</li>
+      <li><strong>V₂ (m³/h):</strong> Computed flowrate using square-root relation.</li>
+      <li><strong>Conversions:</strong> V₂ → L/min, US gpm for easier interpretation.</li>
+    </ul>
+  </div>
+
 
   <div class="note-card">
-    <h3>⚠️ Input Validations</h3>
+    <h3>✅ Input Validations</h3>
     <p>
     The calculator enforces strict input rules to ensure accurate and physically meaningful results:
     </p>
     <ul>
-    <li>✔️ <strong>Flowrate V₁ (m³/h):</strong> Must be numeric and &gt; 0. Typical operational range: 0.001 – 50,000 m³/h.</li>
-    <li>✔️ <strong>Pressure P₁ (bar):</strong> Must be numeric and &gt; 0. Prevents division by zero errors and unrealistic readings. Recommended range: 0.01 – 50 bar.</li>
-    <li>✔️ <strong>Pressure P₂ (bar):</strong> Must be numeric and ≥ 0. Can be greater or smaller than P₁, but extreme ratios are flagged as warnings.</li>
-    <li>⚠️ Very small or very large values trigger warnings to confirm measurement accuracy or unit correctness.</li>
-    <li>⚠️ Extreme pressure ratios (P₂/P₁ &lt; 0.01 or &gt; 100) trigger additional warnings for potential sensor errors.</li>
-    <li>⚠️ Very large V₂/V₁ changes (&gt;10× increase or &lt;0.1× decrease) trigger plausibility warnings.</li>
+    <li> <strong>Flowrate V₁ (m³/h):</strong> Must be numeric and &gt; 0. Typical operational range: 0.001 – 50,000 m³/h.</li>
+    <li> <strong>Pressure P₁ (bar):</strong> Must be numeric and &gt; 0. Prevents division by zero errors and unrealistic readings. Recommended range: 0.01 – 50 bar.</li>
+    <li> <strong>Pressure P₂ (bar):</strong> Must be numeric and ≥ 0. Can be greater or smaller than P₁, but extreme ratios are flagged as warnings.</li>
+    <li> Very small or very large values trigger warnings to confirm measurement accuracy or unit correctness.</li>
+    <li> Extreme pressure ratios (P₂/P₁ &lt; 0.01 or &gt; 100) trigger additional warnings for potential sensor errors.</li>
+    <li> Very large V₂/V₁ changes (&gt;10× increase or &lt;0.1× decrease) trigger plausibility warnings.</li>
     </ul>
     </div>
-
-    <div class="note-card">
-        <h3>🌍 Key Applications</h3>
-        <ul>
-        <li><strong>Fire Safety Systems:</strong> Quick screening of flow changes in sprinkler, hydrant, and standpipe systems.</li>
-        <li><strong>Pipeline Monitoring:</strong> Checking flow consistency across pressure drops in industrial fluid transport.</li>
-        <li><strong>Hydraulic Troubleshooting:</strong> Identifying abnormal flow behavior or measurement errors in process piping.</li>
-        <li><strong>QEHS Audits:</strong> Supports verification of system performance against safety and operational benchmarks.</li>
-        <li><strong>Industrial Design Checks:</strong> Preliminary design validation for pumps, orifices, and valves using measured or design pressures.</li>
-        </ul>
-
-    </div>
+    <div class="note-card validation-card">
+  <h3>✅ Output Validation Rules</h3>
+  <ul>
+    <li> <b>V₂ must be a valid finite number</b>. If V₂ is <em>NaN</em>, negative, or infinite, an error is shown.</li>
+    <li> If <b>P₂ = 0</b>, then V₂ will be 0. This is flagged as a warning to confirm pressure input correctness.</li>
+    <li> If <b>P₂ / P₁ ratio</b> is extremely low (&lt;0.01) or high (&gt;100), a warning is shown: "⚠️ Extreme pressure ratio (P₂/P₁). Verify sensors/units/assignment."</li>
+    <li> If <b>V₂ changes drastically</b> compared to V₁ (more than 10× increase or less than 0.1×), a warning is displayed to recheck P₁ and P₂.</li>
+    <li> Very small or very large inputs trigger warnings:
+      <ul>
+        <li>V₁ &lt; 0.001 m³/h → "Check units and measurement precision."</li>
+        <li> V₁ &gt; 50,000 m³/h → "Verify units or system aggregation."</li>
+        <li>P₁ &lt; 0.01 bar → "Small sensor errors may cause large V₂ errors."</li>
+        <li> P₁ &gt; 50 bar → "Unusually high pressure-loss; confirm it is not absolute pressure."</li>
+        <li> P₂ &gt; 50 bar → "Unusually high P₂; verify units and measurement."</li>
+      </ul>
+    </li>
+    <li>If this is for fire-system design, compare against code-required fire flow (e.g., NFPA baseline ≈ 1000 gpm for many buildings).</li>
+  </ul>
 </div>
 
+  <div class="note-card formula-card">
+    <h3>📐 Governing Principle</h3>
+    <p>
+   A "Liquid flow rate vs pressure drop calculator" isn't tied to a single specific standard but relies on various standards and methodologies depending on its application, such as the VDI/VDE 2173 standard for valve flow factors (Kv/Cv) or general fluid dynamics principles like the Darcy-Weisbach equation for pipe flow. Calculators often implement these underlying standards and principles, which can also be found in national standards like those from the Bureau of Indian Standards (BIS). </p>
+    <ul>
+        <p>Key Standards & Principles Used:</p>
+        <li>
+            <strong>Darcy–Weisbach Equation:</strong> This is a fundamental equation used in engineering to calculate head loss (pressure drop) in pipe systems, which is often used in more advanced calculators for pipes, fittings, and valves.        </li>
+        <li>
+            <strong>Valve Flow Coefficients (Kv/Cv):</strong> Defined by standards like 
+            <em>VDI/VDE 2173</em> (Europe) and <em>JIS</em> (Japan). These factors 
+            describe the relationship between pressure drop and flow rate through valves.
+        </li>
+        <li>
+            <strong>National Standards:</strong> Standards such as 
+            <em>Bureau of Indian Standards (IS 2951-1)</em> provide guidelines 
+            for estimating flow and head loss in straight pipes.
+        </li>
+    </ul>
+    <p>
+        Together, these principles and standards ensure accurate estimation of 
+        <strong>pressure drop vs flow rate</strong> in real-world systems, 
+        helping in pipe design, valve sizing, and system optimization.
+    </p>
+</div>
+
+
+  <!-- Conclusion -->
+  <div class="note-card">
+    <h3>📌 Conclusion</h3>
+    <p>
+      This calculator applies the square-root relationship between flowrate and pressure drop, 
+      valid for incompressible liquids and orifice/venturi type losses.  
+      Always ensure consistent units, confirm pressure measurements, and compare computed flow 
+      against design or code requirements (e.g., fire-flow benchmarks).  
+      Results are indicative and should be validated against engineering standards before use in safety-critical systems.
+    </p>
+  </div>
+
+
+</div>
 <script>
-/* Show error messages (keeps existing flow) */
+// Show error messages
 function showErrors(errors) {
-  const errorBox = document.getElementById("resultError");
-  const errorMessage = document.getElementById("errorMessage");
-  const placeholder = document.getElementById("placeholder");
-  const resultValue = document.getElementById("resultValue");
+    const errorBox = document.getElementById("resultError");
+    const errorMessage = document.getElementById("errorMessage");
+    const placeholder = document.getElementById("placeholder");
+    const resultValue = document.getElementById("resultValue");
 
-  errorMessage.innerHTML = errors.join("<br>");
-  errorBox.classList.remove("hidden");
-  placeholder.classList.add("hidden");
-  resultValue.classList.add("hidden");
+    errorMessage.innerHTML = errors.join("<br>");
+    errorBox.classList.remove("hidden");
+    placeholder.classList.add("hidden");
+    resultValue.classList.add("hidden");
 }
 
-/* Main calculation & validation */
+// Main calculation function
 function calculateFlowRate() {
-  // Inputs (trim strings first)
-  const v1Raw = (document.getElementById("flowV1").value || "").toString().trim();
-  const p1Raw = (document.getElementById("pressureP1").value || "").toString().trim();
-  const p2Raw = (document.getElementById("pressureP2").value || "").toString().trim();
+    // Get input values
+    const v1Raw = (document.getElementById("flowV1").value || "").toString().trim();
+    const p1Raw = (document.getElementById("pressureP1").value || "").toString().trim();
+    const p2Raw = (document.getElementById("pressureP2").value || "").toString().trim();
 
-  const errorBox = document.getElementById("resultError");
-  const errorMessage = document.getElementById("errorMessage");
-  const placeholder = document.getElementById("placeholder");
-  const resultValue = document.getElementById("resultValue");
-  const rateEl = document.getElementById("rateValue");
-  const feedbackEl = document.getElementById("feedbackContent");
+    // Get DOM elements
+    const errorBox = document.getElementById("resultError");
+    const errorMessage = document.getElementById("errorMessage");
+    const placeholder = document.getElementById("placeholder");
+    const resultValue = document.getElementById("resultValue");
+    const rateEl = document.getElementById("rateValue");
+    const feedbackEl = document.getElementById("feedbackContent");
 
-  // Reset displays
-  errorBox.classList.add("hidden");
-  errorMessage.innerHTML = "";
-  feedbackEl.innerHTML = "";
+    // Reset displays
+    errorBox.classList.add("hidden");
+    errorMessage.innerHTML = "";
+    feedbackEl.innerHTML = "";
 
-  const errors = [];
-  const warnings = [];
+    const errors = [];
+    const warnings = [];
 
-  // Required checks
-  if (v1Raw === "") errors.push("👉 Please enter Flow V₁ (m³/h).");
-  if (p1Raw === "") errors.push("👉 Please enter Pressure Loss P₁ (bar).");
-  if (p2Raw === "") errors.push("👉 Please enter Pressure Loss P₂ (bar).");
+    // Required field validation
+    if (v1Raw === "") errors.push("👉 Please enter Flow V₁ (m³/h).");
+    if (p1Raw === "") errors.push("👉 Please enter Pressure Loss P₁ (bar).");
+    if (p2Raw === "") errors.push("👉 Please enter Pressure Loss P₂ (bar).");
 
-  if (errors.length) return showErrors(errors);
+    if (errors.length) return showErrors(errors);
 
-  // Parse numeric
-  const v1 = parseFloat(v1Raw);
-  const p1 = parseFloat(p1Raw);
-  const p2 = parseFloat(p2Raw);
+    // Parse numeric values
+    const v1 = parseFloat(v1Raw);
+    const p1 = parseFloat(p1Raw);
+    const p2 = parseFloat(p2Raw);
 
-  // Numeric & basic range validation
-  if (!Number.isFinite(v1) || v1 <= 0) errors.push("👉 Flow V₁ must be a number greater than 0 (m³/h).");
-  if (!Number.isFinite(p1) || p1 <= 0) errors.push("👉 Pressure P₁ must be a number > 0 bar (P₁ cannot be zero).");
-  if (!Number.isFinite(p2) || p2 < 0) errors.push("👉 Pressure P₂ must be a number ≥ 0 bar.");
+    // Numeric & basic range validation
+    if (!Number.isFinite(v1) || v1 <= 0) errors.push("👉 Flow V₁ must be a number greater than 0 (m³/h).");
+    if (!Number.isFinite(p1) || p1 <= 0) errors.push("👉 Pressure P₁ must be a number > 0 bar (P₁ cannot be zero).");
+    if (!Number.isFinite(p2) || p2 < 0) errors.push("👉 Pressure P₂ must be a number ≥ 0 bar.");
 
-  // Early exit on errors
-  if (errors.length) return showErrors(errors);
+    // Early exit on errors
+    if (errors.length) return showErrors(errors);
 
-  // Recommended bounds and warnings (QEHS-minded)
-  if (v1 < 0.001) warnings.push("⚠️ Very small V₁ (< 0.001 m³/h). Check units and measurement precision.");
-  if (v1 > 50000) warnings.push("⚠️ Very large V₁ (> 50,000 m³/h). Verify units and that this is not an aggregated system value.");
+    // Recommended bounds and warnings
+    if (v1 < 0.001) warnings.push("⚠️ Very small V₁ (< 0.001 m³/h). Check units and measurement precision.");
+    if (v1 > 50000) warnings.push("⚠️ Very large V₁ (> 50,000 m³/h). Verify units and that this is not an aggregated system value.");
 
-  if (p1 < 0.01) warnings.push("⚠️ Very low P₁ (< 0.01 bar). Small sensor errors can cause large V₂ errors.");
-  if (p1 > 50) warnings.push("⚠️ P₁ unusually high (>50 bar). Confirm this is a pressure-loss, not absolute pressure.");
+    if (p1 < 0.01) warnings.push("⚠️ Very low P₁ (< 0.01 bar). Small sensor errors can cause large V₂ errors.");
+    if (p1 > 50) warnings.push("⚠️ P₁ unusually high (>50 bar). Confirm this is a pressure-loss, not absolute pressure.");
 
-  if (p2 > 50) warnings.push("⚠️ P₂ unusually high (>50 bar). Confirm units and measurement.");
+    if (p2 > 50) warnings.push("⚠️ P₂ unusually high (>50 bar). Confirm units and measurement.");
 
-  // Ratio checks
-  const ratio = p2 / p1;
-  if (!Number.isFinite(ratio)) return showErrors(["⚠️ Computed pressure ratio invalid. Check P₁ and P₂."]);
-  if (ratio <= 0) {
-    // ratio == 0 is allowed (p2==0) but flagged
-    if (p2 === 0) warnings.push("⚠️ P₂ = 0 bar → computed V₂ will be 0. Verify that P₂ measurement is correct.");
-  }
+    // Ratio checks
+    const ratio = p2 / p1;
+    if (!Number.isFinite(ratio)) return showErrors(["⚠️ Computed pressure ratio invalid. Check P₁ and P₂."]);
+    
+    if (ratio <= 0) {
+        if (p2 === 0) warnings.push("⚠️ P₂ = 0 bar → computed V₂ will be 0. Verify that P₂ measurement is correct.");
+    }
 
-  if (ratio < 0.01 || ratio > 100) warnings.push("⚠️ Extreme pressure ratio (P₂/P₁). Verify sensors/units/assignment.");
+    if (ratio < 0.01 || ratio > 100) warnings.push("⚠️ Extreme pressure ratio (P₂/P₁). Verify sensors/units/assignment.");
 
-  // Now compute
-  let v2;
-  try {
-    v2 = v1 * Math.sqrt(ratio);
-  } catch (e) {
-    return showErrors(["⚠️ Error computing V₂. Check input values."]);
-  }
+    // Calculate V₂ using the formula: V₂ = V₁ * √(P₂/P₁)
+    let v2;
+    try {
+        v2 = v1 * Math.sqrt(ratio);
+    } catch (e) {
+        return showErrors(["⚠️ Error computing V₂. Check input values."]);
+    }
 
-  if (!Number.isFinite(v2) || v2 < 0) {
-    return showErrors(["⚠️ Computed V₂ is invalid. Check inputs."]);
-  }
+    // Validate result
+    if (!Number.isFinite(v2) || v2 < 0) {
+        return showErrors(["⚠️ Computed V₂ is invalid. Check inputs."]);
+    }
 
-  // Reasonableness check on sudden change
-  const changeFactor = v2 / v1;
-  if (changeFactor > 10) warnings.push(`⚠️ V₂ is ${changeFactor.toFixed(2)}× V₁ — large increase; verify P₂ and P₁.`);
-  if (changeFactor < 0.1) warnings.push(`⚠️ V₂ is ${changeFactor.toFixed(2)}× V₁ — large decrease; verify P₂ and P₁.`);
+    // Reasonableness check on sudden change
+    const changeFactor = v2 / v1;
+    if (changeFactor > 10) warnings.push(`⚠️ V₂ is ${changeFactor.toFixed(2)}× V₁ — large increase; verify P₂ and P₁.`);
+    if (changeFactor < 0.1) warnings.push(`⚠️ V₂ is ${changeFactor.toFixed(2)}× V₁ — large decrease; verify P₂ and P₁.`);
 
-  // Display results
-  rateEl.textContent = v2.toFixed(6);
+    // Display results
+    rateEl.textContent = v2.toFixed(6);
 
-  // Conversions
-  const v2_L_per_min = v2 * 1000.0 / 60.0;               // m³/h -> L/min
-  const v2_gpm = v2 * 4.4028675;                         // m³/h -> US gpm (approx)
+    // Unit conversions
+    const v2_L_per_min = v2 * 1000.0 / 60.0;               // m³/h -> L/min
+    const v2_gpm = v2 * 4.4028675;                         // m³/h -> US gpm (approx)
 
-  // Status message (generic)
-  let statusMsg = "✅ Calculation complete.";
-  // Add domain-aware hint (user must confirm design flow against code)
-  const designHint = `Compare: V₂ ≈ ${v2_gpm.toFixed(2)} US gpm. If this is for fire-system design, compare against code-required fire flow (e.g., NFPA baseline ≈ 1000 gpm for many buildings).`;
+    // Status message
+    let statusMsg = "✅ Calculation complete.";
+    
+    // Domain-aware hint
+    const designHint = `Compare: V₂ ≈ ${v2_gpm.toFixed(2)} US gpm. If this is for fire-system design, compare against code-required fire flow (e.g., NFPA baseline ≈ 1000 gpm for many buildings).`;
 
-  // Build details block
-  let details = `<div>V₂: <b>${v2.toFixed(6)}</b> m³/h</div>`;
-  details += `<div>→ ${v2_L_per_min.toFixed(2)} L/min</div>`;
-  details += `<div>→ ${v2_gpm.toFixed(2)} US gpm</div>`;
-  details += `<div style="margin-top:6px;">Inputs: V₁=${v1.toFixed(6)} m³/h, P₁=${p1.toFixed(4)} bar, P₂=${p2.toFixed(4)} bar</div>`;
-  details += `<div>Pressure ratio (P₂/P₁): <b>${ratio.toFixed(6)}</b></div>`;
-  if (warnings.length) {
-    details += `<div style="margin-top:8px; color:#b35d00; font-size:0.95em;">${warnings.join(" | ")}</div>`;
-  }
-  details += `<div style="margin-top:8px; color:#2c3e50; font-size:0.95em;">${designHint}</div>`;
+    // Build details block
+    let details = `<div>V₂: <b>${v2.toFixed(6)}</b> m³/h</div>`;
+    details += `<div>→ ${v2_L_per_min.toFixed(2)} L/min</div>`;
+    details += `<div>→ ${v2_gpm.toFixed(2)} US gpm</div>`;
+    details += `<div>Pressure ratio (P₂/P₁): <b>${ratio.toFixed(6)}</b></div>`;
+    
+    if (warnings.length) {
+        details += `<div style="margin-top:8px; color:#b35d00; font-size:0.95em;">${warnings.join(" | ")}</div>`;
+    }
+    
+    details += `<div style="margin-top:8px; color:#2c3e50; font-size:0.95em;">${designHint}</div>`;
 
-  feedbackEl.innerHTML = `<div>${statusMsg}</div>${details}`;
+    feedbackEl.innerHTML = `<div>${statusMsg}</div>${details}`;
 
-  placeholder.classList.add("hidden");
-  resultValue.classList.remove("hidden");
-  errorBox.classList.add("hidden");
+    // Show results
+    placeholder.classList.add("hidden");
+    resultValue.classList.remove("hidden");
+    errorBox.classList.add("hidden");
 }
 
-/* Print helper */
+// Print function
 function printReport() {
-  const el = document.getElementById('printDate');
-  if (el) {
-    const now = new Date();
-    el.textContent = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  }
-  window.print();
+    const el = document.getElementById('printDate');
+    if (el) {
+        const now = new Date();
+        el.textContent = now.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+    }
+    window.print();
 }
-</script>
 
+// Add event listeners when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Add Enter key support for inputs
+    const inputs = document.querySelectorAll('.form-input');
+    inputs.forEach(input => {
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                calculateFlowRate();
+            }
+        });
+    });
+    
+    // Clear results when inputs change
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            const placeholder = document.getElementById("placeholder");
+            const resultValue = document.getElementById("resultValue");
+            const errorBox = document.getElementById("resultError");
+            
+            placeholder.classList.remove("hidden");
+            resultValue.classList.add("hidden");
+            errorBox.classList.add("hidden");
+        });
+    });
+});
+</script>
     <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
