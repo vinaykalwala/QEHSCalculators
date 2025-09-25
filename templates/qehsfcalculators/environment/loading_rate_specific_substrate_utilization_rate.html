@@ -564,9 +564,21 @@
         </p>
 
     </div>
+    <div class="note-card">
+        <h3>📌 Parameters</h3>
+        <ul class="note-list">
+            <li><strong>Q (Sewage Inflow Rate)</strong> – m³/day: Flow of wastewater entering the aeration tank.</li>
+            <li><strong>S₀ (Influent Substrate Concentration)</strong> – mg/L: Concentration of substrate in incoming sewage.</li>
+            <li><strong>Sₑ (Effluent Substrate Concentration)</strong> – mg/L: Concentration of substrate in treated water leaving the tank.</li>
+            <li><strong>V (Volume of Aeration Tank)</strong> – m³: Total working volume of the biological tank.</li>
+            <li><strong>X (MLSS Concentration)</strong> – mg/L: Mixed liquor suspended solids, representing biomass concentration.</li>
+            <li><strong>ΔS = S₀ − Sₑ</strong> – mg/L: Substrate removed in the tank; must be > 0.</li>
+        </ul>
+    </div>
+
 
     <div class="note-card">
-        <h3>⚠️ Input & Validation Summary</h3>
+        <h3>✅ Input Validations</h3>
         <ul class="note-list">
             <li><strong>Q (m³/day):</strong> Required, numeric, &gt; 0. Typical: 0.001 – 1,000,000 m³/day. Hard limits applied: 0.0001 – 1,000,000.</li>
             <li><strong>S₀ (mg/L):</strong> Required, numeric, &gt; 0. Typical influent: 10 – 10,000 mg/L. Hard limits: 0.1 – 50,000.</li>
@@ -578,16 +590,51 @@
             <li>❌ Non-numeric, negative, zero where not allowed, or Sₑ ≥ S₀ → hard error.</li>
         </ul>
     </div>
-
     <div class="note-card">
-        <h3>🔎 Output Interpretation (QEHS / audit perspective)</h3>
-        <ul>
-            <li><strong>q_days (days)</strong>: Time equivalent relating biomass inventory to daily substrate removal.
-                - Small q_days (≪ 1 day) → very fast substrate turnover (check measurement/units). </li>
-            <li><strong>q_rate (day⁻¹)</strong>: Specific uptake per unit biomass — used in process control and audit KPIs.</li>
-            <li>⚠️ Extremely large q_days (&gt; 365 days) or extremely small q_rate (&lt; 1e-4 day⁻¹) are implausible and should be investigated (sampling error, wrong units, wrong concentration basis).</li>
+        <h3>✅  Output Validations</h3>
+        <ul class="note-list">
+            <li><strong>q_days &lt; 0.1:</strong> 🔴 Very short characteristic time — very rapid consumption (check for unit errors or very active biomass).</li>
+            <li><strong>0.1 ≤ q_days ≤ 2:</strong> ✅Typical: good turnover — reasonable biomass activity for many activated sludge processes.</li>
+            <li><strong>2 &lt; q_days ≤ 30:</strong> ⚠️ Slow turnover — may indicate underloaded biomass or poor substrate availability.</li>
+            <li><strong>q_days &gt; 30:</strong> ⚠️Very slow — likely process or data issue; investigate solids, concentration units, and sampling.</li>
+            <li><strong>Displayed Outputs:</strong> Characteristic time (q_days), Specific substrate utilization rate (q_rate), Substrate removed (kg/day), Biomass in tank (kg), Input recap, Optional warnings.</li>
         </ul>
     </div>
+    <div class="note-card">
+    <h3>📌 Governing Principle: 
+        Loading Rate Specific Substrate Utilization Rate (U)</h3>
+    <p>
+        A loading rate specific substrate utilization rate (U) is not tied to a single, universal standard but is a key parameter in biological process kinetics, particularly within wastewater treatment and biotechnology, and is calculated using equations based on kinetic models such as the Monod equation and the Stover-Kincannon model. These models provide the framework for defining and calculating these rates based on parameters like influent substrate concentration, effluent substrate concentration, and biomass concentration.
+    </p>
+    <h3>What it is:</h3>
+    <p>
+        The specific substrate utilization rate (U) quantifies how much organic matter microorganisms consume per unit of biomass per day. 
+        It's a critical factor in designing and operating biological treatment systems, as it helps determine the efficiency of microbial processes.
+    </p>
+    <h3>How it's determined:</h3>
+    <ul class="note-list">
+        <li><strong>Kinetic Models:</strong> The calculation relies on established kinetic models, such as the Monod equation, which describes microbial growth in relation to substrate concentration, and the Stover-Kincannon model, often used for biofilm reactors.</li>
+        <li><strong>Parameters:</strong> The specific utilization rate is calculated using parameters defined in these models:
+            <ul class="note-list">
+                <li>Influent Substrate Concentration (Sᵢ): The initial concentration of the organic matter in the wastewater or feedstock.</li>
+                <li>Effluent Substrate Concentration (S): The concentration of organic matter remaining in the treated water.</li>
+                <li>Biomass Concentration (X): The concentration of microorganisms (MLSS) in the system.</li>
+            </ul>
+        </li>
+        <li><strong>Equations:</strong> The specific substrate utilization rate (U) is derived from these parameters using equations like the one found in the 2008 report from the Ministry of Housing and Urban Affairs (MoHUA), which expresses U as <code>(Sᵢ - S) / (V * X)</code>.</li>
+    </ul>
+</div>
+
+
+<div class="note-card">
+    <h3>📝 Conclusion</h3>
+    <p>
+        The <strong>Loading Rate Specific Substrate Utilization Rate Calculator</strong> provides a
+        quick and reliable estimate of the <strong>characteristic time (q_days)</strong> for
+        substrate consumption in biological treatment systems and its reciprocal, the
+        <strong>specific substrate utilization rate (q_rate)</strong>.
+    </p>
+   </div>
 </div>
 
 <script>
@@ -710,7 +757,6 @@ function calculateSpecificTime() {
   details += `<div>Specific substrate utilization (q_rate): <b>${q_rate.toFixed(4)}</b> day⁻¹</div>`;
   details += `<div>Substrate removed: <b>${substrateRemoved_kg_day.toFixed(4)}</b> kg/day</div>`;
   details += `<div>Biomass in tank: <b>${biomass_kg.toFixed(4)}</b> kg (approx.)</div>`;
-  details += `<div>Inputs — Q: <b>${Q}</b> m³/day, S₀: <b>${S0}</b> mg/L, Sₑ: <b>${Se}</b> mg/L, V: <b>${V}</b> m³, X: <b>${X}</b> mg/L</div>`;
   if (warnings.length) details += `<div style="margin-top:8px; color:#b35d00;">${warnings.join(" | ")}</div>`;
 
   // Update UI
