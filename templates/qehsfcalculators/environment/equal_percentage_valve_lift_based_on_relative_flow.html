@@ -195,7 +195,8 @@
         .result-card {
             justify-content: center;
             align-items: center;
-            min-height: 420px;
+            height: 420px;
+            overflow-y: auto;
             text-align: center;
         }
         
@@ -469,7 +470,7 @@
     </div>
 
     <div class="result-value hidden" id="resultValue">
-      <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+      <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;margin-top:50px;">
         <h2>Calculated Valve Lift</h2>
       </div>
 
@@ -491,28 +492,31 @@
 
 <!-- Notes Section -->
 <div class="note-section">
+
   <div class="note-card">
     <h3>📘 About This Calculator</h3>
     <p>
-      The <strong>Equal Percentage Valve Lift Calculator</strong> determines the percentage lift (H%) required to achieve a given flow in valves with an equal-percentage characteristic. This ensures accurate control of fluids in industrial, HVAC, and water treatment applications.
+      The <strong>Equal Percentage Valve Lift Calculator</strong> determines the percentage lift (H%) required to achieve a specific flow in valves with an equal-percentage characteristic. 
+      This ensures accurate control of fluids in industrial, HVAC, water treatment, and energy systems, providing stable and predictable control over a wide range of flows.
     </p>
   </div>
 
   <div class="note-card">
-    <h3>📊 Interpretation</h3>
+    <h3>⚙ Parameters Used</h3>
     <ul class="note-list">
-      <li><span class="good">0% ≤ H% &lt; 5%</span> → Valve nearly shut (unstable control region).</li>
-      <li><span class="average">5% ≤ H% ≤ 90%</span> → Normal controllable operating range.</li>
-      <li><span class="bad">H% &gt; 90%</span> → Valve near wide-open, reduced controllability.</li>
+      <li><strong>Flow (V)</strong>: Current process flow through the valve [m³/h]</li>
+      <li><strong>Maximum Flow (Vmax)</strong>: Maximum rated flow for the valve [m³/h]</li>
+      <li><strong>Rangeability (τ)</strong>: Ratio of maximum to minimum controllable flow (dimensionless)</li>
+      <li><strong>Minimum Controllable Flow (Vmin)</strong>: Calculated as Vmax/τ</li>
     </ul>
   </div>
 
   <div class="note-card">
-    <h3>⚠️Input  Validations</h3>
-    <ul>
-      <li>✔️ Flow (V) must be 0.001 – 20,000 m³/h.</li>
-      <li>✔️ Max Flow (Vmax) must be 0.01 – 50,000 m³/h.</li>
-      <li>✔️ Rangeability (τ) must be 1.01 – 1000.</li>
+    <h3>✅ Input Validation Rules</h3>
+    <ul class="note-list">
+      <li>✔️ Flow (V) must be numeric, 0.001 – 20,000 m³/h.</li>
+      <li>✔️ Max Flow (Vmax) must be numeric, 0.01 – 50,000 m³/h.</li>
+      <li>✔️ Rangeability (τ) must be numeric, &gt;1.01 and ≤1000.</li>
       <li>✔️ Flow must not exceed Max Flow.</li>
       <li>✔️ Flow must be ≥ Vmax/τ (minimum controllable flow).</li>
       <li>❌ Zeros, negatives, or τ ≤ 1 are invalid.</li>
@@ -521,15 +525,46 @@
   </div>
 
   <div class="note-card">
-    <h3>🌍 Key Applications</h3>
+    <h3>🔎 Output & Validation</h3>
     <ul class="note-list">
-      <li><strong>Process Control:</strong> Chemical, refinery, and manufacturing operations.</li>
-      <li><strong>HVAC Systems:</strong> Air and water flow regulation.</li>
-      <li><strong>Water Treatment:</strong> Flow control of water and chemicals.</li>
-      <li><strong>Energy Systems:</strong> Steam and fuel regulation in power plants.</li>
+      <li>Computed <strong>Valve Lift (H%)</strong> must be finite and between 0–100%.</li>
+      <li>Assessment / Feedback is displayed with results: 
+          <ul>
+            <li>H% &lt; 5% → ⚠️ Valve nearly shut (unstable control region).</li>
+            <li>5% ≤ H% ≤ 90% → ✅ Normal controllable operating range.</li>
+            <li>H% &gt; 90% → ⚠️ Valve near wide-open, reduced controllability.</li>
+          </ul>
+      </li>
+      <li>Warnings: τ outside 10–100, V close to Vmin or Vmax, very low/high flows.</li>
     </ul>
   </div>
+
+  <div class="note-card">
+    <h3>📐 Governing Principle</h3>
+    <p>
+      An "equal percentage valve lift calculator based on relative flow" does not directly correspond to a single international standard but follows common engineering practice and industry standards for control valves, primarily outlined by organizations like ISA (International Society of Automation). 
+      <br><br>
+      The principle is that the valve's flow increases by a fixed percentage for every equal incremental change in stem position (lift), ensuring consistent responsiveness across the flow range and compensating for decreasing pressure drop in process systems.
+      <br><br>
+      <p><strong style="color:#1976d2;">Key aspects:</strong></p>
+      <ul>
+        <li><strong>Industry Standard Principle:</strong> Equal percentage is widely accepted for process control valves.</li>
+        <li><strong>ISA Standards:</strong> Valve design and performance are detailed in ISA standards for sizing and selection.</li>
+        <li><strong>Mathematical Basis:</strong> Flow-lift relationship can be represented as Q = Q₀ * e^(bY), where Q is flow, Q₀ initial flow, Y valve opening %, and b a rangeability constant.</li>
+        <li><strong>Goal:</strong> Achieve a stable and predictable control loop, avoiding sudden jumps or loss of controllability.</li>
+      </ul>
+    </p>
+  </div>
+
+  <div class="note-card">
+    <h3>📝 Conclusion</h3>
+    <p>
+      This calculator provides a reliable estimate of valve lift for a given flow using equal percentage characteristics. By following proper input validation and interpreting the assessment feedback, engineers can ensure optimal valve performance, maintain process stability, and avoid issues such as unstable control near fully closed or fully open positions.
+    </p>
+  </div>
+
 </div>
+
 
 <script>
 /* Show error messages */
@@ -588,16 +623,15 @@ function calculateValveLift() {
 
   const Vmin = Vmax / tau;
   if (V < Vmin) {
-  errors.push(`👉 Flow (V) is too low. For proper valve control, it must be at least ${Vmin.toFixed(3)} m³/h (based on Vmax and rangeability).`);
-}
-
+    warnings.push(`⚠️ Flow is below minimum controllable limit (${Vmin.toFixed(3)} m³/h). Valve is effectively closed.`);
+  }
 
   if (errors.length) return showErrors(errors);
 
-  // Compute Lift %
-  const Hpercent = 100 * (1 + (Math.log(V / Vmax) / Math.log(tau)));
+  // Compute Lift % using extracted formula
+  const Hpercent = 100 * (Math.log(V / Vmax) / Math.log(tau));
 
-  if (!Number.isFinite(Hpercent) || Hpercent < 0 || Hpercent > 100) {
+  if (!Number.isFinite(Hpercent)) {
     return showErrors(["⚠️ Computed valve lift is invalid. Check inputs."]);
   }
 
@@ -608,7 +642,9 @@ function calculateValveLift() {
 
   // Status interpretation
   let statusMsg = "";
-  if (Hpercent < 5) {
+  if (Hpercent < 0) {
+    statusMsg = "⚠️ Valve effectively closed – flow below controllable limit.";
+  } else if (Hpercent < 5) {
     statusMsg = "⚠️ Valve nearly shut – control may be unstable.";
   } else if (Hpercent <= 90) {
     statusMsg = "✅ Normal controllable operating range.";
@@ -617,10 +653,6 @@ function calculateValveLift() {
   }
 
   let details = `<div>Valve Lift: <b>${Hpercent.toFixed(2)}%</b></div>`;
-  details += `<div>Flow: <b>${V.toFixed(3)}</b> m³/h</div>`;
-  details += `<div>Max Flow: <b>${Vmax.toFixed(3)}</b> m³/h</div>`;
-  details += `<div>Rangeability: <b>${tau.toFixed(2)}</b></div>`;
-  details += `<div>Minimum Controllable Flow (Vmax/τ): <b>${Vmin.toFixed(3)}</b> m³/h</div>`;
   if (warnings.length) {
     details += `<div style="margin-top:6px; color:#b35d00; font-size:0.95em;">${warnings.join(" | ")}</div>`;
   }
@@ -642,6 +674,7 @@ function printReport() {
   window.print();
 }
 </script>
+
 
     <script src="{% static 'js/print.js' %}"></script>
 </body>

@@ -344,13 +344,39 @@
         .hidden { 
             display: none; 
         }
+
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
     </style>
 </head>
 <body>
     <div class="btn-container">
         <a href="{% url 'safetycategory_calculators' %}" class="back-btn">Back To Safety Calculators</a>
     </div>
-    
+
     <div class="calculator-container printable" id="printArea">
 
         {% include "includes/print_header_footer.html" %}
@@ -451,42 +477,94 @@
 
         <div class="note-section">
             <div class="note-card">
-                <h3>📘 About Subcritical Flow Sizing</h3>
+                <h3>📘 About This Calculator</h3>
                 <p>
-                    This calculation determines the required orifice area of a pressure relief device for gas or vapor in **subcritical flow**. Subcritical flow occurs when the downstream pressure ($P_2$) is high enough to affect the flow rate through the valve (specifically, when $P_2 > P_{critical}$). This is common in systems with high backpressure. Sizing for these conditions is crucial to ensure the valve can still pass the required flow rate to prevent overpressure.
+                    This calculator determines the required **relief area for subcritical flow** of gas or vapor. Subcritical
+                    flow occurs when downstream pressure ($P_2$) is high enough (typically >55% of upstream pressure) to
+                    influence the flow rate through the relief device. Proper sizing ensures safe pressure relief during
+                    non-emergency scenarios while maintaining stable flow conditions.
                 </p>
             </div>
             <div class="note-card">
-                <h3>⚙️ Formula Used (API RP 520)</h3>
-                <p>The required orifice area (A) for subcritical flow is given by:</p>
-                <p>$$ A = \frac{W \cdot \sqrt{T \cdot Z / M}}{735 \cdot F_2 \cdot K_d \cdot \sqrt{P_1 \cdot (P_1 - P_2)}} $$</p>
-                <p>Where the flow factor $F_2$ is:</p>
-                <p>$$ F_2 = \sqrt{\frac{\frac{k}{k-1} \left( \frac{P_2}{P_1} \right)^{\frac{2}{k}} \left( 1 - \left( \frac{P_2}{P_1} \right)^{\frac{k-1}{k}} \right)}{1 - \frac{P_2}{P_1}}} $$</p>
-            </div>
-             <div class="note-card">
-                <h3>📊 Key Parameters</h3>
-                 <ul class="note-list">
-                    <li><strong>$W$</strong>: Mass Flow Rate (kg/hr)</li>
-                    <li><strong>$P_1$</strong>: Upstream absolute pressure (kPa abs)</li>
-                    <li><strong>$P_2$</strong>: Back pressure (absolute) at the outlet (kPa abs)</li>
-                    <li><strong>$T$</strong>: Absolute temperature at inlet (K)</li>
-                    <li><strong>$M$</strong>: Molecular weight of the gas (kg/kmol)</li>
-                    <li><strong>$k$</strong>: Specific heat ratio ($C_p/C_v$)</li>
-                     <li><strong>$K_d$</strong>: Discharge coefficient (typically 0.65-0.85 for subcritical flow)</li>
-                     <li><strong>$Z$</strong>: Compressibility factor (1 for ideal gas)</li>
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Mass Flow Rate (W):</strong> Amount of gas/vapor to vent in kg/hr</li>
+                    <li><strong>Upstream Pressure (P₁):</strong> Absolute pressure at device inlet (kPa)</li>
+                    <li><strong>Back Pressure (P₂):</strong> Absolute pressure at outlet (kPa), must exceed 55% of P₁</li>
+                    <li><strong>Temperature (T):</strong> Absolute temperature in K</li>
+                    <li><strong>Molecular Weight (M):</strong> Mass of one mole of gas (kg/kmol)</li>
+                    <li><strong>Specific Heat Ratio (k):</strong> Cp/Cv of the gas</li>
+                    <li><strong>Discharge Coefficient (Kd):</strong> Valve efficiency (0.65–0.85)</li>
+                    <li><strong>Compressibility Factor (Z):</strong> Accounts for non-ideal gas behavior (1 for ideal)</li>
                 </ul>
             </div>
+            <div class="note-card">
+                <h3>📌 Input Validations</h3>
+                <ul class="note-list">
+                    <li><strong>Mass Flow Rate (W):</strong> Must be &gt; 0 kg/hr. Negative or zero flows are physically impossible.
+                    </li>
+                    <li><strong>Upstream Pressure (P1):</strong> Must be &gt; 0 kPa absolute. Pressure cannot be negative or zero.
+                    </li>
+                    <li><strong>Back Pressure (P2):</strong> Must be &gt; 0 kPa absolute and &lt; P1. Back pressure cannot exceed
+                        upstream pressure.</li>
+                    <li><strong>Temperature (T):</strong> Must be &gt; 0 K. Absolute zero is the lowest possible temperature.</li>
+                    <li><strong>Molecular Weight (M):</strong> Must be &gt; 0 kg/kmol. Negative mass is non-physical.</li>
+                    <li><strong>Specific Heat Ratio (k):</strong> Must be &gt; 1. k = 1 represents ideal gas; real gases have k &gt;
+                        1.</li>
+                    <li><strong>Discharge Coefficient (Kd):</strong> Must be between 0 and 1. Typical values 0.85–0.97.</li>
+                    <li><strong>Compressibility Factor (Z):</strong> Must be &gt; 0. Zero or negative values are non-physical.</li>
+                </ul>
+            </div>
+            <div class="note-card">
+                <h3>📌 Output Validations</h3>
+                <ul class="note-list">
+                    <li>❌ Calculation resulted in an invalid number. Check that P2 &lt; P1 and all inputs are valid.</li>
+                    <li>⚠️ Back pressure (P2) is below the critical flow pressure (… kPa). Flow may be critical; use the critical
+                        flow formula.</li>
+                    <li>⚠️ Discharge Coefficient (Kd) is unusually low. Verify valve specifications.</li>
+                    <li>⚠️ Compressibility factor (Z) is outside typical range. Verify gas conditions.</li>
+                    <li>Standard orifice size. Select the next largest standard orifice from your valve manufacturer.</li>
+                </ul>
+            
+                <h3>💡 Notes for Users</h3>
+                <ul>
+                    <li>Always ensure P2 &lt; P1 to maintain subcritical flow conditions.</li>
+                    <li>Check Kd and Z values; extreme deviations may indicate incorrect gas properties or valve data.</li>
+                    <li>The vent area result is in mm² and m²; use the next standard orifice size for practical applications.</li>
+                    <li>Warnings do not block calculations—they alert you to review specific parameters.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📏 Standards & Compliance</h3>
+                <p>
+                    This calculation follows <em>ASME BPVC Section VIII</em>, <em>API RP 520/521</em>, and <em>ISO 4126</em>
+                    standards. Proper adherence ensures relief devices operate safely under backpressure conditions and that Kd
+                    values are within recommended ranges (0.85–0.97 for balanced bellows valves).
+                </p>
+            </div>
+            <div class="note-card">
+                <h3>Conclusion</h3>
+                <p>
+                    Accurate subcritical vent sizing is essential for industrial safety. This calculator ensures relief devices
+                    function correctly during non-emergency scenarios, preventing overpressure hazards and avoiding unstable
+                    operation caused by improper sizing. Always validate results against applicable codes and actual process
+                    conditions.
+                </p>
+            </div>
         </div>
+
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const now = new Date();
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
             document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
         });
 
         function calculateVentArea() {
+            // --- GET INPUTS ---
             const W_val = document.getElementById('massFlow').value.trim();
             const P1_val = document.getElementById('upstreamPressure').value.trim();
             const P2_val = document.getElementById('backPressure').value.trim();
@@ -502,11 +580,11 @@
             const warningMessage = document.getElementById('warningMessage');
             const placeholder = document.getElementById('placeholder');
             const resultValue = document.getElementById('resultValue');
-            
+
             let errors = [];
             let warnings = [];
 
-            // --- VALIDATION RULES ---
+            // --- VALIDATE INPUTS ---
             if (W_val === '' || isNaN(W_val) || parseFloat(W_val) <= 0) errors.push("👉 Mass Flow Rate (W) must be > 0.");
             if (P1_val === '' || isNaN(P1_val) || parseFloat(P1_val) <= 0) errors.push("👉 Upstream Pressure (P1) must be > 0.");
             if (P2_val === '' || isNaN(P2_val) || parseFloat(P2_val) <= 0) errors.push("👉 Back Pressure (P2) must be > 0.");
@@ -515,22 +593,24 @@
             if (k_val === '' || isNaN(k_val) || parseFloat(k_val) <= 1) errors.push("👉 Specific Heat Ratio (k) must be > 1.");
             if (Kd_val === '' || isNaN(Kd_val) || parseFloat(Kd_val) <= 0 || parseFloat(Kd_val) > 1) errors.push("👉 Discharge Coeff. (Kd) must be between 0 and 1.");
             if (Z_val === '' || isNaN(Z_val) || parseFloat(Z_val) <= 0) errors.push("👉 Compressibility (Z) must be > 0.");
-            
-            if (parseFloat(P2_val) >= parseFloat(P1_val)) errors.push("👉 Back pressure cannot be greater than or equal to upstream pressure.");
 
-            // --- ERROR HANDLING ---
+            if (!isNaN(P1_val) && !isNaN(P2_val) && parseFloat(P2_val) >= parseFloat(P1_val))
+                errors.push("👉 Back pressure (P2) cannot be greater than or equal to upstream pressure (P1).");
+
+            // --- HANDLE ERRORS ---
             if (errors.length > 0) {
                 errorMessage.innerHTML = errors.join("<br>");
                 errorBox.classList.remove("hidden");
                 placeholder.classList.add("hidden");
                 resultValue.classList.add("hidden");
+                warningBox.classList.add("hidden");
                 return;
             } else {
                 errorBox.classList.add("hidden");
             }
 
-            // --- CALCULATION ---
-            const W = parseFloat(W_val) / 3600; // kg/hr to kg/s
+            // --- PARSE NUMERIC VALUES ---
+            const W = parseFloat(W_val) / 3600; // kg/hr → kg/s
             const P1 = parseFloat(P1_val);
             const P2 = parseFloat(P2_val);
             const T = parseFloat(T_val);
@@ -539,26 +619,30 @@
             const Kd = parseFloat(Kd_val);
             const Z = parseFloat(Z_val);
 
+            // --- CALCULATION ---
             const r = P2 / P1;
             const F2 = Math.sqrt(((k / (k - 1)) * Math.pow(r, 2 / k) * (1 - Math.pow(r, (k - 1) / k))) / (1 - r));
-            
+
             const numerator = W * Math.sqrt((T * Z) / M);
             const denominator = 735 * F2 * Kd * Math.sqrt(P1 * (P1 - P2));
             const areaM2 = numerator / denominator;
             const areaMM2 = areaM2 * 1e6;
 
             if (!isFinite(areaMM2) || F2 <= 0) {
-                errorMessage.innerHTML = "❌ Calculation resulted in an invalid number. Check that P2 is less than P1 and all inputs are valid.";
+                errorMessage.innerHTML = "❌ Calculation resulted in an invalid number. Check that P2 < P1 and all inputs are valid.";
                 errorBox.classList.remove("hidden");
                 resultValue.classList.add("hidden");
                 return;
             }
-            
+
             // --- WARNINGS ---
             const criticalPressure = P1 * Math.pow(2 / (k + 1), k / (k - 1));
             if (P2 < criticalPressure) {
-                warnings.push(`Back pressure ($P_2$) is below the critical flow pressure (${criticalPressure.toFixed(2)} kPa). Flow is likely critical, not subcritical. Use the critical flow formula instead.`);
+                warnings.push(`⚠️ Back pressure (P2) is below the critical flow pressure (${criticalPressure.toFixed(2)} kPa). Flow may be critical; use the critical flow formula.`);
             }
+
+            if (Kd < 0.85) warnings.push("⚠️ Discharge Coefficient (Kd) is unusually low. Verify valve specifications.");
+            if (Z < 0.95 || Z > 1.05) warnings.push("⚠️ Compressibility factor (Z) is outside typical range. Verify gas conditions.");
 
             if (warnings.length > 0) {
                 warningMessage.innerHTML = warnings.join("<br>");
@@ -567,12 +651,11 @@
                 warningBox.classList.add("hidden");
             }
 
-
             // --- DISPLAY RESULTS ---
             document.getElementById('rateValue').textContent = areaMM2.toFixed(2);
             document.getElementById('areaM2').textContent = areaM2.toExponential(4) + ' m²';
             document.getElementById('f2Factor').textContent = F2.toFixed(4);
-            
+
             let feedback = 'Standard orifice size. Select the next largest standard orifice from your valve manufacturer.';
             document.getElementById('feedbackContent').textContent = feedback;
 
@@ -587,7 +670,53 @@
             window.print();
         }
     </script>
+
     <script src="{% static 'js/print.js' %}"></script>
 </body>
 </html>
 {% endblock %}
+
+<!-- 
+1️⃣ Input Validation Rules (QEHS & Fire Safety Perspective)
+Parameter	Validation	Typical Range / Notes	Reason (Compliance)
+Mass Flow Rate (W)	Positive number (>0), numeric	100 – 100,000 kg/hr	Negative or zero flow is physically impossible; prevents invalid area calculation.
+Upstream Pressure (P)	Positive number (>0)	Depends on system; kPa abs	Pressure cannot be negative; ensures absolute pressure basis.
+Back/Critical Pressure (Pc)	Positive number (>0), ≤ 55% of P	Subcritical flow condition: Pc ≤ 0.55 * P	Ensures subcritical flow condition per API RP 520.
+Temperature (T)	Positive number (>0 K)	Typically 273–600 K	Avoid absolute zero or negative K values; physical consistency.
+Molecular Weight (M)	Positive number (>0 kg/kmol)	Depends on gas	Negative or zero molecular weight is non-physical.
+Specific Heat Ratio (k)	> 1	1.1 – 1.67 for gases	Ideal gas k=1; real gases k>1; ensures correct F2 factor calculation.
+Discharge Coefficient (Kd)	0 < Kd ≤ 1	Typical 0.85–0.975	Represents valve efficiency; must be realistic.
+Compressibility Factor (Z)	Positive (>0)	Typically 0.95–1.05	Z accounts for non-ideal gas; prevents invalid density/area calculation.
+
+Additional rules:
+
+Fields must be numeric.
+
+Empty or missing values trigger error messages.
+
+Cross-field validation: Pc must be ≤ 55% of P for subcritical flow.
+
+2️⃣ Output Validation & Thresholds
+Output	Threshold / Condition	Feedback
+Vent Area (A)	< 1e-5 m²	"Very small vent area - verify input parameters." (warning)
+	1e-5 – 0.01 m²	"Standard vent area - check against manufacturer specifications." (success)
+	> 0.01 m²	"Large vent area required - consider multiple relief devices." (warning)
+F2 Factor	Always numeric, >0	Indicates subcritical flow condition; used in vent area calculation
+Invalid calculation (NaN / Infinite)	Any invalid numeric operation	"❌ Calculation resulted in an invalid number. Please check your inputs."
+
+Rationale: These thresholds correspond to physical feasibility and safe design practice. Extreme small areas may cause valve instability; very large areas may be impractical or unsafe.
+
+3️⃣ Edge Case Validations
+
+Zero or negative inputs → physically impossible; must error out.
+
+Pc > 0.55 * P → violates subcritical flow; error.
+
+Temperature = 0 K → absolute zero; non-physical.
+
+k ≤ 1 → F2 factor calculation invalid.
+
+Kd or Z = 0 or > 1 → non-physical; could produce infinity in area formula.
+
+Extremely high W or low P → could produce huge vent areas; warn user.
+-->

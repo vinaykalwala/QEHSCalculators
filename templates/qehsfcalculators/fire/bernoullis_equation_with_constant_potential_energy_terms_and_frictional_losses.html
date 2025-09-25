@@ -8,7 +8,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accident Rate Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/print.css' %}">
     <style>
@@ -91,6 +90,8 @@
             flex-direction: column;
             transition: transform 0.3s ease;
             border: 2px solid #1560bd;
+            height: 420px;
+            overflow-y: scroll;
         }
         
         .calc-card {
@@ -191,7 +192,6 @@
 
         /* Result Card */
         .result-card {
-            justify-content: center;
             align-items: center;
             min-height: 420px;
             text-align: center;
@@ -409,7 +409,7 @@ Instead of looking only at ideal flow, it also considers the effect of <em>frict
         </div>
 
         <div class="note-card">
-            <h3>⚙️ Parameters</h3>
+    <h3>⚙️ Parameters Used</h3>
             <ul class="note-list">
                 <li><strong>P₁, P₂ (Pressure at Points 1 & 2):</strong> The force per unit area exerted by the fluid at two different points in the system (measured in Pascals, Pa).</li>
         <li><strong>ρ (Density of Fluid):</strong> The mass per unit volume of the fluid (measured in kg/m³).</li>
@@ -419,7 +419,7 @@ Instead of looking only at ideal flow, it also considers the effect of <em>frict
             </ul>
         </div>
   <div class="note-card">
-    <h3>📝 Detailed Input Validation Rules (Industry-Oriented)</h3>
+    <h3>📌 Input Validation Rules</h3>
     <ul class="note-list">
         <!-- General rules -->
         <li><strong>All numeric fields:</strong> Required, must be parseable as numbers, no letters.</li>
@@ -452,20 +452,50 @@ Instead of looking only at ideal flow, it also considers the effect of <em>frict
     </ul>
 </div>
 
-        <div class="note-card">
-            <h3>Real-Life Applications</h3>
-            <ul class="note-list">
-                <li><strong>Pipelines and Water Distribution:</strong> Engineers use Bernoulli’s equation with friction losses to optimize water flow and pressure in pipelines.</li>
-        <li><strong>Aircraft Design:</strong> The equation explains how pressure differences over a wing generate lift, with frictional losses affecting airflow efficiency.</li>
-        <li><strong>Hydraulic Systems:</strong> Used in designing pumps and turbines to account for energy losses in moving fluids.</li>
-        <li><strong>Medical Flow Analysis:</strong> Applied in blood flow measurement devices to account for energy losses in veins and arteries.</li>
+      <div class="note-card">
+    <h3>📊 Output Validations</h3>
+    <p>This section explains how the results of the Bernoulli calculator are classified based on the energy difference between Point 1 and Point 2.  
+       The <strong>average energy</strong> is calculated as the mean of the absolute energy values at Point 1 and Point 2:  
+       <em>Average Energy = (|Point 1 Energy| + |Point 2 Energy|) / 2</em>.  
+       The tolerance is then set as the larger of 10 Pa or 0.5% of this average energy.
+    </p>
 
-            </ul>
-        </div>
+    <p>
+        <strong>Holds within measurement tolerance:</strong> The absolute difference between Point 1 and Point 2 energy terms is less than or equal to the tolerance.  
+        <br><em>Range:</em> Difference ≤ Tolerance. Energy balance is satisfied within expected measurement uncertainty.
+    </p>
+
+    <p>
+        <strong>Moderate discrepancy — investigate measurement or minor losses:</strong> The difference exceeds the tolerance but is less than or equal to 5% of the average energy.  
+        <br><em>Range:</em> Tolerance < Difference ≤ 0.05 × Average Energy. Suggests minor losses, measurement inaccuracies, or small unaccounted friction; investigation recommended but not critical.
+    </p>
+
+    <p>
+        <strong>Major discrepancy — investigate immediately (units, missing losses, or transience):</strong> The difference is greater than 5% of the average energy.  
+        <br><em>Range:</em> Difference > 0.05 × Average Energy. Indicates a significant energy mismatch likely caused by missing losses, incorrect units, wrong density, or transient effects; immediate investigation required.
+    </p>
+</div>
+
+
+       <div class="note-card">
+    <h3>📐 Governing Principle</h3>
+    <p>
+        Bernoulli’s Equation describes the conservation of mechanical energy in a fluid system, accounting for pressure, velocity, and potential energy.  
+        When frictional losses are present, the Darcy–Weisbach equation (introduced by Henry Darcy and Julius Weisbach in the 1850s) quantifies the energy lost due to pipe friction.  
+        This allows Bernoulli’s principle to be applied to real engineering systems with practical pipe and fitting losses.
+    </p>
+    <ul class="note-list">
+        <li>Bernoulli’s principle evaluates energy distribution between two points in a fluid system.</li>
+        <li>Frictional losses reduce the available energy along the flow path.</li>
+        <li>Energy conservation with friction means the upstream energy minus friction approximately equals the downstream energy, within measurement tolerance.</li>
+    </ul>
+</div>
 
 
        
         <div class="note-card">
+                            <h3>💡 Conclusion</h3>
+
             <p>
                 Click <strong>"Calculate"</strong> to check if Bernoulli’s principle holds between the two points.
                 Use results for fluid system design, safety checks, and engineering analysis.
@@ -498,7 +528,6 @@ function showResult(resultDiv, html) {
     resultDiv.classList.remove('hidden');
 }
 
-/* Main corrected function */
 function calculateBernoulli() {
     const rawP1 = document.getElementById("P1").value.trim();
     const rawU1 = document.getElementById("U1").value.trim();
@@ -519,25 +548,23 @@ function calculateBernoulli() {
     resultError.innerHTML = '';
     bernoulliResults.innerHTML = '';
 
-    // Collect parse errors & warnings
     const errors = [];
     const warnings = [];
 
-    // Required checks
-    if (rawP1 === '') errors.push('P₁ is required.');
-    if (rawU1 === '') errors.push('U₁ is required.');
-    if (rawP2 === '') errors.push('P₂ is required.');
-    if (rawU2 === '') errors.push('U₂ is required.');
-    if (rawRho === '') errors.push('ρ (density) is required.');
-    if (rawHf === '') errors.push('hₓ (friction loss) is required.');
+    // Required field checks
+    if (rawP1 === '') errors.push('Pressure at Point 1 (P₁) [Pa] is required. Allowed range: −100,000 to 50,000,000 Pa.');
+    if (rawU1 === '') errors.push('Velocity at Point 1 (U₁) [m/s] is required. Allowed range: 0 to 300 m/s.');
+    if (rawP2 === '') errors.push('Pressure at Point 2 (P₂) [Pa] is required. Allowed range: −100,000 to 50,000,000 Pa.');
+    if (rawU2 === '') errors.push('Velocity at Point 2 (U₂) [m/s] is required. Allowed range: 0 to 300 m/s.');
+    if (rawRho === '') errors.push('Density (ρ) [kg/m³] is required. Allowed range: >0 to 20,000 kg/m³.');
+    if (rawHf === '') errors.push('Friction Loss (hₓ) [Pa] is required. Allowed range: 0 to 10,000,000 Pa.');
 
-    // If missing fields, show and stop
     if (errors.length > 0) {
         showError(resultError, errors);
         return;
     }
 
-    // Parse floats
+    // Parse numeric values
     const p1 = parseFloat(rawP1);
     const u1 = parseFloat(rawU1);
     const p2 = parseFloat(rawP2);
@@ -545,61 +572,48 @@ function calculateBernoulli() {
     const rho = parseFloat(rawRho);
     const hf = parseFloat(rawHf);
 
-    // Type checks
-    if (!isFinite(p1)) errors.push('P₁ must be a valid number (Pa).');
-    if (!isFinite(u1)) errors.push('U₁ must be a valid number (m/s).');
-    if (!isFinite(p2)) errors.push('P₂ must be a valid number (Pa).');
-    if (!isFinite(u2)) errors.push('U₂ must be a valid number (m/s).');
-    if (!isFinite(rho)) errors.push('ρ must be a valid number (kg/m³).');
-    if (!isFinite(hf)) errors.push('hₓ must be a valid number (Pa).');
+    // Detailed numeric and range validations
+    if (!isFinite(p1)) errors.push('Pressure at Point 1 (P₁) must be a valid number in Pascals (Pa).');
+    else if (p1 < -100000 || p1 > 50000000) errors.push('Pressure at Point 1 (P₁) is out of realistic range: −100,000 to 50,000,000 Pa. Please verify units.');
 
-    // Decimal precision limits (warn if too many)
-    if (countDecimalPlaces(rawP1) > 4) warnings.push('P₁ has >4 decimal places — round to sensible precision for audit.');
-    if (countDecimalPlaces(rawP2) > 4) warnings.push('P₂ has >4 decimal places — round to sensible precision for audit.');
-    if (countDecimalPlaces(rawHf) > 4) warnings.push('hₓ has >4 decimal places — round to sensible precision for audit.');
-    if (countDecimalPlaces(rawU1) > 4) warnings.push('U₁ has >4 decimal places — round to sensible precision.');
-    if (countDecimalPlaces(rawU2) > 4) warnings.push('U₂ has >4 decimal places — round to sensible precision.');
-    if (countDecimalPlaces(rawRho) > 4) warnings.push('ρ has >4 decimal places — round to sensible precision.');
+    if (!isFinite(p2)) errors.push('Pressure at Point 2 (P₂) must be a valid number in Pascals (Pa).');
+    else if (p2 < -100000 || p2 > 50000000) errors.push('Pressure at Point 2 (P₂) is out of realistic range: −100,000 to 50,000,000 Pa. Please verify units.');
 
-    // Basic numeric validations and practical ranges
-    // Pressures: allow moderate vacuum (negative gauge) but reject absurd values
-    if (p1 < -100000 || p1 > 5e7) errors.push('P₁ out of realistic range (−100,000 to 50,000,000 Pa). Verify units.');
-    if (p2 < -100000 || p2 > 5e7) errors.push('P₂ out of realistic range (−100,000 to 50,000,000 Pa). Verify units.');
+    if (!isFinite(u1)) errors.push('Velocity at Point 1 (U₁) must be a valid number in meters per second (m/s).');
+    else if (u1 < 0 || u1 > 300) errors.push('Velocity at Point 1 (U₁) is out of realistic range: 0 to 300 m/s.');
 
-    // Velocities
-    if (u1 < 0) errors.push('U₁ must be ≥ 0 m/s.');
-    if (u2 < 0) errors.push('U₂ must be ≥ 0 m/s.');
-    if (u1 > 300) warnings.push('U₁ > 300 m/s — unusually high; confirm units and fluid type.');
-    if (u2 > 300) warnings.push('U₂ > 300 m/s — unusually high; confirm units and fluid type.');
-    if (u1 > 50) warnings.push('U₁ > 50 m/s — high for many liquid systems; ensure expected for your application.');
-    if (u2 > 50) warnings.push('U₂ > 50 m/s — high for many liquid systems; ensure expected for your application.');
+    if (!isFinite(u2)) errors.push('Velocity at Point 2 (U₂) must be a valid number in meters per second (m/s).');
+    else if (u2 < 0 || u2 > 300) errors.push('Velocity at Point 2 (U₂) is out of realistic range: 0 to 300 m/s.');
 
-    // Density
-    if (!(rho > 0)) errors.push('ρ must be > 0 kg/m³.');
-    if (rho < 0.1 || rho > 20000) warnings.push('ρ is outside typical practical range; confirm units and fluid type.');
+    if (!isFinite(rho)) errors.push('Density (ρ) must be a valid number in kilograms per cubic meter (kg/m³).');
+    else if (rho <= 0) errors.push('Density (ρ) must be greater than 0 kg/m³.');
+    else if (rho < 0.1 || rho > 20000) warnings.push('Density (ρ) is outside typical practical range (0.1–20,000 kg/m³). Please verify fluid type and units.');
 
-    // Friction loss
-    if (hf < 0) errors.push('hₓ must be ≥ 0 Pa.');
-    if (hf > 1e7) warnings.push('hₓ is very large (>10,000,000 Pa) — verify units.');
+    if (!isFinite(hf)) errors.push('Friction Loss (hₓ) must be a valid number in Pascals (Pa).');
+    else if (hf < 0 || hf > 10000000) errors.push('Friction Loss (hₓ) is out of realistic range: 0 to 10,000,000 Pa. Negative values are invalid.');
 
-    // Stop if hard errors
+    // Decimal precision warnings
+    if (countDecimalPlaces(rawP1) > 4) warnings.push('P₁ has more than 4 decimal places — round to sensible precision for auditing.');
+    if (countDecimalPlaces(rawP2) > 4) warnings.push('P₂ has more than 4 decimal places — round to sensible precision for auditing.');
+    if (countDecimalPlaces(rawU1) > 4) warnings.push('U₁ has more than 4 decimal places — round to sensible precision.');
+    if (countDecimalPlaces(rawU2) > 4) warnings.push('U₂ has more than 4 decimal places — round to sensible precision.');
+    if (countDecimalPlaces(rawRho) > 4) warnings.push('ρ has more than 4 decimal places — round to sensible precision.');
+    if (countDecimalPlaces(rawHf) > 4) warnings.push('hₓ has more than 4 decimal places — round to sensible precision.');
+
     if (errors.length > 0) {
         showError(resultError, errors);
         return;
     }
 
-    // Compute Bernoulli terms
+    // Bernoulli calculation
     const term1 = p1 + 0.5 * rho * Math.pow(u1, 2);
     const term2 = p2 + 0.5 * rho * Math.pow(u2, 2) + hf;
     const difference = Math.abs(term1 - term2);
     const avgEnergy = (Math.abs(term1) + Math.abs(term2)) / 2;
 
-    // Additional logical checks
-    if (hf > Math.abs(term1) * 5) warnings.push('Friction loss is several times larger than upstream energy — check measurements or units.');
-    if (avgEnergy === 0) warnings.push('Computed energies are near zero — check input magnitudes.');
+    if (hf > Math.abs(term1) * 5) warnings.push('Friction loss (hₓ) is several times larger than upstream energy — check measurements or units.');
 
-    // Tolerance (combined absolute + relative)
-    const tolerance = Math.max(10, 0.005 * Math.abs(avgEnergy)); // 10 Pa OR 0.5% of avg energy
+    const tolerance = Math.max(10, 0.005 * avgEnergy); // max of 10 Pa or 0.5% avg energy
 
     // Classification
     let classification = '';
@@ -607,15 +621,15 @@ function calculateBernoulli() {
     if (difference <= tolerance) {
         classification = 'Holds within measurement tolerance';
         color = 'green';
-    } else if (difference <= 0.05 * Math.abs(avgEnergy)) {
-        classification = 'Moderate discrepancy — investigate measurement/ minor losses';
+    } else if (difference <= 0.05 * avgEnergy) {
+        classification = 'Moderate discrepancy — investigate measurement or minor losses';
         color = 'orange';
     } else {
-        classification = 'Major discrepancy — investigate immediately (units/missing losses/transience)';
+        classification = 'Major discrepancy — investigate immediately (units, missing losses, or transience)';
         color = 'red';
     }
 
-    // Build result HTML (audit style)
+    // Build result HTML
     let html = `<div style="color:#1560bd;font-size:28px;margin:10px 0;"><strong>Results</strong></div>
                 <div>Point 1 Energy : <strong>${formatPa(term1)}</strong></div>
                 <div>Point 2 Energy : <strong>${formatPa(term2)}</strong></div>
@@ -623,7 +637,6 @@ function calculateBernoulli() {
                 <div>Tolerance used: <strong>${formatPa(tolerance)}</strong> (max of 10 Pa or 0.5% of average)</div>
                 <div style="margin-top:8px; color:${color}; font-weight:bold;">${classification}</div>`;
 
-    // Append warnings if present
     if (warnings.length > 0) {
         html += `<div style="margin-top:8px;"><strong>Notes / Warnings:</strong><ul>`;
         warnings.forEach(w => { html += `<li>${w}</li>`; });
@@ -635,7 +648,6 @@ function calculateBernoulli() {
     resultValue.classList.remove('hidden');
 }
 </script>
-
 
 
     <script src="{% static 'js/print.js' %}"></script>
