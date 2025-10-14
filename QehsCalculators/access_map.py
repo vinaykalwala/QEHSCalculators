@@ -1138,6 +1138,7 @@ CALCULATORS = [
 {"name": "Pump Efficiency Calculator", "url_name":"safety_pump_efficiency_calculator", "plan_type": "corporate", "category": "safety"},
 
 {"name": "Precast Lifting Safety Calculator", "url_name":"safety_precast_lifting_safety_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "PPE Consumption Rate Calculator", "url_name":"safety_ppe_consumption_rate_calculator", "plan_type": "corporate", "category": "safety"},
 
 {"name": "PPE Stock Level Calculator", "url_name":"safety_ppe_stock_level_calculator", "plan_type": "corporate", "category": "safety"},
 
