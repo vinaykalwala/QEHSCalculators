@@ -433,7 +433,7 @@
             <!-- Result Section -->
             <div class="result-card">
                 <div class="result-placeholder" id="placeholder">
-                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Safety illustration">
+                    <img src="{% static 'images/resultimage.png' %}" alt="Safety illustration">
                     <p>This tool will calculate the <strong>Required Vent Area</strong> to prevent overpressure from external heating. Enter your data to see results and insights here.</p>
                 </div>
                 
@@ -458,7 +458,7 @@
                     </div>
 
                     <div class="result-feedback">
-                        <div class="feedback-title">Vent Area Assessment</div>
+                        <div class="feedback-title">Assessment</div>
                         <div class="feedback-content" id="feedbackContent"></div>
                     </div>
                     <div class="btn-wrapper">
@@ -489,42 +489,66 @@
                     <li><strong>Latent Heat of Vaporization (hₓₐ):</strong> The latent heat required to vaporize the liquid (kJ/kg).</li>
                 </ul>
             </div>
-            
             <div class="note-card">
-                <h3>📊 Interpretation</h3>
-                <p>
-                    <b>Vent Area Size Guidelines:</b>
-                </p>
-                <ul class="note-list">
-                    <li><span class="good">Below 0.01 m²</span> → Small vent area, may indicate insufficient venting capacity</li>
-                    <li><span class="average">0.01-0.1 m²</span> → Optimal range for many industrial applications</li>
-                    <li><span class="bad">Above 0.1 m²</span> → Large vent area, may indicate significant heat input or special requirements</li>
-                </ul>
-            </div>
-            
-            <div class="note-card">
-                <h3>🔑 Key Applications</h3>
-                <ul class="note-list">
-                    <li><strong>Emergency Venting Systems:</strong> Designing pressure relief systems in chemical plants.</li>
-                    <li><strong>Fire Safety Compliance:</strong> Ensuring storage tanks meet safety standards for volatile substances.</li>
-                    <li><strong>BLEVE Prevention:</strong> Preventing boiling liquid expanding vapor explosion scenarios.</li>
-                    <li><strong>Process Safety:</strong> Protecting equipment from overpressure conditions during external heating events.</li>
-                </ul>
-            </div>
-            
-            <div class="note-card">
-    <h3>✅ Validation Rules (Compliance)</h3>
+    <h3>✅ Input Validations</h3>
     <ul class="note-list">
-        <li><b>Qₜ (Heat Input):</b> >0, typically 100–10,000 kJ/min, max 100,000</li>
-        <li><b>m₀ (Mass):</b> >0, typically 10–10,000 kg, max 100,000</li>
-        <li><b>vₓₐ (Specific Volume):</b> >0, typically 0.001–0.1 m³/kg, max 10</li>
-        <li><b>G (Mass Flux):</b> >0, typically 5–100 kg/m²s, max 1,000</li>
-        <li><b>V (Volume):</b> >0, typically 1–100 m³, max 10,000</li>
-        <li><b>hₓₐ (Latent Heat):</b> >0, typically 200–2,500 kJ/kg, max 10,000</li>
-        <li><b>Cross-check:</b> m₀ / V ≈ density (500–1500 kg/m³ for liquids). Flag if unrealistic.</li>
+        <li><strong>Constant External Heat Input (Qₜ):</strong> Must be between 1–100,000 kJ/min (industrial fire exposure range)</li>
+        <li><strong>Heat Input Minimum:</strong> Must be > 0 kJ/min (positive heat flux required)</li>
+        <li><strong>Initial Mass (m₀):</strong> Must be between 1–100,000 kg (tank capacity range)</li>
+        <li><strong>Initial Mass Minimum:</strong> Must be > 0 kg (positive mass required)</li>
+        <li><strong>Specific Volume (vₓₐ):</strong> Must be between 0.0001–10 m³/kg (fluid property range)</li>
+        <li><strong>Specific Volume Minimum:</strong> Must be > 0 m³/kg (positive volume)</li>
+        <li><strong>Mass Flux (G):</strong> Must be between 1–1,000 kg/m²·s (API 521 design limits)</li>
+        <li><strong>Mass Flux Minimum:</strong> Must be > 0 kg/m²·s (positive flow rate)</li>
+        <li><strong>Volume (V):</strong> Must be between 0.001–10,000 m³ (vessel size range)</li>
+        <li><strong>Volume Minimum:</strong> Must be > 0 m³ (positive capacity)</li>
+        <li><strong>Latent Heat (hₓₐ):</strong> Must be between 1–10,000 kJ/kg (fluid property limits)</li>
+        <li><strong>Latent Heat Minimum:</strong> Must be > 0 kJ/kg (positive energy requirement)</li>
     </ul>
 </div>
+<div class="note-card">
+    <h3>🔎 Output Validations</h3>
+    <ul class="note-list">
+        <li><strong>Vent Area < 0.001 m²:</strong> 🔴 Very small vent area — check inputs.</li>
+        <li><strong>0.001 ≤ Vent Area < 0.01 m²:</strong> 🟢 Small/Optimal - Acceptable for small tanks & low heat flux</li>
+        <li><strong>0.01 ≤ Vent Area < 0.1 m²:</strong> 🟡 Moderate - Expected in most industrial scenarios</li>
+        <li><strong>0.1 ≤ Vent Area < 1.0 m²:</strong> 🟠 Large - High fire load or large inventory; review inputs</li>
+        <li><strong>Vent Area ≥ 1.0 m²:</strong> 🔴 Very Large - Extreme condition; verify inputs and consult safety engineer</li>
+    </ul>
+</div>
+<div class="note-card">
+    <h3>📐 Governing Principle</h3>
+    <p>
+        The no-overpressure vent area formula for external heating is covered by the American Petroleum Institute (API) Standard 521, Pressure-relieving and Depressuring Systems. The calculations provided in API 521 are used to size pressure relief devices (PRDs) for vessels exposed to external fire.
+    </p>
 
+    <h3 style="margin-top:12px; color:#1976d2;">Key Details from API 521</h3>
+    <ul class="note-list">
+        <li><b>Purpose:</b> To protect pressure vessels from overpressure caused by the heat input from an external fire.</li>
+        <li><b>Scenario:</b> The formulas apply to emergency venting conditions, such as when an external fire engulfs a storage tank containing flammable liquids or gases.</li>
+        <li><b>Heat input:</b> The standard provides formulas for calculating the rate of heat absorption due to fire exposure. For vessels with flammable liquids, the heat input causes vaporization, which is the primary source of overpressure.</li>
+        <li><b>Wetted surface area:</b> Calculations often depend on the "wetted surface area" of the vessel—the portion of the vessel in contact with the liquid contents that is exposed to the fire.</li>
+        <li><b>Basis of formulas:</b> The formulas in API 521 are based on a set of assumptions, which is why more rigorous, dynamic simulations may be needed for specific cases.</li>
+    </ul>
+
+    <h3 style="margin-top:12px; color:#1976d2;">Why "No-Overpressure" Might Be Misleading</h3>
+    <p>
+        While API 521 is used for emergency venting due to external heating, the term "no-overpressure" is not technically correct in the context of pressure relief. The goal of a PRD is to prevent pressure from exceeding a maximum allowable value, but it does so by allowing a controlled amount of overpressure (typically 10% to 21% above the set pressure) to open and operate the device.
+    </p>
+    <p>
+        The phrase "no-overpressure" is sometimes used colloquially or in simplified calculators, but the actual sizing standard (API 521) accounts for a regulated degree of overpressure during an emergency relief event.
+    </p>
+</div>
+<div class="note-card">
+    <h3>💡 Conclusion</h3>
+    <p>
+        This calculator determines the <strong>required vent area</strong> to prevent overpressure in vessels exposed 
+        to external heating, ensuring safe pressure relief during fire exposure scenarios. By accurately sizing 
+        vent areas based on thermodynamic principles and industry standards, it supports proper pressure management, 
+        prevents catastrophic equipment failure, and maintains compliance with NFPA 30, API 521, and ISO 23251 
+        requirements for fire protection and process safety.
+    </p>
+</div>
         </div>
     </div>
 
@@ -604,10 +628,10 @@
     // === Feedback ===
     let feedbackContent = "";
     if (Ao < 0.001) feedbackContent = "Very small vent area — check inputs.";
-    else if (Ao < 0.01) feedbackContent = "Optimal vent area for small systems.";
-    else if (Ao < 0.1) feedbackContent = "Moderate venting requirement.";
-    else if (Ao < 1) feedbackContent = "Large vent area — review safety margins.";
-    else feedbackContent = "Very large vent area — verify inputs and consult safety engineer.";
+    else if (Ao < 0.01) feedbackContent = "Small/Optimal - Acceptable for small tanks & low heat flux";
+    else if (Ao < 0.1) feedbackContent = " Moderate - Expected in most industrial scenarios";
+    else if (Ao < 1) feedbackContent = " Large - High fire load or large inventory; review inputs";
+    else feedbackContent = "Very large  — Extreme condition; verify inputs and consult safety engineer.";
 
     document.getElementById("feedbackContent").innerText = feedbackContent;
 }
