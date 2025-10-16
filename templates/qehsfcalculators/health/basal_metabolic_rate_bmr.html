@@ -463,7 +463,21 @@
                 <p>BMR represents the number of calories your body needs to perform basic life-sustaining functions, such as breathing, circulating blood, and maintaining cell production, while at rest. It is influenced by several factors, including your age, gender, height, and weight.</p>
             </div>
             <div class="note-card">
-                <h3>Input Validation</h3>
+    <h3>⚙️ Parameters Used</h3>
+    <p>The BMR calculator uses the following parameters to estimate basal metabolic rate and total calorie needs:</p>
+    <ul class="note-list">
+        <li><strong>Age:</strong> The person’s age in years. BMR generally decreases with age due to metabolic changes.</li>
+        <li><strong>Gender:</strong> Biological sex (male or female). Men typically have higher BMR because of higher muscle mass.</li>
+        <li><strong>Height:</strong> The person’s height in centimeters. Taller individuals usually have a higher BMR.</li>
+        <li><strong>Weight:</strong> Body weight in kilograms. Higher body weight increases the energy required for basic functions.</li>
+        <li><strong>Activity Level:</strong> Factor used to estimate total daily energy expenditure. Includes categories from sedentary to extra active.</li>
+        <li><strong>Optional Waist/Hip Circumference:</strong> Used for additional body composition insights in some calculations.</li>
+    </ul>
+    <p>These parameters feed into formulas like the Mifflin-St Jeor or Harris-Benedict equations to calculate BMR and total daily calorie needs.</p>
+</div>
+
+            <div class="note-card">
+                <h3>Input Validation Rules</h3>
                 <div class="table-container">
                     <table class="validation-table">
                     <thead>
@@ -516,6 +530,22 @@
                 <p class="note-tip">💡 Tip: Double-check units before submitting to avoid calculation errors.</p>
                 </div>
 
+                <div class="note-card">
+    <h3>📊 Output Validations</h3>
+    <ul class="note-list">
+        <li>Typical adult BMR: 900 – 3500 kcal/day.</li>
+        <li>Flag <800 kcal/day → unusually low; >5000 kcal/day → unusually high.</li>
+        <li>Feedback messages:
+            <ul>
+                <li>Low BMR: May indicate underweight or low energy needs.</li>
+                <li>Normal BMR: Within standard adult range.</li>
+                <li>High BMR: High body mass or metabolic rate.</li>
+            </ul>
+        </li>
+        <li>Edge case checks include unrealistic BMI, negative or zero values, or extreme outliers.</li>
+    </ul>
+</div>
+
             <div class="note-card">
                 <h3>⚙️ How to Estimate Total Calorie Needs</h3>
                 <p>BMR gives a baseline for calories needed at rest. To estimate your total daily calorie needs, multiply your BMR by an activity factor:</p>
@@ -566,22 +596,59 @@
 
                     <p>Keep in mind that BMR is just a starting point. Adjust your diet and exercise based on your health goals (weight loss, maintenance, or gain).</p>
                 </div>
+                <div class="note-card">
+    <h3>📘 Governing Principle</h3>
+    <p>
+        BMR calculators use established formulas to estimate calories burned at rest. They are not absolute measures but provide a reliable baseline:
+    </p>
+    <ul class="note-list">
+        <li><strong>Mifflin-St Jeor Equation:</strong> Developed in 1990; widely considered the most accurate for most adults.</li>
+        <li><strong>Revised Harris-Benedict Equation:</strong> Original formula from 1919, updated in 1984 for better accuracy.</li>
+        <li><strong>Katch-McArdle Formula:</strong> Requires body fat percentage; useful for lean or muscular individuals.</li>
+    </ul>
+    <p>Key Considerations:</p>
+    <ul class="note-list">
+        <li>Estimates, not absolute measures; clinical testing (indirect calorimetry) is the gold standard.</li>
+        <li>Accuracy varies by formula; Mifflin-St Jeor is generally preferred.</li>
+        <li>Body composition significantly affects BMR; more muscle increases metabolic rate.</li>
+    </ul>
+</div>
+<div class="note-card">
+    <h3>📌 Conclusion</h3>
+    <p>
+        The Basal Metabolic Rate (BMR) calculator provides an essential estimate of the calories your body needs to sustain basic life functions while at rest. 
+        By understanding your BMR and adjusting for activity level, you can make informed decisions about diet, exercise, and overall health management.
+    </p>
+    <p>
+        Key takeaways:
+    </p>
+    <ul class="note-list">
+        <li>BMR is influenced by age, gender, height, weight, and body composition.</li>
+        <li>Accurate input values are critical for reliable results; unrealistic or missing inputs can lead to misleading outputs.</li>
+        <li>Estimating total daily calorie needs by considering activity levels helps maintain a healthy weight and prevent metabolic disorders.</li>
+        <li>BMR calculations are estimations and should complement, not replace, professional medical advice for personal health planning.</li>
+    </ul>
+    <p>
+        Use this tool as a guide to better understand your body’s energy requirements and to make healthier lifestyle choices.
+    </p>
+</div>
+
         </div>
     </div>    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const now = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            if(document.getElementById('printDate')) {
-               document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
-            }
-        });
+   <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const now = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    if(document.getElementById('printDate')) {
+        document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+    }
+});
 
-        function calculateBMR() {
-    const age = parseInt(document.getElementById('age').value);
+function calculateBMR() {
+    const ageInput = document.getElementById('age').value.trim();
     const gender = document.getElementById('gender').value;
-    const height = parseFloat(document.getElementById('height').value);
-    const weight = parseFloat(document.getElementById('weight').value);
+    const heightInput = document.getElementById('height').value.trim();
+    const weightInput = document.getElementById('weight').value.trim();
 
     const errorDiv = document.getElementById('resultError');
     const errorMsg = document.getElementById('errorMessage');
@@ -590,37 +657,46 @@
     const feedbackContent = document.getElementById('feedbackContent');
     const placeholder = document.getElementById('placeholder');
 
-    // Reset
+    // Reset visibility
     errorDiv.classList.add("hidden");
     resultDiv.classList.add("hidden");
     placeholder.classList.remove("hidden");
 
-    // Validation rules
+    let errors = [];
+
+    // ---- Input Parsing ----
+    const age = parseInt(ageInput);
+    const height = parseFloat(heightInput);
+    const weight = parseFloat(weightInput);
+
+    // ---- Input Validations ----
     if (isNaN(age) || isNaN(height) || isNaN(weight)) {
-        showError("⚠️ All fields must be filled with numeric values.");
-        return;
+        errors.push("⚠️ All fields must be filled with numeric values.");
     }
-    if (age <= 0 || age > 120) {
-        showError("⚠️ Age must be between 1 and 120 years.");
-        return;
+    if (!Number.isInteger(age) || age < 1 || age > 120) {
+        errors.push("⚠️ Age must be a whole number between 1 and 120 years.");
     }
-    if (height < 45 || height > 272) {
-        showError("⚠️ Height must be between 45 cm and 272 cm.");
-        return;
+    if (height < 50 || height > 250) {
+        errors.push("⚠️ Height must be between 50 cm and 250 cm. Decimals allowed.");
     }
-    if (weight < 2 || weight > 300) {
-        showError("⚠️ Weight must be between 2 kg and 300 kg.");
+    if (weight < 10 || weight > 300) {
+        errors.push("⚠️ Weight must be between 10 kg and 300 kg. Decimals allowed.");
+    }
+
+    // Show errors if any
+    if (errors.length > 0) {
+        showError(errors.join("<br>"));
         return;
     }
 
-    // Cross-field BMI sanity check
+    // ---- BMI sanity check ----
     const bmi = weight / Math.pow(height / 100, 2);
     if (bmi < 10 || bmi > 60) {
         showError("⚠️ Input values create an unrealistic BMI. Please check height and weight.");
         return;
     }
 
-    // BMR formula
+    // ---- BMR Calculation ----
     let bmr;
     if (gender === "male") {
         bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
@@ -628,42 +704,45 @@
         bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
     }
 
-    // Output thresholds
+    // ---- Output Validation ----
     if (bmr < 800 || bmr > 5000) {
         showError("⚠️ The calculated BMR is outside realistic human ranges. Please recheck input values.");
         return;
     }
 
-    // Show results
+    // ---- Display Results ----
     placeholder.classList.add("hidden");
     resultDiv.classList.remove("hidden");
     rateValue.innerText = bmr.toFixed(2);
 
-    // Feedback
+    // ---- Feedback ----
     if (bmr < 1200) {
-        feedbackContent.innerText = "Low BMR — may indicate low energy needs or underweight.";
-    } else if (bmr <= 3000) {
-        feedbackContent.innerText = "Normal BMR range for adults.";
+        feedbackContent.innerText = "Low BMR — may indicate underweight or low energy needs.";
+    } else if (bmr <= 3500) {
+        feedbackContent.innerText = "Normal BMR — within standard adult range.";
     } else {
         feedbackContent.innerText = "High BMR — may indicate high body mass or metabolic rate.";
     }
 
+    // ---- Helper to show errors ----
     function showError(message) {
         placeholder.classList.add("hidden");
         errorDiv.classList.remove("hidden");
-        errorMsg.innerText = message;
+        errorMsg.innerHTML = message;
     }
 }
 
-        function printReport() {
-            const now = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-             if(document.getElementById('printDate')) {
-               document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
-            }
-            window.print();
-        }
-    </script>
+// ---- Print Function ----
+function printReport() {
+    const now = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    if(document.getElementById('printDate')) {
+        document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
+    }
+    window.print();
+}
+</script>
+
 </body>
 </html>
 {% endblock %}

@@ -483,12 +483,22 @@
     </div>
 
     <div class="note-section">
-        <div class="note-card"><h3>What is Age Shock Index?</h3><p>The <strong>Age Shock Index (Age SI)</strong> is an advanced clinical tool that incorporates a patient’s age with their heart rate and systolic blood pressure. It is used to more accurately predict the severity of a patient’s condition, especially in emergencies like acute myocardial infarction (AMI).</p></div>
-        <div class="note-card"><h3>📌 Explanation of Parameters</h3><ul><li><strong>Age (years):</strong> Older individuals generally have a higher baseline risk for cardiovascular issues, adding crucial context to vital signs.</li><li><strong>Heart Rate (beats/min):</strong> A high heart rate can signal physiological stress or shock.</li><li><strong>Systolic Blood Pressure (mmHg):</strong> Low systolic pressure may indicate poor organ perfusion and potential circulatory failure.</li></ul></div>
+        <div class="note-card"><h3>About this Calculator</h3><p>The <strong>Age Shock Index (Age SI)</strong> is an advanced clinical tool that incorporates a patient’s age with their heart rate and systolic blood pressure. It is used to more accurately predict the severity of a patient’s condition, especially in emergencies like acute myocardial infarction (AMI).</p></div>
+        <!-- ⚙️ Parameters Used -->
+<div class="note-card">
+    <h3>⚙️ Parameters Used</h3>
+    <ul>
+        <li><strong>Age (years):</strong> Patient’s age, relevant for risk stratification.</li>
+        <li><strong>Heart Rate (beats/min):</strong> Reflects cardiovascular stress.</li>
+        <li><strong>Systolic Blood Pressure (mmHg):</strong> Indicates circulatory efficiency and perfusion.</li>
+        <li><strong>Age Shock Index (Age SI):</strong> Calculated as (Age × HR) / SBP, used for rapid bedside risk assessment.</li>
+    </ul>
+    <p><em>These parameters provide a quick snapshot of a patient’s hemodynamic status and potential risk in acute settings.</em></p>
+</div>
         <div class="note-card"><h3>How Is It Calculated?</h3><p>The Age SI is calculated with the formula: <strong>(Age × Heart Rate) / Systolic Blood Pressure</strong>. By combining these three parameters, the Age SI provides a clearer and more immediate picture of how well the cardiovascular system is handling stress.</p></div>
         <div class="note-card"><h3>Why It Matters</h3><p>In fast-paced clinical environments, the Age Shock Index helps healthcare professionals make quick, informed decisions. It provides rapid risk stratification at the bedside, with predictive power similar to more complex scoring systems.</p></div>
         <div class="note-card">
-            <h3>Validation Rules & Compliance</h3>
+            <h3>Input Validation Rules</h3>
             <div class="table-container">
                 <table>
                     <thead>
@@ -541,7 +551,55 @@
             </div>
         </div>
 
+<!-- ✅ Output Validations -->
+<div class="note-card">
+    <h3>✅ Output Validations</h3>
+    <ul>
+        <li><strong>Normal Range:</strong> Age SI ≤ 50 → Stable cardiovascular status.</li>
+        <li><strong>Elevated Risk:</strong> Age SI &gt; 50 → Increased risk of shock or adverse events.</li>
+        <li><strong>Physiological Plausibility:</strong> HR &lt; SBP under normal conditions; extreme outliers flagged with warnings.</li>
+        <li><strong>Decimal Handling:</strong> Age, HR, SBP → integers only; Age SI displayed with 2 decimal precision.</li>
+        <li><strong>Edge Cases:</strong>
+            <ul>
+                <li>SBP = 0 → calculation blocked.</li>
+                <li>Extreme elderly + vitals (e.g., Age 120, HR 220, SBP 50) → calculate but display warning.</li>
+                <li>Negative / non-numeric inputs → rejected with descriptive error message.</li>
+            </ul>
+        </li>
+    </ul>
+</div>
 
+<!-- ⚖️ Governing Principle -->
+<div class="note-card">
+    <h3>⚖️ Governing Principle</h3>
+    <p>
+        The <strong>Age Shock Index (Age SI)</strong> is an extension of the traditional Shock Index (SI = HR/SBP), adjusted for patient age. 
+        This modification improves predictive accuracy in older adults and other high-risk populations. It is primarily a clinical research and bedside tool for rapid risk stratification.
+    </p>
+    <p>
+        <strong>Purpose:</strong> To identify patients at higher risk of adverse outcomes, such as mortality or cardiovascular compromise.</p>
+    <p>
+        <strong>Validation:</strong> Different studies suggest thresholds based on population and clinical context:
+        <ul>
+            <li>Gastrointestinal bleeding: cutoff ~45.1</li>
+            <li>Acute coronary syndrome: cutoff ~44</li>
+            <li>Trauma (geriatric patients): cutoff ~50</li>
+        </ul>
+        These thresholds are research-derived and may vary depending on patient cohorts.
+    </p>
+    <p>
+        <strong>Clinical Application:</strong> Age SI supports rapid bedside decision-making in emergency and critical care settings. 
+        It does not replace comprehensive diagnostics but helps prioritize patients at higher risk for adverse outcomes.
+    </p>
+</div>
+<!-- 🧾 Conclusion -->
+<div class="note-card">
+    <h3>🧾 Conclusion</h3>
+    <p>
+        The Age Shock Index is a practical tool to quickly assess hemodynamic stability, particularly in older or high-risk patients. 
+        By integrating age with heart rate and systolic blood pressure, clinicians can identify patients requiring urgent attention and optimize resource allocation in critical care environments.
+    </p>
+</div>
     </div>
 </div>
 
@@ -556,9 +614,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function calculateAgeShockIndex() {
-    const age = parseInt(document.getElementById('age').value, 10);
-    const HR = parseInt(document.getElementById('heartRate').value, 10);
-    const SBP = parseInt(document.getElementById('systolicBP').value, 10);
+    const ageInput = document.getElementById('age').value.trim();
+    const HRInput = document.getElementById('heartRate').value.trim();
+    const SBPInput = document.getElementById('systolicBP').value.trim();
 
     const placeholder = document.getElementById('placeholder');
     const errorBox = document.getElementById('resultError');
@@ -572,18 +630,32 @@ function calculateAgeShockIndex() {
     placeholder.classList.add('hidden');
     errorBox.classList.add('hidden');
     resultBox.classList.add('hidden');
+    ageSiValue.textContent = "";
+    feedbackContent.textContent = "";
+    meterFill.style.width = "0%";
+
+    // --- Input Parsing & Validation ---
+    const age = parseInt(ageInput, 10);
+    const HR = parseInt(HRInput, 10);
+    const SBP = parseInt(SBPInput, 10);
 
     let errorMsg = "";
 
-    // Input validations
-    if (isNaN(age) || isNaN(HR) || isNaN(SBP)) {
-        errorMsg = "❌ Please enter all required values.";
-    } else if (age < 1 || age > 120) {
+    // Required & numeric check
+    if (!ageInput || !HRInput || !SBPInput || isNaN(age) || isNaN(HR) || isNaN(SBP)) {
+        errorMsg = "❌ Please enter all required values as whole numbers.";
+    } 
+    // Range checks
+    else if (age < 1 || age > 120) {
         errorMsg = "❌ Age must be between 1 and 120 years.";
     } else if (HR < 30 || HR > 220) {
         errorMsg = "❌ Heart Rate must be between 30 and 220 bpm.";
     } else if (SBP < 50 || SBP > 300) {
         errorMsg = "❌ Systolic BP must be between 50 and 300 mmHg.";
+    } 
+    // Cross-field plausibility
+    else if (HR >= SBP) {
+        errorMsg = "❌ Physiologically unusual: Heart Rate should be less than Systolic BP.";
     }
 
     if (errorMsg) {
@@ -592,35 +664,37 @@ function calculateAgeShockIndex() {
         return;
     }
 
-    // Calculation
+    // --- Calculation ---
     const ageSI = (age * HR) / SBP;
     ageSiValue.textContent = ageSI.toFixed(2);
 
+    // --- Interpretation ---
     let interpretation = "";
     let fillPercent = 0;
 
-    // Interpretation thresholds
     if (ageSI > 50) {
-        interpretation = "⚠️ Elevated: Increased risk of mortality — possible cardiovascular compromise.";
+        interpretation = "⚠️ Elevated Risk: Age SI > 50 indicates increased risk of shock or adverse cardiovascular events.";
         fillPercent = 100;
     } else {
-        interpretation = "✅ Normal: Suggests stable cardiovascular status.";
+        interpretation = "✅ Normal: Age SI ≤ 50 suggests stable cardiovascular status.";
         fillPercent = (ageSI / 50) * 100;
     }
 
-    // Outlier flagging
-    if ((age > 100 && HR > 180) || (SBP < 60 && HR > 150)) {
+    // Extreme outlier warnings
+    if ((age >= 100 && HR > 180) || (SBP < 60 && HR > 150)) {
         interpretation += "<br>⚠️ Warning: Values appear physiologically extreme — verify input.";
     }
 
-    // Update feedback & meter
+    // --- Update Feedback & Meter ---
     feedbackContent.innerHTML = interpretation;
     meterFill.style.width = fillPercent + "%";
+    meterFill.style.backgroundColor = fillPercent === 100 ? "#c62828" : "#2e7d32";
 
     // Show result
     resultBox.classList.remove('hidden');
 }
 
+// --- Print Function ---
 function printReport() {
     const printDateEl = document.getElementById('printDate');
     if (printDateEl) {
@@ -631,6 +705,7 @@ function printReport() {
     window.print();
 }
 </script>
+
 
 </body>
 </html>
