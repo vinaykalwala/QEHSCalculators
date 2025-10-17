@@ -530,18 +530,22 @@
     </div>
 
     <!-- Governing Principle -->
-    <div class="note-card">
-        <h3>📖 Governing Principle</h3>
-        <p>
-            The Fire Load Density concept is based on the principle that 
-            the <b>energy stored in combustible contents</b> represents 
-            the fire hazard potential of a space.  
-            This is recognized in <b>NFPA 557 – Standard for Determination of Fire Load 
-            for Use in Structural Fire Protection Design</b>, 
-            which provides the methodology for quantifying fire load.  
-            It aligns with international practices in <b>ISO 45001</b>, <b>NFPA codes</b>, and <b>National Building Code (NBC)</b>.
-        </p>
-    </div>
+<div class="note-card">
+    <h3>📐 Governing Principle</h3>
+    <p>
+        The standard for calculating fire load density for fire risk calculations is primarily the <strong>NFPA 557: Standard for Determination of Fire Loads for Use in Structural Fire Protection Design</strong>. This standard provides a risk-based methodology for determining fire loads and fire load densities, expressing them in energy units like MJ/m², which is then used to evaluate and design a building's structural fire protection.
+    </p>
+    <p>
+        <strong>Standard:</strong>  
+        <ul class="note-list">
+            <li><strong>What is Fire Load Density?</strong> It's the amount of combustible heat energy per unit floor area of a compartment, expressed in energy units like MJ/m².</li>
+            <li><strong>Why is it important?</strong> It's a crucial factor in designing fire protection systems, emergency planning, and ensuring compliance with fire safety codes.</li>
+            <li><strong>Who sets the standard?</strong> The National Fire Protection Association (NFPA) develops and publishes NFPA 557, which is a widely recognized standard for this purpose.</li>
+            <li><strong>Methods:</strong> NFPA 557 allows for different methods to conduct fire load surveys, including the weighing technique, the inventory technique, or a combination of both.</li>
+        </ul>
+    </p>
+</div>
+
 
     <!-- Conclusion -->
     <div class="note-card">
@@ -558,8 +562,19 @@
     </div>
 </div>
 
+
+
+<style>
+.warning-text {
+  display: block;
+  font-size: 14px;
+  color: orange;
+  margin-top: 2px;
+}
+</style>
+
 <script>
-// ---- Configurable constants
+    // ---- Configurable constants
 const LIMITS = {
   MAX_MATERIALS: 200,
   MASS: { min: 0, max: 1_000_000, typicalWarnAbove: 100_000, maxDecimals: 3 },
@@ -568,6 +583,7 @@ const LIMITS = {
   FLD: { warnAbove: 10_000, blockAbove: 100_000 }
 };
 
+// Count decimals for validation
 function countDecimals(num) {
   if (!Number.isFinite(num)) return 0;
   const s = num.toString();
@@ -575,8 +591,10 @@ function countDecimals(num) {
   return s.replace(/0+$/, '').split('.')[1]?.length || 0;
 }
 
+// Push errors to array
 function pushError(arr, msg) { arr.push(`👉 ${msg}`); }
 
+// Generate dynamic material input fields
 function generateMaterialInputs() {
   const n = parseInt(document.getElementById('numMaterials').value, 10);
   const container = document.getElementById('materialInputs');
@@ -606,29 +624,28 @@ function generateMaterialInputs() {
   }
 }
 
+// Calculate FLD
 function calculateFLD() {
   const numMaterials = parseInt(document.getElementById('numMaterials').value, 10);
   const floorArea = parseFloat(document.getElementById('floorArea').value);
-
   const errorBox = document.getElementById('resultError');
   const errorMessage = document.getElementById('errorMessage');
   const placeholder = document.getElementById('placeholder');
   const resultValue = document.getElementById('resultValue');
-
   let errors = [];
   let totalFireLoad = 0;
 
   // Reset inline warnings
   document.querySelectorAll(".warning-text").forEach(span => span.textContent = "");
 
-  // ---- Validate numMaterials
+  // Validate numMaterials
   if (!Number.isInteger(numMaterials) || numMaterials < 1) {
     pushError(errors, "Enter a valid number of combustible materials (integer ≥ 1).");
   } else if (numMaterials > LIMITS.MAX_MATERIALS) {
     pushError(errors, `Number of materials cannot exceed ${LIMITS.MAX_MATERIALS}.`);
   }
 
-  // ---- Validate floor area
+  // Validate floor area
   if (!Number.isFinite(floorArea)) {
     pushError(errors, "Enter a valid floor area (m²).");
   } else {
@@ -646,10 +663,9 @@ function calculateFLD() {
     }
   }
 
-  // ---- Validate materials
+  // Validate materials
   if (errors.length === 0) {
     let hasContributingLine = false;
-
     for (let i = 1; i <= numMaterials; i++) {
       const massStr = document.getElementById(`mass${i}`)?.value ?? "";
       const heatStr = document.getElementById(`heat${i}`)?.value ?? "";
@@ -669,7 +685,6 @@ function calculateFLD() {
         continue;
       }
 
-      // Mass validation
       if (mass < LIMITS.MASS.min || mass > LIMITS.MASS.max) {
         pushError(errors, `Material ${i}: mass must be between ${LIMITS.MASS.min} and ${LIMITS.MASS.max} kg.`);
       }
@@ -677,7 +692,6 @@ function calculateFLD() {
         warnMass.textContent = `⚠️ Large mass (${mass} kg). Confirm kg vs tonnes.`;
       }
 
-      // Heat validation
       if (heat < LIMITS.HEAT.min || heat > LIMITS.HEAT.max) {
         pushError(errors, `Material ${i}: heat must be between ${LIMITS.HEAT.min}–${LIMITS.HEAT.max} MJ/kg.`);
       }
@@ -701,7 +715,7 @@ function calculateFLD() {
     }
   }
 
-  // ---- Handle errors
+  // Handle errors
   if (errors.length > 0) {
     errorMessage.innerHTML = errors.join("<br>");
     errorBox.classList.remove("hidden");
@@ -716,7 +730,7 @@ function calculateFLD() {
     errorMessage.innerHTML = "";
   }
 
-  // ---- Calculate FLD
+  // Calculate FLD
   const fld = totalFireLoad / floorArea;
 
   if (!Number.isFinite(fld) || fld < 0) {
@@ -728,7 +742,7 @@ function calculateFLD() {
 
   document.getElementById('fldValue').textContent = fld.toFixed(2);
 
-  // ---- Safety Meter
+  // Safety Meter
   const meterFill = document.getElementById('meterFill');
   let meterWidth, meterColor, feedback;
 
@@ -757,18 +771,8 @@ function calculateFLD() {
 function printReport() {
   window.print();
 }
+
 </script>
-
-<style>
-.warning-text {
-  display: block;
-  font-size: 14px;
-  color: orange;
-  margin-top: 2px;
-}
-</style>
-
-
 
         <script src="{% static 'js/print.js' %}"></script>
 

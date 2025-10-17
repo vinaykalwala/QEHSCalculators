@@ -437,17 +437,36 @@
         </ul>
     </div>
 
-    <!-- 5. Governing Principle -->
-    <div class="note-card">
-        <h3>📐 Governing Principle</h3>
-        <p>
-            Fire Fighting Demand is calculated based on population and fire risk, ensuring adequate water supply for fire protection. 
-            This methodology aligns with <strong>NFPA 1142 – Water Supply for Suburban and Rural Fire Fighting</strong> standards.
-        </p>
-        <p>
-            Analogous concept: A <strong>Critical Number of Samples Calculator</strong> is not tied to a single standard but is applied in fields such as statistical quality control (ISO 2859) or laboratory medicine (Westgard rules) to determine sample sizes for confidence or quality assessment. Similarly, fire demand calculation ensures safety thresholds are met for water supply planning.
-        </p>
-    </div>
+   <!-- Governing Principle -->
+<div class="note-card">
+    <h3>📐 Governing Principle</h3>
+    <p>
+        A "Fire Fighting Demand Calculator" doesn't correspond to a single universal standard but utilizes various methodologies derived from different standards, including international ones like NFPA (National Fire Protection Association) and country-specific Indian Standards (IS) like IS 9668, along with client-specific requirements and formulas such as Kuchling's Formula or the AIA formula. The specific standard or formula used depends on the region, industry, and the particular type of risk being assessed.
+    </p>
+    <p>
+        <strong>Standard:</strong>  
+        <ul class="note-list">
+            <li><strong>NFPA (National Fire Protection Association):</strong> This international organization sets standards for fire protection, including those for calculating fire water demand, as seen in documents like NFPA 1231.</li>
+            <li><strong>Indian Standards (IS):</strong> For India, standards like IS 9668 (Code of Practice for Provision and Maintenance of Water Supplies for Fire Fighting) and IS 12469 (Specification for Pumps for Fire Fighting System) provide guidelines for fire water supply and pumps.</li>
+            <li><strong>Formulas:</strong>
+                <ul class="note-list">
+                    <li><strong>Kuchling's Formula:</strong> A simpler formula often used for preliminary assessments based on population size.</li>
+                    <li><strong>AIA Formula:</strong> A widely used method that considers population and fire risk, especially for urban areas.</li>
+                    <li><strong>Ministry of Urban Development Formula:</strong> Used for large populations, typically over 50,000 people.</li>
+                </ul>
+            </li>
+        </ul>
+    </p>
+    <p>
+        How to Determine the Correct Standard:  
+        <ul class="note-list">
+            <li>Check the documentation: Look for references to the specific standard or formula used in the calculator's design or accompanying literature.</li>
+            <li>Consider the location and industry: The applicable standard will vary based on the project's location (e.g., in India, use IS standards) and the facility type (e.g., power plants may use NFPA standards).</li>
+            <li>Consult the relevant authorities: Contact local fire brigades or engineering consultants who can advise on the required local standards and practices.</li>
+        </ul>
+    </p>
+</div>
+
 
     <!-- 6. Conclusion -->
     <div class="note-card">
@@ -471,7 +490,7 @@ function calculateFireDemand() {
     const feedbackContent = document.getElementById('feedbackContent');
     const resultError = document.getElementById('resultError');
 
-    // Reset display states
+    // Reset display
     resultError.classList.add('hidden');
     resultValue.classList.add('hidden');
     placeholder.classList.add('hidden');
@@ -480,9 +499,7 @@ function calculateFireDemand() {
 
     // Empty check
     if (populationInput === "") {
-        resultError.innerHTML = "⚠️ Please enter the population.";
-        resultError.style.color = "orange";
-        resultError.classList.remove('hidden');
+        showError("⚠️ Please enter the population.", "orange");
         return;
     }
 
@@ -490,28 +507,21 @@ function calculateFireDemand() {
 
     // Numeric and positive check
     if (isNaN(population) || population <= 0) {
-        resultError.innerHTML = "❌ Invalid entry. Please enter a positive numeric value for population.";
-        resultError.style.color = "red";
-        resultError.classList.remove('hidden');
+        showError("❌ Invalid entry. Please enter a positive numeric value for population.", "red");
         return;
     }
 
-    // Upper and lower bounds
+    // Bounds warnings
     if (population < 1) {
-        resultError.innerHTML = "⚠️ Population is too small to generate meaningful fire demand.";
-        resultError.style.color = "orange";
-        resultError.classList.remove('hidden');
+        showError("⚠️ Population is too small to generate meaningful fire demand.", "orange");
         return;
     }
-
     if (population > 10000000) {
-        resultError.innerHTML = "⚠️ Population entered is extremely high. Verify units and data.";
-        resultError.style.color = "orange";
-        resultError.classList.remove('hidden');
+        showError("⚠️ Population entered is extremely high. Verify units and data.", "orange");
         return;
     }
 
-    // Fire demand calculations
+    // ---- FIRE DEMAND CALCULATIONS ----
     const fireDemandAIA = 4637 * Math.sqrt(population) * (1 - 0.01 * Math.sqrt(population));
     const fireDemandKuchling = 3182 * Math.sqrt(population);
     const fireDemandFreeman = 1136.5 * ((population / 5) + 10);
@@ -520,21 +530,19 @@ function calculateFireDemand() {
         fireDemandUrbanDev = 100 * Math.sqrt(population) * 1000; // L/day
     }
 
-    // Ensure outputs are positive
+    // Ensure positive outputs
     if (fireDemandAIA <= 0 || fireDemandKuchling <= 0 || fireDemandFreeman <= 0) {
-        resultError.innerHTML = "❌ Calculated fire demand is non-positive. Check input values.";
-        resultError.style.color = "red";
-        resultError.classList.remove('hidden');
+        showError("❌ Calculated fire demand is non-positive. Check input values.", "red");
         return;
     }
 
-    // Round values
+    // Round outputs
     const AIA = fireDemandAIA.toFixed(2);
     const Kuchling = fireDemandKuchling.toFixed(2);
     const Freeman = fireDemandFreeman.toFixed(2);
     const UrbanDev = (typeof fireDemandUrbanDev === "number") ? fireDemandUrbanDev.toFixed(2) : fireDemandUrbanDev;
 
-    // Display results visually
+    // Display results
     feedbackContent.innerHTML = `
         <div style="display:flex; flex-direction:column; gap:12px; margin-top:15px;">
             <div style="background:#e8f4fc; padding:15px; border-left:5px solid #1560bd; border-radius:8px;">
@@ -554,11 +562,20 @@ function calculateFireDemand() {
     resultValue.classList.remove('hidden');
 }
 
+// ---- HELPER FUNCTION TO SHOW ERRORS ----
+function showError(msg, color="red") {
+    const resultError = document.getElementById('resultError');
+    resultError.innerHTML = msg;
+    resultError.style.color = color;
+    resultError.classList.remove('hidden');
+}
 
+// ---- PRINT FUNCTION ----
 function printReport() {
     window.print();
 }
 </script>
+
 
 
 

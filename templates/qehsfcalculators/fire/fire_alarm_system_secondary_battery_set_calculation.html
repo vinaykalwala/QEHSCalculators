@@ -484,18 +484,35 @@
     </div>
 
     <!-- 5. Governing Principle -->
-    <div class="note-card">
-        <h3>📐 Governing Principle</h3>
-        <p>
-            Battery capacity must cover both standby and alarm operation, with a safety factor for aging and environmental effects. 
-            Ensuring compliance with <strong>NFPA 72 – Fire Alarm System Secondary Battery Set</strong> guarantees reliability in emergencies.
-        </p>
-        <p>
-            Related concept: A <strong>Critical Number of Samples Calculator</strong> is not tied to a single standard, but is used in fields like statistical quality control (ISO 2859) and laboratory medicine (Westgard rules) to determine sample size for confidence or quality levels. 
-            This is analogous to battery sizing: ensuring sufficient capacity to reliably meet standby and alarm performance requirements. 
-            The methodology depends on application-specific requirements.
-        </p>
-    </div>
+   <!-- Governing Principle -->
+<div class="note-card">
+    <h3>📐 Governing Principle</h3>
+    <p>
+        The “–Set” calculation for a fire alarm system’s secondary battery is governed by standards that define the required 
+        standby and alarm operation durations to ensure uninterrupted performance during power loss.  
+        These requirements are primarily defined by <strong>NFPA 72</strong> in the United States, 
+        <strong>BS 5839-1</strong> in the United Kingdom, and <strong>IS 15908</strong> and <strong>IS 2189</strong> in India.  
+        The calculation ensures that the backup battery provides sufficient capacity for <strong>24 hours of standby</strong> 
+        followed by <strong>5–15 minutes of alarm function</strong>, depending on the system type and standard applied.
+    </p>
+    <p>
+        <strong>Standard:</strong>  
+        The following standards specify the framework for determining total battery capacity and ensuring compliance:  
+        <ul class="note-list">
+            <li><strong>NFPA 72 (U.S.):</strong> Mandates 24 hours of standby power and 5 minutes (notification) or 15 minutes (voice systems) of alarm operation.</li>
+            <li><strong>BS 5839-1 (U.K.):</strong> Provides design guidance for calculating standby periods and selecting battery capacity for alarm systems.</li>
+            <li><strong>IS 15908 (India):</strong> Covers the selection, installation, and maintenance of control and indicating equipment for fire alarm systems.</li>
+            <li><strong>IS 2189 (India):</strong> Defines fire detection and alarm system installation practices, incorporating power and battery requirements.</li>
+        </ul>
+    </p>
+    <p>
+        Related concept:  
+        The “–Set” represents the complete backup battery system designed to maintain operational integrity during both standby and alarm conditions.  
+        By considering device current draws, total standby and alarm currents, safety margins, and aging factors,  
+        this calculation ensures reliability and compliance with global fire protection standards such as NFPA, BS, and IS frameworks.
+    </p>
+</div>
+
 
     <!-- 6. Conclusion -->
     <div class="note-card">
@@ -510,14 +527,13 @@
 
 </div>
 
-
 <script>
 function calculateBatteryBackup() {
-    const standbyCurrent = parseFloat(document.getElementById("standbyCurrent").value.trim());
-    const alarmCurrent = parseFloat(document.getElementById("alarmCurrent").value.trim());
-    const standbyTime = parseFloat(document.getElementById("standbyTime").value.trim());
-    const alarmTime = parseFloat(document.getElementById("alarmTime").value.trim());
-    const safetyFactor = parseFloat(document.getElementById("safetyFactor").value.trim());
+    const standbyCurrentInput = document.getElementById("standbyCurrent").value.trim();
+    const alarmCurrentInput = document.getElementById("alarmCurrent").value.trim();
+    const standbyTimeInput = document.getElementById("standbyTime").value.trim();
+    const alarmTimeInput = document.getElementById("alarmTime").value.trim();
+    const safetyFactorInput = document.getElementById("safetyFactor").value.trim();
 
     const resultValue = document.getElementById("resultValue");
     const placeholder = document.getElementById("placeholder");
@@ -533,9 +549,24 @@ function calculateBatteryBackup() {
     feedbackContent.innerHTML = "";
     detailsBox.innerHTML = "";
 
-    // Basic empty/NaN validation
+    // Empty fields check
+    if (!standbyCurrentInput || !alarmCurrentInput || !standbyTimeInput || !alarmTimeInput || !safetyFactorInput) {
+        resultError.innerHTML = "❌ All fields are mandatory and must be numeric.";
+        resultError.style.color = "red";
+        resultError.classList.remove("hidden");
+        return;
+    }
+
+    // Parse inputs
+    const standbyCurrent = parseFloat(standbyCurrentInput);
+    const alarmCurrent = parseFloat(alarmCurrentInput);
+    const standbyTime = parseFloat(standbyTimeInput);
+    const alarmTime = parseFloat(alarmTimeInput);
+    const safetyFactor = parseFloat(safetyFactorInput);
+
+    // Numeric check
     if ([standbyCurrent, alarmCurrent, standbyTime, alarmTime, safetyFactor].some(v => isNaN(v))) {
-        resultError.innerHTML = "❌ Please enter valid numeric values in all fields.";
+        resultError.innerHTML = "❌ All fields are mandatory and must be numeric.";
         resultError.style.color = "red";
         resultError.classList.remove("hidden");
         return;
@@ -543,37 +574,45 @@ function calculateBatteryBackup() {
 
     // Range validations
     if (standbyCurrent < 0.01 || standbyCurrent > 50) {
-        resultError.innerHTML = "❌ Standby current must be between 0.01 and 50 Amps.";
-        resultError.classList.remove("hidden");
-        return;
-    }
-    if (alarmCurrent < 0.1 || alarmCurrent > 100) {
-        resultError.innerHTML = "❌ Alarm current must be between 0.1 and 100 Amps.";
-        resultError.classList.remove("hidden");
-        return;
-    }
-    if (standbyTime < 8 || standbyTime > 72) {
-        resultError.innerHTML = "❌ Standby time must be between 8 and 72 hours (NFPA default is 24).";
-        resultError.classList.remove("hidden");
-        return;
-    }
-    if (alarmTime < 0.05 || alarmTime > 0.5) {
-        resultError.innerHTML = "❌ Alarm time must be between 0.05 and 0.5 hours (NFPA default is 0.083).";
-        resultError.classList.remove("hidden");
-        return;
-    }
-    if (safetyFactor < 1.1 || safetyFactor > 1.5) {
-        resultError.innerHTML = "❌ Safety factor must be between 1.1 and 1.5 (NFPA/industry practice).";
+        resultError.innerHTML = "⚠️ Standby Current: 0.01 – 50 A. Below or above triggers warnings/errors.";
+        resultError.style.color = "orange";
         resultError.classList.remove("hidden");
         return;
     }
 
-    // Cross-field logic
-    if (standbyCurrent > alarmCurrent) {
-        resultError.innerHTML = "⚠️ Standby current is higher than alarm current. Please verify inputs.";
+    if (alarmCurrent < 0.1 || alarmCurrent > 100) {
+        resultError.innerHTML = "⚠️ Alarm Current: 0.1 – 100 A. Must generally be ≥ standby current; otherwise, a warning is displayed.";
         resultError.style.color = "orange";
         resultError.classList.remove("hidden");
-        // Still allow calculation, but warn
+        return;
+    }
+
+    if (standbyTime < 8 || standbyTime > 72) {
+        resultError.innerHTML = "⚠️ Standby Time: 8 – 72 h; default 24 h per NFPA 72.";
+        resultError.style.color = "orange";
+        resultError.classList.remove("hidden");
+        return;
+    }
+
+    if (alarmTime < 0.05 || alarmTime > 0.5) {
+        resultError.innerHTML = "⚠️ Alarm Time: 0.05 – 0.5 h; default 0.083 h per NFPA 72.";
+        resultError.style.color = "orange";
+        resultError.classList.remove("hidden");
+        return;
+    }
+
+    if (safetyFactor < 1.1 || safetyFactor > 1.5) {
+        resultError.innerHTML = "⚠️ Safety Factor: 1.1 – 1.5. Values outside this range are rejected.";
+        resultError.style.color = "orange";
+        resultError.classList.remove("hidden");
+        return;
+    }
+
+    // Cross-field warning
+    if (standbyCurrent > alarmCurrent) {
+        resultError.innerHTML = "⚠️ Standby current > Alarm current triggers a warning, but calculation proceeds.";
+        resultError.style.color = "orange";
+        resultError.classList.remove("hidden");
     }
 
     // Calculation
@@ -582,42 +621,27 @@ function calculateBatteryBackup() {
     const totalCapacity = standbyCapacity + alarmCapacity;
     const adjustedCapacity = totalCapacity * safetyFactor;
 
-    // Display main value
+    // Display value
     document.getElementById("batteryCapacityValue").innerText = adjustedCapacity.toFixed(2);
     resultValue.classList.remove("hidden");
 
-    // Show detailed breakdown
+    // Detailed breakdown
     detailsBox.innerHTML = `
-       <p style="font-size:16px; margin:6px 0; padding:6px; background:#f0f8ff; border-radius:6px;">
-  <strong style="color:#34495e;">Required Standby Capacity:</strong> 
-  <span style="color:#2980b9;">${standbyCapacity.toFixed(2)} Ah</span>
-</p>
+<p><strong>Standby Capacity:</strong> ${standbyCapacity.toFixed(2)} Ah</p>
+<p><strong>Alarm Capacity:</strong> ${alarmCapacity.toFixed(2)} Ah</p>
+<p><strong>Total Capacity:</strong> ${totalCapacity.toFixed(2)} Ah</p>
+<p><strong>Adjusted Capacity (with Safety Factor):</strong> ${adjustedCapacity.toFixed(2)} Ah</p>
+    `;
 
-<p style="font-size:16px; margin:6px 0; padding:6px; background:#f0f8ff; border-radius:6px;">
-  <strong style="color:#34495e;">Required Alarm Capacity:</strong> 
-  <span style="color:#e67e22;">${alarmCapacity.toFixed(2)} Ah</span>
-</p>
-
-<p style="font-size:16px; margin:6px 0; padding:6px; background:#f0f8ff; border-radius:6px;">
-  <strong style="color:#34495e;">Total Required Capacity:</strong> 
-  <span style="color:#16a085;">${totalCapacity.toFixed(2)} Ah</span>
-</p>
-
-<p style="font-size:16px; margin:6px 0; padding:8px; font-weight:bold; background:#f0f8ff; border-radius:6px;">
-  <strong style="color:#2c3e50;">Adjusted Battery Capacity (with Safety Factor):</strong> 
-  <span style="color:#c0392b;">${adjustedCapacity.toFixed(2)} Ah</span>
-</p>
-   `;
-
-    // Feedback thresholds
+    // Feedback based on thresholds
     if (adjustedCapacity < 7) {
-        feedbackContent.innerHTML = "🔴 Insufficient Capacity: Minimum NFPA-compliant batteries are 7Ah or larger.";
-        feedbackContent.style.color = "darkred";
-    } else if (adjustedCapacity < 20) {
-        feedbackContent.innerHTML = "⚠️ Borderline Capacity: Meets minimum NFPA, but consider 20Ah+ for reliability.";
+        feedbackContent.innerHTML = "🔴 Insufficient Capacity: Below minimum NFPA 72 requirements.";
+        feedbackContent.style.color = "red";
+    } else if (adjustedCapacity <= 20) {
+        feedbackContent.innerHTML = "⚠️ Borderline Capacity: Meets NFPA minimum, but larger capacity recommended for reliability.";
         feedbackContent.style.color = "orange";
     } else {
-        feedbackContent.innerHTML = "✅ Sufficient Capacity: Meets NFPA 72 backup requirements.";
+        feedbackContent.innerHTML = "✅ Sufficient Capacity: Fully compliant for typical commercial fire alarm panels.";
         feedbackContent.style.color = "green";
     }
 }
@@ -625,8 +649,8 @@ function calculateBatteryBackup() {
 function printReport() {
     window.print();
 }
-
 </script>
+
 
 
     <script src="{% static 'js/print.js' %}"></script>

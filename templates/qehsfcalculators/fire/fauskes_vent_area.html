@@ -466,7 +466,7 @@
 
     <!-- 4. Output Validation & Feedback -->
     <div class="note-card">
-        <h3>⚡ Output Validations & Feedback</h3>
+        <h3>⚡ Output Validations</h3>
         <ul class="note-list">
             <li><strong>✅ Low Vent Area:</strong> Minimal pressure; standard relief sufficient.</li>
             <li><strong>⚠️ Moderate Vent Area:</strong> Monitor and ensure adequate venting.</li>
@@ -477,16 +477,25 @@
         </ul>
     </div>
 
-    <!-- 5. Governing Principle -->
-    <div class="note-card">
-        <h3>📐 Governing Principle</h3>
-        <p>
-            Vent area calculation is based on safely relieving pressure to avoid catastrophic vessel failure. This methodology aligns with <strong>Fauske's Vent Area methodology</strong> and is guided by <strong>API 520/521 – Sizing, Selection, and Installation of Pressure-Relieving Devices</strong> standards.
-        </p>
-        <p>
-            Analogous concept: A <strong>Critical Number of Samples Calculator</strong> is not tied to a single standard but is used in statistical quality control (ISO 2859) or laboratory medicine (Westgard rules) to determine required sample sizes for confidence or quality assessment. Similarly, vent area calculations ensure safety thresholds are met for pressure relief design.
-        </p>
-    </div>
+    <!-- Governing Principle -->
+<div class="note-card">
+    <h3>📐 Governing Principle</h3>
+    <p>
+        The Fauske Vent Area Calculator is based on methodologies developed by the Design Institute for Emergency Relief Systems (DIERS). 
+        DIERS is not a single standard but an industry-recognized methodology for sizing emergency pressure relief systems for chemical processes, 
+        particularly for runaway reactions.
+    </p>
+    <p>
+        <strong>Standard:</strong>  
+        <ul class="note-list">
+            <li><strong>Fauske Methods:</strong> Developed by Hans K. Fauske, these are simplified methods that apply DIERS principles to different types of chemical reactions, such as vapor, gassy, and hybrid systems.</li>
+            <li><strong>DIERS Two-Phase Flow Technology:</strong> The methodology specifically accounts for two-phase flow, where a mixture of liquid and gas is vented. This is a more realistic and reliable approach for runaway reactions compared to assuming only vapor is released.</li>
+            <li><strong>Adiabatic Calorimetry Data:</strong> The methods use data from specialized adiabatic calorimeters, such as the Vent Sizing Package 2 (VSP2) or the Advanced Reactive System Screening Tool (ARSST), which are both low thermal inertia instruments.</li>
+            <li><strong>API and NFPA Standards:</strong> For non-reactive systems, Fauske software like FERST applies vent sizing techniques consistent with industry standards such as API 520/521 and NFPA 30.</li>
+        </ul>
+    </p>
+</div>
+
 
     <!-- 6. Conclusion -->
     <div class="note-card">
@@ -521,16 +530,15 @@ function calculateVentArea() {
     const feedbackContent = document.getElementById('feedbackContent');
     const resultError = document.getElementById('resultError');
 
-    // Reset display and warnings
+    // Reset display
     resultError.classList.add('hidden');
     resultValue.classList.add('hidden');
     placeholder.classList.add('hidden');
     resultError.innerHTML = "";
     feedbackContent.innerHTML = "";
-
     clearFieldWarnings();
 
-    // Validation: Mandatory & Numeric
+    // ---- INPUT VALIDATION ----
     if ([mass, pressure, specificHeat, temperature, tempRate].some(v => isNaN(v))) {
         showError("❌ All inputs must be numeric.");
         return;
@@ -544,27 +552,37 @@ function calculateVentArea() {
         return;
     }
 
-    // Calculate Vent Area
+    // ---- VENT AREA CALCULATION ----
     const ventArea = (mass / pressure) * Math.sqrt(specificHeat / temperature) * tempRate;
     document.getElementById('ventAreaValue').innerText = ventArea.toFixed(4);
     resultValue.classList.remove('hidden');
 
-    // Feedback
+    // ---- FEEDBACK BASED ON VENT AREA ----
     let feedback = "";
-    if (ventArea < 0.1) { feedback = "✅ Low Vent Area: Standard pressure relief sufficient."; feedbackContent.style.color="green"; }
-    else if (ventArea <= 1.0) { feedback = "⚠️ Moderate Vent Area: Ensure adequate venting and monitoring."; feedbackContent.style.color="orange"; }
-    else if (ventArea <= 10) { feedback = "🚨 High Vent Area: Immediate attention required; risk of overpressure."; feedbackContent.style.color="red"; }
-    else { feedback = "🔴 Extreme Hazard: Critical venting needed; follow emergency protocols."; feedbackContent.style.color="darkred"; }
+    if (ventArea < 0.1) {
+        feedback = "✅ Low Vent Area: Standard pressure relief sufficient.";
+        feedbackContent.style.color = "green";
+    } else if (ventArea <= 1.0) {
+        feedback = "⚠️ Moderate Vent Area: Ensure adequate venting and monitoring.";
+        feedbackContent.style.color = "orange";
+    } else if (ventArea <= 10) {
+        feedback = "🚨 High Vent Area: Immediate attention required; risk of overpressure.";
+        feedbackContent.style.color = "red";
+    } else {
+        feedback = "🔴 Extreme Hazard: Critical venting needed; follow emergency protocols.";
+        feedbackContent.style.color = "darkred";
+    }
     feedbackContent.innerHTML = feedback;
 
-    // Industry-standard warnings (small, inline)
-    if (mass < 0.01 || mass > 10000) showFieldWarning('massWarning', "Mass outside typical range (0.01–10,000 kg)", "warning");
-    if (pressure < 1000 || pressure > 500000) showFieldWarning('pressureWarning', "Overpressure outside typical range (1,000–500,000 Pa)", "warning");
-    if (specificHeat < 100 || specificHeat > 5000) showFieldWarning('specificHeatWarning', "Specific Heat outside typical range (100–5,000 J/kg·K)", "warning");
-    if (temperature < 273 || temperature > 600) showFieldWarning('temperatureWarning', "Temperature outside typical range (273–600 K)", "warning");
-    if (tempRate < 0.01 || tempRate > 10) showFieldWarning('tempRateWarning', "Temperature Rise Rate outside typical range (0.01–10 K/s)", "warning");
+    // ---- INLINE FIELD WARNINGS ----
+    if (mass < 0.01 || mass > 10000) showFieldWarning('massWarning', "Mass outside typical range (0.01–10,000 kg)");
+    if (pressure < 1000 || pressure > 500000) showFieldWarning('pressureWarning', "Overpressure outside typical range (1,000–500,000 Pa)");
+    if (specificHeat < 100 || specificHeat > 5000) showFieldWarning('specificHeatWarning', "Specific Heat outside typical range (100–5,000 J/kg·K)");
+    if (temperature < 273 || temperature > 600) showFieldWarning('temperatureWarning', "Temperature outside typical range (273–600 K)");
+    if (tempRate < 0.01 || tempRate > 10) showFieldWarning('tempRateWarning', "Temperature Rise Rate outside typical range (0.01–10 K/s)");
 }
 
+// ---- HELPER FUNCTIONS ----
 function showError(msg) {
     const resultError = document.getElementById('resultError');
     resultError.innerHTML = msg;
@@ -586,10 +604,12 @@ function clearFieldWarnings() {
     });
 }
 
+// ---- PRINT REPORT ----
 function printReport() {
     window.print();
 }
 </script>
+
 
     <script src="{% static 'js/print.js' %}"></script>
 </body>
