@@ -389,6 +389,17 @@ urlpatterns = [
     path('environment/waterflux_ultrafiltration_calculator/', environment_waterflux_ultrafiltration_calculator, name='environment_waterflux_ultrafiltration_calculator'),
     path('environment/wind_profile_calculator/', environment_wind_profile_calculator, name='environment_wind_profile_calculator'),
     path('environment/weir_flow_rate_q_calculator/', environment_weir_flow_rate_q_calculator, name='environment_weir_flow_rate_q_calculator'),
+    
+    path('environment/air_emissions_calculator/', environment_air_emissions_calculator, name='environment_air_emissions_calculator'),
+    path('environment/waste_recycling_rate_calculator/', environment_waste_recycling_rate_calculator, name='environment_waste_recycling_rate_calculator'),
+    path('environment/water_consumption_per_employee_calculator/', environment_water_consumption_per_employee_calculator, name='environment_water_consumption_per_employee_calculator'),
+    path('environment/energy_intensity_calculator/', environment_energy_intensity_calculator, name='environment_energy_intensity_calculator'),
+    path('environment/water_recycling_rate_calculator/', environment_water_recycling_rate_calculator, name='environment_water_recycling_rate_calculator'),
+    path('environment/hazardous_waste_ratio_calculator/', environment_hazardous_waste_ratio_calculator, name='environment_hazardous_waste_ratio_calculator'),
+    path('environment/carbon_footprint_per_employee_calculator/', environment_carbon_footprint_per_employee_calculator, name='environment_carbon_footprint_per_employee_calculator'),
+    path('environment/energy_consumption_fuel_calculator/', environment_energy_consumption_fuel_calculator, name='environment_energy_consumption_fuel_calculator'),
+    path('environment/energy_consumption_per_hours_calculator/', environment_energy_consumption_per_hours_calculator, name='environment_energy_consumption_per_hours_calculator'),
+
     path('health/main_calculator/', health_main_calculator, name='health_main_calculator'),
     path('health/army_body_fat_calculator/', health_army_body_fat_calculator, name='health_army_body_fat_calculator'),
     path('health/adjusted_body_weight_calculator/', health_adjusted_body_weight_calculator, name='health_adjusted_body_weight_calculator'),
