@@ -494,6 +494,18 @@
             without requiring specialized equipment like calipers or DEXA scans.
         </p>
     </div>
+    <div class="note-card">
+        <h3>⚙️ Parameters Used</h3>
+        <ul>
+            <li><strong>Gender:</strong> Male or Female (affects formula selection).</li>
+            <li><strong>Age:</strong> Used to determine the corresponding Army body fat standard.</li>
+            <li><strong>Height (cm):</strong> Essential for calculating body composition ratio.</li>
+            <li><strong>Weight (kg):</strong> Used for general reference but not directly in the fat percentage formula.</li>
+            <li><strong>Neck Circumference (cm):</strong> Used to account for lean mass around the neck area.</li>
+            <li><strong>Waist Circumference (cm):</strong> Key measure for estimating abdominal fat.</li>
+            <li><strong>Hip Circumference (cm, females only):</strong> Used to enhance accuracy in women’s body fat estimation.</li>
+        </ul>
+    </div>
 
     <div class="note-card">
         <h3>⚠️ Input Validations</h3>
@@ -512,6 +524,37 @@
             <li>If any invalid or missing data is entered, the calculator will display an error message instead of results.</li>
         </ul>
     </div>
+    <!-- ✅ Output Validations -->
+    <div class="note-card">
+        <h3>✅ Output Validations</h3>
+        <ul>
+            <li>The calculated <strong>Body Fat Percentage</strong> is displayed up to two decimal places.</li>
+            <li>Results outside the realistic range of <strong>2%–60%</strong> trigger an error message.</li>
+            <li>Army body fat standards are applied automatically based on <strong>age and gender</strong>.</li>
+            <li>If calculated value is ≤ standard → <strong>“✅ Meets Army Standard.”</strong></li>
+            <li>If calculated value is > standard → <strong>“❌ Exceeds Army Standard.”</strong></li>
+            <li>Feedback and meter visualization update dynamically to reflect compliance status.</li>
+        </ul>
+    </div>
+
+    <!-- ⚖️ Governing Principle -->
+    <div class="note-card">
+        <h3>⚖️ Governing Principle</h3>
+        <p>
+            The U.S. Army Body Fat Calculator, along with the official standards for body composition, is based on 
+            <strong>Army Regulation 600-9</strong>, titled "<em>The Army Body Composition Program</em>". 
+            This regulation details the procedures for calculating body fat percentage using specific measurements, 
+            ensuring that all Army personnel meet the physical demands of their duties and maintain a trim military appearance.
+        </p>
+        <ul>
+            <li><strong>Army Regulation 600-9:</strong> The official governing document outlining body composition standards.</li>
+            <li><strong>Measurements:</strong> Includes height, neck, waist, and hips (for women) to estimate body fat percentage.</li>
+            <li><strong>Purpose:</strong> To ensure soldiers remain fit for combat and maintain professional appearance standards.</li>
+            <li><strong>Formula:</strong> Derived from the AR 600-9 method using circumference-based measurements.</li>
+            <li><strong>Evolution:</strong> Updated through research, including the 2021 Army study linking body composition to ACFT performance.</li>
+        </ul>
+    </div>
+
 
 
     <!-- Army Standards -->
@@ -585,6 +628,18 @@
             or your commanding officer.
         </p>
     </div>
+
+
+     <div class="note-card">
+        <h3>🧾 Conclusion</h3>
+        <p>
+            The U.S. Army Body Fat Calculator serves as a reliable and accessible method for estimating body composition 
+            based on standardized military criteria. By following AR 600-9 guidelines, individuals can assess their 
+            compliance with Army fitness requirements and make informed health and training adjustments. 
+            Whether for active service members or civilians seeking structured goals, this tool ensures consistent, 
+            regulation-aligned assessment of physical readiness.
+        </p>
+    </div>
 </div>
 
 </div>
@@ -610,7 +665,6 @@ function calculateBodyFat() {
     document.getElementById('errorMessage').textContent = message;
     errorDiv.classList.remove('hidden');
 
-    // Hide back button and print button
     document.getElementById('backButtonContainer').style.display = "none";
     document.getElementById('printButtonContainer').style.display = "none";
   }
@@ -626,32 +680,58 @@ function calculateBodyFat() {
 
     resultValue.classList.remove('hidden');
 
-    // Show back button and print button
     document.getElementById('backButtonContainer').style.display = "flex";
     document.getElementById('printButtonContainer').style.display = "block";
   }
 
-  // Validations
-  if (isNaN(age) || age < 17 || age > 60) return showError("❌ Age must be between 17 and 60 years.");
-  if (isNaN(height) || height < 140 || height > 220) return showError("❌ Height must be between 140 and 220 cm.");
-  if (isNaN(weight) || weight < 40 || weight > 200) return showError("❌ Weight must be between 40 and 200 kg.");
-  if (isNaN(neck) || neck < 25 || neck > 60) return showError("❌ Neck must be between 25 and 60 cm.");
-  if (isNaN(waist) || waist < 50 || waist > 200) return showError("❌ Waist must be between 50 and 200 cm.");
-  if (gender === 'female' && (isNaN(hip) || hip < 60 || hip > 200)) return showError("❌ Hip must be between 60 and 200 cm.");
-  if (gender === 'male' && waist <= neck) return showError("❌ Waist must be larger than neck.");
-  if (gender === 'female' && (waist + hip <= neck)) return showError("❌ Waist + Hip must be larger than neck.");
-  if (height <= neck || height <= waist || (gender === 'female' && height <= hip)) {
-    return showError("❌ Height must be greater than body circumferences.");
+  // ⚠️ INPUT VALIDATIONS
+  if (!gender || isNaN(age) || isNaN(height) || isNaN(weight) || isNaN(neck) || isNaN(waist) || 
+     (gender === 'female' && isNaN(hip))) {
+    return showError("❌ All input fields (Height, Weight, Waist, Neck, and Hip for females) are required.");
   }
 
+  const allInputs = [height, weight, waist, neck];
+  if (gender === 'female') allInputs.push(hip);
+  if (allInputs.some(v => v <= 0 || isNaN(v))) {
+    return showError("❌ Values must be entered as positive numbers (no letters or special characters allowed).");
+  }
+
+  if (height < 100 || height > 250) {
+    return showError("❌ Height must be between 100 cm and 250 cm.");
+  }
+
+  if (weight < 30 || weight > 250) {
+    return showError("❌ Weight must be between 30 kg and 250 kg.");
+  }
+
+  if (neck <= 0 || waist <= 0) {
+    return showError("❌ Waist, Neck, and Hip (for females) must be greater than 0 cm.");
+  }
+
+  if (gender === 'female' && (hip < 30 || hip > 200)) {
+    return showError("❌ For females, Hip measurement must be realistic (30 cm – 200 cm).");
+  }
+
+  if (waist <= neck) {
+    return showError("❌ Waist measurement must always be larger than Neck measurement.");
+  }
+
+  // Convert to inches for formula
   const heightInches = height / 2.54;
   const neckInches = neck / 2.54;
   const waistInches = waist / 2.54;
   const hipInches = hip / 2.54;
 
-  if (gender === 'male' && (waistInches - neckInches) <= 0) return showError("❌ Invalid input: waist must exceed neck.");
-  if (gender === 'female' && (waistInches + hipInches - neckInches) <= 0) return showError("❌ Invalid input: waist + hip must exceed neck.");
+  // Ensure measurement relationship validity
+  if (gender === 'male' && (waistInches - neckInches) <= 0) {
+    return showError("❌ Waist measurement must always be larger than Neck measurement.");
+  }
 
+  if (gender === 'female' && (waistInches + hipInches - neckInches) <= 0) {
+    return showError("❌ Waist + Hip must exceed Neck measurement for accurate calculation.");
+  }
+
+  // ✅ BODY FAT CALCULATION (AR 600-9 formula)
   let bodyFatPercentage;
   if (gender === 'male') {
     bodyFatPercentage = (86.010 * Math.log10(waistInches - neckInches)) -
@@ -660,12 +740,15 @@ function calculateBodyFat() {
     bodyFatPercentage = (163.205 * Math.log10(waistInches + hipInches - neckInches)) -
                         (97.684 * Math.log10(heightInches)) - 78.387;
   }
+
   bodyFatPercentage = parseFloat(bodyFatPercentage.toFixed(2));
 
+  // ✅ OUTPUT VALIDATIONS
   if (bodyFatPercentage < 2 || bodyFatPercentage > 60) {
     return showError("❌ Calculated body fat % is unrealistic. Please check your inputs.");
   }
 
+  // Army Standards (AR 600-9)
   let standard;
   if (gender === 'male') {
     if (age <= 20) standard = 20;
@@ -679,7 +762,10 @@ function calculateBodyFat() {
     else standard = 36;
   }
 
-  const feedback = bodyFatPercentage <= standard ? "✅ Meets Army Standard." : "❌ Exceeds Army Standard.";
+  const feedback = bodyFatPercentage <= standard ? 
+    "✅ Meets Army Standard." : 
+    "❌ Exceeds Army Standard.";
+
   const meterPercent = Math.min(100, (bodyFatPercentage / standard) * 100);
 
   showResult(bodyFatPercentage, feedback, `Army Standard: ${standard}%`, meterPercent);
@@ -695,6 +781,7 @@ function printReport() {
   window.print();
 }
 </script>
+
 
 </body>
 </html>

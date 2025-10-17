@@ -16,7 +16,7 @@
         .calculator-container {
             max-width: 1200px;
             margin: 20px auto;
-            padding: 20px;
+            padding:0px  20px;
             border-radius: 12px;
         }
 
@@ -308,6 +308,32 @@
         .hidden { 
             display: none; 
         }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background:linear-gradient(#1560bd,#000040); /* Dark navy background */
+            color: #ffffff; /* White text */
+            border: 2px solid #1560bd; /* Highlight border */
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none; /* Remove underline for link */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd; /* Highlight on hover */
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05); /* Subtle hover effect */
+        }
     </style>
 </head>
 <body>
@@ -336,7 +362,7 @@
 
             <div class="result-card">
                 <div class="result-placeholder" id="placeholder">
-                    <img src="https://cdn-icons-png.flaticon.com/512/2942/2942789.png" alt="Toxicology and risk assessment icon">
+                    <img src="{% static 'images/resultimage.png' %}" alt="Toxicology and risk assessment icon">
                     <p>Enter a probit value to translate it into the corresponding percentage of the population affected.</p>
                 </div>
                 
@@ -360,7 +386,7 @@
                     </div>
 
                     <div class="result-feedback">
-                        <div class="feedback-title">Risk Interpretation</div>
+                        <div class="feedback-title">Assessment</div>
                         <div class="feedback-content" id="feedbackContent"></div>
                     </div>
                     <div class="btn-wrapper">
@@ -372,24 +398,78 @@
 
         <div class="note-section">
             <div class="note-card">
-                <h3>📘 About Probit Analysis</h3>
+                <h3>📘 About This Calculator</h3>
                 <p>
-                   **Probit analysis** is a statistical method used in toxicology, biology, and risk assessment to model dose-response relationships. It transforms a sigmoid (S-shaped) dose-response curve into a straight line, making it easier to analyze. The **Probit Value (Y)** represents a point on this line. This calculator converts that abstract probit value back into a tangible **Percentage Effect**, indicating what proportion of a population is expected to be affected (e.g., show a toxic response) at that dose.
+                   Probit analysis is a statistical method used in toxicology, biology, and risk assessment to model dose-response relationships. It transforms a sigmoid (S-shaped) dose-response curve into a straight line, making it easier to analyze. The **Probit Value (Y)** represents a point on this line. This calculator converts that abstract probit value back into a tangible **Percentage Effect**, indicating what proportion of a population is expected to be affected (e.g., show a toxic response) at that dose.
                 </p>
             </div>
             <div class="note-card">
-                <h3>⚙️ Formula Used</h3>
-                <p>The percentage effect (P) is derived from the probit value (Y) using the cumulative distribution function of the standard normal distribution, often approximated with the error function (erf):</p>
-                <p>$$ P = 50 \times \left(1 + \text{erf}\left(\frac{Y - 5}{\sqrt{2}}\right)\right) $$</p>
-            </div>
-             <div class="note-card">
-                <h3>💡 Interpretation Landmarks</h3>
-                 <ul class="note-list">
-                    <li><strong>Y = 2.67</strong> corresponds to a **1%** effect (often a threshold for "no observable adverse effect level" or NOAEL).</li>
-                    <li><strong>Y = 5.0</strong> corresponds to a **50%** effect, representing the median response (e.g., the dose lethal to 50% of a population, or LD50).</li>
-                    <li><strong>Y = 7.33</strong> corresponds to a **99%** effect, indicating a near-total population impact.</li>
+        <h3> ❓Parameters Used</h3>
+        <ul class="note-list">
+                <ul>
+                    <li><strong>Probit Value (Y):</strong> Positive number representing dose-response effect. Typical range: 2 – 8</li>
                 </ul>
             </div>
+            <div class="note-card">
+                <h3>📊Input Validations</h3>
+                <ul>
+                    <li>Required field: Cannot be empty</li>
+                    <li>Must be a number</li>
+                    <li>Must be positive (>0)</li>
+                </ul>
+            </div>
+            <div class="note-card">
+                <h3>📊Output Validations</h3>
+                <ul>
+                    <li><strong>Probit &lt; 2.67:</strong> Effect &lt; 1%, ✅ <strong>Minimal Effect.</strong> The calculated effect is less than 1%, often considered a negligible or no-effect level in risk assessments.</li>
+                    <li><strong>2.67 ≤ Probit &lt; 5:</strong> Effect 1–50%, 🟡 <strong>Low to Moderate Effect.</strong> The effect is between 1% and 50%, indicating a portion of the population will be affected.</li>
+                    <li><strong>5 ≤ Probit &lt; 7.33:</strong> Effect 50–99%, ⚠️ <strong>Significant Effect.</strong> The effect is between 50% and 99%, indicating a majority of the population will be affected. This is a high-risk level.</li>
+                    <li><strong>Probit ≥ 7.33:</strong> Effect &gt; 99%,🚨 <strong>Near-Total Effect.</strong> The calculated effect is over 99%, signifying that nearly the entire exposed population will be affected. This represents an extreme risk.</li>
+                    <li>If calculation invalid (NaN/Infinity), shows error message</li>
+                </ul>
+            </li>
+            </div>
+            <div class="note-card">
+    <h3>📐 Governing Principle</h3>
+    <p>
+        A Probit Percentage Effect Calculator uses a statistical method known as probit analysis, which assumes that the data is normally distributed. While there is no single international organization standardizing every calculator, the methodology is widely accepted and based on the foundational statistical work of Chester Bliss and D.J. Finney.
+    </p>
+
+    <h3 style="margin-top:12px; color:#1976d2;">Validating Bodies and Applications</h3>
+    <ul class="note-list">
+        <li><b>CLSI (Clinical and Laboratory Standards Institute):</b> The CLSI's EP17-A2 document details probit regression for estimating analytical sensitivity (detection limits) in clinical and molecular diagnostic tests.</li>
+        <li><b>EPA (U.S. Environmental Protection Agency):</b> The EPA uses probit analysis for toxicology studies, such as modeling the lethal concentration (LC50) or dose (LD50) of chemicals on organisms.</li>
+        <li><b>FDA (U.S. Food and Drug Administration):</b> The FDA accepts probit analysis for validating the performance of certain laboratory tests. For example, the probability of detecting a virus at a specific concentration might be determined by probit analysis.</li>
+    </ul>
+
+    <h3 style="margin-top:12px; color:#1976d2;">How the Probit Standard Works</h3>
+    <p>
+        A probit calculator does not follow a formal standard like a building code. Instead, it applies a universally accepted statistical model based on the following principles:
+    </p>
+    <ul class="note-list">
+        <li><b>Standard Normal Distribution:</b> The method relies on the cumulative distribution function (CDF) of the standard normal distribution.</li>
+        <li><b>Dose-Response:</b> It assumes a relationship between the level of a stimulus (dose, concentration) and the proportion of a population that responds.</li>
+        <li><b>Linearization:</b> It transforms a sigmoid-shaped (S-shaped) dose-response curve into a straight line for analysis, making it a powerful tool for modeling.</li>
+    </ul>
+
+    <h3 style="margin-top:12px; color:#1976d2;">Key Statistical Output</h3>
+    <ul class="note-list">
+        <li>A calculator based on probit analysis will compute standard endpoints like the median effective dose (ED50) or lethal concentration (LC50).</li>
+    </ul>
+</div>
+            <div class="note-card">
+                <h3>⚠️ Conclusion</h3>
+    <p>
+        This calculator transforms a Probit value into the corresponding Percentage Effect of the population affected, providing a clear and intuitive understanding of risk. It features a visual meter and feedback system to help assess the level of impact, from minimal to near-total effects. Minimal effects generally indicate safe exposure levels, whereas near-total effects represent extreme risk. Typical Probit values fall within the 2–8 range; values outside this range may not be physiologically meaningful and should be interpreted cautiously.
+    </p>
+</li>
+</div>
+                
+
+
+
+    
+            
         </div>
     </div>
 

@@ -554,11 +554,11 @@
     <div class="note-card">
         <h3>📊 Output Validations</h3>
         <ul class="note-list">
-            <li><strong>Re &lt; 2000:</strong> ✅ Laminar flow — smooth, stable flow with minimal mixing.</li>
-            <li><strong>2000 ≤ Re ≤ 4000:</strong> ⚠️ Transitional flow — unstable region, may cause oscillations.</li>
-            <li><strong>Re &gt; 4000:</strong> 🔶 Turbulent flow — chaotic motion, typical in most industrial discharge valves.</li>
-            <li>Extreme viscosities (&gt;10 Pa·s) trigger advisory notes since Reynolds interpretation may lose accuracy.</li>
-            <li>Re values are capped at 1×10⁹ to prevent overflow in computational display.</li>
+            <li>Re &lt; 2000: ✅ Laminar flow — smooth and stable flow pattern typical of low-velocity fluids.</li>
+            <li>2000 ≤ Re ≤ 4000: ⚠️ Transitional flow — unstable region where flow may oscillate between laminar and turbulent.</li>
+            <li>Re &gt; 4000: 🔶 Turbulent flow — chaotic, well-mixed flow, common in industrial discharge systems.</li>
+            <li>Extreme viscosity (μ &gt; 10 Pa·s): 🚨 Advisory — interpretation less reliable for highly viscous fluids.</li>
+            <li>Re capped at 1×10⁹ to prevent unrealistic or overflow results.</li>
         </ul>
     </div>
 
@@ -595,14 +595,7 @@
     </div>
 </div>
 
-<!-- SCRIPT SECTION -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const now = new Date();
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    document.getElementById('printDate').textContent = now.toLocaleDateString('en-US', options);
-});
-
 function calculateReynolds() {
     const massFlow = parseFloat(document.getElementById('massFlow').value.trim());
     const viscosity = parseFloat(document.getElementById('viscosity').value.trim());
@@ -615,30 +608,25 @@ function calculateReynolds() {
 
     let errors = [];
 
-    // ================= INPUT VALIDATIONS =================
-    if (isNaN(massFlow)) errors.push("👉 Please enter a valid mass flow rate (kg/h).");
-    if (isNaN(viscosity)) errors.push("👉 Please enter a valid dynamic viscosity (Pa·s).");
-    if (isNaN(dischargeArea)) errors.push("👉 Please enter a valid discharge area (mm²).");
+    // ====== INPUT VALIDATION ======
+    if (isNaN(massFlow)) errors.push("👉 Please enter a valid Mass Flow Rate (kg/h).");
+    if (isNaN(viscosity)) errors.push("👉 Please enter a valid Dynamic Viscosity (Pa·s).");
+    if (isNaN(dischargeArea)) errors.push("👉 Please enter a valid Discharge Area (mm²).");
 
     if (errors.length === 0) {
-        // Mass Flow
-        if (massFlow <= 0) errors.push("❌ Mass flow rate must be greater than zero.");
-        if (massFlow > 1e8) errors.push("⚠️ Mass flow rate exceeds maximum realistic range (100,000,000 kg/h).");
+        if (massFlow <= 0) errors.push("👉 Mass Flow Rate must be greater than zero.");
+        if (massFlow > 1e8) errors.push("👉 Mass Flow Rate exceeds physical limits (max 1×10⁸ kg/h).");
 
-        // Dynamic Viscosity
-        if (viscosity <= 0) errors.push("❌ Viscosity must be greater than zero.");
-        if (viscosity < 1e-6) errors.push("⚠️ Viscosity too low (< 0.000001 Pa·s).");
-        if (viscosity > 1000) errors.push("⚠️ Viscosity too high (> 1000 Pa·s).");
+        if (viscosity <= 0) errors.push("👉 Dynamic Viscosity must be greater than zero.");
+        if (viscosity < 1e-6) errors.push("👉 Dynamic Viscosity too low (<0.000001 Pa·s).");
+        if (viscosity > 1000) errors.push("👉 Dynamic Viscosity too high (>1000 Pa·s).");
 
-        // Discharge Area
-        if (dischargeArea <= 0) errors.push("❌ Discharge area must be greater than zero.");
-        if (dischargeArea < 0.1) errors.push("⚠️ Discharge area too small (< 0.1 mm²).");
-        if (dischargeArea > 1e6) errors.push("⚠️ Discharge area too large (> 1,000,000 mm²).");
+        if (dischargeArea <= 0) errors.push("👉 Discharge Area must be greater than zero.");
+        if (dischargeArea < 0.1) errors.push("👉 Discharge Area too small (<0.1 mm²).");
+        if (dischargeArea > 1e6) errors.push("👉 Discharge Area too large (>1,000,000 mm²).");
 
-        // Cross-field Validation
-        if (massFlow > 1e6 && dischargeArea < 10) {
-            errors.push("🚨 Unrealistic input: High mass flow with tiny area. Recheck values.");
-        }
+        if (massFlow > 1e6 && dischargeArea < 10)
+            errors.push("👉 Unrealistic input: High mass flow with very small area. Please verify.");
     }
 
     if (errors.length > 0) {
@@ -651,36 +639,38 @@ function calculateReynolds() {
         errorBox.classList.add("hidden");
     }
 
-    // ================= CALCULATION =================
+    // ====== CALCULATION ======
     const Re = (0.3414 * massFlow) / (viscosity * dischargeArea);
-    const cappedRe = Math.min(Re, 1e9); // Prevent overflow
+    const cappedRe = Math.min(Re, 1e9); // prevent overflow
     document.getElementById('rateValue').textContent = cappedRe.toFixed(2);
 
-    // ================= OUTPUT VALIDATIONS =================
+    // ====== OUTPUT VALIDATION LOGIC ======
     const meterFill = document.getElementById('meterFill');
-    let meterWidth, meterColor, feedback;
+    const feedback = document.getElementById('feedbackContent');
+    let meterWidth = '0%', meterColor = '#ccc', resultText = '';
 
-    if (cappedRe < 2000) {
-        meterWidth = '15%';
+    if (viscosity > 10) {
+        resultText = "🚨 Advisory: Extremely viscous fluid — Reynolds interpretation may not be reliable.";
+    } else if (cappedRe < 2000) {
+        meterWidth = '20%';
         meterColor = '#27ae60';
-        feedback = '✅ Laminar flow: Smooth, stable motion with minimal energy loss.';
-    } else if (cappedRe <= 4000) {
+        resultText = "✅ Laminar Flow — Smooth, stable, and orderly motion typical of low-velocity fluids.";
+    } else if (cappedRe >= 2000 && cappedRe <= 4000) {
         meterWidth = '50%';
         meterColor = '#f39c12';
-        feedback = '⚠️ Transitional flow: Unstable regime; flow oscillations possible.';
+        resultText = "⚠️ Transitional Flow — Unstable regime; may alternate between laminar and turbulent.";
     } else {
         meterWidth = '85%';
         meterColor = '#e74c3c';
-        feedback = '🔶 Turbulent flow: Chaotic, energy-intensive but effective discharge.';
+        resultText = "🔶 Turbulent Flow — Chaotic and mixed motion, typical of high-velocity discharge systems.";
     }
 
-    // ================= UPDATE UI =================
     meterFill.style.width = meterWidth;
     meterFill.style.backgroundColor = meterColor;
-    document.getElementById('feedbackContent').textContent = feedback;
+    feedback.textContent = resultText;
 
-    placeholder.classList.add('hidden');
-    resultValue.classList.remove('hidden');
+    placeholder.classList.add("hidden");
+    resultValue.classList.remove("hidden");
 }
 
 function printReport() {
@@ -690,6 +680,7 @@ function printReport() {
     window.print();
 }
 </script>
+
 <script src="{% static 'js/print.js' %}"></script>
 
 </body>
