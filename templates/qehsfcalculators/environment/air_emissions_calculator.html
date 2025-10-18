@@ -1,0 +1,668 @@
+{% extends 'base.html' %}
+{% block title %}Air Emissions (kg CO₂) Calculator{% endblock %}
+{% block content %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Air Emissions (kg CO₂) Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/print.css' %}">
+    <style>
+        /* Main container */
+        .calculator-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0px 20px;
+            border-radius: 12px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .back-btn {
+            background: linear-gradient(#1560bd, #000040);
+            color: #ffffff;
+            border: 2px solid #1560bd;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #1560bd;
+            color: #ffffff;
+            border-color: #000040;
+            transform: scale(1.05);
+        }
+
+        /* Header */
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .calculator-header h1 {
+            color: #1560bd;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .calculator-header p {
+            color: #7f8c8d;
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Layout */
+        .calc-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 900px) {
+            .calc-content { 
+                flex-direction: column; 
+            }
+        }
+
+        /* Cards */
+        .result-card {
+            flex: 1;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            border: 2px solid #1560bd;
+        }
+        
+        .calc-card {
+            flex: 1;
+            background: linear-gradient(135deg, #1560bd, #1560bd, #000040);
+            color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            height: 420px;
+            overflow-y: auto;
+        }
+        
+        .calc-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .calc-card h2 {
+            color: #ffff;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9fbfd;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+        }
+
+        /* Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+        
+        .btn-wrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .print-btn {
+            display: inline-block;
+            background: linear-gradient(#1560bd, #000040);
+            color: white;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto !important;
+        }
+
+        .print-btn:hover {
+            background: #1560bd;
+        }
+
+        /* Result Card */
+        .result-card {
+            justify-content: center;
+            align-items: center;
+            min-height: 420px;
+            text-align: center;
+        }
+        
+        .result-placeholder img {
+            max-width: 240px;
+            margin-bottom: 20px;
+            opacity: 0.85;
+        }
+        
+        .result-placeholder p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .result-value { 
+            width: 100%; 
+        }
+        
+        .rate-display {
+            display: flex;
+            gap: 6px;
+            align-items: center;  
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .rate-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2980b9;
+            margin-bottom: 10px;
+            line-height: 1.1;
+        }
+
+        .rate-label { 
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .rate-value {
+                font-size: 38px;
+            }
+            .rate-label {
+                font-size: 18px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .rate-value {
+                font-size: 34px;
+            }
+            .rate-label {
+                font-size: 17px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .rate-value {
+                font-size: 30px;
+                margin-bottom: 8px;
+            }
+            .rate-label {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .rate-value {
+                font-size: 28px;
+                margin-bottom: 6px;
+            }
+            .rate-label {
+                font-size: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .rate-display {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+            .rate-value {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .rate-label {
+                font-size: 14px;
+            }
+        }
+
+        /* Meter */
+        .safety-meter {
+            width: 100%; 
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            transition: width 1s ease-in-out;
+            border-radius: 6px;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        /* Feedback */
+        .result-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 4px solid #3498db;
+            text-align: left;
+        }
+        
+        .feedback-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feedback-content { 
+            color: #34495e; 
+        }
+
+        .note-section {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0faff;
+            padding: 15px;
+            margin-top: 60px;
+            border-radius: 12px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border-left: 6px solid #1976d2;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .note-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .note-card h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #1976d2;
+        }
+        
+        .note-card p, .note-card li {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        
+        .good { 
+            color: #2e7d32; 
+            font-weight: 600; 
+        }
+        
+        .average { 
+            color: #f9a825; 
+            font-weight: 600; 
+        }
+        
+        .bad { 
+            color: #c62828; 
+            font-weight: 600; 
+        }
+
+        .result-error {
+            background: #ffe6e6;
+            border: 2px solid #e74c3c;
+            color: #c0392b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .error-icon {
+            font-size: 76px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            font-size: 24px;
+            line-height: 1.6;
+        }
+
+        /* Toggle helper */
+        .hidden { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="btn-container">
+        <a href="{% url 'environmentcategory_calculators' %}" class="back-btn">Back To Environment Calculators</a>
+    </div>
+
+    <div class="calculator-container printable" id="printArea">
+        {% include "includes/print_header_footer.html" %}
+
+        <div class="calculator-header">
+            <h1>Air Emissions (kg CO₂) Calculator</h1>
+            <p>Estimate CO₂ emissions from fuel consumption using emission factors.</p>
+        </div>
+
+        <div class="calc-content">
+            <!-- Calculator -->
+            <div class="calc-card">
+                <h2>Enter Data</h2>
+
+                <div class="form-group">
+                    <label for="fuelConsumed">Fuel Consumed (Litres)</label>
+                    <input type="number" id="fuelConsumed" class="form-input" min="0.1" step="any" placeholder="e.g., 500">
+                </div>
+
+                <div class="form-group">
+                    <label for="emissionFactor">Emission Factor (kg CO₂ / Litre)</label>
+                    <input type="number" id="emissionFactor" class="form-input" min="0" step="0.01" placeholder="e.g., 2.68">
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateAirEmissions()">Calculate Emissions</button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result-card">
+                <div class="result-placeholder" id="placeholder">
+                    <img src="/static/images/mlc_environment_result.png" alt="Air flow illustration">
+                    <p>This tool will calculate the <strong>Air Emissions (kg CO₂)</strong>.</p>
+                </div>
+                
+                <div class="result-error hidden" id="resultError">
+                    <div class="error-icon">❌</div>
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+                 
+                <div class="result-value hidden" id="resultValue">
+                    <div class="calculation-type" style="font-weight:bold; font-size:16px; margin-bottom:5px; color:#1560bd;">
+                        <h2>Calculated Emissions</h2>
+                    </div>
+
+                    <div class="rate-display">
+                        <div class="rate-value" id="emissionValue">0.00</div>
+                        <div class="rate-label" style="color:#2980b9; font-size:20px; font-weight:bold;">kg CO₂ emitted</div>
+                    </div>
+                    
+                    <div class="result-feedback">
+                        <div class="feedback-title">Environmental Impact Assessment</div>
+                        <div class="feedback-content" id="feedbackContent"></div>
+                    </div>
+                    <div class="btn-wrapper">
+                        <button class="calculate-btn print-btn" onclick="printReport()">Print Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="note-section">
+            <div class="note-card">
+                <h3>📘 About This Calculator</h3>
+                <p>
+                    The <strong>Air Emissions (kg CO₂) Calculator</strong> estimates greenhouse gas emissions produced from fuel combustion. 
+                    It supports environmental performance tracking under ISO 14064 and GHG Protocol reporting frameworks.
+                </p>
+            </div>
+
+            <div class="note-card">
+                <h3>⚙️ Parameters Used</h3>
+                <ul class="note-list">
+                    <li><strong>Fuel Consumed (L):</strong> Volume of fuel used during the activity.</li>
+                    <li><strong>Emission Factor (kg CO₂ / L):</strong> Standard value indicating kilograms of CO₂ emitted per litre of fuel.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>✔️ Input Validation Rules</h3>
+                <ul class="note-list">
+                    <li>Fuel Consumed > 0 and ≤ 1,000,000 L (practical range).</li>
+                    <li>Emission Factor > 0 and ≤ 5 kg CO₂/L (typical range for fuels).</li>
+                    <li>Decimals allowed up to 2 places.</li>
+                    <li>Logical check: Both values must be positive.</li>
+                </ul>
+            </div>
+
+            <div class="note-card">
+                <h3>📊 Output Validations / Feedback</h3>
+                <ul class="note-list">
+                    <li>Emissions < 1000 kg CO₂ → 🌿 Low emissions: Excellent fuel efficiency.</li>
+                    <li>1000 ≤ Emissions < 10000 kg CO₂ → ⚠️ Moderate emissions: Consider optimizing usage.</li>
+                    <li>Emissions ≥ 10000 kg CO₂ → 🔥 High emissions: Review fuel consumption patterns urgently.</li>
+                    <li>Warnings appear for unusual fuel consumption or emission factor inputs.</li>
+                    <li>Calculated result is displayed in kg CO₂.</li>
+                    <li>Assessment/feedback is always visible and does not depend on JS calculation.</li>
+                </ul>
+            </div>
+
+         <div class="note-card">
+    <h3>📐 Governing Principle</h3>
+    <p>
+        The <strong>Air Emissions (kg CO₂) Calculator</strong> is grounded in internationally recognized methodologies, primarily following 
+        the <strong>IPCC (Intergovernmental Panel on Climate Change)</strong> guidelines and the <strong>ISO 14064</strong> standard for greenhouse 
+        gas quantification and reporting. These frameworks ensure consistency, accuracy, and transparency in emission estimation.
+    </p>
+    <p>
+        The governing principle is to multiply the quantity of fuel consumed by a scientifically determined <em>emission factor</em> 
+        specific to that fuel type. This factor represents the average CO₂ released per litre of fuel burned, accounting for 
+        the carbon content and combustion efficiency. Mathematically:
+    </p>
+    <p style="text-align:center; font-weight:600; color:#1560bd;">
+        CO₂ Emissions (kg) = Fuel Consumed (L) × Emission Factor (kg CO₂ / L)
+    </p>
+    <p>
+        This principle aligns with environmental management systems (such as <strong>ISO 14001</strong>) and national 
+        greenhouse gas inventory procedures. It enables organizations to track and minimize their carbon footprint, 
+        ensuring compliance with sustainability goals and regulatory frameworks.
+    </p>
+</div>
+
+
+            <div class="note-card">
+                <h3>🏁 Conclusion</h3>
+                <p>
+                    Tracking air emissions enables organizations to benchmark fuel efficiency, comply with sustainability goals, 
+                    and contribute to reduced greenhouse gas footprints. This calculator provides a quick estimation of CO₂ emissions 
+                    from fuel consumption, helping users make informed decisions about energy usage and environmental impact.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    /* Helper to show error messages */
+    function showErrors(errors) {
+        const errorBox = document.getElementById('resultError');
+        const errorMessage = document.getElementById('errorMessage');
+        const placeholder = document.getElementById('placeholder');
+        const resultValue = document.getElementById('resultValue');
+
+        if (errorMessage) errorMessage.innerHTML = errors.join('<br>');
+        if (errorBox) errorBox.classList.remove('hidden');
+        if (placeholder) placeholder.classList.add('hidden');
+        if (resultValue) resultValue.classList.add('hidden');
+    }
+
+  function showErrors(errors) {
+    const errorBox = document.getElementById('resultError');
+    const errorMessage = document.getElementById('errorMessage');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+
+    if (errorMessage) errorMessage.innerHTML = errors.join('<br>');
+    if (errorBox) errorBox.classList.remove('hidden');
+    if (placeholder) placeholder.classList.add('hidden');
+    if (resultValue) resultValue.classList.add('hidden');
+}
+
+function calculateAirEmissions() {
+    const fuelRaw = document.getElementById('fuelConsumed')?.value.trim() ?? "";
+    const factorRaw = document.getElementById('emissionFactor')?.value.trim() ?? "";
+
+    const errorBox = document.getElementById('resultError');
+    const placeholder = document.getElementById('placeholder');
+    const resultValue = document.getElementById('resultValue');
+    const emissionEl = document.getElementById('emissionValue');
+    const feedbackEl = document.getElementById('feedbackContent');
+
+    // Reset UI
+    if (errorBox) errorBox.classList.add('hidden');
+    if (feedbackEl) feedbackEl.innerHTML = "";
+
+    const errors = [];
+    const warnings = [];
+
+    // ✅ Required checks
+    if (fuelRaw === "") errors.push("👉 Please enter the Fuel Consumed (Litres). Acceptable range: 0.1 – 1,000,000 L.");
+    if (factorRaw === "") errors.push("👉 Please enter the Emission Factor (kg CO₂ / Litre). Acceptable range: 0.1 – 5 kg CO₂/L.");
+    if (errors.length > 0) return showErrors(errors);
+
+    // ✅ Parse values
+    const fuel = parseFloat(fuelRaw);
+    const factor = parseFloat(factorRaw);
+
+    if (!Number.isFinite(fuel) || !Number.isFinite(factor)) {
+        return showErrors(["⚠️ Enter valid numeric values for Fuel Consumed and Emission Factor."]);
+    }
+
+    // ✅ Range checks
+    if (fuel < 0.1 || fuel > 1000000) errors.push(`👉 Fuel Consumed must be between 0.1 – 1,000,000 L. You entered: ${fuel}`);
+    if (factor < 0.1 || factor > 5) errors.push(`👉 Emission Factor must be between 0.1 – 5 kg CO₂/L. You entered: ${factor}`);
+    if (errors.length > 0) return showErrors(errors);
+
+    // ✅ Sanity warnings
+    if (fuel < 1) warnings.push("⚠️ Extremely low fuel consumption — check units or sensors.");
+    if (fuel > 500000) warnings.push("⚠️ Very high fuel consumption — verify units or activity.");
+    if (factor < 0.5) warnings.push("⚠️ Very low emission factor — check fuel type.");
+    if (factor > 3.5) warnings.push("⚠️ Very high emission factor — verify fuel type.");
+
+    // ✅ Core calculation
+    const emission = fuel * factor;
+
+    if (!Number.isFinite(emission) || emission < 0) {
+        return showErrors(["⚠️ Calculation invalid. Check input values."]);
+    }
+
+    // ✅ Feedback based on thresholds
+    let feedback;
+    if (emission < 1000) feedback = "🌿 Low emissions. Excellent fuel efficiency.";
+    else if (emission < 10000) feedback = "⚠️ Moderate emissions. Consider optimizing usage.";
+    else feedback = "🔥 High emissions! Review fuel consumption patterns urgently.";
+
+    // ✅ Display results
+    if (emissionEl) emissionEl.textContent = emission.toFixed(2);
+    let details = `<div>Calculated Emissions: <b>${emission.toFixed(2)} kg CO₂</b></div>`;
+    if (warnings.length) {
+        details += `<div style="margin-top:6px; color:#b35d00; font-size:0.95em;">Note: ${warnings.join(' | ')}</div>`;
+    }
+    if (feedbackEl) feedbackEl.innerHTML = `<div>${feedback}</div>${details}`;
+
+    // ✅ Toggle UI
+    if (placeholder) placeholder.classList.add('hidden');
+    if (resultValue) resultValue.classList.remove('hidden');
+    if (errorBox) errorBox.classList.add('hidden');
+}
+
+    /* safe print guard */
+    function printReport() {
+        const el = document.getElementById('printDate');
+        if (el) {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            el.textContent = now.toLocaleDateString('en-US', options);
+        }
+        window.print();
+    }
+    </script>
+
+    <script src="{% static 'js/print.js' %}"></script>
+</body>
+</html>
+{% endblock %}

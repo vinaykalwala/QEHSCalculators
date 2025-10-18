@@ -193,7 +193,7 @@ CALCULATORS = [
     {"name": "Air Changes per Hour (ACH) Calculator", "url_name": "environment_air_changes_per_hour_ach_calculator", "plan_type": "corporate", "category": "environment"},
 
     {"name": "Aeration Tank Volume Calculator", "url_name": "environment_aeration_tank_volume_calculator", "plan_type": "corporate", "category": "environment"},
-
+{"name": "Air Emissions (kg CO2) Calculator", "url_name": "environment_air_emissions_calculator", "plan_type": "corporate", "category": "environment"},
     {"name": "Boiler Blowdown Rate Calculator", "url_name": "environment_boiler_blowdown_rate_calculator", "plan_type": "corporate", "category": "environment"},
 
     {"name": "Boiler efficiency Calculator", "url_name": "environment_boiler_efficiency_calculator", "plan_type": "corporate", "category": "environment"},
@@ -218,6 +218,7 @@ CALCULATORS = [
 
 
 {"name": "Carbon Footprint Efficient Calculator", "url_name": "environment_carbon_footprint_effient_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Carbon Footprint per Employee Calculator", "url_name": "environment_carbon_footprint_per_employee_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 {"name": "Cost of Fuel Saved by Returning Condensate Calculator", "url_name": "environment_cost_of_fuel_saved_by_returning_condensate_calculator", "plan_type": "corporate", "category": "environment"},
@@ -315,6 +316,12 @@ CALCULATORS = [
 
 {"name": "Energy requirement for a non-flow application (e.g. batch or tank)", "url_name": "environment_energy_requirement_for_a_non_flow_application_eg_batch_or_tank_calculator", "plan_type": "corporate", "category": "environment"},
 
+{"name": "Energy Consumption Calculator Based On Fuel Used", "url_name": "environment_energy_consumption_fuel_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Energy Consumption Per Hours Worked Calculator", "url_name": "environment_energy_consumption_per_hours_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Energy Intensity Calculator", "url_name": "environment_energy_intensity_calculator", "plan_type": "corporate", "category": "environment"},
+
+
+
 
 {"name": "Flash Steam Calculator", "url_name": "environment_flash_steam_calculator", "plan_type": "corporate", "category": "environment"},
 
@@ -400,6 +407,7 @@ CALCULATORS = [
 
 
 {"name": "Head Loss through Fine Screens Calculator", "url_name": "environment_head_loss_through_fine_screens_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Hazardous Waste Ratio Calculator", "url_name": "environment_hazardous_waste_ratio_calculator", "plan_type": "corporate", "category": "environment"},
 
 
 {"name": "Incineration DRE Calculator", "url_name": "environment_incineration_dre_calculator", "plan_type": "corporate", "category": "environment"},
@@ -759,7 +767,10 @@ CALCULATORS = [
 {"name": "Wind Profile Calculator", "url_name": "environment_wind_profile_calculator", "plan_type": "corporate", "category": "environment"},
 
 {"name": "Weir Flow Rate Calculator", "url_name": "environment_weir_flow_rate_q_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Waste Recycling Rate Calculator", "url_name": "environment_waste_recycling_rate_calculator", "plan_type": "corporate", "category": "environment"},
 
+{"name": "Water Recycling Rate Calculator", "url_name": "environment_water_recycling_rate_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Water Consumption per Employee Calculator", "url_name": "environment_water_consumption_per_employee_calculator", "plan_type": "corporate", "category": "environment"},
     # Health Calculators
    {"name": "Army Body Fat Calculator", "url_name": "health_army_body_fat_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Adjusted Body Weight Calculator", "url_name": "health_adjusted_body_weight_calculator", "plan_type": "corporate", "category": "health"},
