@@ -2903,6 +2903,52 @@ def environment_wind_profile_calculator(request):
 def environment_weir_flow_rate_q_calculator(request):
     return render(request, 'qehsfcalculators/environment/weir_flow_rate_q.html', {'title': 'Weir Flow Rate (Q) Calculator'})
 
+
+@login_required
+@subscription_required(plan_type="corporate")
+def environment_air_emissions_calculator(request):
+    return render(request, 'qehsfcalculators/environment/air_emissions_calculator.html', {'title': 'Air Emissions (kg CO2) Calculator'})
+
+@login_required
+@subscription_required(plan_type="corporate")
+def environment_waste_recycling_rate_calculator(request):
+    return render(request, 'qehsfcalculators/environment/waste_recycling_rate_calculator.html', {'title': 'Waste Recycling Rate Calculator'})
+
+@login_required
+@subscription_required(plan_type="corporate")
+def environment_water_consumption_per_employee_calculator(request):
+    return render(request, 'qehsfcalculators/environment/water_consumption_per_employee_calculator.html', {'title': 'Water Consumption per Employee Calculator'})
+
+@login_required
+@subscription_required(plan_type="corporate")
+def environment_energy_intensity_calculator(request):
+    return render(request, 'qehsfcalculators/environment/energy_intensity_calculator.html', {'title': 'Energy Intensity Calculator'})
+
+@login_required
+@subscription_required(plan_type="corporate")
+def environment_water_recycling_rate_calculator(request):
+    return render(request, 'qehsfcalculators/environment/water_recycling_rate_calculator.html', {'title': 'Water Recycling Rate Calculator'})
+
+@login_required
+@subscription_required(plan_type="corporate")
+def environment_hazardous_waste_ratio_calculator(request):
+    return render(request, 'qehsfcalculators/environment/hazardous_waste_ratio_calculator.html', {'title': 'Hazardous Waste Ratio Calculator'})
+
+@login_required
+@subscription_required(plan_type="corporate")
+def environment_carbon_footprint_per_employee_calculator(request):
+    return render(request, 'qehsfcalculators/environment/carbon_footprint_per_employee_calculator.html', {'title': 'Carbon Footprint per Employee Calculator'})
+
+@login_required
+@subscription_required(plan_type="corporate")
+def environment_energy_consumption_fuel_calculator(request):
+    return render(request, 'qehsfcalculators/environment/energy_consumption_fuel_calculator.html', {'title': 'Energy Consumption Calculator Based on Fuel Used'})
+
+@login_required
+@subscription_required(plan_type="corporate")
+def environment_energy_consumption_per_hours_calculator(request):
+    return render(request, 'qehsfcalculators/environment/energy_consumption_per_hours_calculator.html', {'title': 'Energy Consumption per Hours Worked Calculator'})
+
 @login_required
 @subscription_required(plan_type="corporate")
 def health_main_calculator(request):
