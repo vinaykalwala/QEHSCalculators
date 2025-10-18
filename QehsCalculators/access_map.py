@@ -831,7 +831,7 @@ CALCULATORS = [
 {"name": "Stroke Volume (SV) Calculator", "url_name": "health_stroke_volume_sv_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Stroke Volume Index (SVI) Calculator", "url_name": "health_stroke_volume_index_svi_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Threshold Limit Value (TLV) Calculator", "url_name": "health_threshold_limit_value_tlv_calculator", "plan_type": "corporate", "category": "health"},
-{"name": "TRCF-ILL Calculator", "url_name": "health_total_recordable_occupational_illness_frequency_trcf_ill_calculator", "plan_type": "corporate", "category": "health"},
+{"name": "Total Recordable Occupational Illness Frequency (TRCF-ILL) Calculator", "url_name": "health_total_recordable_occupational_illness_frequency_trcf_ill_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Time of Death Calculator", "url_name": "health_time_of_death_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Workplace Exposure Limit (WEL) Calculator", "url_name": "health_workplace_exposure_limit_wel_calculator", "plan_type": "corporate", "category": "health"},
 {"name": "Weight Loss Calculator", "url_name": "health_weight_loss_calculator", "plan_type": "corporate", "category": "health"},

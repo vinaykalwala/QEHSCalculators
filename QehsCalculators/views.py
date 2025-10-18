@@ -32,19 +32,27 @@ def check_device_limit(user, plan):
     return True, None
 
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import UserDevice
 from django.contrib import messages
+from .models import UserDevice
 
 @login_required
 def device_limit_exceeded(request):
     devices = UserDevice.objects.filter(user=request.user)
 
     if request.method == "POST":
-        devices.delete()
-        messages.success(request, "All devices removed. You can log in again.")
-        return redirect("logout")  # Or redirect to login page
+        # Delete a single device
+        device_id = request.POST.get("device_id")
+        if device_id:
+            device = get_object_or_404(UserDevice, id=device_id, user=request.user)
+            device.delete()
+            messages.success(request, f"Device '{device.device_id}' removed. You can log in again.")
+        else:
+            # Fallback: delete all devices if no device_id provided
+            devices.delete()
+            messages.success(request, "All devices removed. You can log in again.")
+        return redirect("device_limit_exceeded")  # Stay on the same page
 
     return render(request, "device_limit.html", {"devices": devices})
 
@@ -551,7 +559,11 @@ def accident_rate_calculator(request):
 @subscription_required(plan_type="corporate")
 def oee_calculator(request):
     return render(request, 'oee_calculator.html')
-
+@login_required
+@subscription_required(plan_type="employee")
+def conversion_calculator(request):
+    return render(request, 'calculators/conversion_calculator.html', {'title': 'Conversion Calculator'})
+    
 
 from .forms import CustomUserCreationForm, CustomAuthenticationForm
 from django.contrib.auth import login, logout, authenticate
@@ -1385,10 +1397,7 @@ def subscription_delete(request, pk):
 def co2_calculator(request):
     return render(request, 'calculators/co2_emission.html', {'title': 'CO2 Emission Calculator'})
 
-@login_required
-@subscription_required(plan_type="employee")
-def conversion_calculator(request):
-    return render(request, 'calculators/conversion_calculator.html', {'title': 'Conversion Calculator'})
+
 
 @login_required
 @subscription_required(plan_type="corporate")
