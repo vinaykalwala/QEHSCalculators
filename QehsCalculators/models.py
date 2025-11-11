@@ -86,6 +86,43 @@ class UserSubscription(models.Model):
         self.status = "active"
         self.save()
 
+    def send_7day_expiry_reminder_if_needed(self):
+        """
+        Send 7-day reminder email ONCE, when 0 < days_left <= 7.
+        Uses only end_date and status. No extra field.
+        """
+        if self.status != "active" or not self.end_date:
+            return False
+
+        now = timezone.now()
+        days_left = (self.end_date - now).days
+
+        # Only trigger between 1 and 7 days left (inclusive)
+        if not (1 <= days_left <= 7):
+            return False
+
+        # --- Prevent duplicate emails: Send only ONCE per day ---
+        # Use the *date* part of end_date to define "7-day warning day"
+        warning_trigger_date = self.end_date - timedelta(days=7)
+        today = now.date()
+        trigger_day = warning_trigger_date.date()
+
+        # Send email only if today == the 7-day warning day
+        if today == trigger_day:
+            send_subscription_email(
+                self.user,
+                "Your Subscription Expires in 7 Days",
+                f"Hello {self.user.username},\n\n"
+                f"Your subscription plan '{self.plan}' will expire in 7 days "
+                f"on {self.end_date.strftime('%Y-%m-%d %H:%M')}.\n\n"
+                "Thank you!\n\n"
+                "Best Regards,\n"
+                "The QehsCalculators Team"
+            )
+            return True  # Email sent
+
+        return False
+
     def calculate_remaining_days(self):
         """Calculate remaining days from previous subscription for upgrades"""
         if not self.previous_subscription or not self.previous_subscription.end_date:
