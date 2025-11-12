@@ -10,8 +10,10 @@ class DeviceLimitMiddleware(MiddlewareMixin):
 
         # --- Subscription Expiry Check ---
         active_subscriptions = request.user.subscriptions.filter(status="active")
-        expired_found = False
+        for sub in active_subscriptions:
+            sub.send_7day_expiry_reminder_if_needed()
 
+        expired_found = False
         for sub in active_subscriptions:
             if sub.check_and_update_expiration():  # Marks expired + sends email
                 expired_found = True
