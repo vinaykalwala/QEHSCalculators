@@ -466,6 +466,15 @@ def home(request):
 def about(request):
     return render(request, 'about.html')
 
+def contact_us(request):
+    return render(request, 'contact_us.html')
+
+def shipping(request):
+    return render(request, 'shipping.html')
+
+def refund(request):
+    return render(request, 'refund.html')
+
 def quality_calculators(request):
     return render(request, 'calculators/quality.html', {'title': 'Quality Calculators'})
 
