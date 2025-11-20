@@ -1,82 +1,82 @@
 CALCULATORS = [
     # Quality Calculators
-    {"name": "Actual Evaporation Rate Of A Boiler From Its kW Rating And The Energy Required To Be Added To The Feedwater To Make Steam Calculator", "url_name": "quality_actual_evaporation_rate_of_a_boiler_from_its_kw_rating_and_the_energy_required_to_make_steam_calculator", "plan_type": "corporate", "category": "quality"},
+    {"name": "Actual Evaporation Rate Of A Boiler From Its kW Rating And The Energy Required To Be Added To The Feedwater To Make Steam Calculator", "url_name": "quality_actual_evaporation_rate_of_a_boiler_from_its_kw_rating_and_the_energy_required_to_make_steam_calculator", "plan_type": "individual", "category": "quality"},
 
-    {"name": "Attendee Training Time Calculator", "url_name": "quality_attendee_training_time_calculator", "plan_type": "corporate", "category": "quality"},
+    {"name": "Attendee Training Time Calculator", "url_name": "quality_attendee_training_time_calculator", "plan_type": "individual", "category": "quality"},
 
-    {"name": "Acidity Based On Hydrogen Ion Concentration Calculator", "url_name": "quality_acidity_based_on_hydrogen_ion_concentration_calculator", "plan_type": "corporate", "category": "quality"},
+    {"name": "Acidity Based On Hydrogen Ion Concentration Calculator", "url_name": "quality_acidity_based_on_hydrogen_ion_concentration_calculator", "plan_type": "individual", "category": "quality"},
 
-    {"name": "Boiler Horse Power From Heat Transfer Area Calculator", "url_name": "quality_boiler_horse_power_from_heat_transwer_area_calculator", "plan_type": "corporate", "category": "quality"},
+    {"name": "Boiler Horse Power From Heat Transfer Area Calculator", "url_name": "quality_boiler_horse_power_from_heat_transwer_area_calculator", "plan_type": "individual", "category": "quality"},
 
-    {"name": "Binomial Distribution Calculator", "url_name": "quality_binomial_distribution_calculator", "plan_type": "corporate", "category": "quality"},
+    {"name": "Binomial Distribution Calculator", "url_name": "quality_binomial_distribution_calculator", "plan_type": "individual", "category": "quality"},
 
     # {"name": "Broad Calculation of Garments Cost of Making (CM)", "url_name": "quality_broad_calculation_of_garments_cost_of_making_cm_calculator", "plan_type": "corporate", "category": "quality"},
 
 
 
-{"name": "Boiling Point Elevation Calculator", "url_name": "quality_boiling_point_elevation_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Boiling Point Elevation Calculator", "url_name": "quality_boiling_point_elevation_calculator", "plan_type": "individual", "category": "quality"},
 
 
 
-{"name": "Correct the Conductivity of a Sample Calculator", "url_name": "quality_correct_the_conductivity_of_a_sample_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Correct the Conductivity of a Sample Calculator", "url_name": "quality_correct_the_conductivity_of_a_sample_calculator", "plan_type": "employee", "category": "quality"},
 
 
 
-{"name": "Cost of Poor Quality (COPQ) Calculator", "url_name": "quality_cost_of_poor_quality_copq_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Cost of Poor Quality (COPQ) Calculator", "url_name": "quality_cost_of_poor_quality_copq_calculator", "plan_type": "employee", "category": "quality"},
 
 
-{"name": "Customer Satisfaction (CSAT) Calculator", "url_name": "quality_customer_satisfaction_csat_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Customer Satisfaction (CSAT) Calculator", "url_name": "quality_customer_satisfaction_csat_calculator", "plan_type": "employee", "category": "quality"},
 
 
-{"name": "Cost Per Minute (CPM) Calculator", "url_name": "quality_cost_per_minute_cpm_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Cost Per Minute (CPM) Calculator", "url_name": "quality_cost_per_minute_cpm_calculator", "plan_type": "employee", "category": "quality"},
 
 
 # {"name": "Cost of Making (CM) Calculator", "url_name": "quality_cost_of_making_cm_calculator", "plan_type": "corporate", "category": "quality"},
 
-{"name": "Corrective Action Effectiveness (CAE) Calculator", "url_name": "quality_corrective_action_effectiveness_cae_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Corrective Action Effectiveness (CAE) Calculator", "url_name": "quality_corrective_action_effectiveness_cae_calculator", "plan_type": "employee", "category": "quality"},
 
-{"name": "Continuous Distillation (Rectifying Section) Calculator", "url_name": "quality_continuous_distillation_rectifying_section_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Continuous Distillation (Rectifying Section) Calculator", "url_name": "quality_continuous_distillation_rectifying_section_calculator", "plan_type": "employee", "category": "quality"},
 
-{"name": "Continuous Distillation (Stripping Section) Calculator", "url_name": "quality_continuous_distillation_stripping_section_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Continuous Distillation (Stripping Section) Calculator", "url_name": "quality_continuous_distillation_stripping_section_calculator", "plan_type": "employee", "category": "quality"},
 
-{"name": "Continuous Stirred-Tank Reactor (Back-Mix Reactor) Design Calculator", "url_name": "quality_continuous_stirred_tank_reactor_back_mix_reactor_design_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Continuous Stirred-Tank Reactor (Back-Mix Reactor) Design Calculator", "url_name": "quality_continuous_stirred_tank_reactor_back_mix_reactor_design_calculator", "plan_type": "employee", "category": "quality"},
 
-{"name": "Critical Number of Samples Calculator", "url_name": "quality_critical_number_of_samples_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Critical Number of Samples Calculator", "url_name": "quality_critical_number_of_samples_calculator", "plan_type": "employee", "category": "quality"},
 
-{"name": "Control Score Calculator", "url_name": "quality_control_score_calculator", "plan_type": "corporate", "category": "quality"},
-
-
-{"name": "Defects Per Million Opportunities (DPMO) and Six Sigma Calculator", "url_name": "quality_defects_per_million_opportunities_dpmo_and_six_sigma_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Control Score Calculator", "url_name": "quality_control_score_calculator", "plan_type": "employee", "category": "quality"},
 
 
-
-{"name": "Defect Rate Calculator", "url_name": "quality_defect_rate_calculator", "plan_type": "corporate", "category": "quality"},
-
-
-{"name": "Directional Survey Calculator", "url_name": "quality_directional_survey_calculator", "plan_type": "corporate", "category": "quality"},
-
-{"name": "Dispersion Calculator", "url_name": "quality_dispersion_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Defects Per Million Opportunities (DPMO) and Six Sigma Calculator", "url_name": "quality_defects_per_million_opportunities_dpmo_and_six_sigma_calculator", "plan_type": "employee", "category": "quality"},
 
 
-{"name": "Dilution Ventilation Rate for Contaminant Control Calculator", "url_name": "quality_dilution_ventilation_rate_for_contaminant_control_calculator", "plan_type": "corporate", "category": "quality"},
+
+{"name": "Defect Rate Calculator", "url_name": "quality_defect_rate_calculator", "plan_type": "employee", "category": "quality"},
 
 
-{"name": "Dry Film Thickness (DFT) Calculator", "url_name": "quality_dry_film_thickness_dft_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Directional Survey Calculator", "url_name": "quality_directional_survey_calculator", "plan_type": "employee", "category": "quality"},
+
+{"name": "Dispersion Calculator", "url_name": "quality_dispersion_calculator", "plan_type": "employee", "category": "quality"},
 
 
-{"name": "Evaporation Factor Of A Boiler From Its 'From & At' Rating Calculator", "url_name": "quality_evaporation_factor_of_a_boiler_from_its_from_and_at_rating_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Dilution Ventilation Rate for Contaminant Control Calculator", "url_name": "quality_dilution_ventilation_rate_for_contaminant_control_calculator", "plan_type": "employee", "category": "quality"},
 
 
-{"name": "Electrical Resistance Calculator for Conductivity Probe", "url_name": "quality_electrical_resistance_for_conductivity_probe_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Dry Film Thickness (DFT) Calculator", "url_name": "quality_dry_film_thickness_dft_calculator", "plan_type": "employee", "category": "quality"},
 
 
-{"name": "First Pass Yield (FPY) Calculator", "url_name": "quality_first_pass_yield_fpy_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Evaporation Factor Of A Boiler From Its 'From & At' Rating Calculator", "url_name": "quality_evaporation_factor_of_a_boiler_from_its_from_and_at_rating_calculator", "plan_type": "employee", "category": "quality"},
 
 
-{"name": "Fold of Increase Calculator", "url_name": "quality_fold_of_increase_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "Electrical Resistance Calculator for Conductivity Probe", "url_name": "quality_electrical_resistance_for_conductivity_probe_calculator", "plan_type": "employee", "category": "quality"},
 
 
-{"name": "Facade Element Area Calculator", "url_name": "quality_facade_element_weight_calculator", "plan_type": "corporate", "category": "quality"},
+{"name": "First Pass Yield (FPY) Calculator", "url_name": "quality_first_pass_yield_fpy_calculator", "plan_type": "employee", "category": "quality"},
+
+
+{"name": "Fold of Increase Calculator", "url_name": "quality_fold_of_increase_calculator", "plan_type": "employee", "category": "quality"},
+
+
+{"name": "Facade Element Area Calculator", "url_name": "quality_facade_element_weight_calculator", "plan_type": "employee", "category": "quality"},
 
 {"name": "Gibbs Phase Rule Calculator", "url_name": "quality_gibbs_phase_rule_calculator", "plan_type": "corporate", "category": "quality"},
 

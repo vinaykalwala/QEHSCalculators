@@ -1409,145 +1409,145 @@ def co2_calculator(request):
 
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def quality_main_calculator(request):
     return render(request, 'qehsfcalculators/quality/main.html', {'title': 'Main calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def quality_actual_evaporation_rate_of_a_boiler_from_its_kw_rating_and_the_energy_required_to_make_steam_calculator(request):
     return render(request, 'qehsfcalculators/quality/actual_evaporation_rate_of_a_boiler_from_its_kw_rating_and_the_energy_required_to_make_steam.html', {'title': 'Actual evaporation rate of a boiler from its kW rating and the energy required to make steam Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def quality_attendee_training_time_calculator(request):
     return render(request, 'qehsfcalculators/quality/attendee_training_time.html', {'title': 'Attendee Training Time Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def quality_acidity_based_on_hydrogen_ion_concentration_calculator(request):
     return render(request, 'qehsfcalculators/quality/acidity_based_on_hydrogen_ion_concentration.html', {'title': 'Acidity Calculator based on Hydrogen Ion Concentration'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def quality_boiler_horse_power_from_heat_transwer_area_calculator(request):
     return render(request, 'qehsfcalculators/quality/boiler_horse_power_from_heat_transwer_area.html', {'title': 'Boiler Horse Power From heat transwer area calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def quality_binomial_distribution_calculator(request):
     return render(request, 'qehsfcalculators/quality/binomial_distribution.html', {'title': 'Binomial Distribution Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def quality_broad_calculation_of_garments_cost_of_making_cm_calculator(request):
     return render(request, 'qehsfcalculators/quality/broad_calculation_of_garments_cost_of_making_cm.html', {'title': 'Broad Calculation of Garments Cost of Making (CM)'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def quality_boiling_point_elevation_calculator(request):
     return render(request, 'qehsfcalculators/quality/boiling_point_elevation.html', {'title': 'Boiling Point Elevation Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def quality_correct_the_conductivity_of_a_sample_calculator(request):
     return render(request, 'qehsfcalculators/quality/correct_the_conductivity_of_a_sample.html', {'title': 'Correct the conductivity of a sample Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def quality_cost_of_poor_quality_copq_calculator(request):
     return render(request, 'qehsfcalculators/quality/cost_of_poor_quality_copq.html', {'title': 'Cost of Poor Quality (COPQ) Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def quality_customer_satisfaction_csat_calculator(request):
     return render(request, 'qehsfcalculators/quality/customer_satisfaction_csat.html', {'title': 'Customer Satisfaction (CSAT) Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def quality_cost_per_minute_cpm_calculator(request):
     return render(request, 'qehsfcalculators/quality/cost_per_minute_cpm.html', {'title': 'Cost Per Minute (CPM) Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def quality_cost_of_making_cm_calculator(request):
     return render(request, 'qehsfcalculators/quality/cost_of_making_cm.html', {'title': 'Cost of Making (CM) Calculator '})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def quality_corrective_action_effectiveness_cae_calculator(request):
     return render(request, 'qehsfcalculators/quality/corrective_action_effectiveness_cae.html', {'title': 'Corrective Action Effectiveness (CAE) Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def quality_continuous_distillation_rectifying_section_calculator(request):
     return render(request, 'qehsfcalculators/quality/continuous_distillation_rectifying_section.html', {'title': "Continuous Distillation (Rectifying Section) Calculator"})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def quality_continuous_distillation_stripping_section_calculator(request):
     return render(request, 'qehsfcalculators/quality/continuous_distillation_stripping_section.html', {'title': "Continuous Distillation (Stripping Section) Calculator"})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def quality_continuous_stirred_tank_reactor_back_mix_reactor_design_calculator(request):
     return render(request, 'qehsfcalculators/quality/continuous_stirred_tank_reactor_back_mix_reactor_design.html', {'title': "Continuous Stirred-Tank Reactor (Back-Mix Reactor) Design Calculator"})
     
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def quality_critical_number_of_samples_calculator(request):
     return render(request, 'qehsfcalculators/quality/critical_number_of_samples.html', {'title': 'Critical Number of Samples Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def quality_defects_per_million_opportunities_dpmo_and_six_sigma_calculator(request):
     return render(request, 'qehsfcalculators/quality/defects_per_million_opportunities_dpmo_and_six_sigma.html', {'title': 'Defects Per Million Opportunities (DPMO) and Six Sigma  Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def quality_defect_rate_calculator(request):
     return render(request, 'qehsfcalculators/quality/defect_rate.html', {'title': 'Defect Rate Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def quality_directional_survey_calculator(request):
     return render(request, 'qehsfcalculators/quality/directional_survey.html', {'title': 'Directional Survey Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def quality_dispersion_calculator(request):
     return render(request, 'qehsfcalculators/quality/dispersion.html', {'title': 'Dispersion Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def quality_dilution_ventilation_rate_for_contaminant_control_calculator(request):
     return render(request, 'qehsfcalculators/quality/dilution_ventilation_rate_for_contaminant_control.html', {'title': 'Dilution Ventilation Rate for Contaminant Control Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def quality_dry_film_thickness_dft_calculator(request):
     return render(request, 'qehsfcalculators/quality/dry_film_thickness_dft.html', {'title': 'Dry Film Thickness (DFT) Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def quality_evaporation_factor_of_a_boiler_from_its_from_and_at_rating_calculator(request):
     return render(request, 'qehsfcalculators/quality/evaporation_factor_of_a_boiler_from_its_from_and_at_rating.html')
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def quality_electrical_resistance_for_conductivity_probe_calculator(request):
     return render(request, 'qehsfcalculators/quality/electrical_resistance_for_conductivity_probe.html', {'title': 'Electrical Resistance Calculator for Conductivity Probe calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def quality_first_pass_yield_fpy_calculator(request):
     return render(request, 'qehsfcalculators/quality/first_pass_yield_fpy.html', {'title': 'First Pass Yield (FPY) Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def quality_fold_of_increase_calculator(request):
     return render(request, 'qehsfcalculators/quality/fold_of_increase.html', {'title': 'Fold of Increase Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def quality_facade_element_weight_calculator(request):
     return render(request, 'qehsfcalculators/quality/facade_element_weight.html', {'title': 'Facade Element Weight Calculator '})
 
