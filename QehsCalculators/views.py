@@ -1760,193 +1760,193 @@ def quality_orifice_meter_flow_calculator(request):
     return render(request, 'qehsfcalculators/quality/orifice_meter_flow.html', {'title': 'Orifice Meter Flow Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def environment_main_calculator(request):
     return render(request, 'qehsfcalculators/environment/main.html', {'title': 'Main calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def environment_ambient_noise_level_calculator(request):
     return render(request, 'qehsfcalculators/environment/ambient_noise_level.html', {'title': 'Ambient Noise Level Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def environment_arithmetic_mean_temperature_difference_amtd_calculator(request):
     return render(request, 'qehsfcalculators/environment/arithmetic_mean_temperature_difference_amtd.html', {'title': 'Arithmetic Mean Temperature Difference (AMTD) Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def environment_air_flow_rate_mass_flow_calculator(request):
     return render(request, 'qehsfcalculators/environment/air_flow_rate_mass_flow.html', {'title': 'Air flow rate(mass flow) calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def environment_air_flow_rate_time_based_calculator(request):
     return render(request, 'qehsfcalculators/environment/air_flow_rate_time_based.html', {'title': 'Air flow rate(Time -Based) calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def environment_actual_value_of_super_heated_steam_flow_calculator(request):
     return render(request, 'qehsfcalculators/environment/actual_value_of_super_heated_steam_flow.html', {'title': 'Actual value of super-heated steam flow calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def environment_air_pollutant_concentration_calculator(request):
     return render(request, 'qehsfcalculators/environment/air_pollutant_concentration.html', {'title': 'Air Pollutant Concentration Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def environment_air_changes_per_hour_ach_calculator(request):
     return render(request, 'qehsfcalculators/environment/air_changes_per_hour_ach.html', {'title': 'Air Changes per Hour (ACH) Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def environment_aeration_tank_volume_calculator(request):
     return render(request, 'qehsfcalculators/environment/aeration_tank_volume.html', {'title': 'Aeration Tank Volume Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def environment_boiler_blowdown_rate_calculator(request):
     return render(request, 'qehsfcalculators/environment/boiler_blowdown_rate.html', {'title': 'Boiler Blowdown Rate Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def environment_buoyancy_flux_parameter_calculator(request):
     return render(request,'qehsfcalculators/environment/buoyancy_flux_parameter.html',{'title': 'Buoyancy Flux Parameter (F) Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def environment_boiler_efficiency_calculator(request):
     return render(request, 'qehsfcalculators/environment/boiler_efficiency.html', {'title': 'Boiler efficiency Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def environment_bernoullis_equation_with_constant_potential_energy_terms_calculator(request):
     return render(request, 'qehsfcalculators/environment/bernoullis_equation_with_constant_potential_energy_terms.html')
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def environment_bod_biochemical_oxygen_demand_exertion_calculator(request):
     return render(request, 'qehsfcalculators/environment/bod_biochemical_oxygen_demand_exertion.html', {'title': 'BOD  (Biochemical Oxygen Demand) Exertion Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def environment_breakthrough_time_calculator(request):
     return render(request, 'qehsfcalculators/environment/breakthrough_time.html', {'title': 'Breakthrough Time Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def environment_biomass_microbial_growth_calculator(request):
     return render(request, 'qehsfcalculators/environment/biomass_microbial_growth.html', {'title': 'Biomass Microbial Growth Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def environment_biomass_substrate_utilization_rate_calculator(request):
     return render(request, 'qehsfcalculators/environment/biomass_substrate_utilization_rate.html', {'title': 'Biomass Substrate Utilization Rate Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def environment_biomass_concentration_xr_calculator(request):
     return render(request, 'qehsfcalculators/environment/biomass_concentration_xr.html', {'title': 'Biomass Concentration (Xr) Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def environment_carbnot_effiency_calculator(request):
     return render(request, 'qehsfcalculators/environment/carbnot_effiency.html', {'title': 'Carbnot effiency calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def environment_carbon_footprint_effient_calculator(request):
     return render(request, 'qehsfcalculators/environment/carbon_footprint_effient.html', {'title': 'Carbon Footprint Effient Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def environment_cost_of_fuel_saved_by_returning_condensate_calculator(request):
     return render(request, 'qehsfcalculators/environment/cost_of_fuel_saved_by_returning_condensate.html', {'title': 'Cost of Fuel Saved by Returning Condensate Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def environment_cost_of_water_saved_by_returning_condensate_calculator(request):
     return render(request, 'qehsfcalculators/environment/cost_of_water_saved_by_returning_condensate.html', {'title': 'Cost of water Saved by Returning Condensate Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def environment_cost_of_effluent_saved_by_returning_condensate_calculator(request):
     return render(request, 'qehsfcalculators/environment/cost_of_effluent_saved_by_returning_condensate.html', {'title': 'Cost of Effluent Saved by Returning Condensate Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def environment_corrosion_rate_calculator(request):
     return render(request, 'qehsfcalculators/environment/corrosion_rate.html', {'title': 'Corrosion Rate Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def environment_cyclone_collection_particle_removal_efficiency_calculator(request):
     return render(request, 'qehsfcalculators/environment/cyclone_collection_particle_removal_efficiency.html', {'title': 'Cyclone Collection Particle Removal Efficiency Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def environment_cyclone_50_collection_efficiency_for_particle_diameter_calculator(request):
     return render(request, 'qehsfcalculators/environment/cyclone_50_collection_efficiency_for_particle_diameter.html', {'title': 'Cyclone 50% Collection Efficiency for Particle Diameter Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def environment_cyclone_effective_number_of_turns_approximation_calculator(request):
     return render(request, 'qehsfcalculators/environment/cyclone_effective_number_of_turns_approximation.html', {'title': 'Cyclone Effective Number of Turns Approximation Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def environment_continuity_equation_calculator(request):
     return render(request, 'qehsfcalculators/environment/continuity_equation.html', {'title': 'Continuity Equation Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def environment_cooling_load_temperature_difference_cltd_calculator(request):
     return render(request, 'qehsfcalculators/environment/cooling_load_temperature_difference_cltd.html', {'title': 'Cooling Load Temperature Difference (CLTD) Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def environment_chlorine_contact_time_calculator(request):
     return render(request, 'qehsfcalculators/environment/chlorine_contact_time.html', {'title': 'Chlorine Contact Time Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def environment_carman_kozen_head_loss_and_friction_factor_calculator(request):
     return render(request, 'qehsfcalculators/environment/carman_kozen_head_loss_and_friction_factor.html', {'title': 'Carman-Kozen Head Loss & Friction Factor Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def environment_chicks_law_microbial_disinfection_calculator(request):
     return render(request, 'qehsfcalculators/environment/chicks_law_microbial_disinfection.html', {'title': 'Chick’s Law: Microbial Disinfection Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def environment_combined_conduction_convection_calculator(request):
     return render(request,'qehsfcalculators/environment/combined_conduction_convection.html',{'title': 'Combined Conduction and Convection Calculator'})
 
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def environment_chemical_equilibrium_calculator(request):
     return render(request, 'qehsfcalculators/environment/chemical_equilibrium.html', {'title': 'Chemical Equilibrium Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def environment_cmfr_completely_mixed_flow_reactor_bod_biochemical_oxygen_demand_removal_calculator(request):
     return render(request, 'qehsfcalculators/environment/cmfr_completely_mixed_flow_reactor_bod_biochemical_oxygen_demand_removal.html', {'title': 'CMFR (Completely Mixed Flow Reactor) BOD (Biochemical Oxygen Demand) Removal Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def environment_digester_capacity_v_calculator(request):
     return render(request, 'qehsfcalculators/environment/digester_capacity_v.html', {'title': 'Digester Capacity (V) Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def environment_dynamic_viscosity_calculator(request):
     return render(request, 'qehsfcalculators/environment/dynamic_viscosity.html', {'title': 'Dynamic Viscosity Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def environment_dissolved_oxygen_do_deficit_streeter_phelps_model_calculator(request):
     return render(request, 'qehsfcalculators/environment/dissolved_oxygen_do_deficit_streeter_phelps_model.html', {'title': 'Dissolved Oxygen (DO) Deficit (Streeter-Phelps Model) Calculator'})
 
@@ -1956,17 +1956,17 @@ def environment_dittus_boelter_equation_for_turbulent_flow_heat_transfer_calcula
     return render(request, 'qehsfcalculators/environment/dittus_boelter_equation_for_turbulent_flow_heat_transfer.html', {'title': "Dittus-Boelter Equation for Turbulent Flow Heat Transfer Calculator"})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def environment_decreasing_rate_of_increase_growth_calculator(request):
     return render(request, 'qehsfcalculators/environment/decreasing_rate_of_increase_growth.html', {'title': 'Decreasing-Rate-of-Increase Growth Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def environment_daughter_product_activity_calculator(request):
     return render(request, 'qehsfcalculators/environment/daughter_product_activity.html', {'title': 'Daughter Product Activity Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def environment_darcy_weisbach_head_loss_calculator(request):
     return render(request, 'qehsfcalculators/environment/darcy_weisbach_head_loss.html', {'title': 'Darcy-Weisbach Head Loss Calculator'})
 

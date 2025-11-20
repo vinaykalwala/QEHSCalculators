@@ -178,100 +178,100 @@ CALCULATORS = [
 
 
     # Environment Calculators
-    {"name": "Ambient Noise Level Calculator", "url_name": "environment_ambient_noise_level_calculator", "plan_type": "corporate", "category": "environment"},
+    {"name": "Ambient Noise Level Calculator", "url_name": "environment_ambient_noise_level_calculator", "plan_type": "individual", "category": "environment"},
 
-    {"name": "Arithmetic Mean Temperature Difference (AMTD) Calculator", "url_name": "environment_arithmetic_mean_temperature_difference_amtd_calculator", "plan_type": "corporate", "category": "environment"},
+    {"name": "Arithmetic Mean Temperature Difference (AMTD) Calculator", "url_name": "environment_arithmetic_mean_temperature_difference_amtd_calculator", "plan_type": "individual", "category": "environment"},
 
-    {"name": "Air Flow Rate & Mass Flow Calculator", "url_name": "environment_air_flow_rate_mass_flow_calculator", "plan_type": "corporate", "category": "environment"},
+    {"name": "Air Flow Rate & Mass Flow Calculator", "url_name": "environment_air_flow_rate_mass_flow_calculator", "plan_type": "individual", "category": "environment"},
 
-    {"name": "Air flow rate(Time -Based) calculator", "url_name": "environment_air_flow_rate_time_based_calculator", "plan_type": "corporate", "category": "environment"},
+    {"name": "Air flow rate(Time -Based) calculator", "url_name": "environment_air_flow_rate_time_based_calculator", "plan_type": "individual", "category": "environment"},
 
-    {"name": "Actual value of super-heated steam flow calculator", "url_name": "environment_actual_value_of_super_heated_steam_flow_calculator", "plan_type": "corporate", "category": "environment"},
+    {"name": "Actual value of super-heated steam flow calculator", "url_name": "environment_actual_value_of_super_heated_steam_flow_calculator", "plan_type": "individual", "category": "environment"},
 
-    {"name": "Air Pollutant Concentration Calculator", "url_name": "environment_air_pollutant_concentration_calculator", "plan_type": "corporate", "category": "environment"},
+    {"name": "Air Pollutant Concentration Calculator", "url_name": "environment_air_pollutant_concentration_calculator", "plan_type": "individual", "category": "environment"},
 
-    {"name": "Air Changes per Hour (ACH) Calculator", "url_name": "environment_air_changes_per_hour_ach_calculator", "plan_type": "corporate", "category": "environment"},
+    {"name": "Air Changes per Hour (ACH) Calculator", "url_name": "environment_air_changes_per_hour_ach_calculator", "plan_type": "individual", "category": "environment"},
 
-    {"name": "Aeration Tank Volume Calculator", "url_name": "environment_aeration_tank_volume_calculator", "plan_type": "corporate", "category": "environment"},
+    {"name": "Aeration Tank Volume Calculator", "url_name": "environment_aeration_tank_volume_calculator", "plan_type": "individual", "category": "environment"},
 {"name": "Air Emissions (kg CO2) Calculator", "url_name": "environment_air_emissions_calculator", "plan_type": "corporate", "category": "environment"},
-    {"name": "Boiler Blowdown Rate Calculator", "url_name": "environment_boiler_blowdown_rate_calculator", "plan_type": "corporate", "category": "environment"},
+    {"name": "Boiler Blowdown Rate Calculator", "url_name": "environment_boiler_blowdown_rate_calculator", "plan_type": "individual", "category": "environment"},
 
-    {"name": "Boiler efficiency Calculator", "url_name": "environment_boiler_efficiency_calculator", "plan_type": "corporate", "category": "environment"},
+    {"name": "Boiler efficiency Calculator", "url_name": "environment_boiler_efficiency_calculator", "plan_type": "individual", "category": "environment"},
 
-    {"name": "Bernoulli’s Equation Calculator With constant Potential Energy", "url_name": "environment_bernoullis_equation_with_constant_potential_energy_terms_calculator", "plan_type": "corporate", "category": "environment"},
+    {"name": "Bernoulli’s Equation Calculator With constant Potential Energy", "url_name": "environment_bernoullis_equation_with_constant_potential_energy_terms_calculator", "plan_type": "individual", "category": "environment"},
 
-{"name": "BOD  (Biochemical Oxygen Demand) Exertion Calculator", "url_name": "environment_bod_biochemical_oxygen_demand_exertion_calculator", "plan_type": "corporate", "category": "environment"},
-
-
-{"name": "Breakthrough Time Calculator", "url_name": "environment_breakthrough_time_calculator", "plan_type": "corporate", "category": "environment"},
-
-{"name": "Biomass Microbial Growth Calculator", "url_name": "environment_biomass_microbial_growth_calculator", "plan_type": "corporate", "category": "environment"},
-
-{"name": "Biomass Substrate Utilization Rate Calculator", "url_name": "environment_biomass_substrate_utilization_rate_calculator", "plan_type": "corporate", "category": "environment"},
-
-{"name": "Buoyancy Flux Parameter (F) Calculator", "url_name": "environment_buoyancy_flux_parameter_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "BOD  (Biochemical Oxygen Demand) Exertion Calculator", "url_name": "environment_bod_biochemical_oxygen_demand_exertion_calculator", "plan_type": "individual", "category": "environment"},
 
 
-{"name": "Biomass Concentration (Xr) Calculator", "url_name": "environment_biomass_concentration_xr_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Breakthrough Time Calculator", "url_name": "environment_breakthrough_time_calculator", "plan_type": "individual", "category": "environment"},
 
-{"name": "Carnot Efficiency calculator", "url_name": "environment_carbnot_effiency_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Biomass Microbial Growth Calculator", "url_name": "environment_biomass_microbial_growth_calculator", "plan_type": "individual", "category": "environment"},
+
+{"name": "Biomass Substrate Utilization Rate Calculator", "url_name": "environment_biomass_substrate_utilization_rate_calculator", "plan_type": "individual", "category": "environment"},
+
+{"name": "Buoyancy Flux Parameter (F) Calculator", "url_name": "environment_buoyancy_flux_parameter_calculator", "plan_type": "employee", "category": "environment"},
 
 
-{"name": "Carbon Footprint Efficient Calculator", "url_name": "environment_carbon_footprint_effient_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Biomass Concentration (Xr) Calculator", "url_name": "environment_biomass_concentration_xr_calculator", "plan_type": "employee", "category": "environment"},
+
+{"name": "Carnot Efficiency calculator", "url_name": "environment_carbnot_effiency_calculator", "plan_type": "employee", "category": "environment"},
+
+
+{"name": "Carbon Footprint Efficient Calculator", "url_name": "environment_carbon_footprint_effient_calculator", "plan_type": "employee", "category": "environment"},
 {"name": "Carbon Footprint per Employee Calculator", "url_name": "environment_carbon_footprint_per_employee_calculator", "plan_type": "corporate", "category": "environment"},
 
 
-{"name": "Cost of Fuel Saved by Returning Condensate Calculator", "url_name": "environment_cost_of_fuel_saved_by_returning_condensate_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Cost of Fuel Saved by Returning Condensate Calculator", "url_name": "environment_cost_of_fuel_saved_by_returning_condensate_calculator", "plan_type": "employee", "category": "environment"},
 
-{"name": "Cost of water Saved by Returning Condensate Calculator", "url_name": "environment_cost_of_water_saved_by_returning_condensate_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Cost of water Saved by Returning Condensate Calculator", "url_name": "environment_cost_of_water_saved_by_returning_condensate_calculator", "plan_type": "employee", "category": "environment"},
 
-{"name": "Cost of Effluent Saved by Returning Condensate Calculator", "url_name": "environment_cost_of_effluent_saved_by_returning_condensate_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Cost of Effluent Saved by Returning Condensate Calculator", "url_name": "environment_cost_of_effluent_saved_by_returning_condensate_calculator", "plan_type": "employee", "category": "environment"},
 
-{"name": "Corrosion Rate Calculator", "url_name": "environment_corrosion_rate_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Corrosion Rate Calculator", "url_name": "environment_corrosion_rate_calculator", "plan_type": "employee", "category": "environment"},
 
-{"name": "Cyclone Collection Particle Removal Efficiency Calculator", "url_name": "environment_cyclone_collection_particle_removal_efficiency_calculator", "plan_type": "corporate", "category": "environment"},
-
-
-{"name": "Cyclone 50% Collection Efficiency for Particle Diameter Calculator", "url_name": "environment_cyclone_50_collection_efficiency_for_particle_diameter_calculator", "plan_type": "corporate", "category": "environment"},
-
-{"name": "Cyclone Effective Number of Turns Approximation Calculator", "url_name": "environment_cyclone_effective_number_of_turns_approximation_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Cyclone Collection Particle Removal Efficiency Calculator", "url_name": "environment_cyclone_collection_particle_removal_efficiency_calculator", "plan_type": "employee", "category": "environment"},
 
 
-{"name": "Continuity Equation Calculator", "url_name": "environment_continuity_equation_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Cyclone 50% Collection Efficiency for Particle Diameter Calculator", "url_name": "environment_cyclone_50_collection_efficiency_for_particle_diameter_calculator", "plan_type": "employee", "category": "environment"},
 
-{"name": "Cooling Load Temperature Difference (CLTD) Calculator", "url_name": "environment_cooling_load_temperature_difference_cltd_calculator", "plan_type": "corporate", "category": "environment"},
-
-{"name": "Combined Conduction and Convection Calculator", "url_name": "environment_combined_conduction_convection_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Cyclone Effective Number of Turns Approximation Calculator", "url_name": "environment_cyclone_effective_number_of_turns_approximation_calculator", "plan_type": "employee", "category": "environment"},
 
 
-{"name": "Chlorine Contact Time Calculator", "url_name": "environment_chlorine_contact_time_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Continuity Equation Calculator", "url_name": "environment_continuity_equation_calculator", "plan_type": "employee", "category": "environment"},
+
+{"name": "Cooling Load Temperature Difference (CLTD) Calculator", "url_name": "environment_cooling_load_temperature_difference_cltd_calculator", "plan_type": "employee", "category": "environment"},
+
+{"name": "Combined Conduction and Convection Calculator", "url_name": "environment_combined_conduction_convection_calculator", "plan_type": "employee", "category": "environment"},
+
+
+{"name": "Chlorine Contact Time Calculator", "url_name": "environment_chlorine_contact_time_calculator", "plan_type": "employee", "category": "environment"},
 
 
 
-{"name": "Carman-Kozen Head Loss & Friction Factor Calculator", "url_name": "environment_carman_kozen_head_loss_and_friction_factor_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Carman-Kozen Head Loss & Friction Factor Calculator", "url_name": "environment_carman_kozen_head_loss_and_friction_factor_calculator", "plan_type": "employee", "category": "environment"},
 
-{"name": "Chemical Equilibrium Calculator", "url_name": "environment_chemical_equilibrium_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Chemical Equilibrium Calculator", "url_name": "environment_chemical_equilibrium_calculator", "plan_type": "employee", "category": "environment"},
         
-{"name": "Chick’s Law: Microbial Disinfection Calculator", "url_name": "environment_chicks_law_microbial_disinfection_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Chick’s Law: Microbial Disinfection Calculator", "url_name": "environment_chicks_law_microbial_disinfection_calculator", "plan_type": "employee", "category": "environment"},
 
        
-{"name": "CMFR (Completely Mixed Flow Reactor) BOD (Biochemical Oxygen Demand) Removal Calculator", "url_name": "environment_cmfr_completely_mixed_flow_reactor_bod_biochemical_oxygen_demand_removal_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "CMFR (Completely Mixed Flow Reactor) BOD (Biochemical Oxygen Demand) Removal Calculator", "url_name": "environment_cmfr_completely_mixed_flow_reactor_bod_biochemical_oxygen_demand_removal_calculator", "plan_type": "employee", "category": "environment"},
 
 
 
-{"name": "Digester Capacity (V) Calculator", "url_name": "environment_digester_capacity_v_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Digester Capacity (V) Calculator", "url_name": "environment_digester_capacity_v_calculator", "plan_type": "employee", "category": "environment"},
 
-{"name": "Dynamic Viscosity Calculator", "url_name": "environment_dynamic_viscosity_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Dynamic Viscosity Calculator", "url_name": "environment_dynamic_viscosity_calculator", "plan_type": "employee", "category": "environment"},
 
-{"name": "Dissolved Oxygen (DO) Deficit (Streeter-Phelps Model) Calculator", "url_name": "environment_dissolved_oxygen_do_deficit_streeter_phelps_model_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Dissolved Oxygen (DO) Deficit (Streeter-Phelps Model) Calculator", "url_name": "environment_dissolved_oxygen_do_deficit_streeter_phelps_model_calculator", "plan_type": "employee", "category": "environment"},
 
 {"name": "Dittus-Boelter Equation for Turbulent Flow Heat Transfer Calculator", "url_name": "environment_dittus_boelter_equation_for_turbulent_flow_heat_transfer_calculator", "plan_type": "corporate", "category": "environment"},
 
-{"name": "Decreasing-Rate-of-Increase Growth Calculator", "url_name": "environment_decreasing_rate_of_increase_growth_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Decreasing-Rate-of-Increase Growth Calculator", "url_name": "environment_decreasing_rate_of_increase_growth_calculator", "plan_type": "employee", "category": "environment"},
 
-{"name": "Darcy-Weisbach Head Loss Calculator", "url_name": "environment_darcy_weisbach_head_loss_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Darcy-Weisbach Head Loss Calculator", "url_name": "environment_darcy_weisbach_head_loss_calculator", "plan_type": "employee", "category": "environment"},
 
-{"name": "Daughter Product Activity Calculator", "url_name": "environment_daughter_product_activity_calculator", "plan_type": "corporate", "category": "environment"},
+{"name": "Daughter Product Activity Calculator", "url_name": "environment_daughter_product_activity_calculator", "plan_type": "employee", "category": "environment"},
 
 {"name": "Environmental impact Carbon Footprint Calculator", "url_name": "environment_environmental_impact_carbon_footprint_calculator", "plan_type": "corporate", "category": "environment"},
 
