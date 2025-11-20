@@ -1283,11 +1283,12 @@ CALCULATORS = [
 
 
 
-    # Fire Calculators    {"name": "Burn Rate (Chemical Exposure) Calculator", "url_name": "fire_burn_rate_chemical_exposure_calculator", "plan_type": "individual", "category": "fire"},
-    {"name": "Base Design Quantity For CO₂ Calculator", "url_name": "fire_base_design_quantity_for_co_calculator", "plan_type": "corporate", "individual": "fire"},
-    {"name": "Bernoulli's Equation For A Liquid Calculator", "url_name": "fire_bernoullis_equation_for_a_liquid_calculator", "plan_type": "corporate", "individual": "fire"},
+    # Fire Calculators 
+    {"name": "Burn Rate (Chemical Exposure) Calculator", "url_name": "fire_burn_rate_chemical_exposure_calculator", "plan_type": "individual", "category": "fire"},
+    {"name": "Base Design Quantity For CO₂ Calculator", "url_name": "fire_base_design_quantity_for_co_calculator","plan_type": "individual", "category": "fire"},
+    {"name": "Bernoulli's Equation For A Liquid Calculator", "url_name": "fire_bernoullis_equation_for_a_liquid_calculator", "plan_type": "individual", "category": "fire"},
     {"name": "Bernoulli's Equation With Constant Potential Energy Terms And Frictional Losses Calculator", "url_name": "fire_bernoullis_equation_with_constant_potential_energy_terms_and_frictional_losses_calculator", "plan_type": "individual", "category": "fire"},
-    {"name": "Combustion Efficiency (CE) Calculator", "url_name": "fire_combustion_efficiency_ce_calculator", "plan_type": "individual", "category": "fire"},\
+    {"name": "Combustion Efficiency (CE) Calculator", "url_name": "fire_combustion_efficiency_ce_calculator", "plan_type": "individual", "category": "fire"},
     {"name": "Discharge Rate Calculator For CO₂", "url_name": "fire_discharge_rate_for_co2_calculator", "plan_type": "individual", "category": "fire"},
 
 
