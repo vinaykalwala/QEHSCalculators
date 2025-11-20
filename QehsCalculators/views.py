@@ -2964,142 +2964,142 @@ def health_main_calculator(request):
     return render(request, 'qehsfcalculators/health/main.html', {'title': 'Main calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def health_army_body_fat_calculator(request):
     return render(request, 'qehsfcalculators/health/army_body_fat.html', {'title': 'Army Body Fat Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def health_adjusted_body_weight_calculator(request):
     return render(request, 'qehsfcalculators/health/adjusted_body_weight.html', {'title': 'Adjusted Body Weight Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def health_a_body_shape_index_absi_calculator(request):
     return render(request, 'qehsfcalculators/health/a_body_shape_index_absi.html', {'title': 'A Body Shape Index (ABSI) Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def health_a1c_hemoglobin_a1c_to_average_blood_sugar_calculator(request):
     return render(request, 'qehsfcalculators/health/a1c_hemoglobin_a1c_to_average_blood_sugar.html', {'title': 'A1c Calculator – Hemoglobin A1c to Average Blood Sugar'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def health_age_shock_index_age_si_calculator(request):
     return render(request, 'qehsfcalculators/health/age_shock_index_age_si.html', {'title': 'Age Shock Index (Age SI) Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def health_alzheimers_life_expectancy_calculator(request):
     return render(request, 'qehsfcalculators/health/alzheimers_life_expectancy.html', {'title': 'Alzheimer’s Life Expectancy Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def health_ankle_brachial_index_abi_calculator(request):
     return render(request, 'qehsfcalculators/health/ankle_brachial_index_abi.html', {'title': 'Ankle-Brachial Index (ABI) Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def health_bmi_calculator(request):
     return render(request, 'qehsfcalculators/health/bmi.html', {'title': 'BMI calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def health_bmi_for_kids_calculator(request):
     return render(request, 'qehsfcalculators/health/bmi_for_kids.html', {'title': 'BMI Calculator for Kids'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def health_basal_metabolic_rate_bmr_calculator(request):
     return render(request, 'qehsfcalculators/health/basal_metabolic_rate_bmr.html', {'title': 'Basal metabolic rate (BMR) calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def health_body_roundness_index_bri_calculator(request):
     return render(request, 'qehsfcalculators/health/body_roundness_index_bri.html', {'title': 'Body Roundness Index (BRI) Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def health_body_fat_us_navy_method_calculator(request):
     return render(request, 'qehsfcalculators/health/body_fat_us_navy_method.html', {'title': 'Body Fat Calculator (U.S. Navy Method)'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def health_body_adiposity_index_bai_calculator(request):
     return render(request, 'qehsfcalculators/health/body_adiposity_index_bai.html', {'title': 'Body Adiposity Index (BAI) Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def health_body_frame_size_calculator(request):
     return render(request, 'qehsfcalculators/health/body_frame_size.html', {'title': 'Body Frame Size Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def health_body_surface_area_bsa_calculator(request):
     return render(request, 'qehsfcalculators/health/body_surface_area_bsa.html', {'title': 'Body Surface Area (BSA) Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def health_blood_sugar_converter_calculator(request):
     return render(request, 'qehsfcalculators/health/blood_sugar_converter.html', {'title': 'Blood Sugar Converter'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def health_bedridden_patient_height_estimator_calculator(request):
     return render(request, 'qehsfcalculators/health/bedridden_patient_height_estimator.html', {'title': 'Bedridden Patient Height Estimator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def health_bedridden_patient_weight_estimator_calculator(request):
     return render(request, 'qehsfcalculators/health/bedridden_patient_weight_estimator.html', {'title': 'Bedridden Patient Weight Estimator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def health_baby_milk_intake_calculator(request):
     return render(request, 'qehsfcalculators/health/baby_milk_intake.html', {'title': 'Baby Milk Intake Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def health_cardiac_index_calculator(request):
     return render(request, 'qehsfcalculators/health/cardiac_index.html', {'title': 'Cardiac Index Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def health_daily_drinking_water_intake_calculator(request):
     return render(request, 'qehsfcalculators/health/daily_drinking_water_intake.html', {'title': 'Daily Drinking Water Intake Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def health_dietary_reference_intake_dri_calculator(request):
     return render(request, 'qehsfcalculators/health/dietary_reference_intake_dri.html', {'title': 'Dietary Reference Intake (DRI) Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def health_diabetes_risk_estimate_your_75_year_risk_calculator(request):
     return render(request, 'qehsfcalculators/health/diabetes_risk_estimate_your_75_year_risk.html', {'title': 'Diabetes Risk Calculator – Estimate Your 7.5-Year Risk'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def health_depression_screening_by_phq_2_calculator(request):
     return render(request, 'qehsfcalculators/health/depression_screening_by_phq_2.html', {'title': 'Depression Screening by PHQ-2 Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def health_dose_response_probit_calculator(request):
     return render(request, 'qehsfcalculators/health/dose_response_probit.html', {'title': 'Dose-Response Probit Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def health_diet_risk_score_calculator(request):
     return render(request, 'qehsfcalculators/health/diet_risk_score.html', {'title': 'Diet Risk Score Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def health_estimated_average_glucose_calculator(request):
     return render(request, 'qehsfcalculators/health/estimated_average_glucose.html', {'title': 'Estimated Average Glucose Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def health_epworth_sleepiness_scale_ess_calculator(request):
     return render(request, 'qehsfcalculators/health/epworth_sleepiness_scale_ess.html', {'title': 'Epworth Sleepiness Scale (ESS) Calculator'})
 
