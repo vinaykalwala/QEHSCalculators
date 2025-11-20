@@ -4547,137 +4547,137 @@ def safety_21_ellipsoidal_head_radius_calculator(request):
     return render(request, 'qehsfcalculators/safety/21_ellipsoidal_head_radius.html', {'title': '2:1 Ellipsoidal Head Radius Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def fire_main_calculator(request):
     return render(request, 'qehsfcalculators/fire/main.html', {'title': 'Main calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def fire_burn_rate_chemical_exposure_calculator(request):
     return render(request, 'qehsfcalculators/fire/burn_rate_chemical_exposure.html', {'title': 'Burn Rate (chemical Exposure) Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def fire_base_design_quantity_for_co_calculator(request):
     return render(request, 'qehsfcalculators/fire/base_design_quantity_for_co₂.html', {'title': 'Base Design Quantity for CO₂ Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def fire_bernoullis_equation_for_a_liquid_calculator(request):
     return render(request, 'qehsfcalculators/fire/bernoullis_equation_for_a_liquid.html')
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def fire_bernoullis_equation_with_constant_potential_energy_terms_and_frictional_losses_calculator(request):
     return render(request, 'qehsfcalculators/fire/bernoullis_equation_with_constant_potential_energy_terms_and_frictional_losses.html')
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def fire_combustion_efficiency_ce_calculator(request):
     return render(request, 'qehsfcalculators/fire/combustion_efficiency_ce.html', {'title': 'Combustion Efficiency (CE) Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def fire_discharge_rate_for_co2_calculator(request):
     return render(request, 'qehsfcalculators/fire/discharge_rate_for_co2.html', {'title': 'Discharge Rate Calculator for co2'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def fire_discharge_rate_of_co2_for_local_applications_calculator(request):
     return render(request, 'qehsfcalculators/fire/discharge_rate_of_co2_for_local_applications.html', {'title': 'Discharge Rate of co2 Calculator for local applications'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def fire_equivalent_orifice_area_for_co2_calculator(request):
     return render(request, 'qehsfcalculators/fire/equivalent_orifice_area_for_co2.html', {'title': 'Equivalent Orifice Area Calculator for co2'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def fire_equivalent_water_flowrate_through_a_check_valve_calculator(request):
     return render(request, 'qehsfcalculators/fire/equivalent_water_flowrate_through_a_check_valve.html', {'title': 'Equivalent Water Flowrate Through A Check Valve Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def fire_fire_load_calculator(request):
     return render(request, 'qehsfcalculators/fire/fire_load.html', {'title': 'Fire Load Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def fire_fire_extinguisher_placement_calculator(request):
     return render(request, 'qehsfcalculators/fire/fire_extinguisher_placement.html', {'title': 'Fire Extinguisher Placement Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def fire_fire_extinguisher_weight_inspection_calculator(request):
     return render(request, 'qehsfcalculators/fire/fire_extinguisher_weight_inspection.html', {'title': 'Fire extinguisher weight inspection'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def fire_fire_load_density_calculator(request):
     return render(request, 'qehsfcalculators/fire/fire_load_density.html', {'title': 'fire load density calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def fire_fire_flow_calculator(request):
     return render(request, 'qehsfcalculators/fire/fire_flow.html', {'title': 'Fire Flow calcualtor'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def fire_fm_200_novec_1230_net_hazard_volume_calculator(request):
     return render(request, 'qehsfcalculators/fire/fm_200_novec_1230_net_hazard_volume.html', {'title': 'FM-200 / NOVEC 1230 - Net Hazard Volume Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def fire_fm_200_novec_1230_agent_quantity_calculator(request):
     return render(request, 'qehsfcalculators/fire/fm_200_novec_1230_agent_quantity.html', {'title': 'FM-200 / NOVEC 1230 - agent quantity calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def fire_fm_200_novec_1230_nozzle_quantity_calculator(request):
     return render(request, 'qehsfcalculators/fire/fm_200_novec_1230_nozzle_quantity.html', {'title': 'FM-200 / NOVEC 1230 - Nozzle Quantity Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def fire_fm_200_novec_1230_pipe_sizing_calculator(request):
     return render(request, 'qehsfcalculators/fire/fm_200_novec_1230_pipe_sizing.html', {'title': 'FM-200 / NOVEC 1230 - Pipe Sizing Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def fire_final_design_quantity_for_co2_calculator(request):
     return render(request, 'qehsfcalculators/fire/final_design_quantity_for_co2.html', {'title': 'Final design Quantity for co2 calcualtor'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def fire_flow_rate_for_local_application_system_calculator(request):
     return render(request, 'qehsfcalculators/fire/flow_rate_for_local_application_system.html', {'title': 'Flow rate calculator for Local application System'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def fire_fire_alarm_system_secondary_battery_set_calculation_calculator(request):
     return render(request, 'qehsfcalculators/fire/fire_alarm_system_secondary_battery_set_calculation.html', {'title': 'Fire Alarm System Secondary Battery -Set Calculation'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def fire_fire_safety_occupancy_for_assembly_and_recreation_limit_calculator(request):
     return render(request, 'qehsfcalculators/fire/fire_safety_occupancy_for_assembly_and_recreation_limit.html', {'title': 'Fire Safety Occupancy Calculator For Assembly and Recreation Limit'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def fire_flammable_range_calculator(request):
     return render(request, 'qehsfcalculators/fire/flammable_range.html', {'title': 'Flammable Range Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def fire_flammability_for_gas_mixtures_calculator(request):
     return render(request, 'qehsfcalculators/fire/flammability_for_gas_mixtures.html', {'title': 'Flammability Calculator for Gas Mixtures'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def fire_fauskes_vent_area_calculator(request):
     return render(request, 'qehsfcalculators/fire/fauskes_vent_area.html')
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def fire_fire_fighting_demand_calculator(request):
     return render(request, 'qehsfcalculators/fire/fire_fighting_demand.html', {'title': 'Fire Fighting Demand Calculator'})
 
