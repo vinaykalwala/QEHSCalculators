@@ -3323,207 +3323,207 @@ def probitpercentageeffect(request):
     return render(request, 'qehsfcalculators/health/probitpercentageeffect.html', {'title': 'Probit Percentage Effect'})   
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def safety_main_calculator(request):
     return render(request, 'qehsfcalculators/safety/main.html', {'title': 'Main calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def safety_accident_rate_calculator(request):
     return render(request, 'qehsfcalculators/safety/accident_rate.html', {'title': 'Accident rate calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def safety_average_resolution_time_art_calculator(request):
     return render(request, 'qehsfcalculators/safety/average_resolution_time_art.html', {'title': 'Average Resolution Time (ART) Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def safety_averaging_thickness_for_corroded_areas_calculator(request):
     return render(request, 'qehsfcalculators/safety/averaging_thickness_for_corroded_areas.html', {'title': 'Averaging Thickness for Corroded Areas'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def safety_allowable_leakage_and_additional_leakage_calculation_calculator(request):
     return render(request, 'qehsfcalculators/safety/allowable_leakage_and_additional_leakage_calculation.html', {'title': 'Allowable Leakage and Additional Leakage Calculation'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def safety_approximate_mass_flux_formula_all_liquid_inlet_condition_calculator(request):
     return render(request, 'qehsfcalculators/safety/approximate_mass_flux_formula_all_liquid_inlet_condition.html', {'title': 'Approximate Mass Flux Formula (All-Liquid Inlet Condition) Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def safety_accident_severity_index_asi_calculator(request):
     return render(request, 'qehsfcalculators/safety/accident_severity_index_asi.html', {'title': 'Accident Severity Index (ASI) Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def safety_average_individual_risk_calculator(request):
     return render(request, 'qehsfcalculators/safety/average_individual_risk.html', {'title': 'Average Individual Risk Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def safety_ad_merkblatt_valves_minimum_flow_area_for_steam_calculator(request):
     return render(request, 'qehsfcalculators/safety/ad_merkblatt_valves_minimum_flow_area_for_steam.html', {'title': 'AD-Merkblatt valves - Minimum flow area for steam'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def safety_ad_merkblatt_valves_minimum_flow_area_for_dry_gases_and_air_calculator(request):
     return render(request, 'qehsfcalculators/safety/ad_merkblatt_valves_minimum_flow_area_for_dry_gases_and_air.html', {'title': 'AD-Merkblatt valves - Minimum flow area for Dry Gases And Air'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def safety_asme_api_rp_520_valves_minimum_flow_area_for_liquids_calculator(request):
     return render(request, 'qehsfcalculators/safety/asme_api_rp_520_valves_minimum_flow_area_for_liquids.html', {'title': 'ASME (API RP 520) valves - Minimum Flow Area For Liquids Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def safety_asme_api_rp_520_valves_nozzle_gas_constant_cg_calculator(request):
     return render(request, 'qehsfcalculators/safety/asme_api_rp_520_valves_nozzle_gas_constant_cg.html', {'title': 'ASME (API RP 520) valves - Nozzle Gas Constant (Cg) Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def safety_asme_api_rp_520_valves_backpressure_correction_factor_calculator(request):
     return render(request, 'qehsfcalculators/safety/asme_api_rp_520_valves_backpressure_correction_factor.html', {'title': 'ASME (API RP 520) valves - Backpressure Correction Factor Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def safety_asme_api_rp_520_valves_bellows_balanced_valves_calculator(request):
     return render(request, 'qehsfcalculators/safety/asme_api_rp_520_valves_bellows_balanced_valves.html', {'title': 'ASME (API RP 520) valves - Bellows balanced valves Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def safety_ad_merkblatt_minimum_flow_area_for_liquids_calculator(request):
     return render(request, 'qehsfcalculators/safety/ad_merkblatt_minimum_flow_area_for_liquids.html', {'title': 'AD-MERKBLATT Minimum Flow Area for Liquids Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="individual")
 def safety_asme_api_rp_520_valves_conventional_valves_calculator(request):
     return render(request, 'qehsfcalculators/safety/asme_api_rp_520_valves_conventional_valves.html', {'title': 'ASME (API RP 520) valves - Conventional valves Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def safety_asme_api_rp_520_valves_reynolds_number_metric_units_calculator(request):
     return render(request, 'qehsfcalculators/safety/asme_api_rp_520_valves_reynolds_number_metric_units.html', {'title': 'ASME (API RP 520) valves - Reynolds Number- Metric Units Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def safety_asme_api_rp_520_valves_minimum_flow_area_for_steam_calculator(request):
     return render(request, 'qehsfcalculators/safety/asme_api_rp_520_valves_minimum_flow_area_for_steam.html', {'title': 'ASME (API RP 520) Valves Minimum Flow Area For Steam Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def safety_asme_api_rp_520_valves_minimum_flow_area_for_dry_gases_and_air_calculator(request):
     return render(request, 'qehsfcalculators/safety/asme_api_rp_520_valves_minimum_flow_area_for_dry_gases_and_air.html', {'title': 'ASME (API RP 520) Valves - Minimum Flow Area for Dry Gases and Air Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def safety_asme_api_rp_520_valves_reynolds_number_imperial_units_calculator(request):
     return render(request, 'qehsfcalculators/safety/asme_api_rp_520_valves_reynolds_number_imperial_units_calculator.html', {'title': 'ASME (API RP 520) Valves - Reynolds number imperial units Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def safety_bs_6759_minimum_orifice_area_for_steam_calculator(request):
     return render(request, 'qehsfcalculators/safety/bs_6759_minimum_orifice_area_for_steam.html', {'title': 'BS-6759 Minimum Orifice Area Calculator for Steam'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def safety_bs_6759_minimum_orifice_area_for_air_calculator(request):
     return render(request, 'qehsfcalculators/safety/bs_6759_minimum_orifice_area_for_air.html', {'title': 'BS-6759 Minimum Orifice Area Calculator for Air'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def safety_bs_6759_valves_minimum_orifice_area_for_liquids_calculator(request):
     return render(request, 'qehsfcalculators/safety/bs_6759_valves_minimum_orifice_area_for_liquids.html', {'title': 'BS 6759 Valves Minimum Orifice Area For Liquids Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def safety_bs_6759_valves_minimum_orifice_area_for_hot_water_calculator(request):
     return render(request, 'qehsfcalculators/safety/bs_6759_valves_minimum_orifice_area_for_hot_water.html', {'title': 'BS 6759 Valves Minimum Orifice Area For Hot Water Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def safety_bs_6759_valves_nozzle_gas_constant_calculator(request):
     return render(request, 'qehsfcalculators/safety/bs_6759_valves_nozzle_gas_constant.html', {'title': 'BS 6759 Valves - Nozzle Gas constant Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def safety_bs_6759_minimum_orifice_area_for_dry_gases_calculator(request):
     return render(request, 'qehsfcalculators/safety/bs_6759_minimum_orifice_area_for_dry_gases.html', {'title': 'BS-6759 Minimum Orifice Area Calculator for Dry Gases'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def safety_bs_en_4126_minimum_orifice_area_for_air_and_dry_gas_calculator(request):
     return render(request, 'qehsfcalculators/safety/bs_en_4126_minimum_orifice_area_for_air_and_dry_gas.html', {'title': 'BS EN 4126 Minimum Orifice Area Calculator for Air & Dry Gas'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def safety_bs_en_4126_minimum_orifice_area_for_liquids_calculator(request):
     return render(request, 'qehsfcalculators/safety/bs_en_4126_minimum_orifice_area_for_liquids.html', {'title': 'BS EN 4126 Minimum Orifice Area Calculator for Liquids'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def safety_bs_en_4126_valves_minimum_orifice_area_for_steam_air_and_dry_gas_at_critical_flow_calculator(request):
     return render(request, 'qehsfcalculators/safety/bs_en_4126_valves_minimum_orifice_area_for_steam_air_and_dry_gas_at_critical_flow.html', {'title': 'BS EN 4126 Valves - Minimum Orifice Area For Steam, Air And Dry Gas At Critical Flow Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def safety_bs_en_4126_valves_minimum_flow_area_for_wet_steam_at_crilical_flow_calculator(request):
     return render(request, 'qehsfcalculators/safety/bs_en_4126_valves_minimum_flow_area_for_wet_steam_at_crilical_flow.html', {'title': 'BS EN 4126 Valves - Minimum Flow Area For Wet Steam At Crilical Flow Calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def safety_bit_wear_and_effeiciency_calculator(request):
     return render(request, 'qehsfcalculators/safety/bit_wear_and_effeiciency.html', {'title': 'Bit wear and effeiciency calcualtor'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def safety_bernoullis_equation_multiplied_throughout_by_pg_calculator(request):
     return render(request, 'qehsfcalculators/safety/bernoullis_equation_multiplied_throughout_by_pg.html')
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def safety_boyles_vent_area_calculator(request):
     return render(request, 'qehsfcalculators/safety/boyles_vent_area.html')
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def safety_change_in_entropy_calculator(request):
     return render(request, 'qehsfcalculators/safety/change_in_entropy.html', {'title': 'Change in entropy calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def safety_cost_of_an_accident_calculator(request):
     return render(request, 'qehsfcalculators/safety/cost_of_an_accident.html', {'title': 'Cost of an accident'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def safety_casing_burst_pressure_calculator(request):
     return render(request, 'qehsfcalculators/safety/casing_burst_pressure.html', {'title': 'Casing burst pressure calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def safety_casing_ccollapse_pressure_calculator(request):
     return render(request, 'qehsfcalculators/safety/casing_ccollapse_pressure.html', {'title': 'Casing ccollapse pressure calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def safety_cement_volume_calculator(request):
     return render(request, 'qehsfcalculators/safety/cement_volume.html', {'title': 'Cement-volume-calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def safety_cement_slurry_density_calculator(request):
     return render(request, 'qehsfcalculators/safety/cement_slurry_density.html', {'title': 'Cement-slurry-density-calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def safety_condensate_velocity_of_a_pipe_calculator(request):
     return render(request, 'qehsfcalculators/safety/condensate_velocity_of_a_pipe.html', {'title': 'condensate velocity of a pipe calculator'})
 
 @login_required
-@subscription_required(plan_type="corporate")
+@subscription_required(plan_type="employee")
 def safety_cooling_water_flowrate_for_desuperheater_calculator(request):
     return render(request, 'qehsfcalculators/safety/cooling_water_flowrate_for_desuperheater.html', {'title': 'Cooling Water Flowrate Calculator for Desuperheater'})
 

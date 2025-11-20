@@ -854,87 +854,87 @@ CALCULATORS = [
 
 
     # Safety Calculators
-    {"name": "Accident Rate Calculator", "url_name": "safety_accident_rate_calculator", "plan_type": "corporate", "category": "safety"},
+    {"name": "Accident Rate Calculator", "url_name": "safety_accident_rate_calculator", "plan_type": "individual", "category": "safety"},
 
-    {"name": "Average Resolution Time (ART) Calculator", "url_name": "safety_average_resolution_time_art_calculator", "plan_type": "corporate", "category": "safety"},
+    {"name": "Average Resolution Time (ART) Calculator", "url_name": "safety_average_resolution_time_art_calculator", "plan_type": "individual", "category": "safety"},
 
-    {"name": "Averaging Thickness for Corroded Areas Calculator", "url_name": "safety_averaging_thickness_for_corroded_areas_calculator", "plan_type": "corporate", "category": "safety"},
+    {"name": "Averaging Thickness for Corroded Areas Calculator", "url_name": "safety_averaging_thickness_for_corroded_areas_calculator", "plan_type": "individual", "category": "safety"},
 
-    {"name": "Allowable Leakage and Additional Leakage Calculation", "url_name": "safety_allowable_leakage_and_additional_leakage_calculation_calculator", "plan_type": "corporate", "category": "safety"},
+    {"name": "Allowable Leakage and Additional Leakage Calculation", "url_name": "safety_allowable_leakage_and_additional_leakage_calculation_calculator", "plan_type": "individual", "category": "safety"},
 
-    {"name": "Approximate Mass Flux Formula (All-Liquid Inlet Condition)", "url_name": "safety_approximate_mass_flux_formula_all_liquid_inlet_condition_calculator", "plan_type": "corporate", "category": "safety"},
+    {"name": "Approximate Mass Flux Formula (All-Liquid Inlet Condition)", "url_name": "safety_approximate_mass_flux_formula_all_liquid_inlet_condition_calculator", "plan_type": "individual", "category": "safety"},
 
-    {"name": "Accident Severity Index (ASI) Calculator", "url_name": "safety_accident_severity_index_asi_calculator", "plan_type": "corporate", "category": "safety"},
+    {"name": "Accident Severity Index (ASI) Calculator", "url_name": "safety_accident_severity_index_asi_calculator", "plan_type": "individual", "category": "safety"},
 
-    {"name": "Average Individual Risk Calculator", "url_name": "safety_average_individual_risk_calculator", "plan_type": "corporate", "category": "safety"},
+    {"name": "Average Individual Risk Calculator", "url_name": "safety_average_individual_risk_calculator", "plan_type": "individual", "category": "safety"},
 
-    {"name": "AD-Merkblatt Valves - Minimum Flow Area for Steam", "url_name": "safety_ad_merkblatt_valves_minimum_flow_area_for_steam_calculator", "plan_type": "corporate", "category": "safety"},
+    {"name": "AD-Merkblatt Valves - Minimum Flow Area for Steam", "url_name": "safety_ad_merkblatt_valves_minimum_flow_area_for_steam_calculator", "plan_type": "individual", "category": "safety"},
 
-    {"name": "AD-Merkblatt valves - Minimum flow area for Dry Gases And Air", "url_name": "safety_ad_merkblatt_valves_minimum_flow_area_for_dry_gases_and_air_calculator", "plan_type": "corporate", "category": "safety"},
+    {"name": "AD-Merkblatt valves - Minimum flow area for Dry Gases And Air", "url_name": "safety_ad_merkblatt_valves_minimum_flow_area_for_dry_gases_and_air_calculator", "plan_type": "individual", "category": "safety"},
 
-    {"name": "ASME (API RP 520) Valves - Minimum Flow Area For Liquids", "url_name": "safety_asme_api_rp_520_valves_minimum_flow_area_for_liquids_calculator", "plan_type": "corporate", "category": "safety"},
+    {"name": "ASME (API RP 520) Valves - Minimum Flow Area For Liquids", "url_name": "safety_asme_api_rp_520_valves_minimum_flow_area_for_liquids_calculator", "plan_type": "individual", "category": "safety"},
 
-    {"name": "ASME (API RP 520) Nozzle Gas Constant (Cg) Calculator", "url_name": "safety_asme_api_rp_520_valves_nozzle_gas_constant_cg_calculator", "plan_type": "corporate", "category": "safety"},
+    {"name": "ASME (API RP 520) Nozzle Gas Constant (Cg) Calculator", "url_name": "safety_asme_api_rp_520_valves_nozzle_gas_constant_cg_calculator", "plan_type": "individual", "category": "safety"},
 
-    {"name": "ASME (API RP 520) Valves - Backpressure Correction Factor", "url_name": "safety_asme_api_rp_520_valves_backpressure_correction_factor_calculator", "plan_type": "corporate", "category": "safety"},
+    {"name": "ASME (API RP 520) Valves - Backpressure Correction Factor", "url_name": "safety_asme_api_rp_520_valves_backpressure_correction_factor_calculator", "plan_type": "individual", "category": "safety"},
 
-    {"name": "ASME (API RP 520) Valves - Bellows Balanced Valves", "url_name": "safety_asme_api_rp_520_valves_bellows_balanced_valves_calculator", "plan_type": "corporate", "category": "safety"},
+    {"name": "ASME (API RP 520) Valves - Bellows Balanced Valves", "url_name": "safety_asme_api_rp_520_valves_bellows_balanced_valves_calculator", "plan_type": "individual", "category": "safety"},
 
-    {"name": "AD-MERKBLATT Minimum Flow Area for Liquids", "url_name": "safety_ad_merkblatt_minimum_flow_area_for_liquids_calculator", "plan_type": "corporate", "category": "safety"},
+    {"name": "AD-MERKBLATT Minimum Flow Area for Liquids", "url_name": "safety_ad_merkblatt_minimum_flow_area_for_liquids_calculator", "plan_type": "individual", "category": "safety"},
 
-    {"name": "ASME (API RP 520) Valves - Conventional Valves Calculator", "url_name": "safety_asme_api_rp_520_valves_conventional_valves_calculator", "plan_type": "corporate", "category": "safety"},
+    {"name": "ASME (API RP 520) Valves - Conventional Valves Calculator", "url_name": "safety_asme_api_rp_520_valves_conventional_valves_calculator", "plan_type": "individual", "category": "safety"},
 
-{"name": "ASME (API RP 520) Valves - Reynolds Number Calculator", "url_name": "safety_asme_api_rp_520_valves_reynolds_number_metric_units_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "ASME (API RP 520) Valves - Reynolds Number Calculator", "url_name": "safety_asme_api_rp_520_valves_reynolds_number_metric_units_calculator", "plan_type": "employee", "category": "safety"},
 
-{"name": "ASME (API RP 520) Valves - Minimum Flow Area For Steam", "url_name": "safety_asme_api_rp_520_valves_minimum_flow_area_for_steam_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "ASME (API RP 520) Valves - Minimum Flow Area For Steam", "url_name": "safety_asme_api_rp_520_valves_minimum_flow_area_for_steam_calculator", "plan_type": "employee", "category": "safety"},
 
-{"name": "ASME (API RP 520) Valves - Minimum Flow Area for Dry Gases and Air", "url_name": "safety_asme_api_rp_520_valves_minimum_flow_area_for_dry_gases_and_air_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "ASME (API RP 520) Valves - Minimum Flow Area for Dry Gases and Air", "url_name": "safety_asme_api_rp_520_valves_minimum_flow_area_for_dry_gases_and_air_calculator", "plan_type": "employee", "category": "safety"},
 
-{"name": "ASME (API RP 520) Valves - Reynolds Number Imperial Units Calculator", "url_name": "safety_asme_api_rp_520_valves_reynolds_number_imperial_units_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "ASME (API RP 520) Valves - Reynolds Number Imperial Units Calculator", "url_name": "safety_asme_api_rp_520_valves_reynolds_number_imperial_units_calculator", "plan_type": "employee", "category": "safety"},
 
-{"name": "ASME (API RP 520) Valves - Minimum Flow Area For Steam calculator", "url_name": "safety_bs_6759_minimum_orifice_area_for_steam_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "ASME (API RP 520) Valves - Minimum Flow Area For Steam calculator", "url_name": "safety_bs_6759_minimum_orifice_area_for_steam_calculator", "plan_type": "employee", "category": "safety"},
 
-{"name": "BS-6759 Minimum Orifice Area for Air", "url_name": "safety_bs_6759_minimum_orifice_area_for_air_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "BS-6759 Minimum Orifice Area for Air", "url_name": "safety_bs_6759_minimum_orifice_area_for_air_calculator", "plan_type": "employee", "category": "safety"},
 
-{"name": "BS 6759 Valves Minimum Orifice Area For Liquids Calculator", "url_name": "safety_bs_6759_valves_minimum_orifice_area_for_liquids_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "BS 6759 Valves Minimum Orifice Area For Liquids Calculator", "url_name": "safety_bs_6759_valves_minimum_orifice_area_for_liquids_calculator", "plan_type": "employee", "category": "safety"},
 
-{"name": "BS 6759 Valves Minimum Orifice Area For Hot Water Calculator", "url_name": "safety_bs_6759_valves_minimum_orifice_area_for_hot_water_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "BS 6759 Valves Minimum Orifice Area For Hot Water Calculator", "url_name": "safety_bs_6759_valves_minimum_orifice_area_for_hot_water_calculator", "plan_type": "employee", "category": "safety"},
 
-{"name": "BS 6759 Valves - Nozzle Gas Constant Calculator", "url_name": "safety_bs_6759_valves_nozzle_gas_constant_calculator", "plan_type": "corporate", "category": "safety"},
-
-
-{"name": "BS-6759 Minimum Orifice Area Calculator for Dry Gases", "url_name": "safety_bs_6759_minimum_orifice_area_for_dry_gases_calculator", "plan_type": "corporate", "category": "safety"},
-
-{"name": "BS EN 4126 Minimum Orifice Area Calculator for Air & Dry Gas", "url_name": "safety_bs_en_4126_minimum_orifice_area_for_air_and_dry_gas_calculator", "plan_type": "corporate", "category": "safety"},
-
-{"name": "BS EN 4126 Minimum Orifice Area Calculator for Liquids", "url_name": "safety_bs_en_4126_minimum_orifice_area_for_liquids_calculator", "plan_type": "corporate", "category": "safety"},
-
-{"name": "BS EN 4126 Valves - Minimum Orifice Area For Steam, Air And Dry Gas At Critical Flow Calculator", "url_name": "safety_bs_en_4126_valves_minimum_orifice_area_for_steam_air_and_dry_gas_at_critical_flow_calculator", "plan_type": "corporate", "category": "safety"},
-
-{"name": "BS EN 4126 Valves - Minimum Orifice Area For Wet Steam At Crilical Flow Calculator", "url_name": "safety_bs_en_4126_valves_minimum_flow_area_for_wet_steam_at_crilical_flow_calculator", "plan_type": "corporate", "category": "safety"},
-
-{"name": "Bit Wear and Efficiency Calculator", "url_name": "safety_bit_wear_and_effeiciency_calculator", "plan_type": "corporate", "category": "safety"},
-
-{"name": "Bernoulli's Equation Multiplied Throughout by 'pg' Calculator", "url_name": "safety_bernoullis_equation_multiplied_throughout_by_pg_calculator", "plan_type": "corporate", "category": "safety"},
-
-{"name": "Boyle's Vent Area Calculator", "url_name": "safety_boyles_vent_area_calculator", "plan_type": "corporate", "category": "safety"},
-
-{"name": "Change in Entropy Calculator", "url_name": "safety_change_in_entropy_calculator", "plan_type": "corporate", "category": "safety"},
-
-{"name": "Cost of Accident Calculator", "url_name": "safety_cost_of_an_accident_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "BS 6759 Valves - Nozzle Gas Constant Calculator", "url_name": "safety_bs_6759_valves_nozzle_gas_constant_calculator", "plan_type": "employee", "category": "safety"},
 
 
-{"name": "Casing Burst Pressure Calculator", "url_name": "safety_casing_burst_pressure_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "BS-6759 Minimum Orifice Area Calculator for Dry Gases", "url_name": "safety_bs_6759_minimum_orifice_area_for_dry_gases_calculator", "plan_type": "employee", "category": "safety"},
 
-{"name": "Casing Collapse Pressure Calculator", "url_name": "safety_casing_ccollapse_pressure_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "BS EN 4126 Minimum Orifice Area Calculator for Air & Dry Gas", "url_name": "safety_bs_en_4126_minimum_orifice_area_for_air_and_dry_gas_calculator", "plan_type": "employee", "category": "safety"},
 
-{"name": "Cement Volume Calculator", "url_name": "safety_cement_volume_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "BS EN 4126 Minimum Orifice Area Calculator for Liquids", "url_name": "safety_bs_en_4126_minimum_orifice_area_for_liquids_calculator", "plan_type": "employee", "category": "safety"},
 
-{"name": "Cement Slurry Density Calculator", "url_name":"safety_cement_slurry_density_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "BS EN 4126 Valves - Minimum Orifice Area For Steam, Air And Dry Gas At Critical Flow Calculator", "url_name": "safety_bs_en_4126_valves_minimum_orifice_area_for_steam_air_and_dry_gas_at_critical_flow_calculator", "plan_type": "employee", "category": "safety"},
 
-{"name": "Condensate Velocity Of a Pipe Calculator","url_name": "safety_condensate_velocity_of_a_pipe_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "BS EN 4126 Valves - Minimum Orifice Area For Wet Steam At Crilical Flow Calculator", "url_name": "safety_bs_en_4126_valves_minimum_flow_area_for_wet_steam_at_crilical_flow_calculator", "plan_type": "employee", "category": "safety"},
 
-{"name": "Cooling Water Flowrate Calculator for Desuperheater", "url_name":"safety_cooling_water_flowrate_for_desuperheater_calculator", "plan_type": "corporate", "category": "safety"},
+{"name": "Bit Wear and Efficiency Calculator", "url_name": "safety_bit_wear_and_effeiciency_calculator", "plan_type": "employee", "category": "safety"},
+
+{"name": "Bernoulli's Equation Multiplied Throughout by 'pg' Calculator", "url_name": "safety_bernoullis_equation_multiplied_throughout_by_pg_calculator", "plan_type": "employee", "category": "safety"},
+
+{"name": "Boyle's Vent Area Calculator", "url_name": "safety_boyles_vent_area_calculator", "plan_type": "employee", "category": "safety"},
+
+{"name": "Change in Entropy Calculator", "url_name": "safety_change_in_entropy_calculator", "plan_type": "employee", "category": "safety"},
+
+{"name": "Cost of Accident Calculator", "url_name": "safety_cost_of_an_accident_calculator", "plan_type": "employee", "category": "safety"},
+
+
+{"name": "Casing Burst Pressure Calculator", "url_name": "safety_casing_burst_pressure_calculator", "plan_type": "employee", "category": "safety"},
+
+{"name": "Casing Collapse Pressure Calculator", "url_name": "safety_casing_ccollapse_pressure_calculator", "plan_type": "employee", "category": "safety"},
+
+{"name": "Cement Volume Calculator", "url_name": "safety_cement_volume_calculator", "plan_type": "employee", "category": "safety"},
+
+{"name": "Cement Slurry Density Calculator", "url_name":"safety_cement_slurry_density_calculator", "plan_type": "employee", "category": "safety"},
+
+{"name": "Condensate Velocity Of a Pipe Calculator","url_name": "safety_condensate_velocity_of_a_pipe_calculator", "plan_type": "employee", "category": "safety"},
+
+{"name": "Cooling Water Flowrate Calculator for Desuperheater", "url_name":"safety_cooling_water_flowrate_for_desuperheater_calculator", "plan_type": "employee", "category": "safety"},
 
 {"name": "Capacitance Law  Calculator","url_name":"safety_capacitance_law_calculator", "plan_type": "corporate", "category": "safety"},
 
